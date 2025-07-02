@@ -1,0 +1,28 @@
+{
+  "host": "localhost",
+  "port": 1521,
+  "service_name": "XEPDB1",
+  "username": "target_user",
+  "password": "secure_password",
+  "schema": "TARGET_SCHEMA",
+  
+  "batch_config": {
+    "batch_size": 10000,
+    "batch_wait_limit_seconds": 60.0
+  },
+  
+  "pool_size": 10,
+  "max_overflow": 20,
+  "pool_pre_ping": true,
+  
+  "load_method": "append-only",
+  "add_record_metadata": true,
+  
+  "use_bulk_operations": true,
+  "use_merge_statements": true,
+  "parallel_degree": 1,
+  
+  "varchar_max_length": 4000,
+  "number_precision": 38,
+  "number_scale": 10
+}

@@ -1,42 +1,18 @@
-"""CLI interface for flext-target-oracle."""
+"""
+CLI for FLEXT Target Oracle.
 
-import sys
-import json
-import argparse
-from flext_target_oracle.target import TargetOracle
+Compatible with Python 3.9+
+"""
 
+from __future__ import annotations
 
-def main():
-    """Main CLI entry point."""
-    parser = argparse.ArgumentParser(description='Singer Target for Oracle Database')
-    parser.add_argument(
-        '--config',
-        required=True,
-        help='Configuration file path'
-    )
-    parser.add_argument(
-        '--state',
-        help='State file path'
-    )
-    
-    args = parser.parse_args()
-    
-    # Load configuration
-    with open(args.config) as f:
-        config = json.load(f)
-    
-    # Load state if provided
-    state = {}
-    if args.state:
-        with open(args.state) as f:
-            state = json.load(f)
-    
-    # Initialize target
-    target = TargetOracle(config, state)
-    
-    # Process stdin
-    target.listen()
+from .target import OracleTarget
 
 
-if __name__ == '__main__':
+def main() -> None:
+    """Main CLI entry point - let Singer SDK handle everything."""
+    OracleTarget.cli()
+
+
+if __name__ == "__main__":
     main()
