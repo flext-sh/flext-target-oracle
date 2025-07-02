@@ -38,7 +38,7 @@ class OracleConnector(SQLConnector):
     # Oracle capabilities - disable column alter to avoid DDL issues
     allow_column_add: bool = True
     allow_column_rename: bool = False  # Oracle ALTER COLUMN syntax is complex
-    allow_column_alter: bool = False   # Disable to avoid ORA-01735 errors
+    allow_column_alter: bool = False  # Disable to avoid ORA-01735 errors
     allow_merge_upsert: bool = True
     allow_temp_tables: bool = True
 
@@ -129,54 +129,92 @@ class OracleConnector(SQLConnector):
             if max_length:
                 oracle_type = VARCHAR2(min(max_length, max_varchar_length))  # type: ignore[assignment]
                 if self.config.get("debug_type_mapping", False):
-                    print(f"DEBUG: {column_name} (string with maxLength={max_length}) -> {oracle_type}")
+                    print(
+                        f"DEBUG: {column_name} (string with "
+                        f"maxLength={max_length}) -> {oracle_type}"
+                    )
                 return oracle_type
 
-            # PRIORITY 4: Smart typing rules (only for string fields without explicit length)
+            # PRIORITY 4: Smart typing rules
+            # (only for string fields without explicit length)
             if enable_smart_typing:
                 if schema_convention == "wms":
                     # WMS-specific string rules
-                    if column_name.upper().endswith('_KEY'):
+                    if column_name.upper().endswith("_KEY"):
                         oracle_type = VARCHAR2(255)  # type: ignore[assignment]
                         if self.config.get("debug_type_mapping", False):
-                            print(f"DEBUG: {column_name} (WMS _KEY rule) -> {oracle_type}")
+                            print(
+                                f"DEBUG: {column_name} (WMS _KEY rule) -> {oracle_type}"
+                            )
                         return oracle_type
-                    elif any(word in column_name.lower() for word in ['str', 'user', 'name']):
+                    elif any(
+                        word in column_name.lower() for word in ["str", "user", "name"]
+                    ):
                         oracle_type = VARCHAR2(255)  # type: ignore[assignment]
                         if self.config.get("debug_type_mapping", False):
-                            print(f"DEBUG: {column_name} (WMS str/user/name rule) -> {oracle_type}")
+                            print(
+                                f"DEBUG: {column_name} (WMS str/user/name rule) "
+                                f"-> {oracle_type}"
+                            )
                         return oracle_type
-                    elif column_name.upper().endswith('_DESC'):
+                    elif column_name.upper().endswith("_DESC"):
                         oracle_type = VARCHAR2(255)  # type: ignore[assignment]
                         if self.config.get("debug_type_mapping", False):
-                            print(f"DEBUG: {column_name} (WMS _DESC rule) -> {oracle_type}")
+                            print(
+                                f"DEBUG: {column_name} (WMS _DESC rule) "
+                                f"-> {oracle_type}"
+                            )
                         return oracle_type
-                    elif any(word in column_name.lower() for word in ['code', 'status']):
+                    elif any(
+                        word in column_name.lower() for word in ["code", "status"]
+                    ):
                         oracle_type = VARCHAR2(50)  # type: ignore[assignment]
                         if self.config.get("debug_type_mapping", False):
-                            print(f"DEBUG: {column_name} (WMS code/status rule) -> {oracle_type}")
+                            print(
+                                f"DEBUG: {column_name} (WMS code/status rule) "
+                                f"-> {oracle_type}"
+                            )
                         return oracle_type
                 else:
                     # Generic smart string rules
-                    if any(word in column_name.lower() for word in ['key', 'code']):
+                    if any(word in column_name.lower() for word in ["key", "code"]):
                         oracle_type = VARCHAR2(100)  # type: ignore[assignment]
                         if self.config.get("debug_type_mapping", False):
-                            print(f"DEBUG: {column_name} (generic key/code rule) -> {oracle_type}")
+                            print(
+                                f"DEBUG: {column_name} (generic key/code rule) "
+                                f"-> {oracle_type}"
+                            )
                         return oracle_type
-                    elif any(word in column_name.lower() for word in ['name', 'title']):
+                    elif any(
+                        word in column_name.lower() for word in ["name", "title"]
+                    ):
                         oracle_type = VARCHAR2(255)  # type: ignore[assignment]
                         if self.config.get("debug_type_mapping", False):
-                            print(f"DEBUG: {column_name} (generic name/title rule) -> {oracle_type}")
+                            print(
+                                f"DEBUG: {column_name} (generic name/title rule) "
+                                f"-> {oracle_type}"
+                            )
                         return oracle_type
-                    elif any(word in column_name.lower() for word in ['desc', 'comment', 'note']):
+                    elif any(
+                        word in column_name.lower()
+                        for word in ["desc", "comment", "note"]
+                    ):
                         oracle_type = VARCHAR2(500)  # type: ignore[assignment]
                         if self.config.get("debug_type_mapping", False):
-                            print(f"DEBUG: {column_name} (generic desc/comment/note rule) -> {oracle_type}")
+                            print(
+                                f"DEBUG: {column_name} "
+                                f"(generic desc/comment/note rule) -> {oracle_type}"
+                            )
                         return oracle_type
-                    elif any(word in column_name.lower() for word in ['status', 'code']):
+                    elif any(
+                        word in column_name.lower() for word in ["status", "code"]
+                    ):
                         oracle_type = VARCHAR2(50)  # type: ignore[assignment]
                         if self.config.get("debug_type_mapping", False):
-                            print(f"DEBUG: {column_name} (generic status/code rule) -> {oracle_type}")
+                            print(
+                                f"DEBUG: {column_name} (generic status/code rule) "
+                                f"-> {oracle_type}"
+                            )
                         return oracle_type
 
             # PRIORITY 5: Default VARCHAR2 length
@@ -211,9 +249,13 @@ class OracleConnector(SQLConnector):
         # Debug logging
         if self.config.get("debug_type_mapping", False):
             print(f"DEBUG: to_sql_type called with schema {jsonschema_type}")
-            print(f"DEBUG: json_type={json_type}, format={json_format}, convention={schema_convention}")
+            print(
+                f"DEBUG: json_type={json_type}, format={json_format}, "
+                f"convention={schema_convention}"
+            )
 
-        # PRIORITY 1: JSON Schema type mapping (user's feedback: "olhar o tipo de campo antes das regras")
+        # PRIORITY 1: JSON Schema type mapping
+        # (user's feedback: "olhar o tipo de campo antes das regras")
         if json_type == "integer":
             oracle_type = NUMBER()  # type: ignore[assignment]
             if self.config.get("debug_type_mapping", False):
@@ -234,11 +276,15 @@ class OracleConnector(SQLConnector):
             return oracle_type
 
         elif json_type == "string":
-            # PRIORITY 2: Date/time format handling (user's feedback: "date/time tem que usar timestamp(6)")
+            # PRIORITY 2: Date/time format handling
+            # (user's feedback: "date/time tem que usar timestamp(6)")
             if json_format in ("date-time", "date", "time"):
                 oracle_type = TIMESTAMP()  # type: ignore[assignment]
                 if self.config.get("debug_type_mapping", False):
-                    print(f"DEBUG: to_sql_type (string with {json_format} format) -> {oracle_type}")
+                    print(
+                        f"DEBUG: to_sql_type (string with {json_format} format) "
+                        f"-> {oracle_type}"
+                    )
                 return oracle_type
 
             # PRIORITY 3: Explicit maxLength from schema
@@ -246,10 +292,14 @@ class OracleConnector(SQLConnector):
             if max_length:
                 oracle_type = VARCHAR2(min(max_length, max_varchar_length))  # type: ignore[assignment]
                 if self.config.get("debug_type_mapping", False):
-                    print(f"DEBUG: to_sql_type (string with maxLength={max_length}) -> {oracle_type}")
+                    print(
+                        f"DEBUG: to_sql_type (string with maxLength={max_length}) "
+                        f"-> {oracle_type}"
+                    )
                 return oracle_type
 
-            # PRIORITY 4: Use default VARCHAR2 length (no column name available in to_sql_type)
+            # PRIORITY 4: Use default VARCHAR2 length
+            # (no column name available in to_sql_type)
             oracle_type = VARCHAR2(default_varchar_length)  # type: ignore[assignment]
             if self.config.get("debug_type_mapping", False):
                 print(f"DEBUG: to_sql_type (string default) -> {oracle_type}")
@@ -391,7 +441,9 @@ class OracleConnector(SQLConnector):
                 "dsn": dsn,
                 "ssl_server_dn_match": self.config.get("ssl_server_dn_match", False),
                 "stmtcachesize": self.config.get("statement_cache_size", 50),
-                "tcp_connect_timeout": float(self.config.get("connection_timeout", 60)),
+                "tcp_connect_timeout": float(
+                    self.config.get("connection_timeout", 60)
+                ),
             }
 
             # Add wallet if provided
@@ -438,7 +490,9 @@ class OracleConnector(SQLConnector):
             ),  # Large batches
             # Execution options for performance
             "execution_options": {
-                "isolation_level": self.config.get("isolation_level", "READ COMMITTED"),
+                "isolation_level": self.config.get(
+                    "isolation_level", "READ COMMITTED"
+                ),
                 "compiled_cache": {},  # Statement compilation cache
                 "synchronize_session": False,  # Disable for performance
                 "stream_results": self.config.get(
@@ -591,15 +645,31 @@ class OracleConnector(SQLConnector):
                     except Exception as e:
                         # Categorize Oracle optimization errors
                         error_msg = str(e)
-                        if any(code in error_msg for code in ["ORA-00942", "ORA-00900", "ORA-02248"]):
-                            # Critical errors: table doesn't exist, SQL error, invalid option
-                            raise RuntimeError(f"Critical Oracle optimization error: {opt} - {e}") from e
-                        elif any(code in error_msg for code in ["ORA-00031", "ORA-02097"]):
-                            # Feature not available in this Oracle edition/version - log warning
-                            print(f"WARNING: Oracle feature not available, skipping: {opt} - {e}")
+                        if any(
+                            code in error_msg
+                            for code in ["ORA-00942", "ORA-00900", "ORA-02248"]
+                        ):
+                            # Critical errors: table doesn't exist,
+                            # SQL error, invalid option
+                            raise RuntimeError(
+                                f"Critical Oracle optimization error: {opt} - {e}"
+                            ) from e
+                        elif any(
+                            code in error_msg for code in ["ORA-00031", "ORA-02097"]
+                        ):
+                            # Feature not available in this Oracle
+                            # edition/version - log warning
+                            print(
+                                f"WARNING: Oracle feature not available, "
+                                f"skipping: {opt} - {e}"
+                            )
                         else:
-                            # Unknown error - log and continue but make it visible
-                            print(f"WARNING: Oracle optimization failed, continuing: {opt} - {e}")
+                            # Unknown error - log and continue
+                            # but make it visible
+                            print(
+                                f"WARNING: Oracle optimization failed, "
+                                f"continuing: {opt} - {e}"
+                            )
 
                 # Set array size for this connection
                 cursor.arraysize = self.config.get("array_size", 50000)
@@ -641,7 +711,7 @@ class OracleConnector(SQLConnector):
             full_table_name=full_table_name,
             schema=schema,
             primary_keys=primary_keys or [],
-            as_temp_table=False
+            as_temp_table=False,
         )
 
         # Apply advanced optimizations
@@ -654,7 +724,8 @@ class OracleConnector(SQLConnector):
                 compress_for = self.config.get("compress_for", "OLTP")
                 conn.execute(
                     text(
-                        f"ALTER TABLE {table_name} COMPRESS FOR {compress_for} {compression}"
+                        f"ALTER TABLE {table_name} COMPRESS FOR "
+                        f"{compress_for} {compression}"
                     )
                 )
 
@@ -700,7 +771,8 @@ class OracleConnector(SQLConnector):
                 idx_clause = " ".join(idx_opts)
                 conn.execute(
                     text(
-                        f"CREATE UNIQUE INDEX {idx_name} ON {table_name} ({','.join(primary_keys)}) {idx_clause}"
+                        f"CREATE UNIQUE INDEX {idx_name} ON {table_name} "
+                        f"({','.join(primary_keys)}) {idx_clause}"
                     )
                 )
 
@@ -711,11 +783,13 @@ class OracleConnector(SQLConnector):
             # Automatic Data Optimization (ADO)
             if self.config.get("enable_ado"):
                 conn.execute(
-                    text(f"""
+                    text(
+                        f"""
                     ALTER TABLE {table_name} ILM ADD POLICY
                     ROW STORE COMPRESS ADVANCED SEGMENT
                     AFTER 30 DAYS OF NO MODIFICATION
-                """)
+                """
+                    )
                 )
 
     def _create_partitions(
@@ -728,26 +802,32 @@ class OracleConnector(SQLConnector):
         if partition_type == "INTERVAL":
             # Interval partitioning for time-series data
             interval = self.config.get(
-                "partition_interval", "NUMTOYMINTERVAL(1,'MONTH')"
+                "partition_interval",
+                "NUMTOYMINTERVAL(1,'MONTH')",
             )
             conn.execute(
-                text(f"""
+                text(
+                    f"""
                 ALTER TABLE {table_name} MODIFY
                 PARTITION BY RANGE ({partition_col})
                 INTERVAL ({interval})
-                (PARTITION p_initial VALUES LESS THAN (TO_DATE('2020-01-01','YYYY-MM-DD')))
-            """)
+                (PARTITION p_initial VALUES LESS THAN "
+                "(TO_DATE('2020-01-01','YYYY-MM-DD')))"
+            """
+                )
             )
 
         elif partition_type == "HASH":
             # Hash partitioning for even distribution
             partitions = self.config.get("hash_partitions", 32)
             conn.execute(
-                text(f"""
+                text(
+                    f"""
                 ALTER TABLE {table_name} MODIFY
                 PARTITION BY HASH ({partition_col})
                 PARTITIONS {partitions}
-            """)
+            """
+                )
             )
 
         elif partition_type == "LIST":
@@ -781,7 +861,8 @@ class OracleConnector(SQLConnector):
             # Gather advanced statistics
             if self.config.get("gather_extended_statistics"):
                 conn.execute(
-                    text(f"""
+                    text(
+                        f"""
                     BEGIN
                         DBMS_STATS.GATHER_TABLE_STATS(
                             ownname => USER,
@@ -790,10 +871,11 @@ class OracleConnector(SQLConnector):
                             method_opt => 'FOR ALL COLUMNS SIZE AUTO',
                             granularity => 'ALL',
                             cascade => TRUE,
-                            degree => {self.config.get('parallel_degree', 'DBMS_STATS.DEFAULT_DEGREE')}
+                            degree => {self.config.get('parallel_degree', 'DBMS_STATS.DEFAULT_DEGREE')}"
                         );
                     END;
-                """)
+                """
+                    )
                 )
 
             # Create extended statistics for correlated columns
@@ -804,7 +886,8 @@ class OracleConnector(SQLConnector):
             # Refresh materialized views if any
             if self.config.get("refresh_mviews"):
                 conn.execute(
-                    text(f"""
+                    text(
+                        f"""
                     BEGIN
                         DBMS_MVIEW.REFRESH(
                             list => '{table_name}_MV',
@@ -812,5 +895,6 @@ class OracleConnector(SQLConnector):
                             parallelism => {self.config.get('parallel_degree', 8)}
                         );
                     END;
-                """)
+                """
+                    )
                 )

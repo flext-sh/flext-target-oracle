@@ -13,7 +13,7 @@ def test_basic_initialization():
     """Testa inicialização básica sem config."""
     try:
         print("Testing basic initialization...")
-        target = OracleTarget(config={}, validate_config=False)
+        OracleTarget(config={}, validate_config=False)
         print("✅ Basic initialization successful")
         return True
     except Exception as e:
@@ -32,7 +32,7 @@ def test_initialization_with_minimal_config():
             "password": "test",
             "database": "XE"
         }
-        target = OracleTarget(config=config)
+        OracleTarget(config=config)
         print("✅ Minimal config initialization successful")
         return True
     except Exception as e:
@@ -44,7 +44,7 @@ def test_initialization_with_none_config():
     """Testa inicialização com config None."""
     try:
         print("Testing initialization with None config...")
-        target = OracleTarget(config=None, validate_config=False)
+        OracleTarget(config=None, validate_config=False)
         print("✅ None config initialization successful")
         return True
     except Exception as e:

@@ -87,7 +87,9 @@ class ConfigurationValidator:
         # Protocol validation
         protocol = self.config.get("protocol", "tcp")
         if protocol not in ["tcp", "tcps"]:
-            self.errors.append(f"Invalid protocol: {protocol}. Must be 'tcp' or 'tcps'")
+            self.errors.append(
+                f"Invalid protocol: {protocol}. Must be 'tcp' or 'tcps'"
+            )
 
         # TCPS-specific validation
         if (
@@ -105,7 +107,9 @@ class ConfigurationValidator:
         if wallet_location:
             wallet_path = Path(wallet_location)
             if not wallet_path.exists():
-                self.errors.append(f"Wallet location does not exist: {wallet_location}")
+                self.errors.append(
+                    f"Wallet location does not exist: {wallet_location}"
+                )
             elif not wallet_path.is_dir():
                 self.errors.append(
                     f"Wallet location is not a directory: {wallet_location}"
@@ -184,9 +188,8 @@ class ConfigurationValidator:
                 self.errors.append("Password appears to be a common weak password")
 
         # SSL/TLS validation
-        if (
-            self.config.get("protocol") == "tcps"
-            and not self.config.get("ssl_server_dn_match", True)
+        if self.config.get("protocol") == "tcps" and not self.config.get(
+            "ssl_server_dn_match", True
         ):
             self.warnings.append("SSL certificate verification is disabled")
 
@@ -345,17 +348,21 @@ class ConfigurationValidator:
                     if isinstance(edition_info, dict):
                         edition_info["has_partitioning"] = False
                     if self.logger:
-                        self.logger.debug(f"Partitioning check failed (normal for SE): {e}")
+                        self.logger.debug(
+                            f"Partitioning check failed (normal for SE): {e}"
+                        )
 
                 # Check for Exadata/Autonomous
                 try:
                     platform_result = conn.execute(
-                        text("""
+                        text(
+                            """
                         SELECT banner FROM v$version
                         WHERE banner LIKE '%Exadata%'
                         OR banner LIKE '%Autonomous%'
                         OR banner LIKE '%Cloud%'
-                    """)
+                    """
+                        )
                     )
                     platform_row = platform_result.fetchone()
                     if platform_row:
@@ -383,10 +390,12 @@ class ConfigurationValidator:
                 # Check database size and capabilities
                 try:
                     size_result = conn.execute(
-                        text("""
+                        text(
+                            """
                         SELECT ROUND(SUM(bytes)/1024/1024/1024, 2) as size_gb
                         FROM dba_data_files
-                    """)
+                    """
+                        )
                     )
                     size_row = size_result.fetchone()
                     if size_row:
@@ -398,7 +407,9 @@ class ConfigurationValidator:
                 except Exception as e:
                     # Might not have DBA privileges - log debug info
                     if self.logger:
-                        self.logger.debug(f"Database size check failed (may need DBA privileges): {e}")
+                        self.logger.debug(
+                            f"Database size check failed (may need DBA privileges): {e}"
+                        )
 
         except Exception as e:
             self.errors.append(f"Connection test failed: {e}")
@@ -446,10 +457,9 @@ class ConfigurationValidator:
                 )
 
         # Compression recommendations
-        if (
-            self.config.get("oracle_has_compression_option", False)
-            and not self.config.get("enable_compression", False)
-        ):
+        if self.config.get(
+            "oracle_has_compression_option", False
+        ) and not self.config.get("enable_compression", False):
             recommendations.append(
                 "Consider enabling compression for storage efficiency"
             )
