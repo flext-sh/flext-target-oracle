@@ -1,0 +1,25 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "flext-target-oracle"
+version = "0.1.0"
+description = "Singer Target for Oracle Database - FLEXT ETL Framework"
+authors = ["FLEXT Team <info@flext.sh>"]
+readme = "README.md"
+packages = [{include = "flext_target_oracle"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+singer-python = "^5.0.0"
+cx-oracle = "^8.0.0"
+python-dateutil = "^2.8.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0.0"
+black = "^22.0.0"
+flake8 = "^4.0.0"
+
+[tool.poetry.scripts]
+flext-target-oracle = "flext_target_oracle.cli:main"
