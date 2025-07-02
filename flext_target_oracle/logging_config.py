@@ -16,7 +16,7 @@ import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 try:
     import structlog
@@ -51,7 +51,7 @@ class OracleTargetLogger:
     - Configurable log levels and outputs
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         """Initialize comprehensive logging system."""
         self.config = config
         self.logger_name = "flext_target_oracle"
@@ -67,7 +67,7 @@ class OracleTargetLogger:
         # Session tracking
         self.session_id = self._generate_session_id()
         self.start_time = time.time()
-        self.metrics = {}
+        self.metrics: dict[str, Any] = {}
 
     def _setup_structured_logging(self) -> None:
         """Configure structured logging with contextual processors."""
@@ -158,7 +158,7 @@ class OracleTargetLogger:
 
     def _setup_performance_tracking(self) -> None:
         """Initialize performance tracking variables."""
-        self.performance_counters = {
+        self.performance_counters: dict[str, Any] = {
             "total_records": 0,
             "total_batches": 0,
             "total_errors": 0,
@@ -193,14 +193,15 @@ class OracleTargetLogger:
                 file_formatter = JsonFormatter()
                 file_handler.setFormatter(file_formatter)
             else:
-                file_formatter = logging.Formatter(
+                text_formatter: logging.Formatter = logging.Formatter(
                     "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
                 )
-                file_handler.setFormatter(file_formatter)
+                file_handler.setFormatter(text_formatter)
 
             logger.addHandler(file_handler)
 
         # Console formatter
+        console_formatter: logging.Formatter
         if self.config.get("log_format") == "json":
             console_formatter = JsonFormatter()
         else:
@@ -217,7 +218,7 @@ class OracleTargetLogger:
         return f"oracle_target_{int(time.time())}_{os.getpid()}"
 
     @contextmanager
-    def operation_context(self, operation: str, stream: str = "unknown", **kwargs):
+    def operation_context(self, operation: str, stream: str = "unknown", **kwargs: Any) -> Any:
         """Context manager for tracking operations with metrics and logging."""
         start_time = time.time()
         operation_id = f"{operation}_{int(start_time)}"
@@ -240,8 +241,11 @@ class OracleTargetLogger:
             context["status"] = "success"
 
             # Update performance counters
-            self.performance_counters["total_duration"] += duration
-            self.performance_counters["streams_processed"].add(stream)
+            current_duration = self.performance_counters.get("total_duration", 0.0)
+            self.performance_counters["total_duration"] = float(current_duration) + duration
+            streams_set = self.performance_counters.get("streams_processed", set())
+            streams_set.add(stream)  # type: ignore[attr-defined]
+            self.performance_counters["streams_processed"] = streams_set
 
             # Update Prometheus metrics
             if self.prometheus_enabled:
@@ -259,7 +263,8 @@ class OracleTargetLogger:
             context["error_type"] = type(e).__name__
 
             # Update error counters
-            self.performance_counters["total_errors"] += 1
+            current_errors = self.performance_counters.get("total_errors", 0)
+            self.performance_counters["total_errors"] = int(current_errors) + 1
 
             # Update Prometheus metrics
             if self.prometheus_enabled:
@@ -273,7 +278,7 @@ class OracleTargetLogger:
             self.error("Operation failed", extra=context, exc_info=True)
             raise
 
-    def log_record_batch(self, stream: str, batch_size: int, operation: str = "insert"):
+    def log_record_batch(self, stream: str, batch_size: int, operation: str = "insert") -> None:
         """Log processing of a record batch with metrics."""
         context = {
             "stream": stream,
@@ -283,8 +288,10 @@ class OracleTargetLogger:
         }
 
         # Update performance counters
-        self.performance_counters["total_records"] += batch_size
-        self.performance_counters["total_batches"] += 1
+        current_records = self.performance_counters.get("total_records", 0)
+        current_batches = self.performance_counters.get("total_batches", 0)
+        self.performance_counters["total_records"] = int(current_records) + batch_size
+        self.performance_counters["total_batches"] = int(current_batches) + 1
 
         # Update Prometheus metrics
         if self.prometheus_enabled:
@@ -296,39 +303,37 @@ class OracleTargetLogger:
         if self.config.get("log_batch_details", True):
             self.info("Batch processed", extra=context)
 
-    def log_performance_stats(self):
+    def log_performance_stats(self) -> dict[str, Any]:
         """Log comprehensive performance statistics."""
         current_time = time.time()
         session_duration = current_time - self.start_time
 
+        total_records = self.performance_counters.get("total_records", 0)
+        total_batches = self.performance_counters.get("total_batches", 0)
+        total_errors = self.performance_counters.get("total_errors", 0)
+        streams_processed = self.performance_counters.get("streams_processed", set())
+
         stats = {
             "session_id": self.session_id,
             "session_duration": session_duration,
-            "total_records": self.performance_counters["total_records"],
-            "total_batches": self.performance_counters["total_batches"],
-            "total_errors": self.performance_counters["total_errors"],
-            "streams_count": len(self.performance_counters["streams_processed"]),
-            "streams": list(self.performance_counters["streams_processed"]),
+            "total_records": total_records,
+            "total_batches": total_batches,
+            "total_errors": total_errors,
+            "streams_count": len(streams_processed),
+            "streams": list(streams_processed),
         }
 
         if session_duration > 0:
-            stats["records_per_second"] = (
-                self.performance_counters["total_records"] / session_duration
-            )
-            stats["batches_per_second"] = (
-                self.performance_counters["total_batches"] / session_duration
-            )
+            stats["records_per_second"] = float(total_records) / session_duration
+            stats["batches_per_second"] = float(total_batches) / session_duration
 
-        if self.performance_counters["total_batches"] > 0:
-            stats["avg_batch_size"] = (
-                self.performance_counters["total_records"]
-                / self.performance_counters["total_batches"]
-            )
+        if int(total_batches) > 0:
+            stats["avg_batch_size"] = float(total_records) / float(total_batches)
 
         self.info("Performance statistics", extra=stats)
         return stats
 
-    def log_oracle_connection_info(self, connection_info: Dict[str, Any]):
+    def log_oracle_connection_info(self, connection_info: dict[str, Any]) -> None:
         """Log Oracle database connection information."""
         safe_info = connection_info.copy()
 
@@ -345,7 +350,7 @@ class OracleTargetLogger:
 
         self.info("Oracle connection established", extra=context)
 
-    def log_oracle_performance(self, metrics: Dict[str, Any]):
+    def log_oracle_performance(self, metrics: dict[str, Any]) -> None:
         """Log Oracle-specific performance metrics."""
         context = {
             "session_id": self.session_id,
@@ -362,8 +367,8 @@ class OracleTargetLogger:
         self.info("Oracle performance metrics", extra=context)
 
     def log_sql_statement(
-        self, sql: str, params: Optional[Dict] = None, duration: Optional[float] = None
-    ):
+        self, sql: str, params: dict | None = None, duration: float | None = None
+    ) -> None:
         """Log SQL statements if enabled."""
         if not self.config.get("log_sql_statements", False):
             return
@@ -386,23 +391,23 @@ class OracleTargetLogger:
 
         return generate_latest(self.registry).decode("utf-8")
 
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> dict[str, Any]:
         """Get current health status of the target."""
         current_time = time.time()
         session_duration = current_time - self.start_time
 
+        total_records = self.performance_counters.get("total_records", 0)
+        total_errors = self.performance_counters.get("total_errors", 0)
+
         status = {
-            "status": "healthy"
-            if self.performance_counters["total_errors"] == 0
-            else "degraded",
+            "status": "healthy" if int(total_errors) == 0 else "degraded",
             "session_id": self.session_id,
             "uptime_seconds": session_duration,
-            "total_records": self.performance_counters["total_records"],
-            "total_errors": self.performance_counters["total_errors"],
+            "total_records": total_records,
+            "total_errors": total_errors,
             "error_rate": (
-                self.performance_counters["total_errors"]
-                / max(1, self.performance_counters["total_records"])
-                if self.performance_counters["total_records"] > 0
+                float(total_errors) / max(1, float(total_records))
+                if int(total_records) > 0
                 else 0
             ),
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -411,27 +416,27 @@ class OracleTargetLogger:
         return status
 
     # Standard logging methods with context injection
-    def debug(self, message: str, extra: Optional[Dict] = None, **kwargs):
+    def debug(self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
         """Log debug message with context."""
         self._log(logging.DEBUG, message, extra, **kwargs)
 
-    def info(self, message: str, extra: Optional[Dict] = None, **kwargs):
+    def info(self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
         """Log info message with context."""
         self._log(logging.INFO, message, extra, **kwargs)
 
-    def warning(self, message: str, extra: Optional[Dict] = None, **kwargs):
+    def warning(self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
         """Log warning message with context."""
         self._log(logging.WARNING, message, extra, **kwargs)
 
-    def error(self, message: str, extra: Optional[Dict] = None, **kwargs):
+    def error(self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
         """Log error message with context."""
         self._log(logging.ERROR, message, extra, **kwargs)
 
-    def critical(self, message: str, extra: Optional[Dict] = None, **kwargs):
+    def critical(self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
         """Log critical message with context."""
         self._log(logging.CRITICAL, message, extra, **kwargs)
 
-    def _log(self, level: int, message: str, extra: Optional[Dict] = None, **kwargs):
+    def _log(self, level: int, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
         """Internal logging method with context injection."""
         try:
             # Check if logging system is still functional
@@ -440,9 +445,9 @@ class OracleTargetLogger:
 
             # Check if any handler has a closed stream
             for handler in self.logger.handlers:
-                if hasattr(handler, "stream") and hasattr(handler.stream, "closed"):
-                    if handler.stream.closed:
-                        return
+                if (hasattr(handler, "stream") and hasattr(handler.stream, "closed")
+                    and handler.stream.closed):
+                    return
 
             if extra is None:
                 extra = {}
@@ -515,23 +520,23 @@ class PerformanceTimer:
     def __init__(self, logger: OracleTargetLogger, operation: str):
         self.logger = logger
         self.operation = operation
-        self.start_time = None
-        self.duration = None
+        self.start_time: float | None = None
+        self.duration: float | None = None
 
-    def start(self):
+    def start(self) -> None:
         """Start timing."""
         self.start_time = time.time()
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop timing and calculate duration."""
         if self.start_time is not None:
             self.duration = time.time() - self.start_time
 
-    def __enter__(self):
+    def __enter__(self) -> PerformanceTimer:
         self.start()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         self.stop()
         if self.duration is not None:
             self.logger.info(
@@ -540,6 +545,6 @@ class PerformanceTimer:
             )
 
 
-def create_logger(config: Dict[str, Any]) -> OracleTargetLogger:
+def create_logger(config: dict[str, Any]) -> OracleTargetLogger:
     """Factory function to create configured logger."""
     return OracleTargetLogger(config)

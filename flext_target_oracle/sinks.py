@@ -10,10 +10,9 @@ Maximizes Oracle Database performance for:
 
 from __future__ import annotations
 
-import contextlib
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import sqlalchemy
 from singer_sdk.sinks import SQLSink
@@ -63,15 +62,33 @@ class OracleSink(SQLSink):
         else:
             self._executor = None
 
+        # Historical versioning for WMS data
+        self._enable_versioning = self.config.get("enable_historical_versioning", False)
+        self._versioning_column = self.config.get("historical_versioning_column", "mod_ts")
+        self._original_key_properties = key_properties
+
         # Logging and monitoring (will be set by target)
         self._logger = None
         self._monitor = None
 
     @property
+    def key_properties(self) -> list[str]:
+        """Return primary key properties with historical versioning support."""
+        if (
+            self._enable_versioning
+            and self._versioning_column in self.schema.get("properties", {})
+            and self._original_key_properties
+            and self._versioning_column not in self._original_key_properties
+        ):
+            # Return composite key: original_keys + versioning_column
+            return list(self._original_key_properties) + [self._versioning_column]
+        return self._original_key_properties or []
+
+    @property
     def full_table_name(self) -> str:  # type: ignore[override]
         """Return the fully qualified table name."""
         # Let Singer SDK handle table name generation
-        table = super().full_table_name
+        table = str(super().full_table_name)
 
         # Apply Oracle naming constraints (30 chars max for older versions)
         if self.config.get("max_identifier_length", 128) == 30:
@@ -108,7 +125,7 @@ class OracleSink(SQLSink):
             # Now fix the column types that are incompatible with Oracle
             self._fix_oracle_column_types(conn)
 
-    def _fix_oracle_column_types(self, conn) -> None:
+    def _fix_oracle_column_types(self, conn: Any) -> None:
         """Fix Oracle column types after table creation."""
         # Get table parts
         schema_name, table_name = self._parse_full_table_name(self.full_table_name)
@@ -154,10 +171,11 @@ class OracleSink(SQLSink):
                     conn.execute(sqlalchemy.text(add_sql))
 
             except Exception as e:
-                # Log but don't fail - some columns might not be alterable
-                self.logger.warning(f"Could not fix column {col_name}: {e}")
+                # DO NOT MASK CRITICAL DDL ERRORS
+                self.logger.error(f"CRITICAL: Column modification FAILED for {col_name}: {e}")
+                raise RuntimeError(f"Column modification failed for {col_name}: {e}") from e
 
-    def _parse_full_table_name(self, full_name: str) -> tuple[str, str]:
+    def _parse_full_table_name(self, full_name: str) -> tuple[str | None, str]:
         """Parse schema.table into schema and table parts."""
         if "." in full_name:
             parts = full_name.split(".")
@@ -255,18 +273,21 @@ class OracleSink(SQLSink):
                     f"ALTER TABLE {table_name} RESULT_CACHE (MODE FORCE)"
                 )
 
-            # Execute all optimizations
+            # Execute all optimizations - REPORT ALL ERRORS
             for opt in optimizations:
                 try:
                     conn.execute(sqlalchemy.text(opt))
-                except Exception:
-                    pass  # Some features may not be available
+                    self.logger.info(f"Applied Oracle optimization: {opt}")
+                except Exception as e:
+                    # DO NOT MASK ERRORS - Log them clearly
+                    self.logger.error(f"Oracle optimization FAILED: {opt} - Error: {e}")
+                    raise RuntimeError(f"Oracle optimization failed: {opt}") from e
 
             # Create high-performance indexes
             if self.key_properties and self.config.get("create_table_indexes"):
                 self._create_performance_indexes(conn, table_name)
 
-    def _create_performance_indexes(self, conn, table_name: str) -> None:
+    def _create_performance_indexes(self, conn: Any, table_name: str) -> None:
         """Create indexes with maximum performance options."""
         for i, key in enumerate(self.key_properties):
             idx_name = f"IDX_{table_name.split('.')[-1]}_{i}"[:30]
@@ -288,23 +309,36 @@ class OracleSink(SQLSink):
                         f"CREATE INDEX {idx_name} ON {table_name} ({key}) {idx_clause}"
                     )
                 )
-            except Exception:
-                pass  # Index might already exist
+                self.logger.info(f"Created index: {idx_name}")
+            except Exception as e:
+                # Check for expected errors vs real problems
+                error_msg = str(e)
+                if "ORA-00955" in error_msg:  # Name already used - acceptable
+                    self.logger.info(f"Index {idx_name} already exists - skipping")
+                elif "ORA-00942" in error_msg:  # Table doesn't exist - acceptable during setup
+                    self.logger.info(f"Table not ready for index {idx_name} - skipping")
+                else:
+                    # Real error - DO NOT MASK
+                    self.logger.error(f"Index creation FAILED: {idx_name} - Error: {e}")
+                    raise RuntimeError(f"Index creation failed: {idx_name}: {e}") from e
 
-    def set_logger(self, logger):
+    def set_logger(self, logger: Any) -> None:
         """Set logger for sink operations."""
         self._logger = logger
 
-    def set_monitor(self, monitor):
+    def set_monitor(self, monitor: Any) -> None:
         """Set monitor for sink operations."""
         self._monitor = monitor
         # Pass engine to monitor for database metrics
         try:
             if hasattr(self.connector, "_engine") and self.connector._engine:
                 monitor.set_engine(self.connector._engine)
-        except Exception:
-            # Engine may not be available yet
-            pass
+        except Exception as e:
+            # Engine may not be available yet - log warning but continue
+            if self.logger:
+                self.logger.warning(f"Monitor engine setup failed (will retry later): {e}")
+            else:
+                print(f"WARNING: Monitor engine setup failed (will retry later): {e}")
 
     def process_batch(self, context: dict) -> None:
         """Process batch with Oracle-specific optimizations and logging."""
@@ -376,12 +410,11 @@ class OracleSink(SQLSink):
         # Execute MERGE in batches
         batch_size = self.config.get("merge_batch_size", 1000)
 
-        with self.connector._engine.connect() as conn:
-            with conn.begin():
-                for i in range(0, len(prepared_records), batch_size):
-                    batch = prepared_records[i : i + batch_size]
-                    for record in batch:
-                        conn.execute(sqlalchemy.text(merge_sql), record)
+        with self.connector._engine.connect() as conn, conn.begin():
+            for i in range(0, len(prepared_records), batch_size):
+                batch = prepared_records[i : i + batch_size]
+                for record in batch:
+                    conn.execute(sqlalchemy.text(merge_sql), record)
 
     def _build_oracle_merge_statement(self) -> str:
         """Build Oracle-specific MERGE statement."""
@@ -439,17 +472,25 @@ class OracleSink(SQLSink):
 
         # Process chunks in parallel
         futures = []
-        for chunk in chunks:
-            future = self._executor.submit(self._process_chunk, chunk)
-            futures.append(future)
+        if self._executor:
+            for chunk in chunks:
+                future = self._executor.submit(self._process_chunk, chunk)
+                futures.append(future)
+        else:
+            # Fallback to sequential processing
+            for chunk in chunks:
+                self._process_chunk(chunk)
 
-        # Wait for completion
+        # Wait for completion - DO NOT MASK PARALLEL PROCESSING ERRORS
         for future in as_completed(futures):
             try:
                 future.result()
-            except Exception:
-                if not self.config.get("ignore_errors"):
-                    raise
+            except Exception as e:
+                # Log the specific chunk processing error
+                if self._logger:
+                    self._logger.error(f"Parallel chunk processing failed: {e}")
+                # Always raise - parallel processing errors indicate serious problems
+                raise
 
     def _process_chunk(self, records: list[dict]) -> None:
         """Process a single chunk of records."""
@@ -463,9 +504,8 @@ class OracleSink(SQLSink):
         insert_sql = self._build_direct_path_insert()
         prepared = [self._conform_record(r) for r in records]
 
-        with self.connector._engine.connect() as conn:
-            with conn.begin():
-                conn.execute(sqlalchemy.text(insert_sql), prepared)
+        with self.connector._engine.connect() as conn, conn.begin():
+            conn.execute(sqlalchemy.text(insert_sql), prepared)
 
     def _process_batch_bulk_insert(self, records: list[dict]) -> None:
         """Process using optimized bulk insert."""
@@ -484,22 +524,20 @@ class OracleSink(SQLSink):
         insert_sql = self._build_bulk_insert_statement()
         prepared = [self._conform_record(r) for r in records]
 
-        with self.connector._engine.connect() as conn:
-            with conn.begin():
-                conn.execute(sqlalchemy.text(insert_sql), prepared)
+        with self.connector._engine.connect() as conn, conn.begin():
+            conn.execute(sqlalchemy.text(insert_sql), prepared)
 
     def _execute_merge_batch(self, records: list[dict]) -> None:
         """Execute high-performance MERGE operation."""
         merge_sql = self._build_merge_statement()
         prepared = [self._conform_record(r) for r in records]
 
-        with self.connector._engine.connect() as conn:
-            with conn.begin():
-                # Process in optimal batch sizes
-                batch_size = self.config.get("merge_batch_size", 5000)
-                for i in range(0, len(prepared), batch_size):
-                    batch = prepared[i : i + batch_size]
-                    conn.execute(sqlalchemy.text(merge_sql), batch)
+        with self.connector._engine.connect() as conn, conn.begin():
+            # Process in optimal batch sizes
+            batch_size = self.config.get("merge_batch_size", 5000)
+            for i in range(0, len(prepared), batch_size):
+                batch = prepared[i : i + batch_size]
+                conn.execute(sqlalchemy.text(merge_sql), batch)
 
     def _build_direct_path_insert(self) -> str:
         """Build INSERT with APPEND_VALUES hint for direct path."""
@@ -588,7 +626,7 @@ class OracleSink(SQLSink):
 
     def _singer_sdk_to_oracle_type(
         self, singer_type: dict
-    ) -> sqlalchemy.types.TypeEngine:
+    ) -> sqlalchemy.types.TypeEngine[Any]:
         """Map Singer SDK types to Oracle types using SQLAlchemy."""
         type_str = singer_type.get("type", "string")
 
@@ -634,7 +672,7 @@ class OracleSink(SQLSink):
             # Store JSON as CLOB or native JSON type
             json_type = self.config.get("json_column_type", "CLOB")
             if json_type == "JSON" and hasattr(sqlalchemy.dialects.oracle, "JSON"):
-                return sqlalchemy.dialects.oracle.JSON()
+                return sqlalchemy.dialects.oracle.JSON()  # type: ignore[no-any-return]
             else:
                 return sqlalchemy.dialects.oracle.CLOB()
 
@@ -650,21 +688,12 @@ class OracleSink(SQLSink):
         # Default to VARCHAR2
         return sqlalchemy.dialects.oracle.VARCHAR2(255)
 
-    def _get_state_key(self) -> str:
-        """Get state key using Singer SDK pattern."""
-        return super()._get_state_key()
 
     def activate_version(self, new_version: int) -> None:
         """Activate version using Singer SDK pattern."""
         # Let Singer SDK handle version activation
         super().activate_version(new_version)
 
-    def _validate_and_fully_qualify_column_name(
-        self,
-        column_name: str,
-    ) -> str:
-        """Validate and fully qualify column name using Singer SDK pattern."""
-        return super()._validate_and_fully_qualify_column_name(column_name)
 
     def clean_up(self) -> None:
         """Clean up with maximum performance optimizations and logging."""
@@ -757,7 +786,7 @@ class OracleSink(SQLSink):
 
             for row in result:
                 idx_name = row[0]
-                with contextlib.suppress(Exception):
+                try:
                     conn.execute(
                         sqlalchemy.text(f"""
                         ALTER INDEX {idx_name} REBUILD
@@ -765,12 +794,19 @@ class OracleSink(SQLSink):
                         NOLOGGING
                     """)
                     )
+                    if self._logger:
+                        self._logger.info(f"Successfully rebuilt index: {idx_name}")
+                except Exception as e:
+                    # Log rebuild failures instead of silently suppressing
+                    if self._logger:
+                        self._logger.warning(f"Index rebuild failed for {idx_name}: {e}")
+                    # Don't raise - this is optimization, not critical
 
     def _refresh_materialized_views(self) -> None:
         """Refresh any materialized views on the table."""
         with self.connector._engine.connect() as conn:
             table_name = self.full_table_name
-            with contextlib.suppress(Exception):
+            try:
                 conn.execute(
                     sqlalchemy.text(f"""
                     BEGIN
@@ -784,17 +820,18 @@ class OracleSink(SQLSink):
                 """),
                     {"failures": 0},
                 )
+                if self._logger:
+                    self._logger.info(f"Successfully refreshed materialized views for {table_name}")
+            except Exception as e:
+                # Log MView refresh failures instead of silently suppressing
+                if self._logger:
+                    self._logger.warning(f"Materialized view refresh failed for {table_name}: {e}")
+                # Don't raise - this is optimization, not critical
 
-    def _parse_full_table_name(self, full_table_name: str) -> tuple[str | None, str]:
-        """Parse full table name into schema and table components."""
-        parts = full_table_name.split(".", 1)
-        if len(parts) == 2:
-            return parts[0], parts[1]
-        return None, parts[0]
 
     def _conform_record(self, record: dict) -> dict:
         """Conform record to Oracle requirements using Singer SDK patterns."""
-        conformed = {}
+        conformed: dict[str, Any] = {}
 
         # Process each field according to schema
         for key, value in record.items():

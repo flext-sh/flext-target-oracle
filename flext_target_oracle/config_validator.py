@@ -17,9 +17,10 @@ from sqlalchemy import create_engine, text
 class ConfigurationValidator:
     """Validates Oracle target configuration for production readiness."""
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any], logger: Any = None):
         """Initialize validator with configuration."""
         self.config = config
+        self.logger = logger
         self.errors: list[str] = []
         self.warnings: list[str] = []
         self.recommendations: list[str] = []
@@ -235,14 +236,18 @@ class ConfigurationValidator:
         for option_flag, features in option_features.items():
             has_option = self.config.get(option_flag, False)
 
-            for config_key, feature_name in features.items():
-                if isinstance(feature_name, tuple):
-                    check_func, feature_name = feature_name
+            if not isinstance(features, dict):
+                continue
+
+            for config_key, feature_value in features.items():
+                if isinstance(feature_value, tuple):
+                    check_func, feature_name = feature_value
                     if check_func(self.config.get(config_key)) and not has_option:
                         self.warnings.append(
                             f"{feature_name} requires {option_flag} license"
                         )
                 else:
+                    feature_name = feature_value
                     if self.config.get(config_key, False) and not has_option:
                         self.warnings.append(
                             f"{feature_name} requires {option_flag} license"
@@ -318,10 +323,13 @@ class ConfigurationValidator:
                 )
                 version_row = version_result.fetchone()
                 if version_row:
-                    results["database_version"] = version_row[0]
-                    results["edition_info"]["is_enterprise"] = (
-                        "Enterprise Edition" in version_row[0]
-                    )
+                    version_str = str(version_row[0])
+                    results["database_version"] = version_str
+                    edition_info = results["edition_info"]
+                    if isinstance(edition_info, dict):
+                        edition_info["is_enterprise"] = (
+                            "Enterprise Edition" in version_str
+                        )
 
                 # Check for specific features
                 try:
@@ -329,9 +337,15 @@ class ConfigurationValidator:
                     conn.execute(
                         text("SELECT COUNT(*) FROM user_part_tables WHERE ROWNUM <= 1")
                     )
-                    results["edition_info"]["has_partitioning"] = True
-                except Exception:
-                    results["edition_info"]["has_partitioning"] = False
+                    edition_info = results["edition_info"]
+                    if isinstance(edition_info, dict):
+                        edition_info["has_partitioning"] = True
+                except Exception as e:
+                    edition_info = results["edition_info"]
+                    if isinstance(edition_info, dict):
+                        edition_info["has_partitioning"] = False
+                    if self.logger:
+                        self.logger.debug(f"Partitioning check failed (normal for SE): {e}")
 
                 # Check for Exadata/Autonomous
                 try:
@@ -345,14 +359,26 @@ class ConfigurationValidator:
                     )
                     platform_row = platform_result.fetchone()
                     if platform_row:
-                        results["platform_info"]["type"] = "Exadata/Autonomous/Cloud"
-                        results["platform_info"]["banner"] = platform_row[0]
-                        results["edition_info"]["supports_hcc"] = True
+                        platform_info = results["platform_info"]
+                        if isinstance(platform_info, dict):
+                            platform_info["type"] = "Exadata/Autonomous/Cloud"
+                            platform_info["banner"] = str(platform_row[0])
+                        edition_info = results["edition_info"]
+                        if isinstance(edition_info, dict):
+                            edition_info["supports_hcc"] = True
                     else:
-                        results["platform_info"]["type"] = "Standard"
-                        results["edition_info"]["supports_hcc"] = False
-                except Exception:
-                    results["platform_info"]["type"] = "Unknown"
+                        platform_info = results["platform_info"]
+                        if isinstance(platform_info, dict):
+                            platform_info["type"] = "Standard"
+                        edition_info = results["edition_info"]
+                        if isinstance(edition_info, dict):
+                            edition_info["supports_hcc"] = False
+                except Exception as e:
+                    platform_info = results["platform_info"]
+                    if isinstance(platform_info, dict):
+                        platform_info["type"] = "Unknown"
+                    if self.logger:
+                        self.logger.debug(f"Platform detection failed: {e}")
 
                 # Check database size and capabilities
                 try:
@@ -364,10 +390,15 @@ class ConfigurationValidator:
                     )
                     size_row = size_result.fetchone()
                     if size_row:
-                        results["platform_info"]["size_gb"] = size_row[0]
-                except Exception:
-                    # Might not have DBA privileges
-                    pass
+                        platform_info = results["platform_info"]
+                        if isinstance(platform_info, dict):
+                            platform_info["size_gb"] = (
+                                float(size_row[0]) if size_row[0] is not None else 0.0
+                            )
+                except Exception as e:
+                    # Might not have DBA privileges - log debug info
+                    if self.logger:
+                        self.logger.debug(f"Database size check failed (may need DBA privileges): {e}")
 
         except Exception as e:
             self.errors.append(f"Connection test failed: {e}")
@@ -454,7 +485,7 @@ class ConfigurationValidator:
 
     def validate_environment_variables(self) -> dict[str, Any]:
         """Validate environment-based configuration."""
-        results = {
+        results: dict[str, Any] = {
             "env_vars_found": [],
             "env_vars_missing": [],
             "env_recommendations": [],
