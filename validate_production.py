@@ -105,7 +105,7 @@ def test_data_processing():
     test_data = '\n'.join([schema_msg, record_msg, state_msg])
 
     # Process data
-    result = target.process_lines(io.StringIO(test_data))
+    target.process_lines(io.StringIO(test_data))
     print("  ✅ Data processing: SUCCESS")
 
     return stream_name
@@ -120,7 +120,7 @@ def test_upsert_functionality():
 
     target = OracleTarget(config=config)
 
-    timestamp = datetime.now().isoformat()
+    datetime.now().isoformat()
     stream_name = f"upsert_test_{int(datetime.now().timestamp())}"
 
     schema_msg = json.dumps({
@@ -153,7 +153,7 @@ def test_upsert_functionality():
     test_data = '\n'.join([schema_msg, record1, record2])
 
     # Process upsert data
-    result = target.process_lines(io.StringIO(test_data))
+    target.process_lines(io.StringIO(test_data))
     print("  ✅ UPSERT processing: SUCCESS")
 
     return stream_name
@@ -190,9 +190,9 @@ def verify_database_data(table_names):
 
         # Check for test tables
         result = conn.execute(text("""
-            SELECT table_name, num_rows 
-            FROM user_tables 
-            WHERE table_name LIKE '%TEST%' 
+            SELECT table_name, num_rows
+            FROM user_tables
+            WHERE table_name LIKE '%TEST%'
             ORDER BY table_name DESC
         """))
 
@@ -200,7 +200,7 @@ def verify_database_data(table_names):
         print(f"  📋 Test tables found: {len(tables)}")
 
         # Check data in recent tables
-        for table_name, num_rows in tables[:3]:
+        for table_name, _num_rows in tables[:3]:
             try:
                 result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
                 count = result.scalar()

@@ -231,7 +231,8 @@ class OracleTargetMonitor:
             with self._engine.connect() as conn:
                 # Session information
                 result = conn.execute(
-                    text("""
+                    text(
+                        """
                     SELECT
                         SID,
                         SERIAL#,
@@ -241,36 +242,42 @@ class OracleTargetMonitor:
                         LOGON_TIME
                     FROM V$SESSION
                     WHERE AUDSID = USERENV('SESSIONID')
-                """)
+                """
+                    )
                 )
                 session_info = result.fetchone()
 
                 # Memory usage
                 memory_result = conn.execute(
-                    text("""
+                    text(
+                        """
                     SELECT
                         NAME,
                         VALUE
                     FROM V$MYSTAT ms, V$STATNAME sn
                     WHERE ms.STATISTIC# = sn.STATISTIC#
                     AND sn.NAME IN ('session pga memory', 'session uga memory')
-                """)
+                """
+                    )
                 )
                 memory_stats = dict(memory_result.fetchall())
 
                 # Wait events
                 wait_result = conn.execute(
-                    text("""
+                    text(
+                        """
                     SELECT
                         EVENT,
                         TOTAL_WAITS,
                         TIME_WAITED
                     FROM V$SESSION_EVENT
-                    WHERE SID = (SELECT SID FROM V$SESSION WHERE AUDSID = USERENV('SESSIONID'))
+                    WHERE SID = (SELECT SID FROM V$SESSION "
+                    "WHERE AUDSID = USERENV('SESSIONID'))
                     AND TOTAL_WAITS > 0
                     ORDER BY TIME_WAITED DESC
                     FETCH FIRST 5 ROWS ONLY
-                """)
+                """
+                    )
                 )
                 wait_events = [dict(row._asdict()) for row in wait_result.fetchall()]
 
@@ -375,7 +382,9 @@ class OracleTargetMonitor:
                             {
                                 "type": "connection_pool_usage_high",
                                 "severity": "critical",
-                                "message": f"Connection pool usage is {pool_usage:.1f}%",
+                                "message": (
+                                    f"Connection pool usage is {pool_usage:.1f}%"
+                                ),
                                 "value": pool_usage,
                                 "threshold": self.thresholds["connection_pool_usage"],
                             }
@@ -481,9 +490,11 @@ class OracleTargetMonitor:
                 cpu_percent = system_metrics.get("cpu", {}).get("percent", 0)
 
                 health_status["checks"]["system"] = {
-                    "status": "healthy"
-                    if memory_percent < 90 and cpu_percent < 90
-                    else "degraded",
+                    "status": (
+                        "healthy"
+                        if memory_percent < 90 and cpu_percent < 90
+                        else "degraded"
+                    ),
                     "memory_percent": memory_percent,
                     "cpu_percent": cpu_percent,
                 }
@@ -545,9 +556,11 @@ class OracleTargetMonitor:
 
                 # Check database status
                 status_result = conn.execute(
-                    text("""
+                    text(
+                        """
                     SELECT STATUS FROM V$INSTANCE
-                """)
+                """
+                    )
                 )
                 db_status = status_result.scalar()
 
@@ -583,7 +596,8 @@ class OracleTargetMonitor:
         ) / len(recent_metrics)
 
         avg_cpu = sum(
-            m.get("system", {}).get("cpu", {}).get("percent", 0) for m in recent_metrics
+            m.get("system", {}).get("cpu", {}).get("percent", 0)
+            for m in recent_metrics
         ) / len(recent_metrics)
 
         return {

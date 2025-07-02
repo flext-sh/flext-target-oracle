@@ -125,7 +125,7 @@ class TestEnterpriseFeatures:
                 result = conn.execute(
                     text(f"""
                     SELECT table_name, partitioning_type, partition_count
-                    FROM user_part_tables 
+                    FROM user_part_tables
                     WHERE table_name = UPPER('{test_table_name}')
                 """)
                 )
@@ -149,7 +149,7 @@ class TestEnterpriseFeatures:
                 result = conn.execute(
                     text(f"""
                     SELECT COUNT(*) FROM {test_table_name}
-                    WHERE created_date >= DATE '2025-03-01' 
+                    WHERE created_date >= DATE '2025-03-01'
                     AND created_date < DATE '2025-04-01'
                 """)
                 )
@@ -181,8 +181,8 @@ class TestEnterpriseFeatures:
                 # Check for Exadata or Autonomous indicators
                 result = conn.execute(
                     text("""
-                    SELECT banner FROM v$version 
-                    WHERE banner LIKE '%Exadata%' 
+                    SELECT banner FROM v$version
+                    WHERE banner LIKE '%Exadata%'
                        OR banner LIKE '%Autonomous%'
                        OR banner LIKE '%Cloud%'
                 """)
@@ -290,7 +290,7 @@ class TestEnterpriseFeatures:
                 result = conn.execute(
                     text(f"""
                     SELECT table_name, compression, compress_for
-                    FROM user_tables 
+                    FROM user_tables
                     WHERE table_name = UPPER('{test_table_name}')
                 """)
                 )

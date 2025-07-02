@@ -264,8 +264,8 @@ class TestErrorHandling:
             # Verify specific valid records
             result = conn.execute(
                 text(f"""
-                SELECT id, name, score, active 
-                FROM {test_table_name} 
+                SELECT id, name, score, active
+                FROM {test_table_name}
                 WHERE id IN (1, 2, 5)
                 ORDER BY id
             """)
@@ -468,8 +468,8 @@ class TestErrorHandling:
             # Verify data integrity of processed records
             result = conn.execute(
                 text(f"""
-                SELECT id, LENGTH(large_data), metadata 
-                FROM {test_table_name} 
+                SELECT id, LENGTH(large_data), metadata
+                FROM {test_table_name}
                 WHERE id IN (1, 250, 500)
             """)
             )
@@ -589,8 +589,8 @@ class TestErrorHandling:
             # Verify updated records
             result = conn.execute(
                 text(f"""
-                SELECT id, counter, name 
-                FROM {test_table_name} 
+                SELECT id, counter, name
+                FROM {test_table_name}
                 WHERE id <= 10
                 ORDER BY id
             """)
@@ -865,7 +865,7 @@ class TestErrorHandling:
             # Verify no data corruption
             result = conn.execute(
                 text(f"""
-                SELECT COUNT(DISTINCT id) as unique_ids, 
+                SELECT COUNT(DISTINCT id) as unique_ids,
                        MAX(id) as max_id,
                        MIN(id) as min_id
                 FROM {test_table_name}

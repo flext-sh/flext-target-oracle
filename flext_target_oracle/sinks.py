@@ -63,8 +63,12 @@ class OracleSink(SQLSink):
             self._executor = None
 
         # Historical versioning for WMS data
-        self._enable_versioning = self.config.get("enable_historical_versioning", False)
-        self._versioning_column = self.config.get("historical_versioning_column", "mod_ts")
+        self._enable_versioning = self.config.get(
+            "enable_historical_versioning", False
+        )
+        self._versioning_column = self.config.get(
+            "historical_versioning_column", "mod_ts"
+        )
         self._original_key_properties = key_properties
 
         # Logging and monitoring (will be set by target)
@@ -172,8 +176,12 @@ class OracleSink(SQLSink):
 
             except Exception as e:
                 # DO NOT MASK CRITICAL DDL ERRORS
-                self.logger.error(f"CRITICAL: Column modification FAILED for {col_name}: {e}")
-                raise RuntimeError(f"Column modification failed for {col_name}: {e}") from e
+                self.logger.error(
+                    f"CRITICAL: Column modification FAILED for {col_name}: {e}"
+                )
+                raise RuntimeError(
+                    f"Column modification failed for {col_name}: {e}"
+                ) from e
 
     def _parse_full_table_name(self, full_name: str) -> tuple[str | None, str]:
         """Parse schema.table into schema and table parts."""
@@ -229,20 +237,23 @@ class OracleSink(SQLSink):
                     "oracle_has_compression_option"
                 ):
                     self.logger.warning(
-                        f"Compression type {compression} requires Oracle Advanced Compression option. Using BASIC instead."
+                        f"Compression type {compression} requires Oracle "
+                        f"Advanced Compression option. Using BASIC instead."
                     )
                     compression = "BASIC"
                     compress_for = "OLTP"
 
                 optimizations.append(
-                    f"ALTER TABLE {table_name} COMPRESS FOR {compress_for} {compression}"
+                    f"ALTER TABLE {table_name} COMPRESS FOR "
+                    f"{compress_for} {compression}"
                 )
 
             # Maximum parallelism (requires EE)
             if self.config.get("parallel_degree", 1) > 1:
                 if not is_ee:
                     self.logger.warning(
-                        "Parallel degree > 1 requires Oracle Enterprise Edition. Skipping."
+                        "Parallel degree > 1 requires Oracle Enterprise "
+                        "Edition. Skipping."
                     )
                 else:
                     degree = self.config["parallel_degree"]
@@ -280,7 +291,9 @@ class OracleSink(SQLSink):
                     self.logger.info(f"Applied Oracle optimization: {opt}")
                 except Exception as e:
                     # DO NOT MASK ERRORS - Log them clearly
-                    self.logger.error(f"Oracle optimization FAILED: {opt} - Error: {e}")
+                    self.logger.error(
+                        f"Oracle optimization FAILED: {opt} - Error: {e}"
+                    )
                     raise RuntimeError(f"Oracle optimization failed: {opt}") from e
 
             # Create high-performance indexes
@@ -315,12 +328,20 @@ class OracleSink(SQLSink):
                 error_msg = str(e)
                 if "ORA-00955" in error_msg:  # Name already used - acceptable
                     self.logger.info(f"Index {idx_name} already exists - skipping")
-                elif "ORA-00942" in error_msg:  # Table doesn't exist - acceptable during setup
-                    self.logger.info(f"Table not ready for index {idx_name} - skipping")
+                elif (
+                    "ORA-00942" in error_msg
+                ):  # Table doesn't exist - acceptable during setup
+                    self.logger.info(
+                        f"Table not ready for index {idx_name} - skipping"
+                    )
                 else:
                     # Real error - DO NOT MASK
-                    self.logger.error(f"Index creation FAILED: {idx_name} - Error: {e}")
-                    raise RuntimeError(f"Index creation failed: {idx_name}: {e}") from e
+                    self.logger.error(
+                        f"Index creation FAILED: {idx_name} - Error: {e}"
+                    )
+                    raise RuntimeError(
+                        f"Index creation failed: {idx_name}: {e}"
+                    ) from e
 
     def set_logger(self, logger: Any) -> None:
         """Set logger for sink operations."""
@@ -336,7 +357,9 @@ class OracleSink(SQLSink):
         except Exception as e:
             # Engine may not be available yet - log warning but continue
             if self.logger:
-                self.logger.warning(f"Monitor engine setup failed (will retry later): {e}")
+                self.logger.warning(
+                    f"Monitor engine setup failed (will retry later): {e}"
+                )
             else:
                 print(f"WARNING: Monitor engine setup failed (will retry later): {e}")
 
@@ -551,7 +574,8 @@ class OracleSink(SQLSink):
 
         # Direct path with parallel hint
         return f"""
-        INSERT /*+ APPEND_VALUES PARALLEL({table_name},{self.config.get('parallel_degree', 8)}) */
+        INSERT /*+ APPEND_VALUES "
+        f"PARALLEL({table_name},{self.config.get('parallel_degree', 8)}) */
         INTO {table_name} ({columns_str})
         VALUES ({placeholders})
         """
@@ -577,7 +601,10 @@ class OracleSink(SQLSink):
 
         hint_str = f"/*+ {' '.join(hints)} */" if hints else ""
 
-        return f"INSERT {hint_str} INTO {table_name} ({columns_str}) VALUES ({placeholders})"
+        return (
+            f"INSERT {hint_str} INTO {table_name} ({columns_str}) "
+            f"VALUES ({placeholders})"
+        )
 
     def _build_merge_statement(self) -> str:
         """Build high-performance MERGE with hints."""
@@ -688,12 +715,10 @@ class OracleSink(SQLSink):
         # Default to VARCHAR2
         return sqlalchemy.dialects.oracle.VARCHAR2(255)
 
-
     def activate_version(self, new_version: int) -> None:
         """Activate version using Singer SDK pattern."""
         # Let Singer SDK handle version activation
         super().activate_version(new_version)
-
 
     def clean_up(self) -> None:
         """Clean up with maximum performance optimizations and logging."""
@@ -709,7 +734,8 @@ class OracleSink(SQLSink):
                 with self.connector._engine.connect() as conn:
                     table_name = self.full_table_name.split(".")[-1]
                     conn.execute(
-                        sqlalchemy.text(f"""
+                        sqlalchemy.text(
+                            f"""
                         BEGIN
                             DBMS_STATS.GATHER_TABLE_STATS(
                                 ownname => USER,
@@ -718,10 +744,11 @@ class OracleSink(SQLSink):
                                 method_opt => 'FOR ALL COLUMNS SIZE AUTO',
                                 granularity => 'ALL',
                                 cascade => TRUE,
-                                degree => {self.config.get('parallel_degree', 'DBMS_STATS.DEFAULT_DEGREE')}
+                                degree => {self.config.get('parallel_degree', 'DBMS_STATS.DEFAULT_DEGREE')}"
                             );
                         END;
-                    """)
+                    """
+                        )
                     )
 
             # Rebuild indexes for optimal performance
@@ -778,28 +805,34 @@ class OracleSink(SQLSink):
 
             # Get all indexes
             result = conn.execute(
-                sqlalchemy.text(f"""
+                sqlalchemy.text(
+                    f"""
                 SELECT index_name FROM user_indexes
                 WHERE table_name = '{table_name}' AND index_type != 'LOB'
-            """)
+            """
+                )
             )
 
             for row in result:
                 idx_name = row[0]
                 try:
                     conn.execute(
-                        sqlalchemy.text(f"""
+                        sqlalchemy.text(
+                            f"""
                         ALTER INDEX {idx_name} REBUILD
                         PARALLEL {self.config.get('parallel_degree', 8)}
                         NOLOGGING
-                    """)
+                    """
+                        )
                     )
                     if self._logger:
                         self._logger.info(f"Successfully rebuilt index: {idx_name}")
                 except Exception as e:
                     # Log rebuild failures instead of silently suppressing
                     if self._logger:
-                        self._logger.warning(f"Index rebuild failed for {idx_name}: {e}")
+                        self._logger.warning(
+                            f"Index rebuild failed for {idx_name}: {e}"
+                        )
                     # Don't raise - this is optimization, not critical
 
     def _refresh_materialized_views(self) -> None:
@@ -808,7 +841,8 @@ class OracleSink(SQLSink):
             table_name = self.full_table_name
             try:
                 conn.execute(
-                    sqlalchemy.text(f"""
+                    sqlalchemy.text(
+                        f"""
                     BEGIN
                         DBMS_MVIEW.REFRESH_DEPENDENT(
                             number_of_failures => :failures,
@@ -817,17 +851,21 @@ class OracleSink(SQLSink):
                             parallelism => {self.config.get('parallel_degree', 8)}
                         );
                     END;
-                """),
+                """
+                    ),
                     {"failures": 0},
                 )
                 if self._logger:
-                    self._logger.info(f"Successfully refreshed materialized views for {table_name}")
+                    self._logger.info(
+                        f"Successfully refreshed materialized views for {table_name}"
+                    )
             except Exception as e:
                 # Log MView refresh failures instead of silently suppressing
                 if self._logger:
-                    self._logger.warning(f"Materialized view refresh failed for {table_name}: {e}")
+                    self._logger.warning(
+                        f"Materialized view refresh failed for {table_name}: {e}"
+                    )
                 # Don't raise - this is optimization, not critical
-
 
     def _conform_record(self, record: dict) -> dict:
         """Conform record to Oracle requirements using Singer SDK patterns."""

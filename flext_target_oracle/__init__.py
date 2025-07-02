@@ -19,8 +19,8 @@ from .sinks import OracleSink
 from .target import OracleTarget
 
 __all__ = [
-    "OracleTarget",    # Primary implementation
-    "OracleSink",      # Primary implementation
-    "OracleConnector", # Shared connector
+    "OracleTarget",  # Primary implementation
+    "OracleSink",  # Primary implementation
+    "OracleConnector",  # Shared connector
     "__version__",
 ]

@@ -252,10 +252,9 @@ def clean_test_table(table_name: str, config: dict[str, Any] | None = None) -> N
         config = get_test_config()
 
     try:
-        with oracle_connection(config) as conn:
-            with conn.begin():
-                conn.execute(text(f"DROP TABLE {table_name} CASCADE CONSTRAINTS"))
-                print(f"✅ Cleaned test table: {table_name}")
+        with oracle_connection(config) as conn, conn.begin():
+            conn.execute(text(f"DROP TABLE {table_name} CASCADE CONSTRAINTS"))
+            print(f"✅ Cleaned test table: {table_name}")
     except Exception as e:
         print(f"⚠️ Could not clean table {table_name}: {e}")
 
@@ -273,27 +272,26 @@ def clean_all_test_tables(config: dict[str, Any] | None = None) -> None:
     ]
 
     try:
-        with oracle_connection(config) as conn:
-            with conn.begin():
-                # Find all test tables
-                for pattern in test_table_patterns:
-                    result = conn.execute(
-                        text(f"""
-                        SELECT table_name 
-                        FROM user_tables 
+        with oracle_connection(config) as conn, conn.begin():
+            # Find all test tables
+            for pattern in test_table_patterns:
+                result = conn.execute(
+                    text(f"""
+                        SELECT table_name
+                        FROM user_tables
                         WHERE table_name LIKE '{pattern}'
                     """)
-                    )
+                )
 
-                    for row in result:
-                        table_name = row[0]
-                        try:
-                            conn.execute(
-                                text(f"DROP TABLE {table_name} CASCADE CONSTRAINTS")
-                            )
-                            print(f"✅ Cleaned test table: {table_name}")
-                        except Exception as e:
-                            print(f"⚠️ Could not clean table {table_name}: {e}")
+                for row in result:
+                    table_name = row[0]
+                    try:
+                        conn.execute(
+                            text(f"DROP TABLE {table_name} CASCADE CONSTRAINTS")
+                        )
+                        print(f"✅ Cleaned test table: {table_name}")
+                    except Exception as e:
+                        print(f"⚠️ Could not clean table {table_name}: {e}")
 
     except Exception as e:
         print(f"❌ Error during cleanup: {e}")
@@ -358,8 +356,8 @@ def count_test_tables(config: dict[str, Any] | None = None) -> int:
             for pattern in test_table_patterns:
                 result = conn.execute(
                     text(f"""
-                    SELECT COUNT(*) 
-                    FROM user_tables 
+                    SELECT COUNT(*)
+                    FROM user_tables
                     WHERE table_name LIKE '{pattern}'
                 """)
                 )
@@ -383,8 +381,8 @@ def validate_table_structure(
         with oracle_connection(config) as conn:
             result = conn.execute(
                 text(f"""
-                SELECT column_name 
-                FROM user_tab_columns 
+                SELECT column_name
+                FROM user_tab_columns
                 WHERE table_name = '{table_name.upper()}'
                 ORDER BY column_name
             """)

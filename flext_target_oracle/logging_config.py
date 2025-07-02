@@ -218,7 +218,9 @@ class OracleTargetLogger:
         return f"oracle_target_{int(time.time())}_{os.getpid()}"
 
     @contextmanager
-    def operation_context(self, operation: str, stream: str = "unknown", **kwargs: Any) -> Any:
+    def operation_context(
+        self, operation: str, stream: str = "unknown", **kwargs: Any
+    ) -> Any:
         """Context manager for tracking operations with metrics and logging."""
         start_time = time.time()
         operation_id = f"{operation}_{int(start_time)}"
@@ -242,7 +244,9 @@ class OracleTargetLogger:
 
             # Update performance counters
             current_duration = self.performance_counters.get("total_duration", 0.0)
-            self.performance_counters["total_duration"] = float(current_duration) + duration
+            self.performance_counters["total_duration"] = (
+                float(current_duration) + duration
+            )
             streams_set = self.performance_counters.get("streams_processed", set())
             streams_set.add(stream)  # type: ignore[attr-defined]
             self.performance_counters["streams_processed"] = streams_set
@@ -278,7 +282,9 @@ class OracleTargetLogger:
             self.error("Operation failed", extra=context, exc_info=True)
             raise
 
-    def log_record_batch(self, stream: str, batch_size: int, operation: str = "insert") -> None:
+    def log_record_batch(
+        self, stream: str, batch_size: int, operation: str = "insert"
+    ) -> None:
         """Log processing of a record batch with metrics."""
         context = {
             "stream": stream,
@@ -416,27 +422,43 @@ class OracleTargetLogger:
         return status
 
     # Standard logging methods with context injection
-    def debug(self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
+    def debug(
+        self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any
+    ) -> None:
         """Log debug message with context."""
         self._log(logging.DEBUG, message, extra, **kwargs)
 
-    def info(self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
+    def info(
+        self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any
+    ) -> None:
         """Log info message with context."""
         self._log(logging.INFO, message, extra, **kwargs)
 
-    def warning(self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
+    def warning(
+        self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any
+    ) -> None:
         """Log warning message with context."""
         self._log(logging.WARNING, message, extra, **kwargs)
 
-    def error(self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
+    def error(
+        self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any
+    ) -> None:
         """Log error message with context."""
         self._log(logging.ERROR, message, extra, **kwargs)
 
-    def critical(self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
+    def critical(
+        self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any
+    ) -> None:
         """Log critical message with context."""
         self._log(logging.CRITICAL, message, extra, **kwargs)
 
-    def _log(self, level: int, message: str, extra: dict[str, Any] | None = None, **kwargs: Any) -> None:
+    def _log(
+        self,
+        level: int,
+        message: str,
+        extra: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> None:
         """Internal logging method with context injection."""
         try:
             # Check if logging system is still functional
@@ -445,8 +467,11 @@ class OracleTargetLogger:
 
             # Check if any handler has a closed stream
             for handler in self.logger.handlers:
-                if (hasattr(handler, "stream") and hasattr(handler.stream, "closed")
-                    and handler.stream.closed):
+                if (
+                    hasattr(handler, "stream")
+                    and hasattr(handler.stream, "closed")
+                    and handler.stream.closed
+                ):
                     return
 
             if extra is None:
