@@ -10,13 +10,12 @@ This connector leverages all Oracle Database advanced features:
 
 from __future__ import annotations
 
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any
 
 from singer_sdk.connectors import SQLConnector
 from sqlalchemy import create_engine, event, pool, text
 from sqlalchemy.dialects.oracle import TIMESTAMP
-from sqlalchemy.types import DATETIME, DateTime
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -55,9 +54,8 @@ class OracleConnector(SQLConnector):
         self.jsonschema_to_sql.register_format_handler("time", lambda _: TIMESTAMP())
 
     def get_column_type(self, column_name: str, jsonschema_type: dict) -> Any:
-        """Override column type mapping for Oracle compatibility."""
-        from sqlalchemy import Boolean
-        from sqlalchemy.dialects.oracle import CLOB, NUMBER, VARCHAR2
+        """Override column type mapping with JSON schema type priority."""
+        from sqlalchemy.dialects.oracle import CHAR, CLOB, NUMBER, VARCHAR2
 
         # Get JSON schema type info
         json_type = jsonschema_type.get("type", "string")
@@ -67,44 +65,134 @@ class OracleConnector(SQLConnector):
         if isinstance(json_type, list):
             json_type = next((t for t in json_type if t != "null"), "string")
 
-        # Map directly to Oracle types for compatibility
-        if json_type == "boolean":
-            # Oracle doesn't have native boolean, use NUMBER(1)
-            return NUMBER(1, 0)
-        elif json_type == "integer":
-            return NUMBER(precision=38, scale=0)
+        # Get configuration settings
+        schema_convention = self.config.get("schema_naming_convention", "generic")
+        enable_smart_typing = self.config.get("enable_smart_typing", True)
+        default_varchar_length = self.config.get("varchar_default_length", 255)
+        max_varchar_length = self.config.get("varchar_max_length", 4000)
+
+        # Debug logging to understand what's happening
+        if self.config.get("debug_type_mapping", False):
+            print(
+                f"DEBUG: get_column_type called for {column_name} with schema "
+                f"{jsonschema_type}"
+            )
+            print(
+                f"DEBUG: json_type={json_type}, format={json_format}, "
+                f"convention={schema_convention}"
+            )
+
+        # PRIORITY 1: JSON Schema type mapping
+        # (user's feedback: "olhar o tipo de campo antes das regras")
+        if json_type == "integer":
+            oracle_type = NUMBER()  # type: ignore[assignment]
+            if self.config.get("debug_type_mapping", False):
+                print(f"DEBUG: {column_name} (integer) -> {oracle_type}")
+            return oracle_type
+
         elif json_type == "number":
-            return NUMBER(precision=38, scale=10)
-        elif json_type == "string":
-            if json_format in ("date-time", "date", "time"):
-                return TIMESTAMP()
+            oracle_type = NUMBER()  # type: ignore[assignment]
+            if self.config.get("debug_type_mapping", False):
+                print(f"DEBUG: {column_name} (number) -> {oracle_type}")
+            return oracle_type
+
+        elif json_type == "boolean":
+            # Apply naming convention rules ONLY for boolean
+            if (
+                schema_convention == "wms"
+                and enable_smart_typing
+                and column_name.upper().endswith("_FLG")
+            ):
+                # WMS uses CHAR(1) for flags
+                oracle_type = CHAR(1)  # type: ignore[assignment]
             else:
-                max_length = jsonschema_type.get("maxLength", 4000)
-                return VARCHAR2(min(max_length, 4000))
+                # Standard Oracle boolean
+                oracle_type = NUMBER(1, 0)  # type: ignore[assignment]
+            if self.config.get("debug_type_mapping", False):
+                print(f"DEBUG: {column_name} (boolean) -> {oracle_type}")
+            return oracle_type
+
+        elif json_type == "string":
+            # PRIORITY 2: Date/time format handling
+            # (user's feedback: "date/time tem que usar timestamp(6)")
+            if json_format in ("date-time", "date", "time"):
+                oracle_type = TIMESTAMP()  # type: ignore[assignment]
+                if self.config.get("debug_type_mapping", False):
+                    print(
+                        f"DEBUG: {column_name} (string with {json_format} format) -> "
+                        f"{oracle_type}"
+                    )
+                return oracle_type
+
+            # PRIORITY 3: Explicit maxLength from schema
+            max_length = jsonschema_type.get("maxLength")
+            if max_length:
+                oracle_type = VARCHAR2(min(max_length, max_varchar_length))  # type: ignore[assignment]
+                if self.config.get("debug_type_mapping", False):
+                    print(f"DEBUG: {column_name} (string with maxLength={max_length}) -> {oracle_type}")
+                return oracle_type
+
+            # PRIORITY 4: Smart typing rules (only for string fields without explicit length)
+            if enable_smart_typing:
+                if schema_convention == "wms":
+                    # WMS-specific string rules
+                    if column_name.upper().endswith('_KEY'):
+                        oracle_type = VARCHAR2(255)  # type: ignore[assignment]
+                        if self.config.get("debug_type_mapping", False):
+                            print(f"DEBUG: {column_name} (WMS _KEY rule) -> {oracle_type}")
+                        return oracle_type
+                    elif any(word in column_name.lower() for word in ['str', 'user', 'name']):
+                        oracle_type = VARCHAR2(255)  # type: ignore[assignment]
+                        if self.config.get("debug_type_mapping", False):
+                            print(f"DEBUG: {column_name} (WMS str/user/name rule) -> {oracle_type}")
+                        return oracle_type
+                    elif column_name.upper().endswith('_DESC'):
+                        oracle_type = VARCHAR2(255)  # type: ignore[assignment]
+                        if self.config.get("debug_type_mapping", False):
+                            print(f"DEBUG: {column_name} (WMS _DESC rule) -> {oracle_type}")
+                        return oracle_type
+                    elif any(word in column_name.lower() for word in ['code', 'status']):
+                        oracle_type = VARCHAR2(50)  # type: ignore[assignment]
+                        if self.config.get("debug_type_mapping", False):
+                            print(f"DEBUG: {column_name} (WMS code/status rule) -> {oracle_type}")
+                        return oracle_type
+                else:
+                    # Generic smart string rules
+                    if any(word in column_name.lower() for word in ['key', 'code']):
+                        oracle_type = VARCHAR2(100)  # type: ignore[assignment]
+                        if self.config.get("debug_type_mapping", False):
+                            print(f"DEBUG: {column_name} (generic key/code rule) -> {oracle_type}")
+                        return oracle_type
+                    elif any(word in column_name.lower() for word in ['name', 'title']):
+                        oracle_type = VARCHAR2(255)  # type: ignore[assignment]
+                        if self.config.get("debug_type_mapping", False):
+                            print(f"DEBUG: {column_name} (generic name/title rule) -> {oracle_type}")
+                        return oracle_type
+                    elif any(word in column_name.lower() for word in ['desc', 'comment', 'note']):
+                        oracle_type = VARCHAR2(500)  # type: ignore[assignment]
+                        if self.config.get("debug_type_mapping", False):
+                            print(f"DEBUG: {column_name} (generic desc/comment/note rule) -> {oracle_type}")
+                        return oracle_type
+                    elif any(word in column_name.lower() for word in ['status', 'code']):
+                        oracle_type = VARCHAR2(50)  # type: ignore[assignment]
+                        if self.config.get("debug_type_mapping", False):
+                            print(f"DEBUG: {column_name} (generic status/code rule) -> {oracle_type}")
+                        return oracle_type
+
+            # PRIORITY 5: Default VARCHAR2 length
+            oracle_type = VARCHAR2(default_varchar_length)  # type: ignore[assignment]
+            if self.config.get("debug_type_mapping", False):
+                print(f"DEBUG: {column_name} (default VARCHAR2) -> {oracle_type}")
+            return oracle_type
+
         elif json_type in ("object", "array"):
-            # Store as CLOB for JSON data
-            return CLOB()
+            return CLOB()  # JSON data
 
-        # Fallback: try parent implementation and convert if needed
-        column_type = super().get_column_type(column_name, jsonschema_type)
-
-        # Convert problematic types to Oracle-compatible ones
-        if (
-            isinstance(column_type, type)
-            and issubclass(column_type, DATETIME)
-            or str(column_type).upper().startswith("DATETIME")
-            or isinstance(column_type, DateTime)
-        ):
-            return TIMESTAMP()
-        elif isinstance(column_type, Boolean) or str(column_type).upper().startswith(
-            "BOOLEAN"
-        ):
-            return NUMBER(1, 0)
-
-        return column_type
+        # Fallback to default VARCHAR2
+        return VARCHAR2(default_varchar_length)
 
     def to_sql_type(self, jsonschema_type: dict) -> Any:
-        """Convert JSON Schema type to Oracle SQL type."""
+        """Convert JSON Schema type to Oracle SQL type with user feedback priority."""
         from sqlalchemy.dialects.oracle import CLOB, NUMBER, VARCHAR2
 
         # Get JSON schema type info
@@ -115,30 +203,73 @@ class OracleConnector(SQLConnector):
         if isinstance(json_type, list):
             json_type = next((t for t in json_type if t != "null"), "string")
 
-        # Map directly to Oracle types for compatibility
-        if json_type == "boolean":
-            # Oracle doesn't have native boolean, use NUMBER(1)
-            return NUMBER(1, 0)
-        elif json_type == "integer":
-            return NUMBER(precision=38, scale=0)
-        elif json_type == "number":
-            return NUMBER(precision=38, scale=10)
-        elif json_type == "string":
-            if json_format in ("date-time", "date", "time"):
-                return TIMESTAMP()
-            else:
-                max_length = jsonschema_type.get("maxLength", 4000)
-                return VARCHAR2(min(max_length, 4000))
-        elif json_type in ("object", "array"):
-            # Store as CLOB for JSON data
-            return CLOB()
+        # Get configuration settings
+        schema_convention = self.config.get("schema_naming_convention", "generic")
+        default_varchar_length = self.config.get("varchar_default_length", 255)
+        max_varchar_length = self.config.get("varchar_max_length", 4000)
 
-        # Fallback to parent implementation
-        return super().to_sql_type(jsonschema_type)
+        # Debug logging
+        if self.config.get("debug_type_mapping", False):
+            print(f"DEBUG: to_sql_type called with schema {jsonschema_type}")
+            print(f"DEBUG: json_type={json_type}, format={json_format}, convention={schema_convention}")
+
+        # PRIORITY 1: JSON Schema type mapping (user's feedback: "olhar o tipo de campo antes das regras")
+        if json_type == "integer":
+            oracle_type = NUMBER()  # type: ignore[assignment]
+            if self.config.get("debug_type_mapping", False):
+                print(f"DEBUG: to_sql_type (integer) -> {oracle_type}")
+            return oracle_type
+
+        elif json_type == "number":
+            oracle_type = NUMBER()  # type: ignore[assignment]
+            if self.config.get("debug_type_mapping", False):
+                print(f"DEBUG: to_sql_type (number) -> {oracle_type}")
+            return oracle_type
+
+        elif json_type == "boolean":
+            # Oracle doesn't have native boolean, use NUMBER(1)
+            oracle_type = NUMBER(1, 0)  # type: ignore[assignment]
+            if self.config.get("debug_type_mapping", False):
+                print(f"DEBUG: to_sql_type (boolean) -> {oracle_type}")
+            return oracle_type
+
+        elif json_type == "string":
+            # PRIORITY 2: Date/time format handling (user's feedback: "date/time tem que usar timestamp(6)")
+            if json_format in ("date-time", "date", "time"):
+                oracle_type = TIMESTAMP()  # type: ignore[assignment]
+                if self.config.get("debug_type_mapping", False):
+                    print(f"DEBUG: to_sql_type (string with {json_format} format) -> {oracle_type}")
+                return oracle_type
+
+            # PRIORITY 3: Explicit maxLength from schema
+            max_length = jsonschema_type.get("maxLength")
+            if max_length:
+                oracle_type = VARCHAR2(min(max_length, max_varchar_length))  # type: ignore[assignment]
+                if self.config.get("debug_type_mapping", False):
+                    print(f"DEBUG: to_sql_type (string with maxLength={max_length}) -> {oracle_type}")
+                return oracle_type
+
+            # PRIORITY 4: Use default VARCHAR2 length (no column name available in to_sql_type)
+            oracle_type = VARCHAR2(default_varchar_length)  # type: ignore[assignment]
+            if self.config.get("debug_type_mapping", False):
+                print(f"DEBUG: to_sql_type (string default) -> {oracle_type}")
+            return oracle_type
+
+        elif json_type in ("object", "array"):
+            oracle_type = CLOB()  # type: ignore[assignment]
+            if self.config.get("debug_type_mapping", False):
+                print(f"DEBUG: to_sql_type (object/array) -> {oracle_type}")
+            return oracle_type
+
+        # Fallback to default VARCHAR2
+        oracle_type = VARCHAR2(default_varchar_length)  # type: ignore[assignment]
+        if self.config.get("debug_type_mapping", False):
+            print(f"DEBUG: to_sql_type (fallback) -> {oracle_type}")
+        return oracle_type
 
     def prepare_column(
         self,
-        full_table_name: str,
+        full_table_name: str | Any,
         column_name: str,
         sql_type: Any,
     ) -> None:
@@ -152,18 +283,19 @@ class OracleConnector(SQLConnector):
             # Column doesn't exist - add it
             self._add_column(full_table_name, column_name, sql_type)
 
-    def _add_column(self, full_table_name: str, column_name: str, sql_type: Any) -> None:
+    def _add_column(
+        self, full_table_name: str, column_name: str, sql_type: Any
+    ) -> None:
         """Add column using Oracle-specific syntax."""
-        with self._engine.connect() as conn:
-            with conn.begin():
-                # Compile the SQL type to get proper Oracle syntax
-                compiled_type = sql_type.compile(dialect=conn.dialect)
-                
-                # Use Oracle ADD COLUMN syntax
-                add_column_ddl = text(
-                    f"ALTER TABLE {full_table_name} ADD ({column_name} {compiled_type})"
-                )
-                conn.execute(add_column_ddl)
+        with self._engine.connect() as conn, conn.begin():
+            # Compile the SQL type to get proper Oracle syntax
+            compiled_type = sql_type.compile(dialect=conn.dialect)
+
+            # Use Oracle ADD COLUMN syntax
+            add_column_ddl = text(
+                f"ALTER TABLE {full_table_name} ADD ({column_name} {compiled_type})"
+            )
+            conn.execute(add_column_ddl)
 
     def create_schema(self, schema_name: str) -> None:
         """Create schema - In Oracle, user is the schema, so skip creation."""
@@ -452,13 +584,22 @@ class OracleConnector(SQLConnector):
                         ]
                     )
 
-                # Execute all optimizations
+                # Execute all optimizations with smart error handling
                 for opt in optimizations:
                     try:
                         cursor.execute(opt)
-                    except Exception:
-                        # Some features may not be available in all Oracle versions
-                        pass
+                    except Exception as e:
+                        # Categorize Oracle optimization errors
+                        error_msg = str(e)
+                        if any(code in error_msg for code in ["ORA-00942", "ORA-00900", "ORA-02248"]):
+                            # Critical errors: table doesn't exist, SQL error, invalid option
+                            raise RuntimeError(f"Critical Oracle optimization error: {opt} - {e}") from e
+                        elif any(code in error_msg for code in ["ORA-00031", "ORA-02097"]):
+                            # Feature not available in this Oracle edition/version - log warning
+                            print(f"WARNING: Oracle feature not available, skipping: {opt} - {e}")
+                        else:
+                            # Unknown error - log and continue but make it visible
+                            print(f"WARNING: Oracle optimization failed, continuing: {opt} - {e}")
 
                 # Set array size for this connection
                 cursor.arraysize = self.config.get("array_size", 50000)
@@ -481,8 +622,11 @@ class OracleConnector(SQLConnector):
                 preparations.append("ALTER DATABASE FLASHBACK ON")
 
             for prep in preparations:
-                with suppress(Exception):
+                try:
                     conn.execute(text(prep))
+                except Exception as e:
+                    # Log database preparation failures instead of silently suppressing
+                    print(f"WARNING: Database preparation failed: {prep} - {e}")
 
     def create_high_performance_table(
         self,
@@ -492,12 +636,12 @@ class OracleConnector(SQLConnector):
         partition_keys: list[str] | None = None,
     ) -> None:
         """Create table with maximum performance features."""
-        # Let parent create the basic table
-        super().create_table(
+        # Let parent create the basic table using prepare_table method
+        self.prepare_table(
             full_table_name=full_table_name,
             schema=schema,
-            primary_keys=primary_keys,
-            partition_keys=partition_keys,
+            primary_keys=primary_keys or [],
+            as_temp_table=False
         )
 
         # Apply advanced optimizations
@@ -618,20 +762,18 @@ class OracleConnector(SQLConnector):
     @contextmanager
     def get_high_performance_connection(self) -> Iterator[Connection]:
         """Get connection optimized for bulk operations."""
-        with self._engine.connect() as conn:
-            # Set connection for bulk operations
-            with conn.begin():
-                # Disable constraints temporarily for speed
-                if self.config.get("disable_constraints_during_load"):
-                    conn.execute(text("SET CONSTRAINTS ALL DEFERRED"))
+        with self._engine.connect() as conn, conn.begin():
+            # Disable constraints temporarily for speed
+            if self.config.get("disable_constraints_during_load"):
+                conn.execute(text("SET CONSTRAINTS ALL DEFERRED"))
 
-                # Use append mode for direct path
-                if self.config.get("use_append_values_hint"):
-                    conn.execute(
-                        text("ALTER SESSION SET '_direct_path_insert_mode' = TRUE")
-                    )
+            # Use append mode for direct path
+            if self.config.get("use_append_values_hint"):
+                conn.execute(
+                    text("ALTER SESSION SET '_direct_path_insert_mode' = TRUE")
+                )
 
-                yield conn
+            yield conn
 
     def analyze_and_optimize_table(self, table_name: str) -> None:
         """Analyze table and apply runtime optimizations."""

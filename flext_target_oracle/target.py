@@ -1,8 +1,14 @@
 """
-Simplified Oracle Target maximizing Singer SDK 0.47.4 and SQLAlchemy 2.0+ features.
+DEPRECATED: Oracle Target V1 - This implementation will be replaced by target_v2.py
 
-This implementation leverages all advanced features from both libraries for optimal performance.
-Compatible with Python 3.9+
+This module contains the original Oracle Target implementation with aggressive error handling.
+Please migrate to OracleTargetV2 for new projects.
+
+Breaking changes in this version:
+- Removed fallback mechanisms that masked real errors
+- Enhanced error reporting may cause failures in environments with configuration issues
+
+This module will be removed in a future version.
 """
 
 from __future__ import annotations
@@ -16,6 +22,8 @@ from singer_sdk.helpers._typing import TypeConformanceLevel
 from .logging_config import create_logger
 from .monitoring import create_monitor
 from .sinks import OracleSink
+
+# Module import - no longer deprecated after corrections
 
 
 class OracleTarget(Target):
@@ -35,43 +43,29 @@ class OracleTarget(Target):
     default_sink_class = OracleSink
 
     def __init__(
-        self, config=None, parse_env_config: bool = False, validate_config: bool = True
-    ):
-        """Initialize Oracle Target with logging and monitoring."""
+        self, config: dict[str, Any] | None = None, parse_env_config: bool = False, validate_config: bool = True
+    ) -> None:
+        """Initialize Oracle Target with enhanced logging and monitoring."""
         super().__init__(
             config=config,
             parse_env_config=parse_env_config,
             validate_config=validate_config,
         )
 
-        # Initialize enhanced logging system
-        try:
-            self._enhanced_logger = create_logger(self.config)
-            self._enhanced_logger.info(
-                "Oracle Target initialized",
-                extra={
-                    "target_name": self.name,
-                    "config_keys": list(self.config.keys()) if self.config else [],
-                },
-            )
-        except Exception as e:
-            # Fallback to basic logging if advanced logging fails
-            import logging
+        # Initialize enhanced logging system - NO FALLBACK MASKING
+        self._enhanced_logger = create_logger(dict(self.config))
+        self._enhanced_logger.info(
+            "Oracle Target initialized",
+            extra={
+                "target_name": self.name,
+                "config_keys": list(self.config.keys()) if self.config else [],
+            },
+        )
 
-            self._enhanced_logger = logging.getLogger(self.name)
-            self._enhanced_logger.warning(
-                f"Advanced logging failed, using basic logging: {e}"
-            )
-
-        # Initialize monitoring system
-        try:
-            self.monitor = create_monitor(
-                self.config, getattr(self, "_enhanced_logger", None)
-            )
-        except Exception as e:
-            if hasattr(self, "_enhanced_logger"):
-                self._enhanced_logger.warning(f"Monitoring initialization failed: {e}")
-            self.monitor = None
+        # Initialize monitoring system - NO FALLBACK MASKING
+        self.monitor = create_monitor(
+            dict(self.config), getattr(self, "_enhanced_logger", None)
+        )
 
         # Set up cleanup handlers
         import atexit
@@ -412,6 +406,30 @@ class OracleTarget(Target):
             description="VARCHAR2 max length",
         ),
         th.Property(
+            "varchar_default_length",
+            th.IntegerType,
+            default=255,
+            description="Default VARCHAR2 length when not specified",
+        ),
+        th.Property(
+            "enable_smart_typing",
+            th.BooleanType,
+            default=True,
+            description="Enable intelligent type mapping based on column names",
+        ),
+        th.Property(
+            "schema_naming_convention",
+            th.StringType,
+            default="generic",
+            allowed_values=["generic", "wms", "custom"],
+            description="Schema naming convention to apply",
+        ),
+        th.Property(
+            "custom_type_rules",
+            th.ObjectType(),
+            description="Custom type mapping rules (JSON object)",
+        ),
+        th.Property(
             "use_nvarchar", th.BooleanType, default=False, description="Use NVARCHAR2"
         ),
         th.Property(
@@ -482,17 +500,26 @@ class OracleTarget(Target):
             default=False,
             description="Fail on first error",
         ),
-        th.Property(
-            "ignore_errors",
-            th.ArrayType(th.StringType),
-            description="Error types to ignore",
-        ),
+        # REMOVED: ignore_errors configuration - all errors should be reported
         th.Property(
             "on_schema_mismatch",
             th.StringType,
             default="evolve",
             allowed_values=["evolve", "fail", "ignore"],
             description="Schema mismatch action",
+        ),
+        # === HISTORICAL VERSIONING ===
+        th.Property(
+            "enable_historical_versioning",
+            th.BooleanType,
+            default=False,
+            description="Enable historical versioning by adding replication_key to primary key (disabled by default)",
+        ),
+        th.Property(
+            "historical_versioning_column",
+            th.StringType,
+            default="mod_ts",
+            description="Column to add to primary key for historical versioning (default: mod_ts)",
         ),
         # === TABLE MANAGEMENT ===
         th.Property("table_prefix", th.StringType, description="Table name prefix"),
@@ -1054,14 +1081,14 @@ class OracleTarget(Target):
         """Let Singer SDK handle stream discovery."""
         return []
 
-    def get_sink(
+    def get_sink(  # type: ignore[override]
         self,
         stream_name: str,
         *,
         record: dict[str, Any] | None = None,
         schema: dict | None = None,
         key_properties: list[str] | None = None,
-    ) -> OracleSink:  # type: ignore[override]
+    ) -> OracleSink:
         """Get sink using Singer SDK 0.47.4 pattern with full type hints."""
         # Log sink creation
         if hasattr(self, "_enhanced_logger") and self._enhanced_logger:
@@ -1074,9 +1101,12 @@ class OracleTarget(Target):
                 },
             )
 
-        sink = super().get_sink(  # type: ignore[return-value]
+        sink = super().get_sink(
             stream_name, record=record, schema=schema, key_properties=key_properties
         )
+        if not isinstance(sink, OracleSink):
+            raise TypeError(f"Expected OracleSink, got {type(sink)}")
+
 
         # Pass logger and monitor to sink if available
         if (
@@ -1090,7 +1120,7 @@ class OracleTarget(Target):
 
         return sink
 
-    def _cleanup_on_exit(self):
+    def _cleanup_on_exit(self) -> None:
         """Clean up resources on exit safely."""
         # Disable all cleanup logging to avoid I/O errors during shutdown
         # The system state is being torn down and logging may not be available
@@ -1107,13 +1137,13 @@ class OracleTarget(Target):
                         self.monitor._monitoring_thread.join(timeout=1)
 
                 # Clear monitoring resources
-                self.monitor = None
+                self.monitor = None  # type: ignore[assignment]
 
         except Exception:
             # Silently handle any cleanup errors - system is shutting down
             pass
 
-    def process_lines(self, file_input):
+    def process_lines(self, file_input: Any) -> Any:  # type: ignore[override,misc]
         """Process input lines with comprehensive monitoring."""
         if (
             hasattr(self, "_enhanced_logger")
@@ -1125,23 +1155,39 @@ class OracleTarget(Target):
             if self.config.get("background_monitoring", False):
                 self.monitor.start_background_monitoring()
 
-            # Use operation context for full observability
-            with self._enhanced_logger.operation_context(
-                "process_lines", stream="all_streams"
-            ) as context:
+            # Use operation context only if available
+            if hasattr(self._enhanced_logger, "operation_context"):
+                with self._enhanced_logger.operation_context(
+                    "process_lines", stream="all_streams"
+                ) as context:
+                    try:
+                        result = super().process_lines(file_input)
+                        context["status"] = "completed"
+
+                        # Log final performance stats if available
+                        if hasattr(self._enhanced_logger, "log_performance_stats"):
+                            stats = self._enhanced_logger.log_performance_stats()
+                            context.update(stats)
+
+                        return result
+
+                    except Exception as e:
+                        context["error"] = str(e)
+                        context["status"] = "failed"
+                        raise
+                    finally:
+                        # Stop background monitoring
+                        if self.config.get("background_monitoring", False):
+                            self.monitor.stop_background_monitoring()
+            else:
+                # Enhanced logger exists but no operation_context - use basic logging
+                self._enhanced_logger.info("Starting process_lines")
                 try:
                     result = super().process_lines(file_input)
-                    context["status"] = "completed"
-
-                    # Log final performance stats
-                    stats = self._enhanced_logger.log_performance_stats()
-                    context.update(stats)
-
+                    self._enhanced_logger.info("process_lines completed successfully")
                     return result
-
                 except Exception as e:
-                    context["error"] = str(e)
-                    context["status"] = "failed"
+                    self._enhanced_logger.error(f"process_lines failed: {e}")
                     raise
                 finally:
                     # Stop background monitoring

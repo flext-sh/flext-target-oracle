@@ -12,12 +12,12 @@ import threading
 import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any
 
 import psutil
 
 try:
-    import oracledb
+    import oracledb  # noqa: F401
 
     HAS_ORACLEDB = True
 except ImportError:
@@ -43,7 +43,7 @@ class OracleTargetMonitor:
     - Integration with monitoring platforms
     """
 
-    def __init__(self, config: Dict[str, Any], logger=None):
+    def __init__(self, config: dict[str, Any], logger: Any = None) -> None:
         """Initialize monitoring system."""
         self.config = config
         self.logger = logger
@@ -66,16 +66,16 @@ class OracleTargetMonitor:
         }
 
         # State tracking
-        self.metrics_history = []
-        self.alerts_sent = set()
-        self.last_health_check = None
-        self.monitoring_thread = None
+        self.metrics_history: list[dict[str, Any]] = []
+        self.alerts_sent: set[str] = set()
+        self.last_health_check: dict[str, Any] | None = None
+        self._monitoring_thread: threading.Thread | None = None
         self.shutdown_event = threading.Event()
 
         # Initialize components
         self._initialize_monitoring()
 
-    def _initialize_monitoring(self):
+    def _initialize_monitoring(self) -> None:
         """Initialize monitoring components."""
         if self.logger:
             self.logger.info("Initializing Oracle Target monitoring")
@@ -84,34 +84,34 @@ class OracleTargetMonitor:
         if self.config.get("background_monitoring", False):
             self.start_background_monitoring()
 
-    def start_background_monitoring(self):
+    def start_background_monitoring(self) -> None:
         """Start background monitoring thread."""
-        if self.monitoring_thread and self.monitoring_thread.is_alive():
+        if self._monitoring_thread and self._monitoring_thread.is_alive():
             return
 
         self.shutdown_event.clear()
-        self.monitoring_thread = threading.Thread(
+        self._monitoring_thread = threading.Thread(
             target=self._monitoring_loop, name="OracleTargetMonitor", daemon=True
         )
-        self.monitoring_thread.start()
+        self._monitoring_thread.start()
 
         if self.logger:
             self.logger.info("Background monitoring started")
 
-    def stop_background_monitoring(self):
+    def stop_background_monitoring(self) -> None:
         """Stop background monitoring thread silently."""
         if (
-            hasattr(self, "monitoring_thread")
-            and self.monitoring_thread
-            and self.monitoring_thread.is_alive()
+            hasattr(self, "_monitoring_thread")
+            and self._monitoring_thread
+            and self._monitoring_thread.is_alive()
         ):
             self.shutdown_event.set()
-            self.monitoring_thread.join(timeout=2)
+            self._monitoring_thread.join(timeout=2)
 
         # Clear thread reference
-        self.monitoring_thread = None
+        self._monitoring_thread = None
 
-    def _monitoring_loop(self):
+    def _monitoring_loop(self) -> None:
         """Main monitoring loop."""
         while not self.shutdown_event.is_set():
             try:
@@ -126,7 +126,7 @@ class OracleTargetMonitor:
             # Wait for next interval
             self.shutdown_event.wait(timeout=self.check_interval)
 
-    def collect_metrics(self) -> Dict[str, Any]:
+    def collect_metrics(self) -> dict[str, Any]:
         """Collect comprehensive metrics."""
         metrics = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -141,7 +141,7 @@ class OracleTargetMonitor:
 
         return metrics
 
-    def _collect_system_metrics(self) -> Dict[str, Any]:
+    def _collect_system_metrics(self) -> dict[str, Any]:
         """Collect system-level metrics."""
         try:
             memory = psutil.virtual_memory()
@@ -172,7 +172,7 @@ class OracleTargetMonitor:
                 self.logger.warning(f"Failed to collect system metrics: {e}")
             return {}
 
-    def _collect_process_metrics(self) -> Dict[str, Any]:
+    def _collect_process_metrics(self) -> dict[str, Any]:
         """Collect process-specific metrics."""
         try:
             process = psutil.Process()
@@ -192,7 +192,7 @@ class OracleTargetMonitor:
                 self.logger.warning(f"Failed to collect process metrics: {e}")
             return {}
 
-    def _collect_oracle_metrics(self) -> Dict[str, Any]:
+    def _collect_oracle_metrics(self) -> dict[str, Any]:
         """Collect Oracle database metrics."""
         metrics = {}
 
@@ -222,7 +222,7 @@ class OracleTargetMonitor:
 
         return metrics
 
-    def _collect_database_session_metrics(self) -> Optional[Dict[str, Any]]:
+    def _collect_database_session_metrics(self) -> dict[str, Any] | None:
         """Collect Oracle database session metrics."""
         if not hasattr(self, "_engine") or not self._engine:
             return None
@@ -232,7 +232,7 @@ class OracleTargetMonitor:
                 # Session information
                 result = conn.execute(
                     text("""
-                    SELECT 
+                    SELECT
                         SID,
                         SERIAL#,
                         STATUS,
@@ -248,7 +248,7 @@ class OracleTargetMonitor:
                 # Memory usage
                 memory_result = conn.execute(
                     text("""
-                    SELECT 
+                    SELECT
                         NAME,
                         VALUE
                     FROM V$MYSTAT ms, V$STATNAME sn
@@ -261,7 +261,7 @@ class OracleTargetMonitor:
                 # Wait events
                 wait_result = conn.execute(
                     text("""
-                    SELECT 
+                    SELECT
                         EVENT,
                         TOTAL_WAITS,
                         TIME_WAITED
@@ -286,7 +286,7 @@ class OracleTargetMonitor:
                 self.logger.debug(f"Database metrics collection failed: {e}")
             return None
 
-    def _collect_performance_metrics(self) -> Dict[str, Any]:
+    def _collect_performance_metrics(self) -> dict[str, Any]:
         """Collect performance-related metrics."""
         metrics = {}
 
@@ -325,7 +325,7 @@ class OracleTargetMonitor:
 
         return metrics
 
-    def _check_thresholds(self, metrics: Dict[str, Any]):
+    def _check_thresholds(self, metrics: dict[str, Any]) -> None:
         """Check metrics against alert thresholds."""
         alerts = []
 
@@ -402,7 +402,7 @@ class OracleTargetMonitor:
         for alert in alerts:
             self._send_alert(alert)
 
-    def _send_alert(self, alert: Dict[str, Any]):
+    def _send_alert(self, alert: dict[str, Any]) -> None:
         """Send alert notification."""
         alert["timestamp"] = datetime.now(timezone.utc).isoformat()
 
@@ -417,7 +417,7 @@ class OracleTargetMonitor:
         if webhook_url:
             self._send_webhook_alert(webhook_url, alert)
 
-    def _send_webhook_alert(self, webhook_url: str, alert: Dict[str, Any]):
+    def _send_webhook_alert(self, webhook_url: str, alert: dict[str, Any]) -> None:
         """Send alert to webhook endpoint."""
         try:
             import requests
@@ -434,7 +434,7 @@ class OracleTargetMonitor:
             if self.logger:
                 self.logger.error(f"Failed to send webhook alert: {e}")
 
-    def _store_metrics(self, metrics: Dict[str, Any]):
+    def _store_metrics(self, metrics: dict[str, Any]) -> None:
         """Store metrics in history."""
         self.metrics_history.append(metrics)
 
@@ -444,7 +444,7 @@ class OracleTargetMonitor:
             self.metrics_history = self.metrics_history[-max_history:]
 
     @contextmanager
-    def health_check_context(self):
+    def health_check_context(self) -> Any:
         """Context manager for health checks."""
         start_time = time.time()
         status = "healthy"
@@ -465,9 +465,9 @@ class OracleTargetMonitor:
                 "error": error,
             }
 
-    def perform_health_check(self) -> Dict[str, Any]:
+    def perform_health_check(self) -> dict[str, Any]:
         """Perform comprehensive health check."""
-        health_status = {
+        health_status: dict[str, Any] = {
             "status": "healthy",
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "checks": {},
@@ -526,7 +526,7 @@ class OracleTargetMonitor:
 
         return health_status
 
-    def _check_database_health(self) -> Dict[str, Any]:
+    def _check_database_health(self) -> dict[str, Any]:
         """Check Oracle database health."""
         if not hasattr(self, "_engine") or not self._engine:
             return {
@@ -567,7 +567,7 @@ class OracleTargetMonitor:
                 "connection_test": "failed",
             }
 
-    def get_metrics_summary(self) -> Dict[str, Any]:
+    def get_metrics_summary(self) -> dict[str, Any]:
         """Get summary of recent metrics."""
         if not self.metrics_history:
             return {"error": "No metrics available"}
@@ -597,11 +597,11 @@ class OracleTargetMonitor:
             "alerts_sent": len(self.alerts_sent),
         }
 
-    def set_engine(self, engine):
+    def set_engine(self, engine: Any) -> None:
         """Set SQLAlchemy engine for database monitoring."""
         self._engine = engine
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Clean up monitoring resources silently."""
         # Stop monitoring without logging to avoid shutdown errors
         if hasattr(self, "_monitoring_thread") and self._monitoring_thread:
@@ -614,6 +614,6 @@ class OracleTargetMonitor:
         self._monitoring_thread = None
 
 
-def create_monitor(config: Dict[str, Any], logger=None) -> OracleTargetMonitor:
+def create_monitor(config: dict[str, Any], logger: Any = None) -> OracleTargetMonitor:
     """Factory function to create configured monitor."""
     return OracleTargetMonitor(config, logger)
