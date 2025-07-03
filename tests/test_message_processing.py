@@ -75,9 +75,9 @@ class TestMessageProcessing:
                 # Process should handle schema message
                 try:
                     target.listen(file_input=StringIO(input_data))
-                except EOFError:
-                    # Expected when input ends
-                    pass
+                except EOFError as e:
+                    # Expected when input ends - log for debugging
+                    print(f"ℹ️ Expected EOF after processing input: {e}")
 
     def test_record_message_processing(
         self, oracle_config, schema_message, record_messages

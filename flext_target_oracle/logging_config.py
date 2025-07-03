@@ -248,7 +248,7 @@ class OracleTargetLogger:
                 float(current_duration) + duration
             )
             streams_set = self.performance_counters.get("streams_processed", set())
-            streams_set.add(stream)  # type: ignore[attr-defined]
+            streams_set.add(stream)
             self.performance_counters["streams_processed"] = streams_set
 
             # Update Prometheus metrics
@@ -373,7 +373,10 @@ class OracleTargetLogger:
         self.info("Oracle performance metrics", extra=context)
 
     def log_sql_statement(
-        self, sql: str, params: dict | None = None, duration: float | None = None
+        self,
+        sql: str,
+        params: dict[str, Any] | None = None,
+        duration: float | None = None,
     ) -> None:
         """Log SQL statements if enabled."""
         if not self.config.get("log_sql_statements", False):
@@ -483,9 +486,27 @@ class OracleTargetLogger:
             extra.setdefault("timestamp", datetime.now(timezone.utc).isoformat())
 
             self.logger.log(level, message, extra=extra, **kwargs)
-        except (ValueError, OSError):
-            # Logger stream is closed, skip silently
-            pass
+        except (ValueError, OSError) as e:
+            # Logger stream is closed during shutdown - attempt emergency logging
+            try:
+                # Try to write to stderr as last resort
+                import sys
+                sys.stderr.write(f"WARNING: Logger failed during shutdown: {e}\n")
+                sys.stderr.flush()
+            except Exception as stderr_error:
+                # If even stderr fails, then system is truly shutting down
+                # Try one final fallback before giving up
+                try:
+                    # Attempt to write to any available file descriptor
+                    import os
+                    os.write(
+                        2,
+                        f"CRITICAL: All logging mechanisms failed: "
+                        f"{stderr_error}\n".encode()
+                    )
+                except Exception:
+                    # Absolutely no way to log - system is completely shutting down
+                    pass
 
 
 class JsonFormatter(logging.Formatter):

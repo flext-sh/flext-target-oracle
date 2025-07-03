@@ -1114,17 +1114,17 @@ class OracleTarget(Target):
         ),
     ).to_dict()
 
-    def discover_streams(self) -> list:
+    def discover_streams(self) -> list[Any]:
         """Let Singer SDK handle stream discovery."""
         return []
 
-    def get_sink(  # type: ignore[override]
+    def get_sink(
         self,
         stream_name: str,
         *,
         record: dict[str, Any] | None = None,
-        schema: dict | None = None,
-        key_properties: list[str] | None = None,
+        schema: dict[str, Any] | None = None,
+        key_properties: list[str] | None = None,  # type: ignore[override]
     ) -> OracleSink:
         """Get sink using Singer SDK 0.47.4 pattern with full type hints."""
         # Log sink creation
@@ -1175,11 +1175,30 @@ class OracleTarget(Target):
                 # Clear monitoring resources
                 self.monitor = None  # type: ignore[assignment]
 
-        except Exception:
-            # Silently handle any cleanup errors - system is shutting down
-            pass
+        except Exception as cleanup_error:
+            # DO NOT SILENCE CLEANUP ERRORS - Log them
+            try:
+                if hasattr(self, "_enhanced_logger") and self._enhanced_logger:
+                    self._enhanced_logger.error(
+                        f"❌ CLEANUP ERROR during shutdown: {cleanup_error}",
+                        extra={
+                            "error_type": type(cleanup_error).__name__,
+                            "error_details": str(cleanup_error),
+                            "context": "target_cleanup_on_exit"
+                        }
+                    )
+                else:
+                    import sys
+                    print(f"CLEANUP ERROR: {cleanup_error}", file=sys.stderr)
+            except Exception:
+                # Only if ALL logging fails during shutdown
+                import sys
+                print(
+                    f"EMERGENCY: Cleanup error and logging failed: {cleanup_error}",
+                    file=sys.stderr
+                )
 
-    def process_lines(self, file_input: Any) -> Any:  # type: ignore[override,misc]
+    def process_lines(self, file_input: Any) -> Any:  # type: ignore[misc]
         """Process input lines with comprehensive monitoring."""
         if (
             hasattr(self, "_enhanced_logger")
@@ -1208,8 +1227,70 @@ class OracleTarget(Target):
                         return result
 
                     except Exception as e:
+                        # ENHANCED ERROR LOGGING - Capture full context and stack trace
+                        import traceback
+                        full_traceback = traceback.format_exc()
+                        error_details = {
+                            "error_type": type(e).__name__,
+                            "error_message": str(e),
+                            "full_traceback": full_traceback,
+                            "error_module": getattr(e, "__module__", "unknown"),
+                            "error_class": e.__class__.__name__,
+                        }
+
+                        # Add exception arguments if available
+                        if hasattr(e, "args") and e.args:
+                            error_details["error_args"] = str(e.args)
+
+                        # Add cause chain if available (for chained exceptions)
+                        if hasattr(e, "__cause__") and e.__cause__:
+                            error_details["error_cause"] = str(e.__cause__)
+                            error_details["error_cause_type"] = (
+                                type(e.__cause__).__name__
+                            )
+
                         context["error"] = str(e)
+                        context["error_details"] = error_details
                         context["status"] = "failed"
+
+                        # CRITICAL: Log the complete error with stack trace
+                        self._enhanced_logger.error(
+                            (
+                                f"🚨 ORACLE TARGET CRITICAL ERROR - Type: "
+                                f"{error_details['error_type']} - Message: "
+                                f"{error_details['error_message']}"
+                            ),
+                            extra={
+                                "operation": "process_lines",
+                                "error_full_context": error_details,
+                                "stack_trace": full_traceback,
+                                "immediate_action_required": True,
+                                "debugging_info": {
+                                    "error_occurred_in": "OracleTarget.process_lines",
+                                    "singer_sdk_version": "0.47.4",
+                                    "target_name": self.name
+                                }
+                            },
+                            exc_info=True
+                        )
+
+                        # CRITICAL: Also log to console for immediate visibility
+                        import sys
+                        print(
+                            "\n🚨 ORACLE TARGET CRITICAL ERROR DETAILS:",
+                            file=sys.stderr
+                        )
+                        print(
+                            f"Error Type: {error_details['error_type']}",
+                            file=sys.stderr
+                        )
+                        print(
+                            f"Error Message: {error_details['error_message']}",
+                            file=sys.stderr
+                        )
+                        print(f"Full Stack Trace:\n{full_traceback}", file=sys.stderr)
+                        print("=" * 80, file=sys.stderr)
+
                         raise
                     finally:
                         # Stop background monitoring
@@ -1223,7 +1304,43 @@ class OracleTarget(Target):
                     self._enhanced_logger.info("process_lines completed successfully")
                     return result
                 except Exception as e:
-                    self._enhanced_logger.error(f"process_lines failed: {e}")
+                    # ENHANCED ERROR LOGGING - Complete error details for debugging
+                    import traceback
+                    full_traceback = traceback.format_exc()
+                    error_details = {
+                        "error_type": type(e).__name__,
+                        "error_message": str(e),
+                        "full_traceback": full_traceback,
+                        "error_module": getattr(e, "__module__", "unknown"),
+                    }
+
+                    # Log comprehensive error information
+                    self._enhanced_logger.error(
+                        (
+                            f"🚨 ORACLE TARGET PROCESS_LINES FAILED - "
+                            f"{error_details['error_type']}: "
+                            f"{error_details['error_message']}"
+                        ),
+                        extra={
+                            "operation": "process_lines_fallback",
+                            "error_details": error_details,
+                            "stack_trace": full_traceback
+                        },
+                        exc_info=True
+                    )
+
+                    # Also log to stderr for immediate visibility
+                    import sys
+                    print("\n🚨 ORACLE TARGET FALLBACK ERROR:", file=sys.stderr)
+                    print(
+                        (
+                            f"Error: {error_details['error_type']}: "
+                            f"{error_details['error_message']}"
+                        ),
+                        file=sys.stderr
+                    )
+                    print(f"Stack Trace:\n{full_traceback}", file=sys.stderr)
+
                     raise
                 finally:
                     # Stop background monitoring

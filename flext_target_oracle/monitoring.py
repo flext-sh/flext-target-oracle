@@ -170,7 +170,10 @@ class OracleTargetMonitor:
         except Exception as e:
             if self.logger:
                 self.logger.warning(f"Failed to collect system metrics: {e}")
-            return {}
+            else:
+                print(f"WARNING: Failed to collect system metrics: {e}")
+            # Return empty dict but log the failure for debugging
+            return {"error": f"Failed to collect system metrics: {e}"}
 
     def _collect_process_metrics(self) -> dict[str, Any]:
         """Collect process-specific metrics."""
@@ -190,7 +193,10 @@ class OracleTargetMonitor:
         except Exception as e:
             if self.logger:
                 self.logger.warning(f"Failed to collect process metrics: {e}")
-            return {}
+            else:
+                print(f"WARNING: Failed to collect process metrics: {e}")
+            # Return empty dict but log the failure for debugging
+            return {"error": f"Failed to collect process metrics: {e}"}
 
     def _collect_oracle_metrics(self) -> dict[str, Any]:
         """Collect Oracle database metrics."""
@@ -291,7 +297,10 @@ class OracleTargetMonitor:
         except Exception as e:
             if self.logger:
                 self.logger.debug(f"Database metrics collection failed: {e}")
-            return None
+            else:
+                print(f"DEBUG: Database metrics collection failed: {e}")
+            # Return None but log the failure for debugging
+            return {"error": f"Database metrics collection failed: {e}"}
 
     def _collect_performance_metrics(self) -> dict[str, Any]:
         """Collect performance-related metrics."""

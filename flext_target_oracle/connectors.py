@@ -18,7 +18,7 @@ from sqlalchemy import create_engine, event, pool, text
 from sqlalchemy.dialects.oracle import TIMESTAMP
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterator, Sequence
 
     from sqlalchemy.engine import Connection, Engine
 
@@ -42,7 +42,7 @@ class OracleConnector(SQLConnector):
     allow_merge_upsert: bool = True
     allow_temp_tables: bool = True
 
-    def __init__(self, config: dict | None = None) -> None:
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
         """Initialize Oracle connector with Oracle-specific type mappings."""
         super().__init__(config)
 
@@ -53,7 +53,7 @@ class OracleConnector(SQLConnector):
         self.jsonschema_to_sql.register_format_handler("date", lambda _: TIMESTAMP())
         self.jsonschema_to_sql.register_format_handler("time", lambda _: TIMESTAMP())
 
-    def get_column_type(self, column_name: str, jsonschema_type: dict) -> Any:
+    def get_column_type(self, column_name: str, jsonschema_type: dict[str, Any]) -> Any:
         """Override column type mapping with JSON schema type priority."""
         from sqlalchemy.dialects.oracle import CHAR, CLOB, NUMBER, VARCHAR2
 
@@ -85,13 +85,13 @@ class OracleConnector(SQLConnector):
         # PRIORITY 1: JSON Schema type mapping
         # (user's feedback: "olhar o tipo de campo antes das regras")
         if json_type == "integer":
-            oracle_type = NUMBER()  # type: ignore[assignment]
+            oracle_type = NUMBER()  # type: ignore[no-untyped-call]
             if self.config.get("debug_type_mapping", False):
                 print(f"DEBUG: {column_name} (integer) -> {oracle_type}")
             return oracle_type
 
         elif json_type == "number":
-            oracle_type = NUMBER()  # type: ignore[assignment]
+            oracle_type = NUMBER()  # type: ignore[no-untyped-call]
             if self.config.get("debug_type_mapping", False):
                 print(f"DEBUG: {column_name} (number) -> {oracle_type}")
             return oracle_type
@@ -107,7 +107,7 @@ class OracleConnector(SQLConnector):
                 oracle_type = CHAR(1)  # type: ignore[assignment]
             else:
                 # Standard Oracle boolean
-                oracle_type = NUMBER(1, 0)  # type: ignore[assignment]
+                oracle_type = NUMBER(1, 0)  # type: ignore[no-untyped-call]
             if self.config.get("debug_type_mapping", False):
                 print(f"DEBUG: {column_name} (boolean) -> {oracle_type}")
             return oracle_type
@@ -229,7 +229,7 @@ class OracleConnector(SQLConnector):
         # Fallback to default VARCHAR2
         return VARCHAR2(default_varchar_length)
 
-    def to_sql_type(self, jsonschema_type: dict) -> Any:
+    def to_sql_type(self, jsonschema_type: dict[str, Any]) -> Any:
         """Convert JSON Schema type to Oracle SQL type with user feedback priority."""
         from sqlalchemy.dialects.oracle import CLOB, NUMBER, VARCHAR2
 
@@ -257,20 +257,20 @@ class OracleConnector(SQLConnector):
         # PRIORITY 1: JSON Schema type mapping
         # (user's feedback: "olhar o tipo de campo antes das regras")
         if json_type == "integer":
-            oracle_type = NUMBER()  # type: ignore[assignment]
+            oracle_type = NUMBER()  # type: ignore[no-untyped-call]
             if self.config.get("debug_type_mapping", False):
                 print(f"DEBUG: to_sql_type (integer) -> {oracle_type}")
             return oracle_type
 
         elif json_type == "number":
-            oracle_type = NUMBER()  # type: ignore[assignment]
+            oracle_type = NUMBER()  # type: ignore[no-untyped-call]
             if self.config.get("debug_type_mapping", False):
                 print(f"DEBUG: to_sql_type (number) -> {oracle_type}")
             return oracle_type
 
         elif json_type == "boolean":
             # Oracle doesn't have native boolean, use NUMBER(1)
-            oracle_type = NUMBER(1, 0)  # type: ignore[assignment]
+            oracle_type = NUMBER(1, 0)  # type: ignore[no-untyped-call]
             if self.config.get("debug_type_mapping", False):
                 print(f"DEBUG: to_sql_type (boolean) -> {oracle_type}")
             return oracle_type
@@ -701,7 +701,7 @@ class OracleConnector(SQLConnector):
     def create_high_performance_table(
         self,
         full_table_name: str,
-        schema: dict,
+        schema: dict[str, Any],
         primary_keys: list[str] | None = None,
         partition_keys: list[str] | None = None,
     ) -> None:
@@ -855,6 +855,54 @@ class OracleConnector(SQLConnector):
 
             yield conn
 
+    def prepare_table(
+        self,
+        full_table_name: str | Any,
+        schema: dict[str, Any],
+        primary_keys: Sequence[str],
+        partition_keys: list[str] | None = None,
+        as_temp_table: bool = False,  # noqa: FBT001, FBT002
+    ) -> None:
+        """Adapt target table to provided schema if possible."""
+        # 🔍 DEBUG: Log load_method and table existence
+        print(f"🔍 PREPARE_TABLE DEBUG - Table: {full_table_name}")
+        print(f"🔍 load_method from config: {self.config.get('load_method')}")
+        print(f"🔍 Table exists: {self.table_exists(full_table_name=full_table_name)}")
+
+        # Call parent implementation
+        super().prepare_table(
+            full_table_name=full_table_name,
+            schema=schema,
+            primary_keys=primary_keys,
+            partition_keys=partition_keys,
+            as_temp_table=as_temp_table,
+        )
+
+    def create_empty_table(
+        self,
+        full_table_name: str | Any,
+        schema: dict[str, Any],
+        primary_keys: list[str] | None = None,  # type: ignore[override]
+        partition_keys: list[str] | None = None,
+        as_temp_table: bool = False,  # noqa: FBT002, FBT001
+    ) -> None:
+        """Create table with Oracle-specific column types."""
+        # 🔍 DEBUG: Log the schema being used for table creation
+        properties = schema.get("properties", {})
+        print(f"🔍 CREATE_EMPTY_TABLE DEBUG - Table: {full_table_name}")
+        print(f"🔍 Schema has {len(properties)} properties")
+        print(f"🔍 Properties: {list(properties.keys())}")
+        print(f"🔍 Primary keys: {primary_keys}")
+
+        # Call parent implementation
+        super().create_empty_table(
+            full_table_name=full_table_name,
+            schema=schema,
+            primary_keys=primary_keys,
+            partition_keys=partition_keys,
+            as_temp_table=as_temp_table,
+        )
+
     def analyze_and_optimize_table(self, table_name: str) -> None:
         """Analyze table and apply runtime optimizations."""
         with self._engine.begin() as conn:
@@ -871,7 +919,7 @@ class OracleConnector(SQLConnector):
                             method_opt => 'FOR ALL COLUMNS SIZE AUTO',
                             granularity => 'ALL',
                             cascade => TRUE,
-                            degree => {self.config.get('parallel_degree', 'DBMS_STATS.DEFAULT_DEGREE')}"
+                            degree => DBMS_STATS.DEFAULT_DEGREE"
                         );
                     END;
                 """

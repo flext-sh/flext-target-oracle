@@ -202,9 +202,9 @@ def oracle_edition_info(
                 if banner and banner[0]:
                     edition_info["is_enterprise"] = "Enterprise Edition" in banner[0]
 
-        except Exception:
-            # If we can't detect, assume Standard Edition
-            pass
+        except Exception as e:
+            # If we can't detect, assume Standard Edition but log the issue
+            print(f"⚠️ Could not detect Oracle edition from database: {e}")
 
     return edition_info
 
@@ -391,9 +391,9 @@ def cleanup_test_tables(engine: Engine, table_names: list[str]):
                 try:
                     conn.execute(text(f"DROP TABLE {table_name} CASCADE CONSTRAINTS"))
                     conn.commit()
-                except Exception:
-                    # Ignore errors during cleanup
-                    pass
+                except Exception as e:
+                    # Log cleanup errors for debugging but continue
+                    print(f"⚠️ Could not cleanup table {table_name}: {e}")
 
 
 @pytest.fixture(scope="function")
@@ -412,9 +412,9 @@ def table_cleanup(oracle_engine: Engine):
             try:
                 conn.execute(text(f"DROP TABLE {table_name} CASCADE CONSTRAINTS"))
                 conn.commit()
-            except Exception:
-                # Ignore errors during cleanup
-                pass
+            except Exception as e:
+                # Log cleanup errors for debugging but continue
+                print(f"⚠️ Could not cleanup table {table_name}: {e}")
 
 
 # Performance test utilities

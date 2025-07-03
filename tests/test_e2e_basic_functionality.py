@@ -605,7 +605,9 @@ class TestBasicE2EFunctionality:
             assert (
                 connection_difference <= 2
             ), f"Too many connections leaked: {connection_difference}"
-        except Exception:
+        except Exception as e:
+            # Log connection check failure for debugging
+            print(f"⚠️ Could not check connection count: {e}")
             # If we can't check connections, just verify the target cleaned up properly
             assert oracle_target is not None  # Basic check that target exists
 

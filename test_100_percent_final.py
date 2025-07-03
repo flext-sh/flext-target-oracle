@@ -59,6 +59,18 @@ def test_100_percent_completion():
             if "Monitor engine setup failed (will retry later)" not in sinks_content:
                 raise Exception("sinks.py não tem logging implementado")
 
+        # Verificar target.py
+        with open("flext_target_oracle/target.py") as f:
+            target_content = f.read()
+            if "except Exception:" in target_content and "Cleanup error during shutdown" not in target_content:
+                raise Exception("target.py ainda tem handlers silenciosos sem logging")
+
+        # Verificar logging_config.py  
+        with open("flext_target_oracle/logging_config.py") as f:
+            logging_content = f.read()
+            if "except" in logging_content and "Logger failed during shutdown" not in logging_content:
+                raise Exception("logging_config.py ainda tem handlers silenciosos sem logging")
+
         # Verificar config_validator.py
         with open("flext_target_oracle/config_validator.py") as f:
             config_content = f.read()
@@ -92,8 +104,9 @@ def test_100_percent_completion():
         try:
             from flext_target_oracle.target_v2 import OracleTargetV2
             raise Exception("target_v2 ainda é importável")
-        except ImportError:
-            pass  # Esperado
+        except ImportError as e:
+            # Expected import error since V2 was removed - log for debugging
+            print(f"ℹ️ Expected ImportError for removed V2 module: {e}")
 
         print("✅ Arquivos V2 completamente removidos")
         results.append(("V2 files removed", True, "Over-engineering eliminado"))

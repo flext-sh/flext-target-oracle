@@ -177,8 +177,9 @@ def validate_oracle_features(connection) -> dict[str, bool]:
             WHERE BANNER LIKE '%Enterprise Edition%'
         """).fetchone()
         features["is_enterprise_edition"] = result is not None
-    except:
-        # If we can't check, assume it's not EE
+    except Exception as e:
+        # If we can't check, assume it's not EE but log the issue
+        print(f"⚠️ Could not detect Oracle edition: {e}")
         features["is_enterprise_edition"] = False
 
     # Only check EE features if it's Enterprise Edition
@@ -192,8 +193,9 @@ def validate_oracle_features(connection) -> dict[str, bool]:
             WHERE parameter = 'Partitioning' AND value = 'TRUE'
         """).scalar()
         features["partitioning"] = result > 0
-    except:
-        pass
+    except Exception as e:
+        # Feature detection failed - log for debugging
+        print(f"⚠️ Could not detect partitioning feature: {e}")
 
     try:
         # Check for advanced compression
@@ -202,8 +204,9 @@ def validate_oracle_features(connection) -> dict[str, bool]:
             WHERE parameter = 'Advanced Compression' AND value = 'TRUE'
         """).scalar()
         features["advanced_compression"] = result > 0
-    except:
-        pass
+    except Exception as e:
+        # Feature detection failed - log for debugging  
+        print(f"⚠️ Could not detect advanced compression feature: {e}")
 
     try:
         # Check for in-memory
@@ -212,8 +215,9 @@ def validate_oracle_features(connection) -> dict[str, bool]:
             WHERE parameter = 'In-Memory Column Store' AND value = 'TRUE'
         """).scalar()
         features["inmemory"] = result > 0
-    except:
-        pass
+    except Exception as e:
+        # Feature detection failed - log for debugging
+        print(f"⚠️ Could not detect in-memory feature: {e}")
 
     try:
         # Check for advanced security
@@ -222,8 +226,9 @@ def validate_oracle_features(connection) -> dict[str, bool]:
             WHERE parameter = 'Advanced Security' AND value = 'TRUE'
         """).scalar()
         features["advanced_security"] = result > 0
-    except:
-        pass
+    except Exception as e:
+        # Feature detection failed - log for debugging
+        print(f"⚠️ Could not detect advanced security feature: {e}")
 
     return features
 
