@@ -63,9 +63,7 @@ class OracleSink(SQLSink[OracleConnector]):
             self._executor = None
 
         # Historical versioning for WMS data
-        self._enable_versioning = self.config.get(
-            "enable_historical_versioning", False
-        )
+        self._enable_versioning = self.config.get("enable_historical_versioning", False)
         self._versioning_column = self.config.get(
             "historical_versioning_column", "mod_ts"
         )
@@ -86,16 +84,20 @@ class OracleSink(SQLSink[OracleConnector]):
             "last_batch_time": None,
             "first_batch_time": None,
             "largest_batch_size": 0,
-            "smallest_batch_size": float('inf'),
+            "smallest_batch_size": float("inf"),
             "failed_batches": [],
             "successful_operations": 0,
             "database_operations": {
                 "inserts": 0,
                 "updates": 0,
                 "merges": 0,
-                "rows_affected": 0
-            }
+                "rows_affected": 0,
+            },
         }
+
+        # LAZY CONNECTION: Don't connect until we actually need to
+        self._schema_prepared = False
+        self._connection_established = False
 
     @property
     def key_properties(self) -> list[str]:
@@ -111,28 +113,53 @@ class OracleSink(SQLSink[OracleConnector]):
         return self._original_key_properties or []
 
     @property
-    def full_table_name(self) -> str:  # type: ignore[override]
-        """Return the fully qualified table name."""
-        # Let Singer SDK handle table name generation
-        table = str(super().full_table_name)
+    def full_table_name(self) -> Any:
+        """Return the fully qualified table name with proper prefix handling."""
+        # Build table name properly handling ALL naming options
+        stream_name = self.stream_name
+        schema_name = self.config.get("default_target_schema", "")
+
+        # Apply stream_name_prefix
+        if self.config.get("stream_name_prefix"):
+            stream_name = f"{self.config['stream_name_prefix']}{stream_name}"
+
+        # Apply table_prefix (standard Singer SDK config name)
+        if self.config.get("table_prefix"):
+            stream_name = f"{self.config['table_prefix']}{stream_name.upper()}"
+
+        # Handle stream_maps for table name transformation
+        stream_maps = self.config.get("stream_maps", {})
+        if stream_maps and self.stream_name in stream_maps:
+            stream_map = stream_maps[self.stream_name]
+            if isinstance(stream_map, dict) and "table_name" in stream_map:
+                stream_name = stream_map["table_name"]
+                # Apply stream_name_prefix to mapped name too
+                if self.config.get("stream_name_prefix"):
+                    stream_name = f"{self.config['stream_name_prefix']}{stream_name}"
+
+        # Build full table name
+        table = f"{schema_name}.{stream_name}" if schema_name else stream_name
 
         # Apply Oracle naming constraints (30 chars max for older versions)
         if self.config.get("max_identifier_length", 128) == 30:
-            schema_name, table_name = self._parse_full_table_name(table)
-            if schema_name:
-                table_name = table_name[:30]
-                table = f"{schema_name}.{table_name}"
+            schema_part, table_part = self._parse_full_table_name(table)
+            if schema_part:
+                table_part = table_part[:30]
+                table = f"{schema_part}.{table_part}"
             else:
                 table = table[:30]
 
         return table
 
     def setup(self) -> None:
-        """Set up the sink with Oracle-specific table creation."""
+        """Set up the sink with LAZY Oracle connection - no DB connection until data."""
         # 🔍 DEBUG: Log schema details before setup
         schema_props = self.schema.get("properties", {})
         self.logger.info(
-            "🔍 SINK SETUP DEBUG - Stream: %s - Schema properties: %d",
+            (
+                "🔍 LAZY SINK SETUP - Stream: %s - Schema properties: %d "
+                "(NO DB CONNECTION YET)"
+            ),
             self.stream_name,
             len(schema_props),
             extra={
@@ -141,57 +168,566 @@ class OracleSink(SQLSink[OracleConnector]):
                 "schema_properties": list(schema_props.keys())[:20],  # First 20
                 "full_schema": (
                     self.schema if len(schema_props) <= 10 else None
-                )  # Full schema only if small
-            }
+                ),  # Full schema only if small
+            },
         )
 
-        # 🔍 DEBUG: Check what conform_schema does
+        # 🔍 DEBUG: Check what conform_schema does (no DB connection needed)
         conformed = self.conform_schema(self.schema)
         conformed_props = conformed.get("properties", {})
         self.logger.info(
-            "🔍 SINK SETUP - After conform_schema - Stream: %s - Properties: %d",
+            "🔍 LAZY SETUP - After conform_schema - Stream: %s - Properties: %d",
             self.stream_name,
             len(conformed_props),
             extra={
                 "stream_name": self.stream_name,
                 "conformed_properties_count": len(conformed_props),
                 "conformed_properties": list(conformed_props.keys())[:20],
-            }
+            },
         )
 
-        # Use Singer SDK's normal setup, with Oracle type mapping in connector
-        super().setup()
+        # LAZY SETUP: DON'T call super().setup() here - it tries to connect!
+        # Instead, defer all DB operations until first batch arrives
 
-        # 🔍 DEBUG: Log what was actually created
+        # Store basic info without DB connection
+        self._setup_schema_info()
+
+        # DON'T mark schema as prepared yet - wait for lazy connection
+
+        # 🔍 DEBUG: Log lazy setup completion
         self.logger.info(
-            "🔍 SINK SETUP COMPLETE - Stream: %s - Table: %s",
+            (
+                "🔍 LAZY SETUP COMPLETE - Stream: %s - Table will be: %s "
+                "(connection deferred)"
+            ),
             self.stream_name,
             self.full_table_name,
             extra={
                 "stream_name": self.stream_name,
                 "table_name": self.full_table_name,
-                "setup_completed": True
-            }
+                "lazy_setup_completed": True,
+                "connection_deferred": True,
+            },
         )
 
-        # Apply Oracle optimizations after table is created (skip for basic test)
-        if not self.config.get("skip_table_optimization", True):
-            self._apply_oracle_optimizations()
+    def _setup_schema_info(self) -> None:
+        """Setup schema information without database connection."""
+        # This method stores schema info needed later
+        # No DB connection required
+        pass
 
-    def _create_oracle_table(self) -> None:
-        """Create table with Oracle-compatible column types."""
-        with self.connector._engine.begin() as conn:
-            # Use Singer SDK's method but override column type creation
-            # First, let the connector create the table normally
-            self.connector.prepare_table(
-                full_table_name=self.full_table_name,
-                schema=self.schema,
-                primary_keys=self.key_properties,
-                as_temp_table=False,
+    def _ensure_connection_and_table(self) -> None:
+        """Ensure database connection and table exist - called lazily."""
+        if self._connection_established:
+            return
+
+        if self._logger:
+            self._logger.info(
+                (
+                    f"🔗 LAZY CONNECTION - Establishing Oracle connection "
+                    f"for {self.stream_name}"
+                ),
+                extra={
+                    "stream_name": self.stream_name,
+                    "table_name": self.full_table_name,
+                    "lazy_connection_trigger": "first_batch_processing",
+                },
             )
 
-            # Now fix the column types that are incompatible with Oracle
-            self._fix_oracle_column_types(conn)
+        try:
+            # CUSTOM SETUP: Don't use super().setup() - use our own DDL instead
+            self._setup_custom_oracle_table()
+            self._connection_established = True
+
+            if self._logger:
+                self._logger.info(
+                    (
+                        f"✅ CUSTOM TABLE CREATION SUCCESSFUL - {self.stream_name} "
+                        f"with correct field order and types"
+                    ),
+                    extra={
+                        "stream_name": self.stream_name,
+                        "table_name": self.full_table_name,
+                        "connection_status": "established",
+                    },
+                )
+
+        except Exception as e:
+            if self._logger:
+                self._logger.error(
+                    f"❌ CUSTOM TABLE CREATION FAILED - {self.stream_name}: {e}",
+                    extra={
+                        "stream_name": self.stream_name,
+                        "table_name": self.full_table_name,
+                        "error": str(e),
+                        "connection_status": "failed",
+                    },
+                    exc_info=True,
+                )
+            raise
+
+    def _setup_custom_oracle_table(self) -> None:
+        """Setup Oracle table using our custom DDL instead of Singer SDK SQLAlchemy."""
+        # Step 1: Initialize connection (without table creation)
+        if not self.connector._engine:
+            self.connector.setup()
+            
+        # Step 2: Create table using our custom DDL
+        self._create_oracle_table()
+        
+        # Step 3: Setup other Singer SDK components manually
+        self._setup_schema_info()
+
+    def _create_oracle_table(self) -> None:
+        """Create table with Oracle-compatible column types using SQLAlchemy schema."""
+        with self.connector._engine.begin() as conn:
+            # Create table using SQLAlchemy Table definition instead of raw DDL
+            table_def = self._build_sqlalchemy_table()
+
+            if self._logger:
+                self._logger.info(
+                    f"Creating Oracle table with SQLAlchemy schema: {self.full_table_name}"
+                )
+
+            try:
+                # Drop table first if it exists, then create
+                table_def.drop(conn, checkfirst=True)
+                table_def.create(conn, checkfirst=False)
+                
+                if self._logger:
+                    self._logger.info(
+                        f"✅ Table {self.full_table_name} created successfully "
+                        f"with unified rules via SQLAlchemy"
+                    )
+
+            except Exception as e:
+                if self._logger:
+                    self._logger.error(
+                        f"❌ Failed to create table {self.full_table_name}: {e}"
+                    )
+                raise
+
+    def _build_sqlalchemy_table(self) -> sqlalchemy.Table:
+        """Build SQLAlchemy Table definition with correct Oracle types and field order."""
+        from sqlalchemy import Table, MetaData, Column, PrimaryKeyConstraint
+        from sqlalchemy.dialects.oracle import NUMBER, VARCHAR2, TIMESTAMP
+        
+        schema_name, table_name = self._parse_full_table_name(self.full_table_name)
+        schema_properties = self.schema.get("properties", {})
+        
+        metadata = MetaData()
+        columns = []
+        
+        # STEP 1: Find primary key field (prioritize simple 'id' over complex ones)
+        primary_key_field = None
+        id_fields = [
+            name for name in schema_properties.keys()
+            if name.upper() == "ID" or (name.upper().endswith("_ID") and not name.upper().endswith("_ID_ID"))
+        ]
+        
+        if id_fields:
+            if "id" in [f.lower() for f in id_fields]:
+                primary_key_field = next(f for f in id_fields if f.lower() == "id")
+            else:
+                primary_key_field = id_fields[0]
+        
+        # STEP 2: Add PRIMARY KEY first
+        if primary_key_field:
+            oracle_type = self._get_sqlalchemy_oracle_type(
+                primary_key_field, schema_properties[primary_key_field]
+            )
+            columns.append(Column(primary_key_field.upper(), oracle_type, nullable=False))
+        
+        # STEP 3: Add OTHER FIELDS (sorted, excluding only audit and TK_DATE fields)
+        other_fields = []
+        for prop_name in sorted(schema_properties.keys()):
+            if (
+                prop_name != primary_key_field
+                and not prop_name.upper().endswith("_ID_ID")  # Exclude malformed IDs
+                and prop_name.upper() not in ["TK_DATE", "CREATE_USER", "CREATE_TS", "MOD_USER", "MOD_TS"]
+            ):
+                other_fields.append(prop_name)
+        
+        for prop_name in other_fields:
+            oracle_type = self._get_sqlalchemy_oracle_type(
+                prop_name, schema_properties[prop_name]
+            )
+            columns.append(Column(prop_name.upper(), oracle_type, nullable=True))
+        
+        # STEP 4: Add MANDATORY AUDIT FIELDS at the end
+        columns.extend([
+            Column("CREATE_USER", VARCHAR2(255), nullable=True),
+            Column("CREATE_TS", TIMESTAMP(timezone=False), nullable=True),
+            Column("MOD_USER", VARCHAR2(255), nullable=True),
+            Column("MOD_TS", TIMESTAMP(timezone=False), nullable=False),
+        ])
+        
+        # STEP 5: Add TK_DATE field (ALWAYS, not conditional)
+        columns.append(
+            Column("TK_DATE", TIMESTAMP(timezone=False), 
+                   server_default=sqlalchemy.func.current_timestamp(), nullable=False)
+        )
+        
+        # Create table with composite primary key
+        table = Table(
+            table_name.upper(),
+            metadata,
+            *columns,
+            schema=schema_name.upper() if schema_name else None
+        )
+        
+        # Add composite primary key constraint
+        if primary_key_field:
+            table.append_constraint(
+                PrimaryKeyConstraint(
+                    primary_key_field.upper(), "MOD_TS",
+                    name=f"PK_{table_name.upper()}"
+                )
+            )
+        
+        return table
+
+    def _get_sqlalchemy_oracle_type(self, column_name: str, column_schema: dict) -> Any:
+        """Convert column to SQLAlchemy Oracle type using shared type mapping rules."""
+        from sqlalchemy.dialects.oracle import NUMBER, VARCHAR2, TIMESTAMP
+        
+        # Try to use shared conversion function first
+        import sys
+        sys.path.insert(0, "/home/marlonsc/flext/client-b-meltano-native/src")
+        
+        try:
+            from oracle.type_mapping_rules import convert_singer_schema_to_oracle
+            oracle_type_str = convert_singer_schema_to_oracle(column_name, column_schema)
+            
+            # Convert string type to SQLAlchemy type
+            if oracle_type_str == "NUMBER":
+                return NUMBER()
+            elif oracle_type_str == "NUMBER(1,0)":
+                return NUMBER(1, 0)
+            elif oracle_type_str.startswith("VARCHAR2"):
+                # Extract length from VARCHAR2(255 CHAR) format
+                if "(" in oracle_type_str:
+                    length_part = oracle_type_str.split("(")[1].split(")")[0]
+                    length = int(length_part.split()[0])  # Get number before CHAR
+                    return VARCHAR2(length)
+                return VARCHAR2(255)
+            elif oracle_type_str.startswith("TIMESTAMP"):
+                return TIMESTAMP(timezone=False)
+            else:
+                return VARCHAR2(255)  # Default fallback
+                
+        except ImportError:
+            # Fallback to basic type inference
+            schema_type = column_schema.get("type", "string")
+            if isinstance(schema_type, list):
+                schema_type = next((t for t in schema_type if t != "null"), "string")
+            
+            if schema_type in ["integer", "number"]:
+                return NUMBER()
+            elif schema_type == "boolean":
+                return NUMBER(1, 0)
+            else:
+                return VARCHAR2(255)
+
+    def _generate_oracle_ddl(self) -> Any:
+        """Generate Oracle DDL with CORRECT field order following table_creator.py pattern."""
+        schema_name, table_name = self._parse_full_table_name(self.full_table_name)
+        schema_properties = self.schema.get("properties", {})
+
+        # STEP 1: Organize columns in CORRECT ORDER (like table_creator.py)
+        columns = []
+        primary_key_field = None
+        
+        # 1.1 Find primary key field (prioritize simple 'id' over complex ones)
+        id_fields = [
+            name for name in schema_properties.keys()
+            if name.upper() == "ID" or (name.upper().endswith("_ID") and not name.upper().endswith("_ID_ID"))
+        ]
+        
+        if id_fields:
+            if "id" in [f.lower() for f in id_fields]:
+                primary_key_field = next(f for f in id_fields if f.lower() == "id")
+            else:
+                primary_key_field = id_fields[0]
+                
+        # 1.2 Add PRIMARY KEY first
+        if primary_key_field:
+            oracle_type = self._convert_to_oracle_type(
+                primary_key_field, schema_properties[primary_key_field], {}
+            )
+            columns.append(f'    "{primary_key_field.upper()}" {oracle_type} NOT NULL ENABLE')
+
+        # 1.3 Add OTHER FIELDS (sorted, excluding URLs and complex nested objects)
+        other_fields = []
+        for prop_name in sorted(schema_properties.keys()):
+            if (
+                prop_name != primary_key_field
+                and not prop_name.upper().endswith("_URL")
+                and prop_name.upper() != "URL"
+                and not prop_name.upper().endswith("_ID_ID")
+                and not prop_name.upper().endswith("_ID_KEY")
+                and not prop_name.upper().endswith("_ID_URL")
+                and prop_name.upper() not in ["TK_DATE", "CREATE_USER", "CREATE_TS", "MOD_USER", "MOD_TS"]
+            ):
+                other_fields.append(prop_name)
+
+        for prop_name in other_fields:
+            oracle_type = self._convert_to_oracle_type(
+                prop_name, schema_properties[prop_name], {}
+            )
+            # Add collation for VARCHAR2 types
+            collation = ' COLLATE "USING_NLS_COMP"' if "VARCHAR2" in oracle_type else ""
+            columns.append(f'    "{prop_name.upper()}" {oracle_type}{collation}')
+
+        # 1.4 Add COMPLEX FOREIGN KEY fields (_ID_KEY, _ID_URL, etc.)
+        fk_fields = [
+            name for name in schema_properties.keys()
+            if "_ID_" in name.upper() and not name.upper().endswith("_URL")
+        ]
+        for prop_name in sorted(fk_fields):
+            if not prop_name.upper().endswith("_URL"):
+                oracle_type = self._convert_to_oracle_type(
+                    prop_name, schema_properties[prop_name], {}
+                )
+                collation = ' COLLATE "USING_NLS_COMP"' if "VARCHAR2" in oracle_type else ""
+                columns.append(f'    "{prop_name.upper()}" {oracle_type}{collation}')
+
+        # 1.5 Add MANDATORY AUDIT FIELDS at the end
+        audit_fields = [
+            ("CREATE_USER", "VARCHAR2(255 CHAR)", ""),
+            ("CREATE_TS", "TIMESTAMP (6)", ""),
+            ("MOD_USER", "VARCHAR2(255 CHAR)", ""),
+            ("MOD_TS", "TIMESTAMP (6)", " NOT NULL ENABLE"),
+        ]
+
+        for field_name, field_type, constraints in audit_fields:
+            collation = ' COLLATE "USING_NLS_COMP"' if "VARCHAR2" in field_type else ""
+            columns.append(f'    "{field_name}" {field_type}{collation}{constraints}')
+
+        # 1.6 Add TK_DATE field (ALWAYS, not conditional)
+        columns.append(
+            '    "TK_DATE" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP NOT NULL ENABLE'
+        )
+
+        # STEP 2: Create PRIMARY KEY constraint with MOD_TS
+        pk_constraint = ""
+        if primary_key_field:
+            pk_name = f"PK_{table_name.upper()}"
+            pk_cols = f'"{primary_key_field.upper()}", "MOD_TS"'
+            pk_constraint = f',\n    CONSTRAINT "{pk_name}" PRIMARY KEY ({pk_cols})'
+
+        # STEP 3: Build full DDL
+        if schema_name:
+            full_table_name = f'"{schema_name.upper()}"."{table_name.upper()}"'
+        else:
+            full_table_name = f'"{table_name.upper()}"'
+
+        columns_sql = ",\n".join(columns)
+
+        # Build DDL line by line to avoid any formatting issues
+        ddl_lines = [
+            "-- Oracle table created with unified rules from table_creator.py",
+            f"-- Generated for stream: {self.stream_name}",
+            "-- CORRECT field order: PK -> fields -> audit -> TK_DATE",
+            f"DROP TABLE {full_table_name} CASCADE CONSTRAINTS;",
+            "",
+            f"CREATE TABLE {full_table_name}",
+            "  (",
+        ]
+        
+        # Add column definitions
+        for i, col in enumerate(columns):
+            if i == len(columns) - 1 and not pk_constraint:
+                # Last column without PK constraint - no comma
+                ddl_lines.append(f"    {col}")
+            else:
+                # All columns with comma (PK constraint will follow)
+                ddl_lines.append(f"    {col},")
+        
+        # Add primary key constraint if present
+        if pk_constraint:
+            constraint_clean = pk_constraint.strip().lstrip(',').strip()
+            ddl_lines.append(f"    {constraint_clean}")
+        
+        # Close table definition
+        ddl_lines.extend([
+            " );",
+            ""
+        ])
+        
+        # Join lines and ensure clean formatting
+        ddl = "\n".join(ddl_lines).strip()
+        
+        return ddl
+
+    def _get_table_creator_rules(self) -> dict[str, Any]:
+        """Get the type mapping rules from shared module."""
+        # Import shared type mapping rules
+        import sys
+
+        sys.path.insert(0, "/home/marlonsc/flext/client-b-meltano-native/src")
+
+        try:
+            from oracle.type_mapping_rules import (  # type: ignore[import-not-found]
+                FIELD_PATTERN_RULES,
+                FIELD_PATTERNS_TO_ORACLE,
+            )
+
+            return {
+                "FIELD_PATTERNS_TO_ORACLE": FIELD_PATTERNS_TO_ORACLE,
+                "FIELD_PATTERN_RULES": FIELD_PATTERN_RULES,
+            }
+        except ImportError:
+            # Fallback to embedded rules if import fails
+            return self._get_fallback_rules()
+
+    def _get_fallback_rules(self) -> dict[str, Any]:
+        """Fallback rules if shared module not available."""
+        return {
+            "FIELD_PATTERNS_TO_ORACLE": {
+                "id_patterns": "NUMBER",
+                "key_patterns": "VARCHAR2(255 CHAR)",
+                "qty_patterns": "NUMBER",
+                "price_patterns": "NUMBER",
+                "weight_patterns": "NUMBER",
+                "date_patterns": "TIMESTAMP(6)",
+                "flag_patterns": "NUMBER(1,0)",
+                "desc_patterns": "VARCHAR2(500 CHAR)",
+                "code_patterns": "VARCHAR2(50 CHAR)",
+                "name_patterns": "VARCHAR2(255 CHAR)",
+                "addr_patterns": "VARCHAR2(500 CHAR)",
+                "decimal_patterns": "NUMBER",
+                "set_patterns": "VARCHAR2(4000 CHAR)",
+            },
+            "FIELD_PATTERN_RULES": {
+                "id_patterns": ["*_id", "id"],
+                "key_patterns": ["*_key"],
+                "qty_patterns": [
+                    "*_qty",
+                    "*_quantity",
+                    "*_count",
+                    "*_amount",
+                    "alloc_qty",
+                    "ord_qty",
+                    "packed_qty",
+                    "ordered_uom_qty",
+                    "orig_ord_qty",
+                ],
+                "price_patterns": [
+                    "*_price",
+                    "*_cost",
+                    "*_rate",
+                    "*_percent",
+                    "cost",
+                    "sale_price",
+                    "unit_declared_value",
+                    "orig_sale_price",
+                ],
+                "weight_patterns": [
+                    "*_weight",
+                    "*_volume",
+                    "*_length",
+                    "*_width",
+                    "*_height",
+                ],
+                "date_patterns": [
+                    "*_date",
+                    "*_time",
+                    "*_ts",
+                    "*_timestamp",
+                    "cust_date_*",
+                ],
+                "flag_patterns": ["*_flg", "*_flag", "*_enabled", "*_active"],
+                "desc_patterns": ["*_desc", "*_description", "*_note", "*_comment"],
+                "code_patterns": ["*_code", "*_status", "*_type"],
+                "name_patterns": ["*_name", "*_title"],
+                "addr_patterns": ["*_addr", "*_address"],
+                "decimal_patterns": [
+                    "cust_decimal_*",
+                    "cust_number_*",
+                    "voucher_amount",
+                    "total_orig_ord_qty",
+                ],
+                "set_patterns": ["*_set"],
+            },
+        }
+
+    def _convert_to_oracle_type(
+        self, column_name: str, column_schema: dict[str, Any], rules: dict[str, Any]
+    ) -> Any:
+        """Convert column to Oracle type using shared type mapping rules."""
+        # Try to use shared conversion function first
+        import sys
+
+        sys.path.insert(0, "/home/marlonsc/flext/client-b-meltano-native/src")
+
+        try:
+            from oracle.type_mapping_rules import convert_singer_schema_to_oracle
+
+            return convert_singer_schema_to_oracle(column_name, column_schema)
+        except ImportError:
+            # Fallback to embedded logic if import fails
+            return self._convert_to_oracle_type_fallback(
+                column_name, column_schema, rules
+            )
+
+    def _convert_to_oracle_type_fallback(
+        self, column_name: str, column_schema: dict[str, Any], rules: dict[str, Any]
+    ) -> Any:
+        """Fallback conversion logic if shared module not available."""
+        column_lower = column_name.lower()
+
+        # Priority 1: Field name patterns (same logic as table_creator.py)
+        field_patterns = rules["FIELD_PATTERNS_TO_ORACLE"]
+        field_rules = rules["FIELD_PATTERN_RULES"]
+
+        for pattern_key, patterns in field_rules.items():
+            for pattern in patterns:
+                # Handle wildcard patterns
+                if "*" in pattern:
+                    pattern_clean = pattern.replace("*", "")
+                    if (
+                        pattern.startswith("*_")
+                        and column_lower.endswith(pattern_clean)
+                    ) or (
+                        pattern.endswith("_*")
+                        and column_lower.startswith(pattern_clean)
+                    ):
+                        oracle_type = field_patterns[pattern_key]
+                        # Force 4000 CHAR for _set fields regardless of max_length
+                        if pattern_key == "set_patterns":
+                            return "VARCHAR2(4000 CHAR)"
+                        return oracle_type
+                # Exact match
+                elif pattern == column_lower:
+                    oracle_type = field_patterns[pattern_key]
+                    # Force 4000 CHAR for _set fields regardless of max_length
+                    if pattern_key == "set_patterns":
+                        return "VARCHAR2(4000 CHAR)"
+                    return oracle_type
+
+        # Priority 2: Singer schema type inference
+        schema_type = column_schema.get("type", "string")
+        if isinstance(schema_type, list):
+            # Handle nullable types like ["string", "null"]
+            schema_type = next((t for t in schema_type if t != "null"), "string")
+
+        if schema_type == "integer" or schema_type == "number":
+            return "NUMBER"
+        elif schema_type == "boolean":
+            return "NUMBER(1,0)"
+        elif schema_type == "string":
+            # Check for date-time format
+            format_type = column_schema.get("format")
+            if format_type in ["date-time", "date", "time"]:
+                return "TIMESTAMP(6)"
+
+            # Use max length if available
+            max_length = column_schema.get("maxLength", 255)
+            return f"VARCHAR2({min(max_length, 4000)} CHAR)"
+
+        # Default fallback
+        return "VARCHAR2(255 CHAR)"
 
     def _fix_oracle_column_types(self, conn: Any) -> None:
         """Fix Oracle column types after table creation."""
@@ -262,9 +798,13 @@ class OracleSink(SQLSink[OracleConnector]):
         json_type = json_schema.get("type", "string")
 
         if json_type == "integer" or json_type == "number":
-            return Column(name, NUMBER(), nullable=True)  # type: ignore[no-untyped-call]
+            return Column(
+                name, NUMBER(), nullable=True  # type: ignore[no-untyped-call]
+            )
         elif json_type == "boolean":
-            return Column(name, NUMBER(1), nullable=True)  # type: ignore[no-untyped-call]
+            return Column(
+                name, NUMBER(1), nullable=True  # type: ignore[no-untyped-call]
+            )
         elif json_type == "string":
             # Check for format hints
             format_type = json_schema.get("format")
@@ -355,9 +895,7 @@ class OracleSink(SQLSink[OracleConnector]):
                     self.logger.info(f"Applied Oracle optimization: {opt}")
                 except Exception as e:
                     # DO NOT MASK ERRORS - Log them clearly
-                    self.logger.error(
-                        f"Oracle optimization FAILED: {opt} - Error: {e}"
-                    )
+                    self.logger.error(f"Oracle optimization FAILED: {opt} - Error: {e}")
                     raise RuntimeError(f"Oracle optimization failed: {opt}") from e
 
             # Create high-performance indexes
@@ -395,17 +933,11 @@ class OracleSink(SQLSink[OracleConnector]):
                 elif (
                     "ORA-00942" in error_msg
                 ):  # Table doesn't exist - acceptable during setup
-                    self.logger.info(
-                        f"Table not ready for index {idx_name} - skipping"
-                    )
+                    self.logger.info(f"Table not ready for index {idx_name} - skipping")
                 else:
                     # Real error - DO NOT MASK
-                    self.logger.error(
-                        f"Index creation FAILED: {idx_name} - Error: {e}"
-                    )
-                    raise RuntimeError(
-                        f"Index creation failed: {idx_name}: {e}"
-                    ) from e
+                    self.logger.error(f"Index creation FAILED: {idx_name} - Error: {e}")
+                    raise RuntimeError(f"Index creation failed: {idx_name}: {e}") from e
 
     def set_logger(self, logger: Any) -> None:
         """Set logger for sink operations."""
@@ -430,6 +962,7 @@ class OracleSink(SQLSink[OracleConnector]):
     def process_batch(self, context: dict[str, Any]) -> None:
         """Process batch with comprehensive Oracle insertion tracking and statistics."""
         import time
+
         batch_start_time = time.time()
 
         records = context.get("records", [])
@@ -441,9 +974,9 @@ class OracleSink(SQLSink[OracleConnector]):
             return
 
         # Update statistics - records received
-        self._stream_stats["total_records_received"] = (
-            int(self._stream_stats["total_records_received"]) + len(records)
-        )
+        self._stream_stats["total_records_received"] = int(
+            self._stream_stats["total_records_received"]
+        ) + len(records)
         self._stream_stats["total_batches_processed"] = (
             int(self._stream_stats["total_batches_processed"]) + 1
         )
@@ -476,7 +1009,8 @@ class OracleSink(SQLSink[OracleConnector]):
                     "first_record_keys": list(records[0].keys()) if records else [],
                     "sample_record_preview": (
                         {k: str(v)[:50] for k, v in list(records[0].items())[:5]}
-                        if records else {}
+                        if records
+                        else {}
                     ),
                     "avg_batch_size": (
                         self._stream_stats["total_records_received"]
@@ -485,10 +1019,10 @@ class OracleSink(SQLSink[OracleConnector]):
                     "largest_batch": self._stream_stats["largest_batch_size"],
                     "smallest_batch": (
                         self._stream_stats["smallest_batch_size"]
-                        if self._stream_stats["smallest_batch_size"] != float('inf')
+                        if self._stream_stats["smallest_batch_size"] != float("inf")
                         else batch_size
-                    )
-                }
+                    ),
+                },
             )
 
             # Log batch processing
@@ -527,10 +1061,9 @@ class OracleSink(SQLSink[OracleConnector]):
 
             # Log successful batch completion with performance metrics
             if self._logger:
-                avg_processing_time = (
-                    float(self._stream_stats["total_processing_time"])
-                    / int(self._stream_stats["successful_operations"])
-                )
+                avg_processing_time = float(
+                    self._stream_stats["total_processing_time"]
+                ) / int(self._stream_stats["successful_operations"])
                 records_per_second = (
                     batch_size / batch_duration if batch_duration > 0 else 0
                 )
@@ -562,8 +1095,8 @@ class OracleSink(SQLSink[OracleConnector]):
                         ],
                         "total_rows_affected": self._stream_stats[
                             "database_operations"
-                        ]["rows_affected"]
-                    }
+                        ]["rows_affected"],
+                    },
                 )
 
         except Exception as e:
@@ -576,7 +1109,7 @@ class OracleSink(SQLSink[OracleConnector]):
                 "batch_size": batch_size,
                 "error": str(e),
                 "processing_time": batch_duration,
-                "timestamp": batch_start_time
+                "timestamp": batch_start_time,
             }
             failed_batches = list(self._stream_stats["failed_batches"])
             failed_batches.append(failure_info)
@@ -610,14 +1143,17 @@ class OracleSink(SQLSink[OracleConnector]):
                             )
                             * 100,
                             2,
-                        )
+                        ),
                     },
-                    exc_info=True
+                    exc_info=True,
                 )
             raise
 
     def _process_batch_internal(self, records: list[dict[str, Any]]) -> None:
         """Internal batch processing logic with detailed SQL execution tracking."""
+        # LAZY CONNECTION: Ensure Oracle connection exists before processing
+        self._ensure_connection_and_table()
+
         if self._logger:
             self._logger.info(
                 "🔧 INTERNAL BATCH PROCESSING",
@@ -626,27 +1162,80 @@ class OracleSink(SQLSink[OracleConnector]):
                     "records_count": len(records),
                     "load_method": self.config.get("load_method", "append-only"),
                     "has_key_properties": bool(self.key_properties),
-                    "key_properties": self.key_properties
-                }
+                    "key_properties": self.key_properties,
+                    "connection_established": self._connection_established,
+                },
             )
 
+        # Check load method
+        load_method = self.config.get("load_method", "append-only")
+
+        # Handle overwrite mode - truncate before insert
+        if load_method == "overwrite" and not hasattr(self, "_overwrite_done"):
+            if self._logger:
+                self._logger.info(
+                    f"🗑️ OVERWRITE MODE - Truncating table " f"{self.full_table_name}"
+                )
+            try:
+                with self.connector._engine.connect() as conn:
+                    # Check if table exists and get correct name
+                    schema_name = self.config.get(
+                        "default_target_schema", self.config.get("schema", "")
+                    )
+                    table_base_name = self.stream_name.upper()
+
+                    # Try to find the table - it might be with or without prefix
+                    check_sql = f"""
+                    SELECT table_name
+                    FROM all_tables
+                    WHERE owner = '{schema_name.upper()}'
+                    AND (table_name = '{table_base_name}' OR
+                         table_name = 'WMS_{table_base_name}')
+                    """
+                    result = conn.execute(sqlalchemy.text(check_sql)).fetchone()
+
+                    if result:
+                        actual_table_name = result[0]
+                        truncate_sql = (
+                            f'TRUNCATE TABLE "{schema_name.upper()}"'
+                            f'."{actual_table_name}"'
+                        )
+                        if self._logger:
+                            self._logger.info(
+                                f"Truncating existing table: {truncate_sql}"
+                            )
+                        conn.execute(sqlalchemy.text(truncate_sql))
+                        conn.commit()
+                    else:
+                        # Table doesn't exist yet, will be created by Singer SDK
+                        if self._logger:
+                            self._logger.info(
+                                f"Table doesn't exist yet, will be created: "
+                                f"{self.full_table_name}"
+                            )
+                self._overwrite_done = True
+                if self._logger:
+                    self._logger.info(
+                        f"✅ Table {self.full_table_name} truncated successfully"
+                    )
+            except Exception as e:
+                if self._logger:
+                    self._logger.error(f"❌ Failed to truncate table: {e}")
+                raise
+
         # Check if this is an upsert scenario
-        if (
-            self.config.get("load_method") == "upsert"
-            and self.key_properties
-            and len(records) > 0
-        ):
+        if load_method == "upsert" and self.key_properties and len(records) > 0:
             if self._logger:
                 self._logger.info(
                     f"🔄 USING UPSERT MODE for {self.stream_name}",
-                    extra={"key_properties": self.key_properties}
+                    extra={"key_properties": self.key_properties},
                 )
             self._process_batch_upsert(records)
         else:
-            # Use Singer SDK's standard batch processing for append-only
+            # Use Singer SDK's standard batch processing for append-only and overwrite
             if self._logger:
                 self._logger.info(
-                    f"➕ USING APPEND-ONLY MODE for {self.stream_name}"
+                    f"➕ USING {load_method.upper()} MODE for {self.stream_name}"
                 )
             context = {"records": records}
             super().process_batch(context)
@@ -671,7 +1260,7 @@ class OracleSink(SQLSink[OracleConnector]):
                 for record in batch:
                     conn.execute(sqlalchemy.text(merge_sql), record)
 
-    def _build_oracle_merge_statement(self) -> str:
+    def _build_oracle_merge_statement(self) -> Any:
         """Build Oracle-specific MERGE statement."""
         table_name = self.full_table_name
         columns = list(self.schema["properties"].keys())
@@ -777,6 +1366,7 @@ class OracleSink(SQLSink[OracleConnector]):
     def _execute_insert_batch(self, records: list[dict[str, Any]]) -> None:
         """Execute high-performance bulk insert with comprehensive tracking."""
         import time
+
         operation_start = time.time()
 
         if self._logger:
@@ -786,8 +1376,8 @@ class OracleSink(SQLSink[OracleConnector]):
                     "stream_name": self.stream_name,
                     "records_count": len(records),
                     "table_name": self.full_table_name,
-                    "operation_type": "INSERT"
-                }
+                    "operation_type": "INSERT",
+                },
             )
 
         insert_sql = self._build_bulk_insert_statement()
@@ -804,19 +1394,19 @@ class OracleSink(SQLSink[OracleConnector]):
                         else insert_sql
                     ),
                     "prepared_records_count": len(prepared),
-                    "sample_prepared_record": prepared[0] if prepared else {}
-                }
+                    "sample_prepared_record": prepared[0] if prepared else {},
+                },
             )
 
         try:
             with self.connector._engine.connect() as conn, conn.begin():
                 result = conn.execute(sqlalchemy.text(insert_sql), prepared)
-                rows_affected = getattr(result, 'rowcount', len(prepared))
+                rows_affected = getattr(result, "rowcount", len(prepared))
 
                 # Update statistics
-                self._stream_stats["total_records_inserted"] = (
-                    int(self._stream_stats["total_records_inserted"]) + len(prepared)
-                )
+                self._stream_stats["total_records_inserted"] = int(
+                    self._stream_stats["total_records_inserted"]
+                ) + len(prepared)
                 db_ops = dict(self._stream_stats["database_operations"])
                 db_ops["inserts"] = int(db_ops["inserts"]) + 1
                 db_ops["rows_affected"] = int(db_ops["rows_affected"]) + rows_affected
@@ -843,8 +1433,8 @@ class OracleSink(SQLSink[OracleConnector]):
                                 "stream_name": self.stream_name,
                                 "verification_query": verification_query,
                                 "error_type": type(verification_error).__name__,
-                                "error_details": str(verification_error)
-                            }
+                                "error_details": str(verification_error),
+                            },
                         )
 
                 if self._logger:
@@ -858,9 +1448,11 @@ class OracleSink(SQLSink[OracleConnector]):
                             "table_name": self.full_table_name,
                             "operation_duration": round(operation_duration, 3),
                             "records_per_second": round(
-                                len(prepared) / operation_duration
-                                if operation_duration > 0
-                                else 0,
+                                (
+                                    len(prepared) / operation_duration
+                                    if operation_duration > 0
+                                    else 0
+                                ),
                                 2,
                             ),
                             "total_rows_in_table": total_rows_in_table,
@@ -871,9 +1463,9 @@ class OracleSink(SQLSink[OracleConnector]):
                                 "database_operations"
                             ]["inserts"],
                             "total_rows_affected": self._stream_stats[
-                            "database_operations"
-                        ]["rows_affected"]
-                        }
+                                "database_operations"
+                            ]["rows_affected"],
+                        },
                     )
 
         except Exception as e:
@@ -895,15 +1487,16 @@ class OracleSink(SQLSink[OracleConnector]):
                         "records_attempted": len(prepared),
                         "operation_duration": round(operation_duration, 3),
                         "table_name": self.full_table_name,
-                        "sample_record": prepared[0] if prepared else {}
+                        "sample_record": prepared[0] if prepared else {},
                     },
-                    exc_info=True
+                    exc_info=True,
                 )
             raise
 
     def _execute_merge_batch(self, records: list[dict[str, Any]]) -> None:
         """Execute high-performance MERGE operation with comprehensive tracking."""
         import time
+
         operation_start = time.time()
 
         if self._logger:
@@ -913,8 +1506,8 @@ class OracleSink(SQLSink[OracleConnector]):
                     "stream_name": self.stream_name,
                     "records_count": len(records),
                     "table_name": self.full_table_name,
-                    "operation_type": "MERGE"
-                }
+                    "operation_type": "MERGE",
+                },
             )
 
         merge_sql = self._build_merge_statement()
@@ -926,12 +1519,10 @@ class OracleSink(SQLSink[OracleConnector]):
                 extra={
                     "stream_name": self.stream_name,
                     "sql_statement": (
-                        merge_sql[:500] + "..."
-                        if len(merge_sql) > 500
-                        else merge_sql
+                        merge_sql[:500] + "..." if len(merge_sql) > 500 else merge_sql
                     ),
-                    "prepared_records_count": len(prepared)
-                }
+                    "prepared_records_count": len(prepared),
+                },
             )
 
         try:
@@ -956,8 +1547,8 @@ class OracleSink(SQLSink[OracleConnector]):
                                 "stream_name": self.stream_name,
                                 "verification_query": verification_query,
                                 "error_type": type(initial_count_error).__name__,
-                                "error_details": str(initial_count_error)
-                            }
+                                "error_details": str(initial_count_error),
+                            },
                         )
 
                 # Process in optimal batch sizes
@@ -968,7 +1559,7 @@ class OracleSink(SQLSink[OracleConnector]):
                 for i in range(0, len(prepared), batch_size):
                     batch = prepared[i : i + batch_size]
                     result = conn.execute(sqlalchemy.text(merge_sql), batch)
-                    batch_affected = getattr(result, 'rowcount', 0)
+                    batch_affected = getattr(result, "rowcount", 0)
                     total_affected += batch_affected
                     total_sub_batches += 1
 
@@ -980,8 +1571,8 @@ class OracleSink(SQLSink[OracleConnector]):
                                 "sub_batch_number": (i // batch_size) + 1,
                                 "sub_batch_size": len(batch),
                                 "rows_affected": batch_affected,
-                                "cumulative_affected": total_affected
-                            }
+                                "cumulative_affected": total_affected,
+                            },
                         )
 
                 # Get final row count
@@ -1012,8 +1603,8 @@ class OracleSink(SQLSink[OracleConnector]):
                                 "stream_name": self.stream_name,
                                 "verification_query": verification_query,
                                 "error_type": type(final_count_error).__name__,
-                                "error_details": str(final_count_error)
-                            }
+                                "error_details": str(final_count_error),
+                            },
                         )
 
                 # Update statistics
@@ -1036,9 +1627,9 @@ class OracleSink(SQLSink[OracleConnector]):
                     )
                 else:
                     # Fallback: assume all records were processed
-                    self._stream_stats["total_records_updated"] = (
-                        int(self._stream_stats["total_records_updated"]) + len(prepared)
-                    )
+                    self._stream_stats["total_records_updated"] = int(
+                        self._stream_stats["total_records_updated"]
+                    ) + len(prepared)
 
                 operation_end = time.time()
                 operation_duration = operation_end - operation_start
@@ -1055,9 +1646,11 @@ class OracleSink(SQLSink[OracleConnector]):
                             "table_name": self.full_table_name,
                             "operation_duration": round(operation_duration, 3),
                             "records_per_second": round(
-                                len(prepared) / operation_duration
-                                if operation_duration > 0
-                                else 0,
+                                (
+                                    len(prepared) / operation_duration
+                                    if operation_duration > 0
+                                    else 0
+                                ),
                                 2,
                             ),
                             "initial_table_rows": initial_row_count,
@@ -1084,8 +1677,8 @@ class OracleSink(SQLSink[OracleConnector]):
                             ]["merges"],
                             "total_rows_affected_cumulative": self._stream_stats[
                                 "database_operations"
-                            ]["rows_affected"]
-                        }
+                            ]["rows_affected"],
+                        },
                     )
 
         except Exception as e:
@@ -1107,13 +1700,13 @@ class OracleSink(SQLSink[OracleConnector]):
                         "records_attempted": len(prepared),
                         "operation_duration": round(operation_duration, 3),
                         "table_name": self.full_table_name,
-                        "sample_record": prepared[0] if prepared else {}
+                        "sample_record": prepared[0] if prepared else {},
                     },
-                    exc_info=True
+                    exc_info=True,
                 )
             raise
 
-    def _build_direct_path_insert(self) -> str:
+    def _build_direct_path_insert(self) -> Any:
         """Build INSERT with APPEND_VALUES hint for direct path."""
         table_name = self.full_table_name
         columns = list(self.schema["properties"].keys())
@@ -1131,7 +1724,7 @@ class OracleSink(SQLSink[OracleConnector]):
         VALUES ({placeholders})
         """
 
-    def _build_bulk_insert_statement(self) -> str:
+    def _build_bulk_insert_statement(self) -> Any:
         """Build optimized INSERT with performance hints."""
         table_name = self.full_table_name
         columns = list(self.schema["properties"].keys())
@@ -1157,7 +1750,7 @@ class OracleSink(SQLSink[OracleConnector]):
             f"VALUES ({placeholders})"
         )
 
-    def _build_merge_statement(self) -> str:
+    def _build_merge_statement(self) -> Any:
         """Build high-performance MERGE with hints."""
         table_name = self.full_table_name
         columns = list(self.schema["properties"].keys())
@@ -1229,22 +1822,24 @@ class OracleSink(SQLSink[OracleConnector]):
                 return sqlalchemy.dialects.oracle.VARCHAR2(max_length)
 
         elif type_str == "integer":
-            return sqlalchemy.dialects.oracle.NUMBER(
+            return sqlalchemy.dialects.oracle.NUMBER(  # type: ignore[no-untyped-call]
                 precision=self.config.get("number_precision", 38), scale=0
-            )  # type: ignore[no-untyped-call]
+            )
 
         elif type_str == "number":
-            return sqlalchemy.dialects.oracle.NUMBER(
+            return sqlalchemy.dialects.oracle.NUMBER(  # type: ignore[no-untyped-call]
                 precision=self.config.get("number_precision", 38),
                 scale=self.config.get("number_scale", 10),
-            )  # type: ignore[no-untyped-call]
+            )
 
         elif type_str == "boolean":
             # Oracle doesn't have native boolean
             if self.config.get("supports_native_boolean"):
                 return sqlalchemy.BOOLEAN()
             else:
-                return sqlalchemy.dialects.oracle.NUMBER(1, 0)  # type: ignore[no-untyped-call]
+                return sqlalchemy.dialects.oracle.NUMBER(
+                    1, 0
+                )  # type: ignore[no-untyped-call]
 
         elif type_str == "object" or type_str == "array":
             # Store JSON as CLOB or native JSON type
@@ -1478,8 +2073,10 @@ class OracleSink(SQLSink[OracleConnector]):
 
         # Calculate final metrics
         total_duration = 0.0
-        if (self._stream_stats["first_batch_time"] and
-            self._stream_stats["last_batch_time"]):
+        if (
+            self._stream_stats["first_batch_time"]
+            and self._stream_stats["last_batch_time"]
+        ):
             total_duration = (
                 self._stream_stats["last_batch_time"]
                 - self._stream_stats["first_batch_time"]
@@ -1488,12 +2085,14 @@ class OracleSink(SQLSink[OracleConnector]):
         avg_processing_time = (
             self._stream_stats["total_processing_time"]
             / self._stream_stats["successful_operations"]
-            if self._stream_stats["successful_operations"] > 0 else 0
+            if self._stream_stats["successful_operations"] > 0
+            else 0
         )
 
         overall_records_per_second = (
             self._stream_stats["total_records_received"] / total_duration
-            if total_duration > 0 else 0
+            if total_duration > 0
+            else 0
         )
 
         success_rate = (
@@ -1502,7 +2101,8 @@ class OracleSink(SQLSink[OracleConnector]):
                 / self._stream_stats["total_batches_processed"]
             )
             * 100
-            if self._stream_stats["total_batches_processed"] > 0 else 0
+            if self._stream_stats["total_batches_processed"] > 0
+            else 0
         )
 
         failure_rate = (
@@ -1511,7 +2111,8 @@ class OracleSink(SQLSink[OracleConnector]):
                 / self._stream_stats["total_records_received"]
             )
             * 100
-            if self._stream_stats["total_records_received"] > 0 else 0
+            if self._stream_stats["total_records_received"] > 0
+            else 0
         )
 
         # Get final table row count
@@ -1532,8 +2133,8 @@ class OracleSink(SQLSink[OracleConnector]):
                         "verification_query": verification_query,
                         "error_type": type(final_stats_error).__name__,
                         "error_details": str(final_stats_error),
-                        "context": "final_statistics_generation"
-                    }
+                        "context": "final_statistics_generation",
+                    },
                 )
 
         self._logger.info(
@@ -1543,7 +2144,6 @@ class OracleSink(SQLSink[OracleConnector]):
                 "stream_name": self.stream_name,
                 "table_name": self.full_table_name,
                 "load_method": self.config.get("load_method", "append-only"),
-
                 "=== RECORD PROCESSING STATS ===": True,
                 "total_records_received": self._stream_stats["total_records_received"],
                 "total_batches_processed": self._stream_stats[
@@ -1553,20 +2153,18 @@ class OracleSink(SQLSink[OracleConnector]):
                 "failed_batches": len(self._stream_stats["failed_batches"]),
                 "success_rate_percent": round(success_rate, 2),
                 "failure_rate_percent": round(failure_rate, 2),
-
                 "=== DATABASE OPERATIONS ===": True,
                 "total_records_inserted": self._stream_stats["total_records_inserted"],
                 "total_records_updated": self._stream_stats["total_records_updated"],
                 "total_records_failed": self._stream_stats["total_records_failed"],
-                "insert_operations": self._stream_stats[
-                    "database_operations"
-                ]["inserts"],
+                "insert_operations": self._stream_stats["database_operations"][
+                    "inserts"
+                ],
                 "merge_operations": self._stream_stats["database_operations"]["merges"],
-                "total_rows_affected": self._stream_stats[
-                                "database_operations"
-                            ]["rows_affected"],
+                "total_rows_affected": self._stream_stats["database_operations"][
+                    "rows_affected"
+                ],
                 "final_table_row_count": final_table_count,
-
                 "=== PERFORMANCE METRICS ===": True,
                 "total_processing_duration": round(total_duration, 3),
                 "avg_batch_processing_time": round(avg_processing_time, 3),
@@ -1574,7 +2172,7 @@ class OracleSink(SQLSink[OracleConnector]):
                 "largest_batch_size": self._stream_stats["largest_batch_size"],
                 "smallest_batch_size": (
                     self._stream_stats["smallest_batch_size"]
-                    if self._stream_stats["smallest_batch_size"] != float('inf')
+                    if self._stream_stats["smallest_batch_size"] != float("inf")
                     else 0
                 ),
                 "avg_batch_size": (
@@ -1586,7 +2184,6 @@ class OracleSink(SQLSink[OracleConnector]):
                     if self._stream_stats["total_batches_processed"] > 0
                     else 0
                 ),
-
                 "=== FAILURE ANALYSIS ===": True,
                 "failed_batch_details": (
                     self._stream_stats["failed_batches"][-5:]
@@ -1594,26 +2191,25 @@ class OracleSink(SQLSink[OracleConnector]):
                     else "No failures"
                 ),
                 "total_failed_records": self._stream_stats["total_records_failed"],
-
                 "=== TIMING INFO ===": True,
                 "first_batch_timestamp": (
                     time.strftime(
-                        '%Y-%m-%d %H:%M:%S',
-                        time.localtime(self._stream_stats["first_batch_time"])
+                        "%Y-%m-%d %H:%M:%S",
+                        time.localtime(self._stream_stats["first_batch_time"]),
                     )
                     if self._stream_stats["first_batch_time"]
                     else "N/A"
                 ),
                 "last_batch_timestamp": (
                     time.strftime(
-                        '%Y-%m-%d %H:%M:%S',
-                        time.localtime(self._stream_stats["last_batch_time"])
+                        "%Y-%m-%d %H:%M:%S",
+                        time.localtime(self._stream_stats["last_batch_time"]),
                     )
                     if self._stream_stats["last_batch_time"]
                     else "N/A"
                 ),
-                "total_session_duration": round(total_duration, 3)
-            }
+                "total_session_duration": round(total_duration, 3),
+            },
         )
 
         # Additional summary log for quick reference
