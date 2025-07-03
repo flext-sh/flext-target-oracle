@@ -17,7 +17,7 @@ from flext_target_oracle.sinks import OracleSink
 class TestBasicFunctionality:
     """Test basic target functionality without database."""
 
-    def test_target_initialization_minimal(self):
+    def test_target_initialization_minimal(self) -> None:
         """Test target can be initialized with minimal config."""
         config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
 
@@ -26,7 +26,7 @@ class TestBasicFunctionality:
         assert target.config["host"] == "test-host"
         assert target.config["username"] == "test-user"
 
-    def test_target_capabilities(self):
+    def test_target_capabilities(self) -> None:
         """Test target reports correct capabilities."""
         config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
 
@@ -40,7 +40,7 @@ class TestBasicFunctionality:
         assert "stream-maps" in capability_values
         assert "schema-flattening" in capability_values
 
-    def test_config_defaults(self):
+    def test_config_defaults(self) -> None:
         """Test configuration defaults are applied."""
         config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
 
@@ -53,7 +53,7 @@ class TestBasicFunctionality:
         assert target.config.get("add_record_metadata", True) is True
         assert target.config.get("load_method", "append-only") == "append-only"
 
-    def test_license_flags_default_to_false(self):
+    def test_license_flags_default_to_false(self) -> None:
         """Test Oracle license flags default to false."""
         config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
 
@@ -65,7 +65,7 @@ class TestBasicFunctionality:
         assert target.config.get("oracle_has_inmemory_option", False) is False
         assert target.config.get("oracle_has_advanced_security_option", False) is False
 
-    def test_connector_url_generation(self):
+    def test_connector_url_generation(self) -> None:
         """Test connector generates correct URLs."""
         config = {
             "host": "oracle.example.com",
@@ -84,7 +84,7 @@ class TestBasicFunctionality:
         assert "oracle.example.com:1522" in url
         assert "TESTDB" in url
 
-    def test_connector_tcps_url(self):
+    def test_connector_tcps_url(self) -> None:
         """Test connector generates TCPS URLs correctly."""
         config = {
             "host": "secure.oracle.com",
@@ -106,7 +106,7 @@ class TestBasicFunctionality:
         assert "(HOST=secure.oracle.com)" in url
         assert "(PORT=2484)" in url
 
-    def test_sink_initialization(self):
+    def test_sink_initialization(self) -> None:
         """Test sink can be initialized."""
         config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
 
@@ -129,7 +129,7 @@ class TestBasicFunctionality:
             assert sink.stream_name == "test_stream"
             assert sink.key_properties == ["id"]
 
-    def test_type_mapping(self):
+    def test_type_mapping(self) -> None:
         """Test Singer type to Oracle type mapping."""
         config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
 
@@ -154,7 +154,7 @@ class TestBasicFunctionality:
             object_type = sink._singer_sdk_to_oracle_type({"type": "object"})
             assert "CLOB" in str(object_type) or "JSON" in str(object_type)
 
-    def test_record_conformance(self):
+    def test_record_conformance(self) -> None:
         """Test record conformance for Oracle."""
         config = {
             "host": "test-host",
@@ -185,7 +185,7 @@ class TestBasicFunctionality:
             assert conformed["active"] == 1  # Boolean converted to number
             assert conformed["data"] == '{"key": "value"}'  # Object serialized to JSON
 
-    def test_batch_config_parsing(self):
+    def test_batch_config_parsing(self) -> None:
         """Test batch configuration parsing."""
         config = {
             "host": "test-host",
@@ -204,7 +204,7 @@ class TestBasicFunctionality:
         assert target.config["batch_config"]["batch_wait_limit_seconds"] == 30.0
         assert target.config["batch_config"]["encoding"]["format"] == "jsonl"
 
-    def test_parallel_configuration(self):
+    def test_parallel_configuration(self) -> None:
         """Test parallel processing configuration."""
         config = {
             "host": "test-host",
@@ -229,7 +229,7 @@ class TestBasicFunctionality:
             if sink._parallel_threads > 1:
                 assert sink._executor is not None
 
-    def test_wan_optimization_config(self):
+    def test_wan_optimization_config(self) -> None:
         """Test WAN optimization configuration."""
         config = {
             "host": "remote.oracle.com",
@@ -253,15 +253,16 @@ class TestBasicFunctionality:
         assert connector.config["enable_network_compression"] is True
 
     @pytest.mark.parametrize(
-        "load_method,expected_behavior",
+        "load_method,_expected_behavior",
         [
             ("append-only", "insert"),
             ("upsert", "merge"),
             ("overwrite", "truncate_then_insert"),
         ],
     )
-    def test_load_methods(self, load_method, expected_behavior):
+    def test_load_methods(self, load_method, _expected_behavior) -> None:
         """Test different load methods are configured correctly."""
+        # Note: _expected_behavior is parametrized but not used in logic
         config = {
             "host": "test-host",
             "username": "test-user",
@@ -272,7 +273,7 @@ class TestBasicFunctionality:
         target = OracleTarget(config=config)
         assert target.config["load_method"] == load_method
 
-    def test_error_handling_config(self):
+    def test_error_handling_config(self) -> None:
         """Test error handling configuration."""
         config = {
             "host": "test-host",

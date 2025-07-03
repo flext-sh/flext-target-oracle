@@ -15,11 +15,13 @@ from unittest.mock import patch
 from sqlalchemy import text
 
 from flext_target_oracle.target import OracleTarget
+from tests.helpers import requires_oracle_connection
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
 
+@requires_oracle_connection
 class TestOracleSpecificFeatures:
     """Test Oracle-specific features and optimizations."""
 
@@ -29,7 +31,7 @@ class TestOracleSpecificFeatures:
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ):
+    ) -> None:
         """Test Oracle MERGE operations for efficient upserts."""
         table_cleanup(test_table_name)
 
@@ -151,7 +153,7 @@ class TestOracleSpecificFeatures:
         oracle_engine: Engine,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test Oracle bulk operations for high performance."""
         table_cleanup(test_table_name)
 
@@ -223,7 +225,7 @@ class TestOracleSpecificFeatures:
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ):
+    ) -> None:
         """Test Oracle parallel processing configuration."""
         table_cleanup(test_table_name)
 
@@ -294,7 +296,7 @@ class TestOracleSpecificFeatures:
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ):
+    ) -> None:
         """Test Oracle table compression features."""
         table_cleanup(test_table_name)
 
@@ -330,8 +332,10 @@ class TestOracleSpecificFeatures:
                     "record": {
                         "id": i + 1,
                         "large_text": "A" * 1000,  # 1KB of repeated data
-                        "description": f"Description for record {i + 1} with lots of repeated text "
-                        * 10,
+                        "description": (
+                            f"Description for record {i + 1} with lots of "
+                            "repeated text " * 10
+                        ),
                     },
                 }
             )
@@ -353,18 +357,23 @@ class TestOracleSpecificFeatures:
             # Try to check if compression is enabled (may require DBA privileges)
             try:
                 result = conn.execute(
-                    text(f"""
+                    text(
+                        f"""
                     SELECT compression, compress_for
                     FROM user_tables
                     WHERE table_name = UPPER('{test_table_name}')
-                """)
+                """
+                    )
                 )
                 table_info = result.fetchone()
                 if table_info and table_info.compression:
                     assert table_info.compression in ["ENABLED", "DISABLED"]
             except Exception as e:
-                # Compression info may not be accessible (permissions) - log for debugging
-                print(f"ℹ️ Could not access compression info (expected in some environments): {e}")
+                # Compression info may not be accessible (permissions) - log for debug
+                print(
+                    f"ℹ️ Could not access compression info (expected in some "
+                    f"environments): {e}"
+                )
 
     def test_array_size_optimization(
         self,
@@ -373,7 +382,7 @@ class TestOracleSpecificFeatures:
         oracle_engine: Engine,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test Oracle array size optimization for fetch operations."""
         table_cleanup(test_table_name)
 
@@ -444,7 +453,7 @@ class TestOracleSpecificFeatures:
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ):
+    ) -> None:
         """Test Oracle-specific data type mappings."""
         table_cleanup(test_table_name)
 
@@ -533,12 +542,14 @@ class TestOracleSpecificFeatures:
 
             # Check column types in Oracle
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT column_name, data_type, data_length, data_precision, data_scale
                 FROM user_tab_columns
                 WHERE table_name = UPPER('{test_table_name}')
                 ORDER BY column_id
-            """)
+            """
+                )
             )
 
             columns = result.fetchall()
@@ -556,7 +567,7 @@ class TestOracleSpecificFeatures:
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ):
+    ) -> None:
         """Test Oracle connection pooling behavior."""
         table_cleanup(test_table_name)
 
@@ -617,7 +628,8 @@ class TestOracleSpecificFeatures:
             # Verify data from all workers
             result = conn.execute(
                 text(
-                    f"SELECT DISTINCT worker_id FROM {test_table_name} ORDER BY worker_id"
+                    f"SELECT DISTINCT worker_id FROM {test_table_name} "
+                    f"ORDER BY worker_id"
                 )
             )
             worker_ids = [row[0] for row in result.fetchall()]
@@ -629,7 +641,7 @@ class TestOracleSpecificFeatures:
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ):
+    ) -> None:
         """Test Oracle-specific error handling."""
         table_cleanup(test_table_name)
 

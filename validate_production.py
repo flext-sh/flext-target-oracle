@@ -20,22 +20,23 @@ def load_oracle_config():
     load_dotenv()
 
     return {
-        'host': os.getenv('DATABASE__HOST'),
-        'port': int(os.getenv('DATABASE__PORT', 1521)),
-        'service_name': os.getenv('DATABASE__SERVICE_NAME'),
-        'username': os.getenv('DATABASE__USERNAME'),
-        'password': os.getenv('DATABASE__PASSWORD').strip('"'),
-        'protocol': os.getenv('DATABASE__PROTOCOL', 'tcp'),
-        'auth_type': os.getenv('DATABASE__AUTH_TYPE', 'basic'),
-        'schema': os.getenv('DATABASE__SCHEMA'),
-        'default_target_schema': os.getenv('DEFAULT_TARGET_SCHEMA'),
-        'ssl_server_dn_match': False,
-        'oracle_is_enterprise_edition': True,
-        'connection_timeout': 30,
-        'pool_pre_ping': True,
-        'pool_size': 5,
-        'max_overflow': 10
+        "host": os.getenv("DATABASE__HOST"),
+        "port": int(os.getenv("DATABASE__PORT", 1521)),
+        "service_name": os.getenv("DATABASE__SERVICE_NAME"),
+        "username": os.getenv("DATABASE__USERNAME"),
+        "password": os.getenv("DATABASE__PASSWORD").strip('"'),
+        "protocol": os.getenv("DATABASE__PROTOCOL", "tcp"),
+        "auth_type": os.getenv("DATABASE__AUTH_TYPE", "basic"),
+        "schema": os.getenv("DATABASE__SCHEMA"),
+        "default_target_schema": os.getenv("DEFAULT_TARGET_SCHEMA"),
+        "ssl_server_dn_match": False,
+        "oracle_is_enterprise_edition": True,
+        "connection_timeout": 30,
+        "pool_pre_ping": True,
+        "pool_size": 5,
+        "max_overflow": 10,
     }
+
 
 def test_basic_functionality():
     """Test basic target functionality."""
@@ -50,14 +51,15 @@ def test_basic_functionality():
 
     # Test sink creation
     sink = target.get_sink(
-        'validation_test',
-        schema={'properties': {'id': {'type': 'integer'}, 'name': {'type': 'string'}}},
-        key_properties=['id']
+        "validation_test",
+        schema={"properties": {"id": {"type": "integer"}, "name": {"type": "string"}}},
+        key_properties=["id"],
     )
     assert sink is not None
     print("  ✅ Sink creation: SUCCESS")
 
     return True
+
 
 def test_data_processing():
     """Test complete data processing workflow."""
@@ -70,39 +72,45 @@ def test_data_processing():
     timestamp = datetime.now().isoformat()
     stream_name = f"production_test_{int(datetime.now().timestamp())}"
 
-    schema_msg = json.dumps({
-        'type': 'SCHEMA',
-        'stream': stream_name,
-        'schema': {
-            'properties': {
-                'id': {'type': 'integer'},
-                'name': {'type': 'string'},
-                'amount': {'type': 'number'},
-                'created_at': {'type': 'string', 'format': 'date-time'},
-                'is_active': {'type': 'boolean'}
-            }
-        },
-        'key_properties': ['id']
-    })
-
-    record_msg = json.dumps({
-        'type': 'RECORD',
-        'stream': stream_name,
-        'record': {
-            'id': 1,
-            'name': 'Production Test Record',
-            'amount': 999.99,
-            'created_at': timestamp,
-            'is_active': True
+    schema_msg = json.dumps(
+        {
+            "type": "SCHEMA",
+            "stream": stream_name,
+            "schema": {
+                "properties": {
+                    "id": {"type": "integer"},
+                    "name": {"type": "string"},
+                    "amount": {"type": "number"},
+                    "created_at": {"type": "string", "format": "date-time"},
+                    "is_active": {"type": "boolean"},
+                }
+            },
+            "key_properties": ["id"],
         }
-    })
+    )
 
-    state_msg = json.dumps({
-        'type': 'STATE',
-        'value': {'bookmarks': {stream_name: {'replication_key_value': timestamp}}}
-    })
+    record_msg = json.dumps(
+        {
+            "type": "RECORD",
+            "stream": stream_name,
+            "record": {
+                "id": 1,
+                "name": "Production Test Record",
+                "amount": 999.99,
+                "created_at": timestamp,
+                "is_active": True,
+            },
+        }
+    )
 
-    test_data = '\n'.join([schema_msg, record_msg, state_msg])
+    state_msg = json.dumps(
+        {
+            "type": "STATE",
+            "value": {"bookmarks": {stream_name: {"replication_key_value": timestamp}}},
+        }
+    )
+
+    test_data = "\n".join([schema_msg, record_msg, state_msg])
 
     # Process data
     target.process_lines(io.StringIO(test_data))
@@ -110,47 +118,54 @@ def test_data_processing():
 
     return stream_name
 
+
 def test_upsert_functionality():
     """Test UPSERT/MERGE functionality."""
     print("🔄 Testing UPSERT Functionality...")
 
     config = load_oracle_config()
-    config['load_method'] = 'upsert'
-    config['use_merge_statements'] = True
+    config["load_method"] = "upsert"
+    config["use_merge_statements"] = True
 
     target = OracleTarget(config=config)
 
     datetime.now().isoformat()
     stream_name = f"upsert_test_{int(datetime.now().timestamp())}"
 
-    schema_msg = json.dumps({
-        'type': 'SCHEMA',
-        'stream': stream_name,
-        'schema': {
-            'properties': {
-                'id': {'type': 'integer'},
-                'name': {'type': 'string'},
-                'status': {'type': 'string'}
-            }
-        },
-        'key_properties': ['id']
-    })
+    schema_msg = json.dumps(
+        {
+            "type": "SCHEMA",
+            "stream": stream_name,
+            "schema": {
+                "properties": {
+                    "id": {"type": "integer"},
+                    "name": {"type": "string"},
+                    "status": {"type": "string"},
+                }
+            },
+            "key_properties": ["id"],
+        }
+    )
 
     # Initial record
-    record1 = json.dumps({
-        'type': 'RECORD',
-        'stream': stream_name,
-        'record': {'id': 1, 'name': 'Original', 'status': 'created'}
-    })
+    record1 = json.dumps(
+        {
+            "type": "RECORD",
+            "stream": stream_name,
+            "record": {"id": 1, "name": "Original", "status": "created"},
+        }
+    )
 
     # Upsert the same record
-    record2 = json.dumps({
-        'type': 'RECORD',
-        'stream': stream_name,
-        'record': {'id': 1, 'name': 'Updated', 'status': 'updated'}
-    })
+    record2 = json.dumps(
+        {
+            "type": "RECORD",
+            "stream": stream_name,
+            "record": {"id": 1, "name": "Updated", "status": "updated"},
+        }
+    )
 
-    test_data = '\n'.join([schema_msg, record1, record2])
+    test_data = "\n".join([schema_msg, record1, record2])
 
     # Process upsert data
     target.process_lines(io.StringIO(test_data))
@@ -158,43 +173,51 @@ def test_upsert_functionality():
 
     return stream_name
 
-def verify_database_data(table_names):
+
+def verify_database_data(_table_names):
     """Verify data was written to Oracle database."""
     print("🔍 Verifying Database Data...")
 
     config = load_oracle_config()
 
     # Build connection for verification
-    host = config['host']
-    port = config['port']
-    service_name = config['service_name']
-    username = config['username']
-    password = config['password']
+    host = config["host"]
+    port = config["port"]
+    service_name = config["service_name"]
+    username = config["username"]
+    password = config["password"]
 
-    dsn = f"(DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(HOST={host})(PORT={port}))(CONNECT_DATA=(SERVICE_NAME={service_name})))"
+    dsn = (
+        f"(DESCRIPTION=(ADDRESS=(PROTOCOL=TCPS)(HOST={host})(PORT={port}))"
+        f"(CONNECT_DATA=(SERVICE_NAME={service_name})))"
+    )
 
     connect_args = {
-        'user': username,
-        'password': password,
-        'dsn': dsn,
-        'ssl_server_dn_match': False,
+        "user": username,
+        "password": password,
+        "dsn": dsn,
+        "ssl_server_dn_match": False,
     }
 
-    engine = create_engine('oracle+oracledb://@', connect_args=connect_args)
+    engine = create_engine("oracle+oracledb://@", connect_args=connect_args)
 
     with engine.connect() as conn:
         # Check database connection
-        result = conn.execute(text('SELECT USER FROM DUAL'))
+        result = conn.execute(text("SELECT USER FROM DUAL"))
         user = result.scalar()
         print(f"  📡 Connected as: {user}")
 
         # Check for test tables
-        result = conn.execute(text("""
+        result = conn.execute(
+            text(
+                """
             SELECT table_name, num_rows
             FROM user_tables
             WHERE table_name LIKE '%TEST%'
             ORDER BY table_name DESC
-        """))
+        """
+            )
+        )
 
         tables = result.fetchall()
         print(f"  📋 Test tables found: {len(tables)}")
@@ -210,7 +233,8 @@ def verify_database_data(table_names):
 
         print("  ✅ Database verification: SUCCESS")
 
-def main():
+
+def main() -> None:
     """Run complete production validation."""
     print("🚀 Oracle Target Production Validation")
     print("=" * 50)
@@ -236,8 +260,10 @@ def main():
     except Exception as e:
         print(f"\n❌ Validation failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 if __name__ == "__main__":
     success = main()

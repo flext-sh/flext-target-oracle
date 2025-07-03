@@ -21,6 +21,7 @@ import pytest
 from sqlalchemy import text
 
 from flext_target_oracle.target import OracleTarget
+from tests.helpers import requires_oracle_connection
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.integration
 @pytest.mark.slow
+@requires_oracle_connection
 class TestRealWorldScenarios:
     """Test real-world data loading scenarios."""
 
@@ -38,7 +40,7 @@ class TestRealWorldScenarios:
         test_table_name: str,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test loading e-commerce transaction data with complex schema."""
         table_cleanup(test_table_name)
 
@@ -189,14 +191,16 @@ class TestRealWorldScenarios:
 
             # Verify data integrity - check totals
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT
                     COUNT(DISTINCT order_id) as unique_orders,
                     COUNT(DISTINCT customer_id) as unique_customers,
                     SUM(quantity) as total_quantity,
                     ROUND(SUM(total_amount), 2) as total_revenue
                 FROM {test_table_name}
-            """)
+            """
+                )
             )
             stats = result.fetchone()
 
@@ -207,11 +211,13 @@ class TestRealWorldScenarios:
 
             # Verify complex data types (JSON)
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT shipping_address, customer_metadata, promotion_codes
                 FROM {test_table_name}
                 WHERE ROWNUM <= 3
-            """)
+            """
+                )
             )
             for row in result:
                 # Verify JSON data can be parsed
@@ -232,7 +238,7 @@ class TestRealWorldScenarios:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test loading high-volume user activity logs."""
         table_cleanup(test_table_name)
 
@@ -294,7 +300,10 @@ class TestRealWorldScenarios:
         user_agents = [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
-            "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) AppleWebKit/605.1.15",
+            (
+                "Mozilla/5.0 (iPhone; CPU iPhone OS 14_7_1 like Mac OS X) "
+                "AppleWebKit/605.1.15"
+            ),
             "Mozilla/5.0 (Android 11; Mobile; rv:68.0) Gecko/68.0 Firefox/88.0",
         ]
 
@@ -313,7 +322,10 @@ class TestRealWorldScenarios:
                     "user_id": random.randint(1, 5000),
                     "session_id": f"sess_{random.randint(100000, 999999)}",
                     "event_type": random.choice(event_types),
-                    "page_url": f"https://example.com/{random.choice(['home', 'products', 'cart', 'profile'])}",
+                    "page_url": (
+                        f"https://example.com/"
+                        f"{random.choice(['home', 'products', 'cart', 'profile'])}"
+                    ),
                     "referrer_url": random.choice(
                         [
                             "https://google.com/search",
@@ -324,7 +336,10 @@ class TestRealWorldScenarios:
                         ]
                     ),
                     "user_agent": random.choice(user_agents),
-                    "ip_address": f"{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}",
+                    "ip_address": (
+                        f"{random.randint(1, 255)}.{random.randint(1, 255)}."
+                        f"{random.randint(1, 255)}.{random.randint(1, 255)}"
+                    ),
                     "geolocation": {
                         "country": random.choice(["US", "CA", "UK", "DE", "FR"]),
                         "city": random.choice(
@@ -375,14 +390,16 @@ class TestRealWorldScenarios:
 
             # Verify log analytics
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT
                     event_type,
                     COUNT(*) as event_count
                 FROM {test_table_name}
                 GROUP BY event_type
                 ORDER BY event_count DESC
-            """)
+            """
+                )
             )
             event_stats = dict(result.fetchall())
 
@@ -396,7 +413,7 @@ class TestRealWorldScenarios:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test loading financial records requiring high precision."""
         table_cleanup(test_table_name)
 
@@ -566,14 +583,16 @@ class TestRealWorldScenarios:
 
             # Verify precision is maintained
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT
                     SUM(amount) as total_amount,
                     SUM(fee) as total_fees,
                     SUM(tax) as total_taxes,
                     AVG(exchange_rate) as avg_exchange_rate
                 FROM {test_table_name}
-            """)
+            """
+                )
             )
             totals = result.fetchone()
 
@@ -584,11 +603,13 @@ class TestRealWorldScenarios:
 
             # Verify high precision numbers
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT amount, exchange_rate, balance_after
                 FROM {test_table_name}
                 WHERE ROWNUM <= 5
-            """)
+            """
+                )
             )
             for row in result:
                 # Verify precision is maintained (should have decimal places)
@@ -602,7 +623,7 @@ class TestRealWorldScenarios:
         test_schema_prefix: str,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test concurrent loading of multiple data streams."""
         # Create multiple table names
         table_names = [
@@ -776,13 +797,15 @@ class TestRealWorldScenarios:
 
             # Verify referential integrity (orders reference valid users)
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT COUNT(*) FROM {table_names[1]} o
                 WHERE NOT EXISTS (
                     SELECT 1 FROM {table_names[0]} u
                     WHERE u.user_id = o.user_id
                 )
-            """)
+            """
+                )
             )
             orphaned_orders = result.scalar()
             assert orphaned_orders == 0, f"Found {orphaned_orders} orphaned orders"
@@ -790,5 +813,6 @@ class TestRealWorldScenarios:
         total_records = sum(len(records) for _, records in schemas_and_records)
         throughput = total_records / performance_timer.duration
         print(
-            f"Multi-stream loading: {throughput:.0f} records/second across {len(table_names)} streams"
+            f"Multi-stream loading: {throughput:.0f} records/second "
+            f"across {len(table_names)} streams"
         )

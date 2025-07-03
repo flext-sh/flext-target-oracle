@@ -21,13 +21,14 @@ from flext_target_oracle.logging_config import (
     create_logger,
 )
 from flext_target_oracle.monitoring import create_monitor
+from tests.helpers import requires_oracle_connection
 
 
 @pytest.mark.unit
 class TestLoggingConfiguration:
     """Test logging configuration and functionality."""
 
-    def test_logger_initialization(self):
+    def test_logger_initialization(self) -> None:
         """Test logger initialization with various configurations."""
         # Basic configuration
         config = {
@@ -44,7 +45,7 @@ class TestLoggingConfiguration:
         assert logger.session_id is not None
         assert logger.start_time > 0
 
-    def test_logger_with_file_output(self):
+    def test_logger_with_file_output(self) -> None:
         """Test logger with file output configuration."""
         with tempfile.TemporaryDirectory() as temp_dir:
             log_file = Path(temp_dir) / "test.log"
@@ -68,7 +69,7 @@ class TestLoggingConfiguration:
                 assert "Test log message" in log_content
                 assert "test_key" in log_content
 
-    def test_structured_logging_context(self):
+    def test_structured_logging_context(self) -> None:
         """Test structured logging with operation context."""
         config = {
             "log_level": "INFO",
@@ -88,7 +89,7 @@ class TestLoggingConfiguration:
             assert "operation_id" in context
             assert "session_id" in context
 
-    def test_logging_levels_and_methods(self):
+    def test_logging_levels_and_methods(self) -> None:
         """Test all logging levels and methods."""
         config = {"log_level": "DEBUG"}
         logger = create_logger(config)
@@ -104,7 +105,7 @@ class TestLoggingConfiguration:
             # Verify all levels were called
             assert mock_log.call_count == 5
 
-    def test_record_batch_logging(self):
+    def test_record_batch_logging(self) -> None:
         """Test batch processing logging with metrics."""
         config = {"enable_metrics": True}
         logger = create_logger(config)
@@ -119,7 +120,7 @@ class TestLoggingConfiguration:
         assert logger.performance_counters["total_batches"] == 3
         assert len(logger.performance_counters["streams_processed"]) == 2
 
-    def test_performance_statistics(self):
+    def test_performance_statistics(self) -> None:
         """Test performance statistics collection."""
         config = {"enable_metrics": True}
         logger = create_logger(config)
@@ -138,7 +139,7 @@ class TestLoggingConfiguration:
         assert "records_per_second" in stats
         assert stats["records_per_second"] > 0
 
-    def test_oracle_connection_logging(self):
+    def test_oracle_connection_logging(self) -> None:
         """Test Oracle connection information logging."""
         config = {}
         logger = create_logger(config)
@@ -164,7 +165,7 @@ class TestLoggingConfiguration:
             assert connection_data["wallet_password"] == "***REDACTED***"
             assert connection_data["username"] == "test_user"  # Not sensitive
 
-    def test_sql_statement_logging(self):
+    def test_sql_statement_logging(self) -> None:
         """Test SQL statement logging functionality."""
         config = {"log_sql_statements": True}
         logger = create_logger(config)
@@ -183,7 +184,7 @@ class TestLoggingConfiguration:
             assert extra_data["params_count"] == 1
             assert extra_data["duration"] == 0.045
 
-    def test_json_formatter(self):
+    def test_json_formatter(self) -> None:
         """Test JSON log formatter."""
         formatter = JsonFormatter()
 
@@ -213,7 +214,7 @@ class TestLoggingConfiguration:
         assert log_data["session_id"] == "test_session"
         assert "timestamp" in log_data
 
-    def test_performance_timer(self):
+    def test_performance_timer(self) -> None:
         """Test performance timer functionality."""
         config = {}
         logger = create_logger(config)
@@ -239,7 +240,7 @@ class TestLoggingConfiguration:
 class TestMonitoringSystem:
     """Test monitoring system functionality."""
 
-    def test_monitor_initialization(self):
+    def test_monitor_initialization(self) -> None:
         """Test monitor initialization."""
         config = {
             "enable_monitoring": True,
@@ -255,14 +256,14 @@ class TestMonitoringSystem:
         assert monitor.thresholds["memory_usage_percent"] == 80
         assert monitor.thresholds["cpu_usage_percent"] == 75
 
-    def test_monitor_disabled(self):
+    def test_monitor_disabled(self) -> None:
         """Test monitor when disabled."""
         config = {"enable_monitoring": False}
         monitor = create_monitor(config)
 
         assert monitor.enabled is False
 
-    def test_system_metrics_collection(self):
+    def test_system_metrics_collection(self) -> None:
         """Test system metrics collection."""
         config = {"enable_monitoring": True}
         monitor = create_monitor(config)
@@ -285,7 +286,7 @@ class TestMonitoringSystem:
         assert "percent" in cpu
         assert "count" in cpu
 
-    def test_process_metrics_collection(self):
+    def test_process_metrics_collection(self) -> None:
         """Test process-specific metrics collection."""
         config = {"enable_monitoring": True}
         monitor = create_monitor(config)
@@ -298,7 +299,7 @@ class TestMonitoringSystem:
         assert "num_threads" in metrics
         assert "status" in metrics
 
-    def test_performance_metrics_collection(self):
+    def test_performance_metrics_collection(self) -> None:
         """Test performance metrics collection."""
         config = {"enable_monitoring": True}
         logger = create_logger({"enable_metrics": True})
@@ -316,7 +317,7 @@ class TestMonitoringSystem:
         assert metrics["total_records"] == 3000
         assert metrics["total_batches"] == 2
 
-    def test_health_check(self):
+    def test_health_check(self) -> None:
         """Test comprehensive health check."""
         config = {"enable_monitoring": True}
         monitor = create_monitor(config)
@@ -335,7 +336,7 @@ class TestMonitoringSystem:
         system_check = checks["system"]
         assert "status" in system_check
 
-    def test_threshold_checking(self):
+    def test_threshold_checking(self) -> None:
         """Test alert threshold checking."""
         config = {
             "enable_monitoring": True,
@@ -363,7 +364,7 @@ class TestMonitoringSystem:
             # Should send alerts for memory and CPU
             assert mock_alert.call_count >= 1
 
-    def test_metrics_history_management(self):
+    def test_metrics_history_management(self) -> None:
         """Test metrics history storage and management."""
         config = {
             "enable_monitoring": True,
@@ -382,7 +383,7 @@ class TestMonitoringSystem:
         assert monitor.metrics_history[-1]["value"] == 9  # Latest
         assert monitor.metrics_history[0]["value"] == 5  # Oldest kept
 
-    def test_background_monitoring(self):
+    def test_background_monitoring(self) -> None:
         """Test background monitoring thread."""
         config = {
             "enable_monitoring": True,
@@ -411,7 +412,7 @@ class TestMonitoringSystem:
         # Should have collected some metrics
         assert len(monitor.metrics_history) > 0
 
-    def test_webhook_alert_integration(self):
+    def test_webhook_alert_integration(self) -> None:
         """Test webhook alert integration."""
         config = {
             "enable_monitoring": True,
@@ -442,10 +443,11 @@ class TestMonitoringSystem:
 
 
 @pytest.mark.integration
+@requires_oracle_connection
 class TestLoggingMonitoringIntegration:
     """Test integration between logging and monitoring systems."""
 
-    def test_logger_monitor_integration(self):
+    def test_logger_monitor_integration(self) -> None:
         """Test integration between logger and monitor."""
         config = {
             "enable_monitoring": True,
@@ -468,7 +470,7 @@ class TestLoggingMonitoringIntegration:
         assert metrics["total_batches"] == 1
         assert "records_per_second" in metrics
 
-    def test_full_observability_stack(self):
+    def test_full_observability_stack(self) -> None:
         """Test complete observability stack."""
         with tempfile.TemporaryDirectory() as temp_dir:
             log_file = Path(temp_dir) / "oracle_target.log"
@@ -524,7 +526,7 @@ class TestLoggingMonitoringIntegration:
             operation_logs = [entry for entry in log_entries if "operation" in entry]
             assert len(operation_logs) >= 2  # Start and end
 
-    def test_health_check_with_logging(self):
+    def test_health_check_with_logging(self) -> None:
         """Test health check with comprehensive logging."""
         config = {
             "enable_monitoring": True,
@@ -541,7 +543,7 @@ class TestLoggingMonitoringIntegration:
             assert health["status"] in ["healthy", "degraded", "unhealthy"]
             assert "checks" in health
 
-    def test_error_tracking_integration(self):
+    def test_error_tracking_integration(self) -> None:
         """Test error tracking between logging and monitoring."""
         config = {
             "enable_monitoring": True,

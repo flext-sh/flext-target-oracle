@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def test_direct_connection():
+def test_direct_connection() -> None:
     """Test direct oracledb connection."""
 
     # Get connection parameters

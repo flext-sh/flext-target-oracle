@@ -97,6 +97,10 @@ strict_optional = true
 module = "oracledb.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "oracle.*"
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-ra -q --cov=flext_target_oracle --cov-report=term-missing"

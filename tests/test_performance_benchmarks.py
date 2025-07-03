@@ -16,11 +16,13 @@ import pytest
 from sqlalchemy import text
 
 from flext_target_oracle.target import OracleTarget
+from tests.helpers import requires_oracle_connection
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
 
+@requires_oracle_connection
 class TestPerformanceBenchmarks:
     """Performance benchmark tests for Oracle target."""
 
@@ -32,7 +34,7 @@ class TestPerformanceBenchmarks:
         oracle_engine: Engine,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test high-throughput data ingestion performance."""
         table_cleanup(test_table_name)
 
@@ -124,7 +126,7 @@ class TestPerformanceBenchmarks:
         oracle_engine: Engine,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Compare bulk operations vs individual insert performance."""
 
         record_count = 10000
@@ -239,7 +241,8 @@ class TestPerformanceBenchmarks:
             f"Bulk operations: {bulk_throughput:.2f} records/sec ({bulk_duration:.2f}s)"
         )
         print(
-            f"Individual operations: {individual_throughput:.2f} records/sec ({individual_duration:.2f}s)"
+            f"Individual operations: {individual_throughput:.2f} records/sec "
+            f"({individual_duration:.2f}s)"
         )
         print(f"Bulk is {performance_ratio:.1f}x faster")
 
@@ -260,7 +263,7 @@ class TestPerformanceBenchmarks:
         oracle_engine: Engine,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test performance scaling with different parallel degrees."""
 
         record_count = 20000
@@ -292,7 +295,9 @@ class TestPerformanceBenchmarks:
                         "id": i + 1,
                         "category": f"Category {(i % 5) + 1}",
                         "amount": float(i * 2.5),
-                        "description": f"Description for record {i + 1} with some text data",
+                        "description": (
+                            f"Description for record {i + 1} with some text data"
+                        ),
                     },
                 }
             )
@@ -346,7 +351,8 @@ class TestPerformanceBenchmarks:
                 assert result.fetchone()[0] == record_count
 
             print(
-                f"Parallel degree {degree}: {throughput:.2f} records/sec ({duration:.2f}s)"
+                f"Parallel degree {degree}: {throughput:.2f} records/sec "
+                f"({duration:.2f}s)"
             )
 
             # Cleanup
@@ -376,7 +382,7 @@ class TestPerformanceBenchmarks:
         oracle_engine: Engine,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test memory usage with different batch sizes."""
 
         # Test different batch sizes
@@ -460,7 +466,8 @@ class TestPerformanceBenchmarks:
                 assert result.fetchone()[0] == record_count
 
             print(
-                f"Batch size {batch_size}: {throughput:.2f} records/sec ({duration:.2f}s)"
+                f"Batch size {batch_size}: {throughput:.2f} records/sec "
+                f"({duration:.2f}s)"
             )
 
             # Cleanup
@@ -474,7 +481,8 @@ class TestPerformanceBenchmarks:
                 result["throughput"] / batch_size
             )  # Records per second per batch item
             print(
-                f"Batch {batch_size}: {result['throughput']:.2f} records/sec (efficiency: {efficiency:.4f})"
+                f"Batch {batch_size}: {result['throughput']:.2f} records/sec "
+                f"(efficiency: {efficiency:.4f})"
             )
 
         # Larger batch sizes should generally be more efficient
@@ -494,7 +502,7 @@ class TestPerformanceBenchmarks:
         oracle_engine: Engine,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test performance impact of connection pool settings."""
 
         record_count = 15000
@@ -545,7 +553,10 @@ class TestPerformanceBenchmarks:
                         "record": {
                             "id": j + 1,
                             "worker_id": (j % pool_config["max_workers"]) + 1,
-                            "data": f"Data item {j + 1} for worker {(j % pool_config['max_workers']) + 1}",
+                            "data": (
+                                f"Data item {j + 1} for worker "
+                                f"{(j % pool_config['max_workers']) + 1}"
+                            ),
                         },
                     }
                 )
@@ -589,19 +600,21 @@ class TestPerformanceBenchmarks:
 
         # Analyze pool scaling
         print("\nConnection Pool Performance Results:")
-        for i, result in pool_results.items():
+        for _i, result in pool_results.items():
             config = result["config"]
             print(
-                f"Pool {config['pool_size']}/Workers {config['max_workers']}: {result['throughput']:.2f} records/sec"
+                f"Pool {config['pool_size']}/Workers {config['max_workers']}: "
+                f"{result['throughput']:.2f} records/sec"
             )
 
         # Verify reasonable performance scaling
         baseline = pool_results[0]["throughput"]
         for i in range(1, len(pool_results)):
             scaling = pool_results[i]["throughput"] / baseline
-            assert (
-                scaling >= 0.5
-            ), f"Pool config {i} shows significant performance regression: {scaling:.2f}x"
+            assert scaling >= 0.5, (
+                f"Pool config {_i} shows significant performance regression: "
+                f"{scaling:.2f}x"
+            )
 
     @pytest.mark.performance
     def test_large_record_handling(
@@ -611,7 +624,7 @@ class TestPerformanceBenchmarks:
         oracle_engine: Engine,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test performance with large individual records."""
         table_cleanup(test_table_name)
 
@@ -661,7 +674,10 @@ class TestPerformanceBenchmarks:
                         "id": i + 1,
                         "large_text": large_text,
                         "metadata": metadata,
-                        "description": f"Large record {i + 1} with extensive content for performance testing",
+                        "description": (
+                            f"Large record {i + 1} with extensive content "
+                            f"for performance testing"
+                        ),
                     },
                 }
             )

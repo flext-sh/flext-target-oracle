@@ -59,7 +59,7 @@ class TestMessageProcessing:
             },
         ]
 
-    def test_schema_message_processing(self, oracle_config, schema_message):
+    def test_schema_message_processing(self, oracle_config, schema_message) -> None:
         """Test SCHEMA message processing."""
         target = OracleTarget(config=oracle_config)
 
@@ -81,7 +81,7 @@ class TestMessageProcessing:
 
     def test_record_message_processing(
         self, oracle_config, schema_message, record_messages
-    ):
+    ) -> None:
         """Test RECORD message processing."""
         target = OracleTarget(config=oracle_config)
 
@@ -94,11 +94,13 @@ class TestMessageProcessing:
             mock_sink = MagicMock()
             mock_sink_class.return_value = mock_sink
 
-            with patch("sys.stdin", StringIO(input_data)):
-                with contextlib.suppress(EOFError):
-                    target.listen(file_input=StringIO(input_data))
+            with (
+                patch("sys.stdin", StringIO(input_data)),
+                contextlib.suppress(EOFError),
+            ):
+                target.listen(file_input=StringIO(input_data))
 
-    def test_state_message_processing(self, oracle_config):
+    def test_state_message_processing(self, oracle_config) -> None:
         """Test STATE message processing."""
         target = OracleTarget(config=oracle_config)
 
@@ -116,20 +118,19 @@ class TestMessageProcessing:
 
         input_data = json.dumps(state_message)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            with patch("sys.stdout", new_callable=StringIO) as mock_stdout:
-                with contextlib.suppress(EOFError):
-                    target.listen(file_input=StringIO(input_data))
+        with (
+            patch("sys.stdin", StringIO(input_data)),
+            patch("sys.stdout", new_callable=StringIO) as mock_stdout,
+            contextlib.suppress(EOFError),
+        ):
+            target.listen(file_input=StringIO(input_data))
 
-                # State should be written to stdout
-                output = mock_stdout.getvalue()
-                if output:
-                    assert (
-                        "STATE" in output
-                        or json.dumps(state_message["value"]) in output
-                    )
+            # State should be written to stdout
+            output = mock_stdout.getvalue()
+            if output:
+                assert "STATE" in output or json.dumps(state_message["value"]) in output
 
-    def test_activate_version_message(self, oracle_config, schema_message):
+    def test_activate_version_message(self, oracle_config, schema_message) -> None:
         """Test ACTIVATE_VERSION message processing."""
         target = OracleTarget(config=oracle_config)
 
@@ -145,11 +146,13 @@ class TestMessageProcessing:
             mock_sink = MagicMock()
             mock_sink_class.return_value = mock_sink
 
-            with patch("sys.stdin", StringIO(input_data)):
-                with contextlib.suppress(EOFError):
-                    target.listen(file_input=StringIO(input_data))
+            with (
+                patch("sys.stdin", StringIO(input_data)),
+                contextlib.suppress(EOFError),
+            ):
+                target.listen(file_input=StringIO(input_data))
 
-    def test_batch_processing(self, oracle_config, schema_message):
+    def test_batch_processing(self, oracle_config, schema_message) -> None:
         """Test batch message processing."""
         # Configure for batching
         batch_config = oracle_config.copy()
@@ -181,11 +184,13 @@ class TestMessageProcessing:
             mock_sink = MagicMock()
             mock_sink_class.return_value = mock_sink
 
-            with patch("sys.stdin", StringIO(input_data)):
-                with contextlib.suppress(EOFError):
-                    target.listen(file_input=StringIO(input_data))
+            with (
+                patch("sys.stdin", StringIO(input_data)),
+                contextlib.suppress(EOFError),
+            ):
+                target.listen(file_input=StringIO(input_data))
 
-    def test_multiple_streams(self, oracle_config):
+    def test_multiple_streams(self, oracle_config) -> None:
         """Test processing multiple streams."""
         target = OracleTarget(config=oracle_config)
 
@@ -235,11 +240,13 @@ class TestMessageProcessing:
             mock_sink = MagicMock()
             mock_sink_class.return_value = mock_sink
 
-            with patch("sys.stdin", StringIO(input_data)):
-                with contextlib.suppress(EOFError):
-                    target.listen(file_input=StringIO(input_data))
+            with (
+                patch("sys.stdin", StringIO(input_data)),
+                contextlib.suppress(EOFError),
+            ):
+                target.listen(file_input=StringIO(input_data))
 
-    def test_invalid_message_handling(self, oracle_config):
+    def test_invalid_message_handling(self, oracle_config) -> None:
         """Test handling of invalid messages."""
         target = OracleTarget(config=oracle_config)
 
@@ -254,16 +261,15 @@ class TestMessageProcessing:
         ]
 
         for msg in messages:
-            with patch("sys.stdin", StringIO(msg)):
-                # Should handle gracefully or raise appropriate error
-                try:
-                    target.listen(file_input=StringIO(msg))
-                except (json.JSONDecodeError, EOFError, KeyError, Exception):
-                    # Expected for invalid input
-                    # InvalidInputLine is a subclass of Exception
-                    pass
+            with (patch("sys.stdin", StringIO(msg)),
+                  contextlib.suppress(
+                      json.JSONDecodeError, EOFError, KeyError, Exception
+                  )):
+                target.listen(file_input=StringIO(msg))
 
-    def test_record_metadata(self, oracle_config, schema_message, record_messages):
+    def test_record_metadata(
+        self, oracle_config, schema_message, record_messages
+    ) -> None:
         """Test Singer metadata column handling."""
         target = OracleTarget(config=oracle_config)
 
@@ -282,6 +288,8 @@ class TestMessageProcessing:
             mock_sink = MagicMock()
             mock_sink_class.return_value = mock_sink
 
-            with patch("sys.stdin", StringIO(input_data)):
-                with contextlib.suppress(EOFError):
-                    target.listen(file_input=StringIO(input_data))
+            with (
+                patch("sys.stdin", StringIO(input_data)),
+                contextlib.suppress(EOFError),
+            ):
+                target.listen(file_input=StringIO(input_data))

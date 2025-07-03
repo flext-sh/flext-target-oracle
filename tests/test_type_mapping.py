@@ -7,8 +7,10 @@ import json
 import pytest
 
 from flext_target_oracle import OracleSink, OracleTarget
+from tests.helpers import requires_oracle_connection
 
 
+@requires_oracle_connection
 class TestTypeMapping:
     """Test Singer to Oracle type mapping."""
 
@@ -27,7 +29,7 @@ class TestTypeMapping:
         """Create target instance."""
         return OracleTarget(config=target_config)
 
-    def test_string_type_mapping(self, oracle_target):
+    def test_string_type_mapping(self, oracle_target) -> None:
         """Test string type mappings."""
         schema = {
             "type": "object",
@@ -51,7 +53,7 @@ class TestTypeMapping:
         assert sink.stream_name == "test_strings"
         assert "short_string" in sink.schema["properties"]
 
-    def test_numeric_type_mapping(self, oracle_target):
+    def test_numeric_type_mapping(self, oracle_target) -> None:
         """Test numeric type mappings."""
         schema = {
             "type": "object",
@@ -70,7 +72,7 @@ class TestTypeMapping:
         assert "integer_field" in sink.schema["properties"]
         assert "number_field" in sink.schema["properties"]
 
-    def test_boolean_type_mapping(self, oracle_target):
+    def test_boolean_type_mapping(self, oracle_target) -> None:
         """Test boolean type mapping."""
         schema = {
             "type": "object",
@@ -93,7 +95,7 @@ class TestTypeMapping:
         assert conformed["is_active"] == 1
         assert conformed["is_verified"] == 0
 
-    def test_datetime_type_mapping(self, oracle_target):
+    def test_datetime_type_mapping(self, oracle_target) -> None:
         """Test date/time type mappings."""
         schema = {
             "type": "object",
@@ -109,7 +111,7 @@ class TestTypeMapping:
         assert "date_field" in sink.schema["properties"]
         assert "datetime_field" in sink.schema["properties"]
 
-    def test_json_type_mapping(self, oracle_target):
+    def test_json_type_mapping(self, oracle_target) -> None:
         """Test JSON/object type mappings."""
         schema = {
             "type": "object",
@@ -146,7 +148,7 @@ class TestTypeMapping:
         assert json.loads(conformed["metadata"]) == record["metadata"]
         assert json.loads(conformed["tags"]) == record["tags"]
 
-    def test_nullable_types(self, oracle_target):
+    def test_nullable_types(self, oracle_target) -> None:
         """Test nullable type handling."""
         schema = {
             "type": "object",
@@ -174,7 +176,7 @@ class TestTypeMapping:
         assert conformed["nullable_number"] is None
         assert conformed["nullable_object"] is None
 
-    def test_custom_type_configuration(self):
+    def test_custom_type_configuration(self) -> None:
         """Test custom type configuration."""
         config = {
             "host": "localhost",
@@ -207,7 +209,7 @@ class TestTypeMapping:
         # Should use custom boolean values
         assert conformed["flag"] == "Y"
 
-    def test_complex_nested_types(self, oracle_target):
+    def test_complex_nested_types(self, oracle_target) -> None:
         """Test complex nested data structures."""
         schema = {
             "type": "object",

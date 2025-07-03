@@ -214,7 +214,6 @@ class OracleSink(SQLSink[OracleConnector]):
         """Setup schema information without database connection."""
         # This method stores schema info needed later
         # No DB connection required
-        pass
 
     def _ensure_connection_and_table(self) -> None:
         """Ensure database connection and table exist - called lazily."""
@@ -270,11 +269,12 @@ class OracleSink(SQLSink[OracleConnector]):
         """Setup Oracle table using our custom DDL instead of Singer SDK SQLAlchemy."""
         # Step 1: Initialize connection (without table creation)
         if not self.connector._engine:
-            self.connector.setup()
-            
+            # Initialize SQLAlchemy engine by accessing the URL property
+            _ = self.connector.sqlalchemy_url
+
         # Step 2: Create table using our custom DDL
         self._create_oracle_table()
-        
+
         # Step 3: Setup other Singer SDK components manually
         self._setup_schema_info()
 
@@ -286,14 +286,15 @@ class OracleSink(SQLSink[OracleConnector]):
 
             if self._logger:
                 self._logger.info(
-                    f"Creating Oracle table with SQLAlchemy schema: {self.full_table_name}"
+                    f"Creating Oracle table with SQLAlchemy schema: "
+                    f"{self.full_table_name}"
                 )
 
             try:
                 # Drop table first if it exists, then create
                 table_def.drop(conn, checkfirst=True)
                 table_def.create(conn, checkfirst=False)
-                
+
                 if self._logger:
                     self._logger.info(
                         f"✅ Table {self.full_table_name} created successfully "
@@ -308,52 +309,62 @@ class OracleSink(SQLSink[OracleConnector]):
                 raise
 
     def _build_sqlalchemy_table(self) -> sqlalchemy.Table:
-        """Build SQLAlchemy Table definition with correct Oracle types and field order."""
-        from sqlalchemy import Table, MetaData, Column, PrimaryKeyConstraint
-        from sqlalchemy.dialects.oracle import NUMBER, VARCHAR2, TIMESTAMP
-        
+        """Build SQLAlchemy Table definition with Oracle types and field order."""
+        from sqlalchemy import Column, MetaData, PrimaryKeyConstraint, Table
+        from sqlalchemy.dialects.oracle import TIMESTAMP, VARCHAR2
+
         schema_name, table_name = self._parse_full_table_name(self.full_table_name)
         schema_properties = self.schema.get("properties", {})
-        
+
         metadata = MetaData()
-        columns = []
-        
+        columns: list[Column[Any]] = []
+
         # STEP 1: Find primary key field (prioritize simple 'id' over complex ones)
         primary_key_field = None
         id_fields = [
-            name for name in schema_properties.keys()
-            if name.upper() == "ID" or (name.upper().endswith("_ID") and not name.upper().endswith("_ID_ID"))
+            name for name in schema_properties
+            if (name.upper() == "ID" or
+                (name.upper().endswith("_ID") and not name.upper().endswith("_ID_ID")))
         ]
-        
+
         if id_fields:
             if "id" in [f.lower() for f in id_fields]:
                 primary_key_field = next(f for f in id_fields if f.lower() == "id")
             else:
                 primary_key_field = id_fields[0]
-        
+
         # STEP 2: Add PRIMARY KEY first
         if primary_key_field:
             oracle_type = self._get_sqlalchemy_oracle_type(
                 primary_key_field, schema_properties[primary_key_field]
             )
-            columns.append(Column(primary_key_field.upper(), oracle_type, nullable=False))
-        
-        # STEP 3: Add OTHER FIELDS (sorted, excluding only audit and TK_DATE fields)
+            columns.append(Column(
+                primary_key_field.upper(), oracle_type, nullable=False
+            ))
+
+        # STEP 3: Add OTHER FIELDS (sorted, excluding audit, TK_DATE, and URL fields)
         other_fields = []
         for prop_name in sorted(schema_properties.keys()):
+            prop_upper = prop_name.upper()
             if (
                 prop_name != primary_key_field
-                and not prop_name.upper().endswith("_ID_ID")  # Exclude malformed IDs
-                and prop_name.upper() not in ["TK_DATE", "CREATE_USER", "CREATE_TS", "MOD_USER", "MOD_TS"]
+                and prop_upper != "URL"  # Exclude URL fields
+                and not prop_upper.endswith("_URL")  # Exclude _URL fields
+                and not prop_upper.endswith("_ID_ID")  # Exclude malformed IDs
+                and not prop_upper.endswith("_ID_KEY") # Exclude key fields
+                and not prop_upper.endswith("_ID_URL")  # Exclude URL ID fields
+                and prop_upper not in [
+                    "TK_DATE", "CREATE_USER", "CREATE_TS", "MOD_USER", "MOD_TS"
+                ]
             ):
                 other_fields.append(prop_name)
-        
+
         for prop_name in other_fields:
             oracle_type = self._get_sqlalchemy_oracle_type(
                 prop_name, schema_properties[prop_name]
             )
             columns.append(Column(prop_name.upper(), oracle_type, nullable=True))
-        
+
         # STEP 4: Add MANDATORY AUDIT FIELDS at the end
         columns.extend([
             Column("CREATE_USER", VARCHAR2(255), nullable=True),
@@ -361,13 +372,13 @@ class OracleSink(SQLSink[OracleConnector]):
             Column("MOD_USER", VARCHAR2(255), nullable=True),
             Column("MOD_TS", TIMESTAMP(timezone=False), nullable=False),
         ])
-        
+
         # STEP 5: Add TK_DATE field (ALWAYS, not conditional)
         columns.append(
-            Column("TK_DATE", TIMESTAMP(timezone=False), 
+            Column("TK_DATE", TIMESTAMP(timezone=False),
                    server_default=sqlalchemy.func.current_timestamp(), nullable=False)
         )
-        
+
         # Create table with composite primary key
         table = Table(
             table_name.upper(),
@@ -375,7 +386,7 @@ class OracleSink(SQLSink[OracleConnector]):
             *columns,
             schema=schema_name.upper() if schema_name else None
         )
-        
+
         # Add composite primary key constraint
         if primary_key_field:
             table.append_constraint(
@@ -384,26 +395,32 @@ class OracleSink(SQLSink[OracleConnector]):
                     name=f"PK_{table_name.upper()}"
                 )
             )
-        
+
         return table
 
-    def _get_sqlalchemy_oracle_type(self, column_name: str, column_schema: dict) -> Any:
+    def _get_sqlalchemy_oracle_type(
+        self, column_name: str, column_schema: dict[str, Any]
+    ) -> Any:
         """Convert column to SQLAlchemy Oracle type using shared type mapping rules."""
-        from sqlalchemy.dialects.oracle import NUMBER, VARCHAR2, TIMESTAMP
-        
         # Try to use shared conversion function first
         import sys
+
+        from sqlalchemy.dialects.oracle import NUMBER, TIMESTAMP, VARCHAR2
         sys.path.insert(0, "/home/marlonsc/flext/client-b-meltano-native/src")
-        
+
         try:
-            from oracle.type_mapping_rules import convert_singer_schema_to_oracle
-            oracle_type_str = convert_singer_schema_to_oracle(column_name, column_schema)
-            
+            from oracle.type_mapping_rules import (
+                convert_singer_schema_to_oracle,
+            )
+            oracle_type_str = convert_singer_schema_to_oracle(
+                column_name, column_schema
+            )
+
             # Convert string type to SQLAlchemy type
             if oracle_type_str == "NUMBER":
-                return NUMBER()
+                return NUMBER()  # type: ignore[no-untyped-call]
             elif oracle_type_str == "NUMBER(1,0)":
-                return NUMBER(1, 0)
+                return NUMBER(1, 0)  # type: ignore[no-untyped-call]
             elif oracle_type_str.startswith("VARCHAR2"):
                 # Extract length from VARCHAR2(255 CHAR) format
                 if "(" in oracle_type_str:
@@ -415,59 +432,66 @@ class OracleSink(SQLSink[OracleConnector]):
                 return TIMESTAMP(timezone=False)
             else:
                 return VARCHAR2(255)  # Default fallback
-                
+
         except ImportError:
             # Fallback to basic type inference
             schema_type = column_schema.get("type", "string")
             if isinstance(schema_type, list):
                 schema_type = next((t for t in schema_type if t != "null"), "string")
-            
+
             if schema_type in ["integer", "number"]:
-                return NUMBER()
+                return NUMBER()  # type: ignore[no-untyped-call]
             elif schema_type == "boolean":
-                return NUMBER(1, 0)
+                return NUMBER(1, 0)  # type: ignore[no-untyped-call]
             else:
                 return VARCHAR2(255)
 
     def _generate_oracle_ddl(self) -> Any:
-        """Generate Oracle DDL with CORRECT field order following table_creator.py pattern."""
+        """Generate Oracle DDL with CORRECT field order following table_creator.py."""
         schema_name, table_name = self._parse_full_table_name(self.full_table_name)
         schema_properties = self.schema.get("properties", {})
 
         # STEP 1: Organize columns in CORRECT ORDER (like table_creator.py)
-        columns = []
+        columns: list[str] = []
         primary_key_field = None
-        
+
         # 1.1 Find primary key field (prioritize simple 'id' over complex ones)
         id_fields = [
-            name for name in schema_properties.keys()
-            if name.upper() == "ID" or (name.upper().endswith("_ID") and not name.upper().endswith("_ID_ID"))
+            name for name in schema_properties
+            if (name.upper() == "ID" or
+                (name.upper().endswith("_ID") and not name.upper().endswith("_ID_ID")))
         ]
-        
+
         if id_fields:
             if "id" in [f.lower() for f in id_fields]:
                 primary_key_field = next(f for f in id_fields if f.lower() == "id")
             else:
                 primary_key_field = id_fields[0]
-                
+
         # 1.2 Add PRIMARY KEY first
         if primary_key_field:
             oracle_type = self._convert_to_oracle_type(
                 primary_key_field, schema_properties[primary_key_field], {}
             )
-            columns.append(f'    "{primary_key_field.upper()}" {oracle_type} NOT NULL ENABLE')
+            columns.append(
+                f'    "{primary_key_field.upper()}" {oracle_type} NOT NULL ENABLE'
+            )
 
         # 1.3 Add OTHER FIELDS (sorted, excluding URLs and complex nested objects)
         other_fields = []
         for prop_name in sorted(schema_properties.keys()):
+            # Skip URLs and system fields
+            prop_upper = prop_name.upper()
             if (
                 prop_name != primary_key_field
-                and not prop_name.upper().endswith("_URL")
-                and prop_name.upper() != "URL"
-                and not prop_name.upper().endswith("_ID_ID")
-                and not prop_name.upper().endswith("_ID_KEY")
-                and not prop_name.upper().endswith("_ID_URL")
-                and prop_name.upper() not in ["TK_DATE", "CREATE_USER", "CREATE_TS", "MOD_USER", "MOD_TS"]
+                and prop_upper != "URL"
+                and not prop_upper.endswith("_URL")
+                and not prop_upper.endswith("_ID_ID")
+                and not prop_upper.endswith("_ID_KEY")
+                and not prop_upper.endswith("_ID_URL")
+                and prop_upper not in [
+                    "TK_DATE", "CREATE_USER", "CREATE_TS", "MOD_USER", "MOD_TS"
+                ]
             ):
                 other_fields.append(prop_name)
 
@@ -481,7 +505,7 @@ class OracleSink(SQLSink[OracleConnector]):
 
         # 1.4 Add COMPLEX FOREIGN KEY fields (_ID_KEY, _ID_URL, etc.)
         fk_fields = [
-            name for name in schema_properties.keys()
+            name for name in schema_properties
             if "_ID_" in name.upper() and not name.upper().endswith("_URL")
         ]
         for prop_name in sorted(fk_fields):
@@ -489,7 +513,9 @@ class OracleSink(SQLSink[OracleConnector]):
                 oracle_type = self._convert_to_oracle_type(
                     prop_name, schema_properties[prop_name], {}
                 )
-                collation = ' COLLATE "USING_NLS_COMP"' if "VARCHAR2" in oracle_type else ""
+                collation = (
+                    ' COLLATE "USING_NLS_COMP"' if "VARCHAR2" in oracle_type else ""
+                )
                 columns.append(f'    "{prop_name.upper()}" {oracle_type}{collation}')
 
         # 1.5 Add MANDATORY AUDIT FIELDS at the end
@@ -522,7 +548,7 @@ class OracleSink(SQLSink[OracleConnector]):
         else:
             full_table_name = f'"{table_name.upper()}"'
 
-        columns_sql = ",\n".join(columns)
+        # columns_sql = ",\n".join(columns)  # Not used
 
         # Build DDL line by line to avoid any formatting issues
         ddl_lines = [
@@ -534,31 +560,35 @@ class OracleSink(SQLSink[OracleConnector]):
             f"CREATE TABLE {full_table_name}",
             "  (",
         ]
-        
+
         # Add column definitions
         for i, col in enumerate(columns):
-            if i == len(columns) - 1 and not pk_constraint:
-                # Last column without PK constraint - no comma
-                ddl_lines.append(f"    {col}")
+            if i == len(columns) - 1:
+                # Last column: add comma only if there's a PK constraint coming
+                if pk_constraint:
+                    ddl_lines.append(f"    {col},")
+                else:
+                    ddl_lines.append(f"    {col}")
             else:
-                # All columns with comma (PK constraint will follow)
+                # Not last column: always add comma
                 ddl_lines.append(f"    {col},")
-        
+
         # Add primary key constraint if present
         if pk_constraint:
             constraint_clean = pk_constraint.strip().lstrip(',').strip()
             ddl_lines.append(f"    {constraint_clean}")
-        
+
         # Close table definition
         ddl_lines.extend([
             " );",
             ""
         ])
-        
+
         # Join lines and ensure clean formatting
         ddl = "\n".join(ddl_lines).strip()
-        
+
         return ddl
+
 
     def _get_table_creator_rules(self) -> dict[str, Any]:
         """Get the type mapping rules from shared module."""
@@ -568,7 +598,7 @@ class OracleSink(SQLSink[OracleConnector]):
         sys.path.insert(0, "/home/marlonsc/flext/client-b-meltano-native/src")
 
         try:
-            from oracle.type_mapping_rules import (  # type: ignore[import-not-found]
+            from oracle.type_mapping_rules import (
                 FIELD_PATTERN_RULES,
                 FIELD_PATTERNS_TO_ORACLE,
             )
@@ -662,7 +692,9 @@ class OracleSink(SQLSink[OracleConnector]):
         sys.path.insert(0, "/home/marlonsc/flext/client-b-meltano-native/src")
 
         try:
-            from oracle.type_mapping_rules import convert_singer_schema_to_oracle
+            from oracle.type_mapping_rules import (
+                convert_singer_schema_to_oracle,
+            )
 
             return convert_singer_schema_to_oracle(column_name, column_schema)
         except ImportError:
@@ -2024,6 +2056,17 @@ class OracleSink(SQLSink[OracleConnector]):
 
         # Process each field according to schema
         for key, value in record.items():
+            # Skip URL fields completely during record processing
+            key_upper = key.upper()
+            if (
+                key_upper == "URL"
+                or key_upper.endswith("_URL")
+                or key_upper.endswith("_ID_URL")
+                or key_upper.endswith("_ID_KEY")
+                or key_upper.endswith("_ID_ID")
+            ):
+                # Skip URL and problematic fields completely
+                continue
             if key in self.schema.get("properties", {}):
                 prop_schema = self.schema["properties"][key]
                 prop_type = prop_schema.get("type", "string")
@@ -2057,12 +2100,46 @@ class OracleSink(SQLSink[OracleConnector]):
                 else:
                     conformed[key] = None
             else:
-                # Pass through fields not in schema
+                # Pass through fields not in schema (except URL fields)
                 conformed[key] = value
 
         # Don't add Singer metadata here - Singer SDK handles this automatically
 
         return conformed
+
+    def conform_schema(self, schema: dict[str, Any]) -> dict[str, Any]:
+        """Override schema conforming to filter out URL fields."""
+        conformed_schema = schema.copy()
+
+        # Filter URL fields from schema properties
+        if "properties" in conformed_schema:
+            filtered_properties = {}
+            for prop_name, prop_schema in conformed_schema["properties"].items():
+                prop_upper = prop_name.upper()
+                # Skip URL fields completely from schema
+                if not (
+                    prop_upper == "URL"
+                    or prop_upper.endswith("_URL")
+                    or prop_upper.endswith("_ID_URL")
+                    or prop_upper.endswith("_ID_KEY")
+                    or prop_upper.endswith("_ID_ID")
+                ):
+                    filtered_properties[prop_name] = prop_schema
+
+            conformed_schema["properties"] = filtered_properties
+
+            # Log the filtering result
+            original_count = len(schema.get("properties", {}))
+            filtered_count = len(filtered_properties)
+            if self.logger:
+                self.logger.info(
+                    f"🔍 SCHEMA FILTERED - Stream: {self.stream_name} - "
+                    f"Original: {original_count} fields - "
+                    f"Filtered: {filtered_count} fields - "
+                    f"Removed: {original_count - filtered_count} URL fields"
+                )
+
+        return super().conform_schema(conformed_schema)
 
     def _generate_final_statistics_report(self) -> None:
         """Generate comprehensive final statistics report for the stream."""

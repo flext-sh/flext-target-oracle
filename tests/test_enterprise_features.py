@@ -2,7 +2,8 @@
 Oracle Enterprise Edition features tests.
 
 These tests validate advanced Oracle features that require Enterprise Edition
-licenses, focusing on partitioning and compression (including HCC for Exadata/Autonomous).
+licenses, focusing on partitioning and compression (including HCC for
+Exadata/Autonomous).
 """
 
 from __future__ import annotations
@@ -17,12 +18,14 @@ import pytest
 from sqlalchemy import text
 
 from flext_target_oracle.target import OracleTarget
+from tests.helpers import requires_oracle_connection
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
 
 @pytest.mark.integration
+@requires_oracle_connection
 class TestEnterpriseFeatures:
     """Test Oracle Enterprise Edition advanced features."""
 
@@ -33,7 +36,7 @@ class TestEnterpriseFeatures:
         oracle_edition_info: dict[str, bool],
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test Oracle table partitioning (requires Partitioning option)."""
         table_cleanup(test_table_name)
 
@@ -123,22 +126,26 @@ class TestEnterpriseFeatures:
             # Check if table is partitioned (Enterprise Edition feature)
             try:
                 result = conn.execute(
-                    text(f"""
+                    text(
+                        f"""
                     SELECT table_name, partitioning_type, partition_count
                     FROM user_part_tables
                     WHERE table_name = UPPER('{test_table_name}')
-                """)
+                """
+                    )
                 )
                 partition_info = result.fetchone()
 
                 if partition_info:
                     print(
-                        f"Table partitioned: {partition_info[1]} with {partition_info[2]} partitions"
+                        f"Table partitioned: {partition_info[1]} with "
+                        f"{partition_info[2]} partitions"
                     )
                     assert partition_info[1] is not None, "Partitioning type not set"
                 else:
                     print(
-                        "Partitioning not applied (may require specific Oracle configuration)"
+                        "Partitioning not applied (may require specific "
+                        "Oracle configuration)"
                     )
 
             except Exception as e:
@@ -147,11 +154,13 @@ class TestEnterpriseFeatures:
             # Test partition pruning with date-based queries
             try:
                 result = conn.execute(
-                    text(f"""
+                    text(
+                        f"""
                     SELECT COUNT(*) FROM {test_table_name}
                     WHERE created_date >= DATE '2025-03-01'
                     AND created_date < DATE '2025-04-01'
-                """)
+                """
+                    )
                 )
                 march_count = result.scalar()
                 assert march_count > 0, "No records found in March partition"
@@ -164,11 +173,12 @@ class TestEnterpriseFeatures:
         self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
-        oracle_edition_info: dict[str, bool],
+        _oracle_edition_info: dict[str, bool],
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test Oracle compression (HCC for Exadata/Autonomous, Advanced for others)."""
+        # Note: _oracle_edition_info fixture provided but not used in test logic
         table_cleanup(test_table_name)
 
         # Detect if running on Exadata or Autonomous Database
@@ -180,12 +190,14 @@ class TestEnterpriseFeatures:
             with oracle_engine.connect() as conn:
                 # Check for Exadata or Autonomous indicators
                 result = conn.execute(
-                    text("""
+                    text(
+                        """
                     SELECT banner FROM v$version
                     WHERE banner LIKE '%Exadata%'
                        OR banner LIKE '%Autonomous%'
                        OR banner LIKE '%Cloud%'
-                """)
+                """
+                    )
                 )
                 exadata_check = result.fetchone()
 
@@ -288,11 +300,13 @@ class TestEnterpriseFeatures:
             # Check compression status
             try:
                 result = conn.execute(
-                    text(f"""
+                    text(
+                        f"""
                     SELECT table_name, compression, compress_for
                     FROM user_tables
                     WHERE table_name = UPPER('{test_table_name}')
-                """)
+                """
+                    )
                 )
                 compression_info = result.fetchone()
 
@@ -305,7 +319,8 @@ class TestEnterpriseFeatures:
                     assert compression_info[1] == "ENABLED", "Compression not enabled"
                 else:
                     print(
-                        "Compression not applied (may require license or specific platform)"
+                        "Compression not applied (may require license or "
+                        "specific platform)"
                     )
 
             except Exception as e:
@@ -315,13 +330,15 @@ class TestEnterpriseFeatures:
             try:
                 # Query that benefits from compression
                 result = conn.execute(
-                    text(f"""
+                    text(
+                        f"""
                     SELECT repeated_text, COUNT(*) as frequency,
                            AVG(numeric_value) as avg_value
                     FROM {test_table_name}
                     GROUP BY repeated_text
                     ORDER BY frequency DESC
-                """)
+                """
+                    )
                 )
 
                 compression_query_results = result.fetchall()
@@ -335,7 +352,8 @@ class TestEnterpriseFeatures:
                     assert result_row[2] > 0, "Average calculation failed"
 
                 print(
-                    f"Compression query successful: {len(compression_query_results)} groups"
+                    f"Compression query successful: "
+                    f"{len(compression_query_results)} groups"
                 )
 
             except Exception as e:
@@ -349,7 +367,7 @@ class TestEnterpriseFeatures:
         test_table_name: str,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test Oracle Parallel DML operations (requires Enterprise Edition)."""
         table_cleanup(test_table_name)
 
@@ -403,7 +421,9 @@ class TestEnterpriseFeatures:
                     "id": i + 1,
                     "batch_id": (i // 1000) + 1,  # 20 batches of 1000 records
                     "data_value": round(random.uniform(1.0, 1000.0), 3),
-                    "text_content": f"Parallel processing record {i + 1} with substantial content",
+                    "text_content": (
+                        f"Parallel processing record {i + 1} with substantial content"
+                    ),
                     "processing_timestamp": datetime.now().isoformat() + "Z",
                 },
                 "time_extracted": datetime.now().isoformat() + "Z",
@@ -430,12 +450,14 @@ class TestEnterpriseFeatures:
 
             # Verify batch distribution
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT batch_id, COUNT(*) as batch_count
                 FROM {test_table_name}
                 GROUP BY batch_id
                 ORDER BY batch_id
-            """)
+            """
+                )
             )
 
             batch_stats = result.fetchall()
