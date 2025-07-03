@@ -127,7 +127,9 @@ class OracleConnector(SQLConnector):
             # PRIORITY 3: Explicit maxLength from schema
             max_length = jsonschema_type.get("maxLength")
             if max_length:
-                oracle_type = VARCHAR2(min(max_length, max_varchar_length))  # type: ignore[assignment]
+                oracle_type = VARCHAR2(
+                    min(max_length, max_varchar_length)
+                )  # type: ignore[assignment]
                 if self.config.get("debug_type_mapping", False):
                     print(
                         f"DEBUG: {column_name} (string with "
@@ -185,9 +187,7 @@ class OracleConnector(SQLConnector):
                                 f"-> {oracle_type}"
                             )
                         return oracle_type
-                    elif any(
-                        word in column_name.lower() for word in ["name", "title"]
-                    ):
+                    elif any(word in column_name.lower() for word in ["name", "title"]):
                         oracle_type = VARCHAR2(255)  # type: ignore[assignment]
                         if self.config.get("debug_type_mapping", False):
                             print(
@@ -290,7 +290,9 @@ class OracleConnector(SQLConnector):
             # PRIORITY 3: Explicit maxLength from schema
             max_length = jsonschema_type.get("maxLength")
             if max_length:
-                oracle_type = VARCHAR2(min(max_length, max_varchar_length))  # type: ignore[assignment]
+                oracle_type = VARCHAR2(
+                    min(max_length, max_varchar_length)
+                )  # type: ignore[assignment]
                 if self.config.get("debug_type_mapping", False):
                     print(
                         f"DEBUG: to_sql_type (string with maxLength={max_length}) "
@@ -440,10 +442,8 @@ class OracleConnector(SQLConnector):
                 "password": password,
                 "dsn": dsn,
                 "ssl_server_dn_match": self.config.get("ssl_server_dn_match", False),
-                "stmtcachesize": self.config.get("statement_cache_size", 50),
-                "tcp_connect_timeout": float(
-                    self.config.get("connection_timeout", 60)
-                ),
+                # Only use parameters supported in Thin Mode
+                "tcp_connect_timeout": float(self.config.get("connection_timeout", 60)),
             }
 
             # Add wallet if provided
@@ -467,18 +467,24 @@ class OracleConnector(SQLConnector):
         else:
             pool_class = pool.QueuePool
 
-        # Engine configuration for maximum performance
+        # Engine configuration - simplified for NullPool compatibility
         engine_kwargs = {
-            # Advanced pooling for high concurrency
             "poolclass": pool_class,
-            "pool_size": self.config.get("pool_size", 50),  # Larger for parallel ops
-            "max_overflow": self.config.get("max_overflow", 100),  # High overflow
-            "pool_timeout": self.config.get("pool_timeout", 30),
-            "pool_recycle": self.config.get("pool_recycle", 3600),
-            "pool_pre_ping": self.config.get("pool_pre_ping", True),
-            "pool_use_lifo": self.config.get(
-                "pool_use_lifo", True
-            ),  # Better for bursts
+        }
+
+        # Only add pool parameters if not using NullPool
+        if pool_class != pool.NullPool:
+            engine_kwargs.update({
+                "pool_size": self.config.get("pool_size", 10),
+                "max_overflow": self.config.get("max_overflow", 20),
+                "pool_timeout": self.config.get("pool_timeout", 60),
+                "pool_recycle": self.config.get("pool_recycle", 1800),
+                "pool_pre_ping": self.config.get("pool_pre_ping", True),
+                "pool_use_lifo": self.config.get("pool_use_lifo", True),
+            })
+
+        # Add common parameters
+        engine_kwargs.update({
             # SQLAlchemy 2.0+ performance features
             "future": True,
             "query_cache_size": self.config.get(
@@ -490,9 +496,7 @@ class OracleConnector(SQLConnector):
             ),  # Large batches
             # Execution options for performance
             "execution_options": {
-                "isolation_level": self.config.get(
-                    "isolation_level", "READ COMMITTED"
-                ),
+                "isolation_level": self.config.get("isolation_level", "READ COMMITTED"),
                 "compiled_cache": {},  # Statement compilation cache
                 "synchronize_session": False,  # Disable for performance
                 "stream_results": self.config.get(
@@ -504,7 +508,7 @@ class OracleConnector(SQLConnector):
             "echo": self.config.get("echo", False),
             "echo_pool": self.config.get("echo_pool", False),
             "hide_parameters": not self.config.get("log_sql_parameters", False),
-        }
+        })
 
         # Add connect_args if present
         if connect_args:

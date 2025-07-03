@@ -57,9 +57,11 @@ def get_test_config(include_licensed_features: bool = False) -> dict:
         "host": os.getenv("DATABASE__HOST"),
         "port": int(os.getenv("DATABASE__PORT", "1521")),
         "username": os.getenv("DATABASE__USERNAME"),
-        "password": os.getenv("DATABASE__PASSWORD").strip('"')
-        if os.getenv("DATABASE__PASSWORD")
-        else None,
+        "password": (
+            os.getenv("DATABASE__PASSWORD").strip('"')
+            if os.getenv("DATABASE__PASSWORD")
+            else None
+        ),
         "protocol": os.getenv("DATABASE__PROTOCOL", "tcp"),
         "schema": os.getenv("DATABASE__SCHEMA", os.getenv("DATABASE__USERNAME")),
         # Service name or database
@@ -172,10 +174,12 @@ def validate_oracle_features(connection) -> dict[str, bool]:
 
     # First check if it's Enterprise Edition
     try:
-        result = connection.execute("""
+        result = connection.execute(
+            """
             SELECT BANNER FROM v$version
             WHERE BANNER LIKE '%Enterprise Edition%'
-        """).fetchone()
+        """
+        ).fetchone()
         features["is_enterprise_edition"] = result is not None
     except Exception as e:
         # If we can't check, assume it's not EE but log the issue
@@ -188,10 +192,12 @@ def validate_oracle_features(connection) -> dict[str, bool]:
 
     try:
         # Check for partitioning
-        result = connection.execute("""
+        result = connection.execute(
+            """
             SELECT COUNT(*) FROM v$option
             WHERE parameter = 'Partitioning' AND value = 'TRUE'
-        """).scalar()
+        """
+        ).scalar()
         features["partitioning"] = result > 0
     except Exception as e:
         # Feature detection failed - log for debugging
@@ -199,21 +205,25 @@ def validate_oracle_features(connection) -> dict[str, bool]:
 
     try:
         # Check for advanced compression
-        result = connection.execute("""
+        result = connection.execute(
+            """
             SELECT COUNT(*) FROM v$option
             WHERE parameter = 'Advanced Compression' AND value = 'TRUE'
-        """).scalar()
+        """
+        ).scalar()
         features["advanced_compression"] = result > 0
     except Exception as e:
-        # Feature detection failed - log for debugging  
+        # Feature detection failed - log for debugging
         print(f"⚠️ Could not detect advanced compression feature: {e}")
 
     try:
         # Check for in-memory
-        result = connection.execute("""
+        result = connection.execute(
+            """
             SELECT COUNT(*) FROM v$option
             WHERE parameter = 'In-Memory Column Store' AND value = 'TRUE'
-        """).scalar()
+        """
+        ).scalar()
         features["inmemory"] = result > 0
     except Exception as e:
         # Feature detection failed - log for debugging
@@ -221,10 +231,12 @@ def validate_oracle_features(connection) -> dict[str, bool]:
 
     try:
         # Check for advanced security
-        result = connection.execute("""
+        result = connection.execute(
+            """
             SELECT COUNT(*) FROM v$option
             WHERE parameter = 'Advanced Security' AND value = 'TRUE'
-        """).scalar()
+        """
+        ).scalar()
         features["advanced_security"] = result > 0
     except Exception as e:
         # Feature detection failed - log for debugging
@@ -281,11 +293,13 @@ def clean_all_test_tables(config: dict[str, Any] | None = None) -> None:
             # Find all test tables
             for pattern in test_table_patterns:
                 result = conn.execute(
-                    text(f"""
+                    text(
+                        f"""
                         SELECT table_name
                         FROM user_tables
                         WHERE table_name LIKE '{pattern}'
-                    """)
+                    """
+                    )
                 )
 
                 for row in result:
@@ -360,11 +374,13 @@ def count_test_tables(config: dict[str, Any] | None = None) -> int:
         with oracle_connection(config) as conn:
             for pattern in test_table_patterns:
                 result = conn.execute(
-                    text(f"""
+                    text(
+                        f"""
                     SELECT COUNT(*)
                     FROM user_tables
                     WHERE table_name LIKE '{pattern}'
-                """)
+                """
+                    )
                 )
                 count = result.scalar()
                 total_count += count
@@ -385,12 +401,14 @@ def validate_table_structure(
     try:
         with oracle_connection(config) as conn:
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT column_name
                 FROM user_tab_columns
                 WHERE table_name = '{table_name.upper()}'
                 ORDER BY column_name
-            """)
+            """
+                )
             )
 
             actual_columns = {row[0] for row in result}

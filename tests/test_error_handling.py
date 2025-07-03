@@ -17,12 +17,14 @@ import pytest
 from sqlalchemy import text
 
 from flext_target_oracle.target import OracleTarget
+from tests.helpers import requires_oracle_connection
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
 
 @pytest.mark.integration
+@requires_oracle_connection
 class TestErrorHandling:
     """Test comprehensive error handling and recovery mechanisms."""
 
@@ -32,7 +34,7 @@ class TestErrorHandling:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test recovery from connection failures with retry logic."""
         table_cleanup(test_table_name)
 
@@ -128,7 +130,7 @@ class TestErrorHandling:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test handling of schema validation and data type errors."""
         table_cleanup(test_table_name)
 
@@ -263,12 +265,14 @@ class TestErrorHandling:
 
             # Verify specific valid records
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT id, name, score, active
                 FROM {test_table_name}
                 WHERE id IN (1, 2, 5)
                 ORDER BY id
-            """)
+            """
+                )
             )
             valid_records = result.fetchall()
             assert len(valid_records) >= 2, "Valid records not found"
@@ -279,7 +283,7 @@ class TestErrorHandling:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test transaction rollback behavior on batch failures."""
         table_cleanup(test_table_name)
 
@@ -378,7 +382,8 @@ class TestErrorHandling:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
 
-            # Should still have the first batch, but problematic batch behavior depends on implementation
+            # Should still have the first batch, but problematic batch behavior
+            # depends on implementation
             assert count >= 10, f"Transaction rollback affected previous data: {count}"
 
     def test_memory_pressure_handling(
@@ -387,7 +392,7 @@ class TestErrorHandling:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test graceful handling under memory pressure."""
         table_cleanup(test_table_name)
 
@@ -467,11 +472,13 @@ class TestErrorHandling:
 
             # Verify data integrity of processed records
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT id, LENGTH(large_data), metadata
                 FROM {test_table_name}
                 WHERE id IN (1, 250, 500)
-            """)
+            """
+                )
             )
 
             for row in result:
@@ -485,7 +492,7 @@ class TestErrorHandling:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test handling of concurrent access and locking conflicts."""
         table_cleanup(test_table_name)
 
@@ -576,7 +583,8 @@ class TestErrorHandling:
                 time.sleep(0.1)  # Small delay between batches
             except Exception as e:
                 print(
-                    f"Concurrent processing batch completed with potential conflicts: {e}"
+                    f"Concurrent processing batch completed with potential "
+                    f"conflicts: {e}"
                 )
 
         # Verify final state
@@ -588,12 +596,14 @@ class TestErrorHandling:
 
             # Verify updated records
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT id, counter, name
                 FROM {test_table_name}
                 WHERE id <= 10
                 ORDER BY id
-            """)
+            """
+                )
             )
 
             updated_records = result.fetchall()
@@ -609,7 +619,7 @@ class TestErrorHandling:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test recovery from network timeouts and slow connections."""
         table_cleanup(test_table_name)
 
@@ -648,8 +658,10 @@ class TestErrorHandling:
                 "stream": test_table_name,
                 "record": {
                     "id": i + 1,
-                    "description": f"Timeout test record {i + 1} with substantial content "
-                    * 10,
+                    "description": (
+                        f"Timeout test record {i + 1} with substantial content "
+                        * 10
+                    ),
                     "timestamp": datetime.now().isoformat() + "Z",
                 },
                 "time_extracted": datetime.now().isoformat() + "Z",
@@ -683,7 +695,7 @@ class TestErrorHandling:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test handling of invalid SQL generation and execution errors."""
         table_cleanup(test_table_name)
 
@@ -771,7 +783,7 @@ class TestErrorHandling:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test graceful handling of resource exhaustion scenarios."""
         table_cleanup(test_table_name)
 
@@ -822,7 +834,7 @@ class TestErrorHandling:
 
         # Process multiple targets concurrently to stress resources
         targets = []
-        for i in range(3):
+        for _ in range(3):
             target = OracleTarget(config=config)
             targets.append(target)
 
@@ -860,16 +872,21 @@ class TestErrorHandling:
             expected_min = record_count * 0.7
             assert (
                 total_count >= expected_min
-            ), f"Resource exhaustion caused too many losses: {total_count}/{record_count}"
+            ), (
+                f"Resource exhaustion caused too many losses: "
+                f"{total_count}/{record_count}"
+            )
 
             # Verify no data corruption
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT COUNT(DISTINCT id) as unique_ids,
                        MAX(id) as max_id,
                        MIN(id) as min_id
                 FROM {test_table_name}
-            """)
+            """
+                )
             )
 
             stats = result.fetchone()

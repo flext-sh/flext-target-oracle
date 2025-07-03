@@ -11,7 +11,7 @@ from sqlalchemy import create_engine, text
 load_dotenv()
 
 
-def test_sqlalchemy_connection():
+def test_sqlalchemy_connection() -> None:
     """Test SQLAlchemy connection to Oracle Autonomous Database."""
 
     # Get connection parameters
@@ -62,10 +62,12 @@ def test_sqlalchemy_connection():
         # Check if we're on Enterprise Edition
         is_ee = (
             conn.execute(
-                text("""
+                text(
+                    """
             SELECT COUNT(*) FROM v$version
             WHERE BANNER LIKE '%Enterprise Edition%'
-        """)
+        """
+                )
             ).scalar()
             > 0
         )

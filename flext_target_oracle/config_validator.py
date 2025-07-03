@@ -9,9 +9,22 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from sqlalchemy import create_engine, text
+
+# Configuration constants
+MAX_PORT_NUMBER = 65535
+MIN_CONNECTION_TIMEOUT = 30
+MAX_POOL_SIZE = 50
+MAX_BATCH_SIZE = 50000
+MAX_PARALLEL_THREADS = 32
+MIN_PASSWORD_LENGTH = 8
+MIN_RETRIES = 3
+MIN_MEMORY_MB = 512
+MIN_BATCH_SIZE_PERF = 5000
+MAX_BATCH_SIZE_PERF = 25000
+MIN_ARRAY_SIZE_PERF = 500
 
 
 class ConfigurationValidator:
@@ -49,7 +62,7 @@ class ConfigurationValidator:
         try:
             connection_results = self._test_connection()
             results.update(connection_results)
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             self.errors.append(f"Connection test failed: {e}")
 
         # Compile results
@@ -79,7 +92,7 @@ class ConfigurationValidator:
 
         # Validate port
         port = self.config.get("port", 1521)
-        if not isinstance(port, int) or port < 1 or port > 65535:
+        if not isinstance(port, int) or port < 1 or port > MAX_PORT_NUMBER:
             self.errors.append(f"Invalid port number: {port}")
 
     def _validate_connection_parameters(self) -> None:
@@ -87,9 +100,7 @@ class ConfigurationValidator:
         # Protocol validation
         protocol = self.config.get("protocol", "tcp")
         if protocol not in ["tcp", "tcps"]:
-            self.errors.append(
-                f"Invalid protocol: {protocol}. Must be 'tcp' or 'tcps'"
-            )
+            self.errors.append(f"Invalid protocol: {protocol}. Must be 'tcp' or 'tcps'")
 
         # TCPS-specific validation
         if (
@@ -107,9 +118,7 @@ class ConfigurationValidator:
         if wallet_location:
             wallet_path = Path(wallet_location)
             if not wallet_path.exists():
-                self.errors.append(
-                    f"Wallet location does not exist: {wallet_location}"
-                )
+                self.errors.append(f"Wallet location does not exist: {wallet_location}")
             elif not wallet_path.is_dir():
                 self.errors.append(
                     f"Wallet location is not a directory: {wallet_location}"
@@ -127,7 +136,7 @@ class ConfigurationValidator:
         timeout = self.config.get("connection_timeout", 60)
         if not isinstance(timeout, (int, float)) or timeout <= 0:
             self.errors.append(f"Invalid connection_timeout: {timeout}")
-        elif timeout < 30:
+        elif timeout < MIN_CONNECTION_TIMEOUT:
             self.warnings.append(
                 "connection_timeout < 30 seconds may cause issues with slow networks"
             )
@@ -140,7 +149,7 @@ class ConfigurationValidator:
 
         if not isinstance(pool_size, int) or pool_size < 1:
             self.errors.append(f"Invalid pool_size: {pool_size}")
-        elif pool_size > 50:
+        elif pool_size > MAX_POOL_SIZE:
             self.warnings.append(
                 "pool_size > 50 may consume excessive database resources"
             )
@@ -152,7 +161,7 @@ class ConfigurationValidator:
         batch_size = self.config.get("batch_size", 10000)
         if not isinstance(batch_size, int) or batch_size < 1:
             self.errors.append(f"Invalid batch_size: {batch_size}")
-        elif batch_size > 50000:
+        elif batch_size > MAX_BATCH_SIZE:
             self.warnings.append("batch_size > 50000 may cause memory issues")
 
         # Parallel settings
@@ -169,7 +178,7 @@ class ConfigurationValidator:
         parallel_threads = self.config.get("parallel_threads", 8)
         if not isinstance(parallel_threads, int) or parallel_threads < 1:
             self.errors.append(f"Invalid parallel_threads: {parallel_threads}")
-        elif parallel_threads > 32:
+        elif parallel_threads > MAX_PARALLEL_THREADS:
             self.warnings.append("parallel_threads > 32 may cause resource contention")
 
         # Array size for Oracle driver
@@ -182,7 +191,7 @@ class ConfigurationValidator:
         # Password validation
         password = self.config.get("password", "")
         if isinstance(password, str):
-            if len(password) < 8:
+            if len(password) < MIN_PASSWORD_LENGTH:
                 self.warnings.append("Password is shorter than 8 characters")
             if password.lower() in ["password", "oracle", "admin", "welcome"]:
                 self.errors.append("Password appears to be a common weak password")
@@ -206,19 +215,24 @@ class ConfigurationValidator:
         def _check_parallel_degree(value: int) -> bool:
             return value > 1
 
-        def _check_boolean_feature(value: bool) -> bool:
+        def _check_boolean_feature(*, value: bool) -> bool:
             return value
 
-        ee_features = {
+        ee_features: dict[str, tuple[Callable[..., bool], str]] = {
             "parallel_degree": (_check_parallel_degree, "Parallel processing > 1"),
             "use_parallel_dml": (_check_boolean_feature, "Parallel DML"),
             "enable_parallel_ddl": (_check_boolean_feature, "Parallel DDL"),
             "enable_parallel_query": (_check_boolean_feature, "Parallel Query"),
         }
 
-        for config_key, (check_func, feature_name) in ee_features.items():
+        for config_key, (_check_func, feature_name) in ee_features.items():
             config_value = self.config.get(config_key, False)
-            if check_func(config_value) and not is_ee:
+            if config_key == "parallel_degree":
+                feature_enabled = _check_parallel_degree(config_value)
+            else:
+                feature_enabled = _check_boolean_feature(value=config_value)
+
+            if feature_enabled and not is_ee:
                 self.warnings.append(
                     f"{feature_name} requires Oracle Enterprise Edition license"
                 )
@@ -282,7 +296,7 @@ class ConfigurationValidator:
             )
 
         max_retries = self.config.get("max_retries", 5)
-        if max_retries < 3:
+        if max_retries < MIN_RETRIES:
             self.recommendations.append(
                 "Consider increasing max_retries for production resilience"
             )
@@ -295,7 +309,7 @@ class ConfigurationValidator:
 
         # Resource limits
         max_memory = self.config.get("max_memory_usage_mb", 1024)
-        if max_memory < 512:
+        if max_memory < MIN_MEMORY_MB:
             self.warnings.append("max_memory_usage_mb < 512MB may limit performance")
 
         # Connection pooling
@@ -350,7 +364,7 @@ class ConfigurationValidator:
                     edition_info = results["edition_info"]
                     if isinstance(edition_info, dict):
                         edition_info["has_partitioning"] = True
-                except Exception as e:
+                except (OSError, ValueError, RuntimeError) as e:
                     edition_info = results["edition_info"]
                     if isinstance(edition_info, dict):
                         edition_info["has_partitioning"] = False
@@ -387,7 +401,7 @@ class ConfigurationValidator:
                         edition_info = results["edition_info"]
                         if isinstance(edition_info, dict):
                             edition_info["supports_hcc"] = False
-                except Exception as e:
+                except (OSError, ValueError, RuntimeError) as e:
                     platform_info = results["platform_info"]
                     if isinstance(platform_info, dict):
                         platform_info["type"] = "Unknown"
@@ -411,14 +425,14 @@ class ConfigurationValidator:
                             platform_info["size_gb"] = (
                                 float(size_row[0]) if size_row[0] is not None else 0.0
                             )
-                except Exception as e:
+                except (OSError, ValueError, RuntimeError) as e:
                     # Might not have DBA privileges - log debug info
                     if self.logger:
                         self.logger.debug(
                             f"Database size check failed (may need DBA privileges): {e}"
                         )
 
-        except Exception as e:
+        except (OSError, ValueError, RuntimeError) as e:
             self.errors.append(f"Connection test failed: {e}")
             return results
 
@@ -472,18 +486,18 @@ class ConfigurationValidator:
             )
 
         # Batch size optimization
-        if batch_size < 5000:
+        if batch_size < MIN_BATCH_SIZE_PERF:
             recommendations.append(
                 "Consider increasing batch_size for better throughput"
             )
-        elif batch_size > 25000:
+        elif batch_size > MAX_BATCH_SIZE_PERF:
             recommendations.append(
                 "Consider reducing batch_size to avoid memory issues"
             )
 
         # Array size optimization
         array_size = self.config.get("array_size", 1000)
-        if array_size < 500:
+        if array_size < MIN_ARRAY_SIZE_PERF:
             recommendations.append(
                 "Consider increasing array_size for better network efficiency"
             )

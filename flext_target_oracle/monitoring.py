@@ -605,8 +605,7 @@ class OracleTargetMonitor:
         ) / len(recent_metrics)
 
         avg_cpu = sum(
-            m.get("system", {}).get("cpu", {}).get("percent", 0)
-            for m in recent_metrics
+            m.get("system", {}).get("cpu", {}).get("percent", 0) for m in recent_metrics
         ) / len(recent_metrics)
 
         return {

@@ -116,7 +116,7 @@ class TestOracleAutonomousE2E:
         ]
 
     @requires_oracle_connection
-    def test_connection_verification(self, oracle_config):
+    def test_connection_verification(self, oracle_config) -> None:
         """Test basic connection to Oracle Autonomous Database."""
         target = OracleTarget(config=oracle_config)
 
@@ -134,7 +134,9 @@ class TestOracleAutonomousE2E:
             assert result == 1
 
     @requires_oracle_connection
-    def test_complete_data_pipeline(self, oracle_config, sample_schema, sample_records):
+    def test_complete_data_pipeline(
+        self, oracle_config, sample_schema, sample_records
+    ) -> None:
         """Test complete data pipeline from Singer messages to Oracle."""
         target = OracleTarget(config=oracle_config)
 
@@ -201,7 +203,7 @@ class TestOracleAutonomousE2E:
                 assert all(col is not None for col in metadata_result)
 
     @requires_oracle_connection
-    def test_upsert_functionality(self, oracle_config, sample_schema):
+    def test_upsert_functionality(self, oracle_config, sample_schema) -> None:
         """Test UPSERT (MERGE) functionality."""
         # Enable upsert mode
         oracle_config["load_method"] = "upsert"
@@ -289,7 +291,7 @@ class TestOracleAutonomousE2E:
             assert result[3] == "Updated order"
 
     @requires_oracle_connection
-    def test_data_type_handling(self, oracle_config):
+    def test_data_type_handling(self, oracle_config) -> None:
         """Test various data type conversions."""
         target = OracleTarget(config=oracle_config)
 
@@ -393,7 +395,7 @@ class TestOracleAutonomousE2E:
             assert results[1][8] is None  # Null value
 
     @requires_oracle_connection
-    def test_batch_performance(self, oracle_config):
+    def test_batch_performance(self, oracle_config) -> None:
         """Test batch processing performance."""
         # Configure for larger batches
         oracle_config["batch_config"]["batch_size"] = 1000
@@ -457,7 +459,7 @@ class TestOracleAutonomousE2E:
         print(f"Processed 1000 records in {elapsed_time:.2f} seconds")
 
     @requires_oracle_connection
-    def test_error_handling(self, oracle_config):
+    def test_error_handling(self, oracle_config) -> None:
         """Test error handling and recovery."""
         target = OracleTarget(config=oracle_config)
 
@@ -516,8 +518,10 @@ class TestOracleAutonomousE2E:
             print(f"ℹ️ Expected error in append-only mode with duplicate key: {e}")
             # Check if it's actually the expected duplicate key error
             error_str = str(e).lower()
-            assert any(keyword in error_str for keyword in ["unique", "duplicate", "constraint"]), \
-                f"Unexpected error type: {e}"
+            assert any(
+                keyword in error_str
+                for keyword in ["unique", "duplicate", "constraint"]
+            ), f"Unexpected error type: {e}"
 
         # Verify original record is still there
         sink = target.get_sink("test_errors")
@@ -528,7 +532,7 @@ class TestOracleAutonomousE2E:
             assert count >= 1  # At least the valid record
 
     @requires_oracle_connection
-    def test_cleanup(self, oracle_config):
+    def test_cleanup(self, oracle_config) -> None:
         """Clean up test tables after tests."""
         target = OracleTarget(config=oracle_config)
 

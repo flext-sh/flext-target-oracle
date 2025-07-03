@@ -15,11 +15,13 @@ from unittest.mock import patch
 from sqlalchemy import text
 
 from flext_target_oracle.target import OracleTarget
+from tests.helpers import requires_oracle_connection
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
 
 
+@requires_oracle_connection
 class TestE2EIntegration:
     """End-to-end integration tests."""
 
@@ -30,7 +32,7 @@ class TestE2EIntegration:
         oracle_engine: Engine,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test complete ETL workflow from schema to final data."""
         table_cleanup(test_table_name)
 
@@ -131,14 +133,16 @@ class TestE2EIntegration:
 
             # Verify data integrity
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT
                     COUNT(DISTINCT customer_id) as unique_customers,
                     COUNT(*) as total_records,
                     MIN(customer_id) as min_id,
                     MAX(customer_id) as max_id
                 FROM {test_table_name}
-            """)
+            """
+                )
             )
             stats = result.fetchone()
             assert stats.unique_customers == 10000
@@ -253,33 +257,39 @@ class TestE2EIntegration:
 
             # Verify updates were applied
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT COUNT(*)
                 FROM {test_table_name}
                 WHERE first_name LIKE 'UpdatedFirst%'
-            """)
+            """
+                )
             )
             updated_count = result.fetchone()[0]
             assert updated_count == 200  # 2000/10 updates
 
             # Verify new customers
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT COUNT(*)
                 FROM {test_table_name}
                 WHERE first_name LIKE 'NewCustomer%'
-            """)
+            """
+                )
             )
             new_count = result.fetchone()[0]
             assert new_count == 2000
 
             # Verify premium upgrades
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT COUNT(*)
                 FROM {test_table_name}
                 WHERE status = 'premium'
-            """)
+            """
+                )
             )
             premium_count = result.fetchone()[0]
             assert premium_count >= 10  # At least 10 premium upgrades
@@ -290,7 +300,10 @@ class TestE2EIntegration:
             data_quality_checks = [
                 (
                     "No duplicate customer IDs",
-                    f"SELECT COUNT(*) - COUNT(DISTINCT customer_id) FROM {test_table_name}",
+                    (
+                        f"SELECT COUNT(*) - COUNT(DISTINCT customer_id) "
+                        f"FROM {test_table_name}"
+                    ),
                 ),
                 (
                     "All emails are unique",
@@ -302,7 +315,10 @@ class TestE2EIntegration:
                 ),
                 (
                     "All statuses are valid",
-                    f"SELECT COUNT(*) FROM {test_table_name} WHERE status NOT IN ('active', 'inactive', 'premium')",
+                    (
+                        f"SELECT COUNT(*) FROM {test_table_name} WHERE status "
+                        f"NOT IN ('active', 'inactive', 'premium')"
+                    ),
                 ),
                 (
                     "Reasonable lifetime values",
@@ -324,10 +340,12 @@ class TestE2EIntegration:
 
         print("\nEnd-to-End ETL Performance:")
         print(
-            f"Initial load: {initial_throughput:.2f} records/sec ({initial_load_time:.2f}s)"
+            f"Initial load: {initial_throughput:.2f} records/sec "
+            f"({initial_load_time:.2f}s)"
         )
         print(
-            f"Incremental load: {incremental_throughput:.2f} records/sec ({incremental_load_time:.2f}s)"
+            f"Incremental load: {incremental_throughput:.2f} records/sec "
+            f"({incremental_load_time:.2f}s)"
         )
         print(f"Overall throughput: {total_throughput:.2f} records/sec")
         print("Total records processed: 12,200")
@@ -347,7 +365,7 @@ class TestE2EIntegration:
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ):
+    ) -> None:
         """Test schema evolution with column additions."""
         table_cleanup(test_table_name)
 
@@ -396,12 +414,14 @@ class TestE2EIntegration:
 
             # Check initial columns
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT column_name
                 FROM user_tab_columns
                 WHERE table_name = UPPER('{test_table_name}')
                 ORDER BY column_id
-            """)
+            """
+                )
             )
             initial_columns = [row[0] for row in result.fetchall()]
             expected_initial = ["ID", "NAME", "EMAIL"]
@@ -473,12 +493,14 @@ class TestE2EIntegration:
 
             # Check evolved columns
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT column_name
                 FROM user_tab_columns
                 WHERE table_name = UPPER('{test_table_name}')
                 ORDER BY column_id
-            """)
+            """
+                )
             )
             evolved_columns = [row[0] for row in result.fetchall()]
             expected_evolved = ["AGE", "PHONE", "METADATA", "IS_ACTIVE"]
@@ -487,11 +509,13 @@ class TestE2EIntegration:
 
             # Verify data integrity
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT id, name, age, phone
                 FROM {test_table_name}
                 WHERE id = 1
-            """)
+            """
+                )
             )
             updated_record = result.fetchone()
             assert updated_record.name == "John Updated"
@@ -500,11 +524,13 @@ class TestE2EIntegration:
 
             # Verify new record
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT id, name, age
                 FROM {test_table_name}
                 WHERE id = 3
-            """)
+            """
+                )
             )
             new_record = result.fetchone()
             assert new_record.name == "Bob"
@@ -516,7 +542,7 @@ class TestE2EIntegration:
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ):
+    ) -> None:
         """Test error recovery and resilience workflow."""
         table_cleanup(test_table_name)
 
@@ -593,7 +619,7 @@ class TestE2EIntegration:
                 "stream": test_table_name,
                 "record": {
                     "id": 4,
-                    "short_text": "This text is too long for the column",  # Will likely cause error
+                    "short_text": "This text is too long for column",  # Error expected
                     "required_field": "Present4",
                 },
             },
@@ -639,7 +665,7 @@ class TestE2EIntegration:
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ):
+    ) -> None:
         """Test monitoring and metrics collection workflow."""
         table_cleanup(test_table_name)
 
@@ -698,7 +724,8 @@ class TestE2EIntegration:
 
             # Verify monitoring data distribution
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT
                     metric_name,
                     COUNT(*) as record_count,
@@ -708,7 +735,8 @@ class TestE2EIntegration:
                 FROM {test_table_name}
                 GROUP BY metric_name
                 ORDER BY metric_name
-            """)
+            """
+                )
             )
 
             metrics = result.fetchall()
@@ -726,7 +754,7 @@ class TestE2EIntegration:
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ):
+    ) -> None:
         """Test with realistic data patterns and edge cases."""
         table_cleanup(test_table_name)
 
@@ -859,7 +887,7 @@ class TestE2EIntegration:
                         "user_id": 777,
                         "amount": 25.50,
                         "currency": "EUR",
-                        "description": "Café purchase with émojis 🛒 and special chars: áéíóú",
+                        "description": "Café purchase with émojis 🛒 and chars: áéíóú",
                         "metadata": {
                             "merchant_name": "Café Münchën & Co.",
                             "location": "São Paulo, Brasil",
@@ -892,30 +920,36 @@ class TestE2EIntegration:
 
             # Large amount
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT amount FROM {test_table_name}
                 WHERE transaction_id = 'TXN-LARGE-001'
-            """)
+            """
+                )
             )
             large_amount = result.fetchone()
             assert float(large_amount.amount) == 999999.99
 
             # Zero amount
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT amount FROM {test_table_name}
                 WHERE transaction_id = 'TXN-ZERO-001'
-            """)
+            """
+                )
             )
             zero_amount = result.fetchone()
             assert float(zero_amount.amount) == 0.0
 
             # Negative amount
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT amount, is_refund FROM {test_table_name}
                 WHERE transaction_id = 'TXN-REFUND-001'
-            """)
+            """
+                )
             )
             refund = result.fetchone()
             assert float(refund.amount) == -50.25
@@ -923,10 +957,12 @@ class TestE2EIntegration:
 
             # Unicode handling
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT description FROM {test_table_name}
                 WHERE transaction_id = 'TXN-UNICODE-001'
-            """)
+            """
+                )
             )
             unicode_desc = result.fetchone()
             assert "🛒" in unicode_desc.description
@@ -934,7 +970,8 @@ class TestE2EIntegration:
 
             # Data distribution analysis
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT
                     COUNT(*) as total_transactions,
                     COUNT(DISTINCT user_id) as unique_users,
@@ -942,7 +979,8 @@ class TestE2EIntegration:
                     SUM(CASE WHEN amount < 0 THEN amount ELSE 0 END) as total_negative,
                     AVG(amount) as avg_amount
                 FROM {test_table_name}
-            """)
+            """
+                )
             )
 
             summary = result.fetchone()

@@ -491,6 +491,7 @@ class OracleTargetLogger:
             try:
                 # Try to write to stderr as last resort
                 import sys
+
                 sys.stderr.write(f"WARNING: Logger failed during shutdown: {e}\n")
                 sys.stderr.flush()
             except Exception as stderr_error:
@@ -499,10 +500,11 @@ class OracleTargetLogger:
                 try:
                     # Attempt to write to any available file descriptor
                     import os
+
                     os.write(
                         2,
                         f"CRITICAL: All logging mechanisms failed: "
-                        f"{stderr_error}\n".encode()
+                        f"{stderr_error}\n".encode(),
                     )
                 except Exception:
                     # Absolutely no way to log - system is completely shutting down

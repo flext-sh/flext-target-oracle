@@ -24,7 +24,6 @@ def main():
         "username": "target_user",
         "password": "secure_password",
         "schema": "TARGET_SCHEMA",
-
         # Performance settings
         "batch_config": {
             "batch_size": 10000,
@@ -32,10 +31,8 @@ def main():
         "pool_size": 10,
         "use_bulk_operations": True,
         "parallel_degree": 2,
-
         # Load method
         "load_method": "upsert",  # or "append-only", "overwrite"
-
         # Oracle optimizations
         "enable_compression": True,
         "compression_type": "basic",
@@ -43,7 +40,7 @@ def main():
     }
 
     # Create target
-    _target = OracleTarget(config=config)
+    target = OracleTarget(config=config)
 
     # Example: Process Singer messages from stdin
     # In real usage, this would come from a tap
@@ -61,9 +58,9 @@ def main():
                     "active": {"type": "boolean"},
                     "created_at": {"type": "string", "format": "date-time"},
                     "metadata": {"type": "object"},
-                }
+                },
             },
-            "key_properties": ["id"]
+            "key_properties": ["id"],
         },
         # Record messages
         {
@@ -75,8 +72,8 @@ def main():
                 "email": "john@example.com",
                 "active": True,
                 "created_at": "2025-07-02T10:00:00Z",
-                "metadata": {"source": "web"}
-            }
+                "metadata": {"source": "web"},
+            },
         },
         {
             "type": "RECORD",
@@ -87,15 +84,19 @@ def main():
                 "email": "jane@example.com",
                 "active": True,
                 "created_at": "2025-07-02T11:00:00Z",
-                "metadata": {"source": "api"}
-            }
-        }
+                "metadata": {"source": "api"},
+            },
+        },
     ]
 
     # Process messages
     for message in example_messages:
         print(json.dumps(message))
         sys.stdout.flush()
+
+    # Show target info
+    print(f"# Target created: {target.name}")
+    print(f"# Config loaded: {len(config)} settings")
 
     # In real usage:
     # tap-postgres --config tap_config.json | \

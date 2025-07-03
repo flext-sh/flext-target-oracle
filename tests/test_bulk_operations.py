@@ -18,6 +18,7 @@ import pytest
 from sqlalchemy import text
 
 from flext_target_oracle.target import OracleTarget
+from tests.helpers import requires_oracle_connection
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Engine
@@ -25,6 +26,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.integration
 @pytest.mark.performance
+@requires_oracle_connection
 class TestBulkOperations:
     """Test bulk operations and performance optimizations."""
 
@@ -35,7 +37,7 @@ class TestBulkOperations:
         test_table_name: str,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test large batch insert performance with 10k+ records."""
         table_cleanup(test_table_name)
 
@@ -126,12 +128,14 @@ class TestBulkOperations:
 
             # Verify data sampling
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT id, name, score, active
                 FROM {test_table_name}
                 WHERE id IN (1, 5000, 10000)
                 ORDER BY id
-            """)
+            """
+                )
             )
             rows = result.fetchall()
             assert len(rows) >= 2, "Sample records not found"
@@ -154,7 +158,7 @@ class TestBulkOperations:
         test_table_name: str,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test parallel processing with multiple threads."""
         table_cleanup(test_table_name)
 
@@ -224,12 +228,14 @@ class TestBulkOperations:
 
             # Verify data distribution across threads
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT thread_id, COUNT(*)
                 FROM {test_table_name}
                 GROUP BY thread_id
                 ORDER BY thread_id
-            """)
+            """
+                )
             )
             thread_counts = dict(result.fetchall())
 
@@ -239,7 +245,10 @@ class TestBulkOperations:
                 assert thread_id in thread_counts, f"Thread {thread_id} data not found"
                 assert (
                     thread_counts[thread_id] == expected_per_thread
-                ), f"Thread {thread_id}: expected {expected_per_thread}, got {thread_counts[thread_id]}"
+                ), (
+                    f"Thread {thread_id}: expected {expected_per_thread}, "
+                    f"got {thread_counts[thread_id]}"
+                )
 
         throughput = record_count / performance_timer.duration
         print(f"Parallel processing performance: {throughput:.0f} records/second")
@@ -251,7 +260,7 @@ class TestBulkOperations:
         test_table_name: str,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test MERGE (upsert) performance with large dataset."""
         table_cleanup(test_table_name)
 
@@ -375,10 +384,12 @@ class TestBulkOperations:
 
             # Check updated records
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT COUNT(*) FROM {test_table_name}
                 WHERE user_id <= 3000 AND login_count = 2
-            """)
+            """
+                )
             )
             updated_count = result.scalar()
             assert (
@@ -387,10 +398,12 @@ class TestBulkOperations:
 
             # Check new records
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT COUNT(*) FROM {test_table_name}
                 WHERE user_id > {initial_count}
-            """)
+            """
+                )
             )
             new_count = result.scalar()
             assert new_count == 2000, f"Expected 2000 new records, got {new_count}"
@@ -406,7 +419,7 @@ class TestBulkOperations:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test memory-efficient streaming for very large datasets."""
         table_cleanup(test_table_name)
 
@@ -482,12 +495,14 @@ class TestBulkOperations:
 
             # Verify large data was stored correctly
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT id, LENGTH(large_text), json_data
                 FROM {test_table_name}
                 WHERE id IN (1, 2500, 5000)
                 ORDER BY id
-            """)
+            """
+                )
             )
             rows = result.fetchall()
             assert len(rows) == 3, "Sample records not found"
@@ -507,7 +522,7 @@ class TestBulkOperations:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test connection pool efficiency under load."""
         table_cleanup(test_table_name)
 
@@ -587,12 +602,14 @@ class TestBulkOperations:
 
             # Verify batch distribution
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT batch_num, COUNT(*)
                 FROM {test_table_name}
                 GROUP BY batch_num
                 ORDER BY batch_num
-            """)
+            """
+                )
             )
             batch_counts = dict(result.fetchall())
 
@@ -600,7 +617,10 @@ class TestBulkOperations:
                 assert batch_num in batch_counts, f"Batch {batch_num} not found"
                 assert (
                     batch_counts[batch_num] == records_per_batch
-                ), f"Batch {batch_num}: expected {records_per_batch}, got {batch_counts[batch_num]}"
+                ), (
+                    f"Batch {batch_num}: expected {records_per_batch}, "
+                    f"got {batch_counts[batch_num]}"
+                )
 
     def test_error_recovery_bulk_operations(
         self,
@@ -608,7 +628,7 @@ class TestBulkOperations:
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test error recovery during bulk operations."""
         table_cleanup(test_table_name)
 
@@ -696,11 +716,13 @@ class TestBulkOperations:
 
             # Verify data quality
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT category, COUNT(*)
                 FROM {test_table_name}
                 GROUP BY category
-            """)
+            """
+                )
             )
             categories = dict(result.fetchall())
 

@@ -16,7 +16,7 @@ class TestBasicConnection:
     """Test basic Oracle connectivity."""
 
     @requires_oracle_connection
-    def test_connection_and_simple_query(self):
+    def test_connection_and_simple_query(self) -> None:
         """Test basic connection and simple query execution."""
         config = get_test_config(include_licensed_features=False)
         target = OracleTarget(config=config)
@@ -47,10 +47,12 @@ class TestBasicConnection:
             # Check if we're on Enterprise Edition
             is_ee = (
                 conn.execute(
-                    text("""
+                    text(
+                        """
                 SELECT COUNT(*) FROM v$version
                 WHERE BANNER LIKE '%Enterprise Edition%'
-            """)
+            """
+                    )
                 ).scalar()
                 > 0
             )
@@ -58,22 +60,26 @@ class TestBasicConnection:
 
             # Verify table was created
             table_count = conn.execute(
-                text("""
+                text(
+                    """
                 SELECT COUNT(*) FROM user_tables
                 WHERE table_name = 'TEST_CONNECTION'
-            """)
+            """
+                )
             ).scalar()
             assert table_count == 1
             print("Table created successfully")
 
             # Check column types are Oracle-compatible
             column_types = conn.execute(
-                text("""
+                text(
+                    """
                 SELECT column_name, data_type
                 FROM user_tab_columns
                 WHERE table_name = 'TEST_CONNECTION'
                 ORDER BY column_name
-            """)
+            """
+                )
             ).fetchall()
             print("Column types:")
             for col_name, data_type in column_types:
@@ -83,7 +89,7 @@ class TestBasicConnection:
             conn.execute(text("DROP TABLE test_connection"))
 
     @requires_oracle_connection
-    def test_basic_table_operations(self):
+    def test_basic_table_operations(self) -> None:
         """Test basic table operations available in all editions."""
         config = get_test_config(include_licensed_features=False)
         # Ensure we're using basic features only
@@ -138,7 +144,7 @@ class TestBasicConnection:
             conn.execute(text(f"DROP TABLE {sink.full_table_name}"))
 
     @requires_oracle_connection
-    def test_merge_statement(self):
+    def test_merge_statement(self) -> None:
         """Test MERGE statement (available in all editions)."""
         config = get_test_config(include_licensed_features=False)
         config["load_method"] = "upsert"

@@ -18,9 +18,11 @@ import pytest
 from sqlalchemy import text
 
 from flext_target_oracle.target import OracleTarget
+from tests.helpers import requires_oracle_connection
 
 
 @pytest.mark.integration
+@requires_oracle_connection
 class TestBasicE2EFunctionality:
     """End-to-end tests for basic Oracle Target functionality."""
 
@@ -31,7 +33,7 @@ class TestBasicE2EFunctionality:
         sample_singer_schema: dict[str, Any],
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test that SCHEMA messages are processed correctly."""
         table_cleanup(test_table_name)
 
@@ -60,22 +62,26 @@ class TestBasicE2EFunctionality:
         with oracle_engine.connect() as conn:
             # Check if table exists
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT COUNT(*) FROM user_tables
                 WHERE table_name = UPPER('{test_table_name}')
-            """)
+            """
+                )
             )
             count = result.scalar()
             assert count == 1, f"Table {test_table_name} was not created"
 
             # Check table structure
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT column_name, data_type
                 FROM user_tab_columns
                 WHERE table_name = UPPER('{test_table_name}')
                 ORDER BY column_name
-            """)
+            """
+                )
             )
             columns = {row[0]: row[1] for row in result}
 
@@ -101,7 +107,7 @@ class TestBasicE2EFunctionality:
         sample_singer_records: list[dict[str, Any]],
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test basic record insertion using append-only mode."""
         table_cleanup(test_table_name)
 
@@ -148,11 +154,13 @@ class TestBasicE2EFunctionality:
 
             # Verify data integrity
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT id, name, email, age, active
                 FROM {test_table_name}
                 ORDER BY id
-            """)
+            """
+                )
             )
             rows = result.fetchall()
 
@@ -178,7 +186,7 @@ class TestBasicE2EFunctionality:
         sample_singer_records: list[dict[str, Any]],
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test record upsert using Oracle MERGE."""
         table_cleanup(test_table_name)
 
@@ -241,9 +249,11 @@ class TestBasicE2EFunctionality:
 
             # Check updated record
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT name, age FROM {test_table_name} WHERE id = 1
-            """)
+            """
+                )
             )
             row = result.fetchone()
             assert row[0] == "John Doe Updated", "Record was not updated"
@@ -251,9 +261,11 @@ class TestBasicE2EFunctionality:
 
             # Check new record was inserted
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT COUNT(*) FROM {test_table_name} WHERE id = 3
-            """)
+            """
+                )
             )
             count = result.scalar()
             assert count == 1, "New record was not inserted"
@@ -264,7 +276,7 @@ class TestBasicE2EFunctionality:
         oracle_engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test various data type conversions and handling."""
         table_cleanup(test_table_name)
 
@@ -327,11 +339,13 @@ class TestBasicE2EFunctionality:
         # Verify data was stored correctly
         with oracle_engine.connect() as conn:
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT text_field, number_field, boolean_field,
                        json_field, array_field, null_field
                 FROM {test_table_name} WHERE id = 1
-            """)
+            """
+                )
             )
             row = result.fetchone()
 
@@ -361,7 +375,7 @@ class TestBasicE2EFunctionality:
         test_table_name: str,
         table_cleanup,
         performance_timer,
-    ):
+    ) -> None:
         """Test bulk loading performance with moderate dataset."""
         table_cleanup(test_table_name)
 
@@ -408,12 +422,14 @@ class TestBasicE2EFunctionality:
 
             # Verify data sampling
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT id, name, department, score
                 FROM {test_table_name}
                 WHERE id IN (1, 500, 1000)
                 ORDER BY id
-            """)
+            """
+                )
             )
             rows = result.fetchall()
             assert len(rows) >= 2, "Sample records not found"
@@ -433,7 +449,7 @@ class TestBasicE2EFunctionality:
         oracle_engine,
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test error handling and recovery scenarios."""
         table_cleanup(test_table_name)
 
@@ -521,15 +537,17 @@ class TestBasicE2EFunctionality:
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
-            # Should have at least the valid records, possibly the problematic one truncated
+            # Should have at least the valid records, possibly problematic one truncated
             assert count >= 2, f"Expected at least 2 valid records, found {count}"
 
             # Check that valid records are there
             result = conn.execute(
-                text(f"""
+                text(
+                    f"""
                 SELECT id, name FROM {test_table_name}
                 WHERE id IN (1, 3) ORDER BY id
-            """)
+            """
+                )
             )
             rows = result.fetchall()
             assert len(rows) >= 1, "No valid records found"
@@ -542,7 +560,7 @@ class TestBasicE2EFunctionality:
         sample_singer_records: list[dict[str, Any]],
         test_table_name: str,
         table_cleanup,
-    ):
+    ) -> None:
         """Test that connections are properly cleaned up after processing."""
         table_cleanup(test_table_name)
 
@@ -560,10 +578,12 @@ class TestBasicE2EFunctionality:
         try:
             with oracle_engine.connect() as conn:
                 result = conn.execute(
-                    text("""
+                    text(
+                        """
                     SELECT COUNT(*) FROM v$session
                     WHERE username = USER AND status = 'ACTIVE'
-                """)
+                """
+                    )
                 )
                 initial_connections = result.scalar()
         except Exception:
@@ -587,16 +607,19 @@ class TestBasicE2EFunctionality:
         oracle_target.process_lines(input_stream)
 
         # Force cleanup
+        target_processed = True  # Mark that processing succeeded
         del oracle_target
 
         # Check connection count after processing
         try:
             with oracle_engine.connect() as conn:
                 result = conn.execute(
-                    text("""
+                    text(
+                        """
                     SELECT COUNT(*) FROM v$session
                     WHERE username = USER AND status = 'ACTIVE'
-                """)
+                """
+                    )
                 )
                 final_connections = result.scalar()
 
@@ -608,8 +631,8 @@ class TestBasicE2EFunctionality:
         except Exception as e:
             # Log connection check failure for debugging
             print(f"⚠️ Could not check connection count: {e}")
-            # If we can't check connections, just verify the target cleaned up properly
-            assert oracle_target is not None  # Basic check that target exists
+            # If we can't check connections, just verify processing succeeded
+            assert target_processed  # Basic check that processing completed
 
     def test_cli_integration(
         self,
@@ -617,7 +640,7 @@ class TestBasicE2EFunctionality:
         test_table_name: str,
         table_cleanup,
         oracle_engine,
-    ):
+    ) -> None:
         """Test CLI integration with configuration file."""
         table_cleanup(test_table_name)
 

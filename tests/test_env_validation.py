@@ -15,19 +15,19 @@ import pytest
 class TestEnvironmentValidation:
     """Test environment configuration validation."""
 
-    def test_env_file_exists(self, project_root: Path):
+    def test_env_file_exists(self, project_root: Path) -> None:
         """Test that .env file exists."""
         env_path = project_root / ".env"
         if not env_path.exists():
             pytest.skip(".env file not found - copy .env.example to .env and configure")
         assert env_path.exists(), "Environment file .env is required for tests"
 
-    def test_env_example_exists(self, project_root: Path):
+    def test_env_example_exists(self, project_root: Path) -> None:
         """Test that .env.example file exists."""
         env_example_path = project_root / ".env.example"
         assert env_example_path.exists(), ".env.example file should exist"
 
-    def test_required_env_vars(self, env_config: dict):
+    def test_required_env_vars(self, env_config: dict) -> None:
         """Test that all required environment variables are set."""
         required_vars = ["host", "username", "password", "service_name"]
 
@@ -35,26 +35,25 @@ class TestEnvironmentValidation:
             assert var in env_config, f"Required environment variable {var} is missing"
             assert env_config[var], f"Required environment variable {var} is empty"
 
-    def test_port_configuration(self, env_config: dict):
+    def test_port_configuration(self, env_config: dict) -> None:
         """Test port configuration is valid."""
         port = env_config.get("port", 1521)
         assert isinstance(port, int), "Port must be an integer"
         assert 1 <= port <= 65535, f"Port {port} is out of valid range"
 
-    def test_protocol_configuration(self, env_config: dict):
+    def test_protocol_configuration(self, env_config: dict) -> None:
         """Test protocol configuration is valid."""
         protocol = env_config.get("protocol", "tcp")
         assert protocol in ["tcp", "tcps"], f"Invalid protocol: {protocol}"
 
         # If using TCPS, additional fields might be required
-        if protocol == "tcps":
+        if protocol == "tcps" and "wallet_location" in env_config:
             # Check for SSL-related configuration
-            if "wallet_location" in env_config:
-                assert env_config[
-                    "wallet_location"
-                ], "Wallet location cannot be empty for TCPS"
+            assert env_config[
+                "wallet_location"
+            ], "Wallet location cannot be empty for TCPS"
 
-    def test_optional_performance_settings(self, env_config: dict):
+    def test_optional_performance_settings(self, env_config: dict) -> None:
         """Test optional performance settings if present."""
         # Check batch size if specified
         if "batch_size" in env_config:
@@ -78,7 +77,7 @@ class TestEnvironmentValidation:
         not os.path.exists(".env"),
         reason="Requires .env file with Oracle configuration",
     )
-    def test_connection_string_format(self, env_config: dict):
+    def test_connection_string_format(self, env_config: dict) -> None:
         """Test that connection string can be formed from config."""
         # Verify we can build a connection string
         host = env_config["host"]
@@ -91,7 +90,7 @@ class TestEnvironmentValidation:
             "database"
         ), "Either service_name or database (SID) must be provided"
 
-    def test_schema_configuration(self, env_config: dict):
+    def test_schema_configuration(self, env_config: dict) -> None:
         """Test schema configuration if present."""
         if "schema" in env_config:
             schema = env_config["schema"]
@@ -101,7 +100,7 @@ class TestEnvironmentValidation:
                 schema.replace("_", "").replace("$", "").replace("#", "").isalnum()
             ), "Schema name contains invalid characters"
 
-    def test_license_flags(self, env_config: dict):
+    def test_license_flags(self, env_config: dict) -> None:
         """Test Oracle license flags if present."""
         license_flags = [
             "oracle_has_partitioning_option",
@@ -133,7 +132,9 @@ class TestEnvironmentValidation:
             ("merge_batch_size", 50000),
         ],
     )
-    def test_numeric_limits(self, env_config: dict, config_key: str, max_value: int):
+    def test_numeric_limits(
+        self, env_config: dict, config_key: str, max_value: int
+    ) -> None:
         """Test numeric configuration values are within reasonable limits."""
         if config_key in env_config:
             try:
@@ -145,7 +146,7 @@ class TestEnvironmentValidation:
             except ValueError:
                 pytest.fail(f"{config_key} must be a valid integer")
 
-    def test_compression_settings(self, env_config: dict):
+    def test_compression_settings(self, env_config: dict) -> None:
         """Test compression settings consistency."""
         if env_config.get("enable_compression", "").lower() == "true":
             compression_type = env_config.get("compression_type", "basic")
@@ -157,9 +158,15 @@ class TestEnvironmentValidation:
             ], f"Invalid compression type: {compression_type}"
 
             # If advanced compression is used, license flag should be set
-            if compression_type != "basic":
-                if "oracle_has_compression_option" in env_config:
-                    assert (
-                        env_config["oracle_has_compression_option"].lower()
-                        in ["true", "1", "yes"]
-                    ), f"Advanced compression type '{compression_type}' requires oracle_has_compression_option=true"
+            if (
+                compression_type != "basic"
+                and "oracle_has_compression_option" in env_config
+            ):
+                assert env_config["oracle_has_compression_option"].lower() in [
+                    "true",
+                    "1",
+                    "yes",
+                ], (
+                    f"Advanced compression type '{compression_type}' requires "
+                    f"oracle_has_compression_option=true"
+                )

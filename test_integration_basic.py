@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Teste básico de integração para verificar se as modificações quebraram funcionalidade essencial.
+Teste básico de integração para verificar se as modificações quebraram
+funcionalidade essencial.
 """
 
 import sys
@@ -9,7 +10,7 @@ import traceback
 from flext_target_oracle.target import OracleTarget
 
 
-def test_basic_initialization():
+def test_basic_initialization() -> None:
     """Testa inicialização básica sem config."""
     try:
         print("Testing basic initialization...")
@@ -21,7 +22,8 @@ def test_basic_initialization():
         traceback.print_exc()
         return False
 
-def test_initialization_with_minimal_config():
+
+def test_initialization_with_minimal_config() -> None:
     """Testa inicialização com config mínima."""
     try:
         print("Testing initialization with minimal config...")
@@ -30,7 +32,7 @@ def test_initialization_with_minimal_config():
             "port": 1521,
             "username": "test",
             "password": "test",
-            "database": "XE"
+            "database": "XE",
         }
         OracleTarget(config=config)
         print("✅ Minimal config initialization successful")
@@ -40,7 +42,8 @@ def test_initialization_with_minimal_config():
         traceback.print_exc()
         return False
 
-def test_initialization_with_none_config():
+
+def test_initialization_with_none_config() -> None:
     """Testa inicialização com config None."""
     try:
         print("Testing initialization with None config...")
@@ -51,6 +54,7 @@ def test_initialization_with_none_config():
         print(f"❌ None config initialization FAILED: {e}")
         traceback.print_exc()
         return False
+
 
 def main():
     """Execute todos os testes básicos."""
@@ -76,6 +80,7 @@ def main():
     else:
         print("💥 ALGUNS TESTES FALHARAM!")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

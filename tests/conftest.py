@@ -59,7 +59,10 @@ def env_config(project_root: Path) -> dict[str, Any]:
 
     if not env_path.exists():
         skip_msg = f"Environment file not found: {env_path}\n"
-        skip_msg += f"Please copy {env_example_path} to {env_path} and configure with your Oracle database credentials."
+        skip_msg += (
+            f"Please copy {env_example_path} to {env_path} and configure "
+            "with your Oracle database credentials."
+        )
         pytest.skip(skip_msg)
 
     config = {}
@@ -74,10 +77,9 @@ def env_config(project_root: Path) -> dict[str, Any]:
                 # Convert boolean strings to actual booleans (except for cert DN)
                 if value.lower() in ("true", "false") and "cert_dn" not in key.lower():
                     value = value.lower() == "true"
-                elif value.isdigit():
+                elif value.isdigit() and key.lower() in ["database__port", "port"]:
                     # Check if it's a port or other numeric value
-                    if key.lower() in ["database__port", "port"]:
-                        value = int(value)
+                    value = int(value)
 
                 # Handle special case for ssl_server_cert_dn
                 if (
@@ -105,7 +107,10 @@ def env_config(project_root: Path) -> dict[str, Any]:
 
     if missing_keys:
         skip_msg = f"Missing required configuration keys: {missing_keys}\n"
-        skip_msg += "Please ensure your .env file contains all required fields. See .env.example for reference."
+        skip_msg += (
+            "Please ensure your .env file contains all required fields. "
+            "See .env.example for reference."
+        )
         pytest.skip(skip_msg)
 
     # Convert port to integer if not already converted
@@ -192,11 +197,13 @@ def oracle_edition_info(
             with oracle_engine.connect() as conn:
                 # Check V$VERSION for edition info
                 result = conn.execute(
-                    text("""
+                    text(
+                        """
                     SELECT BANNER
                     FROM V$VERSION
                     WHERE BANNER LIKE 'Oracle Database%'
-                """)
+                """
+                    )
                 )
                 banner = result.fetchone()
                 if banner and banner[0]:
@@ -319,7 +326,7 @@ def sample_singer_schema() -> dict[str, Any]:
 
 
 @pytest.fixture(scope="function")
-def bulk_singer_records(test_schema_prefix: str) -> list[dict[str, Any]]:
+def bulk_singer_records(_test_schema_prefix: str) -> list[dict[str, Any]]:
     """Generate bulk Singer records for performance testing."""
     import random
     from datetime import datetime, timedelta
