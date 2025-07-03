@@ -203,15 +203,22 @@ class ConfigurationValidator:
         is_ee = self.config.get("oracle_is_enterprise_edition", False)
 
         # Features that require Enterprise Edition
+        def _check_parallel_degree(value: int) -> bool:
+            return value > 1
+
+        def _check_boolean_feature(value: bool) -> bool:
+            return value
+
         ee_features = {
-            "parallel_degree": (lambda x: x > 1, "Parallel processing > 1"),
-            "use_parallel_dml": (lambda x: x, "Parallel DML"),
-            "enable_parallel_ddl": (lambda x: x, "Parallel DDL"),
-            "enable_parallel_query": (lambda x: x, "Parallel Query"),
+            "parallel_degree": (_check_parallel_degree, "Parallel processing > 1"),
+            "use_parallel_dml": (_check_boolean_feature, "Parallel DML"),
+            "enable_parallel_ddl": (_check_boolean_feature, "Parallel DDL"),
+            "enable_parallel_query": (_check_boolean_feature, "Parallel Query"),
         }
 
         for config_key, (check_func, feature_name) in ee_features.items():
-            if check_func(self.config.get(config_key, False)) and not is_ee:
+            config_value = self.config.get(config_key, False)
+            if check_func(config_value) and not is_ee:
                 self.warnings.append(
                     f"{feature_name} requires Oracle Enterprise Edition license"
                 )

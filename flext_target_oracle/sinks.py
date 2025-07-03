@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from singer_sdk.target_base import Target
 
 
-class OracleSink(SQLSink):
+class OracleSink(SQLSink[OracleConnector]):
     """
     High-performance Oracle sink optimized for WAN and parallel processing.
 
@@ -43,7 +43,7 @@ class OracleSink(SQLSink):
         self,
         target: Target,
         stream_name: str,
-        schema: dict,
+        schema: dict[str, Any],
         key_properties: list[str] | None = None,
     ) -> None:
         """Initialize high-performance Oracle sink."""
@@ -74,6 +74,28 @@ class OracleSink(SQLSink):
         # Logging and monitoring (will be set by target)
         self._logger = None
         self._monitor = None
+
+        # Enhanced statistics tracking
+        self._stream_stats: dict[str, Any] = {
+            "total_records_received": 0,
+            "total_batches_processed": 0,
+            "total_records_inserted": 0,
+            "total_records_updated": 0,
+            "total_records_failed": 0,
+            "total_processing_time": 0.0,
+            "last_batch_time": None,
+            "first_batch_time": None,
+            "largest_batch_size": 0,
+            "smallest_batch_size": float('inf'),
+            "failed_batches": [],
+            "successful_operations": 0,
+            "database_operations": {
+                "inserts": 0,
+                "updates": 0,
+                "merges": 0,
+                "rows_affected": 0
+            }
+        }
 
     @property
     def key_properties(self) -> list[str]:
@@ -107,8 +129,50 @@ class OracleSink(SQLSink):
 
     def setup(self) -> None:
         """Set up the sink with Oracle-specific table creation."""
+        # 🔍 DEBUG: Log schema details before setup
+        schema_props = self.schema.get("properties", {})
+        self.logger.info(
+            "🔍 SINK SETUP DEBUG - Stream: %s - Schema properties: %d",
+            self.stream_name,
+            len(schema_props),
+            extra={
+                "stream_name": self.stream_name,
+                "schema_properties_count": len(schema_props),
+                "schema_properties": list(schema_props.keys())[:20],  # First 20
+                "full_schema": (
+                    self.schema if len(schema_props) <= 10 else None
+                )  # Full schema only if small
+            }
+        )
+
+        # 🔍 DEBUG: Check what conform_schema does
+        conformed = self.conform_schema(self.schema)
+        conformed_props = conformed.get("properties", {})
+        self.logger.info(
+            "🔍 SINK SETUP - After conform_schema - Stream: %s - Properties: %d",
+            self.stream_name,
+            len(conformed_props),
+            extra={
+                "stream_name": self.stream_name,
+                "conformed_properties_count": len(conformed_props),
+                "conformed_properties": list(conformed_props.keys())[:20],
+            }
+        )
+
         # Use Singer SDK's normal setup, with Oracle type mapping in connector
         super().setup()
+
+        # 🔍 DEBUG: Log what was actually created
+        self.logger.info(
+            "🔍 SINK SETUP COMPLETE - Stream: %s - Table: %s",
+            self.stream_name,
+            self.full_table_name,
+            extra={
+                "stream_name": self.stream_name,
+                "table_name": self.full_table_name,
+                "setup_completed": True
+            }
+        )
 
         # Apply Oracle optimizations after table is created (skip for basic test)
         if not self.config.get("skip_table_optimization", True):
@@ -193,14 +257,14 @@ class OracleSink(SQLSink):
         else:
             return None, full_name.strip('"')
 
-    def _get_oracle_column(self, name: str, json_schema: dict) -> Column:
+    def _get_oracle_column(self, name: str, json_schema: dict[str, Any]) -> Column[Any]:
         """Convert JSON schema property to Oracle column."""
         json_type = json_schema.get("type", "string")
 
         if json_type == "integer" or json_type == "number":
-            return Column(name, NUMBER(), nullable=True)
+            return Column(name, NUMBER(), nullable=True)  # type: ignore[no-untyped-call]
         elif json_type == "boolean":
-            return Column(name, NUMBER(1), nullable=True)
+            return Column(name, NUMBER(1), nullable=True)  # type: ignore[no-untyped-call]
         elif json_type == "string":
             # Check for format hints
             format_type = json_schema.get("format")
@@ -363,14 +427,71 @@ class OracleSink(SQLSink):
             else:
                 print(f"WARNING: Monitor engine setup failed (will retry later): {e}")
 
-    def process_batch(self, context: dict) -> None:
-        """Process batch with Oracle-specific optimizations and logging."""
+    def process_batch(self, context: dict[str, Any]) -> None:
+        """Process batch with comprehensive Oracle insertion tracking and statistics."""
+        import time
+        batch_start_time = time.time()
+
         records = context.get("records", [])
         if not records:
+            if self._logger:
+                self._logger.warning(
+                    f"⚠️ EMPTY BATCH for stream {self.stream_name} - No records"
+                )
             return
 
-        # Log batch processing
+        # Update statistics - records received
+        self._stream_stats["total_records_received"] = (
+            int(self._stream_stats["total_records_received"]) + len(records)
+        )
+        self._stream_stats["total_batches_processed"] = (
+            int(self._stream_stats["total_batches_processed"]) + 1
+        )
+
+        # Track batch size statistics
+        batch_size = len(records)
+        if batch_size > int(self._stream_stats["largest_batch_size"]):
+            self._stream_stats["largest_batch_size"] = batch_size
+        smallest_batch = self._stream_stats["smallest_batch_size"]
+        if isinstance(smallest_batch, (int, float)) and batch_size < smallest_batch:
+            self._stream_stats["smallest_batch_size"] = batch_size
+
+        # Track timing
+        if self._stream_stats["first_batch_time"] is None:
+            self._stream_stats["first_batch_time"] = batch_start_time
+        self._stream_stats["last_batch_time"] = batch_start_time
+
+        # Detailed batch analysis with enhanced statistics
         if self._logger:
+            self._logger.info(
+                f"📦 BATCH #{self._stream_stats['total_batches_processed']} STARTING",
+                extra={
+                    "stream_name": self.stream_name,
+                    "batch_number": self._stream_stats["total_batches_processed"],
+                    "batch_size": batch_size,
+                    "cumulative_records": self._stream_stats["total_records_received"],
+                    "load_method": self.config.get("load_method", "append-only"),
+                    "table_name": self.full_table_name,
+                    "key_properties": self.key_properties,
+                    "first_record_keys": list(records[0].keys()) if records else [],
+                    "sample_record_preview": (
+                        {k: str(v)[:50] for k, v in list(records[0].items())[:5]}
+                        if records else {}
+                    ),
+                    "avg_batch_size": (
+                        self._stream_stats["total_records_received"]
+                        / self._stream_stats["total_batches_processed"]
+                    ),
+                    "largest_batch": self._stream_stats["largest_batch_size"],
+                    "smallest_batch": (
+                        self._stream_stats["smallest_batch_size"]
+                        if self._stream_stats["smallest_batch_size"] != float('inf')
+                        else batch_size
+                    )
+                }
+            )
+
+            # Log batch processing
             self._logger.log_record_batch(
                 stream=self.stream_name,
                 batch_size=len(records),
@@ -393,33 +514,144 @@ class OracleSink(SQLSink):
                     self._process_batch_internal(records)
             else:
                 self._process_batch_internal(records)
+
+            # Mark successful processing
+            self._stream_stats["successful_operations"] = (
+                int(self._stream_stats["successful_operations"]) + 1
+            )
+            batch_end_time = time.time()
+            batch_duration = batch_end_time - batch_start_time
+            self._stream_stats["total_processing_time"] = (
+                float(self._stream_stats["total_processing_time"]) + batch_duration
+            )
+
+            # Log successful batch completion with performance metrics
+            if self._logger:
+                avg_processing_time = (
+                    float(self._stream_stats["total_processing_time"])
+                    / int(self._stream_stats["successful_operations"])
+                )
+                records_per_second = (
+                    batch_size / batch_duration if batch_duration > 0 else 0
+                )
+
+                self._logger.info(
+                    (
+                        f"✅ ORACLE SINK - BATCH "
+                        f"#{self._stream_stats['total_batches_processed']} COMPLETED"
+                    ),
+                    extra={
+                        "stream_name": self.stream_name,
+                        "batch_number": self._stream_stats["total_batches_processed"],
+                        "batch_size": batch_size,
+                        "processing_time_seconds": round(batch_duration, 3),
+                        "records_per_second": round(records_per_second, 2),
+                        "avg_processing_time": round(avg_processing_time, 3),
+                        "total_records_processed": self._stream_stats[
+                            "total_records_received"
+                        ],
+                        "successful_batches": self._stream_stats[
+                            "successful_operations"
+                        ],
+                        "failed_batches": len(self._stream_stats["failed_batches"]),
+                        "total_inserts": self._stream_stats["database_operations"][
+                            "inserts"
+                        ],
+                        "total_updates": self._stream_stats["database_operations"][
+                            "updates"
+                        ],
+                        "total_rows_affected": self._stream_stats[
+                            "database_operations"
+                        ]["rows_affected"]
+                    }
+                )
+
         except Exception as e:
+            # Track failed batch
+            batch_end_time = time.time()
+            batch_duration = batch_end_time - batch_start_time
+
+            failure_info = {
+                "batch_number": self._stream_stats["total_batches_processed"],
+                "batch_size": batch_size,
+                "error": str(e),
+                "processing_time": batch_duration,
+                "timestamp": batch_start_time
+            }
+            failed_batches = list(self._stream_stats["failed_batches"])
+            failed_batches.append(failure_info)
+            self._stream_stats["failed_batches"] = failed_batches
+            self._stream_stats["total_records_failed"] = (
+                int(self._stream_stats["total_records_failed"]) + batch_size
+            )
+
             if self._logger:
                 self._logger.error(
-                    f"Batch processing failed for stream {self.stream_name}",
+                    (
+                        f"❌ ORACLE SINK - BATCH "
+                        f"#{self._stream_stats['total_batches_processed']} FAILED"
+                    ),
                     extra={
                         "stream": self.stream_name,
-                        "batch_size": len(records),
+                        "batch_number": self._stream_stats["total_batches_processed"],
+                        "batch_size": batch_size,
                         "error": str(e),
+                        "processing_time_seconds": round(batch_duration, 3),
+                        "total_failed_records": self._stream_stats[
+                            "total_records_failed"
+                        ],
+                        "total_failed_batches": len(
+                            self._stream_stats["failed_batches"]
+                        ),
+                        "failure_rate": round(
+                            (
+                                self._stream_stats["total_records_failed"]
+                                / self._stream_stats["total_records_received"]
+                            )
+                            * 100,
+                            2,
+                        )
                     },
+                    exc_info=True
                 )
             raise
 
-    def _process_batch_internal(self, records: list[dict]) -> None:
-        """Internal batch processing logic."""
+    def _process_batch_internal(self, records: list[dict[str, Any]]) -> None:
+        """Internal batch processing logic with detailed SQL execution tracking."""
+        if self._logger:
+            self._logger.info(
+                "🔧 INTERNAL BATCH PROCESSING",
+                extra={
+                    "stream_name": self.stream_name,
+                    "records_count": len(records),
+                    "load_method": self.config.get("load_method", "append-only"),
+                    "has_key_properties": bool(self.key_properties),
+                    "key_properties": self.key_properties
+                }
+            )
+
         # Check if this is an upsert scenario
         if (
             self.config.get("load_method") == "upsert"
             and self.key_properties
             and len(records) > 0
         ):
+            if self._logger:
+                self._logger.info(
+                    f"🔄 USING UPSERT MODE for {self.stream_name}",
+                    extra={"key_properties": self.key_properties}
+                )
             self._process_batch_upsert(records)
         else:
             # Use Singer SDK's standard batch processing for append-only
+            if self._logger:
+                self._logger.info(
+                    f"➕ USING APPEND-ONLY MODE for {self.stream_name}"
+                )
             context = {"records": records}
             super().process_batch(context)
 
-    def _process_batch_upsert(self, records: list[dict]) -> None:
+    def _process_batch_upsert(self, records: list[dict[str, Any]]) -> None:
         """Process batch using Oracle MERGE for upsert operations."""
         if not self.key_properties:
             raise ValueError("Upsert requires key_properties to be defined")
@@ -486,7 +718,7 @@ class OracleSink(SQLSink):
 
         return merge_sql
 
-    def _process_batch_parallel(self, records: list[dict]) -> None:
+    def _process_batch_parallel(self, records: list[dict[str, Any]]) -> None:
         """Process batch in parallel chunks for maximum throughput."""
         # Split into chunks
         chunks = []
@@ -515,14 +747,14 @@ class OracleSink(SQLSink):
                 # Always raise - parallel processing errors indicate serious problems
                 raise
 
-    def _process_chunk(self, records: list[dict]) -> None:
+    def _process_chunk(self, records: list[dict[str, Any]]) -> None:
         """Process a single chunk of records."""
         if self.key_properties:
             self._execute_merge_batch(records)
         else:
             self._execute_insert_batch(records)
 
-    def _process_batch_direct_path(self, records: list[dict]) -> None:
+    def _process_batch_direct_path(self, records: list[dict[str, Any]]) -> None:
         """Process using Oracle direct path for maximum speed."""
         insert_sql = self._build_direct_path_insert()
         prepared = [self._conform_record(r) for r in records]
@@ -530,11 +762,11 @@ class OracleSink(SQLSink):
         with self.connector._engine.connect() as conn, conn.begin():
             conn.execute(sqlalchemy.text(insert_sql), prepared)
 
-    def _process_batch_bulk_insert(self, records: list[dict]) -> None:
+    def _process_batch_bulk_insert(self, records: list[dict[str, Any]]) -> None:
         """Process using optimized bulk insert."""
         self._execute_insert_batch(records)
 
-    def _process_batch_with_merge(self, context: dict) -> None:
+    def _process_batch_with_merge(self, context: dict[str, Any]) -> None:
         """Process batch using high-performance Oracle MERGE."""
         records = context.get("records", [])
         if not records:
@@ -542,25 +774,344 @@ class OracleSink(SQLSink):
 
         self._execute_merge_batch(records)
 
-    def _execute_insert_batch(self, records: list[dict]) -> None:
-        """Execute high-performance bulk insert."""
+    def _execute_insert_batch(self, records: list[dict[str, Any]]) -> None:
+        """Execute high-performance bulk insert with comprehensive tracking."""
+        import time
+        operation_start = time.time()
+
+        if self._logger:
+            self._logger.info(
+                "💽 EXECUTING INSERT BATCH",
+                extra={
+                    "stream_name": self.stream_name,
+                    "records_count": len(records),
+                    "table_name": self.full_table_name,
+                    "operation_type": "INSERT"
+                }
+            )
+
         insert_sql = self._build_bulk_insert_statement()
         prepared = [self._conform_record(r) for r in records]
 
-        with self.connector._engine.connect() as conn, conn.begin():
-            conn.execute(sqlalchemy.text(insert_sql), prepared)
+        if self._logger:
+            self._logger.info(
+                "📝 SQL INSERT STATEMENT",
+                extra={
+                    "stream_name": self.stream_name,
+                    "sql_statement": (
+                        insert_sql[:500] + "..."
+                        if len(insert_sql) > 500
+                        else insert_sql
+                    ),
+                    "prepared_records_count": len(prepared),
+                    "sample_prepared_record": prepared[0] if prepared else {}
+                }
+            )
 
-    def _execute_merge_batch(self, records: list[dict]) -> None:
-        """Execute high-performance MERGE operation."""
+        try:
+            with self.connector._engine.connect() as conn, conn.begin():
+                result = conn.execute(sqlalchemy.text(insert_sql), prepared)
+                rows_affected = getattr(result, 'rowcount', len(prepared))
+
+                # Update statistics
+                self._stream_stats["total_records_inserted"] = (
+                    int(self._stream_stats["total_records_inserted"]) + len(prepared)
+                )
+                db_ops = dict(self._stream_stats["database_operations"])
+                db_ops["inserts"] = int(db_ops["inserts"]) + 1
+                db_ops["rows_affected"] = int(db_ops["rows_affected"]) + rows_affected
+                self._stream_stats["database_operations"] = db_ops
+
+                operation_end = time.time()
+                operation_duration = operation_end - operation_start
+
+                # Verify actual insertion by querying the database
+                verification_query = f"SELECT COUNT(*) FROM {self.full_table_name}"
+                try:
+                    count_result = conn.execute(sqlalchemy.text(verification_query))
+                    total_rows_in_table = count_result.scalar()
+                except Exception as verification_error:
+                    # DO NOT SILENCE VERIFICATION ERRORS - Log them clearly
+                    total_rows_in_table = "verification_failed"
+                    if self._logger:
+                        self._logger.error(
+                            (
+                                f"❌ VERIFICATION QUERY FAILED after INSERT: "
+                                f"{verification_error}"
+                            ),
+                            extra={
+                                "stream_name": self.stream_name,
+                                "verification_query": verification_query,
+                                "error_type": type(verification_error).__name__,
+                                "error_details": str(verification_error)
+                            }
+                        )
+
+                if self._logger:
+                    self._logger.info(
+                        "✅ INSERT OPERATION SUCCESSFUL",
+                        extra={
+                            "stream_name": self.stream_name,
+                            "operation_type": "INSERT",
+                            "records_sent": len(prepared),
+                            "rows_affected": rows_affected,
+                            "table_name": self.full_table_name,
+                            "operation_duration": round(operation_duration, 3),
+                            "records_per_second": round(
+                                len(prepared) / operation_duration
+                                if operation_duration > 0
+                                else 0,
+                                2,
+                            ),
+                            "total_rows_in_table": total_rows_in_table,
+                            "cumulative_inserts": self._stream_stats[
+                                "total_records_inserted"
+                            ],
+                            "total_db_operations": self._stream_stats[
+                                "database_operations"
+                            ]["inserts"],
+                            "total_rows_affected": self._stream_stats[
+                            "database_operations"
+                        ]["rows_affected"]
+                        }
+                    )
+
+        except Exception as e:
+            operation_end = time.time()
+            operation_duration = operation_end - operation_start
+
+            if self._logger:
+                self._logger.error(
+                    "❌ INSERT OPERATION FAILED",
+                    extra={
+                        "stream_name": self.stream_name,
+                        "operation_type": "INSERT",
+                        "error": str(e),
+                        "sql_statement": (
+                            insert_sql[:200] + "..."
+                            if len(insert_sql) > 200
+                            else insert_sql
+                        ),
+                        "records_attempted": len(prepared),
+                        "operation_duration": round(operation_duration, 3),
+                        "table_name": self.full_table_name,
+                        "sample_record": prepared[0] if prepared else {}
+                    },
+                    exc_info=True
+                )
+            raise
+
+    def _execute_merge_batch(self, records: list[dict[str, Any]]) -> None:
+        """Execute high-performance MERGE operation with comprehensive tracking."""
+        import time
+        operation_start = time.time()
+
+        if self._logger:
+            self._logger.info(
+                "🔄 EXECUTING MERGE BATCH",
+                extra={
+                    "stream_name": self.stream_name,
+                    "records_count": len(records),
+                    "table_name": self.full_table_name,
+                    "operation_type": "MERGE"
+                }
+            )
+
         merge_sql = self._build_merge_statement()
         prepared = [self._conform_record(r) for r in records]
 
-        with self.connector._engine.connect() as conn, conn.begin():
-            # Process in optimal batch sizes
-            batch_size = self.config.get("merge_batch_size", 5000)
-            for i in range(0, len(prepared), batch_size):
-                batch = prepared[i : i + batch_size]
-                conn.execute(sqlalchemy.text(merge_sql), batch)
+        if self._logger:
+            self._logger.info(
+                "📝 SQL MERGE STATEMENT",
+                extra={
+                    "stream_name": self.stream_name,
+                    "sql_statement": (
+                        merge_sql[:500] + "..."
+                        if len(merge_sql) > 500
+                        else merge_sql
+                    ),
+                    "prepared_records_count": len(prepared)
+                }
+            )
+
+        try:
+            with self.connector._engine.connect() as conn, conn.begin():
+                # Get initial row count for comparison
+                verification_query = f"SELECT COUNT(*) FROM {self.full_table_name}"
+                try:
+                    initial_count_result = conn.execute(
+                        sqlalchemy.text(verification_query)
+                    )
+                    initial_row_count = initial_count_result.scalar()
+                except Exception as initial_count_error:
+                    # DO NOT SILENCE INITIAL COUNT ERRORS - Log them
+                    initial_row_count = "count_failed"
+                    if self._logger:
+                        self._logger.error(
+                            (
+                                f"❌ INITIAL COUNT QUERY FAILED for MERGE: "
+                                f"{initial_count_error}"
+                            ),
+                            extra={
+                                "stream_name": self.stream_name,
+                                "verification_query": verification_query,
+                                "error_type": type(initial_count_error).__name__,
+                                "error_details": str(initial_count_error)
+                            }
+                        )
+
+                # Process in optimal batch sizes
+                batch_size = self.config.get("merge_batch_size", 5000)
+                total_affected = 0
+                total_sub_batches = 0
+
+                for i in range(0, len(prepared), batch_size):
+                    batch = prepared[i : i + batch_size]
+                    result = conn.execute(sqlalchemy.text(merge_sql), batch)
+                    batch_affected = getattr(result, 'rowcount', 0)
+                    total_affected += batch_affected
+                    total_sub_batches += 1
+
+                    if self._logger:
+                        self._logger.info(
+                            "🔄 MERGE SUB-BATCH PROCESSED",
+                            extra={
+                                "stream_name": self.stream_name,
+                                "sub_batch_number": (i // batch_size) + 1,
+                                "sub_batch_size": len(batch),
+                                "rows_affected": batch_affected,
+                                "cumulative_affected": total_affected
+                            }
+                        )
+
+                # Get final row count
+                try:
+                    final_count_result = conn.execute(
+                        sqlalchemy.text(verification_query)
+                    )
+                    final_row_count = final_count_result.scalar()
+                    net_change = (
+                        final_row_count - initial_row_count
+                        if (
+                            isinstance(initial_row_count, int)
+                            and isinstance(final_row_count, int)
+                        )
+                        else "unknown"
+                    )
+                except Exception as final_count_error:
+                    # DO NOT SILENCE FINAL COUNT ERRORS - Log them
+                    final_row_count = "count_failed"
+                    net_change = "count_failed"
+                    if self._logger:
+                        self._logger.error(
+                            (
+                                f"❌ FINAL COUNT QUERY FAILED for MERGE: "
+                                f"{final_count_error}"
+                            ),
+                            extra={
+                                "stream_name": self.stream_name,
+                                "verification_query": verification_query,
+                                "error_type": type(final_count_error).__name__,
+                                "error_details": str(final_count_error)
+                            }
+                        )
+
+                # Update statistics
+                db_ops = dict(self._stream_stats["database_operations"])
+                db_ops["merges"] = int(db_ops["merges"]) + 1
+                db_ops["rows_affected"] = int(db_ops["rows_affected"]) + total_affected
+                self._stream_stats["database_operations"] = db_ops
+
+                # Estimate inserts vs updates (rough calculation)
+                if isinstance(net_change, int) and net_change >= 0:
+                    estimated_inserts = net_change
+                    estimated_updates = len(prepared) - estimated_inserts
+                    self._stream_stats["total_records_inserted"] = (
+                        int(self._stream_stats["total_records_inserted"])
+                        + estimated_inserts
+                    )
+                    self._stream_stats["total_records_updated"] = (
+                        int(self._stream_stats["total_records_updated"])
+                        + estimated_updates
+                    )
+                else:
+                    # Fallback: assume all records were processed
+                    self._stream_stats["total_records_updated"] = (
+                        int(self._stream_stats["total_records_updated"]) + len(prepared)
+                    )
+
+                operation_end = time.time()
+                operation_duration = operation_end - operation_start
+
+                if self._logger:
+                    self._logger.info(
+                        "✅ MERGE OPERATION SUCCESSFUL",
+                        extra={
+                            "stream_name": self.stream_name,
+                            "operation_type": "MERGE",
+                            "records_sent": len(prepared),
+                            "total_rows_affected": total_affected,
+                            "sub_batches_processed": total_sub_batches,
+                            "table_name": self.full_table_name,
+                            "operation_duration": round(operation_duration, 3),
+                            "records_per_second": round(
+                                len(prepared) / operation_duration
+                                if operation_duration > 0
+                                else 0,
+                                2,
+                            ),
+                            "initial_table_rows": initial_row_count,
+                            "final_table_rows": final_row_count,
+                            "net_row_change": net_change,
+                            "estimated_inserts": (
+                                net_change
+                                if isinstance(net_change, int) and net_change >= 0
+                                else "unknown"
+                            ),
+                            "estimated_updates": (
+                                len(prepared) - net_change
+                                if isinstance(net_change, int) and net_change >= 0
+                                else "unknown"
+                            ),
+                            "cumulative_inserts": self._stream_stats[
+                                "total_records_inserted"
+                            ],
+                            "cumulative_updates": self._stream_stats[
+                                "total_records_updated"
+                            ],
+                            "total_db_operations": self._stream_stats[
+                                "database_operations"
+                            ]["merges"],
+                            "total_rows_affected_cumulative": self._stream_stats[
+                                "database_operations"
+                            ]["rows_affected"]
+                        }
+                    )
+
+        except Exception as e:
+            operation_end = time.time()
+            operation_duration = operation_end - operation_start
+
+            if self._logger:
+                self._logger.error(
+                    "❌ MERGE OPERATION FAILED",
+                    extra={
+                        "stream_name": self.stream_name,
+                        "operation_type": "MERGE",
+                        "error": str(e),
+                        "sql_statement": (
+                            merge_sql[:200] + "..."
+                            if len(merge_sql) > 200
+                            else merge_sql
+                        ),
+                        "records_attempted": len(prepared),
+                        "operation_duration": round(operation_duration, 3),
+                        "table_name": self.full_table_name,
+                        "sample_record": prepared[0] if prepared else {}
+                    },
+                    exc_info=True
+                )
+            raise
 
     def _build_direct_path_insert(self) -> str:
         """Build INSERT with APPEND_VALUES hint for direct path."""
@@ -652,7 +1203,7 @@ class OracleSink(SQLSink):
         return merge_sql
 
     def _singer_sdk_to_oracle_type(
-        self, singer_type: dict
+        self, singer_type: dict[str, Any]
     ) -> sqlalchemy.types.TypeEngine[Any]:
         """Map Singer SDK types to Oracle types using SQLAlchemy."""
         type_str = singer_type.get("type", "string")
@@ -680,20 +1231,20 @@ class OracleSink(SQLSink):
         elif type_str == "integer":
             return sqlalchemy.dialects.oracle.NUMBER(
                 precision=self.config.get("number_precision", 38), scale=0
-            )
+            )  # type: ignore[no-untyped-call]
 
         elif type_str == "number":
             return sqlalchemy.dialects.oracle.NUMBER(
                 precision=self.config.get("number_precision", 38),
                 scale=self.config.get("number_scale", 10),
-            )
+            )  # type: ignore[no-untyped-call]
 
         elif type_str == "boolean":
             # Oracle doesn't have native boolean
             if self.config.get("supports_native_boolean"):
                 return sqlalchemy.BOOLEAN()
             else:
-                return sqlalchemy.dialects.oracle.NUMBER(1, 0)
+                return sqlalchemy.dialects.oracle.NUMBER(1, 0)  # type: ignore[no-untyped-call]
 
         elif type_str == "object" or type_str == "array":
             # Store JSON as CLOB or native JSON type
@@ -721,9 +1272,12 @@ class OracleSink(SQLSink):
         super().activate_version(new_version)
 
     def clean_up(self) -> None:
-        """Clean up with maximum performance optimizations and logging."""
+        """Clean up with comprehensive final statistics reporting."""
         if self._logger:
-            self._logger.info(f"Starting cleanup for stream {self.stream_name}")
+            self._logger.info(f"🧹 Starting cleanup for stream {self.stream_name}")
+
+        # Generate comprehensive final statistics report
+        self._generate_final_statistics_report()
 
         try:
             # Gather advanced statistics
@@ -744,7 +1298,9 @@ class OracleSink(SQLSink):
                                 method_opt => 'FOR ALL COLUMNS SIZE AUTO',
                                 granularity => 'ALL',
                                 cascade => TRUE,
-                                degree => {self.config.get('parallel_degree', 'DBMS_STATS.DEFAULT_DEGREE')}"
+                                degree => {self.config.get(
+                                    'parallel_degree', 'DBMS_STATS.DEFAULT_DEGREE'
+                                )}"
                             );
                         END;
                     """
@@ -867,7 +1423,7 @@ class OracleSink(SQLSink):
                     )
                 # Don't raise - this is optimization, not critical
 
-    def _conform_record(self, record: dict) -> dict:
+    def _conform_record(self, record: dict[str, Any]) -> dict[str, Any]:
         """Conform record to Oracle requirements using Singer SDK patterns."""
         conformed: dict[str, Any] = {}
 
@@ -912,3 +1468,162 @@ class OracleSink(SQLSink):
         # Don't add Singer metadata here - Singer SDK handles this automatically
 
         return conformed
+
+    def _generate_final_statistics_report(self) -> None:
+        """Generate comprehensive final statistics report for the stream."""
+        import time
+
+        if not self._logger:
+            return
+
+        # Calculate final metrics
+        total_duration = 0.0
+        if (self._stream_stats["first_batch_time"] and
+            self._stream_stats["last_batch_time"]):
+            total_duration = (
+                self._stream_stats["last_batch_time"]
+                - self._stream_stats["first_batch_time"]
+            )
+
+        avg_processing_time = (
+            self._stream_stats["total_processing_time"]
+            / self._stream_stats["successful_operations"]
+            if self._stream_stats["successful_operations"] > 0 else 0
+        )
+
+        overall_records_per_second = (
+            self._stream_stats["total_records_received"] / total_duration
+            if total_duration > 0 else 0
+        )
+
+        success_rate = (
+            (
+                self._stream_stats["successful_operations"]
+                / self._stream_stats["total_batches_processed"]
+            )
+            * 100
+            if self._stream_stats["total_batches_processed"] > 0 else 0
+        )
+
+        failure_rate = (
+            (
+                self._stream_stats["total_records_failed"]
+                / self._stream_stats["total_records_received"]
+            )
+            * 100
+            if self._stream_stats["total_records_received"] > 0 else 0
+        )
+
+        # Get final table row count
+        final_table_count = "unknown"
+        try:
+            with self.connector._engine.connect() as conn:
+                verification_query = f"SELECT COUNT(*) FROM {self.full_table_name}"
+                count_result = conn.execute(sqlalchemy.text(verification_query))
+                final_table_count = count_result.scalar()
+        except Exception as final_stats_error:
+            # DO NOT SILENCE FINAL STATISTICS ERRORS - Log them
+            final_table_count = "statistics_query_failed"
+            if self._logger:
+                self._logger.error(
+                    f"❌ FINAL STATISTICS QUERY FAILED: {final_stats_error}",
+                    extra={
+                        "stream_name": self.stream_name,
+                        "verification_query": verification_query,
+                        "error_type": type(final_stats_error).__name__,
+                        "error_details": str(final_stats_error),
+                        "context": "final_statistics_generation"
+                    }
+                )
+
+        self._logger.info(
+            f"📊 FINAL STATISTICS REPORT - STREAM: {self.stream_name}",
+            extra={
+                "=== STREAM PROCESSING SUMMARY ===": True,
+                "stream_name": self.stream_name,
+                "table_name": self.full_table_name,
+                "load_method": self.config.get("load_method", "append-only"),
+
+                "=== RECORD PROCESSING STATS ===": True,
+                "total_records_received": self._stream_stats["total_records_received"],
+                "total_batches_processed": self._stream_stats[
+                    "total_batches_processed"
+                ],
+                "successful_batches": self._stream_stats["successful_operations"],
+                "failed_batches": len(self._stream_stats["failed_batches"]),
+                "success_rate_percent": round(success_rate, 2),
+                "failure_rate_percent": round(failure_rate, 2),
+
+                "=== DATABASE OPERATIONS ===": True,
+                "total_records_inserted": self._stream_stats["total_records_inserted"],
+                "total_records_updated": self._stream_stats["total_records_updated"],
+                "total_records_failed": self._stream_stats["total_records_failed"],
+                "insert_operations": self._stream_stats[
+                    "database_operations"
+                ]["inserts"],
+                "merge_operations": self._stream_stats["database_operations"]["merges"],
+                "total_rows_affected": self._stream_stats[
+                                "database_operations"
+                            ]["rows_affected"],
+                "final_table_row_count": final_table_count,
+
+                "=== PERFORMANCE METRICS ===": True,
+                "total_processing_duration": round(total_duration, 3),
+                "avg_batch_processing_time": round(avg_processing_time, 3),
+                "overall_records_per_second": round(overall_records_per_second, 2),
+                "largest_batch_size": self._stream_stats["largest_batch_size"],
+                "smallest_batch_size": (
+                    self._stream_stats["smallest_batch_size"]
+                    if self._stream_stats["smallest_batch_size"] != float('inf')
+                    else 0
+                ),
+                "avg_batch_size": (
+                    round(
+                        self._stream_stats["total_records_received"]
+                        / self._stream_stats["total_batches_processed"],
+                        2,
+                    )
+                    if self._stream_stats["total_batches_processed"] > 0
+                    else 0
+                ),
+
+                "=== FAILURE ANALYSIS ===": True,
+                "failed_batch_details": (
+                    self._stream_stats["failed_batches"][-5:]
+                    if self._stream_stats["failed_batches"]
+                    else "No failures"
+                ),
+                "total_failed_records": self._stream_stats["total_records_failed"],
+
+                "=== TIMING INFO ===": True,
+                "first_batch_timestamp": (
+                    time.strftime(
+                        '%Y-%m-%d %H:%M:%S',
+                        time.localtime(self._stream_stats["first_batch_time"])
+                    )
+                    if self._stream_stats["first_batch_time"]
+                    else "N/A"
+                ),
+                "last_batch_timestamp": (
+                    time.strftime(
+                        '%Y-%m-%d %H:%M:%S',
+                        time.localtime(self._stream_stats["last_batch_time"])
+                    )
+                    if self._stream_stats["last_batch_time"]
+                    else "N/A"
+                ),
+                "total_session_duration": round(total_duration, 3)
+            }
+        )
+
+        # Additional summary log for quick reference
+        self._logger.info(
+            f"🎯 QUICK SUMMARY - {self.stream_name}: "
+            f"{self._stream_stats['total_records_received']} records → "
+            f"{self._stream_stats['total_records_inserted']} inserted, "
+            f"{self._stream_stats['total_records_updated']} updated, "
+            f"{self._stream_stats['total_records_failed']} failed | "
+            f"Final table count: {final_table_count} | "
+            f"Success rate: {round(success_rate, 1)}% | "
+            f"Avg speed: {round(overall_records_per_second, 1)} rec/sec"
+        )

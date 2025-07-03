@@ -511,9 +511,13 @@ class TestOracleAutonomousE2E:
         # depending on error handling configuration
         try:
             target.listen(file_input=StringIO(input_data))
-        except Exception:
-            # Expected for duplicate key in append-only mode
-            pass
+        except Exception as e:
+            # Expected for duplicate key in append-only mode - log for debugging
+            print(f"ℹ️ Expected error in append-only mode with duplicate key: {e}")
+            # Check if it's actually the expected duplicate key error
+            error_str = str(e).lower()
+            assert any(keyword in error_str for keyword in ["unique", "duplicate", "constraint"]), \
+                f"Unexpected error type: {e}"
 
         # Verify original record is still there
         sink = target.get_sink("test_errors")

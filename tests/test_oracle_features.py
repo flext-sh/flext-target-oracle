@@ -362,9 +362,9 @@ class TestOracleSpecificFeatures:
                 table_info = result.fetchone()
                 if table_info and table_info.compression:
                     assert table_info.compression in ["ENABLED", "DISABLED"]
-            except Exception:
-                # Compression info may not be accessible, which is acceptable
-                pass
+            except Exception as e:
+                # Compression info may not be accessible (permissions) - log for debugging
+                print(f"ℹ️ Could not access compression info (expected in some environments): {e}")
 
     def test_array_size_optimization(
         self,
