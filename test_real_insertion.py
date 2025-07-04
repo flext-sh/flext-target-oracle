@@ -146,6 +146,7 @@ def test_real_data_insertion():
         traceback.print_exc()
         return False
 
+
 if __name__ == '__main__':
     success = test_real_data_insertion()
     print(f'\n📊 RESULTADO: {"✅ SUCESSO" if success else "❌ FALHOU"}')

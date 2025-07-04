@@ -412,64 +412,6 @@ class OracleConnector(SQLConnector):
         # Don't add query parameters as they're handled in connect_args
         return url
 
-    def _setup_async_engine(self) -> None:
-        """Setup SQLAlchemy 2.x async engine with modern patterns."""
-        if self.config.get("enable_async", False):
-            # Create async engine for modern SQLAlchemy 2.x patterns
-            url = self.get_sqlalchemy_url().replace(
-                "oracle+oracledb", "oracle+oracledb_async"
-            )
-
-            self._async_engine = create_async_engine(
-                url,
-                echo=self.config.get("echo", False),
-                pool_size=self.config.get("pool_size", 10),
-                max_overflow=self.config.get("max_overflow", 20),
-                pool_pre_ping=True,
-                # SQLAlchemy 2.x specific options
-                future=True,
-                query_cache_size=self.config.get("query_cache_size", 5000),
-            )
-
-            # Create async session factory
-            self._async_session_factory = async_sessionmaker(
-                bind=self._async_engine,
-                class_=AsyncSession,
-                expire_on_commit=False,
-            )
-
-    @asynccontextmanager
-    async def get_async_session(self) -> AsyncIterator[AsyncSession]:
-        """Get async session with proper lifecycle management."""
-        if not self._async_session_factory:
-            raise RuntimeError("Async engine not configured. Set enable_async=True")
-
-        async with self._async_session_factory() as session:
-            try:
-                yield session
-                await session.commit()
-            except Exception:
-                await session.rollback()
-                raise
-            finally:
-                await session.close()
-
-    @asynccontextmanager
-    async def get_async_connection(self) -> AsyncIterator[AsyncConnection]:
-        """Get async connection for advanced operations."""
-        if not self._async_engine:
-            raise RuntimeError("Async engine not configured. Set enable_async=True")
-
-        async with self._async_engine.begin() as conn:
-            yield conn
-
-    async def execute_async(
-        self, stmt: Any, parameters: dict[str, Any] | None = None
-    ) -> Any:
-        """Execute statement asynchronously with modern SQLAlchemy 2.x patterns."""
-        async with self.get_async_connection() as conn:
-            return await conn.execute(stmt, parameters or {})
-
     def create_engine(self) -> Engine:
         """Create SQLAlchemy engine with maximum Oracle performance features."""
         # For Oracle Autonomous Database with TCPS, use connect_args approach

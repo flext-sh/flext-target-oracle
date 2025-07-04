@@ -10,57 +10,19 @@ Maximizes Oracle Database performance for:
 
 from __future__ import annotations
 
-import asyncio
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import TYPE_CHECKING, Any
 
 import sqlalchemy
 from singer_sdk.sinks import SQLSink
-from sqlalchemy import Column, insert, select, update
+from sqlalchemy import Column
 from sqlalchemy.dialects.oracle import CLOB, NUMBER, TIMESTAMP, VARCHAR2
-from sqlalchemy.orm import Mapped, mapped_column
 
-from .connectors import OracleConnector, OracleConnectorBase
+from .connectors import OracleConnector
 
 if TYPE_CHECKING:
-    import datetime
-
     from singer_sdk.target_base import Target
-
-
-class OracleTargetTable(OracleConnectorBase):
-    """SQLAlchemy 2.x ORM model for Oracle target tables with typed mappings."""
-
-    __abstract__ = True  # This is a base class
-
-    # Standard audit fields with typed mappings
-    create_user: Mapped[str | None] = mapped_column(VARCHAR2(255), nullable=True)
-    create_ts: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=False), nullable=True
-    )
-    mod_user: Mapped[str | None] = mapped_column(VARCHAR2(255), nullable=True)
-    mod_ts: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=False), nullable=False
-    )
-    tk_date: Mapped[datetime.datetime] = mapped_column(
-        TIMESTAMP(timezone=False),
-        server_default=sqlalchemy.func.current_timestamp(),
-        nullable=False
-    )
-
-    # Singer SDK metadata fields with typed mappings
-    sdc_extracted_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=False), nullable=True
-    )
-    sdc_received_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=False), nullable=True
-    )
-    sdc_batched_at: Mapped[datetime.datetime | None] = mapped_column(
-        TIMESTAMP(timezone=False), nullable=True
-    )
-    sdc_sequence: Mapped[int | None] = mapped_column(NUMBER(), nullable=True)  # type: ignore[no-untyped-call]
-    sdc_table_version: Mapped[int | None] = mapped_column(NUMBER(), nullable=True)  # type: ignore[no-untyped-call]
 
 
 class OracleSink(SQLSink[OracleConnector]):
@@ -1488,25 +1450,9 @@ class OracleSink(SQLSink[OracleConnector]):
                     # Always raise - parallel processing errors indicate serious issues
                     raise
         else:
-            # Use async processing if available
-            if self.config.get("enable_async", False):
-                asyncio.run(self._process_chunks_async(chunks))
-            else:
-                # Fallback to sequential processing
-                for chunk in chunks:
-                    self._process_chunk(chunk)
-
-    async def _process_chunks_async(self, chunks: list[list[dict[str, Any]]]) -> None:
-        """Process chunks asynchronously with SQLAlchemy 2.x patterns."""
-        tasks = []
-        for chunk in chunks:
-            if self.key_properties:
-                task = self._execute_merge_batch_async(chunk)
-            else:
-                task = self._execute_insert_batch_async(chunk)
-            tasks.append(task)
-
-        await asyncio.gather(*tasks)
+            # Fallback to sequential processing
+            for chunk in chunks:
+                self._process_chunk(chunk)
 
     def _process_chunk(self, records: list[dict[str, Any]]) -> None:
         """Process a single chunk of records."""
@@ -1534,23 +1480,6 @@ class OracleSink(SQLSink[OracleConnector]):
             return
 
         self._execute_merge_batch(records)
-
-    async def _execute_insert_batch_async(self, records: list[dict[str, Any]]) -> None:
-        """Execute async bulk insert with SQLAlchemy 2.x patterns."""
-        if not self.connector._async_engine:
-            # Fallback to sync processing
-            return self._execute_insert_batch(records)
-
-        async with self.connector.get_async_session() as session:
-            # Use modern SQLAlchemy 2.x insert patterns
-            stmt = insert(self._get_table_model())
-            prepared_records = [self._conform_record(r) for r in records]
-
-            await session.execute(stmt, prepared_records)
-            await session.commit()
-
-            # Update statistics
-            self._stream_stats["total_records_inserted"] += len(prepared_records)
 
     def _execute_insert_batch(self, records: list[dict[str, Any]]) -> None:
         """Execute high-performance bulk insert with comprehensive tracking."""
@@ -1681,49 +1610,6 @@ class OracleSink(SQLSink[OracleConnector]):
                     exc_info=True,
                 )
             raise
-
-    async def _execute_merge_batch_async(self, records: list[dict[str, Any]]) -> None:
-        """Execute async MERGE with modern SQLAlchemy 2.x patterns."""
-        if not self.connector._async_engine:
-            # Fallback to sync processing
-            return self._execute_merge_batch(records)
-
-        async with self.connector.get_async_session() as session:
-            table_model = self._get_table_model()
-
-            for record in records:
-                conformed = self._conform_record(record)
-                key_values = {
-                    k: conformed[k] for k in self.key_properties if k in conformed
-                }
-
-                # Try to find existing record
-                stmt = select(table_model).where(
-                    *[getattr(table_model, k) == v for k, v in key_values.items()]
-                )
-                existing = await session.execute(stmt)
-                row = existing.scalar_one_or_none()
-
-                if row:
-                    # Update existing record
-                    update_stmt = update(table_model).where(
-                        *[getattr(table_model, k) == v for k, v in key_values.items()]
-                    ).values(**conformed)
-                    await session.execute(update_stmt)
-                    self._stream_stats["total_records_updated"] += 1
-                else:
-                    # Insert new record
-                    insert_stmt = insert(table_model).values(**conformed)
-                    await session.execute(insert_stmt)
-                    self._stream_stats["total_records_inserted"] += 1
-
-            await session.commit()
-
-    def _get_table_model(self) -> type[OracleTargetTable]:
-        """Get or create SQLAlchemy 2.x ORM model for this table."""
-        # This would dynamically create a table model based on schema
-        # For now, return the base class
-        return OracleTargetTable
 
     def _execute_merge_batch(self, records: list[dict[str, Any]]) -> None:
         """Execute high-performance MERGE operation with comprehensive tracking."""
