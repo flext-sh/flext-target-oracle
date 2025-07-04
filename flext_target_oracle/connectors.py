@@ -39,7 +39,7 @@ class OracleConnector(SQLConnector):
     allow_merge_upsert: bool = True
     allow_temp_tables: bool = True
 
-    def get_sqlalchemy_url(self, config: dict[str, Any]) -> URL:
+    def get_sqlalchemy_url(self, config: dict[str, Any]) -> URL:  # type: ignore[override]
         """Construct SQLAlchemy URL using URL.create() - SQLAlchemy 2.0 way."""
         # Use oracledb (python-oracledb) driver
         return URL.create(
@@ -115,7 +115,8 @@ class OracleConnector(SQLConnector):
         @event.listens_for(engine, "connect")
         def receive_connect(dbapi_conn: DBAPIConnection, _: Any) -> None:
             """Configure each new connection."""
-            with dbapi_conn.cursor() as cursor:
+            cursor = dbapi_conn.cursor()
+            try:
                 # Set session parameters for optimization
                 if self.config.get("enable_parallel_dml", False):
                     cursor.execute("ALTER SESSION ENABLE PARALLEL DML")
@@ -134,19 +135,23 @@ class OracleConnector(SQLConnector):
                     cursor.execute(
                         f"ALTER SESSION SET OPTIMIZER_MODE = {optimizer_mode}"
                     )
+            finally:
+                cursor.close()
 
-            # Configure connection parameters
-            dbapi_conn.arraysize = self.config.get("arraysize", 1000)
-            dbapi_conn.prefetchrows = self.config.get("prefetchrows", 1000)
+            # Configure connection parameters (Oracle-specific)
+            if hasattr(dbapi_conn, "arraysize"):
+                dbapi_conn.arraysize = self.config.get("arraysize", 1000)  # type: ignore[attr-defined]
+            if hasattr(dbapi_conn, "prefetchrows"):
+                dbapi_conn.prefetchrows = self.config.get("prefetchrows", 1000)  # type: ignore[attr-defined]
 
     @property
     def connector_config(self) -> dict[str, Any]:
         """Return config for Singer SDK, hiding password."""
-        config = super().connector_config.copy()
+        config = super().connector_config.copy()  # type: ignore[misc]
         config.pop("password", None)
         return config
 
-    def get_column_add_ddl(
+    def get_column_add_ddl(  # type: ignore[override]
         self, _: str, column_name: str, column_type: Any
     ) -> str:
         """Use SQLAlchemy's DDL compiler for ALTER TABLE ADD."""
@@ -154,7 +159,7 @@ class OracleConnector(SQLConnector):
         from sqlalchemy.schema import AddColumn
 
         # Create column for DDL
-        column = Column(column_name, column_type)
+        column: Column[Any] = Column(column_name, column_type)
 
         # Use SQLAlchemy's DDL compiler
         add_column = AddColumn(column)

@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 class OracleSink(SQLSink[OracleConnector]):
     """
     High-performance Oracle sink using SQLAlchemy 2.0.
-    
+
     Uses SQLAlchemy's native features:
     - Bulk operations with executemany()
     - ON CONFLICT for upserts
@@ -76,7 +76,7 @@ class OracleSink(SQLSink[OracleConnector]):
         }
 
     @property
-    def full_table_name(self) -> str:
+    def full_table_name(self) -> str:  # type: ignore[override]
         """Get fully qualified table name."""
         schema_name = self.config.get("default_target_schema", "")
         table_name = self.stream_name.upper()
@@ -207,7 +207,7 @@ class OracleSink(SQLSink[OracleConnector]):
             # Build MERGE statement
             merge_sql = f"""
             MERGE INTO {table_name} target
-            USING (SELECT {', '.join([f':{col} AS {col}' for col in columns])} 
+            USING (SELECT {', '.join([f':{col} AS {col}' for col in columns])}
                    FROM DUAL) source
             ON ({' AND '.join([f'target.{col} = source.{col}' for col in key_cols])})
             WHEN MATCHED THEN
@@ -267,7 +267,7 @@ class OracleSink(SQLSink[OracleConnector]):
 
         for record in records:
             # Let SQLAlchemy handle type conversions
-            prepared_record = {}
+            prepared_record: dict[str, Any] = {}
 
             for key, value in record.items():
                 # Skip metadata fields

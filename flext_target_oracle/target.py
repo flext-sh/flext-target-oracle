@@ -132,8 +132,14 @@ class OracleTarget(Target):
             self._engine = create_engine(connection_url, **engine_kwargs)
 
             # Initialize async engine for advanced operations
-            async_url = connection_url.replace("oracle+oracledb://", "oracle+oracledb+asyncio://")
-            self._async_engine = create_async_engine(async_url, **engine_kwargs)
+            # Note: async engines need different pool settings
+            async_engine_kwargs = {
+                "echo": self.config.get("echo", False),
+                "future": True,
+            }
+            self._async_engine = create_async_engine(
+                connection_url, **async_engine_kwargs
+            )
 
             self._enhanced_logger.info(
                 "SQLAlchemy 2.x engines initialized successfully",
