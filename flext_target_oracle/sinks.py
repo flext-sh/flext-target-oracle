@@ -649,7 +649,7 @@ class OracleSink(SQLSink[OracleConnector]):
         """
         # Check for custom rules in configuration
         if "custom_type_rules" in self.config:
-            return self.config["custom_type_rules"]
+            return self.config["custom_type_rules"]  # type: ignore[no-any-return]
 
         # Use intelligent built-in rules
         return self._get_intelligent_type_mapping_rules()
@@ -785,14 +785,14 @@ class OracleSink(SQLSink[OracleConnector]):
                         # Force 4000 CHAR for _set fields regardless of max_length
                         if pattern_key == "set_patterns":
                             return "VARCHAR2(4000 CHAR)"
-                        return oracle_type
+                        return oracle_type  # type: ignore[no-any-return]
                 # Exact match
                 elif pattern == column_lower:
                     oracle_type = field_patterns[pattern_key]
                     # Force 4000 CHAR for _set fields regardless of max_length
                     if pattern_key == "set_patterns":
                         return "VARCHAR2(4000 CHAR)"
-                    return oracle_type
+                    return oracle_type  # type: ignore[no-any-return]
 
         # No pattern matched
         return None
