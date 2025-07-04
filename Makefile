@@ -1,35 +1,44 @@
-# FLEXT Target Oracle - Simplified Makefile
-# Simple commands for development and testing
+# FLEXT Target Oracle - Development Makefile
+# Complete development automation for target-oracle
 
-.PHONY: help install clean test test-unit test-integration test-all lint format check validate run
+.PHONY: help install setup clean test test-unit test-integration test-all lint format check validate run build package debug
 
 # Variables
 PYTHON := /home/marlonsc/flext/.venv/bin/python
 PIP := /home/marlonsc/flext/.venv/bin/pip
 PYTEST := /home/marlonsc/flext/.venv/bin/python -m pytest
+RUFF := /home/marlonsc/flext/.venv/bin/ruff
+MYPY := /home/marlonsc/flext/.venv/bin/mypy
 
 # Default target
 help: ## Show available commands
 	@echo "FLEXT Target Oracle - Available Commands"
 	@echo ""
-	@echo "Setup:"
-	@echo "  install     - Install package"
-	@echo "  clean       - Clean build files"
+	@echo "Setup & Build:"
+	@echo "  install     - Install package in development mode"
+	@echo "  setup       - Complete setup (install + check environment)"
+	@echo "  build       - Build distribution packages"
+	@echo "  package     - Create release package"
+	@echo "  clean       - Clean all build artifacts"
 	@echo ""
 	@echo "Testing:"
-	@echo "  test-unit   - Run unit tests (no database needed)"
-	@echo "  test-integration - Run integration tests (needs Oracle)"
-	@echo "  test-all    - Run all tests"
-	@echo "  test        - Alias for test-all"
+	@echo "  test        - Run all tests (alias for test-all)"
+	@echo "  test-unit   - Run unit tests only (no database)"
+	@echo "  test-integration - Run integration tests (requires Oracle)"
+	@echo "  test-all    - Run complete test suite"
 	@echo ""
 	@echo "Quality:"
-	@echo "  lint        - Run code linting"
-	@echo "  format      - Format code"
+	@echo "  lint        - Run code linting (ruff + mypy)"
+	@echo "  format      - Auto-format code"
 	@echo "  check       - Quick check (lint + unit tests)"
 	@echo "  validate    - Full validation (format + lint + all tests)"
 	@echo ""
-	@echo "Usage:"
-	@echo "  run         - Run the target (needs .env file)"
+	@echo "Development:"
+	@echo "  run         - Run the target (requires .env file)"
+	@echo "  debug       - Run with debug logging enabled"
+	@echo "  dev         - Setup dev environment and run checks"
+	@echo "  quick       - Quick dev cycle (format + unit tests)"
+	@echo "  full        - Full validation workflow"
 
 # Setup commands
 install: ## Install package and dependencies
@@ -96,8 +105,33 @@ run: ## Run the Oracle target
 	@if [ ! -f .env ]; then echo "Error: .env file not found. Copy .env.example and configure."; exit 1; fi
 	@$(PYTHON) -m flext_target_oracle.target
 
+debug: ## Run with debug logging
+	@echo "Running Oracle target with debug logging..."
+	@if [ ! -f .env ]; then echo "Error: .env file not found. Copy .env.example and configure."; exit 1; fi
+	@FLEXT_LOG_LEVEL=DEBUG $(PYTHON) -m flext_target_oracle.target
+
+# Build commands
+build: clean ## Build distribution packages
+	@echo "Building distribution packages..."
+	@$(PYTHON) -m pip install --upgrade build
+	@$(PYTHON) -m build
+	@echo "Build complete. Check dist/ directory."
+
+package: build ## Create release package
+	@echo "Creating release package..."
+	@ls -la dist/
+	@echo "Package ready for distribution"
+
+# Setup commands
+setup: install ## Complete setup with environment check
+	@echo "Setting up development environment..."
+	@$(MAKE) install
+	@echo "Checking environment..."
+	@$(PYTHON) -c "import flext_target_oracle; print(f'Package installed: {flext_target_oracle.__version__}')"
+	@echo "Setup complete"
+
 # Development shortcuts
-dev: install check ## Setup development environment and run checks
+dev: setup check ## Setup development environment and run checks
 
 quick: format test-unit ## Quick development workflow
 

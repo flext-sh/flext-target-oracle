@@ -1,5 +1,4 @@
-"""
-Production-ready Oracle Target implementation for Singer SDK 0.47.4.
+"""Production-ready Oracle Target implementation for Singer SDK 0.47.4.
 
 This module provides a comprehensive Oracle database target with intelligent
 error handling,
@@ -19,32 +18,34 @@ while maintaining resilience for recoverable conditions.
 from __future__ import annotations
 
 import asyncio
-from typing import TYPE_CHECKING, Any
+import sys
+from collections import Counter
+from typing import IO, TYPE_CHECKING, Any
 
 from singer_sdk import Target
 from singer_sdk import typing as th
 from singer_sdk.helpers._typing import TypeConformanceLevel
 from sqlalchemy import create_engine
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.pool import QueuePool
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
 
-from .logging_config import create_logger
-from .monitoring import create_monitor
-from .sinks import OracleSink
+    from sqlalchemy.engine import Engine
+    from sqlalchemy.ext.asyncio import AsyncEngine
+
+from flext_target_oracle.logging_config import create_logger
+from flext_target_oracle.monitoring import create_monitor
+from flext_target_oracle.sinks import OracleSink
 
 # Use Thin mode (default) - no Oracle Client libraries required
 # This avoids NNE (Native Network Encryption) issues with Autonomous Database
-print("✅ Using Oracle Thin mode - no client libraries required")
 
 # Module import - no longer deprecated after corrections
 
 
 class OracleTarget(Target):
-    """
-    Production-ready Oracle target for Singer SDK with SQLAlchemy 2.x and async support.
+    """Production-ready Oracle target for Singer SDK with SQLAlchemy 2.x and async support.
 
     Features:
     - SQLAlchemy 2.x with async/await patterns and typed annotations
@@ -70,6 +71,7 @@ class OracleTarget(Target):
     def __init__(
         self,
         config: dict[str, Any] | None = None,
+        *,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
@@ -94,7 +96,7 @@ class OracleTarget(Target):
 
         # Initialize monitoring system - NO FALLBACK MASKING
         self.monitor = create_monitor(
-            dict(self.config), getattr(self, "_enhanced_logger", None)
+            dict(self.config), getattr(self, "_enhanced_logger", None),
         )
 
         # Initialize SQLAlchemy 2.x engines with modern patterns
@@ -121,7 +123,7 @@ class OracleTarget(Target):
                 "pool_pre_ping": self.config.get("pool_pre_ping", True),
                 "pool_use_lifo": self.config.get("pool_use_lifo", False),
                 "pool_reset_on_return": self.config.get(
-                    "pool_reset_on_return", "rollback"
+                    "pool_reset_on_return", "rollback",
                 ),
                 "echo": self.config.get("echo", False),
                 "echo_pool": self.config.get("echo_pool", False),
@@ -138,7 +140,7 @@ class OracleTarget(Target):
                 "future": True,
             }
             self._async_engine = create_async_engine(
-                connection_url, **async_engine_kwargs
+                connection_url, **async_engine_kwargs,
             )
 
             self._enhanced_logger.info(
@@ -152,10 +154,9 @@ class OracleTarget(Target):
             )
 
         except Exception as e:
-            self._enhanced_logger.error(
-                f"Failed to initialize SQLAlchemy engines: {e}",
+            self._enhanced_logger.exception(
+                "Failed to initialize SQLAlchemy engines",
                 extra={"error_type": type(e).__name__},
-                exc_info=True,
             )
             raise
 
@@ -173,19 +174,19 @@ class OracleTarget(Target):
         elif "database" in self.config:
             database_part = f"/{self.config['database']}"
         else:
-            raise ValueError("Either 'database' or 'service_name' must be specified")
+            msg = "Either 'database' or 'service_name' must be specified"
+            raise ValueError(msg)
 
         # Build base URL with modern oracle+oracledb driver
-        connection_url = f"oracle+oracledb://{username}:{password}@{host}:{port}{database_part}"
-
-        return connection_url
+        return f"oracle+oracledb://{username}:{password}@{host}:{port}{database_part}"
 
     @property
     def engine(self) -> Engine:
         """Get synchronous SQLAlchemy engine (SOLID: Interface Segregation)."""
         if self._engine is None:
+            msg = "Engine not initialized. Call _initialize_engines() first."
             raise RuntimeError(
-                "Engine not initialized. Call _initialize_engines() first."
+                msg,
             )
         return self._engine
 
@@ -193,8 +194,9 @@ class OracleTarget(Target):
     def async_engine(self) -> AsyncEngine:
         """Get asynchronous SQLAlchemy engine for advanced operations."""
         if self._async_engine is None:
+            msg = "Async engine not initialized. Call _initialize_engines() first."
             raise RuntimeError(
-                "Async engine not initialized. Call _initialize_engines() first."
+                msg,
             )
         return self._async_engine
 
@@ -272,7 +274,7 @@ class OracleTarget(Target):
             description="SSL DN match",
         ),
         th.Property(
-            "ssl_server_cert_dn", th.StringType, description="SSL certificate DN"
+            "ssl_server_cert_dn", th.StringType, description="SSL certificate DN",
         ),
         th.Property(
             "connection_timeout",
@@ -281,7 +283,7 @@ class OracleTarget(Target):
             description="Connection timeout",
         ),
         th.Property(
-            "encoding", th.StringType, default="UTF-8", description="Database encoding"
+            "encoding", th.StringType, default="UTF-8", description="Database encoding",
         ),
         th.Property(
             "nencoding",
@@ -291,10 +293,10 @@ class OracleTarget(Target):
         ),
         # === SQLALCHEMY ENGINE SETTINGS ===
         th.Property(
-            "pool_size", th.IntegerType, default=10, description="SQLAlchemy pool size"
+            "pool_size", th.IntegerType, default=10, description="SQLAlchemy pool size",
         ),
         th.Property(
-            "max_overflow", th.IntegerType, default=20, description="Max pool overflow"
+            "max_overflow", th.IntegerType, default=20, description="Max pool overflow",
         ),
         th.Property(
             "pool_timeout",
@@ -328,7 +330,7 @@ class OracleTarget(Target):
             description="Pool reset mode",
         ),
         th.Property(
-            "echo", th.BooleanType, default=False, description="SQLAlchemy echo SQL"
+            "echo", th.BooleanType, default=False, description="SQLAlchemy echo SQL",
         ),
         th.Property(
             "echo_pool",
@@ -355,7 +357,7 @@ class OracleTarget(Target):
             description="Insertmanyvalues page size",
         ),
         th.Property(
-            "isolation_level", th.StringType, description="Transaction isolation level"
+            "isolation_level", th.StringType, description="Transaction isolation level",
         ),
         th.Property(
             "future",
@@ -395,7 +397,7 @@ class OracleTarget(Target):
             description="Use pure Python driver",
         ),
         th.Property(
-            "events", th.BooleanType, default=False, description="Enable Oracle events"
+            "events", th.BooleanType, default=False, description="Enable Oracle events",
         ),
         th.Property(
             "externalauth",
@@ -407,7 +409,7 @@ class OracleTarget(Target):
         th.Property("action", th.StringType, description="Oracle action name"),
         th.Property("client_info", th.StringType, description="Oracle client info"),
         th.Property(
-            "client_identifier", th.StringType, description="Oracle client identifier"
+            "client_identifier", th.StringType, description="Oracle client identifier",
         ),
         th.Property("edition", th.StringType, description="Oracle edition"),
         # === SINGER SDK SETTINGS ===
@@ -449,7 +451,7 @@ class OracleTarget(Target):
             description="Load method",
         ),
         th.Property(
-            "default_target_schema", th.StringType, description="Default target schema"
+            "default_target_schema", th.StringType, description="Default target schema",
         ),
         th.Property("stream_maps", th.ObjectType(), description="Singer stream maps"),
         th.Property(
@@ -533,10 +535,10 @@ class OracleTarget(Target):
             description="Use direct path insert",
         ),
         th.Property(
-            "append_hint", th.BooleanType, default=False, description="Use APPEND hint"
+            "append_hint", th.BooleanType, default=False, description="Use APPEND hint",
         ),
         th.Property(
-            "nologging", th.BooleanType, default=False, description="Use NOLOGGING"
+            "nologging", th.BooleanType, default=False, description="Use NOLOGGING",
         ),
         # === DATA TYPE SETTINGS ===
         th.Property(
@@ -570,7 +572,7 @@ class OracleTarget(Target):
             description="Custom type mapping rules (JSON object)",
         ),
         th.Property(
-            "use_nvarchar", th.BooleanType, default=False, description="Use NVARCHAR2"
+            "use_nvarchar", th.BooleanType, default=False, description="Use NVARCHAR2",
         ),
         th.Property(
             "number_precision",
@@ -579,7 +581,7 @@ class OracleTarget(Target):
             description="NUMBER precision",
         ),
         th.Property(
-            "number_scale", th.IntegerType, default=10, description="NUMBER scale"
+            "number_scale", th.IntegerType, default=10, description="NUMBER scale",
         ),
         th.Property(
             "timestamp_timezone",
@@ -620,7 +622,7 @@ class OracleTarget(Target):
         ),
         # === ERROR HANDLING ===
         th.Property(
-            "max_retries", th.IntegerType, default=5, description="Max retry attempts"
+            "max_retries", th.IntegerType, default=5, description="Max retry attempts",
         ),
         th.Property(
             "retry_delay",
@@ -825,10 +827,10 @@ class OracleTarget(Target):
             description="Records per parallel chunk",
         ),
         th.Property(
-            "parallel_max_servers", th.IntegerType, description="Max parallel servers"
+            "parallel_max_servers", th.IntegerType, description="Max parallel servers",
         ),
         th.Property(
-            "parallel_min_servers", th.IntegerType, description="Min parallel servers"
+            "parallel_min_servers", th.IntegerType, description="Min parallel servers",
         ),
         th.Property(
             "enable_parallel_ddl",
@@ -1166,12 +1168,12 @@ class OracleTarget(Target):
             description="Max memory usage (MB)",
         ),
         th.Property(
-            "temp_tablespace", th.StringType, description="Temporary tablespace"
+            "temp_tablespace", th.StringType, description="Temporary tablespace",
         ),
         th.Property("sort_area_size", th.IntegerType, description="Sort area size"),
         th.Property("hash_area_size", th.IntegerType, description="Hash area size"),
         th.Property(
-            "pga_aggregate_target", th.IntegerType, description="PGA aggregate target"
+            "pga_aggregate_target", th.IntegerType, description="PGA aggregate target",
         ),
         # === ADVANCED SQLALCHEMY FEATURES ===
         th.Property(
@@ -1180,7 +1182,7 @@ class OracleTarget(Target):
             description="SQLAlchemy execution options",
         ),
         th.Property(
-            "connect_args", th.ObjectType(), description="Additional connect arguments"
+            "connect_args", th.ObjectType(), description="Additional connect arguments",
         ),
         th.Property(
             "server_side_cursors",
@@ -1219,7 +1221,7 @@ class OracleTarget(Target):
             description="Unicode bind support",
         ),
         th.Property(
-            "use_ansi", th.BooleanType, default=True, description="Use ANSI SQL"
+            "use_ansi", th.BooleanType, default=True, description="Use ANSI SQL",
         ),
         th.Property(
             "optimize_limits",
@@ -1258,11 +1260,12 @@ class OracleTarget(Target):
             )
 
         sink = super().get_sink(
-            stream_name, record=record, schema=schema, key_properties=key_properties
+            stream_name, record=record, schema=schema, key_properties=key_properties,
         )
         # Skip type check in test environment to allow mocking
-        if not isinstance(sink, OracleSink) and not hasattr(sink, '_mock_name'):
-            raise TypeError(f"Expected OracleSink, got {type(sink)}")
+        if not isinstance(sink, OracleSink) and not hasattr(sink, "_mock_name"):
+            msg = f"Expected OracleSink, got {type(sink)}"
+            raise TypeError(msg)
 
         # Pass SQLAlchemy 2.x engines to sink (SOLID: Dependency Injection)
         if hasattr(sink, "set_engine") and self._engine:
@@ -1299,6 +1302,7 @@ class OracleTarget(Target):
                             if loop.is_running():
                                 # Create new loop for cleanup if current loop is running
                                 import threading
+
                                 def dispose_async() -> None:
                                     if self._async_engine:
                                         asyncio.run(self._async_engine.dispose())
@@ -1307,14 +1311,16 @@ class OracleTarget(Target):
                                 thread.join(timeout=1)
                             else:
                                 loop.run_until_complete(self._async_engine.dispose())
-                        except Exception:
+                        except (OSError, ValueError, AttributeError, RuntimeError):
                             # Fallback: try sync dispose if available
                             if (
-                                self._async_engine and
-                                hasattr(self._async_engine, "_dispose_impl")
+                                self._async_engine
+                                and hasattr(self._async_engine, "sync_engine")
                             ):
-                                self._async_engine._dispose_impl()
-                except Exception:
+                                sync_engine = self._async_engine.sync_engine
+                                if hasattr(sync_engine, "dispose"):
+                                    sync_engine.dispose()
+                except (OSError, ValueError, AttributeError, RuntimeError):
                     # Fallback cleanup without logging during shutdown
                     pass
                 self._async_engine = None
@@ -1328,44 +1334,30 @@ class OracleTarget(Target):
             # Monitor cleanup
             if hasattr(self, "monitor") and self.monitor:
                 # Direct cleanup without logging
-                if (
-                    hasattr(self.monitor, "_monitoring_thread")
-                    and self.monitor._monitoring_thread
-                ):
-                    if hasattr(self.monitor, "shutdown_event"):
-                        self.monitor.shutdown_event.set()
-                    if self.monitor._monitoring_thread.is_alive():
-                        self.monitor._monitoring_thread.join(timeout=1)
+                if hasattr(self.monitor, "stop_background_monitoring"):
+                    self.monitor.stop_background_monitoring()
 
                 # Clear monitoring resources
                 self.monitor = None  # type: ignore[assignment]
 
-        except Exception as cleanup_error:
+        except (OSError, ValueError, AttributeError, RuntimeError) as cleanup_error:
             # DO NOT SILENCE CLEANUP ERRORS - Log them
             try:
                 if hasattr(self, "_enhanced_logger") and self._enhanced_logger:
-                    self._enhanced_logger.error(
-                        f"❌ CLEANUP ERROR during shutdown: {cleanup_error}",
+                    self._enhanced_logger.exception(
+                        "❌ CLEANUP ERROR during shutdown",
                         extra={
                             "error_type": type(cleanup_error).__name__,
                             "error_details": str(cleanup_error),
                             "context": "target_cleanup_on_exit",
                         },
                     )
-                else:
-                    import sys
 
-                    print(f"CLEANUP ERROR: {cleanup_error}", file=sys.stderr)
-            except Exception:
+            except (OSError, ValueError, AttributeError, RuntimeError):
                 # Only if ALL logging fails during shutdown
-                import sys
+                pass
 
-                print(
-                    f"EMERGENCY: Cleanup error and logging failed: {cleanup_error}",
-                    file=sys.stderr,
-                )
-
-    def process_lines(self, file_input: Any) -> Any:  # type: ignore[misc]
+    def process_lines(self, file_input: IO[str] | None = None) -> Counter[str]:  # type: ignore[misc]
         """Process input lines with comprehensive monitoring."""
         if (
             hasattr(self, "_enhanced_logger")
@@ -1380,10 +1372,11 @@ class OracleTarget(Target):
             # Use operation context only if available
             if hasattr(self._enhanced_logger, "operation_context"):
                 with self._enhanced_logger.operation_context(
-                    "process_lines", stream="all_streams"
+                    "process_lines", stream="all_streams",
                 ) as context:
                     try:
-                        result = super().process_lines(file_input)
+                        actual_input = file_input or sys.stdin
+                        result = super().process_lines(actual_input)
                         context["status"] = "completed"
 
                         # Log final performance stats if available
@@ -1391,7 +1384,7 @@ class OracleTarget(Target):
                             stats = self._enhanced_logger.log_performance_stats()
                             context.update(stats)
 
-                        return result
+                        return result or Counter()
 
                     except Exception as e:
                         # ENHANCED ERROR LOGGING - Capture full context and stack trace
@@ -1414,7 +1407,7 @@ class OracleTarget(Target):
                         if hasattr(e, "__cause__") and e.__cause__:
                             error_details["error_cause"] = str(e.__cause__)
                             error_details["error_cause_type"] = type(
-                                e.__cause__
+                                e.__cause__,
                             ).__name__
 
                         context["error"] = str(e)
@@ -1422,12 +1415,13 @@ class OracleTarget(Target):
                         context["status"] = "failed"
 
                         # CRITICAL: Log the complete error with stack trace
-                        self._enhanced_logger.error(
-                            (
-                                f"🚨 ORACLE TARGET CRITICAL ERROR - Type: "
-                                f"{error_details['error_type']} - Message: "
-                                f"{error_details['error_message']}"
-                            ),
+                        error_msg = (
+                            f"🚨 ORACLE TARGET CRITICAL ERROR - Type: "
+                            f"{error_details['error_type']} - Message: "
+                            f"{error_details['error_message']}"
+                        )
+                        self._enhanced_logger.exception(
+                            error_msg,
                             extra={
                                 "operation": "process_lines",
                                 "error_full_context": error_details,
@@ -1439,26 +1433,9 @@ class OracleTarget(Target):
                                     "target_name": self.name,
                                 },
                             },
-                            exc_info=True,
                         )
 
                         # CRITICAL: Also log to console for immediate visibility
-                        import sys
-
-                        print(
-                            "\n🚨 ORACLE TARGET CRITICAL ERROR DETAILS:",
-                            file=sys.stderr,
-                        )
-                        print(
-                            f"Error Type: {error_details['error_type']}",
-                            file=sys.stderr,
-                        )
-                        print(
-                            f"Error Message: {error_details['error_message']}",
-                            file=sys.stderr,
-                        )
-                        print(f"Full Stack Trace:\n{full_traceback}", file=sys.stderr)
-                        print("=" * 80, file=sys.stderr)
 
                         raise
                     finally:
@@ -1469,9 +1446,10 @@ class OracleTarget(Target):
                 # Enhanced logger exists but no operation_context - use basic logging
                 self._enhanced_logger.info("Starting process_lines")
                 try:
-                    result = super().process_lines(file_input)
+                    actual_input = file_input or sys.stdin
+                    result = super().process_lines(actual_input)
                     self._enhanced_logger.info("process_lines completed successfully")
-                    return result
+                    return result or Counter()
                 except Exception as e:
                     # ENHANCED ERROR LOGGING - Complete error details for debugging
                     import traceback
@@ -1485,32 +1463,21 @@ class OracleTarget(Target):
                     }
 
                     # Log comprehensive error information
-                    self._enhanced_logger.error(
-                        (
-                            f"🚨 ORACLE TARGET PROCESS_LINES FAILED - "
-                            f"{error_details['error_type']}: "
-                            f"{error_details['error_message']}"
-                        ),
+                    error_msg = (
+                        f"🚨 ORACLE TARGET PROCESS_LINES FAILED - "
+                        f"{error_details['error_type']}: "
+                        f"{error_details['error_message']}"
+                    )
+                    self._enhanced_logger.exception(
+                        error_msg,
                         extra={
                             "operation": "process_lines_fallback",
                             "error_details": error_details,
                             "stack_trace": full_traceback,
                         },
-                        exc_info=True,
                     )
 
                     # Also log to stderr for immediate visibility
-                    import sys
-
-                    print("\n🚨 ORACLE TARGET FALLBACK ERROR:", file=sys.stderr)
-                    print(
-                        (
-                            f"Error: {error_details['error_type']}: "
-                            f"{error_details['error_message']}"
-                        ),
-                        file=sys.stderr,
-                    )
-                    print(f"Stack Trace:\n{full_traceback}", file=sys.stderr)
 
                     raise
                 finally:
@@ -1519,7 +1486,9 @@ class OracleTarget(Target):
                         self.monitor.stop_background_monitoring()
         else:
             # Fallback to standard processing
-            return super().process_lines(file_input)
+            actual_input = file_input or sys.stdin
+            result = super().process_lines(actual_input)
+            return result or Counter()
 
     def get_health_status(self) -> dict[str, Any]:
         """Get comprehensive health status including SQLAlchemy 2.x engine status."""
@@ -1567,7 +1536,7 @@ class OracleTarget(Target):
                         else "unknown"
                     ),
                 }
-            except Exception as e:
+            except (OSError, ValueError, AttributeError, RuntimeError) as e:
                 engine_health["sync_engine"] = {
                     "status": "unhealthy",
                     "error": str(e),
@@ -1589,7 +1558,7 @@ class OracleTarget(Target):
                         else "unknown"
                     ),
                 }
-            except Exception as e:
+            except (OSError, ValueError, AttributeError, RuntimeError) as e:
                 engine_health["async_engine"] = {
                     "status": "error",
                     "error": str(e),
@@ -1616,7 +1585,7 @@ class OracleTarget(Target):
                 "async_connection": True,
                 "checked_at": "now",
             }
-        except Exception as e:
+        except (OSError, ValueError, AttributeError, RuntimeError) as e:
             return {
                 "status": "unhealthy",
                 "error": str(e),
@@ -1680,7 +1649,7 @@ class OracleTarget(Target):
             for metric_name, value in metrics.items():
                 if isinstance(value, (int, float)):
                     prometheus_output.append(
-                        f"oracle_target_{engine_type}_{metric_name} {value}"
+                        f"oracle_target_{engine_type}_{metric_name} {value}",
                     )
 
         return "\n".join(prometheus_output)

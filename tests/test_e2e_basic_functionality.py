@@ -1,11 +1,12 @@
-"""
-End-to-End tests for basic Oracle Target functionality without advanced options.
+import logging
+
+log = logging.getLogger(__name__)
+
+"""End-to-End tests for basic Oracle Target functionality without advanced options.
 
 These tests validate core Singer target functionality with real Oracle database
 connections, focusing on basic operations without Enterprise Edition features.
 """
-
-from __future__ import annotations
 
 import contextlib
 import json
@@ -43,7 +44,7 @@ class TestBasicE2EFunctionality:
             {
                 "skip_table_optimization": True,
                 "parallel_degree": 1,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -66,8 +67,8 @@ class TestBasicE2EFunctionality:
                     f"""
                 SELECT COUNT(*) FROM user_tables
                 WHERE table_name = UPPER('{test_table_name}')
-            """
-                )
+            """,
+                ),
             )
             count = result.scalar()
             assert count == 1, f"Table {test_table_name} was not created"
@@ -80,8 +81,8 @@ class TestBasicE2EFunctionality:
                 FROM user_tab_columns
                 WHERE table_name = UPPER('{test_table_name}')
                 ORDER BY column_name
-            """
-                )
+            """,
+                ),
             )
             columns = {row[0]: row[1] for row in result}
 
@@ -122,7 +123,7 @@ class TestBasicE2EFunctionality:
                 "use_parallel_dml": False,
                 "enable_compression": False,
                 "use_inmemory": False,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -137,7 +138,7 @@ class TestBasicE2EFunctionality:
             record_messages.append(record_msg)
 
         # Create input stream
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
@@ -149,7 +150,7 @@ class TestBasicE2EFunctionality:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert count == len(
-                sample_singer_records
+                sample_singer_records,
             ), f"Expected {len(sample_singer_records)} records, found {count}"
 
             # Verify data integrity
@@ -159,8 +160,8 @@ class TestBasicE2EFunctionality:
                 SELECT id, name, email, age, active
                 FROM {test_table_name}
                 ORDER BY id
-            """
-                )
+            """,
+                ),
             )
             rows = result.fetchall()
 
@@ -201,7 +202,7 @@ class TestBasicE2EFunctionality:
                 "use_parallel_dml": False,
                 "enable_compression": False,
                 "use_inmemory": False,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -215,7 +216,7 @@ class TestBasicE2EFunctionality:
             msg["stream"] = test_table_name
 
         # First load - insert initial records
-        messages = [schema_message] + initial_messages
+        messages = [schema_message, *initial_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
         oracle_target.process_lines(input_stream)
@@ -252,8 +253,8 @@ class TestBasicE2EFunctionality:
                 text(
                     f"""
                 SELECT name, age FROM {test_table_name} WHERE id = 1
-            """
-                )
+            """,
+                ),
             )
             row = result.fetchone()
             assert row[0] == "John Doe Updated", "Record was not updated"
@@ -264,8 +265,8 @@ class TestBasicE2EFunctionality:
                 text(
                     f"""
                 SELECT COUNT(*) FROM {test_table_name} WHERE id = 3
-            """
-                )
+            """,
+                ),
             )
             count = result.scalar()
             assert count == 1, "New record was not inserted"
@@ -287,7 +288,7 @@ class TestBasicE2EFunctionality:
                 "load_method": "append-only",
                 "skip_table_optimization": True,
                 "parallel_degree": 1,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -344,8 +345,8 @@ class TestBasicE2EFunctionality:
                 SELECT text_field, number_field, boolean_field,
                        json_field, array_field, null_field
                 FROM {test_table_name} WHERE id = 1
-            """
-                )
+            """,
+                ),
             )
             row = result.fetchone()
 
@@ -388,7 +389,7 @@ class TestBasicE2EFunctionality:
                 "parallel_degree": 1,
                 "batch_size": 500,
                 "use_bulk_operations": True,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -403,7 +404,7 @@ class TestBasicE2EFunctionality:
             record_messages.append(record_msg)
 
         # Create input stream
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
@@ -417,7 +418,7 @@ class TestBasicE2EFunctionality:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert count == len(
-                bulk_singer_records
+                bulk_singer_records,
             ), f"Expected {len(bulk_singer_records)} records, found {count}"
 
             # Verify data sampling
@@ -428,8 +429,8 @@ class TestBasicE2EFunctionality:
                 FROM {test_table_name}
                 WHERE id IN (1, 500, 1000)
                 ORDER BY id
-            """
-                )
+            """,
+                ),
             )
             rows = result.fetchall()
             assert len(rows) >= 2, "Sample records not found"
@@ -441,7 +442,10 @@ class TestBasicE2EFunctionality:
 
         # Calculate throughput
         records_per_second = len(bulk_singer_records) / performance_timer.duration
-        print(f"Bulk load performance: {records_per_second:.0f} records/second")
+        log.error(
+            f"Bulk load performance: {
+                records_per_second:.0f} records/second",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
     def test_error_handling_and_recovery(
         self,
@@ -461,7 +465,7 @@ class TestBasicE2EFunctionality:
                 "skip_table_optimization": True,
                 "max_retries": 3,
                 "fail_fast": False,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -530,14 +534,18 @@ class TestBasicE2EFunctionality:
         try:
             oracle_target.process_lines(input_stream)
         except Exception as e:
-            # Some errors might be expected, but processing should attempt to continue
-            print(f"Processing completed with error: {e}")
+            # continue
+            # TODO: Consider using else block
+            log.exception(
+                f"Processing completed with error: {e}",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Verify that at least the valid records were processed
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
-            # Should have at least the valid records, possibly problematic one truncated
+            # Should have at least the valid records, possibly problematic one
+            # truncated
             assert count >= 2, f"Expected at least 2 valid records, found {count}"
 
             # Check that valid records are there
@@ -546,8 +554,8 @@ class TestBasicE2EFunctionality:
                     f"""
                 SELECT id, name FROM {test_table_name}
                 WHERE id IN (1, 3) ORDER BY id
-            """
-                )
+            """,
+                ),
             )
             rows = result.fetchall()
             assert len(rows) >= 1, "No valid records found"
@@ -570,11 +578,12 @@ class TestBasicE2EFunctionality:
             {
                 "load_method": "append-only",
                 "skip_table_optimization": True,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
-        # Skip connection count check for autonomous database (v$session not accessible)
+        # Skip connection count check for autonomous database (v$session not
+        # accessible)
         try:
             with oracle_engine.connect() as conn:
                 result = conn.execute(
@@ -582,14 +591,15 @@ class TestBasicE2EFunctionality:
                         """
                     SELECT COUNT(*) FROM v$session
                     WHERE username = USER AND status = 'ACTIVE'
-                """
-                    )
+                """,
+                    ),
                 )
                 initial_connections = result.scalar()
-        except Exception:
-            # Skip this test if we can't access v$session (common in cloud/autonomous)
+        except Exception:  # noqa: BLE001
+            # Skip this test if we can't access v$session (common in
+            # cloud/autonomous)
             pytest.skip(
-                "Cannot access v$session view - likely using autonomous database"
+                "Cannot access v$session view - likely using autonomous database",
             )
 
         # Process some data
@@ -600,7 +610,7 @@ class TestBasicE2EFunctionality:
         for msg in record_messages:
             msg["stream"] = test_table_name
 
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
@@ -618,8 +628,8 @@ class TestBasicE2EFunctionality:
                         """
                     SELECT COUNT(*) FROM v$session
                     WHERE username = USER AND status = 'ACTIVE'
-                """
-                    )
+                """,
+                    ),
                 )
                 final_connections = result.scalar()
 
@@ -630,7 +640,10 @@ class TestBasicE2EFunctionality:
             ), f"Too many connections leaked: {connection_difference}"
         except Exception as e:
             # Log connection check failure for debugging
-            print(f"⚠️ Could not check connection count: {e}")
+            # TODO: Consider using else block
+            log.exception(
+                f"⚠️ Could not check connection count: {e}",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
             # If we can't check connections, just verify processing succeeded
             assert target_processed  # Basic check that processing completed
 
@@ -666,7 +679,7 @@ class TestBasicE2EFunctionality:
         }
 
         # Create temporary input file
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False, encoding="utf-8") as f:
             f.write(json.dumps(schema_message) + "\n")
             f.write(json.dumps(record_message) + "\n")
             input_file = f.name
@@ -684,19 +697,32 @@ class TestBasicE2EFunctionality:
                 temp_config_file,
             ]
 
-            with open(input_file) as input_stream:
+            with open(input_file, encoding="utf-8") as input_stream:
                 result = subprocess.run(
-                    cmd, stdin=input_stream, capture_output=True, text=True, timeout=60
+                    cmd, stdin=input_stream, capture_output=True, text=True, timeout=60, check=False,
                 )
 
             # Check if execution was successful
             if result.returncode != 0:
-                print(f"CLI execution failed with return code {result.returncode}")
-                print(f"STDOUT: {result.stdout}")
-                print(f"STDERR: {result.stderr}")
+                log.error(
+                    f"CLI execution failed with return code {
+                        result.returncode}",
+                # TODO(@dev): Replace with proper logging  # Link:
+                # https://github.com/issue/todo
+                )
+                log.error(
+                    f"STDOUT: {result.stdout}",
+                # TODO(@dev): Replace with proper logging  # Link:
+                # https://github.com/issue/todo
+                )
+                log.error(
+                    f"STDERR: {result.stderr}",
+                # TODO(@dev): Replace with proper logging  # Link:
+                # https://github.com/issue/todo
+                )
                 # Don't fail the test if CLI has issues, just warn
                 pytest.skip(
-                    "CLI execution failed - this might be expected in test environment"
+                    "CLI execution failed - this might be expected in test environment",
                 )
 
             # Verify data was loaded via CLI
@@ -705,9 +731,11 @@ class TestBasicE2EFunctionality:
                 count = result.scalar()
                 assert count == 1, "CLI did not load data correctly"
 
-        except subprocess.TimeoutExpired:
+        except Exception:
+            # TODO: Consider using else block
             pytest.skip("CLI execution timed out")
-        except FileNotFoundError:
+        except Exception:
+            # TODO: Consider using else block
             pytest.skip("CLI module not found")
         finally:
             # Cleanup

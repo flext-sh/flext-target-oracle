@@ -1,24 +1,23 @@
-"""
-Test Oracle-specific features and optimizations.
+import logging
+
+log = logging.getLogger(__name__)
+
+"""Test Oracle-specific features and optimizations.
 
 This module tests Oracle-specific functionality including MERGE operations,
 partitioning, compression, and advanced Oracle features.
 """
 
-from __future__ import annotations
-
 import json
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from unittest.mock import patch
 
 from sqlalchemy import text
+from sqlalchemy.engine import Engine
 
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
-
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
 
 
 @requires_oracle_connection
@@ -136,13 +135,13 @@ class TestOracleSpecificFeatures:
 
             # Verify updated record
             result = conn.execute(
-                text(f"SELECT name FROM {test_table_name} WHERE id = 1")
+                text(f"SELECT name FROM {test_table_name} WHERE id = 1"),
             )
             assert result.fetchone()[0] == "Alice Updated"
 
             # Verify inserted record
             result = conn.execute(
-                text(f"SELECT name FROM {test_table_name} WHERE id = 3")
+                text(f"SELECT name FROM {test_table_name} WHERE id = 3"),
             )
             assert result.fetchone()[0] == "Charlie"
 
@@ -181,10 +180,7 @@ class TestOracleSpecificFeatures:
         }
 
         # Generate large dataset for bulk testing
-        bulk_records = []
-        for i in range(5000):
-            bulk_records.append(
-                {
+        bulk_records = [{
                     "type": "RECORD",
                     "stream": test_table_name,
                     "record": {
@@ -192,8 +188,7 @@ class TestOracleSpecificFeatures:
                         "data": f"Bulk data item {i + 1}",
                         "value": float(i * 0.5),
                     },
-                }
-            )
+                } for i in range(5000)]
 
         # Process with timing
         messages = [json.dumps(test_schema)]
@@ -253,10 +248,7 @@ class TestOracleSpecificFeatures:
         }
 
         # Generate moderate dataset
-        parallel_records = []
-        for i in range(2000):
-            parallel_records.append(
-                {
+        parallel_records = [{
                     "type": "RECORD",
                     "stream": test_table_name,
                     "record": {
@@ -264,8 +256,7 @@ class TestOracleSpecificFeatures:
                         "category": f"Category {(i % 10) + 1}",
                         "amount": float(i * 1.25),
                     },
-                }
-            )
+                } for i in range(2000)]
 
         # Process records
         messages = [json.dumps(test_schema)]
@@ -284,8 +275,8 @@ class TestOracleSpecificFeatures:
             # Verify data distribution
             result = conn.execute(
                 text(
-                    f"SELECT DISTINCT category FROM {test_table_name} ORDER BY category"
-                )
+                    f"SELECT DISTINCT category FROM {test_table_name} ORDER BY category",
+                ),
             )
             categories = [row[0] for row in result.fetchall()]
             assert len(categories) == 10  # Should have 10 different categories
@@ -323,10 +314,7 @@ class TestOracleSpecificFeatures:
         }
 
         # Generate records with larger text data
-        compression_records = []
-        for i in range(100):
-            compression_records.append(
-                {
+        compression_records = [{
                     "type": "RECORD",
                     "stream": test_table_name,
                     "record": {
@@ -337,8 +325,7 @@ class TestOracleSpecificFeatures:
                             "repeated text " * 10
                         ),
                     },
-                }
-            )
+                } for i in range(100)]
 
         # Process records
         messages = [json.dumps(test_schema)]
@@ -354,7 +341,8 @@ class TestOracleSpecificFeatures:
             count = result.fetchone()[0]
             assert count == len(compression_records)
 
-            # Try to check if compression is enabled (may require DBA privileges)
+            # Try to check if compression is enabled (may require DBA
+            # privileges)
             try:
                 result = conn.execute(
                     text(
@@ -362,17 +350,19 @@ class TestOracleSpecificFeatures:
                     SELECT compression, compress_for
                     FROM user_tables
                     WHERE table_name = UPPER('{test_table_name}')
-                """
-                    )
+                """,
+                    ),
                 )
                 table_info = result.fetchone()
                 if table_info and table_info.compression:
-                    assert table_info.compression in ["ENABLED", "DISABLED"]
+                    assert table_info.compression in {"ENABLED", "DISABLED"}
             except Exception as e:
-                # Compression info may not be accessible (permissions) - log for debug
-                print(
+                # for debug
+                # TODO: Consider using else block
+                log.exception(
                     f"ℹ️ Could not access compression info (expected in some "
-                    f"environments): {e}"
+                    # Link: https://github.com/issue/todo
+                    f"environments)  # TODO(@dev): Replace with proper logging: {e}",
                 )
 
     def test_array_size_optimization(
@@ -409,10 +399,7 @@ class TestOracleSpecificFeatures:
         }
 
         # Generate dataset for array size testing
-        array_records = []
-        for i in range(3000):
-            array_records.append(
-                {
+        array_records = [{
                     "type": "RECORD",
                     "stream": test_table_name,
                     "record": {
@@ -420,8 +407,7 @@ class TestOracleSpecificFeatures:
                         "name": f"Record {i + 1}",
                         "timestamp": "2025-07-02T10:00:00Z",
                     },
-                }
-            )
+                } for i in range(3000)]
 
         # Process with timing
         messages = [json.dumps(test_schema)]
@@ -538,7 +524,7 @@ class TestOracleSpecificFeatures:
             assert len(row.long_text) == 8000
             assert "中文" in row.unicode_text
             assert row.small_number == 42
-            assert row.boolean_flag in (1, True)
+            assert row.boolean_flag == 1
 
             # Check column types in Oracle
             result = conn.execute(
@@ -548,17 +534,17 @@ class TestOracleSpecificFeatures:
                 FROM user_tab_columns
                 WHERE table_name = UPPER('{test_table_name}')
                 ORDER BY column_id
-            """
-                )
+            """,
+                ),
             )
 
             columns = result.fetchall()
             column_types = {col.column_name: col.data_type for col in columns}
 
             # Verify Oracle-specific type mappings
-            assert column_types.get("ID") in ["NUMBER", "INTEGER"]
-            assert column_types.get("SHORT_TEXT") in ["VARCHAR2", "NVARCHAR2"]
-            assert column_types.get("LONG_TEXT") in ["CLOB", "NCLOB"]
+            assert column_types.get("ID") in {"NUMBER", "INTEGER"}
+            assert column_types.get("SHORT_TEXT") in {"VARCHAR2", "NVARCHAR2"}
+            assert column_types.get("LONG_TEXT") in {"CLOB", "NCLOB"}
             assert column_types.get("PRECISE_DECIMAL") == "NUMBER"
 
     def test_connection_pooling_behavior(
@@ -598,10 +584,7 @@ class TestOracleSpecificFeatures:
 
         # Process records with multiple targets (simulating concurrent access)
         for worker_id, target in enumerate(targets):
-            worker_records = []
-            for i in range(100):
-                worker_records.append(
-                    {
+            worker_records = [{
                         "type": "RECORD",
                         "stream": test_table_name,
                         "record": {
@@ -609,8 +592,7 @@ class TestOracleSpecificFeatures:
                             "worker_id": worker_id + 1,
                             "data": f"Worker {worker_id + 1} Record {i + 1}",
                         },
-                    }
-                )
+                    } for i in range(100)]
 
             messages = [json.dumps(test_schema)]
             messages.extend([json.dumps(record) for record in worker_records])
@@ -629,8 +611,8 @@ class TestOracleSpecificFeatures:
             result = conn.execute(
                 text(
                     f"SELECT DISTINCT worker_id FROM {test_table_name} "
-                    f"ORDER BY worker_id"
-                )
+                    f"ORDER BY worker_id",
+                ),
             )
             worker_ids = [row[0] for row in result.fetchall()]
             assert worker_ids == [1, 2, 3]
@@ -705,10 +687,11 @@ class TestOracleSpecificFeatures:
         messages = [json.dumps(constraint_schema), json.dumps(duplicate_record)]
         input_data = "\n".join(messages)
 
-        # This should handle the duplicate gracefully depending on upsert settings
+        # This should handle the duplicate gracefully depending on upsert
+        # settings
         try:
             with patch("sys.stdin", StringIO(input_data)):
                 target_new.cli()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             # Duplicate errors are expected and should be handled
             assert "unique" in str(e).lower() or "duplicate" in str(e).lower()

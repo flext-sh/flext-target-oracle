@@ -1,3 +1,5 @@
+from typing import Any
+
 """
 Test data type mapping and conversion.
 """
@@ -15,7 +17,7 @@ class TestTypeMapping:
     """Test Singer to Oracle type mapping."""
 
     @pytest.fixture
-    def target_config(self):
+    def target_config(self) -> Any:
         """Basic target configuration."""
         return {
             "host": "localhost",
@@ -25,11 +27,11 @@ class TestTypeMapping:
         }
 
     @pytest.fixture
-    def oracle_target(self, target_config):
+    def oracle_target(self, target_config: dict[str, Any]) -> OracleTarget:
         """Create target instance."""
         return OracleTarget(config=target_config)
 
-    def test_string_type_mapping(self, oracle_target) -> None:
+    def test_string_type_mapping(self, oracle_target: OracleTarget) -> None:
         """Test string type mappings."""
         schema = {
             "type": "object",
@@ -55,6 +57,7 @@ class TestTypeMapping:
 
     def test_numeric_type_mapping(self, oracle_target) -> None:
         """Test numeric type mappings."""
+        """Test numeric type mappings."""
         schema = {
             "type": "object",
             "properties": {
@@ -66,13 +69,14 @@ class TestTypeMapping:
         }
 
         sink = OracleSink(
-            target=oracle_target, stream_name="test_numbers", schema=schema
+            target=oracle_target, stream_name="test_numbers", schema=schema,
         )
 
         assert "integer_field" in sink.schema["properties"]
         assert "number_field" in sink.schema["properties"]
 
     def test_boolean_type_mapping(self, oracle_target) -> None:
+        """Test boolean type mapping."""
         """Test boolean type mapping."""
         schema = {
             "type": "object",
@@ -84,7 +88,7 @@ class TestTypeMapping:
 
         # Test with default boolean values
         sink = OracleSink(
-            target=oracle_target, stream_name="test_booleans", schema=schema
+            target=oracle_target, stream_name="test_booleans", schema=schema,
         )
 
         # Test boolean conversion
@@ -97,6 +101,7 @@ class TestTypeMapping:
 
     def test_datetime_type_mapping(self, oracle_target) -> None:
         """Test date/time type mappings."""
+        """Test date/time type mappings."""
         schema = {
             "type": "object",
             "properties": {
@@ -106,12 +111,16 @@ class TestTypeMapping:
             },
         }
 
-        sink = OracleSink(target=oracle_target, stream_name="test_dates", schema=schema)
+        sink = OracleSink(
+            target=oracle_target,
+            stream_name="test_dates",
+            schema=schema)
 
         assert "date_field" in sink.schema["properties"]
         assert "datetime_field" in sink.schema["properties"]
 
     def test_json_type_mapping(self, oracle_target) -> None:
+        """Test JSON/object type mappings."""
         """Test JSON/object type mappings."""
         schema = {
             "type": "object",
@@ -128,7 +137,10 @@ class TestTypeMapping:
             },
         }
 
-        sink = OracleSink(target=oracle_target, stream_name="test_json", schema=schema)
+        sink = OracleSink(
+            target=oracle_target,
+            stream_name="test_json",
+            schema=schema)
 
         # Test JSON serialization
         record = {
@@ -150,6 +162,7 @@ class TestTypeMapping:
 
     def test_nullable_types(self, oracle_target) -> None:
         """Test nullable type handling."""
+        """Test nullable type handling."""
         schema = {
             "type": "object",
             "properties": {
@@ -160,7 +173,7 @@ class TestTypeMapping:
         }
 
         sink = OracleSink(
-            target=oracle_target, stream_name="test_nullable", schema=schema
+            target=oracle_target, stream_name="test_nullable", schema=schema,
         )
 
         # Test with null values
@@ -200,7 +213,10 @@ class TestTypeMapping:
             "properties": {"text": {"type": "string"}, "flag": {"type": "boolean"}},
         }
 
-        sink = OracleSink(target=target, stream_name="test_custom", schema=schema)
+        sink = OracleSink(
+            target=target,
+            stream_name="test_custom",
+            schema=schema)
 
         # Test custom boolean values
         record = {"text": "test", "flag": True}
@@ -210,6 +226,7 @@ class TestTypeMapping:
         assert conformed["flag"] == "Y"
 
     def test_complex_nested_types(self, oracle_target) -> None:
+        """Test complex nested data structures."""
         """Test complex nested data structures."""
         schema = {
             "type": "object",

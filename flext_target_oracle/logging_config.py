@@ -1,5 +1,4 @@
-"""
-Comprehensive logging and monitoring configuration for Oracle Target.
+"""Comprehensive logging and monitoring configuration for Oracle Target.
 
 Provides structured logging, performance metrics, operational monitoring,
 and integration with observability platforms.
@@ -16,7 +15,16 @@ import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, Union
+
+# Constants for logging configuration
+MAX_SQL_LOG_LENGTH = 500
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+    from types import TracebackType
+
+    from typing_extensions import Self
 
 try:
     import structlog
@@ -40,8 +48,7 @@ except ImportError:
 
 
 class OracleTargetLogger:
-    """
-    Enhanced logging system for Oracle Target with structured logging and metrics.
+    """Enhanced logging system for Oracle Target with structured logging and metrics.
 
     Features:
     - Structured logging with contextual information
@@ -51,7 +58,7 @@ class OracleTargetLogger:
     - Configurable log levels and outputs
     """
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any]) -> None:
         """Initialize comprehensive logging system."""
         self.config = config
         self.logger_name = "flext_target_oracle"
@@ -194,7 +201,7 @@ class OracleTargetLogger:
                 file_handler.setFormatter(file_formatter)
             else:
                 text_formatter: logging.Formatter = logging.Formatter(
-                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                 )
                 file_handler.setFormatter(text_formatter)
 
@@ -206,7 +213,7 @@ class OracleTargetLogger:
             console_formatter = JsonFormatter()
         else:
             console_formatter = logging.Formatter(
-                "%(asctime)s - %(levelname)s - %(message)s"
+                "%(asctime)s - %(levelname)s - %(message)s",
             )
         console_handler.setFormatter(console_formatter)
         logger.addHandler(console_handler)
@@ -219,13 +226,13 @@ class OracleTargetLogger:
 
     @contextmanager
     def operation_context(
-        self, operation: str, stream: str = "unknown", **kwargs: Any
-    ) -> Any:
+        self, operation: str, stream: str = "unknown", **kwargs: Union[str, int, bool],
+    ) -> Generator[dict[str, Any], None, None]:
         """Context manager for tracking operations with metrics and logging."""
         start_time = time.time()
         operation_id = f"{operation}_{int(start_time)}"
 
-        context = {
+        context: dict[str, Any] = {
             "operation": operation,
             "operation_id": operation_id,
             "stream": stream,
@@ -254,7 +261,7 @@ class OracleTargetLogger:
             # Update Prometheus metrics
             if self.prometheus_enabled:
                 self.processing_duration.labels(
-                    stream=stream, operation=operation
+                    stream=stream, operation=operation,
                 ).observe(duration)
 
             self.info("Operation completed", extra=context)
@@ -273,17 +280,17 @@ class OracleTargetLogger:
             # Update Prometheus metrics
             if self.prometheus_enabled:
                 self.errors_total.labels(
-                    stream=stream, error_type=type(e).__name__
+                    stream=stream, error_type=type(e).__name__,
                 ).inc()
                 self.processing_duration.labels(
-                    stream=stream, operation=operation
+                    stream=stream, operation=operation,
                 ).observe(duration)
 
             self.error("Operation failed", extra=context, exc_info=True)
             raise
 
     def log_record_batch(
-        self, stream: str, batch_size: int, operation: str = "insert"
+        self, stream: str, batch_size: int, operation: str = "insert",
     ) -> None:
         """Log processing of a record batch with metrics."""
         context = {
@@ -302,7 +309,7 @@ class OracleTargetLogger:
         # Update Prometheus metrics
         if self.prometheus_enabled:
             self.records_processed.labels(stream=stream, operation=operation).inc(
-                batch_size
+                batch_size,
             )
             self.batch_size.labels(stream=stream).observe(batch_size)
 
@@ -384,7 +391,11 @@ class OracleTargetLogger:
 
         context = {
             "session_id": self.session_id,
-            "sql": sql[:500] + "..." if len(sql) > 500 else sql,  # Truncate long SQL
+            "sql": (
+                sql[:MAX_SQL_LOG_LENGTH] + "..."
+                if len(sql) > MAX_SQL_LOG_LENGTH
+                else sql
+            ),
             "params_count": len(params) if params else 0,
         }
 
@@ -408,7 +419,7 @@ class OracleTargetLogger:
         total_records = self.performance_counters.get("total_records", 0)
         total_errors = self.performance_counters.get("total_errors", 0)
 
-        status = {
+        return {
             "status": "healthy" if int(total_errors) == 0 else "degraded",
             "session_id": self.session_id,
             "uptime_seconds": session_duration,
@@ -422,38 +433,62 @@ class OracleTargetLogger:
             "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
-        return status
-
     # Standard logging methods with context injection
     def debug(
-        self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any
+        self,
+        message: str,
+        extra: dict[str, Any] | None = None,
+        **kwargs: Any,
     ) -> None:
         """Log debug message with context."""
         self._log(logging.DEBUG, message, extra, **kwargs)
 
     def info(
-        self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any
+        self,
+        message: str,
+        extra: dict[str, Any] | None = None,
+        **kwargs: Any,
     ) -> None:
         """Log info message with context."""
         self._log(logging.INFO, message, extra, **kwargs)
 
     def warning(
-        self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any
+        self,
+        message: str,
+        extra: dict[str, Any] | None = None,
+        **kwargs: Any,
     ) -> None:
         """Log warning message with context."""
         self._log(logging.WARNING, message, extra, **kwargs)
 
     def error(
-        self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any
+        self,
+        message: str,
+        extra: dict[str, Any] | None = None,
+        **kwargs: Any,
     ) -> None:
         """Log error message with context."""
         self._log(logging.ERROR, message, extra, **kwargs)
 
     def critical(
-        self, message: str, extra: dict[str, Any] | None = None, **kwargs: Any
+        self,
+        message: str,
+        extra: dict[str, Any] | None = None,
+        **kwargs: Any,
     ) -> None:
         """Log critical message with context."""
         self._log(logging.CRITICAL, message, extra, **kwargs)
+
+    def exception(
+        self,
+        message: str,
+        *args: str | float,
+        extra: dict[str, Any] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Log exception message with context and traceback."""
+        kwargs.setdefault("exc_info", True)
+        self._log(logging.ERROR, message % args if args else message, extra, **kwargs)
 
     def _log(
         self,
@@ -494,7 +529,7 @@ class OracleTargetLogger:
 
                 sys.stderr.write(f"WARNING: Logger failed during shutdown: {e}\n")
                 sys.stderr.flush()
-            except Exception as stderr_error:
+            except (OSError, AttributeError) as stderr_error:
                 # If even stderr fails, then system is truly shutting down
                 # Try one final fallback before giving up
                 try:
@@ -506,7 +541,7 @@ class OracleTargetLogger:
                         f"CRITICAL: All logging mechanisms failed: "
                         f"{stderr_error}\n".encode(),
                     )
-                except Exception:
+                except OSError:
                     # Absolutely no way to log - system is completely shutting down
                     pass
 
@@ -518,7 +553,7 @@ class JsonFormatter(logging.Formatter):
         """Format log record as JSON."""
         log_entry = {
             "timestamp": datetime.fromtimestamp(
-                record.created, tz=timezone.utc
+                record.created, tz=timezone.utc,
             ).isoformat(),
             "level": record.levelname,
             "logger": record.name,
@@ -530,8 +565,7 @@ class JsonFormatter(logging.Formatter):
 
         # Add extra fields if present
         if hasattr(record, "__dict__"):
-            for key, value in record.__dict__.items():
-                if key not in [
+            log_entry.update({key: value for key, value in record.__dict__.items() if key not in {
                     "name",
                     "msg",
                     "args",
@@ -552,8 +586,7 @@ class JsonFormatter(logging.Formatter):
                     "stack_info",
                     "exc_info",
                     "exc_text",
-                ]:
-                    log_entry[key] = value
+                }})
 
         # Add exception info if present
         if record.exc_info:
@@ -565,7 +598,7 @@ class JsonFormatter(logging.Formatter):
 class PerformanceTimer:
     """Context manager for timing operations."""
 
-    def __init__(self, logger: OracleTargetLogger, operation: str):
+    def __init__(self, logger: OracleTargetLogger, operation: str) -> None:
         self.logger = logger
         self.operation = operation
         self.start_time: float | None = None
@@ -580,11 +613,16 @@ class PerformanceTimer:
         if self.start_time is not None:
             self.duration = time.time() - self.start_time
 
-    def __enter__(self) -> PerformanceTimer:
+    def __enter__(self) -> Self:
         self.start()
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
         self.stop()
         if self.duration is not None:
             self.logger.info(

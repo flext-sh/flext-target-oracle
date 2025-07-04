@@ -24,13 +24,13 @@ setup(
             "mypy>=1.0",
             "black>=22.0",
             "flake8>=5.0",
-        ]
+        ],
     },
     entry_points={
         "console_scripts": [
             "target-oracle = target:TargetOracle.cli",
             "flext-target-oracle = target:TargetOracle.cli",
-        ]
+        ],
     },
     classifiers=[
         "Development Status :: 4 - Beta",

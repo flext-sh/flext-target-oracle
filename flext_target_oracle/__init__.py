@@ -1,5 +1,4 @@
-"""
-FLEXT Target Oracle - Advanced Singer Target for Oracle Database.
+"""FLEXT Target Oracle - Advanced Singer Target for Oracle Database.
 
 Enhanced implementation with smart error handling:
 - Categorized Oracle error handling (critical vs non-critical vs features)
@@ -14,9 +13,9 @@ from __future__ import annotations
 __version__ = "1.0.0"
 
 # Import core implementations
-from .connectors import OracleConnector
-from .sinks import OracleSink
-from .target import OracleTarget
+from flext_target_oracle.connectors import OracleConnector
+from flext_target_oracle.sinks import OracleSink
+from flext_target_oracle.target import OracleTarget
 
 __all__ = [
     "OracleConnector",  # Shared connector

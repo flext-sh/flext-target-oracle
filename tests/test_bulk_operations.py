@@ -1,27 +1,26 @@
-"""
-Comprehensive bulk operations and performance optimization tests.
+import logging
+
+log = logging.getLogger(__name__)
+
+"""Comprehensive bulk operations and performance optimization tests.
 
 These tests validate high-volume data loading scenarios, parallel processing,
 and performance optimizations with real Oracle database connections.
 """
 
-from __future__ import annotations
-
 import json
 import random
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import pytest
 from sqlalchemy import text
+from sqlalchemy.engine import Engine
 
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
-
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
 
 
 @pytest.mark.integration
@@ -58,7 +57,7 @@ class TestBulkOperations:
                 "use_insertmanyvalues": True,
                 "insertmanyvalues_page_size": 1000,
                 "skip_table_optimization": True,  # Skip advanced features for this test
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -82,7 +81,7 @@ class TestBulkOperations:
         }
 
         # Generate bulk records
-        base_time = datetime.now()
+        base_time = datetime.now(timezone.utc)
         record_messages = []
 
         for i in range(record_count):
@@ -109,7 +108,7 @@ class TestBulkOperations:
             record_messages.append(record)
 
         # Create input stream
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
@@ -134,19 +133,27 @@ class TestBulkOperations:
                 FROM {test_table_name}
                 WHERE id IN (1, 5000, 10000)
                 ORDER BY id
-            """
-                )
+            """,
+                ),
             )
             rows = result.fetchall()
             assert len(rows) >= 2, "Sample records not found"
 
         # Performance validation
         throughput = record_count / performance_timer.duration
-        print(f"Large batch performance: {throughput:.0f} records/second")
-        print(f"Total time: {performance_timer.duration:.2f}s")
+        log.error(
+            f"Large batch performance: {throughput:.0f} records/second",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Total time: {performance_timer.duration:.2f}s",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
-        # Should achieve reasonable throughput (adjust based on your Oracle setup)
-        assert throughput > 100, f"Throughput too low: {throughput:.0f} records/second"
+        # Should achieve reasonable throughput (adjust based on your Oracle
+        # setup)
+        assert (
+            throughput > 100
+        ), f"Throughput too low: {
+            throughput:.0f} records/second"
         assert (
             performance_timer.duration < 120
         ), f"Load took too long: {performance_timer.duration:.2f}s"
@@ -172,7 +179,7 @@ class TestBulkOperations:
                 "chunk_size": 1000,
                 "use_bulk_operations": True,
                 "skip_table_optimization": True,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -203,14 +210,14 @@ class TestBulkOperations:
                     "id": i + 1,
                     "thread_id": (i % 4) + 1,  # Distribute across 4 threads
                     "data": f"Parallel data chunk {i + 1}",
-                    "timestamp": datetime.now().isoformat() + "Z",
+                    "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
         # Process with parallel execution
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
@@ -234,8 +241,8 @@ class TestBulkOperations:
                 FROM {test_table_name}
                 GROUP BY thread_id
                 ORDER BY thread_id
-            """
-                )
+            """,
+                ),
             )
             thread_counts = dict(result.fetchall())
 
@@ -243,15 +250,16 @@ class TestBulkOperations:
             expected_per_thread = record_count // 4
             for thread_id in range(1, 5):
                 assert thread_id in thread_counts, f"Thread {thread_id} data not found"
-                assert (
-                    thread_counts[thread_id] == expected_per_thread
-                ), (
+                assert thread_counts[thread_id] == expected_per_thread, (
                     f"Thread {thread_id}: expected {expected_per_thread}, "
                     f"got {thread_counts[thread_id]}"
                 )
 
         throughput = record_count / performance_timer.duration
-        print(f"Parallel processing performance: {throughput:.0f} records/second")
+        log.error(
+            f"Parallel processing performance: {
+                throughput:.0f} records/second",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
     def test_upsert_performance_large_dataset(
         self,
@@ -274,7 +282,7 @@ class TestBulkOperations:
                 "use_merge_statements": True,
                 "use_merge_hint": True,
                 "skip_table_optimization": True,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -307,15 +315,15 @@ class TestBulkOperations:
                     "user_id": i + 1,
                     "username": f"user_{i + 1}",
                     "email": f"user_{i + 1}@example.com",
-                    "last_login": datetime.now().isoformat() + "Z",
+                    "last_login": datetime.now(timezone.utc).isoformat() + "Z",
                     "login_count": 1,
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             initial_messages.append(record)
 
         # Process initial load
-        messages = [schema_message] + initial_messages
+        messages = [schema_message, *initial_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
         oracle_target.process_lines(input_stream)
@@ -340,11 +348,13 @@ class TestBulkOperations:
                     "user_id": i + 1,
                     "username": f"user_{i + 1}",
                     "email": f"user_{i + 1}@example.com",
-                    "last_login": (datetime.now() + timedelta(hours=1)).isoformat()
+                    "last_login": (
+                        datetime.now(timezone.utc) + timedelta(hours=1)
+                    ).isoformat()
                     + "Z",
                     "login_count": 2,  # Updated
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             update_messages.append(record)
 
@@ -357,10 +367,10 @@ class TestBulkOperations:
                     "user_id": i + 1,
                     "username": f"user_{i + 1}",
                     "email": f"user_{i + 1}@example.com",
-                    "last_login": datetime.now().isoformat() + "Z",
+                    "last_login": datetime.now(timezone.utc).isoformat() + "Z",
                     "login_count": 1,
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             update_messages.append(record)
 
@@ -388,8 +398,8 @@ class TestBulkOperations:
                     f"""
                 SELECT COUNT(*) FROM {test_table_name}
                 WHERE user_id <= 3000 AND login_count = 2
-            """
-                )
+            """,
+                ),
             )
             updated_count = result.scalar()
             assert (
@@ -402,8 +412,8 @@ class TestBulkOperations:
                     f"""
                 SELECT COUNT(*) FROM {test_table_name}
                 WHERE user_id > {initial_count}
-            """
-                )
+            """,
+                ),
             )
             new_count = result.scalar()
             assert new_count == 2000, f"Expected 2000 new records, got {new_count}"
@@ -411,7 +421,9 @@ class TestBulkOperations:
         throughput = (
             3000 + 2000
         ) / performance_timer.duration  # Total processed records
-        print(f"Upsert performance: {throughput:.0f} records/second")
+        log.error(
+            f"Upsert performance: {throughput:.0f} records/second",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
     def test_memory_efficient_streaming(
         self,
@@ -432,7 +444,7 @@ class TestBulkOperations:
                 "stream_results": True,
                 "max_memory_usage_mb": 512,
                 "skip_table_optimization": True,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -474,12 +486,12 @@ class TestBulkOperations:
                         "description": f"JSON metadata for record {i + 1}",
                     },
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
         # Process in streaming fashion
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
@@ -501,15 +513,18 @@ class TestBulkOperations:
                 FROM {test_table_name}
                 WHERE id IN (1, 2500, 5000)
                 ORDER BY id
-            """
-                )
+            """,
+                ),
             )
             rows = result.fetchall()
             assert len(rows) == 3, "Sample records not found"
 
             for row in rows:
                 # Large text should be around 1500 characters
-                assert row[1] > 1000, f"Large text too small: {row[1]} characters"
+                assert (
+                    row[1] > 1000
+                ), f"Large text too small: {
+                    row[1]} characters"
 
                 # JSON data should be valid
                 json_data = json.loads(row[2])
@@ -537,7 +552,7 @@ class TestBulkOperations:
                 "pool_recycle": 3600,
                 "batch_size": 2000,
                 "skip_table_optimization": True,
-            }
+            },
         )
 
         # Process multiple smaller loads to test pool efficiency
@@ -573,13 +588,13 @@ class TestBulkOperations:
                         "batch_num": batch_num + 1,
                         "data": f"Batch {batch_num + 1} Record {i + 1}",
                     },
-                    "time_extracted": datetime.now().isoformat() + "Z",
+                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
                 }
                 record_messages.append(record)
 
             # Process batch
             if batch_num == 0:
-                messages = [schema_message] + record_messages
+                messages = [schema_message, *record_messages]
             else:
                 messages = record_messages
 
@@ -608,16 +623,14 @@ class TestBulkOperations:
                 FROM {test_table_name}
                 GROUP BY batch_num
                 ORDER BY batch_num
-            """
-                )
+            """,
+                ),
             )
             batch_counts = dict(result.fetchall())
 
             for batch_num in range(1, num_batches + 1):
                 assert batch_num in batch_counts, f"Batch {batch_num} not found"
-                assert (
-                    batch_counts[batch_num] == records_per_batch
-                ), (
+                assert batch_counts[batch_num] == records_per_batch, (
                     f"Batch {batch_num}: expected {records_per_batch}, "
                     f"got {batch_counts[batch_num]}"
                 )
@@ -643,7 +656,7 @@ class TestBulkOperations:
                 "retry_backoff": 1.5,
                 "fail_fast": False,
                 "skip_table_optimization": True,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -676,7 +689,7 @@ class TestBulkOperations:
                         "name": "A" * 100,  # Exceeds maxLength of 50
                         "category": "problematic",
                     },
-                    "time_extracted": datetime.now().isoformat() + "Z",
+                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
                 }
             else:
                 # Normal valid record
@@ -688,21 +701,24 @@ class TestBulkOperations:
                         "name": f"User {i + 1}",
                         "category": random.choice(["standard", "premium", "basic"]),
                     },
-                    "time_extracted": datetime.now().isoformat() + "Z",
+                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
                 }
                 valid_record_count += 1
 
             record_messages.append(record)
 
         # Process with error recovery
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
         try:
             oracle_target.process_lines(input_stream)
         except Exception as e:
-            print(f"Processing completed with expected errors: {e}")
+            # TODO: Consider using else block
+            log.exception(
+                f"Processing completed with expected errors: {e}",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Verify that valid records were processed despite errors
         with oracle_engine.connect() as conn:
@@ -721,8 +737,8 @@ class TestBulkOperations:
                 SELECT category, COUNT(*)
                 FROM {test_table_name}
                 GROUP BY category
-            """
-                )
+            """,
+                ),
             )
             categories = dict(result.fetchall())
 

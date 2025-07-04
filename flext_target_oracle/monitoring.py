@@ -1,5 +1,4 @@
-"""
-Comprehensive monitoring and observability for Oracle Target.
+"""Comprehensive monitoring and observability for Oracle Target.
 
 Provides health checks, metrics collection, alerting integration,
 and operational monitoring capabilities.
@@ -12,9 +11,20 @@ import threading
 import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any, Union
 
 import psutil
+
+# Health check thresholds
+HEALTH_CPU_THRESHOLD = 90
+HEALTH_MEMORY_THRESHOLD = 90
+HEALTH_ERROR_RATE_THRESHOLD = 5
+
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Generator
+
+    from sqlalchemy.engine import Engine
 
 try:
     import oracledb  # noqa: F401
@@ -32,8 +42,7 @@ except ImportError:
 
 
 class OracleTargetMonitor:
-    """
-    Comprehensive monitoring system for Oracle Target.
+    """Comprehensive monitoring system for Oracle Target.
 
     Features:
     - System resource monitoring
@@ -43,7 +52,9 @@ class OracleTargetMonitor:
     - Integration with monitoring platforms
     """
 
-    def __init__(self, config: dict[str, Any], logger: Any = None) -> None:
+    def __init__(
+        self, config: dict[str, Any], logger: logging.Logger | None = None,
+    ) -> None:
         """Initialize monitoring system."""
         self.config = config
         self.logger = logger
@@ -91,7 +102,7 @@ class OracleTargetMonitor:
 
         self.shutdown_event.clear()
         self._monitoring_thread = threading.Thread(
-            target=self._monitoring_loop, name="OracleTargetMonitor", daemon=True
+            target=self._monitoring_loop, name="OracleTargetMonitor", daemon=True,
         )
         self._monitoring_thread.start()
 
@@ -119,9 +130,9 @@ class OracleTargetMonitor:
                 self._check_thresholds(metrics)
                 self._store_metrics(metrics)
 
-            except Exception as e:
+            except (OSError, ValueError, AttributeError, ImportError):
                 if self.logger:
-                    self.logger.error(f"Monitoring loop error: {e}")
+                    self.logger.exception("Monitoring loop error")
 
             # Wait for next interval
             self.shutdown_event.wait(timeout=self.check_interval)
@@ -167,11 +178,9 @@ class OracleTargetMonitor:
                 },
                 "load_average": os.getloadavg() if hasattr(os, "getloadavg") else None,
             }
-        except Exception as e:
+        except (OSError, ValueError, AttributeError, ImportError) as e:
             if self.logger:
-                self.logger.warning(f"Failed to collect system metrics: {e}")
-            else:
-                print(f"WARNING: Failed to collect system metrics: {e}")
+                self.logger.warning("Failed to collect system metrics: %s", e)
             # Return empty dict but log the failure for debugging
             return {"error": f"Failed to collect system metrics: {e}"}
 
@@ -190,22 +199,22 @@ class OracleTargetMonitor:
                 "create_time": process.create_time(),
                 "status": process.status(),
             }
-        except Exception as e:
+        except (OSError, ValueError, AttributeError, ImportError) as e:
             if self.logger:
-                self.logger.warning(f"Failed to collect process metrics: {e}")
-            else:
-                print(f"WARNING: Failed to collect process metrics: {e}")
+                self.logger.warning("Failed to collect process metrics: %s", e)
             # Return empty dict but log the failure for debugging
             return {"error": f"Failed to collect process metrics: {e}"}
 
     def _collect_oracle_metrics(self) -> dict[str, Any]:
         """Collect Oracle database metrics."""
-        metrics = {}
+        metrics: dict[str, Any] = {}
 
         # Connection pool metrics
         try:
             if hasattr(self, "_engine") and self._engine:
-                pool = self._engine.pool
+                pool = getattr(self._engine, "pool", None)
+                if not pool:
+                    return metrics
                 metrics["connection_pool"] = {
                     "size": pool.size(),
                     "checked_in": pool.checkedin(),
@@ -213,18 +222,18 @@ class OracleTargetMonitor:
                     "overflow": pool.overflow(),
                     "invalid": pool.invalid(),
                 }
-        except Exception as e:
+        except (OSError, ValueError, AttributeError, ImportError) as e:
             if self.logger:
-                self.logger.debug(f"Could not collect pool metrics: {e}")
+                self.logger.debug("Could not collect pool metrics: %s", e)
 
         # Database session metrics (if connection available)
         try:
             db_metrics = self._collect_database_session_metrics()
             if db_metrics:
                 metrics["database"] = db_metrics
-        except Exception as e:
+        except (OSError, ValueError, AttributeError, ImportError) as e:
             if self.logger:
-                self.logger.debug(f"Could not collect database metrics: {e}")
+                self.logger.debug("Could not collect database metrics: %s", e)
 
         return metrics
 
@@ -234,7 +243,8 @@ class OracleTargetMonitor:
             return None
 
         try:
-            with self._engine.connect() as conn:
+            # Type ignore for dynamic engine object
+            with self._engine.connect() as conn:  # type: ignore[attr-defined]
                 # Session information
                 result = conn.execute(
                     text(
@@ -248,8 +258,8 @@ class OracleTargetMonitor:
                         LOGON_TIME
                     FROM V$SESSION
                     WHERE AUDSID = USERENV('SESSIONID')
-                """
-                    )
+                """,
+                    ),
                 )
                 session_info = result.fetchone()
 
@@ -263,8 +273,8 @@ class OracleTargetMonitor:
                     FROM V$MYSTAT ms, V$STATNAME sn
                     WHERE ms.STATISTIC# = sn.STATISTIC#
                     AND sn.NAME IN ('session pga memory', 'session uga memory')
-                """
-                    )
+                """,
+                    ),
                 )
                 memory_stats = dict(memory_result.fetchall())
 
@@ -282,8 +292,8 @@ class OracleTargetMonitor:
                     AND TOTAL_WAITS > 0
                     ORDER BY TIME_WAITED DESC
                     FETCH FIRST 5 ROWS ONLY
-                """
-                    )
+                """,
+                    ),
                 )
                 wait_events = [dict(row._asdict()) for row in wait_result.fetchall()]
 
@@ -294,11 +304,9 @@ class OracleTargetMonitor:
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
 
-        except Exception as e:
+        except (OSError, ValueError, AttributeError, ImportError) as e:
             if self.logger:
-                self.logger.debug(f"Database metrics collection failed: {e}")
-            else:
-                print(f"DEBUG: Database metrics collection failed: {e}")
+                self.logger.debug("Database metrics collection failed: %s", e)
             # Return None but log the failure for debugging
             return {"error": f"Database metrics collection failed: {e}"}
 
@@ -307,11 +315,12 @@ class OracleTargetMonitor:
         metrics = {}
 
         # Get performance data from logger if available
-        if hasattr(self, "logger") and hasattr(self.logger, "performance_counters"):
+        if (hasattr(self, "logger") and self.logger and
+                hasattr(self.logger, "performance_counters")):
             counters = self.logger.performance_counters
 
             session_duration = time.time() - getattr(
-                self.logger, "start_time", time.time()
+                self.logger, "start_time", time.time(),
             )
 
             metrics = {
@@ -357,7 +366,7 @@ class OracleTargetMonitor:
                         "message": f"Memory usage is {memory_percent:.1f}%",
                         "value": memory_percent,
                         "threshold": self.thresholds["memory_usage_percent"],
-                    }
+                    },
                 )
                 self.alerts_sent.add(alert_key)
 
@@ -373,7 +382,7 @@ class OracleTargetMonitor:
                         "message": f"CPU usage is {cpu_percent:.1f}%",
                         "value": cpu_percent,
                         "threshold": self.thresholds["cpu_usage_percent"],
-                    }
+                    },
                 )
                 self.alerts_sent.add(alert_key)
 
@@ -396,7 +405,7 @@ class OracleTargetMonitor:
                                 ),
                                 "value": pool_usage,
                                 "threshold": self.thresholds["connection_pool_usage"],
-                            }
+                            },
                         )
                         self.alerts_sent.add(alert_key)
 
@@ -412,7 +421,7 @@ class OracleTargetMonitor:
                         "message": f"Error rate is {error_rate:.2f}%",
                         "value": error_rate,
                         "threshold": self.thresholds["error_rate_percent"],
-                    }
+                    },
                 )
                 self.alerts_sent.add(alert_key)
 
@@ -427,7 +436,7 @@ class OracleTargetMonitor:
         if self.logger:
             level = "critical" if alert["severity"] == "critical" else "warning"
             getattr(self.logger, level)(
-                f"ALERT: {alert['message']}", extra={"alert": alert}
+                f"ALERT: {alert['message']}", extra={"alert": alert},
             )
 
         # Integration with external alerting systems
@@ -448,9 +457,9 @@ class OracleTargetMonitor:
 
             requests.post(webhook_url, json=payload, timeout=10)
 
-        except Exception as e:
+        except (OSError, ValueError, AttributeError, ImportError):
             if self.logger:
-                self.logger.error(f"Failed to send webhook alert: {e}")
+                self.logger.exception("Failed to send webhook alert")
 
     def _store_metrics(self, metrics: dict[str, Any]) -> None:
         """Store metrics in history."""
@@ -462,15 +471,16 @@ class OracleTargetMonitor:
             self.metrics_history = self.metrics_history[-max_history:]
 
     @contextmanager
-    def health_check_context(self) -> Any:
+    def health_check_context(self) -> Generator[dict[str, Any], None, None]:
         """Context manager for health checks."""
         start_time = time.time()
         status = "healthy"
         error = None
 
         try:
-            yield
-        except Exception as e:
+            context = {"start_time": start_time, "status": status}
+            yield context
+        except (OSError, ValueError, AttributeError, ImportError) as e:
             status = "unhealthy"
             error = str(e)
             raise
@@ -501,13 +511,13 @@ class OracleTargetMonitor:
                 health_status["checks"]["system"] = {
                     "status": (
                         "healthy"
-                        if memory_percent < 90 and cpu_percent < 90
+                        if memory_percent < HEALTH_MEMORY_THRESHOLD and cpu_percent < HEALTH_CPU_THRESHOLD
                         else "degraded"
                     ),
                     "memory_percent": memory_percent,
                     "cpu_percent": cpu_percent,
                 }
-        except Exception as e:
+        except (OSError, ValueError, AttributeError, ImportError) as e:
             health_status["checks"]["system"] = {
                 "status": "unhealthy",
                 "error": str(e),
@@ -521,7 +531,7 @@ class OracleTargetMonitor:
                 health_status["checks"]["database"] = db_health
                 if db_health["status"] != "healthy":
                     health_status["status"] = "degraded"
-        except Exception as e:
+        except (OSError, ValueError, AttributeError, ImportError) as e:
             health_status["checks"]["database"] = {
                 "status": "unhealthy",
                 "error": str(e),
@@ -534,11 +544,11 @@ class OracleTargetMonitor:
             error_rate = perf_metrics.get("error_rate_percent", 0)
 
             health_status["checks"]["performance"] = {
-                "status": "healthy" if error_rate < 5 else "degraded",
+                "status": "healthy" if error_rate < HEALTH_ERROR_RATE_THRESHOLD else "degraded",
                 "error_rate": error_rate,
                 "total_records": perf_metrics.get("total_records", 0),
             }
-        except Exception as e:
+        except (OSError, ValueError, AttributeError, ImportError) as e:
             health_status["checks"]["performance"] = {
                 "status": "unknown",
                 "error": str(e),
@@ -557,19 +567,21 @@ class OracleTargetMonitor:
         try:
             start_time = time.time()
 
-            with self._engine.connect() as conn:
+            # Type ignore for dynamic engine object
+            with self._engine.connect() as conn:  # type: ignore[attr-defined]
                 # Simple connectivity test
                 result = conn.execute(text("SELECT 1 FROM DUAL"))
                 if result.scalar() != 1:
-                    raise Exception("Invalid response from database")
+                    msg = "Invalid response from database"
+                    raise Exception(msg)
 
                 # Check database status
                 status_result = conn.execute(
                     text(
                         """
                     SELECT STATUS FROM V$INSTANCE
-                """
-                    )
+                """,
+                    ),
                 )
                 db_status = status_result.scalar()
 
@@ -582,7 +594,7 @@ class OracleTargetMonitor:
                     "connection_test": "passed",
                 }
 
-        except Exception as e:
+        except (OSError, ValueError, AttributeError, ImportError) as e:
             return {
                 "status": "unhealthy",
                 "error": str(e),
@@ -619,7 +631,7 @@ class OracleTargetMonitor:
             "alerts_sent": len(self.alerts_sent),
         }
 
-    def set_engine(self, engine: Any) -> None:
+    def set_engine(self, engine: Union[object, Engine]) -> None:
         """Set SQLAlchemy engine for database monitoring."""
         self._engine = engine
 
@@ -636,6 +648,8 @@ class OracleTargetMonitor:
         self._monitoring_thread = None
 
 
-def create_monitor(config: dict[str, Any], logger: Any = None) -> OracleTargetMonitor:
+def create_monitor(
+    config: dict[str, Any], logger: logging.Logger | None = None,
+) -> OracleTargetMonitor:
     """Factory function to create configured monitor."""
     return OracleTargetMonitor(config, logger)

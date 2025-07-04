@@ -23,10 +23,11 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
     "Topic :: Database",
-    "Topic :: Scientific/Engineering :: Information Analysis",
-]
-packages = [{include = "flext_target_oracle"}]
+    "Topic :: Scientific/Engineering :: Information Analysis"]
+packages = [{ include = "flext_target_oracle" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
@@ -35,8 +36,8 @@ singer-sdk = ">=0.47.4"
 oracledb = ">=2.5.0"
 sqlalchemy = ">=2.0.0"
 # Optional monitoring
-structlog = {version = ">=24.4.0", optional = true}
-prometheus-client = {version = ">=0.21.0", optional = true}
+structlog = { version = ">=24.4.0", optional = true }
+prometheus-client = { version = ">=0.21.0", optional = true }
 
 [tool.poetry.extras]
 monitoring = ["structlog", "prometheus-client"]
@@ -67,22 +68,12 @@ target-version = "py39"
 line-length = 88
 
 [tool.ruff.lint]
-select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
-    "ARG", # flake8-unused-arguments
-    "SIM", # flake8-simplify
-    "TCH", # flake8-type-checking
-]
+select = ["ALL"]
+ignore = ["UP007"]
 
 [tool.black]
 line-length = 88
-target-version = ['py39', 'py310', 'py311', 'py312']
+target-version = ['py39']
 
 [tool.mypy]
 python_version = "3.9"
@@ -116,5 +107,39 @@ exclude_lines = [
     "pragma: no cover",
     "def __repr__",
     "raise AssertionError",
-    "raise NotImplementedError",
-]
+    "raise NotImplementedError"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.flake8-type-checking]
+strict = true
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 88
+
+[tool.ruff.lint.pylint]
+max-args = 10
+max-branches = 15
+max-returns = 8
+max-statements = 60
+
+[tool.vulture]
+min_confidence = 100
+paths = ["src"]
+exclude = ["tests/"]
+ignore_decorators = ["@app.route", "@router.get", "@router.post"]
+ignore_names = ["_*"]
+make_whitelist = true
+sort_by_size = true
+
+[tool.radon]
+exclude = ["tests/*", "*/tests/*"]
+ignore = ["F401"]  # Unused imports
+total_average = true
+show_complexity = true
+average = true
+order = "SCORE"

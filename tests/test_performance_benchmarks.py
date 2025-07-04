@@ -1,26 +1,24 @@
-"""
-Performance benchmark tests for Oracle target.
+import logging
+
+log = logging.getLogger(__name__)
+
+"""Performance benchmark tests for Oracle target.
 
 This module provides comprehensive performance testing including
 throughput benchmarks, scalability tests, and resource utilization monitoring.
 """
 
-from __future__ import annotations
-
 import json
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from unittest.mock import patch
 
 import pytest
 from sqlalchemy import text
+from sqlalchemy.engine import Engine
 
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
-
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
-
 
 @requires_oracle_connection
 class TestPerformanceBenchmarks:
@@ -83,7 +81,7 @@ class TestPerformanceBenchmarks:
                         "value": float(i * 1.5),
                         "status": "active" if i % 2 == 0 else "inactive",
                     },
-                }
+                },
             )
 
         # Measure ingestion performance
@@ -108,15 +106,30 @@ class TestPerformanceBenchmarks:
         duration = performance_timer.duration
         throughput = record_count / duration
 
-        print("\nPerformance Results:")
-        print(f"Records processed: {record_count:,}")
-        print(f"Duration: {duration:.2f} seconds")
-        print(f"Throughput: {throughput:.2f} records/second")
-        print(f"Throughput: {throughput * 60:.2f} records/minute")
+        # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error("\nPerformance Results:")
+        log.error(
+            f"Records processed: {record_count:,}",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Duration: {duration:.2f} seconds",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Throughput: {throughput:.2f} records/second",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Throughput: {throughput * 60:.2f} records/minute",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Performance assertions
-        assert throughput > 1000, f"Throughput too low: {throughput:.2f} records/sec"
-        assert duration < 120, f"Processing took too long: {duration:.2f} seconds"
+        assert (
+            throughput > 1000
+        ), f"Throughput too low: {
+            throughput:.2f} records/sec"
+        assert (
+            duration < 120
+        ), f"Processing took too long: {
+            duration:.2f} seconds"
 
     @pytest.mark.performance
     def test_bulk_vs_individual_performance(
@@ -128,7 +141,6 @@ class TestPerformanceBenchmarks:
         performance_timer,
     ) -> None:
         """Compare bulk operations vs individual insert performance."""
-
         record_count = 10000
 
         # Test schema
@@ -158,7 +170,7 @@ class TestPerformanceBenchmarks:
                         "data": f"Data item {i + 1}",
                         "value": float(i * 0.5),
                     },
-                }
+                },
             )
 
         messages = [json.dumps(test_schema)]
@@ -209,7 +221,7 @@ class TestPerformanceBenchmarks:
 
         individual_messages = [json.dumps(individual_schema)]
         individual_messages.extend(
-            [json.dumps(record) for record in individual_records]
+            [json.dumps(record) for record in individual_records],
         )
         individual_input = "\n".join(individual_messages)
 
@@ -229,22 +241,31 @@ class TestPerformanceBenchmarks:
             assert result.fetchone()[0] == record_count
 
             result = conn.execute(
-                text(f"SELECT COUNT(*) FROM {test_table_name}_individual")
+                text(f"SELECT COUNT(*) FROM {test_table_name}_individual"),
             )
             assert result.fetchone()[0] == record_count
 
         # Performance comparison
         performance_ratio = bulk_throughput / individual_throughput
 
-        print("\nBulk vs Individual Performance:")
-        print(
-            f"Bulk operations: {bulk_throughput:.2f} records/sec ({bulk_duration:.2f}s)"
+        log.error(
+            "\nBulk vs Individual Performance:",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Bulk operations: {
+                bulk_throughput:.2f} records/sec ({
+                # TODO(@dev): Replace with proper logging",  # Link:
+                # https://github.com/issue/todo
+                bulk_duration:.2f}s)
         )
-        print(
+        log.error(
             f"Individual operations: {individual_throughput:.2f} records/sec "
-            f"({individual_duration:.2f}s)"
+            # Link: https://github.com/issue/todo
+            f"({individual_duration:.2f}s)  # TODO(@dev): Replace with proper logging",
         )
-        print(f"Bulk is {performance_ratio:.1f}x faster")
+        log.error(
+            f"Bulk is {performance_ratio:.1f}x faster",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Bulk should be significantly faster
         assert (
@@ -265,7 +286,6 @@ class TestPerformanceBenchmarks:
         performance_timer,
     ) -> None:
         """Test performance scaling with different parallel degrees."""
-
         record_count = 20000
 
         # Test schema
@@ -296,10 +316,11 @@ class TestPerformanceBenchmarks:
                         "category": f"Category {(i % 5) + 1}",
                         "amount": float(i * 2.5),
                         "description": (
-                            f"Description for record {i + 1} with some text data"
+                            f"Description for record {
+                                i + 1} with some text data"
                         ),
                     },
-                }
+                },
             )
 
         # Test different parallel degrees
@@ -350,21 +371,27 @@ class TestPerformanceBenchmarks:
                 result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
                 assert result.fetchone()[0] == record_count
 
-            print(
+            log.error(
                 f"Parallel degree {degree}: {throughput:.2f} records/sec "
-                f"({duration:.2f}s)"
+                # Link: https://github.com/issue/todo
+                f"({duration:.2f}s)  # TODO(@dev): Replace with proper logging",
             )
 
             # Cleanup
             table_cleanup(table_name)
 
         # Analyze scaling
-        print("\nParallel Degree Scaling Results:")
+        log.error(
+            "\nParallel Degree Scaling Results:",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
         baseline_throughput = results[1]["throughput"]
 
         for degree in parallel_degrees:
             scaling_factor = results[degree]["throughput"] / baseline_throughput
-            print(f"Degree {degree}: {scaling_factor:.2f}x baseline performance")
+            log.error(
+                f"Degree {degree}: {
+                    scaling_factor:.2f}x baseline performance",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Higher parallel degrees should generally perform better
         assert (
@@ -384,7 +411,6 @@ class TestPerformanceBenchmarks:
         performance_timer,
     ) -> None:
         """Test memory usage with different batch sizes."""
-
         # Test different batch sizes
         batch_sizes = [1000, 5000, 10000]
         record_count = 30000
@@ -418,7 +444,7 @@ class TestPerformanceBenchmarks:
                         "text_data": "Sample text data " * 10,  # ~200 bytes
                         "numeric_data": float(i * 1.234),
                     },
-                }
+                },
             )
 
         batch_results = {}
@@ -465,24 +491,27 @@ class TestPerformanceBenchmarks:
                 result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
                 assert result.fetchone()[0] == record_count
 
-            print(
+            log.error(
                 f"Batch size {batch_size}: {throughput:.2f} records/sec "
-                f"({duration:.2f}s)"
+                # Link: https://github.com/issue/todo
+                f"({duration:.2f}s)  # TODO(@dev): Replace with proper logging",
             )
 
             # Cleanup
             table_cleanup(table_name)
 
         # Analyze batch size scaling
-        print("\nBatch Size Scaling Results:")
+        # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error("\nBatch Size Scaling Results:")
         for batch_size in batch_sizes:
             result = batch_results[batch_size]
             efficiency = (
                 result["throughput"] / batch_size
             )  # Records per second per batch item
-            print(
+            log.error(
                 f"Batch {batch_size}: {result['throughput']:.2f} records/sec "
-                f"(efficiency: {efficiency:.4f})"
+                # Link: https://github.com/issue/todo
+                f"(efficiency: {efficiency:.4f})  # TODO(@dev): Replace with proper logging",
             )
 
         # Larger batch sizes should generally be more efficient
@@ -504,7 +533,6 @@ class TestPerformanceBenchmarks:
         performance_timer,
     ) -> None:
         """Test performance impact of connection pool settings."""
-
         record_count = 15000
 
         # Test schema
@@ -558,7 +586,7 @@ class TestPerformanceBenchmarks:
                                 f"{(j % pool_config['max_workers']) + 1}"
                             ),
                         },
-                    }
+                    },
                 )
 
             # Prepare messages
@@ -590,22 +618,29 @@ class TestPerformanceBenchmarks:
                 result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
                 assert result.fetchone()[0] == record_count
 
-            config_desc = (
-                f"Pool:{pool_config['pool_size']}, Workers:{pool_config['max_workers']}"
+            config_desc = f"Pool:{
+                    pool_config['pool_size']}, Workers:{
+                    pool_config['max_workers']}"
+            log.error(
+                f"{config_desc}: {
+    throughput:.2f} records/sec ({
+        duration:.2f}s)  # TODO(@dev): Replace with proper logging",
+          # Link: https://github.com/issue/todo
             )
-            print(f"{config_desc}: {throughput:.2f} records/sec ({duration:.2f}s)")
 
             # Cleanup
             table_cleanup(table_name)
 
         # Analyze pool scaling
-        print("\nConnection Pool Performance Results:")
+        log.error(
+            "\nConnection Pool Performance Results:",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
         for _i, result in pool_results.items():
             config = result["config"]
-            print(
+            log.error(
                 f"Pool {config['pool_size']}/Workers {config['max_workers']}: "
-                f"{result['throughput']:.2f} records/sec"
-            )
+                f"{result['throughput']:.2f} records/sec",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Verify reasonable performance scaling
         baseline = pool_results[0]["throughput"]
@@ -679,7 +714,7 @@ class TestPerformanceBenchmarks:
                             f"for performance testing"
                         ),
                     },
-                }
+                },
             )
 
         # Process large records
@@ -703,18 +738,36 @@ class TestPerformanceBenchmarks:
         # Performance metrics for large records
         duration = performance_timer.duration
         throughput = record_count / duration
-        data_size_mb = (record_count * 10) / 1024  # Approximate data size in MB
+        # Approximate data size in MB
+        data_size_mb = (record_count * 10) / 1024
         mb_per_second = data_size_mb / duration
 
-        print("\nLarge Record Performance:")
-        print(f"Records: {record_count:,} (~10KB each)")
-        print(f"Total data: ~{data_size_mb:.1f} MB")
-        print(f"Duration: {duration:.2f} seconds")
-        print(f"Throughput: {throughput:.2f} records/second")
-        print(f"Data rate: {mb_per_second:.2f} MB/second")
+        # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error("\nLarge Record Performance:")
+        log.error(
+            f"Records: {
+    record_count:,
+    } (~10KB each)  # TODO(@dev): Replace with proper logging",
+      # Link: https://github.com/issue/todo
+        )
+        log.error(
+            f"Total data: ~{data_size_mb:.1f} MB",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Duration: {duration:.2f} seconds",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Throughput: {throughput:.2f} records/second",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Data rate: {mb_per_second:.2f} MB/second",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Performance assertions for large records
         assert (
             throughput > 50
         ), f"Large record throughput too low: {throughput:.2f} records/sec"
-        assert mb_per_second > 2, f"Data rate too low: {mb_per_second:.2f} MB/sec"
+        assert (
+            mb_per_second > 2
+        ), f"Data rate too low: {
+            mb_per_second:.2f} MB/sec"

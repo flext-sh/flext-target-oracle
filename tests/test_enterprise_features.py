@@ -6,37 +6,31 @@ licenses, focusing on partitioning and compression (including HCC for
 Exadata/Autonomous).
 """
 
-from __future__ import annotations
-
 import json
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import pytest
-from sqlalchemy import text
-
 from flext_target_oracle.target import OracleTarget
+from sqlalchemy import text
+from sqlalchemy.engine import Engine
+
 from tests.helpers import requires_oracle_connection
-
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
-
 
 @pytest.mark.integration
 @requires_oracle_connection
 class TestEnterpriseFeatures:
     """Test Oracle Enterprise Edition advanced features."""
 
-    def test_table_partitioning_features(
-        self,
-        oracle_config: dict[str, Any],
-        oracle_engine: Engine,
-        oracle_edition_info: dict[str, bool],
-        test_table_name: str,
-        table_cleanup,
-    ) -> None:
+    def test_table_partitioning_features(self,
+                                         oracle_config: dict[str, Any],
+                                         oracle_engine: Engine,
+                                         oracle_edition_info: dict[str, bool],
+                                         test_table_name: str,
+                                         table_cleanup,
+                                         ) -> None:
         """Test Oracle table partitioning (requires Partitioning option)."""
         table_cleanup(test_table_name)
 
@@ -90,7 +84,8 @@ class TestEnterpriseFeatures:
         for i in range(record_count):
             # Distribute data across 6 months
             month_offset = i % 6
-            record_date = base_date + timedelta(days=30 * month_offset + (i % 30))
+            record_date = base_date + \
+                timedelta(days=30 * month_offset + (i % 30))
 
             record = {
                 "type": "RECORD",
@@ -103,7 +98,7 @@ class TestEnterpriseFeatures:
                     "product_category": random.choice(categories),
                     "region": random.choice(regions),
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -117,7 +112,8 @@ class TestEnterpriseFeatures:
         # Verify partitioning worked
         with oracle_engine.connect() as conn:
             # Check total record count
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert (
                 count == record_count
@@ -137,19 +133,24 @@ class TestEnterpriseFeatures:
                 partition_info = result.fetchone()
 
                 if partition_info:
-                    print(
+                    log.error(
                         f"Table partitioned: {partition_info[1]} with "
                         f"{partition_info[2]} partitions"
+                    # TODO(@dev): Replace with proper logging  # Link:
+                    # https://github.com/issue/todo
                     )
                     assert partition_info[1] is not None, "Partitioning type not set"
                 else:
-                    print(
+                    log.error(
                         "Partitioning not applied (may require specific "
-                        "Oracle configuration)"
+                        # Link: https://github.com/issue/todo
+                        "Oracle configuration)  # TODO(@dev): Replace with proper logging"
                     )
 
-            except Exception as e:
-                print(f"Could not verify partitioning (may not be available): {e}")
+            except Exception as e:  # noqa: BLE001
+                log.error(
+                    # Link: https://github.com/issue/todo
+                    f"Could not verify partitioning (may not be available)  # TODO(@dev): Replace with proper logging: {e}")
 
             # Test partition pruning with date-based queries
             try:
@@ -164,21 +165,25 @@ class TestEnterpriseFeatures:
                 )
                 march_count = result.scalar()
                 assert march_count > 0, "No records found in March partition"
-                print(f"March partition contains {march_count} records")
+                # TODO(@dev): Replace with proper logging  # Link:
+                # https://github.com/issue/todo
+                log.error(f"March partition contains {march_count} records")
 
-            except Exception as e:
-                print(f"Partition pruning test failed: {e}")
+            except Exception as e:  # noqa: BLE001
+                # TODO(@dev): Replace with proper logging  # Link:
+                # https://github.com/issue/todo
+                log.error(f"Partition pruning test failed: {e}")
 
-    def test_compression_features(
-        self,
-        oracle_config: dict[str, Any],
-        oracle_engine: Engine,
-        _oracle_edition_info: dict[str, bool],
-        test_table_name: str,
-        table_cleanup,
-    ) -> None:
+    def test_compression_features(self,
+                                  oracle_config: dict[str, Any],
+                                  oracle_engine: Engine,
+                                  _oracle_edition_info: dict[str, bool],
+                                  test_table_name: str,
+                                  table_cleanup,
+                                  ) -> None:
         """Test Oracle compression (HCC for Exadata/Autonomous, Advanced for others)."""
-        # Note: _oracle_edition_info fixture provided but not used in test logic
+        # Note: _oracle_edition_info fixture provided but not used in test
+        # logic
         table_cleanup(test_table_name)
 
         # Detect if running on Exadata or Autonomous Database
@@ -205,14 +210,21 @@ class TestEnterpriseFeatures:
                     is_exadata_or_autonomous = True
                     compression_type = "hcc"  # Hybrid Columnar Compression
                     compress_for = "QUERY HIGH"
-                    print(
-                        f"Detected Exadata/Autonomous environment: {exadata_check[0]}"
+                    log.error(
+                        f"Detected Exadata/Autonomous environment: {
+                            exadata_check[0]}"
+                    # TODO(@dev): Replace with proper logging  # Link:
+                    # https://github.com/issue/todo
                     )
                 else:
-                    print("Standard Oracle environment detected")
+                    # TODO(@dev): Replace with proper logging  # Link:
+                    # https://github.com/issue/todo
+                    log.error("Standard Oracle environment detected")
 
-        except Exception as e:
-            print(f"Could not detect Oracle environment: {e}")
+        except Exception as e:  # noqa: BLE001
+            # TODO(@dev): Replace with proper logging  # Link:
+            # https://github.com/issue/todo
+            log.error(f"Could not detect Oracle environment: {e}")
 
         # Configure with appropriate compression
         config = oracle_config.copy()
@@ -267,17 +279,19 @@ class TestEnterpriseFeatures:
                     "id": i + 1,
                     "text_data": f"Record {i + 1}: "
                     + random.choice(repeated_phrases) * 3,
-                    "repeated_text": repeated_phrases[i % 4],  # Highly repetitive
+                    # Highly repetitive
+                    "repeated_text": repeated_phrases[i % 4],
                     "numeric_value": round(random.uniform(1.0, 100.0), 2),
                     "json_metadata": {
-                        "category": random.choice(["A", "B", "C"]),  # Low cardinality
+                        # Low cardinality
+                        "category": random.choice(["A", "B", "C"]),
                         "status": random.choice(["active", "inactive"]),
                         "priority": random.choice(["high", "medium", "low"]),
                         "template_id": i % 10,  # Repetitive values
                     },
-                    "created_at": datetime.now().isoformat() + "Z",
+                    "created_at": datetime.now(timezone.utc).isoformat() + "Z",
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -291,7 +305,8 @@ class TestEnterpriseFeatures:
         # Verify compression worked
         with oracle_engine.connect() as conn:
             # Check record count
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert (
                 count == record_count
@@ -311,20 +326,29 @@ class TestEnterpriseFeatures:
                 compression_info = result.fetchone()
 
                 if compression_info and compression_info[1] == "ENABLED":
-                    print(f"Table compressed: {compression_info[2]}")
+                    # TODO(@dev): Replace with proper logging  # Link:
+                    # https://github.com/issue/todo
+                    log.error(f"Table compressed: {compression_info[2]}")
                     if is_exadata_or_autonomous:
-                        print("HCC (Hybrid Columnar Compression) applied")
+                        # Link: https://github.com/issue/todo
+                        log.error(
+                            "HCC (Hybrid Columnar Compression)  # TODO(@dev): Replace with proper logging applied")
                     else:
-                        print("Advanced compression applied")
+                        # TODO(@dev): Replace with proper logging  # Link:
+                        # https://github.com/issue/todo
+                        log.error("Advanced compression applied")
                     assert compression_info[1] == "ENABLED", "Compression not enabled"
                 else:
-                    print(
+                    log.error(
                         "Compression not applied (may require license or "
-                        "specific platform)"
+                        # Link: https://github.com/issue/todo
+                        "specific platform)  # TODO(@dev): Replace with proper logging"
                     )
 
-            except Exception as e:
-                print(f"Could not verify compression (may not be available): {e}")
+            except Exception as e:  # noqa: BLE001
+                log.error(
+                    # Link: https://github.com/issue/todo
+                    f"Could not verify compression (may not be available)  # TODO(@dev): Replace with proper logging: {e}")
 
             # Test compressed data retrieval performance
             try:
@@ -342,7 +366,8 @@ class TestEnterpriseFeatures:
                 )
 
                 compression_query_results = result.fetchall()
-                assert len(compression_query_results) == 4, "Compressed query failed"
+                assert len(
+                    compression_query_results) == 4, "Compressed query failed"
 
                 # Verify compression effectiveness
                 for result_row in compression_query_results:
@@ -351,16 +376,17 @@ class TestEnterpriseFeatures:
                     ), "Compression query incorrect"
                     assert result_row[2] > 0, "Average calculation failed"
 
-                print(
+                log.error(
                     f"Compression query successful: "
-                    f"{len(compression_query_results)} groups"
+                    f"{len(compression_query_results)  # TODO(@dev): Replace with proper logging} groups"  # Link: https://github.com/issue/todo
                 )
 
-            except Exception as e:
-                print(f"Compression query test failed: {e}")
+            except Exception as e:  # noqa: BLE001
+                # TODO(@dev): Replace with proper logging  # Link:
+                # https://github.com/issue/todo
+                log.error(f"Compression query test failed: {e}")
 
-    def test_parallel_dml_operations(
-        self,
+    def test_parallel_dml_operations(self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         oracle_edition_info: dict[str, bool],
@@ -422,11 +448,12 @@ class TestEnterpriseFeatures:
                     "batch_id": (i // 1000) + 1,  # 20 batches of 1000 records
                     "data_value": round(random.uniform(1.0, 1000.0), 3),
                     "text_content": (
-                        f"Parallel processing record {i + 1} with substantial content"
+                        f"Parallel processing record {
+                            i + 1} with substantial content"
                     ),
-                    "processing_timestamp": datetime.now().isoformat() + "Z",
+                    "processing_timestamp": datetime.now(timezone.utc).isoformat() + "Z",
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -442,7 +469,8 @@ class TestEnterpriseFeatures:
         # Verify parallel processing results
         with oracle_engine.connect() as conn:
             # Check record count
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert (
                 count == record_count
@@ -486,14 +514,14 @@ class TestEnterpriseFeatures:
                 result = conn.execute(text(parallel_query))
                 parallel_results = result.fetchall()
                 assert len(parallel_results) == 20, "Parallel query failed"
-                print("Parallel query execution successful")
+                log.error("Parallel query execution successful")  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
-            except Exception as e:
-                print(f"Parallel query test failed: {e}")
+            except Exception as e:  # noqa: BLE001
+                log.error(f"Parallel query test failed: {e}")  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Performance validation
         throughput = record_count / performance_timer.duration
-        print(f"Parallel DML performance: {throughput:.0f} records/second")
+        log.error(f"Parallel DML performance: {throughput:.0f} records/second")  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Parallel processing should show good performance
         expected_min_throughput = 500  # Adjust based on your Oracle setup

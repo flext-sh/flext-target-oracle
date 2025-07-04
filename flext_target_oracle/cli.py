@@ -1,12 +1,11 @@
-"""
-CLI for FLEXT Target Oracle.
+"""CLI for FLEXT Target Oracle.
 
 Compatible with Python 3.9+
 """
 
 from __future__ import annotations
 
-from .target import OracleTarget
+from flext_target_oracle.target import OracleTarget
 
 
 def main() -> None:
