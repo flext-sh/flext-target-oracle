@@ -274,7 +274,7 @@ class OracleConnector(SQLConnector):
 
             # Description/Comment columns
             (lambda col: any(col.endswith(suffix)
-                           for suffix in ("_DESC", "_DESCRIPTION", 
+                           for suffix in ("_DESC", "_DESCRIPTION",
                                          "_COMMENT", "_NOTE")),
              oracle.VARCHAR2(length=4000)),
 

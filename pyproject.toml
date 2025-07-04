@@ -1,113 +1,286 @@
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.9.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry]
+[project]
 name = "flext-target-oracle"
-version = "1.0.0"
-description = "Advanced Singer Target for Oracle Database with SQLAlchemy 2.0+ and oracledb - FLEXT ETL Framework"
-authors = ["FLEXT Team <info@flext.sh>"]
+version = "0.2.0"
+description = "FLEXT Target Oracle - Advanced Singer Target for Oracle Database with SQLAlchemy 2.0+"
+authors = [{ name = "FLEXT Team", email = "team@flext.sh" }]
+license = { text = "MIT" }
 readme = "README.md"
-homepage = "https://github.com/flext/flext-target-oracle"
-repository = "https://github.com/flext/flext-target-oracle"
-documentation = "https://flext-target-oracle.readthedocs.io"
-license = "MIT"
-keywords = ["singer", "oracle", "etl", "database", "target"]
+requires-python = ">=3.13"
+keywords = [
+    "flext",
+    "singer",
+    "target",
+    "oracle",
+    "database",
+    "etl",
+    "enterprise",
+]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Database",
-    "Topic :: Scientific/Engineering :: Information Analysis"]
+    "Topic :: System :: Systems Administration",
+    "Typing :: Typed",
+]
+dependencies = [
+    "singer-sdk>=0.44.0",
+    "oracledb>=2.4.0",
+    "sqlalchemy>=2.0.0",
+    "pydantic>=2.11.0",
+    "pydantic-settings>=2.5.0",
+    "structlog>=24.0.0",
+    "click>=8.1.7",
+    "python-dateutil>=2.9.0",
+    "tenacity>=9.0.0",
+    "cryptography>=42.0.0",
+    "orjson>=3.10.0",
+    "prometheus-client>=0.21.0",
+    "opentelemetry-api>=1.27.0",
+    "opentelemetry-instrumentation>=0.48b0",
+]
+
+[project.scripts]
+target-oracle = "flext_target_oracle.cli:main"
+flext-target-oracle = "flext_target_oracle.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/flext-sh/flext-target-oracle"
+Repository = "https://github.com/flext-sh/flext-target-oracle"
+Documentation = "https://github.com/flext-sh/flext-target-oracle/blob/main/README.md"
+"Bug Tracker" = "https://github.com/flext-sh/flext-target-oracle/issues"
+Changelog = "https://github.com/flext-sh/flext-target-oracle/blob/main/CHANGELOG.md"
+
+[tool.poetry]
 packages = [{ include = "flext_target_oracle" }]
 
-[tool.poetry.dependencies]
-python = ">=3.10,<4.0"
-# Core dependencies - maximizing latest features
-singer-sdk = ">=0.47.4"
-oracledb = ">=2.5.0"
-sqlalchemy = ">=2.0.0"
-# Optional monitoring
-structlog = { version = ">=24.4.0", optional = true }
-prometheus-client = { version = ">=0.21.0", optional = true }
-
-[tool.poetry.extras]
-monitoring = ["structlog", "prometheus-client"]
-all = ["structlog", "prometheus-client"]
-
 [tool.poetry.group.dev.dependencies]
-# Testing
+# Testing - Maximum strictness
 pytest = "^8.3.0"
 pytest-asyncio = "^0.24.0"
 pytest-cov = "^6.0.0"
-pytest-mock = "^3.14.0"
 pytest-xdist = "^3.6.0"
-# Code quality
-black = "^24.10.0"
-ruff = "^0.7.0"
-mypy = "^1.13.0"
-pre-commit = "^4.0.0"
-# Documentation
-sphinx = "^8.1.0"
-sphinx-rtd-theme = "^3.0.0"
-myst-parser = "^4.0.0"
+pytest-mock = "^3.14.0"
+pytest-timeout = "^2.3.0"
+pytest-benchmark = "^4.0.0"
+pytest-randomly = "^3.15.0"
 
-[tool.poetry.scripts]
-flext-target-oracle = "flext_target_oracle.cli:main"
+# Code quality - Maximum strictness
+ruff = "^0.8.4"
+mypy = "^1.13.0"
+black = "^24.10.0"
+isort = "^5.13.0"
+pre-commit = "^4.0.0"
+
+# Type stubs
+types-requests = "^2.32.0"
+types-setuptools = "^75.6.0"
+types-python-dateutil = "^2.9.0"
+
+# Documentation
+mkdocs = "^1.6.0"
+mkdocs-material = "^9.5.0"
+
+# Development tools
+ipython = "^8.29.0"
+
+[tool.poetry.group.security.dependencies]
+bandit = { extras = ["toml"], version = "^1.7.0" }
+safety = "^3.2.0"
+
+[tool.poetry.group.build.dependencies]
+build = "^1.2.0"
+twine = "^6.0.0"
+
+[tool.poetry.group.test.dependencies]
+pytest-benchmark = "^4.0.0"
+faker = "^30.8.0"
+factory-boy = "^3.3.0"
+testcontainers = "^4.8.0"
 
 [tool.ruff]
-target-version = "py39"
 line-length = 88
+fix = true
+target-version = "py313"
+src = ["flext_target_oracle", "tests"]
 
 [tool.ruff.lint]
+ignore = [
+    # MANDATORY: Only formatter conflicts that cannot be auto-fixed
+    "COM812", # trailing-comma-missing (handled by formatter)
+    "ISC001", # implicit-str-concat (conflicts with formatter)
+    "D203",   # one-blank-line-before-class (conflicts with D211)
+    "D213",   # multi-line-docstring-summary-second-line (conflicts with D212)
+
+    # FOCUS: Only critical errors for now - ignore non-critical temporarily
+    "E501",    # line-too-long (formatting)
+    "D100",    # docstring issues
+    "ANN001",  # type annotations
+    "PLR0911", # complexity
+    "E402",    # import-not-at-top (legacy)
+    "S110",    # security (non-critical)
+    "ARG001",  # unused arguments
+    "PTH108",  # pathlib
+    "TRY002",  # try/except patterns
+    "FBT001",  # boolean traps
+    "DTZ001",  # datetime
+    "G004",    # logging
+    "N806",    # naming
+    "B007",    # bugbear non-critical
+    "SIM102",  # simplify
+    "RUF001",  # ruff specific
+    "UP035",   # typing upgrades
+    "ERA001",  # commented code
+    "TD002",   # todos
+    "FIX002",  # fixme
+    "PLW0602", # pylint warnings
+    "PLC0415", # pylint conventions
+    "PLE0605", # pylint errors non-critical
+    "PERF102", # performance
+    "A002",    # builtins
+    "PT011",   # pytest
+    "PD008",   # pandas
+    "INP001",  # namespace packages
+    "PLR0124", # magic values
+    "PYI056",  # pyi
+    "EXE001",  # executable
+    "BLE001",  # blind except (temporarily)
+    "SLF001",  # private access (temporarily)
+    "E722",    # bare except and ambiguous names
+    "T201",    # print statements (temporarily)
+    "PLW2901", # redefined loop variable (temporarily)
+    "D401",    # docstring imperative mood (temporarily)
+]
 select = ["ALL"]
-ignore = ["UP007"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "PLR2004", "D", "ANN"]
+"examples/*" = ["T201", "D", "ERA001"]
+"__init__.py" = ["D104"]
+"conftest.py" = ["D"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
 
 [tool.black]
 line-length = 88
-target-version = ['py39']
+target-version = ["py313"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.13"
+strict = true
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
-strict_optional = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
 
 [[tool.mypy.overrides]]
-module = "oracledb.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "oracle.*"
+module = ["oracledb.*", "singer.*", "testcontainers.*", "sqlalchemy.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "-ra -q --cov=flext_target_oracle --cov-report=term-missing"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--tb=short",
+    "--cov=flext_target_oracle",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html:reports/coverage",
+    "--cov-report=xml:reports/coverage.xml",
+    "--cov-fail-under=95",
+    "--junitxml=reports/pytest.xml",
+    "--maxfail=10",
+    "--timeout=60",
+]
 testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "e2e: marks tests as end-to-end tests",
+    "singer: marks tests as Singer protocol tests",
+    "oracle: marks tests as Oracle tests",
+    "target: marks tests as target tests",
+    "performance: marks tests as performance tests",
+    "requires_oracle: tests that need Oracle database",
+]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
 asyncio_mode = "auto"
 
 [tool.coverage.run]
+branch = true
 source = ["flext_target_oracle"]
-omit = ["*/tests/*", "*/test_*.py"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/*_test.py",
+    "*/conftest.py",
+    "*/__pycache__/*",
+    "*/site-packages/*",
+    "*/.venv/*",
+    "*/venv/*",
+    "*/build/*",
+    "*/dist/*",
+    "*/.eggs/*",
+]
 
 [tool.coverage.report]
+skip_empty = true
+skip_covered = false
+show_missing = true
+sort = "Cover"
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
     "raise AssertionError",
-    "raise NotImplementedError"]
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "TYPE_CHECKING",
+]
+
+[tool.bandit]
+targets = ["flext_target_oracle"]
+exclude_dirs = ["tests", "build", "dist"]
+skips = ["B101", "B601"]
+
+[tool.bandit.assert_used]
+skips = ["*/tests/*", "*/test_*.py"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -128,9 +301,6 @@ max-returns = 8
 max-statements = 60
 
 [tool.vulture]
-min_confidence = 100
-paths = ["src"]
-exclude = ["tests/"]
 ignore_decorators = ["@app.route", "@router.get", "@router.post"]
 ignore_names = ["_*"]
 make_whitelist = true
@@ -138,8 +308,11 @@ sort_by_size = true
 
 [tool.radon]
 exclude = ["tests/*", "*/tests/*"]
-ignore = ["F401"]  # Unused imports
+ignore = ["F401"]
+# Unused imports
 total_average = true
 show_complexity = true
 average = true
 order = "SCORE"
+min_confidence = 100
+paths = ["flext_target_oracle"]

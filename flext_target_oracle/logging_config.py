@@ -12,10 +12,10 @@ import logging.handlers
 import os
 import sys
 import time
-from contextlib import contextmanager
-from datetime import datetime, timezone
+from contextlib import contextmanager, suppress
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 
 # Constants for logging configuration
 MAX_SQL_LOG_LENGTH = 500
@@ -226,8 +226,8 @@ class OracleTargetLogger:
 
     @contextmanager
     def operation_context(
-        self, operation: str, stream: str = "unknown", **kwargs: Union[str, int, bool],
-    ) -> Generator[dict[str, Any], None, None]:
+        self, operation: str, stream: str = "unknown", **kwargs: str | int | bool,
+    ) -> Generator[dict[str, Any]]:
         """Context manager for tracking operations with metrics and logging."""
         start_time = time.time()
         operation_id = f"{operation}_{int(start_time)}"
@@ -430,7 +430,7 @@ class OracleTargetLogger:
                 if int(total_records) > 0
                 else 0
             ),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         }
 
     # Standard logging methods with context injection
@@ -438,7 +438,7 @@ class OracleTargetLogger:
         self,
         message: str,
         extra: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: str | float | bool | None,
     ) -> None:
         """Log debug message with context."""
         self._log(logging.DEBUG, message, extra, **kwargs)
@@ -447,7 +447,7 @@ class OracleTargetLogger:
         self,
         message: str,
         extra: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: str | float | bool | None,
     ) -> None:
         """Log info message with context."""
         self._log(logging.INFO, message, extra, **kwargs)
@@ -456,7 +456,7 @@ class OracleTargetLogger:
         self,
         message: str,
         extra: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: str | float | bool | None,
     ) -> None:
         """Log warning message with context."""
         self._log(logging.WARNING, message, extra, **kwargs)
@@ -465,7 +465,7 @@ class OracleTargetLogger:
         self,
         message: str,
         extra: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: str | float | bool | None,
     ) -> None:
         """Log error message with context."""
         self._log(logging.ERROR, message, extra, **kwargs)
@@ -474,7 +474,7 @@ class OracleTargetLogger:
         self,
         message: str,
         extra: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: str | float | bool | None,
     ) -> None:
         """Log critical message with context."""
         self._log(logging.CRITICAL, message, extra, **kwargs)
@@ -484,7 +484,7 @@ class OracleTargetLogger:
         message: str,
         *args: str | float,
         extra: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: str | float | bool | None,
     ) -> None:
         """Log exception message with context and traceback."""
         kwargs.setdefault("exc_info", True)
@@ -495,7 +495,7 @@ class OracleTargetLogger:
         level: int,
         message: str,
         extra: dict[str, Any] | None = None,
-        **kwargs: Any,
+        **kwargs: str | float | bool | None,
     ) -> None:
         """Internal logging method with context injection."""
         try:
@@ -518,32 +518,25 @@ class OracleTargetLogger:
             # Add common context
             extra.setdefault("session_id", self.session_id)
             extra.setdefault("component", "oracle_target")
-            extra.setdefault("timestamp", datetime.now(timezone.utc).isoformat())
+            extra.setdefault("timestamp", datetime.now(UTC).isoformat())
 
             self.logger.log(level, message, extra=extra, **kwargs)
         except (ValueError, OSError) as e:
             # Logger stream is closed during shutdown - attempt emergency logging
             try:
                 # Try to write to stderr as last resort
-                import sys
-
                 sys.stderr.write(f"WARNING: Logger failed during shutdown: {e}\n")
                 sys.stderr.flush()
             except (OSError, AttributeError) as stderr_error:
                 # If even stderr fails, then system is truly shutting down
                 # Try one final fallback before giving up
-                try:
+                with suppress(OSError):
                     # Attempt to write to any available file descriptor
-                    import os
-
                     os.write(
                         2,
                         f"CRITICAL: All logging mechanisms failed: "
                         f"{stderr_error}\n".encode(),
                     )
-                except OSError:
-                    # Absolutely no way to log - system is completely shutting down
-                    pass
 
 
 class JsonFormatter(logging.Formatter):
@@ -553,7 +546,7 @@ class JsonFormatter(logging.Formatter):
         """Format log record as JSON."""
         log_entry = {
             "timestamp": datetime.fromtimestamp(
-                record.created, tz=timezone.utc,
+                record.created, tz=UTC,
             ).isoformat(),
             "level": record.levelname,
             "logger": record.name,
@@ -565,28 +558,16 @@ class JsonFormatter(logging.Formatter):
 
         # Add extra fields if present
         if hasattr(record, "__dict__"):
-            log_entry.update({key: value for key, value in record.__dict__.items() if key not in {
-                    "name",
-                    "msg",
-                    "args",
-                    "levelname",
-                    "levelno",
-                    "pathname",
-                    "filename",
-                    "module",
-                    "lineno",
-                    "funcName",
-                    "created",
-                    "msecs",
-                    "relativeCreated",
-                    "thread",
-                    "threadName",
-                    "processName",
-                    "process",
-                    "stack_info",
-                    "exc_info",
-                    "exc_text",
-                }})
+            excluded_keys = {
+                "name", "msg", "args", "levelname", "levelno", "pathname",
+                "filename", "module", "lineno", "funcName", "created", "msecs",
+                "relativeCreated", "thread", "threadName", "processName",
+                "process", "stack_info", "exc_info", "exc_text",
+            }
+            log_entry.update({
+                key: value for key, value in record.__dict__.items()
+                if key not in excluded_keys
+            })
 
         # Add exception info if present
         if record.exc_info:
@@ -599,6 +580,7 @@ class PerformanceTimer:
     """Context manager for timing operations."""
 
     def __init__(self, logger: OracleTargetLogger, operation: str) -> None:
+        """Initialize timer with logger and operation name."""
         self.logger = logger
         self.operation = operation
         self.start_time: float | None = None
@@ -614,6 +596,7 @@ class PerformanceTimer:
             self.duration = time.time() - self.start_time
 
     def __enter__(self) -> Self:
+        """Enter context manager and start timing."""
         self.start()
         return self
 
@@ -623,10 +606,12 @@ class PerformanceTimer:
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
+        """Exit context manager and log duration."""
         self.stop()
         if self.duration is not None:
             self.logger.info(
-                f"{self.operation} completed",
+                "%s completed",
+                self.operation,
                 extra={"operation": self.operation, "duration": self.duration},
             )
 

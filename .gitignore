@@ -1,8 +1,3 @@
-# Meltano files and directories
-.meltano/
-meltano.yml
-meltano_cache/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -55,6 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+reports/
 
 # Translations
 *.mo
@@ -75,6 +71,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+site/
 
 # PyBuilder
 .pybuilder/
@@ -160,37 +157,80 @@ cython_debug/
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #  be added to the global gitignore or merged into this project gitignore.  For a PyCharm
-#  project, it is recommended to ignore the following files:
-.idea/
+#  project, it is generally recommended to include the directories below, but the decision
+#  belongs to the individual developer.
+#/.idea/
 
 # VS Code
 .vscode/
 
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
+# flext-target-oracle specific
+data/
+output/
+logs/
+state/
+extracted/
+loaded/
+transformed/
+reports/
 
-# Vim
-*.swp
-*.swo
-*~
+# Singer SDK specific
+*.state
+state.json
+catalogs/
+schema.json
 
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
+# Oracle specific
+oracle_data/
+oracle_backup/
+sync_state/
+migration_state/
+*.dmp
+*.ctl
+tnsnames.ora.bak
+sqlnet.ora.bak
+
+# Target-specific
+target_state/
+target_data/
+batch_files/
+error_files/
+success_files/
+
+# Test artifacts
+test_output/
+test_data/
+e2e_results/
+performance_results/
+load_test_results/
+
+# Docker
+docker-compose.override.yml
+.dockerignore
 
 # Temporary files
 *.tmp
 *.temp
-*.bak
-*.backup
-*.orig
+.DS_Store
+Thumbs.db
+
+# Local configuration
+internal.invalid.json
+.internal.invalid
+.env.*.local
+internal.invalid.json
+internal.invalid.conf
+
+# Pipeline artifacts
+pipeline_state/
+execution_logs/
+workflow_data/
+batch_logs/
+
+# IDE files
+*.swp
+*.swo
+*~
 
 # OS generated files
 .DS_Store
@@ -200,81 +240,42 @@ tramp
 .Trashes
 ehthumbs.db
 Thumbs.db
-Desktop.ini
 
-# Project specific
-# Configuration files with secrets
-config.json
-*.secret.json
-secrets/
+# Runtime data
+runtime/
+cache/
+.cache/
 
-# Test outputs
-test_results.json
-test_outputs/
-artifacts/
-logs/
-downloads/
-*.log
+# Oracle client libraries (if downloaded locally)
+instantclient*/
+oracle_client/
 
-# Coverage reports
-htmlcov/
-coverage/
-.coverage.*
+# Security files (never commit these)
+wallet/
+*.p12
+*.jks
+*.key
+*.pem
+*.crt
+credentials.json
+secrets.json
 
-# Poetry virtual environment
-# poetry.lock  # Keep lock file for reproducible builds
+# Monitoring and observability
+prometheus_data/
+grafana_data/
+jaeger_data/
+otel_data/
 
-# Local development
-.internal.invalid
-.env.development
-.env.test
-.env.production
+# Backup files
+*.bak
+*.backup
+*.old
 
-# Documentation builds
-docs/build/
-site/
+# Lock files from package managers
+yarn.lock
+package-lock.json
 
-# IDE specific
-.vscode/settings.json
-.idea/workspace.xml
-.idea/tasks.xml
-
-# Profiling output
-*.prof
-*.pstats
-
-# Singer specific
-state.json
-catalog.json
-catalog_*.json
-config.json
-config_*.json
-test_config*.json
-output/
-extracts/
-
-# Oracle Integration Cloud specific
-*.iar
-*.oic
-oic_artifacts/
-integration_exports/
-reference/
-
-# Test configuration files (auto-generated)
-test_configs/
-tests/configs/
-configs/test_*
-*_test_config.json
-*_real_config.json
-debug_config*.json
-
-# Development artifacts
-*_report.json
-*_report.md
-validation_*.json
-test_all_*.py
-comprehensive_*.py
-full_*_test.py
-
-# Temporary development directory
-temp/
+# Local development databases
+*.db
+*.sqlite
+*.sqlite3
