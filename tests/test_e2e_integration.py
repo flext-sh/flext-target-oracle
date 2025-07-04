@@ -1,24 +1,23 @@
-"""
-End-to-end integration tests for Oracle target.
+import logging
+
+log = logging.getLogger(__name__)
+
+"""End-to-end integration tests for Oracle target.
 
 This module provides comprehensive end-to-end testing scenarios
 that simulate real-world usage patterns and complex data workflows.
 """
 
-from __future__ import annotations
-
 import json
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from unittest.mock import patch
 
 from sqlalchemy import text
+from sqlalchemy.engine import Engine
 
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
-
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
 
 
 @requires_oracle_connection
@@ -74,10 +73,7 @@ class TestE2EIntegration:
         }
 
         # Phase 2: Initial data load (simulate historical data)
-        historical_customers = []
-        for i in range(10000):
-            historical_customers.append(
-                {
+        historical_customers = [{
                     "type": "RECORD",
                     "stream": test_table_name,
                     "record": {
@@ -109,8 +105,7 @@ class TestE2EIntegration:
                         "updated_at": "2025-07-02T10:00:00Z",
                     },
                     "time_extracted": "2025-07-02T10:00:00Z",
-                }
-            )
+                } for i in range(10000)]
 
         # Process initial load
         messages = [json.dumps(customer_schema)]
@@ -141,8 +136,8 @@ class TestE2EIntegration:
                     MIN(customer_id) as min_id,
                     MAX(customer_id) as max_id
                 FROM {test_table_name}
-            """
-                )
+            """,
+                ),
             )
             stats = result.fetchone()
             assert stats.unique_customers == 10000
@@ -151,12 +146,10 @@ class TestE2EIntegration:
             assert stats.max_id == 10000
 
         # Phase 3: Incremental updates (simulate daily changes)
-        incremental_updates = []
 
         # Update existing customers (simulate profile updates)
-        for i in range(0, 2000, 10):  # Update every 10th customer in first 2000
-            incremental_updates.append(
-                {
+        # Update every 10th customer in first 2000
+        incremental_updates = [{
                     "type": "RECORD",
                     "stream": test_table_name,
                     "record": {
@@ -175,7 +168,8 @@ class TestE2EIntegration:
                         "registration_date": "2024-01-01T10:00:00Z",
                         "last_login": "2025-07-02T11:00:00Z",  # Updated login
                         "status": "premium" if i % 20 == 0 else "active",
-                        "lifetime_value": float((i + 1) * 35.75),  # Increased value
+                        # Increased value
+                        "lifetime_value": float((i + 1) * 35.75),
                         "preferences": {
                             "email_notifications": True,
                             "sms_notifications": True,  # Updated preference
@@ -192,13 +186,10 @@ class TestE2EIntegration:
                         "updated_at": "2025-07-02T11:00:00Z",  # Updated timestamp
                     },
                     "time_extracted": "2025-07-02T11:00:00Z",
-                }
-            )
+                } for i in range(0, 2000, 10)]
 
         # Add new customers (simulate new registrations)
-        for i in range(10000, 12000):
-            incremental_updates.append(
-                {
+        incremental_updates.extend({
                     "type": "RECORD",
                     "stream": test_table_name,
                     "record": {
@@ -230,8 +221,7 @@ class TestE2EIntegration:
                         "updated_at": "2025-07-02T11:00:00Z",
                     },
                     "time_extracted": "2025-07-02T11:00:00Z",
-                }
-            )
+                } for i in range(10000, 12000))
 
         # Process incremental updates
         messages = [json.dumps(customer_schema)]
@@ -262,8 +252,8 @@ class TestE2EIntegration:
                 SELECT COUNT(*)
                 FROM {test_table_name}
                 WHERE first_name LIKE 'UpdatedFirst%'
-            """
-                )
+            """,
+                ),
             )
             updated_count = result.fetchone()[0]
             assert updated_count == 200  # 2000/10 updates
@@ -275,8 +265,8 @@ class TestE2EIntegration:
                 SELECT COUNT(*)
                 FROM {test_table_name}
                 WHERE first_name LIKE 'NewCustomer%'
-            """
-                )
+            """,
+                ),
             )
             new_count = result.fetchone()[0]
             assert new_count == 2000
@@ -288,8 +278,8 @@ class TestE2EIntegration:
                 SELECT COUNT(*)
                 FROM {test_table_name}
                 WHERE status = 'premium'
-            """
-                )
+            """,
+                ),
             )
             premium_count = result.fetchone()[0]
             assert premium_count >= 10  # At least 10 premium upgrades
@@ -338,18 +328,27 @@ class TestE2EIntegration:
             2200 / incremental_load_time
         )  # 200 updates + 2000 inserts
 
-        print("\nEnd-to-End ETL Performance:")
-        print(
+        # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error("\nEnd-to-End ETL Performance:")
+        log.error(
             f"Initial load: {initial_throughput:.2f} records/sec "
-            f"({initial_load_time:.2f}s)"
+            # Link: https://github.com/issue/todo
+            f"({initial_load_time:.2f}s)  # TODO(@dev): Replace with proper logging",
         )
-        print(
+        log.error(
             f"Incremental load: {incremental_throughput:.2f} records/sec "
-            f"({incremental_load_time:.2f}s)"
+            # Link: https://github.com/issue/todo
+            f"({incremental_load_time:.2f}s)  # TODO(@dev): Replace with proper logging",
         )
-        print(f"Overall throughput: {total_throughput:.2f} records/sec")
-        print("Total records processed: 12,200")
-        print(f"Final customer count: {final_count:,}")
+        log.error(
+            f"Overall throughput: {total_throughput:.2f} records/sec",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            "Total records processed: 12,200",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Final customer count: {final_count:,}",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Performance assertions
         assert (
@@ -420,8 +419,8 @@ class TestE2EIntegration:
                 FROM user_tab_columns
                 WHERE table_name = UPPER('{test_table_name}')
                 ORDER BY column_id
-            """
-                )
+            """,
+                ),
             )
             initial_columns = [row[0] for row in result.fetchall()]
             expected_initial = ["ID", "NAME", "EMAIL"]
@@ -499,8 +498,8 @@ class TestE2EIntegration:
                 FROM user_tab_columns
                 WHERE table_name = UPPER('{test_table_name}')
                 ORDER BY column_id
-            """
-                )
+            """,
+                ),
             )
             evolved_columns = [row[0] for row in result.fetchall()]
             expected_evolved = ["AGE", "PHONE", "METADATA", "IS_ACTIVE"]
@@ -514,8 +513,8 @@ class TestE2EIntegration:
                 SELECT id, name, age, phone
                 FROM {test_table_name}
                 WHERE id = 1
-            """
-                )
+            """,
+                ),
             )
             updated_record = result.fetchone()
             assert updated_record.name == "John Updated"
@@ -529,8 +528,8 @@ class TestE2EIntegration:
                 SELECT id, name, age
                 FROM {test_table_name}
                 WHERE id = 3
-            """
-                )
+            """,
+                ),
             )
             new_record = result.fetchone()
             assert new_record.name == "Bob"
@@ -644,7 +643,7 @@ class TestE2EIntegration:
         try:
             with patch("sys.stdin", StringIO(input_data)):
                 target_recovery.cli()
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             # Some errors may be expected - verify they're constraint-related
             error_msg = str(e).lower()
             assert any(
@@ -656,7 +655,8 @@ class TestE2EIntegration:
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.fetchone()[0]
-            # Should have at least the original 2 records, possibly more valid ones
+            # Should have at least the original 2 records, possibly more valid
+            # ones
             assert count >= 2, f"Error recovery failed - only {count} records found"
 
     def test_monitoring_and_metrics_workflow(
@@ -693,10 +693,7 @@ class TestE2EIntegration:
         }
 
         # Generate monitoring test data
-        monitoring_records = []
-        for i in range(5000):
-            monitoring_records.append(
-                {
+        monitoring_records = [{
                     "type": "RECORD",
                     "stream": test_table_name,
                     "record": {
@@ -705,8 +702,7 @@ class TestE2EIntegration:
                         "metric_value": float(i * 1.5),
                         "timestamp": "2025-07-02T10:00:00Z",
                     },
-                }
-            )
+                } for i in range(5000)]
 
         # Process with monitoring
         messages = [json.dumps(monitoring_schema)]
@@ -735,8 +731,8 @@ class TestE2EIntegration:
                 FROM {test_table_name}
                 GROUP BY metric_name
                 ORDER BY metric_name
-            """
-                )
+            """,
+                ),
             )
 
             metrics = result.fetchall()
@@ -783,12 +779,9 @@ class TestE2EIntegration:
         }
 
         # Generate realistic data with edge cases
-        realistic_records = []
 
         # Regular transactions
-        for i in range(1000):
-            realistic_records.append(
-                {
+        realistic_records = [{
                     "type": "RECORD",
                     "stream": test_table_name,
                     "record": {
@@ -807,8 +800,7 @@ class TestE2EIntegration:
                         "is_refund": False,
                         "source_system": "web_app",
                     },
-                }
-            )
+                } for i in range(1000)]
 
         # Edge case: Very large amounts
         realistic_records.extend(
@@ -828,8 +820,8 @@ class TestE2EIntegration:
                         "is_refund": False,
                         "source_system": "admin_panel",
                     },
-                }
-            ]
+                },
+            ],
         )
 
         # Edge case: Zero amounts
@@ -850,8 +842,8 @@ class TestE2EIntegration:
                         "is_refund": False,
                         "source_system": "accounting",
                     },
-                }
-            ]
+                },
+            ],
         )
 
         # Edge case: Negative amounts (refunds)
@@ -872,8 +864,8 @@ class TestE2EIntegration:
                         "is_refund": True,
                         "source_system": "refund_api",
                     },
-                }
-            ]
+                },
+            ],
         )
 
         # Edge case: Unicode and special characters
@@ -898,8 +890,8 @@ class TestE2EIntegration:
                         "is_refund": False,
                         "source_system": "mobile_app",
                     },
-                }
-            ]
+                },
+            ],
         )
 
         # Process realistic data
@@ -924,8 +916,8 @@ class TestE2EIntegration:
                     f"""
                 SELECT amount FROM {test_table_name}
                 WHERE transaction_id = 'TXN-LARGE-001'
-            """
-                )
+            """,
+                ),
             )
             large_amount = result.fetchone()
             assert float(large_amount.amount) == 999999.99
@@ -936,8 +928,8 @@ class TestE2EIntegration:
                     f"""
                 SELECT amount FROM {test_table_name}
                 WHERE transaction_id = 'TXN-ZERO-001'
-            """
-                )
+            """,
+                ),
             )
             zero_amount = result.fetchone()
             assert float(zero_amount.amount) == 0.0
@@ -948,12 +940,12 @@ class TestE2EIntegration:
                     f"""
                 SELECT amount, is_refund FROM {test_table_name}
                 WHERE transaction_id = 'TXN-REFUND-001'
-            """
-                )
+            """,
+                ),
             )
             refund = result.fetchone()
             assert float(refund.amount) == -50.25
-            assert refund.is_refund in (1, True)
+            assert refund.is_refund == 1
 
             # Unicode handling
             result = conn.execute(
@@ -961,8 +953,8 @@ class TestE2EIntegration:
                     f"""
                 SELECT description FROM {test_table_name}
                 WHERE transaction_id = 'TXN-UNICODE-001'
-            """
-                )
+            """,
+                ),
             )
             unicode_desc = result.fetchone()
             assert "🛒" in unicode_desc.description
@@ -979,8 +971,8 @@ class TestE2EIntegration:
                     SUM(CASE WHEN amount < 0 THEN amount ELSE 0 END) as total_negative,
                     AVG(amount) as avg_amount
                 FROM {test_table_name}
-            """
-                )
+            """,
+                ),
             )
 
             summary = result.fetchone()
@@ -989,9 +981,21 @@ class TestE2EIntegration:
             assert summary.total_positive > 0
             assert summary.total_negative < 0  # Should have negative refunds
 
-        print("\nRealistic Data Processing Summary:")
-        print(f"Total transactions: {summary.total_transactions}")
-        print(f"Unique users: {summary.unique_users}")
-        print(f"Total positive amount: ${summary.total_positive:.2f}")
-        print(f"Total negative amount: ${summary.total_negative:.2f}")
-        print(f"Average transaction: ${summary.avg_amount:.2f}")
+        log.error(
+            "\nRealistic Data Processing Summary:",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Total transactions: {summary.total_transactions}",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Unique users: {summary.unique_users}",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Total positive amount: ${summary.total_positive:.2f}",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Total negative amount: ${summary.total_negative:.2f}",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(
+            f"Average transaction: ${summary.avg_amount:.2f}",
+        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo

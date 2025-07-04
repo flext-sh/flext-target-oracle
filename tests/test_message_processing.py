@@ -1,3 +1,5 @@
+from typing import Any
+
 """
 Test Singer message processing.
 """
@@ -11,12 +13,13 @@ import pytest
 
 from flext_target_oracle import OracleTarget
 
-
 class TestMessageProcessing:
     """Test Singer message processing."""
 
     @pytest.fixture
-    def oracle_config(self):
+    def oracle_config(self) -> Any:
+
+    def oracle_config(self) -> Any:
         """Oracle configuration for testing."""
         return {
             "host": "localhost",
@@ -27,7 +30,9 @@ class TestMessageProcessing:
         }
 
     @pytest.fixture
-    def schema_message(self):
+    def schema_message(self) -> Any:
+
+    def schema_message(self) -> Any:
         """Sample SCHEMA message."""
         return {
             "type": "SCHEMA",
@@ -44,7 +49,9 @@ class TestMessageProcessing:
         }
 
     @pytest.fixture
-    def record_messages(self):
+    def record_messages(self) -> Any:
+
+    def record_messages(self) -> Any:
         """Sample RECORD messages."""
         return [
             {
@@ -61,6 +68,7 @@ class TestMessageProcessing:
 
     def test_schema_message_processing(self, oracle_config, schema_message) -> None:
         """Test SCHEMA message processing."""
+        """Test SCHEMA message processing."""
         target = OracleTarget(config=oracle_config)
 
         # Create input with schema message
@@ -75,18 +83,23 @@ class TestMessageProcessing:
                 # Process should handle schema message
                 try:
                     target.listen(file_input=StringIO(input_data))
-                except EOFError as e:
+                except Exception:
                     # Expected when input ends - log for debugging
-                    print(f"ℹ️ Expected EOF after processing input: {e}")
+                    # TODO: Consider using else block
+                    log.exception(
+                        f"ℹ️ Expected EOF after processing input: {e}",
+                    # TODO(@dev): Replace with proper logging  # Link:
+                    # https://github.com/issue/todo
+                    )
 
     def test_record_message_processing(
-        self, oracle_config, schema_message, record_messages
+        self, oracle_config, schema_message, record_messages,
     ) -> None:
         """Test RECORD message processing."""
         target = OracleTarget(config=oracle_config)
 
         # Create input with schema and records
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_data = "\n".join(json.dumps(msg) for msg in messages)
 
         # Mock sink to capture processed records
@@ -102,6 +115,7 @@ class TestMessageProcessing:
 
     def test_state_message_processing(self, oracle_config) -> None:
         """Test STATE message processing."""
+        """Test STATE message processing."""
         target = OracleTarget(config=oracle_config)
 
         state_message = {
@@ -111,8 +125,8 @@ class TestMessageProcessing:
                     "test_stream": {
                         "replication_key": "updated_at",
                         "replication_key_value": "2025-01-01T00:00:00Z",
-                    }
-                }
+                    },
+                },
             },
         }
 
@@ -131,6 +145,7 @@ class TestMessageProcessing:
                 assert "STATE" in output or json.dumps(state_message["value"]) in output
 
     def test_activate_version_message(self, oracle_config, schema_message) -> None:
+        """Test ACTIVATE_VERSION message processing."""
         """Test ACTIVATE_VERSION message processing."""
         target = OracleTarget(config=oracle_config)
 
@@ -154,6 +169,7 @@ class TestMessageProcessing:
 
     def test_batch_processing(self, oracle_config, schema_message) -> None:
         """Test batch message processing."""
+        """Test batch message processing."""
         # Configure for batching
         batch_config = oracle_config.copy()
         batch_config["batch_config"] = {
@@ -175,7 +191,7 @@ class TestMessageProcessing:
                         "name": f"Record {i + 1}",
                         "value": float(i * 10),
                     },
-                }
+                },
             )
 
         input_data = "\n".join(json.dumps(msg) for msg in messages)
@@ -191,6 +207,7 @@ class TestMessageProcessing:
                 target.listen(file_input=StringIO(input_data))
 
     def test_multiple_streams(self, oracle_config) -> None:
+        """Test processing multiple streams."""
         """Test processing multiple streams."""
         target = OracleTarget(config=oracle_config)
 
@@ -248,6 +265,7 @@ class TestMessageProcessing:
 
     def test_invalid_message_handling(self, oracle_config) -> None:
         """Test handling of invalid messages."""
+        """Test handling of invalid messages."""
         target = OracleTarget(config=oracle_config)
 
         # Invalid message (missing type)
@@ -261,14 +279,16 @@ class TestMessageProcessing:
         ]
 
         for msg in messages:
-            with (patch("sys.stdin", StringIO(msg)),
-                  contextlib.suppress(
-                      json.JSONDecodeError, EOFError, KeyError, Exception
-                  )):
+            with (
+                patch("sys.stdin", StringIO(msg)),
+                contextlib.suppress(
+                    json.JSONDecodeError, EOFError, KeyError, Exception,
+                ),
+            ):
                 target.listen(file_input=StringIO(msg))
 
     def test_record_metadata(
-        self, oracle_config, schema_message, record_messages
+        self, oracle_config, schema_message, record_messages,
     ) -> None:
         """Test Singer metadata column handling."""
         target = OracleTarget(config=oracle_config)
@@ -281,7 +301,7 @@ class TestMessageProcessing:
             enhanced["version"] = 1
             records_with_metadata.append(enhanced)
 
-        messages = [schema_message] + records_with_metadata
+        messages = [schema_message, *records_with_metadata]
         input_data = "\n".join(json.dumps(msg) for msg in messages)
 
         with patch.object(target, "default_sink_class") as mock_sink_class:

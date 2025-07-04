@@ -1,5 +1,4 @@
-"""
-High-Performance Oracle Sink using SQLAlchemy 2.0.
+"""High-Performance Oracle Sink using SQLAlchemy 2.0.
 
 Leverages SQLAlchemy's modern features for:
 - Bulk operations with executemany()
@@ -15,19 +14,22 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import TYPE_CHECKING, Any
 
 from singer_sdk.sinks import SQLSink
+
+# Batch processing thresholds
+LARGE_BATCH_THRESHOLD = 1000
 from sqlalchemy import MetaData, Table, event, insert, text
 from sqlalchemy.sql import Insert
 
-from .connectors import OracleConnector
+from flext_target_oracle.connectors import OracleConnector
 
 if TYPE_CHECKING:
     from singer_sdk.target_base import Target
     from sqlalchemy.engine import Connection
+    from sqlalchemy.sql.expression import Executable
 
 
 class OracleSink(SQLSink[OracleConnector]):
-    """
-    High-performance Oracle sink using SQLAlchemy 2.0.
+    """High-performance Oracle sink using SQLAlchemy 2.0.
 
     Uses SQLAlchemy's native features:
     - Bulk operations with executemany()
@@ -111,24 +113,29 @@ class OracleSink(SQLSink[OracleConnector]):
                 table_name,
                 self._metadata,
                 schema=schema_name,
-                autoload_with=self.connector._engine,
+                autoload_with=self.connector.create_engine(),
             )
-            self.logger.info(f"Reflected existing table: {self.full_table_name}")
-        except Exception:
+            self.logger.info("Reflected existing table: %s", self.full_table_name)
+        except (AttributeError, ImportError, RuntimeError):
             # Table doesn't exist, will be created by parent class
-            self.logger.info(f"Table {self.full_table_name} will be created")
+            self.logger.info("Table %s will be created", self.full_table_name)
 
     def _setup_event_handlers(self) -> None:
         """Setup SQLAlchemy event handlers for bulk operations."""
-        if not self.connector._engine:
+        engine = self.connector.create_engine()
+        if not engine:
             return
 
-        @event.listens_for(self.connector._engine, "before_execute")
+        @event.listens_for(engine, "before_execute")
         def receive_before_execute(
-            _: Connection, clauseelement: Any, multiparams: Any, __: Any, ___: Any
+            _: Connection,
+            clauseelement: Executable,
+            multiparams: list[dict[str, Any]],
+            __: dict[str, Any],
+            ___: dict[str, Any],
         ) -> None:
             """Add Oracle hints for bulk operations."""
-            if (isinstance(clauseelement, Insert) and len(multiparams) > 1000
+            if (isinstance(clauseelement, Insert) and len(multiparams) > LARGE_BATCH_THRESHOLD
                 and self.config.get("use_direct_path", True)):
                 # Add APPEND_VALUES hint for large batches
                 clauseelement = clauseelement.prefix_with("/*+ APPEND_VALUES */")
@@ -159,13 +166,13 @@ class OracleSink(SQLSink[OracleConnector]):
             records_per_second = len(records) / elapsed if elapsed > 0 else 0
 
             self.logger.info(
-                f"Processed batch of {len(records)} records in {elapsed:.2f}s "
-                f"({records_per_second:.0f} records/sec)"
+                "Processed batch of %d records in %.2fs (%d records/sec)",
+                len(records), elapsed, int(records_per_second),
             )
 
-        except Exception as e:
+        except Exception:
             self._stats["failed_records"] += len(records)
-            self.logger.error(f"Batch processing failed: {e}")
+            self.logger.exception("Batch processing failed")
             raise
 
     def _process_batch_append(self, records: list[dict[str, Any]]) -> None:
@@ -178,8 +185,8 @@ class OracleSink(SQLSink[OracleConnector]):
         prepared_records = self._prepare_records(records)
 
         # Use SQLAlchemy 2.0 Connection.execute() with insert()
-        with self.connector._engine.begin() as conn:
-            if self._use_parallel and len(prepared_records) > 1000:
+        with self.connector.create_engine().begin() as conn:
+            if self._use_parallel and len(prepared_records) > LARGE_BATCH_THRESHOLD:
                 # Parallel processing for large batches
                 self._execute_parallel_insert(conn, prepared_records)
             else:
@@ -194,7 +201,7 @@ class OracleSink(SQLSink[OracleConnector]):
 
         prepared_records = self._prepare_records(records)
 
-        with self.connector._engine.begin() as conn:
+        with self.connector.create_engine().begin() as conn:
             # Build Oracle MERGE statement
             table_name = self._table.name
             if self._table.schema:
@@ -229,7 +236,7 @@ class OracleSink(SQLSink[OracleConnector]):
 
         prepared_records = self._prepare_records(records)
 
-        with self.connector._engine.begin() as conn:
+        with self.connector.create_engine().begin() as conn:
             # Truncate table first
             conn.execute(text(f"TRUNCATE TABLE {self.full_table_name}"))
 
@@ -238,7 +245,7 @@ class OracleSink(SQLSink[OracleConnector]):
             conn.execute(stmt, prepared_records)
 
     def _execute_parallel_insert(
-        self, conn: Connection, records: list[dict[str, Any]]
+        self, conn: Connection, records: list[dict[str, Any]],
     ) -> None:
         """Execute insert in parallel chunks."""
         chunk_size = max(1000, len(records) // self._parallel_threads)
@@ -248,9 +255,14 @@ class OracleSink(SQLSink[OracleConnector]):
         ]
 
         futures = []
-        for chunk in chunks:
-            future = self._executor.submit(self._insert_chunk, conn, chunk)
-            futures.append(future)
+        if self._executor is not None:
+            for chunk in chunks:
+                future = self._executor.submit(self._insert_chunk, conn, chunk)
+                futures.append(future)
+        else:
+            # Execute sequentially if no executor
+            for chunk in chunks:
+                self._insert_chunk(conn, chunk)
 
         # Wait for all chunks to complete
         for future in as_completed(futures):
@@ -258,8 +270,12 @@ class OracleSink(SQLSink[OracleConnector]):
 
     def _insert_chunk(self, conn: Connection, chunk: list[dict[str, Any]]) -> None:
         """Insert a single chunk of records."""
-        stmt = insert(self._table)
-        conn.execute(stmt, chunk)
+        if self._table is not None:
+            stmt = insert(self._table)
+            conn.execute(stmt, chunk)
+        else:
+            msg = "Table not initialized"
+            raise RuntimeError(msg)
 
     def _prepare_records(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Prepare records for database operations."""
@@ -285,7 +301,7 @@ class OracleSink(SQLSink[OracleConnector]):
             # Add audit fields if configured
             if self.config.get("add_record_metadata", True):
                 import datetime
-                now = datetime.datetime.utcnow()
+                now = datetime.datetime.now(datetime.timezone.utc)
 
                 if "CREATE_TS" not in prepared_record:
                     prepared_record["CREATE_TS"] = now
@@ -309,10 +325,9 @@ class OracleSink(SQLSink[OracleConnector]):
         # Log final statistics
         elapsed = time.time() - self._stats["start_time"]
         self.logger.info(
-            f"Stream {self.stream_name} complete: "
-            f"{self._stats['total_records']} records in "
-            f"{self._stats['total_batches']} batches "
-            f"({elapsed:.1f}s total)"
+            "Stream %s complete: %d records in %d batches (%.1fs total)",
+            self.stream_name, self._stats["total_records"],
+            self._stats["total_batches"], elapsed,
         )
 
         # Let parent clean up
@@ -322,10 +337,17 @@ class OracleSink(SQLSink[OracleConnector]):
         """Get SQLAlchemy Table object."""
         if self._table is None:
             # Use parent's method to get table
-            self._table = super().table
+            parent_table = getattr(super(), "table", None)
+            if parent_table is not None:
+                self._table = parent_table
+            else:
+                self._setup_table_metadata()
+        if self._table is None:
+            msg = "Unable to initialize table"
+            raise RuntimeError(msg)
         return self._table
 
-    def activate_version(self, new_version: Any) -> None:
+    def activate_version(self, new_version: int) -> None:
         """Activate version for incremental replication."""
         # Let parent handle this
         super().activate_version(new_version)
@@ -335,8 +357,13 @@ class OracleSink(SQLSink[OracleConnector]):
         """Get the SQLAlchemy Table object."""
         if self._table is None:
             # Let parent create table
-            _ = super().table
-            # Then setup our reference
-            self._setup_table_metadata()
+            parent_table = getattr(super(), "table", None)
+            if parent_table is not None:
+                self._table = parent_table
+            else:
+                # Then setup our reference
+                self._setup_table_metadata()
+        if self._table is None:
+            msg = "Unable to initialize table"
+            raise RuntimeError(msg)
         return self._table
-

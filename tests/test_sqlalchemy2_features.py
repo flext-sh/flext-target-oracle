@@ -1,3 +1,5 @@
+from typing import Any
+
 """Test SQLAlchemy 2.0 features in Oracle Target.
 
 This module tests the modern SQLAlchemy 2.0 implementation including:
@@ -11,18 +13,18 @@ This module tests the modern SQLAlchemy 2.0 implementation including:
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from sqlalchemy import pool
-from sqlalchemy.engine import URL
-
 from flext_target_oracle.connectors import OracleConnector
 from flext_target_oracle.sinks import OracleSink
 from flext_target_oracle.target import OracleTarget
-
+from sqlalchemy import pool
+from sqlalchemy.engine import URL
 
 class TestSQLAlchemy2Features:
     """Test SQLAlchemy 2.0 features."""
 
-    def test_url_create_usage(self):
+    def test_url_create_usage(self) -> None:
+
+    def test_url_create_usage(self) -> None:
         """Test that URL.create() is used for connection URLs."""
         config = {
             "host": "localhost",
@@ -39,12 +41,14 @@ class TestSQLAlchemy2Features:
         assert isinstance(url, URL)
         assert url.drivername == "oracle+oracledb"
         assert url.username == "test_user"
-        assert url.password == "test_pass"
+        assert url.password == "test_pass"  # noqa: S105
         assert url.host == "localhost"
         assert url.port == 1521
         assert url.query == {"service_name": "ORCL"}
 
-    def test_pool_class_selection(self):
+    def test_pool_class_selection(self) -> None:
+
+    def test_pool_class_selection(self) -> None:
         """Test pool class selection based on configuration."""
         connector = OracleConnector({})
 
@@ -64,7 +68,8 @@ class TestSQLAlchemy2Features:
         assert connector._get_pool_class() == pool.StaticPool
 
     @patch('flext_target_oracle.connectors.create_engine')
-    def test_engine_creation_with_future_mode(self, mock_create_engine):
+    def test_engine_creation_with_future_mode(self, mock_create_engine) -> None:
+        """Test engine creation with future=True for SQLAlchemy 2.0."""
         """Test engine creation with future=True for SQLAlchemy 2.0."""
         config = {
             "host": "localhost",
@@ -92,7 +97,8 @@ class TestSQLAlchemy2Features:
 
     @patch('flext_target_oracle.connectors.event')
     @patch('flext_target_oracle.connectors.create_engine')
-    def test_event_listeners_setup(self, mock_create_engine, mock_event):
+    def test_event_listeners_setup(self, mock_create_engine, mock_event) -> None:
+        """Test SQLAlchemy event listeners are properly set up."""
         """Test SQLAlchemy event listeners are properly set up."""
         config = {
             "host": "localhost",
@@ -112,7 +118,9 @@ class TestSQLAlchemy2Features:
         # Verify event.listens_for was called
         mock_event.listens_for.assert_called_with(mock_engine, "connect")
 
-    def test_oracle_type_mapping(self):
+    def test_oracle_type_mapping(self) -> None:
+
+    def test_oracle_type_mapping(self) -> None:
         """Test Oracle-specific type mapping."""
         connector = OracleConnector({})
 
@@ -125,14 +133,18 @@ class TestSQLAlchemy2Features:
         assert str(bool_type) == "NUMBER(precision=1, scale=0)"
 
         # Test string mapping with length
-        string_type = connector.to_sql_type({"type": "string", "maxLength": 100})
+        string_type = connector.to_sql_type(
+            {"type": "string", "maxLength": 100})
         assert str(string_type) == "VARCHAR2(length=100)"
 
         # Test CLOB for long strings
-        clob_type = connector.to_sql_type({"type": "string", "maxLength": 5000})
+        clob_type = connector.to_sql_type(
+            {"type": "string", "maxLength": 5000})
         assert str(clob_type) == "CLOB"
 
-    def test_column_pattern_recognition(self):
+    def test_column_pattern_recognition(self) -> None:
+
+    def test_column_pattern_recognition(self) -> None:
         """Test intelligent column type mapping based on patterns."""
         config = {"enable_column_patterns": True}
         connector = OracleConnector(config)
@@ -150,15 +162,17 @@ class TestSQLAlchemy2Features:
         assert "TIMESTAMP" in str(ts_type)
 
         # Test amount column
-        amt_type = connector.get_column_type("TOTAL_AMOUNT", {"type": "number"})
+        amt_type = connector.get_column_type(
+            "TOTAL_AMOUNT", {"type": "number"})
         assert str(amt_type) == "NUMBER(precision=19, scale=4)"
-
 
 class TestOracleSinkSQLAlchemy2:
     """Test Oracle Sink with SQLAlchemy 2.0 features."""
 
     @pytest.fixture
-    def mock_target(self):
+    def mock_target(self) -> Any:
+
+    def mock_target(self) -> Any:
         """Create mock target."""
         target = Mock()
         target.config = {
@@ -171,13 +185,16 @@ class TestOracleSinkSQLAlchemy2:
         return target
 
     @pytest.fixture
-    def mock_connector(self):
+    def mock_connector(self) -> Any:
+
+    def mock_connector(self) -> Any:
         """Create mock connector with engine."""
         connector = Mock()
         connector._engine = Mock()
         return connector
 
-    def test_bulk_insert_with_sqlalchemy2(self, mock_target, mock_connector):
+    def test_bulk_insert_with_sqlalchemy2(self, mock_target, mock_connector) -> None:
+        """Test bulk insert using SQLAlchemy 2.0 insert()."""
         """Test bulk insert using SQLAlchemy 2.0 insert()."""
         schema = {
             "type": "object",
@@ -223,9 +240,12 @@ class TestOracleSinkSQLAlchemy2:
             call_args = mock_conn.execute.call_args[0][1]
             assert all("CREATE_TS" in record for record in call_args)
             assert all("MOD_TS" in record for record in call_args)
-            assert all(record["CREATE_USER"] == "SINGER" for record in call_args)
+            assert all(record["CREATE_USER"] ==
+                       "SINGER" for record in call_args)
 
-    def test_event_handler_for_bulk_operations(self, mock_target, mock_connector):
+    def test_event_handler_for_bulk_operations(self,
+                                               mock_target,
+                                               mock_connector) -> None:
         """Test event handler adds Oracle hints for bulk operations."""
         sink = OracleSink(
             target=mock_target,
@@ -241,15 +261,15 @@ class TestOracleSinkSQLAlchemy2:
         # Verify event.listens_for was used
         # This would be tested in integration tests with real engine
 
-
 class TestOracleTargetSQLAlchemy2:
     """Test Oracle Target with SQLAlchemy 2.0 features."""
 
     @patch('flext_target_oracle.target.create_async_engine')
     @patch('flext_target_oracle.target.create_engine')
-    def test_initialize_engines_with_modern_patterns(
-        self, mock_create_engine, mock_create_async_engine
-    ):
+    def test_initialize_engines_with_modern_patterns(self,
+                                                     mock_create_engine,
+                                                     mock_create_async_engine
+                                                     ) -> None:
         """Test engine initialization with SQLAlchemy 2.0 patterns."""
         config = {
             "host": "localhost",
@@ -282,7 +302,9 @@ class TestOracleTargetSQLAlchemy2:
             assert engine_kwargs['pool_recycle'] == 7200
             assert engine_kwargs['future'] is True
 
-    def test_connection_url_building(self):
+    def test_connection_url_building(self) -> None:
+
+    def test_connection_url_building(self) -> None:
         """Test connection URL building with modern patterns."""
         config = {
             "host": "oracle.example.com",
@@ -301,10 +323,16 @@ class TestOracleTargetSQLAlchemy2:
             target = OracleTarget(config=config)
             url = target._build_connection_url()
 
-            assert url == "oracle+oracledb://app_user:secure_pass@oracle.example.com:1522/PROD_DB"
+            assert url = (
+                = "oracle+oracledb://app_user:secure_pass@oracle.example.com:1522/PROD_DB"
+            )
 
-    def test_health_check_with_sqlalchemy2(self):
-        """Test health check using SQLAlchemy 2.0 text()."""
+    def test_health_check_with_sqlalchemy2(self) -> None:
+        # TODO: Reduce complexity
+
+    def test_health_check_with_sqlalchemy2(self) -> None:
+        # TODO: Reduce complexity
+                """Test health check using SQLAlchemy 2.0 text()."""
         config = {
             "host": "localhost",
             "username": "test",
@@ -342,7 +370,5 @@ class TestOracleTargetSQLAlchemy2:
                 assert health_status["sync_engine"]["pool_size"] == 10
                 assert health_status["sync_engine"]["checked_out"] == 2
 
-
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
-

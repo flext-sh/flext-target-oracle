@@ -9,23 +9,18 @@ These tests simulate actual production use cases including:
 - Time-series data with partitioning
 """
 
-from __future__ import annotations
-
 import json
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import pytest
-from sqlalchemy import text
-
 from flext_target_oracle.target import OracleTarget
+from sqlalchemy import text
+from sqlalchemy.engine import Engine
+
 from tests.helpers import requires_oracle_connection
-
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
-
 
 @pytest.mark.integration
 @pytest.mark.slow
@@ -33,14 +28,13 @@ if TYPE_CHECKING:
 class TestRealWorldScenarios:
     """Test real-world data loading scenarios."""
 
-    def test_ecommerce_transaction_data(
-        self,
-        oracle_config: dict[str, Any],
-        oracle_engine: Engine,
-        test_table_name: str,
-        table_cleanup,
-        performance_timer,
-    ) -> None:
+    def test_ecommerce_transaction_data(self,
+                                        oracle_config: dict[str, Any],
+                                        oracle_engine: Engine,
+                                        test_table_name: str,
+                                        table_cleanup,
+                                        performance_timer,
+                                        ) -> None:
         """Test loading e-commerce transaction data with complex schema."""
         table_cleanup(test_table_name)
 
@@ -109,9 +103,14 @@ class TestRealWorldScenarios:
             "google_pay",
         ]
         currencies = ["USD", "EUR", "GBP", "CAD"]
-        statuses = ["pending", "confirmed", "shipped", "delivered", "cancelled"]
+        statuses = [
+            "pending",
+            "confirmed",
+            "shipped",
+            "delivered",
+            "cancelled"]
 
-        base_time = datetime.now() - timedelta(days=30)
+        base_time = datetime.now(timezone.utc) - timedelta(days=30)
 
         for i in range(record_count):
             transaction_time = base_time + timedelta(
@@ -128,7 +127,8 @@ class TestRealWorldScenarios:
                 "stream": test_table_name,
                 "record": {
                     "transaction_id": f"TXN_{i + 1:06d}",
-                    "order_id": f"ORD_{(i // 3) + 1:06d}",  # Multiple items per order
+                    # Multiple items per order
+                    "order_id": f"ORD_{(i // 3) + 1:06d}",
                     "customer_id": random.randint(1, 1000),
                     "product_id": f"PROD_{random.randint(1, 500):05d}",
                     "product_name": f"{category} Product {random.randint(1, 100)}",
@@ -151,7 +151,8 @@ class TestRealWorldScenarios:
                     "customer_metadata": {
                         "tier": random.choice(["bronze", "silver", "gold", "platinum"]),
                         "signup_date": (
-                            transaction_time - timedelta(days=random.randint(30, 365))
+                            transaction_time -
+                            timedelta(days=random.randint(30, 365))
                         ).isoformat()
                         + "Z",
                         "lifetime_value": round(random.uniform(100, 5000), 2),
@@ -163,11 +164,12 @@ class TestRealWorldScenarios:
                     "status": random.choice(statuses),
                     "created_at": transaction_time.isoformat() + "Z",
                     "updated_at": (
-                        transaction_time + timedelta(hours=random.randint(1, 72))
+                        transaction_time +
+                        timedelta(hours=random.randint(1, 72))
                     ).isoformat()
                     + "Z",
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -183,7 +185,8 @@ class TestRealWorldScenarios:
         # Verify e-commerce data loading
         with oracle_engine.connect() as conn:
             # Verify record count
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert (
                 count == record_count
@@ -230,15 +233,15 @@ class TestRealWorldScenarios:
                 assert isinstance(promos, list), "Promotion codes not array"
 
         throughput = record_count / performance_timer.duration
-        print(f"E-commerce data loading: {throughput:.0f} records/second")
+        # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        log.error(f"E-commerce data loading: {throughput:.0f} records/second")
 
-    def test_user_activity_logs(
-        self,
-        oracle_config: dict[str, Any],
-        oracle_engine: Engine,
-        test_table_name: str,
-        table_cleanup,
-    ) -> None:
+    def test_user_activity_logs(self,
+                                oracle_config: dict[str, Any],
+                                oracle_engine: Engine,
+                                test_table_name: str,
+                                table_cleanup,
+                                ) -> None:
         """Test loading high-volume user activity logs."""
         table_cleanup(test_table_name)
 
@@ -307,7 +310,7 @@ class TestRealWorldScenarios:
             "Mozilla/5.0 (Android 11; Mobile; rv:68.0) Gecko/68.0 Firefox/88.0",
         ]
 
-        base_time = datetime.now() - timedelta(hours=24)
+        base_time = datetime.now(timezone.utc) - timedelta(hours=24)
 
         for i in range(record_count):
             log_time = base_time + timedelta(
@@ -369,7 +372,7 @@ class TestRealWorldScenarios:
                     "timestamp": log_time.isoformat() + "Z",
                     "duration_seconds": random.randint(1, 300),
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -382,7 +385,8 @@ class TestRealWorldScenarios:
 
         # Verify activity log data
         with oracle_engine.connect() as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert (
                 count == record_count
@@ -407,13 +411,12 @@ class TestRealWorldScenarios:
             assert len(event_stats) > 0, "No events found"
             assert "page_view" in event_stats, "Page view events missing"
 
-    def test_financial_records_with_precision(
-        self,
-        oracle_config: dict[str, Any],
-        oracle_engine: Engine,
-        test_table_name: str,
-        table_cleanup,
-    ) -> None:
+    def test_financial_records_with_precision(self,
+                                              oracle_config: dict[str, Any],
+                                              oracle_engine: Engine,
+                                              test_table_name: str,
+                                              table_cleanup,
+                                              ) -> None:
         """Test loading financial records requiring high precision."""
         table_cleanup(test_table_name)
 
@@ -487,7 +490,7 @@ class TestRealWorldScenarios:
         }
 
         running_balance = 100000.0  # Starting balance
-        base_time = datetime.now() - timedelta(days=7)
+        base_time = datetime.now(timezone.utc) - timedelta(days=7)
 
         for i in range(record_count):
             transaction_time = base_time + timedelta(
@@ -512,7 +515,9 @@ class TestRealWorldScenarios:
                 if transaction_type in ["transfer", "payment"]
                 else 0.0
             )
-            tax = round(amount * 0.005, 8) if transaction_type == "interest" else 0.0
+            tax = round(
+                amount * 0.005,
+                8) if transaction_type == "interest" else 0.0
             net_amount = round(amount - fee - tax, 8)
 
             balance_before = running_balance
@@ -540,7 +545,8 @@ class TestRealWorldScenarios:
                     "description": f"{transaction_type.title()} transaction #{i + 1}",
                     "transaction_date": transaction_time.isoformat() + "Z",
                     "processing_date": (
-                        transaction_time + timedelta(hours=random.randint(0, 24))
+                        transaction_time +
+                        timedelta(hours=random.randint(0, 24))
                     ).isoformat()
                     + "Z",
                     "value_date": (
@@ -562,7 +568,7 @@ class TestRealWorldScenarios:
                         k=random.randint(2, 4),
                     ),
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -575,7 +581,8 @@ class TestRealWorldScenarios:
 
         # Verify financial data with precision
         with oracle_engine.connect() as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert (
                 count == record_count
@@ -616,14 +623,13 @@ class TestRealWorldScenarios:
                 amount_str = str(float(row[0]))
                 assert "." in amount_str, f"Amount precision lost: {amount_str}"
 
-    def test_multi_stream_concurrent_loading(
-        self,
-        oracle_config: dict[str, Any],
-        oracle_engine: Engine,
-        test_schema_prefix: str,
-        table_cleanup,
-        performance_timer,
-    ) -> None:
+    def test_multi_stream_concurrent_loading(self,
+                                             oracle_config: dict[str, Any],
+                                             oracle_engine: Engine,
+                                             test_schema_prefix: str,
+                                             table_cleanup,
+                                             performance_timer,
+                                             ) -> None:
         """Test concurrent loading of multiple data streams."""
         # Create multiple table names
         table_names = [
@@ -675,9 +681,9 @@ class TestRealWorldScenarios:
                         "user_id": i + 1,
                         "username": f"user_{i + 1}",
                         "email": f"user_{i + 1}@example.com",
-                        "created_at": datetime.now().isoformat() + "Z",
+                        "created_at": datetime.now(timezone.utc).isoformat() + "Z",
                     },
-                    "time_extracted": datetime.now().isoformat() + "Z",
+                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
                 }
             )
 
@@ -713,9 +719,9 @@ class TestRealWorldScenarios:
                         "status": random.choice(
                             ["pending", "confirmed", "shipped", "delivered"]
                         ),
-                        "order_date": datetime.now().isoformat() + "Z",
+                        "order_date": datetime.now(timezone.utc).isoformat() + "Z",
                     },
-                    "time_extracted": datetime.now().isoformat() + "Z",
+                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
                 }
             )
 
@@ -752,7 +758,7 @@ class TestRealWorldScenarios:
                         "price": round(random.uniform(5.0, 200.0), 2),
                         "inventory": random.randint(0, 1000),
                     },
-                    "time_extracted": datetime.now().isoformat() + "Z",
+                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
                 }
             )
 
@@ -779,17 +785,20 @@ class TestRealWorldScenarios:
         # Verify all streams were loaded correctly
         with oracle_engine.connect() as conn:
             # Verify users
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {table_names[0]}"))
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {table_names[0]}"))
             users_count = result.scalar()
             assert users_count == 1000, f"Users: expected 1000, got {users_count}"
 
             # Verify orders
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {table_names[1]}"))
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {table_names[1]}"))
             orders_count = result.scalar()
             assert orders_count == 2000, f"Orders: expected 2000, got {orders_count}"
 
             # Verify products
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {table_names[2]}"))
+            result = conn.execute(
+                text(f"SELECT COUNT(*) FROM {table_names[2]}"))
             products_count = result.scalar()
             assert (
                 products_count == 500
@@ -812,7 +821,7 @@ class TestRealWorldScenarios:
 
         total_records = sum(len(records) for _, records in schemas_and_records)
         throughput = total_records / performance_timer.duration
-        print(
+        log.error(
             f"Multi-stream loading: {throughput:.0f} records/second "
-            f"across {len(table_names)} streams"
-        )
+            f"across {len(table_names)  # TODO(@dev): Replace with proper logging} streams"  # Link: https://github.com/issue/todo
+                      )

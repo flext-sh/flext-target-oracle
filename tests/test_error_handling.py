@@ -1,26 +1,25 @@
-"""
-Comprehensive error handling and recovery mechanism tests.
+import logging
+
+log = logging.getLogger(__name__)
+
+"""Comprehensive error handling and recovery mechanism tests.
 
 These tests validate robust error handling, retry logic, connection recovery,
 and graceful degradation under various failure scenarios.
 """
 
-from __future__ import annotations
-
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import pytest
 from sqlalchemy import text
+from sqlalchemy.engine import Engine
 
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
-
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
 
 
 @pytest.mark.integration
@@ -50,7 +49,7 @@ class TestErrorHandling:
                 "pool_pre_ping": True,
                 "pool_recycle": 1,  # Short recycle for testing
                 "skip_table_optimization": True,
-            }
+            },
         )
 
         schema_message = {
@@ -78,7 +77,7 @@ class TestErrorHandling:
                     "name": f"Test Record {i + 1}",
                     "status": "active",
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -86,24 +85,32 @@ class TestErrorHandling:
         oracle_target = OracleTarget(config=config)
 
         # First, establish the table
-        setup_messages = [schema_message] + record_messages[:10]
+        setup_messages = [schema_message, *record_messages[:10]]
         input_lines = [json.dumps(msg) + "\n" for msg in setup_messages]
         input_stream = StringIO("".join(input_lines))
         oracle_target.process_lines(input_stream)
 
-        # Verify initial records were processed (may be 0 if connection simulated)
+        # Verify initial records were processed (may be 0 if connection
+        # simulated)
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             initial_count = result.scalar()
             # In test environment, connection might be simulated
-            print(f"Initial record count: {initial_count}")
+            log.error(
+                f"Initial record count: {initial_count}",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
             if initial_count == 0:
-                print("Warning: No records inserted - likely simulated connection")
+                log.error(
+                    "Warning: No records inserted - likely simulated connection",
+                # TODO(@dev): Replace with proper logging  # Link:
+                # https://github.com/issue/todo
+                )
 
         # Now test with connection issues during processing
         remaining_records = record_messages[10:]
 
-        # Process remaining records - Oracle target should handle any connection issues
+        # Process remaining records - Oracle target should handle any
+        # connection issues
         input_lines = [json.dumps(msg) + "\n" for msg in remaining_records]
         input_stream = StringIO("".join(input_lines))
 
@@ -111,7 +118,10 @@ class TestErrorHandling:
             oracle_target.process_lines(input_stream)
         except Exception as e:
             # Log but don't fail - target should have retry logic
-            print(f"Processing completed with potential recoverable errors: {e}")
+            # TODO: Consider using else block
+            log.exception(
+                f"Processing completed with potential recoverable errors: {e}",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Verify final state - should have most or all records
         with oracle_engine.connect() as conn:
@@ -142,7 +152,7 @@ class TestErrorHandling:
                 "fail_fast": False,
                 "max_retries": 2,
                 "skip_table_optimization": True,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -246,14 +256,17 @@ class TestErrorHandling:
         ]
 
         # Process mixed records
-        messages = [schema_message] + test_records
+        messages = [schema_message, *test_records]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
         try:
             oracle_target.process_lines(input_stream)
         except Exception as e:
-            print(f"Processing completed with expected validation errors: {e}")
+            # TODO: Consider using else block
+            log.exception(
+                f"Processing completed with expected validation errors: {e}",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Verify that valid records were processed despite errors
         with oracle_engine.connect() as conn:
@@ -271,8 +284,8 @@ class TestErrorHandling:
                 FROM {test_table_name}
                 WHERE id IN (1, 2, 5)
                 ORDER BY id
-            """
-                )
+            """,
+                ),
             )
             valid_records = result.fetchall()
             assert len(valid_records) >= 2, "Valid records not found"
@@ -294,7 +307,7 @@ class TestErrorHandling:
                 "batch_size": 10,  # Small batches to isolate failures
                 "fail_fast": True,  # Should rollback on first error
                 "skip_table_optimization": True,
-            }
+            },
         )
 
         schema_message = {
@@ -322,13 +335,13 @@ class TestErrorHandling:
                     "name": f"User {i + 1}",
                     "amount": 100.0 + i,
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             valid_records.append(record)
 
         # Process first batch successfully
         oracle_target = OracleTarget(config=config)
-        first_batch = [schema_message] + valid_records[:10]
+        first_batch = [schema_message, *valid_records[:10]]
         input_lines = [json.dumps(msg) + "\n" for msg in first_batch]
         input_stream = StringIO("".join(input_lines))
         oracle_target.process_lines(input_stream)
@@ -350,7 +363,7 @@ class TestErrorHandling:
                     "name": "A" * 50,  # Exceeds maxLength of 20
                     "amount": 200.0 + i,
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             problematic_records.append(record)
 
@@ -364,7 +377,7 @@ class TestErrorHandling:
                     "name": f"User {i + 1}",
                     "amount": 300.0 + i,
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             problematic_records.append(record)
 
@@ -375,7 +388,10 @@ class TestErrorHandling:
         try:
             oracle_target.process_lines(input_stream)
         except Exception as e:
-            print(f"Expected failure in problematic batch: {e}")
+            # TODO: Consider using else block
+            log.exception(
+                f"Expected failure in problematic batch: {e}",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Verify the state - first batch should still be there
         with oracle_engine.connect() as conn:
@@ -404,7 +420,7 @@ class TestErrorHandling:
                 "max_memory_usage_mb": 64,  # Low memory limit
                 "stream_results": True,
                 "skip_table_optimization": True,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -445,19 +461,22 @@ class TestErrorHandling:
                         ],  # Additional memory usage
                     },
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
         # Process large data set
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
         try:
             oracle_target.process_lines(input_stream)
         except Exception as e:
-            print(f"Processing completed under memory pressure: {e}")
+            # TODO: Consider using else block
+            log.exception(
+                f"Processing completed under memory pressure: {e}",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Verify data was processed efficiently
         with oracle_engine.connect() as conn:
@@ -477,8 +496,8 @@ class TestErrorHandling:
                 SELECT id, LENGTH(large_data), metadata
                 FROM {test_table_name}
                 WHERE id IN (1, 250, 500)
-            """
-                )
+            """,
+                ),
             )
 
             for row in result:
@@ -505,7 +524,7 @@ class TestErrorHandling:
                 "retry_delay": 0.2,
                 "pool_size": 3,
                 "skip_table_optimization": True,
-            }
+            },
         )
 
         schema_message = {
@@ -535,14 +554,14 @@ class TestErrorHandling:
                     "id": i + 1,
                     "name": f"Record {i + 1}",
                     "counter": 1,
-                    "updated_at": datetime.now().isoformat() + "Z",
+                    "updated_at": datetime.now(timezone.utc).isoformat() + "Z",
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             initial_records.append(record)
 
         # Load initial data
-        messages = [schema_message] + initial_records
+        messages = [schema_message, *initial_records]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
         oracle_target.process_lines(input_stream)
@@ -566,9 +585,9 @@ class TestErrorHandling:
                         "id": i + 1,
                         "name": f"Updated Record {i + 1} - Batch {batch_num + 1}",
                         "counter": batch_num + 2,
-                        "updated_at": datetime.now().isoformat() + "Z",
+                        "updated_at": datetime.now(timezone.utc).isoformat() + "Z",
                     },
-                    "time_extracted": datetime.now().isoformat() + "Z",
+                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
                 }
                 batch_records.append(record)
             update_batches.append(batch_records)
@@ -582,9 +601,12 @@ class TestErrorHandling:
                 oracle_target.process_lines(input_stream)
                 time.sleep(0.1)  # Small delay between batches
             except Exception as e:
-                print(
+                # TODO: Consider using else block
+                log.exception(
                     f"Concurrent processing batch completed with potential "
-                    f"conflicts: {e}"
+                    f"conflicts: {e}",
+                # TODO(@dev): Replace with proper logging  # Link:
+                # https://github.com/issue/todo
                 )
 
         # Verify final state
@@ -602,8 +624,8 @@ class TestErrorHandling:
                 FROM {test_table_name}
                 WHERE id <= 10
                 ORDER BY id
-            """
-                )
+            """,
+                ),
             )
 
             updated_records = result.fetchall()
@@ -632,7 +654,7 @@ class TestErrorHandling:
                 "max_retries": 4,
                 "retry_delay": 0.5,
                 "skip_table_optimization": True,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -659,24 +681,28 @@ class TestErrorHandling:
                 "record": {
                     "id": i + 1,
                     "description": (
-                        f"Timeout test record {i + 1} with substantial content "
+                        f"Timeout test record {
+                            i + 1} with substantial content "
                         * 10
                     ),
-                    "timestamp": datetime.now().isoformat() + "Z",
+                    "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
         # Process with potential timeouts
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
         try:
             oracle_target.process_lines(input_stream)
         except Exception as e:
-            print(f"Processing completed with potential timeout recovery: {e}")
+            # TODO: Consider using else block
+            log.exception(
+                f"Processing completed with potential timeout recovery: {e}",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Verify recovery
         with oracle_engine.connect() as conn:
@@ -707,7 +733,7 @@ class TestErrorHandling:
                 "fail_fast": False,
                 "max_retries": 2,
                 "skip_table_optimization": True,
-            }
+            },
         )
         oracle_target = OracleTarget(config=config)
 
@@ -744,19 +770,22 @@ class TestErrorHandling:
                     "123numeric": round(100.5 + i, 2),
                     "case_sensitive": i % 2 == 0,
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             test_records.append(record)
 
         # Process with potentially problematic SQL
-        messages = [schema_message] + test_records
+        messages = [schema_message, *test_records]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
         try:
             oracle_target.process_lines(input_stream)
         except Exception as e:
-            print(f"Processing completed with SQL generation challenges: {e}")
+            # TODO: Consider using else block
+            log.exception(
+                f"Processing completed with SQL generation challenges: {e}",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Verify that data was processed despite SQL complexities
         with oracle_engine.connect() as conn:
@@ -772,7 +801,7 @@ class TestErrorHandling:
             # Verify column handling worked
             if count > 0:
                 result = conn.execute(
-                    text(f"SELECT * FROM {test_table_name} WHERE ROWNUM <= 3")
+                    text(f"SELECT * FROM {test_table_name} WHERE ROWNUM <= 3"),
                 )
                 sample_rows = result.fetchall()
                 assert len(sample_rows) > 0, "No sample data retrieved"
@@ -798,7 +827,7 @@ class TestErrorHandling:
                 "max_retries": 5,
                 "retry_delay": 0.1,
                 "skip_table_optimization": True,
-            }
+            },
         )
 
         schema_message = {
@@ -826,9 +855,9 @@ class TestErrorHandling:
                 "record": {
                     "id": i + 1,
                     "resource_data": f"Resource test data {i + 1}: " + "R" * 1500,
-                    "timestamp": datetime.now().isoformat() + "Z",
+                    "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
                 },
-                "time_extracted": datetime.now().isoformat() + "Z",
+                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -840,7 +869,7 @@ class TestErrorHandling:
 
         # Process first batch to establish table
         first_target = targets[0]
-        setup_messages = [schema_message] + record_messages[:100]
+        setup_messages = [schema_message, *record_messages[:100]]
         input_lines = [json.dumps(msg) + "\n" for msg in setup_messages]
         input_stream = StringIO("".join(input_lines))
         first_target.process_lines(input_stream)
@@ -861,7 +890,12 @@ class TestErrorHandling:
                 try:
                     target.process_lines(input_stream)
                 except Exception as e:
-                    print(f"Target {i} completed with resource constraints: {e}")
+                    # TODO: Consider using else block
+                    log.exception(
+                        f"Target {i} completed with resource constraints: {e}",
+                    # TODO(@dev): Replace with proper logging  # Link:
+                    # https://github.com/issue/todo
+                    )
 
         # Verify recovery and data integrity
         with oracle_engine.connect() as conn:
@@ -870,9 +904,7 @@ class TestErrorHandling:
 
             # Should have processed most records despite resource constraints
             expected_min = record_count * 0.7
-            assert (
-                total_count >= expected_min
-            ), (
+            assert total_count >= expected_min, (
                 f"Resource exhaustion caused too many losses: "
                 f"{total_count}/{record_count}"
             )
@@ -885,8 +917,8 @@ class TestErrorHandling:
                        MAX(id) as max_id,
                        MIN(id) as min_id
                 FROM {test_table_name}
-            """
-                )
+            """,
+                ),
             )
 
             stats = result.fetchone()

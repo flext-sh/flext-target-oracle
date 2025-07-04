@@ -1,29 +1,23 @@
-"""
-Pytest configuration and fixtures for FLEXT Target Oracle tests.
+"""Pytest configuration and fixtures for FLEXT Target Oracle tests.
 
 This module provides comprehensive test fixtures for end-to-end testing
 with Oracle Autonomous Database using TCPS connections.
 """
 
-from __future__ import annotations
-
 import json
 import os
 import tempfile
+from collections.abc import Generator
 from contextlib import contextmanager, suppress
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import pytest
 import structlog
 from sqlalchemy import text
+from sqlalchemy.engine import Engine
 
 from flext_target_oracle.target import OracleTarget
-
-if TYPE_CHECKING:
-    from collections.abc import Generator
-
-    from sqlalchemy.engine import Engine
 
 # Configure structured logging for tests
 structlog.configure(
@@ -44,15 +38,15 @@ structlog.configure(
     cache_logger_on_first_use=True,
 )
 
-
 @pytest.fixture(scope="session")
+def project_root() -> Path:
 def project_root() -> Path:
     """Get the project root directory."""
     return Path(__file__).parent.parent
 
-
 @pytest.fixture(scope="session")
 def env_config(project_root: Path) -> dict[str, Any]:
+    """Load configuration from .env file."""
     """Load configuration from .env file."""
     env_path = project_root / ".env"
     env_example_path = project_root / ".env.example"
@@ -74,7 +68,8 @@ def env_config(project_root: Path) -> dict[str, Any]:
                 # Remove quotes if present
                 value = value.strip("\"'")
 
-                # Convert boolean strings to actual booleans (except for cert DN)
+                # Convert boolean strings to actual booleans (except for cert
+                # DN)
                 if value.lower() in ("true", "false") and "cert_dn" not in key.lower():
                     value = value.lower() == "true"
                 elif value.isdigit() and key.lower() in ["database__port", "port"]:
@@ -119,9 +114,9 @@ def env_config(project_root: Path) -> dict[str, Any]:
 
     return config
 
-
 @pytest.fixture(scope="session")
 def oracle_config(env_config: dict[str, Any]) -> dict[str, Any]:
+    """Create Oracle target configuration for testing."""
     """Create Oracle target configuration for testing."""
     return {
         **env_config,
@@ -149,9 +144,9 @@ def oracle_config(env_config: dict[str, Any]) -> dict[str, Any]:
         "array_size": 500,
     }
 
-
 @pytest.fixture(scope="session")
 def oracle_engine(oracle_config: dict[str, Any]) -> Generator[Engine, None, None]:
+    """Create SQLAlchemy engine for direct database operations."""
     """Create SQLAlchemy engine for direct database operations."""
     from flext_target_oracle.connectors import OracleConnector
 
@@ -167,7 +162,7 @@ def oracle_engine(oracle_config: dict[str, Any]) -> Generator[Engine, None, None
             row = result.fetchone()
             assert row[0] == 1, "Database connection test failed"
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         pytest.skip(f"Cannot connect to Oracle database: {e}")
 
     yield engine
@@ -175,10 +170,9 @@ def oracle_engine(oracle_config: dict[str, Any]) -> Generator[Engine, None, None
     # Cleanup
     engine.dispose()
 
-
 @pytest.fixture(scope="session")
 def oracle_edition_info(
-    oracle_engine: Engine, oracle_config: dict[str, Any]
+    oracle_engine: Engine, oracle_config: dict[str, Any],
 ) -> dict[str, bool]:
     """Detect Oracle edition and available features."""
     edition_info = {
@@ -187,7 +181,7 @@ def oracle_edition_info(
         "has_compression": oracle_config.get("oracle_has_compression_option", False),
         "has_inmemory": oracle_config.get("oracle_has_inmemory_option", False),
         "has_advanced_security": oracle_config.get(
-            "oracle_has_advanced_security_option", False
+            "oracle_has_advanced_security_option", False,
         ),
     }
 
@@ -202,28 +196,31 @@ def oracle_edition_info(
                     SELECT BANNER
                     FROM V$VERSION
                     WHERE BANNER LIKE 'Oracle Database%'
-                """
-                    )
+                """,
+                    ),
                 )
                 banner = result.fetchone()
                 if banner and banner[0]:
                     edition_info["is_enterprise"] = "Enterprise Edition" in banner[0]
 
-        except Exception as e:
+        except Exception:
             # If we can't detect, assume Standard Edition but log the issue
-            print(f"⚠️ Could not detect Oracle edition from database: {e}")
+            # TODO: Consider using else block
+            log.exception(
+                f"⚠️ Could not detect Oracle edition from database: {e}",
+            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
     return edition_info
 
-
-@pytest.fixture(scope="function")
+@pytest.fixture
 def oracle_target(oracle_config: dict[str, Any]) -> OracleTarget:
+    """Create Oracle target instance for testing."""
     """Create Oracle target instance for testing."""
     return OracleTarget(config=oracle_config)
 
-
-@pytest.fixture(scope="function")
+@pytest.fixture
 def temp_config_file(oracle_config: dict[str, Any]) -> Generator[str, None, None]:
+    """Create temporary configuration file."""
     """Create temporary configuration file."""
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
         json.dump(oracle_config, f, indent=2)
@@ -235,22 +232,22 @@ def temp_config_file(oracle_config: dict[str, Any]) -> Generator[str, None, None
     with suppress(OSError):
         os.unlink(config_path)
 
-
-@pytest.fixture(scope="function")
+@pytest.fixture
+def test_schema_prefix() -> str:
 def test_schema_prefix() -> str:
     """Generate unique schema prefix for test isolation."""
     import uuid
 
     return f"test_{uuid.uuid4().hex[:8]}"
 
-
-@pytest.fixture(scope="function")
+@pytest.fixture
 def test_table_name(test_schema_prefix: str) -> str:
+    """Generate unique table name for tests."""
     """Generate unique table name for tests."""
     return f"{test_schema_prefix}_users"
 
-
-@pytest.fixture(scope="function")
+@pytest.fixture
+def sample_singer_records() -> list[dict[str, Any]]:
 def sample_singer_records() -> list[dict[str, Any]]:
     """Generate sample Singer records for testing."""
     return [
@@ -301,8 +298,8 @@ def sample_singer_records() -> list[dict[str, Any]]:
         },
     ]
 
-
-@pytest.fixture(scope="function")
+@pytest.fixture
+def sample_singer_schema() -> dict[str, Any]:
 def sample_singer_schema() -> dict[str, Any]:
     """Generate sample Singer schema for testing."""
     return {
@@ -324,15 +321,15 @@ def sample_singer_schema() -> dict[str, Any]:
         "key_properties": ["id"],
     }
 
-
-@pytest.fixture(scope="function")
+@pytest.fixture
 def bulk_singer_records(_test_schema_prefix: str) -> list[dict[str, Any]]:
     """Generate bulk Singer records for performance testing."""
+    """Generate bulk Singer records for performance testing."""
     import random
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
 
     records = []
-    base_time = datetime.now()
+    base_time = datetime.now(timezone.utc)
 
     for i in range(1000):
         record_time = base_time + timedelta(seconds=i)
@@ -348,7 +345,7 @@ def bulk_singer_records(_test_schema_prefix: str) -> list[dict[str, Any]]:
                     "active": random.choice([True, False]),
                     "created_at": record_time.isoformat() + "Z",
                     "department": random.choice(
-                        ["Engineering", "Marketing", "Sales", "HR"]
+                        ["Engineering", "Marketing", "Sales", "HR"],
                     ),
                     "score": round(random.uniform(60.0, 100.0), 2),
                     "metadata": {
@@ -357,13 +354,13 @@ def bulk_singer_records(_test_schema_prefix: str) -> list[dict[str, Any]]:
                     },
                 },
                 "time_extracted": record_time.isoformat() + "Z",
-            }
+            },
         )
 
     return records
 
-
-@pytest.fixture(scope="function")
+@pytest.fixture
+def bulk_singer_schema() -> dict[str, Any]:
 def bulk_singer_schema() -> dict[str, Any]:
     """Generate bulk Singer schema for performance testing."""
     return {
@@ -386,9 +383,9 @@ def bulk_singer_schema() -> dict[str, Any]:
         "key_properties": ["id"],
     }
 
-
 @contextmanager
-def cleanup_test_tables(engine: Engine, table_names: list[str]):
+def cleanup_test_tables(engine: Engine, table_names: list[str]) -> None:
+    """Context manager to cleanup test tables after tests."""
     """Context manager to cleanup test tables after tests."""
     try:
         yield
@@ -398,17 +395,24 @@ def cleanup_test_tables(engine: Engine, table_names: list[str]):
                 try:
                     conn.execute(text(f"DROP TABLE {table_name} CASCADE CONSTRAINTS"))
                     conn.commit()
-                except Exception as e:
+                except Exception:
                     # Log cleanup errors for debugging but continue
-                    print(f"⚠️ Could not cleanup table {table_name}: {e}")
+                    # TODO: Consider using else block
+                    log.exception(
+                        f"⚠️ Could not cleanup table {table_name}: {e}",
+                    # TODO(@dev): Replace with proper logging  # Link:
+                    # https://github.com/issue/todo
+                    )
 
-
-@pytest.fixture(scope="function")
-def table_cleanup(oracle_engine: Engine):
+@pytest.fixture
+def table_cleanup(oracle_engine: Engine) -> None:
+    """Fixture to automatically cleanup test tables."""
     """Fixture to automatically cleanup test tables."""
     tables_to_cleanup = []
 
-    def register_table(table_name: str):
+    def register_table(table_name: str) -> None:
+        """TODO: Add docstring."""
+        """TODO: Add docstring."""
         tables_to_cleanup.append(table_name)
 
     yield register_table
@@ -419,55 +423,74 @@ def table_cleanup(oracle_engine: Engine):
             try:
                 conn.execute(text(f"DROP TABLE {table_name} CASCADE CONSTRAINTS"))
                 conn.commit()
-            except Exception as e:
+            except Exception:
                 # Log cleanup errors for debugging but continue
-                print(f"⚠️ Could not cleanup table {table_name}: {e}")
-
+                # TODO: Consider using else block
+                log.exception(
+                    f"⚠️ Could not cleanup table {table_name}: {e}",
+                # TODO(@dev): Replace with proper logging  # Link:
+                # https://github.com/issue/todo
+                )
 
 # Performance test utilities
 class PerformanceTimer:
     """Utility class for measuring test performance."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+
+    def __init__(self) -> None:
+        """TODO: Add docstring."""
         self.start_time = None
         self.end_time = None
 
-    def start(self):
+    def start(self) -> None:
+
+    def start(self) -> None:
+        """TODO: Add docstring."""
         import time
 
         self.start_time = time.perf_counter()
 
-    def stop(self):
+    def stop(self) -> None:
+
+    def stop(self) -> None:
+        """TODO: Add docstring."""
         import time
 
         self.end_time = time.perf_counter()
 
     @property
     def duration(self) -> float:
+
+    def duration(self) -> float:
+        """TODO: Add docstring."""
         if self.start_time is None or self.end_time is None:
             return 0.0
         return self.end_time - self.start_time
 
     @property
     def duration_ms(self) -> float:
+
+    def duration_ms(self) -> float:
+        """TODO: Add docstring."""
         return self.duration * 1000
 
-
-@pytest.fixture(scope="function")
+@pytest.fixture
+def performance_timer() -> PerformanceTimer:
 def performance_timer() -> PerformanceTimer:
     """Provide performance timing utility."""
     return PerformanceTimer()
 
-
 # Test data generators
 def generate_test_data(record_count: int = 100) -> list[dict[str, Any]]:
     """Generate test data for various test scenarios."""
+    """Generate test data for various test scenarios."""
     import random
     import string
-    from datetime import datetime, timedelta
+    from datetime import datetime, timedelta, timezone
 
     records = []
-    base_time = datetime.now()
+    base_time = datetime.now(timezone.utc)
 
     for i in range(record_count):
         # Generate random string data
@@ -490,8 +513,8 @@ def generate_test_data(record_count: int = 100) -> list[dict[str, Any]]:
                     "category": random.choice(["A", "B", "C", "D"]),
                     "notes": "".join(
                         random.choices(
-                            string.ascii_letters + " ", k=random.randint(10, 200)
-                        )
+                            string.ascii_letters + " ", k=random.randint(10, 200),
+                        ),
                     ),
                     "metadata": {
                         "source": random.choice(["web", "api", "mobile"]),
@@ -503,22 +526,22 @@ def generate_test_data(record_count: int = 100) -> list[dict[str, Any]]:
                     },
                 },
                 "time_extracted": record_time.isoformat() + "Z",
-            }
+            },
         )
 
     return records
 
-
 # Markers for different test categories
-def pytest_configure(config):
+def pytest_configure(config) -> None:
+    """Configure pytest with custom markers."""
     """Configure pytest with custom markers."""
     config.addinivalue_line(
-        "markers", "integration: mark test as requiring database connection"
+        "markers", "integration: mark test as requiring database connection",
     )
     config.addinivalue_line(
-        "markers", "unit: mark test as unit test (no database required)"
+        "markers", "unit: mark test as unit test (no database required)",
     )
     config.addinivalue_line(
-        "markers", "performance: mark test as performance benchmark"
+        "markers", "performance: mark test as performance benchmark",
     )
     config.addinivalue_line("markers", "slow: mark test as slow running")
