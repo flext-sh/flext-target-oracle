@@ -18,11 +18,18 @@ while maintaining resilience for recoverable conditions.
 
 from __future__ import annotations
 
-from typing import Any
+import asyncio
+from typing import TYPE_CHECKING, Any
 
 from singer_sdk import Target
 from singer_sdk import typing as th
 from singer_sdk.helpers._typing import TypeConformanceLevel
+from sqlalchemy import create_engine
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy.pool import QueuePool
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
 
 from .logging_config import create_logger
 from .monitoring import create_monitor
@@ -37,14 +44,15 @@ print("✅ Using Oracle Thin mode - no client libraries required")
 
 class OracleTarget(Target):
     """
-    Production-ready Oracle target for Singer SDK with advanced performance features.
+    Production-ready Oracle target for Singer SDK with SQLAlchemy 2.x and async support.
 
     Features:
+    - SQLAlchemy 2.x with async/await patterns and typed annotations
+    - Modern connection pooling with QueuePool optimization
     - Enterprise Oracle features with license compliance checking
     - Comprehensive monitoring and observability integration
     - Performance optimization for high-volume data loads
-    - Robust connection pooling and retry mechanisms
-    - Smart error categorization without masking critical issues
+    - SOLID principles with dependency injection and separation of concerns
     """
 
     name = "flext-target-oracle"
@@ -55,13 +63,17 @@ class OracleTarget(Target):
     # Let Singer SDK handle sink creation
     default_sink_class = OracleSink
 
+    # SQLAlchemy 2.x engines (following modern patterns)
+    _engine: Engine | None = None
+    _async_engine: AsyncEngine | None = None
+
     def __init__(
         self,
         config: dict[str, Any] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
-        """Initialize Oracle Target with enhanced logging and monitoring."""
+        """Initialize Oracle Target with SQLAlchemy 2.x, logging, and monitoring."""
         super().__init__(
             config=config,
             parse_env_config=parse_env_config,
@@ -71,10 +83,12 @@ class OracleTarget(Target):
         # Initialize enhanced logging system - NO FALLBACK MASKING
         self._enhanced_logger = create_logger(dict(self.config))
         self._enhanced_logger.info(
-            "Oracle Target initialized",
+            "Oracle Target initialized with SQLAlchemy 2.x",
             extra={
                 "target_name": self.name,
                 "config_keys": list(self.config.keys()) if self.config else [],
+                "sqlalchemy_version": "2.x",
+                "async_support": True,
             },
         )
 
@@ -83,10 +97,100 @@ class OracleTarget(Target):
             dict(self.config), getattr(self, "_enhanced_logger", None)
         )
 
+        # Initialize SQLAlchemy 2.x engines with modern patterns
+        self._initialize_engines()
+
         # Set up cleanup handlers
         import atexit
 
         atexit.register(self._cleanup_on_exit)
+
+    def _initialize_engines(self) -> None:
+        """Initialize SQLAlchemy 2.x engines with modern patterns and QueuePool."""
+        try:
+            # Build connection URL using modern Oracle pattern
+            connection_url = self._build_connection_url()
+
+            # SQLAlchemy 2.x engine with QueuePool (SOLID: Single Responsibility)
+            engine_kwargs = {
+                "poolclass": QueuePool,
+                "pool_size": self.config.get("pool_size", 10),
+                "max_overflow": self.config.get("max_overflow", 20),
+                "pool_timeout": self.config.get("pool_timeout", 30),
+                "pool_recycle": self.config.get("pool_recycle", 3600),
+                "pool_pre_ping": self.config.get("pool_pre_ping", True),
+                "pool_use_lifo": self.config.get("pool_use_lifo", False),
+                "pool_reset_on_return": self.config.get(
+                    "pool_reset_on_return", "rollback"
+                ),
+                "echo": self.config.get("echo", False),
+                "echo_pool": self.config.get("echo_pool", False),
+                "future": True,  # Always use SQLAlchemy 2.x future mode
+            }
+
+            # Initialize synchronous engine
+            self._engine = create_engine(connection_url, **engine_kwargs)
+
+            # Initialize async engine for advanced operations
+            async_url = connection_url.replace("oracle+oracledb://", "oracle+oracledb+asyncio://")
+            self._async_engine = create_async_engine(async_url, **engine_kwargs)
+
+            self._enhanced_logger.info(
+                "SQLAlchemy 2.x engines initialized successfully",
+                extra={
+                    "engine_type": "QueuePool",
+                    "pool_size": engine_kwargs["pool_size"],
+                    "async_support": True,
+                    "future_mode": True,
+                },
+            )
+
+        except Exception as e:
+            self._enhanced_logger.error(
+                f"Failed to initialize SQLAlchemy engines: {e}",
+                extra={"error_type": type(e).__name__},
+                exc_info=True,
+            )
+            raise
+
+    def _build_connection_url(self) -> str:
+        """Build Oracle connection URL following SQLAlchemy 2.x patterns (DRY)."""
+        # Extract connection parameters
+        host = self.config["host"]
+        port = self.config.get("port", 1521)
+        username = self.config["username"]
+        password = self.config["password"]
+
+        # Handle database vs service_name (Oracle-specific logic)
+        if "service_name" in self.config:
+            database_part = f"/{self.config['service_name']}"
+        elif "database" in self.config:
+            database_part = f"/{self.config['database']}"
+        else:
+            raise ValueError("Either 'database' or 'service_name' must be specified")
+
+        # Build base URL with modern oracle+oracledb driver
+        connection_url = f"oracle+oracledb://{username}:{password}@{host}:{port}{database_part}"
+
+        return connection_url
+
+    @property
+    def engine(self) -> Engine:
+        """Get synchronous SQLAlchemy engine (SOLID: Interface Segregation)."""
+        if self._engine is None:
+            raise RuntimeError(
+                "Engine not initialized. Call _initialize_engines() first."
+            )
+        return self._engine
+
+    @property
+    def async_engine(self) -> AsyncEngine:
+        """Get asynchronous SQLAlchemy engine for advanced operations."""
+        if self._async_engine is None:
+            raise RuntimeError(
+                "Async engine not initialized. Call _initialize_engines() first."
+            )
+        return self._async_engine
 
     # Comprehensive configuration with all useful Oracle parameters
     config_jsonschema = th.PropertiesList(
@@ -1131,15 +1235,19 @@ class OracleTarget(Target):
         schema: dict[str, Any] | None = None,
         key_properties: list[str] | None = None,  # type: ignore[override]
     ) -> OracleSink:
-        """Get sink using Singer SDK 0.47.4 pattern with full type hints."""
-        # Log sink creation
+        """Get sink using Singer SDK 0.47.4 with SQLAlchemy 2.x engine injection."""
+        # Log sink creation with SQLAlchemy 2.x details
         if hasattr(self, "_enhanced_logger") and self._enhanced_logger:
             self._enhanced_logger.info(
-                "Creating sink for stream",
+                "Creating sink for stream with SQLAlchemy 2.x engine",
                 extra={
                     "stream_name": stream_name,
                     "has_schema": schema is not None,
                     "key_properties": key_properties,
+                    "engine_type": (
+                        type(self._engine).__name__ if self._engine else None
+                    ),
+                    "async_support": self._async_engine is not None,
                 },
             )
 
@@ -1149,6 +1257,12 @@ class OracleTarget(Target):
         # Skip type check in test environment to allow mocking
         if not isinstance(sink, OracleSink) and not hasattr(sink, '_mock_name'):
             raise TypeError(f"Expected OracleSink, got {type(sink)}")
+
+        # Pass SQLAlchemy 2.x engines to sink (SOLID: Dependency Injection)
+        if hasattr(sink, "set_engine") and self._engine:
+            sink.set_engine(self._engine)
+        if hasattr(sink, "set_async_engine") and self._async_engine:
+            sink.set_async_engine(self._async_engine)
 
         # Pass logger and monitor to sink if available
         if (
@@ -1163,10 +1277,49 @@ class OracleTarget(Target):
         return sink  # type: ignore[return-value]
 
     def _cleanup_on_exit(self) -> None:
-        """Clean up resources on exit safely."""
+        """Clean up SQLAlchemy 2.x engines and resources on exit safely."""
         # Disable all cleanup logging to avoid I/O errors during shutdown
         # The system state is being torn down and logging may not be available
         try:
+            # Cleanup SQLAlchemy 2.x engines first (following modern patterns)
+            if hasattr(self, "_async_engine") and self._async_engine:
+                # For async engine, use dispose method for cleanup
+                try:
+                    if hasattr(self._async_engine, "dispose"):
+                        # In SQLAlchemy 2.x async, use dispose() for cleanup
+                        # Run async dispose in new event loop if needed
+                        try:
+                            loop = asyncio.get_event_loop()
+                            if loop.is_running():
+                                # Create new loop for cleanup if current loop is running
+                                import threading
+                                def dispose_async() -> None:
+                                    if self._async_engine:
+                                        asyncio.run(self._async_engine.dispose())
+                                thread = threading.Thread(target=dispose_async)
+                                thread.start()
+                                thread.join(timeout=1)
+                            else:
+                                loop.run_until_complete(self._async_engine.dispose())
+                        except Exception:
+                            # Fallback: try sync dispose if available
+                            if (
+                                self._async_engine and
+                                hasattr(self._async_engine, "_dispose_impl")
+                            ):
+                                self._async_engine._dispose_impl()
+                except Exception:
+                    # Fallback cleanup without logging during shutdown
+                    pass
+                self._async_engine = None
+
+            if hasattr(self, "_engine") and self._engine:
+                # Synchronous engine cleanup
+                if hasattr(self._engine, "dispose"):
+                    self._engine.dispose()
+                self._engine = None
+
+            # Monitor cleanup
             if hasattr(self, "monitor") and self.monitor:
                 # Direct cleanup without logging
                 if (
@@ -1363,26 +1516,168 @@ class OracleTarget(Target):
             return super().process_lines(file_input)
 
     def get_health_status(self) -> dict[str, Any]:
-        """Get comprehensive health status."""
+        """Get comprehensive health status including SQLAlchemy 2.x engine status."""
+        health_status = {}
+
+        # Monitor health check
         if hasattr(self, "monitor") and self.monitor:
-            return self.monitor.perform_health_check()
-        return {"status": "unknown", "message": "Monitoring not initialized"}
+            health_status.update(self.monitor.perform_health_check())
+        else:
+            health_status = {
+                "status": "unknown",
+                "message": "Monitoring not initialized",
+            }
+
+        # SQLAlchemy 2.x engine health checks
+        engine_status = self._check_engine_health()
+        health_status["engines"] = engine_status
+
+        return health_status
+
+    def _check_engine_health(self) -> dict[str, Any]:
+        """Check SQLAlchemy 2.x engines health (SOLID: Single Responsibility)."""
+        engine_health = {
+            "sync_engine": {"status": "unknown"},
+            "async_engine": {"status": "unknown"},
+        }
+
+        # Check synchronous engine
+        if self._engine:
+            try:
+                from sqlalchemy import text
+                with self._engine.connect() as conn:
+                    # Simple health check query using SQLAlchemy 2.x text()
+                    conn.execute(text("SELECT 1 FROM DUAL"))
+                engine_health["sync_engine"] = {
+                    "status": "healthy",
+                    "pool_size": (
+                        self._engine.pool.size()
+                        if hasattr(self._engine.pool, "size")
+                        else "unknown"
+                    ),
+                    "checked_out": (
+                        self._engine.pool.checkedout()
+                        if hasattr(self._engine.pool, "checkedout")
+                        else "unknown"
+                    ),
+                }
+            except Exception as e:
+                engine_health["sync_engine"] = {
+                    "status": "unhealthy",
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                }
+        else:
+            engine_health["sync_engine"]["status"] = "not_initialized"
+
+        # Check async engine (more complex due to async nature)
+        if self._async_engine:
+            try:
+                # For async health check, we could run a simple check
+                # but keeping it simple for now
+                engine_health["async_engine"] = {
+                    "status": "initialized",
+                    "pool_size": (
+                        self._async_engine.pool.size()
+                        if hasattr(self._async_engine.pool, "size")
+                        else "unknown"
+                    ),
+                }
+            except Exception as e:
+                engine_health["async_engine"] = {
+                    "status": "error",
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                }
+        else:
+            engine_health["async_engine"]["status"] = "not_initialized"
+
+        return engine_health
+
+    async def async_health_check(self) -> dict[str, Any]:
+        """Perform async health check using SQLAlchemy 2.x async engine."""
+        if not self._async_engine:
+            return {"status": "async_engine_not_available"}
+
+        try:
+            from sqlalchemy import text
+            async with self._async_engine.begin() as conn:
+                result = await conn.execute(text("SELECT 1 FROM DUAL"))
+                await result.close()
+
+            return {
+                "status": "healthy",
+                "async_connection": True,
+                "checked_at": "now",
+            }
+        except Exception as e:
+            return {
+                "status": "unhealthy",
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "async_connection": False,
+            }
 
     def get_metrics(self) -> dict[str, Any]:
-        """Get current metrics."""
+        """Get current metrics including SQLAlchemy 2.x engine metrics."""
+        metrics = {}
+
         if hasattr(self, "monitor") and self.monitor:
-            return self.monitor.get_metrics_summary()
-        return {"error": "Monitoring not initialized"}
+            metrics.update(self.monitor.get_metrics_summary())
+        else:
+            metrics = {"error": "Monitoring not initialized"}
+
+        # Add SQLAlchemy engine metrics
+        metrics["engines"] = self._get_engine_metrics()
+
+        return metrics
+
+    def _get_engine_metrics(self) -> dict[str, Any]:
+        """Get SQLAlchemy 2.x engine metrics (DRY principle)."""
+        engine_metrics = {}
+
+        if self._engine and hasattr(self._engine, "pool"):
+            pool = self._engine.pool
+            engine_metrics["sync_engine"] = {
+                "pool_size": pool.size() if hasattr(pool, "size") else 0,
+                "checked_out": pool.checkedout() if hasattr(pool, "checkedout") else 0,
+                "overflow": pool.overflow() if hasattr(pool, "overflow") else 0,
+                "checked_in": pool.checkedin() if hasattr(pool, "checkedin") else 0,
+            }
+
+        if self._async_engine and hasattr(self._async_engine, "pool"):
+            pool = self._async_engine.pool
+            engine_metrics["async_engine"] = {
+                "pool_size": pool.size() if hasattr(pool, "size") else 0,
+                "checked_out": pool.checkedout() if hasattr(pool, "checkedout") else 0,
+                "overflow": pool.overflow() if hasattr(pool, "overflow") else 0,
+                "checked_in": pool.checkedin() if hasattr(pool, "checkedin") else 0,
+            }
+
+        return engine_metrics
 
     def export_prometheus_metrics(self) -> str:
-        """Export metrics in Prometheus format."""
+        """Export metrics in Prometheus format including SQLAlchemy 2.x metrics."""
+        prometheus_output = []
+
+        # Traditional metrics
         if (
             hasattr(self, "_enhanced_logger")
             and self._enhanced_logger
             and hasattr(self._enhanced_logger, "export_metrics")
         ):
-            return self._enhanced_logger.export_metrics()
-        return ""
+            prometheus_output.append(self._enhanced_logger.export_metrics())
+
+        # SQLAlchemy 2.x engine metrics
+        engine_metrics = self._get_engine_metrics()
+        for engine_type, metrics in engine_metrics.items():
+            for metric_name, value in metrics.items():
+                if isinstance(value, (int, float)):
+                    prometheus_output.append(
+                        f"oracle_target_{engine_type}_{metric_name} {value}"
+                    )
+
+        return "\n".join(prometheus_output)
 
 
 if __name__ == "__main__":
