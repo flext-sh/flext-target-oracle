@@ -124,12 +124,14 @@ class OracleSink(SQLSink[OracleConnector]):
             return
 
         @event.listens_for(self.connector._engine, "before_execute")
-        def receive_before_execute(conn: Connection, clauseelement: Any, multiparams: Any, params: Any, execution_options: Any) -> None:
+        def receive_before_execute(
+            _: Connection, clauseelement: Any, multiparams: Any, __: Any, ___: Any
+        ) -> None:
             """Add Oracle hints for bulk operations."""
-            if isinstance(clauseelement, Insert) and len(multiparams) > 1000:
+            if (isinstance(clauseelement, Insert) and len(multiparams) > 1000
+                and self.config.get("use_direct_path", True)):
                 # Add APPEND_VALUES hint for large batches
-                if self.config.get("use_direct_path", True):
-                    clauseelement = clauseelement.prefix_with("/*+ APPEND_VALUES */")
+                clauseelement = clauseelement.prefix_with("/*+ APPEND_VALUES */")
 
     def process_batch(self, context: dict[str, Any]) -> None:
         """Process batch using SQLAlchemy 2.0 bulk operations."""
@@ -205,10 +207,12 @@ class OracleSink(SQLSink[OracleConnector]):
             # Build MERGE statement
             merge_sql = f"""
             MERGE INTO {table_name} target
-            USING (SELECT {', '.join([f':{col} AS {col}' for col in columns])} FROM DUAL) source
+            USING (SELECT {', '.join([f':{col} AS {col}' for col in columns])} 
+                   FROM DUAL) source
             ON ({' AND '.join([f'target.{col} = source.{col}' for col in key_cols])})
             WHEN MATCHED THEN
-                UPDATE SET {', '.join([f'{col} = source.{col}' for col in columns if col not in key_cols])}
+                UPDATE SET {', '.join([f'{col} = source.{col}'
+                                      for col in columns if col not in key_cols])}
             WHEN NOT MATCHED THEN
                 INSERT ({', '.join(columns)})
                 VALUES ({', '.join([f'source.{col}' for col in columns])})
@@ -233,7 +237,9 @@ class OracleSink(SQLSink[OracleConnector]):
             stmt = insert(self._table)
             conn.execute(stmt, prepared_records)
 
-    def _execute_parallel_insert(self, conn: Connection, records: list[dict[str, Any]]) -> None:
+    def _execute_parallel_insert(
+        self, conn: Connection, records: list[dict[str, Any]]
+    ) -> None:
         """Execute insert in parallel chunks."""
         chunk_size = max(1000, len(records) // self._parallel_threads)
         chunks = [
@@ -333,3 +339,4 @@ class OracleSink(SQLSink[OracleConnector]):
             # Then setup our reference
             self._setup_table_metadata()
         return self._table
+
