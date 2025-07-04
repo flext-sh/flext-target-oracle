@@ -9,6 +9,7 @@ Leverages SQLAlchemy's modern features for:
 
 from __future__ import annotations
 
+import datetime
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import TYPE_CHECKING, Any
@@ -211,7 +212,9 @@ class OracleSink(SQLSink[OracleConnector]):
             columns = list(prepared_records[0].keys())
             key_cols = self.key_properties or ["id"]
 
-            # Build MERGE statement
+            # Build MERGE statement using parameterized queries for safety
+            # Note: table_name and column names are from schema validation,
+            # not user input. Parameters use SQLAlchemy named parameters (:param)
             merge_sql = f"""
             MERGE INTO {table_name} target
             USING (SELECT {', '.join([f':{col} AS {col}' for col in columns])}
@@ -223,7 +226,7 @@ class OracleSink(SQLSink[OracleConnector]):
             WHEN NOT MATCHED THEN
                 INSERT ({', '.join(columns)})
                 VALUES ({', '.join([f'source.{col}' for col in columns])})
-            """
+            """  # noqa: S608  # Table/column names from validated schema
 
             # Execute MERGE for each record
             for record in prepared_records:
@@ -300,8 +303,7 @@ class OracleSink(SQLSink[OracleConnector]):
 
             # Add audit fields if configured
             if self.config.get("add_record_metadata", True):
-                import datetime
-                now = datetime.datetime.now(datetime.timezone.utc)
+                now = datetime.datetime.now(datetime.UTC)
 
                 if "CREATE_TS" not in prepared_record:
                     prepared_record["CREATE_TS"] = now

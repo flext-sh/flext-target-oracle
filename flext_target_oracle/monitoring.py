@@ -10,10 +10,15 @@ import os
 import threading
 import time
 from contextlib import contextmanager
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Union
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
 
 import psutil
+
+try:
+    import requests
+except ImportError:
+    requests = None
 
 # Health check thresholds
 HEALTH_CPU_THRESHOLD = 90
@@ -140,7 +145,7 @@ class OracleTargetMonitor:
     def collect_metrics(self) -> dict[str, Any]:
         """Collect comprehensive metrics."""
         metrics = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "system": self._collect_system_metrics(),
             "process": self._collect_process_metrics(),
             "oracle": self._collect_oracle_metrics(),
@@ -301,7 +306,7 @@ class OracleTargetMonitor:
                     "session": dict(session_info._asdict()) if session_info else {},
                     "memory": memory_stats,
                     "wait_events": wait_events,
-                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
 
         except (OSError, ValueError, AttributeError, ImportError) as e:
@@ -354,39 +359,53 @@ class OracleTargetMonitor:
         """Check metrics against alert thresholds."""
         alerts = []
 
-        # Memory threshold
+        # Check all threshold types
+        alerts.extend(self._check_memory_threshold(metrics))
+        alerts.extend(self._check_cpu_threshold(metrics))
+        alerts.extend(self._check_pool_threshold(metrics))
+        alerts.extend(self._check_error_rate_threshold(metrics))
+
+        # Send alerts
+        for alert in alerts:
+            self._send_alert(alert)
+
+    def _check_memory_threshold(self, metrics: dict[str, Any]) -> list[dict[str, Any]]:
+        """Check memory usage threshold."""
+        alerts = []
         memory_percent = metrics.get("system", {}).get("memory", {}).get("percent", 0)
         if memory_percent > self.thresholds["memory_usage_percent"]:
             alert_key = f"memory_high_{int(memory_percent)}"
             if alert_key not in self.alerts_sent:
-                alerts.append(
-                    {
-                        "type": "memory_usage_high",
-                        "severity": "warning",
-                        "message": f"Memory usage is {memory_percent:.1f}%",
-                        "value": memory_percent,
-                        "threshold": self.thresholds["memory_usage_percent"],
-                    },
-                )
+                alerts.append({
+                    "type": "memory_usage_high",
+                    "severity": "warning",
+                    "message": f"Memory usage is {memory_percent:.1f}%",
+                    "value": memory_percent,
+                    "threshold": self.thresholds["memory_usage_percent"],
+                })
                 self.alerts_sent.add(alert_key)
+        return alerts
 
-        # CPU threshold
+    def _check_cpu_threshold(self, metrics: dict[str, Any]) -> list[dict[str, Any]]:
+        """Check CPU usage threshold."""
+        alerts = []
         cpu_percent = metrics.get("system", {}).get("cpu", {}).get("percent", 0)
         if cpu_percent > self.thresholds["cpu_usage_percent"]:
             alert_key = f"cpu_high_{int(cpu_percent)}"
             if alert_key not in self.alerts_sent:
-                alerts.append(
-                    {
-                        "type": "cpu_usage_high",
-                        "severity": "warning",
-                        "message": f"CPU usage is {cpu_percent:.1f}%",
-                        "value": cpu_percent,
-                        "threshold": self.thresholds["cpu_usage_percent"],
-                    },
-                )
+                alerts.append({
+                    "type": "cpu_usage_high",
+                    "severity": "warning",
+                    "message": f"CPU usage is {cpu_percent:.1f}%",
+                    "value": cpu_percent,
+                    "threshold": self.thresholds["cpu_usage_percent"],
+                })
                 self.alerts_sent.add(alert_key)
+        return alerts
 
-        # Connection pool threshold
+    def _check_pool_threshold(self, metrics: dict[str, Any]) -> list[dict[str, Any]]:
+        """Check connection pool usage threshold."""
+        alerts = []
         pool_metrics = metrics.get("oracle", {}).get("connection_pool", {})
         if pool_metrics:
             pool_size = pool_metrics.get("size", 0)
@@ -396,42 +415,36 @@ class OracleTargetMonitor:
                 if pool_usage > self.thresholds["connection_pool_usage"]:
                     alert_key = f"pool_high_{int(pool_usage)}"
                     if alert_key not in self.alerts_sent:
-                        alerts.append(
-                            {
-                                "type": "connection_pool_usage_high",
-                                "severity": "critical",
-                                "message": (
-                                    f"Connection pool usage is {pool_usage:.1f}%"
-                                ),
-                                "value": pool_usage,
-                                "threshold": self.thresholds["connection_pool_usage"],
-                            },
-                        )
+                        alerts.append({
+                            "type": "connection_pool_usage_high",
+                            "severity": "critical",
+                            "message": f"Connection pool usage is {pool_usage:.1f}%",
+                            "value": pool_usage,
+                            "threshold": self.thresholds["connection_pool_usage"],
+                        })
                         self.alerts_sent.add(alert_key)
+        return alerts
 
-        # Error rate threshold
+    def _check_error_rate_threshold(self, metrics: dict[str, Any]) -> list[dict[str, Any]]:
+        """Check error rate threshold."""
+        alerts = []
         error_rate = metrics.get("performance", {}).get("error_rate_percent", 0)
         if error_rate > self.thresholds["error_rate_percent"]:
             alert_key = f"error_rate_high_{int(error_rate)}"
             if alert_key not in self.alerts_sent:
-                alerts.append(
-                    {
-                        "type": "error_rate_high",
-                        "severity": "critical",
-                        "message": f"Error rate is {error_rate:.2f}%",
-                        "value": error_rate,
-                        "threshold": self.thresholds["error_rate_percent"],
-                    },
-                )
+                alerts.append({
+                    "type": "error_rate_high",
+                    "severity": "critical",
+                    "message": f"Error rate is {error_rate:.2f}%",
+                    "value": error_rate,
+                    "threshold": self.thresholds["error_rate_percent"],
+                })
                 self.alerts_sent.add(alert_key)
-
-        # Send alerts
-        for alert in alerts:
-            self._send_alert(alert)
+        return alerts
 
     def _send_alert(self, alert: dict[str, Any]) -> None:
         """Send alert notification."""
-        alert["timestamp"] = datetime.now(timezone.utc).isoformat()
+        alert["timestamp"] = datetime.now(UTC).isoformat()
 
         if self.logger:
             level = "critical" if alert["severity"] == "critical" else "warning"
@@ -446,9 +459,12 @@ class OracleTargetMonitor:
 
     def _send_webhook_alert(self, webhook_url: str, alert: dict[str, Any]) -> None:
         """Send alert to webhook endpoint."""
-        try:
-            import requests
+        if requests is None:
+            if self.logger:
+                self.logger.warning("requests library not available for webhook alerts")
+            return
 
+        try:
             payload = {
                 "text": f"Oracle Target Alert: {alert['message']}",
                 "alert": alert,
@@ -471,7 +487,7 @@ class OracleTargetMonitor:
             self.metrics_history = self.metrics_history[-max_history:]
 
     @contextmanager
-    def health_check_context(self) -> Generator[dict[str, Any], None, None]:
+    def health_check_context(self) -> Generator[dict[str, Any]]:
         """Context manager for health checks."""
         start_time = time.time()
         status = "healthy"
@@ -487,7 +503,7 @@ class OracleTargetMonitor:
         finally:
             duration = time.time() - start_time
             self.last_health_check = {
-                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
                 "status": status,
                 "duration": duration,
                 "error": error,
@@ -497,7 +513,7 @@ class OracleTargetMonitor:
         """Perform comprehensive health check."""
         health_status: dict[str, Any] = {
             "status": "healthy",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "checks": {},
         }
 
@@ -631,7 +647,7 @@ class OracleTargetMonitor:
             "alerts_sent": len(self.alerts_sent),
         }
 
-    def set_engine(self, engine: Union[object, Engine]) -> None:
+    def set_engine(self, engine: object | Engine) -> None:
         """Set SQLAlchemy engine for database monitoring."""
         self._engine = engine
 

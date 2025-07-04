@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
+import threading
 from collections import Counter
 from typing import IO, TYPE_CHECKING, Any
 
@@ -45,7 +46,7 @@ from flext_target_oracle.sinks import OracleSink
 
 
 class OracleTarget(Target):
-    """Production-ready Oracle target for Singer SDK with SQLAlchemy 2.x and async support.
+    """Production-ready Oracle target for Singer SDK with SQLAlchemy 2.x support.
 
     Features:
     - SQLAlchemy 2.x with async/await patterns and typed annotations
@@ -1287,208 +1288,198 @@ class OracleTarget(Target):
 
     def _cleanup_on_exit(self) -> None:
         """Clean up SQLAlchemy 2.x engines and resources on exit safely."""
-        # Disable all cleanup logging to avoid I/O errors during shutdown
-        # The system state is being torn down and logging may not be available
         try:
-            # Cleanup SQLAlchemy 2.x engines first (following modern patterns)
-            if hasattr(self, "_async_engine") and self._async_engine:
-                # For async engine, use dispose method for cleanup
-                try:
-                    if hasattr(self._async_engine, "dispose"):
-                        # In SQLAlchemy 2.x async, use dispose() for cleanup
-                        # Run async dispose in new event loop if needed
-                        try:
-                            loop = asyncio.get_event_loop()
-                            if loop.is_running():
-                                # Create new loop for cleanup if current loop is running
-                                import threading
-
-                                def dispose_async() -> None:
-                                    if self._async_engine:
-                                        asyncio.run(self._async_engine.dispose())
-                                thread = threading.Thread(target=dispose_async)
-                                thread.start()
-                                thread.join(timeout=1)
-                            else:
-                                loop.run_until_complete(self._async_engine.dispose())
-                        except (OSError, ValueError, AttributeError, RuntimeError):
-                            # Fallback: try sync dispose if available
-                            if (
-                                self._async_engine
-                                and hasattr(self._async_engine, "sync_engine")
-                            ):
-                                sync_engine = self._async_engine.sync_engine
-                                if hasattr(sync_engine, "dispose"):
-                                    sync_engine.dispose()
-                except (OSError, ValueError, AttributeError, RuntimeError):
-                    # Fallback cleanup without logging during shutdown
-                    pass
-                self._async_engine = None
-
-            if hasattr(self, "_engine") and self._engine:
-                # Synchronous engine cleanup
-                if hasattr(self._engine, "dispose"):
-                    self._engine.dispose()
-                self._engine = None
-
-            # Monitor cleanup
-            if hasattr(self, "monitor") and self.monitor:
-                # Direct cleanup without logging
-                if hasattr(self.monitor, "stop_background_monitoring"):
-                    self.monitor.stop_background_monitoring()
-
-                # Clear monitoring resources
-                self.monitor = None  # type: ignore[assignment]
+            self._cleanup_async_engine()
+            self._cleanup_sync_engine()
+            self._cleanup_monitor()
 
         except (OSError, ValueError, AttributeError, RuntimeError) as cleanup_error:
-            # DO NOT SILENCE CLEANUP ERRORS - Log them
-            try:
-                if hasattr(self, "_enhanced_logger") and self._enhanced_logger:
-                    self._enhanced_logger.exception(
-                        "❌ CLEANUP ERROR during shutdown",
-                        extra={
-                            "error_type": type(cleanup_error).__name__,
-                            "error_details": str(cleanup_error),
-                            "context": "target_cleanup_on_exit",
-                        },
-                    )
+            self._log_cleanup_error(cleanup_error)
 
-            except (OSError, ValueError, AttributeError, RuntimeError):
-                # Only if ALL logging fails during shutdown
-                pass
+    def _cleanup_async_engine(self) -> None:
+        """Clean up async engine resources."""
+        if not hasattr(self, "_async_engine") or not self._async_engine:
+            return
+
+        try:
+            if hasattr(self._async_engine, "dispose"):
+                self._dispose_async_engine()
+        except (OSError, ValueError, AttributeError, RuntimeError):
+            self._fallback_sync_dispose()
+        finally:
+            self._async_engine = None
+
+    def _dispose_async_engine(self) -> None:
+        """Dispose async engine using appropriate event loop."""
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                self._dispose_in_thread()
+            else:
+                loop.run_until_complete(self._async_engine.dispose())
+        except (OSError, ValueError, AttributeError, RuntimeError):
+            self._fallback_sync_dispose()
+
+    def _dispose_in_thread(self) -> None:
+        """Dispose async engine in separate thread."""
+        def dispose_async() -> None:
+            if self._async_engine:
+                asyncio.run(self._async_engine.dispose())
+
+        thread = threading.Thread(target=dispose_async)
+        thread.start()
+        thread.join(timeout=1)
+
+    def _fallback_sync_dispose(self) -> None:
+        """Fallback to sync dispose if available."""
+        if (self._async_engine
+            and hasattr(self._async_engine, "sync_engine")):
+            sync_engine = self._async_engine.sync_engine
+            if hasattr(sync_engine, "dispose"):
+                sync_engine.dispose()
+
+    def _cleanup_sync_engine(self) -> None:
+        """Clean up synchronous engine."""
+        if hasattr(self, "_engine") and self._engine:
+            if hasattr(self._engine, "dispose"):
+                self._engine.dispose()
+            self._engine = None
+
+    def _cleanup_monitor(self) -> None:
+        """Clean up monitoring resources."""
+        if hasattr(self, "monitor") and self.monitor:
+            if hasattr(self.monitor, "stop_background_monitoring"):
+                self.monitor.stop_background_monitoring()
+            self.monitor = None  # type: ignore[assignment]
+
+    def _log_cleanup_error(self, cleanup_error: Exception) -> None:
+        """Log cleanup errors if logging is available."""
+        try:
+            if hasattr(self, "_enhanced_logger") and self._enhanced_logger:
+                self._enhanced_logger.exception(
+                    "❌ CLEANUP ERROR during shutdown",
+                    extra={
+                        "error_type": type(cleanup_error).__name__,
+                        "error_details": str(cleanup_error),
+                        "context": "target_cleanup_on_exit",
+                    },
+                )
+        except (OSError, ValueError, AttributeError, RuntimeError):
+            # Only if ALL logging fails during shutdown
+            pass
 
     def process_lines(self, file_input: IO[str] | None = None) -> Counter[str]:  # type: ignore[misc]
         """Process input lines with comprehensive monitoring."""
-        if (
+        if self._should_use_monitoring():
+            return self._process_with_monitoring(file_input)
+        return self._process_without_monitoring(file_input)
+
+    def _should_use_monitoring(self) -> bool:
+        """Check if monitoring should be used."""
+        return (
             hasattr(self, "_enhanced_logger")
             and hasattr(self, "monitor")
             and self._enhanced_logger
             and self.monitor
-        ):
-            # Start monitoring if configured
-            if self.config.get("background_monitoring", False):
-                self.monitor.start_background_monitoring()
+        )
 
-            # Use operation context only if available
-            if hasattr(self._enhanced_logger, "operation_context"):
-                with self._enhanced_logger.operation_context(
-                    "process_lines", stream="all_streams",
-                ) as context:
-                    try:
-                        actual_input = file_input or sys.stdin
-                        result = super().process_lines(actual_input)
-                        context["status"] = "completed"
+    def _process_with_monitoring(self, file_input: IO[str] | None) -> Counter[str]:
+        """Process lines with monitoring enabled."""
+        # Start monitoring if configured
+        if self.config.get("background_monitoring", False):
+            self.monitor.start_background_monitoring()
 
-                        # Log final performance stats if available
-                        if hasattr(self._enhanced_logger, "log_performance_stats"):
-                            stats = self._enhanced_logger.log_performance_stats()
-                            context.update(stats)
+        # Use operation context only if available
+        if hasattr(self._enhanced_logger, "operation_context"):
+            return self._process_with_context(file_input)
+        return self._process_fallback(file_input)
 
-                        return result or Counter()
+    def _process_with_context(self, file_input: IO[str] | None) -> Counter[str]:
+        """Process with operation context."""
+        with self._enhanced_logger.operation_context(
+            "process_lines", stream="all_streams",
+        ) as context:
+            try:
+                actual_input = file_input or sys.stdin
+                result = super().process_lines(actual_input)
+                context["status"] = "completed"
 
-                    except Exception as e:
-                        # ENHANCED ERROR LOGGING - Capture full context and stack trace
-                        import traceback
+                # Log final performance stats if available
+                if hasattr(self._enhanced_logger, "log_performance_stats"):
+                    stats = self._enhanced_logger.log_performance_stats()
+                    context.update(stats)
 
-                        full_traceback = traceback.format_exc()
-                        error_details = {
-                            "error_type": type(e).__name__,
-                            "error_message": str(e),
-                            "full_traceback": full_traceback,
-                            "error_module": getattr(e, "__module__", "unknown"),
-                            "error_class": e.__class__.__name__,
-                        }
+                return result or Counter()
 
-                        # Add exception arguments if available
-                        if hasattr(e, "args") and e.args:
-                            error_details["error_args"] = str(e.args)
+            except Exception as e:
+                return self._handle_processing_error(e, context)
 
-                        # Add cause chain if available (for chained exceptions)
-                        if hasattr(e, "__cause__") and e.__cause__:
-                            error_details["error_cause"] = str(e.__cause__)
-                            error_details["error_cause_type"] = type(
-                                e.__cause__,
-                            ).__name__
+    def _handle_processing_error(self, e: Exception, context: dict[str, Any]) -> Counter[str]:
+        """Handle processing errors with enhanced logging."""
+        import traceback
 
-                        context["error"] = str(e)
-                        context["error_details"] = error_details
-                        context["status"] = "failed"
+        full_traceback = traceback.format_exc()
+        error_details = {
+            "error_type": type(e).__name__,
+            "error_message": str(e),
+            "full_traceback": full_traceback,
+            "error_module": getattr(e, "__module__", "unknown"),
+            "error_class": e.__class__.__name__,
+        }
 
-                        # CRITICAL: Log the complete error with stack trace
-                        error_msg = (
-                            f"🚨 ORACLE TARGET CRITICAL ERROR - Type: "
-                            f"{error_details['error_type']} - Message: "
-                            f"{error_details['error_message']}"
-                        )
-                        self._enhanced_logger.exception(
-                            error_msg,
-                            extra={
-                                "operation": "process_lines",
-                                "error_full_context": error_details,
-                                "stack_trace": full_traceback,
-                                "immediate_action_required": True,
-                                "debugging_info": {
-                                    "error_occurred_in": "OracleTarget.process_lines",
-                                    "singer_sdk_version": "0.47.4",
-                                    "target_name": self.name,
-                                },
-                            },
-                        )
+        # Add exception arguments if available
+        if hasattr(e, "args") and e.args:
+            error_details["error_args"] = str(e.args)
 
-                        # CRITICAL: Also log to console for immediate visibility
+        # Add cause chain if available (for chained exceptions)
+        if hasattr(e, "__cause__") and e.__cause__:
+            error_details["error_cause"] = str(e.__cause__)
+            error_details["error_cause_type"] = type(e.__cause__).__name__
 
-                        raise
-                    finally:
-                        # Stop background monitoring
-                        if self.config.get("background_monitoring", False):
-                            self.monitor.stop_background_monitoring()
-            else:
-                # Enhanced logger exists but no operation_context - use basic logging
-                self._enhanced_logger.info("Starting process_lines")
-                try:
-                    actual_input = file_input or sys.stdin
-                    result = super().process_lines(actual_input)
-                    self._enhanced_logger.info("process_lines completed successfully")
-                    return result or Counter()
-                except Exception as e:
-                    # ENHANCED ERROR LOGGING - Complete error details for debugging
-                    import traceback
+        context["error"] = str(e)
+        context["error_details"] = error_details
+        context["status"] = "failed"
 
-                    full_traceback = traceback.format_exc()
-                    error_details = {
-                        "error_type": type(e).__name__,
-                        "error_message": str(e),
-                        "full_traceback": full_traceback,
-                        "error_module": getattr(e, "__module__", "unknown"),
-                    }
+        # CRITICAL: Log the complete error with stack trace
+        error_msg = (
+            f"🚨 ORACLE TARGET CRITICAL ERROR - Type: "
+            f"{error_details['error_type']} - Message: "
+            f"{error_details['error_message']}"
+        )
+        self._enhanced_logger.exception(
+            error_msg,
+            extra={
+                "operation": "process_lines",
+                "error_full_context": error_details,
+                "stack_trace": full_traceback,
+                "immediate_action_required": True,
+                "debugging_info": {
+                    "error_occurred_in": "OracleTarget.process_lines",
+                    "singer_sdk_version": "0.47.4",
+                    "target_name": self.name,
+                },
+            },
+        )
 
-                    # Log comprehensive error information
-                    error_msg = (
-                        f"🚨 ORACLE TARGET PROCESS_LINES FAILED - "
-                        f"{error_details['error_type']}: "
-                        f"{error_details['error_message']}"
-                    )
-                    self._enhanced_logger.exception(
-                        error_msg,
-                        extra={
-                            "operation": "process_lines_fallback",
-                            "error_details": error_details,
-                            "stack_trace": full_traceback,
-                        },
-                    )
+        # Re-raise to maintain error propagation
+        raise
 
-                    # Also log to stderr for immediate visibility
-
-                    raise
-                finally:
-                    # Stop background monitoring
-                    if self.config.get("background_monitoring", False):
-                        self.monitor.stop_background_monitoring()
-        else:
-            # Fallback to standard processing
+    def _process_fallback(self, file_input: IO[str] | None) -> Counter[str]:
+        """Process lines without operation context."""
+        try:
             actual_input = file_input or sys.stdin
             result = super().process_lines(actual_input)
             return result or Counter()
+        except Exception as e:
+            if hasattr(self, "_enhanced_logger") and self._enhanced_logger:
+                self._enhanced_logger.exception("Processing failed", extra={"error": str(e)})
+            raise
+
+    def _process_without_monitoring(self, file_input: IO[str] | None) -> Counter[str]:
+        """Process lines without monitoring."""
+        actual_input = file_input or sys.stdin
+        result = super().process_lines(actual_input)
+        return result or Counter()
 
     def get_health_status(self) -> dict[str, Any]:
         """Get comprehensive health status including SQLAlchemy 2.x engine status."""
@@ -1579,18 +1570,18 @@ class OracleTarget(Target):
             async with self._async_engine.begin() as conn:
                 result = await conn.execute(text("SELECT 1 FROM DUAL"))
                 await result.close()
-
-            return {
-                "status": "healthy",
-                "async_connection": True,
-                "checked_at": "now",
-            }
         except (OSError, ValueError, AttributeError, RuntimeError) as e:
             return {
                 "status": "unhealthy",
                 "error": str(e),
                 "error_type": type(e).__name__,
                 "async_connection": False,
+            }
+        else:
+            return {
+                "status": "healthy",
+                "async_connection": True,
+                "checked_at": "now",
             }
 
     def get_metrics(self) -> dict[str, Any]:

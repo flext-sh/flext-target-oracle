@@ -1,138 +1,177 @@
-# FLEXT Target Oracle - Development Makefile
-# Complete development automation for target-oracle
+# FLEXT-TARGET-ORACLE Makefile - Oracle Singer Target
+# ===================================================
 
-.PHONY: help install setup clean test test-unit test-integration test-all lint format check validate run build package debug
+.PHONY: help install test clean lint format build docs dev security target-test load-test
 
-# Variables
+# Variables - Use workspace venv from FLEXT standards
 PYTHON := /home/marlonsc/flext/.venv/bin/python
 PIP := /home/marlonsc/flext/.venv/bin/pip
 PYTEST := /home/marlonsc/flext/.venv/bin/python -m pytest
-RUFF := /home/marlonsc/flext/.venv/bin/ruff
-MYPY := /home/marlonsc/flext/.venv/bin/mypy
+POETRY := poetry
 
 # Default target
-help: ## Show available commands
-	@echo "FLEXT Target Oracle - Available Commands"
-	@echo ""
-	@echo "Setup & Build:"
-	@echo "  install     - Install package in development mode"
-	@echo "  setup       - Complete setup (install + check environment)"
-	@echo "  build       - Build distribution packages"
-	@echo "  package     - Create release package"
-	@echo "  clean       - Clean all build artifacts"
-	@echo ""
-	@echo "Testing:"
-	@echo "  test        - Run all tests (alias for test-all)"
-	@echo "  test-unit   - Run unit tests only (no database)"
-	@echo "  test-integration - Run integration tests (requires Oracle)"
-	@echo "  test-all    - Run complete test suite"
-	@echo ""
-	@echo "Quality:"
-	@echo "  lint        - Run code linting (ruff + mypy)"
-	@echo "  format      - Auto-format code"
-	@echo "  check       - Quick check (lint + unit tests)"
-	@echo "  validate    - Full validation (format + lint + all tests)"
-	@echo ""
-	@echo "Development:"
-	@echo "  run         - Run the target (requires .env file)"
-	@echo "  debug       - Run with debug logging enabled"
-	@echo "  dev         - Setup dev environment and run checks"
-	@echo "  quick       - Quick dev cycle (format + unit tests)"
-	@echo "  full        - Full validation workflow"
+help: ## Show this help message
+	@echo "🎯 FLEXT-TARGET-ORACLE - Oracle Singer Target"
+	@echo "============================================="
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-# Setup commands
-install: ## Install package and dependencies
-	@echo "Installing package..."
-	@$(PIP) install -e ".[dev,test]"
-	@echo "Installation complete"
+# Installation & Setup
+install: ## Install dependencies with Poetry
+	@echo "📦 Installing dependencies for flext-target-oracle..."
+	$(POETRY) install --all-extras
 
-clean: ## Clean build artifacts
-	@echo "Cleaning build artifacts..."
-	@rm -rf build/ dist/ *.egg-info/ .pytest_cache/ .coverage htmlcov/
-	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	@find . -type f -name "*.pyc" -delete
-	@echo "Cleanup complete"
+install-dev: ## Install with dev dependencies
+	@echo "🛠️  Installing dev dependencies..."
+	$(POETRY) install --all-extras --group dev --group test --group security
 
-# Testing commands
-test-unit: ## Run unit tests only
-	@echo "Running unit tests..."
-	@$(PYTEST) tests/test_basic_functionality.py tests/test_env_validation.py -v --tb=short --disable-warnings
-	@echo "Unit tests complete"
+# Target Operations
+target-run: ## Run target with sample data
+	@echo "🎯 Running flext-target-oracle with sample data..."
+	$(POETRY) run target-oracle --config config.json
+
+target-test: ## Test target functionality
+	@echo "🔍 Testing target functionality..."
+	$(POETRY) run pytest tests/integration/ -v -k "target"
+
+target-schema: ## Generate target schema
+	@echo "📋 Generating target schema..."
+	$(POETRY) run target-oracle --discover > schema.json
+
+target-validate: ## Validate target configuration
+	@echo "✅ Validating target configuration..."
+	$(POETRY) run target-oracle --config config.json --test
+
+# Testing
+test: ## Run Singer target tests
+	@echo "🧪 Running target tests..."
+	$(POETRY) run pytest tests/ -v --tb=short
+
+test-coverage: ## Run tests with coverage
+	@echo "📊 Running tests with coverage..."
+	$(POETRY) run pytest tests/ --cov=flext_target_oracle --cov-report=html:reports/coverage --cov-report=xml:reports/coverage.xml --cov-fail-under=95
+
+test-oracle: ## Run Oracle-specific tests
+	@echo "🗄️  Running Oracle tests..."
+	$(POETRY) run pytest tests/ -v -m "oracle"
+
+test-singer: ## Run Singer protocol tests
+	@echo "🎵 Running Singer protocol tests..."
+	$(POETRY) run pytest tests/ -v -m "singer"
 
 test-integration: ## Run integration tests
-	@echo "Running integration tests..."
-	@if [ ! -f .env ]; then echo "Error: .env file not found. Copy .env.example and configure."; exit 1; fi
-	@$(PYTEST) tests/test_connection.py -v --tb=short --disable-warnings
-	@echo "Integration tests complete"
+	@echo "🔗 Running integration tests..."
+	$(POETRY) run pytest tests/integration/ -v
 
-test-all: ## Run all tests
-	@echo "Running all tests..."
-	@if [ ! -f .env ]; then echo "Error: .env file not found. Copy .env.example and configure."; exit 1; fi
-	@$(PYTEST) tests/ -v --tb=short --disable-warnings
-	@echo "All tests complete"
+test-e2e: ## Run end-to-end tests
+	@echo "🌐 Running end-to-end tests..."
+	$(POETRY) run pytest tests/e2e/ -v --timeout=300
 
-test: test-all ## Alias for test-all
+test-unit: ## Run unit tests only (legacy alias)
+	@echo "🧪 Running unit tests..."
+	$(POETRY) run pytest tests/test_basic_functionality.py tests/test_env_validation.py -v --tb=short --disable-warnings
 
-# Quality commands
-lint: ## Run code linting
-	@echo "Running linting..."
-	@$(PYTHON) -m ruff check flext_target_oracle/ tests/ || true
-	@$(PYTHON) -m mypy flext_target_oracle/ || true
-	@echo "Linting complete"
+performance-test: ## Run performance benchmarks
+	@echo "⚡ Running performance tests..."
+	$(POETRY) run pytest tests/performance/ -v --benchmark-only
 
-format: ## Format code
-	@echo "Formatting code..."
-	@$(PYTHON) -m ruff format flext_target_oracle/ tests/
-	@$(PYTHON) -m ruff check --fix flext_target_oracle/ tests/ || true
-	@echo "Formatting complete"
+# Code Quality - Maximum Strictness
+lint: ## Run all linters with maximum strictness
+	@echo "🔍 Running maximum strictness linting for target..."
+	$(POETRY) run ruff check . --output-format=verbose
+	@echo "✅ Ruff linting complete"
 
-check: ## Quick quality check
-	@echo "Running quick check..."
-	@$(MAKE) lint
-	@$(MAKE) test-unit
-	@echo "Quick check complete"
+format: ## Format code with strict standards
+	@echo "🎨 Formatting target code..."
+	$(POETRY) run black .
+	$(POETRY) run ruff check --fix .
+	@echo "✅ Code formatting complete"
 
-validate: ## Complete validation
-	@echo "Running complete validation..."
-	@$(MAKE) format
-	@$(MAKE) lint
-	@$(MAKE) test-all
-	@echo "Validation complete"
+type-check: ## Run strict type checking
+	@echo "🎯 Running strict MyPy type checking..."
+	$(POETRY) run mypy flext_target_oracle --strict --show-error-codes
+	@echo "✅ Type checking complete"
 
-# Usage commands
-run: ## Run the Oracle target
-	@echo "Running Oracle target..."
-	@if [ ! -f .env ]; then echo "Error: .env file not found. Copy .env.example and configure."; exit 1; fi
-	@$(PYTHON) -m flext_target_oracle.target
+security: ## Run security analysis
+	@echo "🔒 Running security analysis for target..."
+	$(POETRY) run bandit -r flext_target_oracle/ -f json -o reports/security.json || true
+	$(POETRY) run bandit -r flext_target_oracle/ -f txt
+	@echo "✅ Security analysis complete"
 
-debug: ## Run with debug logging
-	@echo "Running Oracle target with debug logging..."
+pre-commit: ## Run pre-commit hooks
+	@echo "🎣 Running pre-commit hooks..."
+	$(POETRY) run pre-commit run --all-files
+	@echo "✅ Pre-commit checks complete"
+
+check: lint type-check security test ## Run all quality checks
+	@echo "✅ All quality checks complete for flext-target-oracle!"
+
+# Build & Distribution
+build: ## Build the package with Poetry
+	@echo "🔨 Building flext-target-oracle package..."
+	$(POETRY) build
+	@echo "📦 Package built successfully"
+
+build-docker: ## Build Docker image
+	@echo "🐳 Building Docker image..."
+	docker build -t flext-target-oracle:latest .
+	@echo "🏗️  Docker image built successfully"
+
+# Singer Protocol Compliance
+singer-check: ## Validate Singer protocol compliance
+	@echo "🎵 Checking Singer protocol compliance..."
+	$(POETRY) run target-oracle --config config.json --test-connection
+
+singer-discover: ## Run Singer discovery
+	@echo "🔍 Running Singer discovery..."
+	$(POETRY) run target-oracle --discover
+
+singer-spec: ## Show Singer specification
+	@echo "📖 Showing Singer specification..."
+	$(POETRY) run target-oracle --about
+
+# Database Operations
+db-test: ## Test Oracle database connection
+	@echo "🗄️  Testing Oracle database connection..."
+	$(POETRY) run python -c "from flext_target_oracle.connectors import test_connection; result = test_connection(); print('✅ Connection successful' if result else '❌ Connection failed')"
+
+oracle-ping: ## Ping Oracle database
+	@echo "🏓 Pinging Oracle database..."
+	$(POETRY) run python -c "import oracledb; from flext_target_oracle.config_validator import get_connection_string; conn = oracledb.connect(get_connection_string()); print('✅ Oracle database is reachable')"
+
+# Development Workflow
+dev-setup: install-dev ## Complete development setup
+	@echo "🎯 Setting up development environment for flext-target-oracle..."
+	$(POETRY) run pre-commit install
+	mkdir -p reports logs data
+	@echo "✅ Development setup complete!"
+
+dev: target-run ## Alias for development target run
+
+# Legacy aliases for backward compatibility
+run: target-run ## Legacy alias for target-run
+debug: ## Run with debug logging (legacy)
+	@echo "🐛 Running Oracle target with debug logging..."
 	@if [ ! -f .env ]; then echo "Error: .env file not found. Copy .env.example and configure."; exit 1; fi
 	@FLEXT_LOG_LEVEL=DEBUG $(PYTHON) -m flext_target_oracle.target
 
-# Build commands
-build: clean ## Build distribution packages
-	@echo "Building distribution packages..."
-	@$(PYTHON) -m pip install --upgrade build
-	@$(PYTHON) -m build
-	@echo "Build complete. Check dist/ directory."
-
-package: build ## Create release package
-	@echo "Creating release package..."
-	@ls -la dist/
-	@echo "Package ready for distribution"
-
-# Setup commands
-setup: install ## Complete setup with environment check
-	@echo "Setting up development environment..."
-	@$(MAKE) install
-	@echo "Checking environment..."
-	@$(PYTHON) -c "import flext_target_oracle; print(f'Package installed: {flext_target_oracle.__version__}')"
-	@echo "Setup complete"
-
-# Development shortcuts
-dev: setup check ## Setup development environment and run checks
-
+setup: install ## Legacy alias for install
+validate: check ## Legacy alias for check
 quick: format test-unit ## Quick development workflow
+full: check ## Full validation workflow
 
-full: validate ## Full validation workflow
+# Cleanup
+clean: ## Clean build artifacts
+	@echo "🧹 Cleaning build artifacts..."
+	@rm -rf build/ dist/ *.egg-info/
+	@rm -rf reports/ logs/ .coverage htmlcov/
+	@rm -rf data/ state/ output/
+	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	@find . -name "*.pyc" -delete 2>/dev/null || true
+	@find . -name "*.pyo" -delete 2>/dev/null || true
+	@find . -name "*.state" -delete 2>/dev/null || true
+	@find . -name "*.log" -delete 2>/dev/null || true
+
+# Environment variables
+export PYTHONPATH := $(PWD):$(PYTHONPATH)
+export FLEXT_TARGET_ORACLE_DEV := true
+export SINGER_SDK_LOG_LEVEL := DEBUG
