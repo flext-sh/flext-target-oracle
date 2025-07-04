@@ -15,15 +15,14 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import TYPE_CHECKING, Any
 
 from singer_sdk.sinks import SQLSink
-from sqlalchemy import MetaData, Table, event, insert, select, text, update
-from sqlalchemy.engine import Connection
-from sqlalchemy.exc import DatabaseError, IntegrityError
+from sqlalchemy import MetaData, Table, event, insert, text
 from sqlalchemy.sql import Insert
 
 from .connectors import OracleConnector
 
 if TYPE_CHECKING:
     from singer_sdk.target_base import Target
+    from sqlalchemy.engine import Connection
 
 
 class OracleSink(SQLSink[OracleConnector]):
@@ -53,7 +52,7 @@ class OracleSink(SQLSink[OracleConnector]):
         self._batch_size = self.config.get("batch_size_rows", 50000)
         self._parallel_threads = self.config.get("parallel_threads", 8)
         self._use_parallel = self._parallel_threads > 1
-        
+
         # Thread pool for parallel processing (if enabled)
         self._executor = (
             ThreadPoolExecutor(max_workers=self._parallel_threads)
@@ -63,11 +62,11 @@ class OracleSink(SQLSink[OracleConnector]):
 
         # Load method configuration
         self._load_method = self.config.get("load_method", "append-only")
-        
+
         # SQLAlchemy 2.0 metadata
         self._table: Table | None = None
         self._metadata = MetaData()
-        
+
         # Statistics tracking
         self._stats = {
             "total_records": 0,
@@ -81,21 +80,21 @@ class OracleSink(SQLSink[OracleConnector]):
         """Get fully qualified table name."""
         schema_name = self.config.get("default_target_schema", "")
         table_name = self.stream_name.upper()
-        
+
         # Apply any prefixes
         if prefix := self.config.get("table_prefix"):
             table_name = f"{prefix}{table_name}"
-        
+
         return f"{schema_name}.{table_name}" if schema_name else table_name
 
     def setup(self) -> None:
         """Setup sink using SQLAlchemy table reflection/creation."""
         # Let parent handle basic setup
         super().setup()
-        
+
         # Setup SQLAlchemy table metadata
         self._setup_table_metadata()
-        
+
         # Setup event handlers for optimization
         self._setup_event_handlers()
 
@@ -105,7 +104,7 @@ class OracleSink(SQLSink[OracleConnector]):
         parts = self.full_table_name.split(".")
         schema_name = parts[0] if len(parts) > 1 else None
         table_name = parts[-1]
-        
+
         # Try to reflect existing table first
         try:
             self._table = Table(
@@ -123,7 +122,7 @@ class OracleSink(SQLSink[OracleConnector]):
         """Setup SQLAlchemy event handlers for bulk operations."""
         if not self.connector._engine:
             return
-            
+
         @event.listens_for(self.connector._engine, "before_execute")
         def receive_before_execute(conn: Connection, clauseelement: Any, multiparams: Any, params: Any, execution_options: Any) -> None:
             """Add Oracle hints for bulk operations."""
@@ -137,13 +136,13 @@ class OracleSink(SQLSink[OracleConnector]):
         records = context.get("records", [])
         if not records:
             return
-        
+
         start_time = time.time()
-        
+
         # Update statistics
         self._stats["total_records"] += len(records)
         self._stats["total_batches"] += 1
-        
+
         try:
             # Choose processing method based on configuration
             if self._load_method == "overwrite":
@@ -152,16 +151,16 @@ class OracleSink(SQLSink[OracleConnector]):
                 self._process_batch_upsert(records)
             else:
                 self._process_batch_append(records)
-            
+
             # Log performance metrics
             elapsed = time.time() - start_time
             records_per_second = len(records) / elapsed if elapsed > 0 else 0
-            
+
             self.logger.info(
                 f"Processed batch of {len(records)} records in {elapsed:.2f}s "
                 f"({records_per_second:.0f} records/sec)"
             )
-            
+
         except Exception as e:
             self._stats["failed_records"] += len(records)
             self.logger.error(f"Batch processing failed: {e}")
@@ -172,10 +171,10 @@ class OracleSink(SQLSink[OracleConnector]):
         if not self._table:
             # Use parent's table reference
             self._table = self.get_table()
-        
+
         # Prepare records for insert
         prepared_records = self._prepare_records(records)
-        
+
         # Use SQLAlchemy 2.0 Connection.execute() with insert()
         with self.connector._engine.begin() as conn:
             if self._use_parallel and len(prepared_records) > 1000:
@@ -190,19 +189,19 @@ class OracleSink(SQLSink[OracleConnector]):
         """Process batch using Oracle MERGE statement."""
         if not self._table:
             self._table = self.get_table()
-        
+
         prepared_records = self._prepare_records(records)
-        
+
         with self.connector._engine.begin() as conn:
             # Build Oracle MERGE statement
             table_name = self._table.name
             if self._table.schema:
                 table_name = f"{self._table.schema}.{table_name}"
-            
+
             # Get column names
             columns = list(prepared_records[0].keys())
             key_cols = self.key_properties or ["id"]
-            
+
             # Build MERGE statement
             merge_sql = f"""
             MERGE INTO {table_name} target
@@ -214,7 +213,7 @@ class OracleSink(SQLSink[OracleConnector]):
                 INSERT ({', '.join(columns)})
                 VALUES ({', '.join([f'source.{col}' for col in columns])})
             """
-            
+
             # Execute MERGE for each record
             for record in prepared_records:
                 conn.execute(text(merge_sql), record)
@@ -223,13 +222,13 @@ class OracleSink(SQLSink[OracleConnector]):
         """Process batch with table truncation."""
         if not self._table:
             self._table = self.get_table()
-        
+
         prepared_records = self._prepare_records(records)
-        
+
         with self.connector._engine.begin() as conn:
             # Truncate table first
             conn.execute(text(f"TRUNCATE TABLE {self.full_table_name}"))
-            
+
             # Then insert
             stmt = insert(self._table)
             conn.execute(stmt, prepared_records)
@@ -241,12 +240,12 @@ class OracleSink(SQLSink[OracleConnector]):
             records[i:i + chunk_size]
             for i in range(0, len(records), chunk_size)
         ]
-        
+
         futures = []
         for chunk in chunks:
             future = self._executor.submit(self._insert_chunk, conn, chunk)
             futures.append(future)
-        
+
         # Wait for all chunks to complete
         for future in as_completed(futures):
             future.result()  # Raise any exceptions
@@ -259,29 +258,29 @@ class OracleSink(SQLSink[OracleConnector]):
     def _prepare_records(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Prepare records for database operations."""
         prepared = []
-        
+
         for record in records:
             # Let SQLAlchemy handle type conversions
             prepared_record = {}
-            
+
             for key, value in record.items():
                 # Skip metadata fields
                 if key.startswith("_sdc_"):
                     continue
-                
+
                 # Handle None values
                 if value is None:
                     prepared_record[key] = None
                     continue
-                
+
                 # Let SQLAlchemy's type system handle conversions
                 prepared_record[key] = value
-            
+
             # Add audit fields if configured
             if self.config.get("add_record_metadata", True):
                 import datetime
                 now = datetime.datetime.utcnow()
-                
+
                 if "CREATE_TS" not in prepared_record:
                     prepared_record["CREATE_TS"] = now
                 if "MOD_TS" not in prepared_record:
@@ -290,9 +289,9 @@ class OracleSink(SQLSink[OracleConnector]):
                     prepared_record["CREATE_USER"] = "SINGER"
                 if "MOD_USER" not in prepared_record:
                     prepared_record["MOD_USER"] = "SINGER"
-            
+
             prepared.append(prepared_record)
-        
+
         return prepared
 
     def clean_up(self) -> None:
@@ -300,7 +299,7 @@ class OracleSink(SQLSink[OracleConnector]):
         # Shutdown thread pool if used
         if self._executor:
             self._executor.shutdown(wait=True)
-        
+
         # Log final statistics
         elapsed = time.time() - self._stats["start_time"]
         self.logger.info(
@@ -309,7 +308,7 @@ class OracleSink(SQLSink[OracleConnector]):
             f"{self._stats['total_batches']} batches "
             f"({elapsed:.1f}s total)"
         )
-        
+
         # Let parent clean up
         super().clean_up()
 
