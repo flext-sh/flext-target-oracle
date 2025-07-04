@@ -230,7 +230,7 @@ def test_complete_functionality() -> None:
     print("\n" + "=" * 80)
     print("📊 RESULTADO FINAL:")
     print(f"   Testes passaram: {success_count}/{total_tests}")
-    print(f"   Taxa de sucesso: {(success_count/total_tests)*100:.1f}%")
+    print(f"   Taxa de sucesso: {(success_count / total_tests) * 100:.1f}%")
 
     if success_count == total_tests:
         print("\n🎉 SUCESSO COMPLETO!")

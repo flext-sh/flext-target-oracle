@@ -136,5 +136,6 @@ def check_real_database():
             except Exception as e:
                 print(f'⚠️ Erro ao verificar dados: {e}')
 
+
 if __name__ == '__main__':
     check_real_database()

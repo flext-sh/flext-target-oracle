@@ -23,7 +23,7 @@ def fix_ruff_auto_fixable():
 
     # Run ruff with auto-fix and unsafe fixes
     cmd = ["ruff", "check", ".", "--fix", "--unsafe-fixes"]
-    exit_code, stdout, stderr = run_command(cmd)
+    exit_code, _stdout, stderr = run_command(cmd)
 
     if exit_code == 0:
         print("  ✅ Auto-fixes applied successfully")

@@ -21,6 +21,7 @@ test_files_needing_decorators = [
     "test_type_mapping.py"
 ]
 
+
 def fix_test_file(file_path: Path) -> bool:
     """Fix a single test file to include the requires_oracle_connection decorator."""
     print(f"Processing {file_path}")
@@ -101,6 +102,7 @@ def fix_test_file(file_path: Path) -> bool:
         print(f"  ❌ Error processing {file_path.name}: {e}")
         return False
 
+
 def main():
     """Fix all integration test files."""
     tests_dir = Path("tests")
@@ -125,6 +127,7 @@ def main():
         "✅ All integration tests should now properly skip when Oracle is not "
         "available"
     )
+
 
 if __name__ == "__main__":
     main()
