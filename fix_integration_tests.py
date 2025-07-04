@@ -27,7 +27,7 @@ def fix_test_file(file_path: Path) -> bool:
 
     try:
         content = file_path.read_text()
-        
+
         # Check if file uses Oracle fixtures
         oracle_fixtures = ["oracle_target", "oracle_engine", "oracle_config"]
         uses_oracle = any(fixture in content for fixture in oracle_fixtures)
@@ -38,7 +38,7 @@ def fix_test_file(file_path: Path) -> bool:
 
         # Check if already has the import
         has_import = "from tests.helpers import requires_oracle_connection" in content
-        
+
         # Check if already has decorators
         has_decorator = "@requires_oracle_connection" in content
 
@@ -104,7 +104,7 @@ def fix_test_file(file_path: Path) -> bool:
 def main():
     """Fix all integration test files."""
     tests_dir = Path("tests")
-    
+
     if not tests_dir.exists():
         print("❌ Tests directory not found")
         return

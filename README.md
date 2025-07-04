@@ -1,16 +1,34 @@
-# FLEXT Target Oracle
+# flext-target-oracle
 
-A high-performance Singer target for Oracle Database with comprehensive monitoring and enterprise features.
+A high-performance [Singer](https://singer.io) target for Oracle Database, built with the modern [Singer SDK](https://sdk.meltano.com) and optimized for enterprise workloads.
 
 ## Features
 
-- **Oracle Database Support**: Full connectivity including Oracle Autonomous Database (TCPS)
-- **Singer SDK 0.47.4**: Latest Singer specification compatibility
-- **SQLAlchemy 2.0+**: Modern SQLAlchemy with Oracle dialect
-- **Enterprise Features**: Partitioning, compression, In-Memory, parallel processing
-- **High Performance**: Bulk operations, direct path inserts, connection pooling
-- **Comprehensive Monitoring**: System metrics, performance tracking, health checks
-- **Production Ready**: Structured logging, error handling, configuration validation
+### 🚀 Performance
+- **Parallel Processing**: Multi-threaded batch processing for maximum throughput
+- **Direct Path Loading**: Oracle direct path inserts for bulk operations
+- **Intelligent Batching**: Configurable batch sizes with automatic optimization
+- **Connection Pooling**: Advanced connection management for high concurrency
+- **Lazy Connections**: No database connection until data arrives
+
+### 🎯 Type Mapping
+- **Intelligent Type Detection**: Pattern-based column type mapping
+- **Configurable Rules**: Custom type mapping via configuration
+- **JSON Schema Support**: Full JSON schema to Oracle type conversion
+- **Large Text Handling**: Automatic VARCHAR2/CLOB selection
+
+### 🔧 Enterprise Features
+- **Historical Versioning**: Optional time-series data support
+- **Audit Fields**: Configurable audit column addition
+- **Compression Support**: Table and index compression options
+- **Partitioning**: Automatic partition management
+- **Performance Monitoring**: Built-in metrics and logging
+
+### 🔒 Reliability
+- **Transaction Management**: ACID compliance with rollback support
+- **Error Handling**: Detailed error reporting and recovery
+- **Schema Evolution**: Automatic schema updates
+- **Data Validation**: Input validation and type checking
 
 ## Quick Start
 
