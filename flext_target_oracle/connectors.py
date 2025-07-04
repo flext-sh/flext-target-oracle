@@ -1,38 +1,53 @@
 """
-Oracle Connector with maximum performance optimizations for WAN and parallelism.
+Oracle Connector with enterprise-grade performance optimizations.
 
-This connector leverages all Oracle Database advanced features:
-- Network optimization for WAN environments
-- Maximum parallelism and partitioning
-- Advanced bulk operations and compression
-- Oracle 19c/21c/23c features
+This connector provides:
+- Network optimization for distributed environments
+- Parallel processing capabilities
+- Bulk operations and performance features
+- Support for Oracle 12c through 23c
 """
 
 from __future__ import annotations
 
-from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any
+from contextlib import asynccontextmanager, contextmanager
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from singer_sdk.connectors import SQLConnector
 from sqlalchemy import create_engine, event, pool, text
 from sqlalchemy.dialects.oracle import TIMESTAMP
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+from sqlalchemy.orm import DeclarativeBase, registry
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Sequence
+    from collections.abc import AsyncIterator, Iterator, Sequence
 
     from sqlalchemy.engine import Connection, Engine
+    from sqlalchemy.ext.asyncio import AsyncConnection
+
+
+class OracleConnectorBase(DeclarativeBase):
+    """SQLAlchemy 2.x declarative base for Oracle entities."""
+
+    registry: ClassVar[registry] = registry()
+    metadata = registry.metadata
 
 
 class OracleConnector(SQLConnector):
     """
-    High-performance Oracle connector optimized for WAN and parallel processing.
+    Enterprise Oracle connector with advanced performance features.
 
     Features:
-    - WAN optimization with SDU/TDU tuning
-    - Maximum parallelism with RAC awareness
-    - Advanced bulk operations with direct path
-    - Network compression and encryption
-    - Connection multiplexing and pooling
+    - Network optimization with configurable parameters
+    - Parallel processing support
+    - Bulk operations with direct path loading
+    - Compression and encryption support
+    - Advanced connection pooling
     """
 
     # Oracle capabilities - disable column alter to avoid DDL issues
@@ -43,8 +58,12 @@ class OracleConnector(SQLConnector):
     allow_temp_tables: bool = True
 
     def __init__(self, config: dict[str, Any] | None = None) -> None:
-        """Initialize Oracle connector with Oracle-specific type mappings."""
+        """Initialize Oracle connector with SQLAlchemy 2.x async support."""
         super().__init__(config)
+
+        # SQLAlchemy 2.x async engine and session factory
+        self._async_engine: AsyncEngine | None = None
+        self._async_session_factory: async_sessionmaker[AsyncSession] | None = None
 
         # Override format handlers to use Oracle types
         self.jsonschema_to_sql.register_format_handler(
@@ -52,6 +71,9 @@ class OracleConnector(SQLConnector):
         )
         self.jsonschema_to_sql.register_format_handler("date", lambda _: TIMESTAMP())
         self.jsonschema_to_sql.register_format_handler("time", lambda _: TIMESTAMP())
+
+        # Initialize async components
+        self._setup_async_engine()
 
     def get_column_type(self, column_name: str, jsonschema_type: dict[str, Any]) -> Any:
         """Override column type mapping with JSON schema type priority."""
@@ -411,6 +433,64 @@ class OracleConnector(SQLConnector):
 
         # Don't add query parameters as they're handled in connect_args
         return url
+
+    def _setup_async_engine(self) -> None:
+        """Setup SQLAlchemy 2.x async engine with modern patterns."""
+        if self.config.get("enable_async", False):
+            # Create async engine for modern SQLAlchemy 2.x patterns
+            url = self.get_sqlalchemy_url().replace(
+                "oracle+oracledb", "oracle+oracledb_async"
+            )
+
+            self._async_engine = create_async_engine(
+                url,
+                echo=self.config.get("echo", False),
+                pool_size=self.config.get("pool_size", 10),
+                max_overflow=self.config.get("max_overflow", 20),
+                pool_pre_ping=True,
+                # SQLAlchemy 2.x specific options
+                future=True,
+                query_cache_size=self.config.get("query_cache_size", 5000),
+            )
+
+            # Create async session factory
+            self._async_session_factory = async_sessionmaker(
+                bind=self._async_engine,
+                class_=AsyncSession,
+                expire_on_commit=False,
+            )
+
+    @asynccontextmanager
+    async def get_async_session(self) -> AsyncIterator[AsyncSession]:
+        """Get async session with proper lifecycle management."""
+        if not self._async_session_factory:
+            raise RuntimeError("Async engine not configured. Set enable_async=True")
+
+        async with self._async_session_factory() as session:
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
+            finally:
+                await session.close()
+
+    @asynccontextmanager
+    async def get_async_connection(self) -> AsyncIterator[AsyncConnection]:
+        """Get async connection for advanced operations."""
+        if not self._async_engine:
+            raise RuntimeError("Async engine not configured. Set enable_async=True")
+
+        async with self._async_engine.begin() as conn:
+            yield conn
+
+    async def execute_async(
+        self, stmt: Any, parameters: dict[str, Any] | None = None
+    ) -> Any:
+        """Execute statement asynchronously with modern SQLAlchemy 2.x patterns."""
+        async with self.get_async_connection() as conn:
+            return await conn.execute(stmt, parameters or {})
 
     def create_engine(self) -> Engine:
         """Create SQLAlchemy engine with maximum Oracle performance features."""

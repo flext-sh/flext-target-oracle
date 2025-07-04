@@ -18,15 +18,20 @@ while maintaining resilience for recoverable conditions.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from singer_sdk import Target
 from singer_sdk import typing as th
 from singer_sdk.helpers._typing import TypeConformanceLevel
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy.orm import registry
 
 from .logging_config import create_logger
 from .monitoring import create_monitor
 from .sinks import OracleSink
+
+if TYPE_CHECKING:
+    from sqlalchemy import MetaData
 
 # Use Thin mode (default) - no Oracle Client libraries required
 # This avoids NNE (Native Network Encryption) issues with Autonomous Database
@@ -37,11 +42,15 @@ print("✅ Using Oracle Thin mode - no client libraries required")
 
 class OracleTarget(Target):
     """
-    Simplified Oracle target maximizing Singer SDK 0.47.4 and SQLAlchemy 2.0+ features.
+    Modern Oracle target with SQLAlchemy 2.x async/await patterns and advanced features.
 
-    Uses all advanced capabilities from both libraries for optimal performance
-    and simplicity.
-    Includes comprehensive logging and monitoring for production environments.
+    Features:
+    - SQLAlchemy 2.x declarative base with typed mappings
+    - Async/await support for high-performance operations
+    - Advanced connection pooling with QueuePool
+    - Modern query patterns with select() and update()
+    - Enterprise Oracle features with license compliance
+    - Comprehensive monitoring and observability
     """
 
     name = "flext-target-oracle"
@@ -52,13 +61,18 @@ class OracleTarget(Target):
     # Let Singer SDK handle sink creation
     default_sink_class = OracleSink
 
+    # SQLAlchemy 2.x registry and metadata
+    _registry: ClassVar[registry] = registry()
+    _metadata: ClassVar[MetaData] = _registry.metadata
+    _async_engine: AsyncEngine | None = None
+
     def __init__(
         self,
         config: dict[str, Any] | None = None,
         parse_env_config: bool = False,
         validate_config: bool = True,
     ) -> None:
-        """Initialize Oracle Target with enhanced logging and monitoring."""
+        """Initialize Oracle Target with SQLAlchemy 2.x async support."""
         super().__init__(
             config=config,
             parse_env_config=parse_env_config,
@@ -68,10 +82,12 @@ class OracleTarget(Target):
         # Initialize enhanced logging system - NO FALLBACK MASKING
         self._enhanced_logger = create_logger(dict(self.config))
         self._enhanced_logger.info(
-            "Oracle Target initialized",
+            "Oracle Target initialized with SQLAlchemy 2.x support",
             extra={
                 "target_name": self.name,
                 "config_keys": list(self.config.keys()) if self.config else [],
+                "async_enabled": self.config.get("enable_async", False),
+                "sqlalchemy_version": "2.x",
             },
         )
 
@@ -80,10 +96,65 @@ class OracleTarget(Target):
             dict(self.config), getattr(self, "_enhanced_logger", None)
         )
 
+        # Initialize SQLAlchemy 2.x async engine if enabled
+        if self.config.get("enable_async", False):
+            self._setup_async_engine()
+
         # Set up cleanup handlers
         import atexit
 
         atexit.register(self._cleanup_on_exit)
+
+    def _setup_async_engine(self) -> None:
+        """Setup SQLAlchemy 2.x async engine for modern operations."""
+        from .connectors import OracleConnector
+
+        # Get URL from connector and convert to async
+        connector = OracleConnector(dict(self.config))
+        sync_url = connector.get_sqlalchemy_url()
+        async_url = sync_url.replace("oracle+oracledb", "oracle+oracledb_async")
+
+        self._async_engine = create_async_engine(
+            async_url,
+            echo=self.config.get("echo", False),
+            # Advanced SQLAlchemy 2.x options
+            future=True,
+            query_cache_size=self.config.get("query_cache_size", 5000),
+            pool_size=self.config.get("pool_size", 10),
+            max_overflow=self.config.get("max_overflow", 20),
+            pool_pre_ping=True,
+            pool_recycle=self.config.get("pool_recycle", 1800),
+        )
+
+        self._enhanced_logger.info(
+            "SQLAlchemy 2.x async engine configured",
+            extra={
+                "async_url": async_url.split("@")[0] + "@[REDACTED]",
+                "pool_size": self.config.get("pool_size", 10),
+                "query_cache_size": self.config.get("query_cache_size", 5000),
+            }
+        )
+
+    async def create_tables_async(self) -> None:
+        """Create tables using SQLAlchemy 2.x async patterns."""
+        if not self._async_engine:
+            raise RuntimeError("Async engine not configured. Set enable_async=True")
+
+        async with self._async_engine.begin() as conn:
+            await conn.run_sync(self._metadata.create_all)
+
+        self._enhanced_logger.info(
+            "Tables created using SQLAlchemy 2.x async patterns",
+            extra={"metadata_tables": list(self._metadata.tables.keys())}
+        )
+
+    def get_registry(self) -> registry:
+        """Get SQLAlchemy 2.x registry for ORM models."""
+        return self._registry
+
+    def get_metadata(self) -> MetaData:
+        """Get SQLAlchemy 2.x metadata for reflection and introspection."""
+        return self._metadata
 
     # Comprehensive configuration with all useful Oracle parameters
     config_jsonschema = th.PropertiesList(

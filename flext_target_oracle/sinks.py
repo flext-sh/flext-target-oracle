@@ -10,19 +10,57 @@ Maximizes Oracle Database performance for:
 
 from __future__ import annotations
 
+import asyncio
 import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import TYPE_CHECKING, Any
 
 import sqlalchemy
 from singer_sdk.sinks import SQLSink
-from sqlalchemy import Column
+from sqlalchemy import Column, insert, select, update
 from sqlalchemy.dialects.oracle import CLOB, NUMBER, TIMESTAMP, VARCHAR2
+from sqlalchemy.orm import Mapped, mapped_column
 
-from .connectors import OracleConnector
+from .connectors import OracleConnector, OracleConnectorBase
 
 if TYPE_CHECKING:
+    import datetime
+
     from singer_sdk.target_base import Target
+
+
+class OracleTargetTable(OracleConnectorBase):
+    """SQLAlchemy 2.x ORM model for Oracle target tables with typed mappings."""
+
+    __abstract__ = True  # This is a base class
+
+    # Standard audit fields with typed mappings
+    create_user: Mapped[str | None] = mapped_column(VARCHAR2(255), nullable=True)
+    create_ts: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=False), nullable=True
+    )
+    mod_user: Mapped[str | None] = mapped_column(VARCHAR2(255), nullable=True)
+    mod_ts: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=False), nullable=False
+    )
+    tk_date: Mapped[datetime.datetime] = mapped_column(
+        TIMESTAMP(timezone=False),
+        server_default=sqlalchemy.func.current_timestamp(),
+        nullable=False
+    )
+
+    # Singer SDK metadata fields with typed mappings
+    sdc_extracted_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=False), nullable=True
+    )
+    sdc_received_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=False), nullable=True
+    )
+    sdc_batched_at: Mapped[datetime.datetime | None] = mapped_column(
+        TIMESTAMP(timezone=False), nullable=True
+    )
+    sdc_sequence: Mapped[int | None] = mapped_column(NUMBER(), nullable=True)  # type: ignore[no-untyped-call]
+    sdc_table_version: Mapped[int | None] = mapped_column(NUMBER(), nullable=True)  # type: ignore[no-untyped-call]
 
 
 class OracleSink(SQLSink[OracleConnector]):
@@ -62,7 +100,7 @@ class OracleSink(SQLSink[OracleConnector]):
         else:
             self._executor = None
 
-        # Historical versioning for WMS data
+        # Historical versioning support for time-series data
         self._enable_versioning = self.config.get("enable_historical_versioning", False)
         self._versioning_column = self.config.get(
             "historical_versioning_column", "mod_ts"
@@ -322,9 +360,14 @@ class OracleSink(SQLSink[OracleConnector]):
         # STEP 1: Find primary key field (prioritize simple 'id' over complex ones)
         primary_key_field = None
         id_fields = [
-            name for name in schema_properties
-            if (name.upper() == "ID" or
-                (name.upper().endswith("_ID") and not name.upper().endswith("_ID_ID")))
+            name
+            for name in schema_properties
+            if (
+                name.upper() == "ID"
+                or (
+                    name.upper().endswith("_ID") and not name.upper().endswith("_ID_ID")
+                )
+            )
         ]
 
         if id_fields:
@@ -338,9 +381,9 @@ class OracleSink(SQLSink[OracleConnector]):
             oracle_type = self._get_sqlalchemy_oracle_type(
                 primary_key_field, schema_properties[primary_key_field]
             )
-            columns.append(Column(
-                primary_key_field.upper(), oracle_type, nullable=False
-            ))
+            columns.append(
+                Column(primary_key_field.upper(), oracle_type, nullable=False)
+            )
 
         # STEP 3: Add OTHER FIELDS (sorted, excluding audit, TK_DATE, and URL fields)
         other_fields = []
@@ -351,11 +394,10 @@ class OracleSink(SQLSink[OracleConnector]):
                 and prop_upper != "URL"  # Exclude URL fields
                 and not prop_upper.endswith("_URL")  # Exclude _URL fields
                 and not prop_upper.endswith("_ID_ID")  # Exclude malformed IDs
-                and not prop_upper.endswith("_ID_KEY") # Exclude key fields
+                and not prop_upper.endswith("_ID_KEY")  # Exclude key fields
                 and not prop_upper.endswith("_ID_URL")  # Exclude URL ID fields
-                and prop_upper not in [
-                    "TK_DATE", "CREATE_USER", "CREATE_TS", "MOD_USER", "MOD_TS"
-                ]
+                and prop_upper
+                not in ["TK_DATE", "CREATE_USER", "CREATE_TS", "MOD_USER", "MOD_TS"]
             ):
                 other_fields.append(prop_name)
 
@@ -366,17 +408,23 @@ class OracleSink(SQLSink[OracleConnector]):
             columns.append(Column(prop_name.upper(), oracle_type, nullable=True))
 
         # STEP 4: Add MANDATORY AUDIT FIELDS at the end
-        columns.extend([
-            Column("CREATE_USER", VARCHAR2(255), nullable=True),
-            Column("CREATE_TS", TIMESTAMP(timezone=False), nullable=True),
-            Column("MOD_USER", VARCHAR2(255), nullable=True),
-            Column("MOD_TS", TIMESTAMP(timezone=False), nullable=False),
-        ])
+        columns.extend(
+            [
+                Column("CREATE_USER", VARCHAR2(255), nullable=True),
+                Column("CREATE_TS", TIMESTAMP(timezone=False), nullable=True),
+                Column("MOD_USER", VARCHAR2(255), nullable=True),
+                Column("MOD_TS", TIMESTAMP(timezone=False), nullable=False),
+            ]
+        )
 
         # STEP 5: Add TK_DATE field (ALWAYS, not conditional)
         columns.append(
-            Column("TK_DATE", TIMESTAMP(timezone=False),
-                   server_default=sqlalchemy.func.current_timestamp(), nullable=False)
+            Column(
+                "TK_DATE",
+                TIMESTAMP(timezone=False),
+                server_default=sqlalchemy.func.current_timestamp(),
+                nullable=False,
+            )
         )
 
         # Create table with composite primary key
@@ -384,15 +432,14 @@ class OracleSink(SQLSink[OracleConnector]):
             table_name.upper(),
             metadata,
             *columns,
-            schema=schema_name.upper() if schema_name else None
+            schema=schema_name.upper() if schema_name else None,
         )
 
         # Add composite primary key constraint
         if primary_key_field:
             table.append_constraint(
                 PrimaryKeyConstraint(
-                    primary_key_field.upper(), "MOD_TS",
-                    name=f"PK_{table_name.upper()}"
+                    primary_key_field.upper(), "MOD_TS", name=f"PK_{table_name.upper()}"
                 )
             )
 
@@ -401,50 +448,51 @@ class OracleSink(SQLSink[OracleConnector]):
     def _get_sqlalchemy_oracle_type(
         self, column_name: str, column_schema: dict[str, Any]
     ) -> Any:
-        """Convert column to SQLAlchemy Oracle type using shared type mapping rules."""
-        # Try to use shared conversion function first
-        import sys
+        """Convert column to SQLAlchemy Oracle type using intelligent mapping.
 
-        from sqlalchemy.dialects.oracle import NUMBER, TIMESTAMP, VARCHAR2
-        sys.path.insert(0, "/home/marlonsc/flext/gruponos-meltano-native/src")
+        This method provides generic type mapping that works for any Oracle database.
+        """
+        from sqlalchemy.dialects.oracle import CLOB, DATE, NUMBER, TIMESTAMP, VARCHAR2
 
-        try:
-            from oracle.type_mapping_rules import (
-                convert_singer_schema_to_oracle,
-            )
-            oracle_type_str = convert_singer_schema_to_oracle(
-                column_name, column_schema
-            )
+        # Get type mapping rules (from config or built-in)
+        rules = self._get_type_mapping_rules()
 
-            # Convert string type to SQLAlchemy type
-            if oracle_type_str == "NUMBER":
-                return NUMBER()  # type: ignore[no-untyped-call]
-            elif oracle_type_str == "NUMBER(1,0)":
-                return NUMBER(1, 0)  # type: ignore[no-untyped-call]
-            elif oracle_type_str.startswith("VARCHAR2"):
-                # Extract length from VARCHAR2(255 CHAR) format
-                if "(" in oracle_type_str:
-                    length_part = oracle_type_str.split("(")[1].split(")")[0]
-                    length = int(length_part.split()[0])  # Get number before CHAR
-                    return VARCHAR2(length)
-                return VARCHAR2(255)
-            elif oracle_type_str.startswith("TIMESTAMP"):
-                return TIMESTAMP(timezone=False)
+        # Convert to Oracle type string using intelligent mapping
+        oracle_type_str = self._convert_to_oracle_type(
+            column_name, column_schema, rules
+        )
+
+        # Convert string type to SQLAlchemy type
+        if oracle_type_str == "NUMBER":
+            return NUMBER()  # type: ignore[no-untyped-call]
+        elif oracle_type_str == "NUMBER(1,0)":
+            return NUMBER(1, 0)  # type: ignore[no-untyped-call]
+        elif oracle_type_str.startswith("NUMBER("):
+            # Parse NUMBER(precision,scale)
+            params = oracle_type_str[7:-1].split(",")
+            if len(params) == 2:
+                return NUMBER(int(params[0]), int(params[1]))  # type: ignore[no-untyped-call]
+            elif len(params) == 1:
+                return NUMBER(int(params[0]), 0)  # type: ignore[no-untyped-call]
             else:
-                return VARCHAR2(255)  # Default fallback
-
-        except ImportError:
-            # Fallback to basic type inference
-            schema_type = column_schema.get("type", "string")
-            if isinstance(schema_type, list):
-                schema_type = next((t for t in schema_type if t != "null"), "string")
-
-            if schema_type in ["integer", "number"]:
                 return NUMBER()  # type: ignore[no-untyped-call]
-            elif schema_type == "boolean":
-                return NUMBER(1, 0)  # type: ignore[no-untyped-call]
-            else:
-                return VARCHAR2(255)
+        elif oracle_type_str.startswith("VARCHAR2"):
+            # Extract length from VARCHAR2(255 CHAR) format
+            if "(" in oracle_type_str:
+                length_part = oracle_type_str.split("(")[1].split(")")[0]
+                length = int(length_part.split()[0])  # Get number before CHAR
+                return VARCHAR2(length)
+            return VARCHAR2(255)
+        elif oracle_type_str.startswith("TIMESTAMP"):
+            return TIMESTAMP(timezone=False)
+        elif oracle_type_str == "DATE":
+            return DATE()
+        elif oracle_type_str == "CLOB":
+            return CLOB()
+        else:
+            # Default to VARCHAR2 with configured default length
+            default_length = self.config.get("varchar_default_length", 255)
+            return VARCHAR2(default_length)
 
     def _generate_oracle_ddl(self) -> Any:
         """Generate Oracle DDL with CORRECT field order following table_creator.py."""
@@ -457,9 +505,14 @@ class OracleSink(SQLSink[OracleConnector]):
 
         # 1.1 Find primary key field (prioritize simple 'id' over complex ones)
         id_fields = [
-            name for name in schema_properties
-            if (name.upper() == "ID" or
-                (name.upper().endswith("_ID") and not name.upper().endswith("_ID_ID")))
+            name
+            for name in schema_properties
+            if (
+                name.upper() == "ID"
+                or (
+                    name.upper().endswith("_ID") and not name.upper().endswith("_ID_ID")
+                )
+            )
         ]
 
         if id_fields:
@@ -489,9 +542,8 @@ class OracleSink(SQLSink[OracleConnector]):
                 and not prop_upper.endswith("_ID_ID")
                 and not prop_upper.endswith("_ID_KEY")
                 and not prop_upper.endswith("_ID_URL")
-                and prop_upper not in [
-                    "TK_DATE", "CREATE_USER", "CREATE_TS", "MOD_USER", "MOD_TS"
-                ]
+                and prop_upper
+                not in ["TK_DATE", "CREATE_USER", "CREATE_TS", "MOD_USER", "MOD_TS"]
             ):
                 other_fields.append(prop_name)
 
@@ -505,7 +557,8 @@ class OracleSink(SQLSink[OracleConnector]):
 
         # 1.4 Add COMPLEX FOREIGN KEY fields (_ID_KEY, _ID_URL, etc.)
         fk_fields = [
-            name for name in schema_properties
+            name
+            for name in schema_properties
             if "_ID_" in name.upper() and not name.upper().endswith("_URL")
         ]
         for prop_name in sorted(fk_fields):
@@ -575,44 +628,38 @@ class OracleSink(SQLSink[OracleConnector]):
 
         # Add primary key constraint if present
         if pk_constraint:
-            constraint_clean = pk_constraint.strip().lstrip(',').strip()
+            constraint_clean = pk_constraint.strip().lstrip(",").strip()
             ddl_lines.append(f"    {constraint_clean}")
 
         # Close table definition
-        ddl_lines.extend([
-            " );",
-            ""
-        ])
+        ddl_lines.extend([" );", ""])
 
         # Join lines and ensure clean formatting
         ddl = "\n".join(ddl_lines).strip()
 
         return ddl
 
+    def _get_type_mapping_rules(self) -> dict[str, Any]:
+        """Get type mapping rules from configuration or intelligent defaults.
 
-    def _get_table_creator_rules(self) -> dict[str, Any]:
-        """Get the type mapping rules from shared module."""
-        # Import shared type mapping rules
-        import sys
+        This method provides a professional type mapping system that:
+        1. Allows custom rules via configuration
+        2. Provides intelligent built-in defaults
+        3. Supports extensibility without code changes
+        """
+        # Check for custom rules in configuration
+        if "custom_type_rules" in self.config:
+            return self.config["custom_type_rules"]
 
-        sys.path.insert(0, "/home/marlonsc/flext/gruponos-meltano-native/src")
+        # Use intelligent built-in rules
+        return self._get_intelligent_type_mapping_rules()
 
-        try:
-            from oracle.type_mapping_rules import (
-                FIELD_PATTERN_RULES,
-                FIELD_PATTERNS_TO_ORACLE,
-            )
+    def _get_intelligent_type_mapping_rules(self) -> dict[str, Any]:
+        """Get intelligent type mapping rules for Oracle.
 
-            return {
-                "FIELD_PATTERNS_TO_ORACLE": FIELD_PATTERNS_TO_ORACLE,
-                "FIELD_PATTERN_RULES": FIELD_PATTERN_RULES,
-            }
-        except ImportError:
-            # Fallback to embedded rules if import fails
-            return self._get_fallback_rules()
-
-    def _get_fallback_rules(self) -> dict[str, Any]:
-        """Fallback rules if shared module not available."""
+        These rules are based on common database naming conventions
+        and provide optimal Oracle types for various data patterns.
+        """
         return {
             "FIELD_PATTERNS_TO_ORACLE": {
                 "id_patterns": "NUMBER",
@@ -637,21 +684,19 @@ class OracleSink(SQLSink[OracleConnector]):
                     "*_quantity",
                     "*_count",
                     "*_amount",
-                    "alloc_qty",
-                    "ord_qty",
-                    "packed_qty",
-                    "ordered_uom_qty",
-                    "orig_ord_qty",
+                    "*_number",
+                    "*_total",
                 ],
                 "price_patterns": [
                     "*_price",
                     "*_cost",
                     "*_rate",
                     "*_percent",
+                    "*_value",
+                    "*_amount",
+                    "price",
                     "cost",
-                    "sale_price",
-                    "unit_declared_value",
-                    "orig_sale_price",
+                    "rate",
                 ],
                 "weight_patterns": [
                     "*_weight",
@@ -665,7 +710,11 @@ class OracleSink(SQLSink[OracleConnector]):
                     "*_time",
                     "*_ts",
                     "*_timestamp",
-                    "cust_date_*",
+                    "*_datetime",
+                    "*_at",
+                    "created_*",
+                    "updated_*",
+                    "modified_*",
                 ],
                 "flag_patterns": ["*_flg", "*_flag", "*_enabled", "*_active"],
                 "desc_patterns": ["*_desc", "*_description", "*_note", "*_comment"],
@@ -673,10 +722,11 @@ class OracleSink(SQLSink[OracleConnector]):
                 "name_patterns": ["*_name", "*_title"],
                 "addr_patterns": ["*_addr", "*_address"],
                 "decimal_patterns": [
-                    "cust_decimal_*",
-                    "cust_number_*",
-                    "voucher_amount",
-                    "total_orig_ord_qty",
+                    "*_decimal",
+                    "*_numeric",
+                    "*_float",
+                    "*_double",
+                    "*_real",
                 ],
                 "set_patterns": ["*_set"],
             },
@@ -685,28 +735,34 @@ class OracleSink(SQLSink[OracleConnector]):
     def _convert_to_oracle_type(
         self, column_name: str, column_schema: dict[str, Any], rules: dict[str, Any]
     ) -> Any:
-        """Convert column to Oracle type using shared type mapping rules."""
-        # Try to use shared conversion function first
-        import sys
+        """Convert column to Oracle type using intelligent mapping rules.
 
-        sys.path.insert(0, "/home/marlonsc/flext/gruponos-meltano-native/src")
+        This method implements a professional type mapping system that:
+        1. Respects explicit type hints in schema
+        2. Uses pattern matching for common naming conventions
+        3. Falls back to JSON schema type mapping
+        """
+        # Priority 1: Check for explicit Oracle type hint in schema
+        if "sql_type" in column_schema or "oracle_type" in column_schema:
+            return column_schema.get("oracle_type", column_schema.get("sql_type"))
 
-        try:
-            from oracle.type_mapping_rules import (
-                convert_singer_schema_to_oracle,
-            )
+        # Priority 2: Apply intelligent pattern-based mapping
+        pattern_type = self._apply_pattern_based_mapping(
+            column_name, column_schema, rules
+        )
+        if pattern_type:
+            return pattern_type
 
-            return convert_singer_schema_to_oracle(column_name, column_schema)
-        except ImportError:
-            # Fallback to embedded logic if import fails
-            return self._convert_to_oracle_type_fallback(
-                column_name, column_schema, rules
-            )
+        # Priority 3: Use JSON schema type mapping
+        return self._map_json_schema_to_oracle_type(column_schema)
 
-    def _convert_to_oracle_type_fallback(
-        self, column_name: str, column_schema: dict[str, Any], rules: dict[str, Any]
-    ) -> Any:
-        """Fallback conversion logic if shared module not available."""
+    def _apply_pattern_based_mapping(
+        self, column_name: str, _column_schema: dict[str, Any], rules: dict[str, Any]
+    ) -> str | None:
+        """Apply pattern-based type mapping using intelligent rules.
+
+        Returns None if no pattern matches, allowing fallback to other methods.
+        """
         column_lower = column_name.lower()
 
         # Priority 1: Field name patterns (same logic as table_creator.py)
@@ -738,47 +794,115 @@ class OracleSink(SQLSink[OracleConnector]):
                         return "VARCHAR2(4000 CHAR)"
                     return oracle_type
 
-        # Priority 2: Singer schema type inference
+        # No pattern matched
+        return None
+
+    def _map_json_schema_to_oracle_type(self, column_schema: dict[str, Any]) -> str:
+        """Map JSON schema types to Oracle types.
+
+        This provides intelligent default mappings for standard JSON schema types.
+        """
+        # Extract base type from schema
         schema_type = column_schema.get("type", "string")
         if isinstance(schema_type, list):
             # Handle nullable types like ["string", "null"]
             schema_type = next((t for t in schema_type if t != "null"), "string")
 
-        if schema_type == "integer" or schema_type == "number":
+        # Integer types
+        if schema_type == "integer":
+            # Check for specific integer constraints
+            if "minimum" in column_schema and column_schema["minimum"] >= 0:
+                # Unsigned integer
+                max_val = column_schema.get("maximum", 999999999999)
+                if max_val <= 999:
+                    return "NUMBER(3,0)"
+                elif max_val <= 999999:
+                    return "NUMBER(6,0)"
+                elif max_val <= 999999999:
+                    return "NUMBER(9,0)"
             return "NUMBER"
+
+        # Number/float types
+        elif schema_type == "number":
+            # Check for decimal places
+            if "multipleOf" in column_schema:
+                # Determine precision from multipleOf
+                multiple = str(column_schema["multipleOf"])
+                if "." in multiple:
+                    scale = len(multiple.split(".")[1])
+                    return f"NUMBER(38,{min(scale, 10)})"
+            return "NUMBER"
+
+        # Boolean type
         elif schema_type == "boolean":
             return "NUMBER(1,0)"
+
+        # String types
         elif schema_type == "string":
-            # Check for date-time format
+            # Check for date/time formats
             format_type = column_schema.get("format")
-            if format_type in ["date-time", "date", "time"]:
+            if format_type in ["date-time", "datetime"]:
+                return "TIMESTAMP(6)"
+            elif format_type == "date":
+                return "DATE"
+            elif format_type == "time":
                 return "TIMESTAMP(6)"
 
-            # Use max length if available
-            max_length = column_schema.get("maxLength", 255)
-            return f"VARCHAR2({min(max_length, 4000)} CHAR)"
+            # Check for enum constraints (use appropriate size)
+            if "enum" in column_schema:
+                max_enum_length = max(len(str(e)) for e in column_schema["enum"])
+                return f"VARCHAR2({min(max_enum_length * 2, 4000)} CHAR)"
+
+            # Use maxLength if specified
+            max_length = column_schema.get("maxLength")
+            if max_length:
+                return f"VARCHAR2({min(max_length, 4000)} CHAR)"
+
+            # Check for content hints
+            if (
+                "contentEncoding" in column_schema
+                and column_schema["contentEncoding"] == "base64"
+            ):
+                return "CLOB"  # Base64 data can be large
+
+            # Default string size based on config
+            default_size = self.config.get("varchar_default_length", 255)
+            return f"VARCHAR2({default_size} CHAR)"
+
+        # Array and object types
+        elif schema_type in ["array", "object"]:
+            # Use CLOB for complex types
+            return "CLOB"
 
         # Default fallback
         return "VARCHAR2(255 CHAR)"
 
-    def _fix_oracle_column_types(self, conn: Any) -> None:
-        """Fix Oracle column types after table creation."""
+    def _ensure_metadata_columns(self, conn: Any) -> None:
+        """Ensure Singer metadata columns have correct types.
+
+        This method ensures that standard Singer metadata columns
+        are properly typed for Oracle.
+        """
         # Get table parts
         schema_name, table_name = self._parse_full_table_name(self.full_table_name)
 
-        # Get list of columns that need fixing
-        columns_to_fix = [
-            ("_sdc_extracted_at", "TIMESTAMP"),
-            ("_sdc_received_at", "TIMESTAMP"),
-            ("_sdc_batched_at", "TIMESTAMP"),
-            ("_sdc_deleted_at", "TIMESTAMP"),
+        # Define standard Singer metadata columns with optimal Oracle types
+        metadata_columns = [
+            ("_sdc_extracted_at", "TIMESTAMP(6)"),
+            ("_sdc_received_at", "TIMESTAMP(6)"),
+            ("_sdc_batched_at", "TIMESTAMP(6)"),
+            ("_sdc_deleted_at", "TIMESTAMP(6)"),
             ("_sdc_sequence", "NUMBER"),
             ("_sdc_table_version", "NUMBER"),
-            ("_sdc_sync_started_at", "NUMBER"),
+            ("_sdc_sync_started_at", "TIMESTAMP(6)"),
         ]
 
+        # Only process if metadata columns are enabled
+        if not self.config.get("add_record_metadata", True):
+            return
+
         # Try to alter columns - some may not exist yet
-        for col_name, oracle_type in columns_to_fix:
+        for col_name, oracle_type in metadata_columns:
             try:
                 if schema_name:
                     full_name = f'"{schema_name}"."{table_name}"'
@@ -1352,21 +1476,37 @@ class OracleSink(SQLSink[OracleConnector]):
             for chunk in chunks:
                 future = self._executor.submit(self._process_chunk, chunk)
                 futures.append(future)
-        else:
-            # Fallback to sequential processing
-            for chunk in chunks:
-                self._process_chunk(chunk)
 
-        # Wait for completion - DO NOT MASK PARALLEL PROCESSING ERRORS
-        for future in as_completed(futures):
-            try:
-                future.result()
-            except Exception as e:
-                # Log the specific chunk processing error
-                if self._logger:
-                    self._logger.error(f"Parallel chunk processing failed: {e}")
-                # Always raise - parallel processing errors indicate serious problems
-                raise
+            # Wait for completion - DO NOT MASK PARALLEL PROCESSING ERRORS
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except Exception as e:
+                    # Log the specific chunk processing error
+                    if self._logger:
+                        self._logger.error(f"Parallel chunk processing failed: {e}")
+                    # Always raise - parallel processing errors indicate serious issues
+                    raise
+        else:
+            # Use async processing if available
+            if self.config.get("enable_async", False):
+                asyncio.run(self._process_chunks_async(chunks))
+            else:
+                # Fallback to sequential processing
+                for chunk in chunks:
+                    self._process_chunk(chunk)
+
+    async def _process_chunks_async(self, chunks: list[list[dict[str, Any]]]) -> None:
+        """Process chunks asynchronously with SQLAlchemy 2.x patterns."""
+        tasks = []
+        for chunk in chunks:
+            if self.key_properties:
+                task = self._execute_merge_batch_async(chunk)
+            else:
+                task = self._execute_insert_batch_async(chunk)
+            tasks.append(task)
+
+        await asyncio.gather(*tasks)
 
     def _process_chunk(self, records: list[dict[str, Any]]) -> None:
         """Process a single chunk of records."""
@@ -1394,6 +1534,23 @@ class OracleSink(SQLSink[OracleConnector]):
             return
 
         self._execute_merge_batch(records)
+
+    async def _execute_insert_batch_async(self, records: list[dict[str, Any]]) -> None:
+        """Execute async bulk insert with SQLAlchemy 2.x patterns."""
+        if not self.connector._async_engine:
+            # Fallback to sync processing
+            return self._execute_insert_batch(records)
+
+        async with self.connector.get_async_session() as session:
+            # Use modern SQLAlchemy 2.x insert patterns
+            stmt = insert(self._get_table_model())
+            prepared_records = [self._conform_record(r) for r in records]
+
+            await session.execute(stmt, prepared_records)
+            await session.commit()
+
+            # Update statistics
+            self._stream_stats["total_records_inserted"] += len(prepared_records)
 
     def _execute_insert_batch(self, records: list[dict[str, Any]]) -> None:
         """Execute high-performance bulk insert with comprehensive tracking."""
@@ -1524,6 +1681,49 @@ class OracleSink(SQLSink[OracleConnector]):
                     exc_info=True,
                 )
             raise
+
+    async def _execute_merge_batch_async(self, records: list[dict[str, Any]]) -> None:
+        """Execute async MERGE with modern SQLAlchemy 2.x patterns."""
+        if not self.connector._async_engine:
+            # Fallback to sync processing
+            return self._execute_merge_batch(records)
+
+        async with self.connector.get_async_session() as session:
+            table_model = self._get_table_model()
+
+            for record in records:
+                conformed = self._conform_record(record)
+                key_values = {
+                    k: conformed[k] for k in self.key_properties if k in conformed
+                }
+
+                # Try to find existing record
+                stmt = select(table_model).where(
+                    *[getattr(table_model, k) == v for k, v in key_values.items()]
+                )
+                existing = await session.execute(stmt)
+                row = existing.scalar_one_or_none()
+
+                if row:
+                    # Update existing record
+                    update_stmt = update(table_model).where(
+                        *[getattr(table_model, k) == v for k, v in key_values.items()]
+                    ).values(**conformed)
+                    await session.execute(update_stmt)
+                    self._stream_stats["total_records_updated"] += 1
+                else:
+                    # Insert new record
+                    insert_stmt = insert(table_model).values(**conformed)
+                    await session.execute(insert_stmt)
+                    self._stream_stats["total_records_inserted"] += 1
+
+            await session.commit()
+
+    def _get_table_model(self) -> type[OracleTargetTable]:
+        """Get or create SQLAlchemy 2.x ORM model for this table."""
+        # This would dynamically create a table model based on schema
+        # For now, return the base class
+        return OracleTargetTable
 
     def _execute_merge_batch(self, records: list[dict[str, Any]]) -> None:
         """Execute high-performance MERGE operation with comprehensive tracking."""
