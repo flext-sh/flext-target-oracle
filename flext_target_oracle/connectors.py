@@ -10,32 +10,17 @@ This connector provides:
 
 from __future__ import annotations
 
-from contextlib import asynccontextmanager, contextmanager
-from typing import TYPE_CHECKING, Any, ClassVar
+from contextlib import contextmanager
+from typing import TYPE_CHECKING, Any
 
 from singer_sdk.connectors import SQLConnector
 from sqlalchemy import create_engine, event, pool, text
 from sqlalchemy.dialects.oracle import TIMESTAMP
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
-from sqlalchemy.orm import DeclarativeBase, registry
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Iterator, Sequence
+    from collections.abc import Iterator, Sequence
 
     from sqlalchemy.engine import Connection, Engine
-    from sqlalchemy.ext.asyncio import AsyncConnection
-
-
-class OracleConnectorBase(DeclarativeBase):
-    """SQLAlchemy 2.x declarative base for Oracle entities."""
-
-    registry: ClassVar[registry] = registry()
-    metadata = registry.metadata
 
 
 class OracleConnector(SQLConnector):
@@ -58,12 +43,8 @@ class OracleConnector(SQLConnector):
     allow_temp_tables: bool = True
 
     def __init__(self, config: dict[str, Any] | None = None) -> None:
-        """Initialize Oracle connector with SQLAlchemy 2.x async support."""
+        """Initialize Oracle connector with Oracle-specific type mappings."""
         super().__init__(config)
-
-        # SQLAlchemy 2.x async engine and session factory
-        self._async_engine: AsyncEngine | None = None
-        self._async_session_factory: async_sessionmaker[AsyncSession] | None = None
 
         # Override format handlers to use Oracle types
         self.jsonschema_to_sql.register_format_handler(
@@ -71,9 +52,6 @@ class OracleConnector(SQLConnector):
         )
         self.jsonschema_to_sql.register_format_handler("date", lambda _: TIMESTAMP())
         self.jsonschema_to_sql.register_format_handler("time", lambda _: TIMESTAMP())
-
-        # Initialize async components
-        self._setup_async_engine()
 
     def get_column_type(self, column_name: str, jsonschema_type: dict[str, Any]) -> Any:
         """Override column type mapping with JSON schema type priority."""
