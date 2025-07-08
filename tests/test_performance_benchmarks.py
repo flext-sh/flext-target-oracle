@@ -1,24 +1,28 @@
-import logging
-
-log = logging.getLogger(__name__)
-
 """Performance benchmark tests for Oracle target.
 
 This module provides comprehensive performance testing including
 throughput benchmarks, scalability tests, and resource utilization monitoring.
 """
 
+from __future__ import annotations
+
 import json
+import logging
 from io import StringIO
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import patch
 
 import pytest
 from sqlalchemy import text
-from sqlalchemy.engine import Engine
 
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+
+log = logging.getLogger(__name__)
+
 
 @requires_oracle_connection
 class TestPerformanceBenchmarks:
@@ -30,8 +34,8 @@ class TestPerformanceBenchmarks:
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
-        table_cleanup,
-        performance_timer,
+        table_cleanup: Any,
+        performance_timer: Any,
     ) -> None:
         """Test high-throughput data ingestion performance."""
         table_cleanup(test_table_name)
@@ -99,7 +103,9 @@ class TestPerformanceBenchmarks:
         # Verify all records were processed
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            count = row[0]
             assert count == record_count
 
         # Performance metrics
@@ -137,8 +143,8 @@ class TestPerformanceBenchmarks:
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
-        table_cleanup,
-        performance_timer,
+        table_cleanup: Any,
+        performance_timer: Any,
     ) -> None:
         """Compare bulk operations vs individual insert performance."""
         record_count = 10000
@@ -238,12 +244,16 @@ class TestPerformanceBenchmarks:
         # Verify both processed correctly
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}_bulk"))
-            assert result.fetchone()[0] == record_count
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == record_count
 
             result = conn.execute(
                 text(f"SELECT COUNT(*) FROM {test_table_name}_individual"),
             )
-            assert result.fetchone()[0] == record_count
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == record_count
 
         # Performance comparison
         performance_ratio = bulk_throughput / individual_throughput
@@ -252,16 +262,13 @@ class TestPerformanceBenchmarks:
             "\nBulk vs Individual Performance:",
         )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
         log.error(
-            f"Bulk operations: {
-                bulk_throughput:.2f} records/sec ({
-                # TODO(@dev): Replace with proper logging",  # Link:
-                # https://github.com/issue/todo
-                bulk_duration:.2f}s)
+            f"Bulk operations: {bulk_throughput:.2f} records/sec ({bulk_duration:.2f}s)"
+            # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
         )
         log.error(
             f"Individual operations: {individual_throughput:.2f} records/sec "
-            # Link: https://github.com/issue/todo
-            f"({individual_duration:.2f}s)  # TODO(@dev): Replace with proper logging",
+            f"({individual_duration:.2f}s)"
+            # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
         )
         log.error(
             f"Bulk is {performance_ratio:.1f}x faster",
@@ -282,8 +289,8 @@ class TestPerformanceBenchmarks:
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
-        table_cleanup,
-        performance_timer,
+        table_cleanup: Any,
+        performance_timer: Any,
     ) -> None:
         """Test performance scaling with different parallel degrees."""
         record_count = 20000
@@ -369,7 +376,9 @@ class TestPerformanceBenchmarks:
             # Verify processing
             with oracle_engine.connect() as conn:
                 result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
-                assert result.fetchone()[0] == record_count
+                row = result.fetchone()
+            assert row is not None
+            assert row[0] == record_count
 
             log.error(
                 f"Parallel degree {degree}: {throughput:.2f} records/sec "
@@ -407,8 +416,8 @@ class TestPerformanceBenchmarks:
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
-        table_cleanup,
-        performance_timer,
+        table_cleanup: Any,
+        performance_timer: Any,
     ) -> None:
         """Test memory usage with different batch sizes."""
         # Test different batch sizes
@@ -489,7 +498,9 @@ class TestPerformanceBenchmarks:
             # Verify processing
             with oracle_engine.connect() as conn:
                 result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
-                assert result.fetchone()[0] == record_count
+                row = result.fetchone()
+            assert row is not None
+            assert row[0] == record_count
 
             log.error(
                 f"Batch size {batch_size}: {throughput:.2f} records/sec "
@@ -504,14 +515,15 @@ class TestPerformanceBenchmarks:
         # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
         log.error("\nBatch Size Scaling Results:")
         for batch_size in batch_sizes:
-            result = batch_results[batch_size]
+            batch_result = batch_results[batch_size]
             efficiency = (
-                result["throughput"] / batch_size
+                batch_result["throughput"] / batch_size
             )  # Records per second per batch item
             log.error(
-                f"Batch {batch_size}: {result['throughput']:.2f} records/sec "
+                f"Batch {batch_size}: {batch_result['throughput']:.2f} records/sec "
                 # Link: https://github.com/issue/todo
-                f"(efficiency: {efficiency:.4f})  # TODO(@dev): Replace with proper logging",
+                f"(efficiency: {efficiency:.4f})  "
+                "# TODO(@dev): Replace with proper logging",
             )
 
         # Larger batch sizes should generally be more efficient
@@ -529,8 +541,8 @@ class TestPerformanceBenchmarks:
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
-        table_cleanup,
-        performance_timer,
+        table_cleanup: Any,
+        performance_timer: Any,
     ) -> None:
         """Test performance impact of connection pool settings."""
         record_count = 15000
@@ -616,7 +628,9 @@ class TestPerformanceBenchmarks:
             # Verify processing
             with oracle_engine.connect() as conn:
                 result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
-                assert result.fetchone()[0] == record_count
+                row = result.fetchone()
+            assert row is not None
+            assert row[0] == record_count
 
             config_desc = f"Pool:{
                     pool_config['pool_size']}, Workers:{
@@ -635,11 +649,11 @@ class TestPerformanceBenchmarks:
         log.error(
             "\nConnection Pool Performance Results:",
         )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
-        for _i, result in pool_results.items():
-            config = result["config"]
+        for _i, pool_result in pool_results.items():
+            config = pool_result["config"]
             log.error(
                 f"Pool {config['pool_size']}/Workers {config['max_workers']}: "
-                f"{result['throughput']:.2f} records/sec",
+                f"{pool_result['throughput']:.2f} records/sec",
             )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
         # Verify reasonable performance scaling
@@ -657,8 +671,8 @@ class TestPerformanceBenchmarks:
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
-        table_cleanup,
-        performance_timer,
+        table_cleanup: Any,
+        performance_timer: Any,
     ) -> None:
         """Test performance with large individual records."""
         table_cleanup(test_table_name)
@@ -732,7 +746,9 @@ class TestPerformanceBenchmarks:
         # Verify processing
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            count = row[0]
             assert count == record_count
 
         # Performance metrics for large records
@@ -745,10 +761,8 @@ class TestPerformanceBenchmarks:
         # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
         log.error("\nLarge Record Performance:")
         log.error(
-            f"Records: {
-    record_count:,
-    } (~10KB each)  # TODO(@dev): Replace with proper logging",
-      # Link: https://github.com/issue/todo
+            f"Records: {record_count:,} (~10KB each)"
+            # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
         )
         log.error(
             f"Total data: ~{data_size_mb:.1f} MB",

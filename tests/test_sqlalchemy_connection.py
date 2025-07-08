@@ -8,7 +8,7 @@ from sqlalchemy import create_engine, text
 # Load environment
 load_dotenv()
 
-def test_sqlalchemy_connection() -> None:
+
 def test_sqlalchemy_connection() -> None:
     """Test SQLAlchemy connection to Oracle Autonomous Database."""
     # Get connection parameters
@@ -16,7 +16,7 @@ def test_sqlalchemy_connection() -> None:
     port = int(os.getenv("DATABASE__PORT", "1521"))
     service_name = os.getenv("DATABASE__SERVICE_NAME")
     username = os.getenv("DATABASE__USERNAME")
-    password = os.getenv("DATABASE__PASSWORD"  # noqa: S105)
+    password = os.getenv("DATABASE__PASSWORD")
     os.getenv("DATABASE__PROTOCOL", "tcp")
 
     # Build DSN for TCPS
@@ -52,17 +52,16 @@ def test_sqlalchemy_connection() -> None:
         conn.execute(text("SELECT USER FROM DUAL")).scalar()
 
         # Check if we're on Enterprise Edition
-        (
-            conn.execute(
-                text(
-                    """
+        conn.execute(
+            text(
+                """
             SELECT COUNT(*) FROM v$version
             WHERE BANNER LIKE '%Enterprise Edition%'
         """,
-                ),
-            ).scalar()
-            > 0
-        )
+            ),
+        ).scalar()
+        # Note: enterprise_count > 0 indicates Enterprise Edition
+
 
 if __name__ == "__main__":
     test_sqlalchemy_connection()

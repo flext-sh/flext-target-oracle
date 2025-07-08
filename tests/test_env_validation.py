@@ -5,10 +5,10 @@ for connecting to Oracle Database and conditionally runs tests based on
 environment availability.
 """
 
-import os
 from pathlib import Path
 
 import pytest
+
 
 class TestEnvironmentValidation:
     """Test environment configuration validation."""
@@ -28,7 +28,7 @@ class TestEnvironmentValidation:
         env_example_path = project_root / ".env.example"
         assert env_example_path.exists(), ".env.example file should exist"
 
-    def test_required_env_vars(self, env_config: dict) -> None:
+    def test_required_env_vars(self, env_config: dict[str, str]) -> None:
         """Test that all required environment variables are set."""
         """Test that all required environment variables are set."""
         required_vars = ["host", "username", "password", "service_name"]
@@ -37,18 +37,18 @@ class TestEnvironmentValidation:
             assert var in env_config, f"Required environment variable {var} is missing"
             assert env_config[var], f"Required environment variable {var} is empty"
 
-    def test_port_configuration(self, env_config: dict) -> None:
+    def test_port_configuration(self, env_config: dict[str, str]) -> None:
         """Test port configuration is valid."""
         """Test port configuration is valid."""
         port = env_config.get("port", 1521)
         assert isinstance(port, int), "Port must be an integer"
         assert 1 <= port <= 65535, f"Port {port} is out of valid range"
 
-    def test_protocol_configuration(self, env_config: dict) -> None:
+    def test_protocol_configuration(self, env_config: dict[str, str]) -> None:
         """Test protocol configuration is valid."""
         """Test protocol configuration is valid."""
         protocol = env_config.get("protocol", "tcp")
-        assert protocol in ["tcp", "tcps"], f"Invalid protocol: {protocol}"
+        assert protocol in {"tcp", "tcps"}, f"Invalid protocol: {protocol}"
 
         # If using TCPS, additional fields might be required
         if protocol == "tcps" and "wallet_location" in env_config:
@@ -57,7 +57,7 @@ class TestEnvironmentValidation:
                 "wallet_location"
             ], "Wallet location cannot be empty for TCPS"
 
-    def test_optional_performance_settings(self, env_config: dict) -> None:
+    def test_optional_performance_settings(self, env_config: dict[str, str]) -> None:
         """Test optional performance settings if present."""
         """Test optional performance settings if present."""
         # Check batch size if specified
@@ -79,10 +79,10 @@ class TestEnvironmentValidation:
             assert pool_size <= 100, "Pool size seems too large"
 
     @pytest.mark.skipif(
-        not os.path.exists(".env"),
+        not Path(".env").exists(),
         reason="Requires .env file with Oracle configuration",
     )
-    def test_connection_string_format(self, env_config: dict) -> None:
+    def test_connection_string_format(self, env_config: dict[str, str]) -> None:
         """Test that connection string can be formed from config."""
         """Test that connection string can be formed from config."""
         # Verify we can build a connection string
@@ -96,7 +96,7 @@ class TestEnvironmentValidation:
             "database",
         ), "Either service_name or database (SID) must be provided"
 
-    def test_schema_configuration(self, env_config: dict) -> None:
+    def test_schema_configuration(self, env_config: dict[str, str]) -> None:
         """Test schema configuration if present."""
         """Test schema configuration if present."""
         if "schema" in env_config:
@@ -114,7 +114,7 @@ class TestEnvironmentValidation:
                     "").isalnum()
             ), "Schema name contains invalid characters"
 
-    def test_license_flags(self, env_config: dict) -> None:
+    def test_license_flags(self, env_config: dict[str, str]) -> None:
         """Test Oracle license flags if present."""
         """Test Oracle license flags if present."""
         license_flags = [
@@ -128,14 +128,14 @@ class TestEnvironmentValidation:
             if flag in env_config:
                 value = env_config[flag]
                 # Should be convertible to boolean
-                assert value.lower() in [
+                assert value.lower() in {
                     "true",
                     "false",
                     "1",
                     "0",
                     "yes",
                     "no",
-                ], f"License flag {flag} must be a boolean value"
+                }, f"License flag {flag} must be a boolean value"
 
     @pytest.mark.parametrize(
         ("config_key", "max_value"),
@@ -147,8 +147,9 @@ class TestEnvironmentValidation:
             ("merge_batch_size", 50000),
         ],
     )
-    def test_numeric_limits(self, env_config -> None: dict, config_key: str, max_value: int,
-                            ) -> None:
+    def test_numeric_limits(
+        self, env_config: dict[str, str], config_key: str, max_value: int
+    ) -> None:
         """Test numeric configuration values are within reasonable limits."""
         if config_key in env_config:
             try:
@@ -161,28 +162,28 @@ class TestEnvironmentValidation:
                 # TODO: Consider using else block
                 pytest.fail(f"{config_key} must be a valid integer")
 
-    def test_compression_settings(self, env_config: dict) -> None:
+    def test_compression_settings(self, env_config: dict[str, str]) -> None:
         """Test compression settings consistency."""
         """Test compression settings consistency."""
         if env_config.get("enable_compression", "").lower() == "true":
             compression_type = env_config.get("compression_type", "basic")
-            assert compression_type in [
+            assert compression_type in {
                 "basic",
                 "advanced",
                 "hybrid",
                 "archive",
-            ], f"Invalid compression type: {compression_type}"
+            }, f"Invalid compression type: {compression_type}"
 
             # If advanced compression is used, license flag should be set
             if (
                 compression_type != "basic"
                 and "oracle_has_compression_option" in env_config
             ):
-                assert env_config["oracle_has_compression_option"].lower() in [
+                assert env_config["oracle_has_compression_option"].lower() in {
                     "true",
                     "1",
                     "yes",
-                ], (
+                }, (
                     f"Advanced compression type '{compression_type}' requires "
                     f"oracle_has_compression_option=true"
                 )

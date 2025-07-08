@@ -12,10 +12,9 @@ from flext_target_oracle import OracleTarget
 from flext_target_oracle.connectors import OracleConnector
 from flext_target_oracle.sinks import OracleSink
 
+
 class TestBasicFunctionality:
     """Test basic target functionality without database."""
-
-    def test_target_initialization_minimal(self) -> None:
 
     def test_target_initialization_minimal(self) -> None:
         """Test target can be initialized with minimal config."""
@@ -28,8 +27,6 @@ class TestBasicFunctionality:
         assert target.name == "flext-target-oracle"
         assert target.config["host"] == "test-host"
         assert target.config["username"] == "test-user"
-
-    def test_target_capabilities(self) -> None:
 
     def test_target_capabilities(self) -> None:
         """Test target reports correct capabilities."""
@@ -49,8 +46,6 @@ class TestBasicFunctionality:
         assert "schema-flattening" in capability_values
 
     def test_config_defaults(self) -> None:
-
-    def test_config_defaults(self) -> None:
         """Test configuration defaults are applied."""
         config = {
             "host": "test-host",
@@ -65,8 +60,6 @@ class TestBasicFunctionality:
         assert target.config.get("pool_size", 10) == 10
         assert target.config.get("add_record_metadata", True) is True
         assert target.config.get("load_method", "append-only") == "append-only"
-
-    def test_license_flags_default_to_false(self) -> None:
 
     def test_license_flags_default_to_false(self) -> None:
         """Test Oracle license flags default to false."""
@@ -90,8 +83,6 @@ class TestBasicFunctionality:
             False) is False
 
     def test_connector_url_generation(self) -> None:
-
-    def test_connector_url_generation(self) -> None:
         """Test connector generates correct URLs."""
         config = {
             "host": "oracle.example.com",
@@ -109,8 +100,6 @@ class TestBasicFunctionality:
         assert "test_user:test_pass@" in url
         assert "oracle.example.com:1522" in url
         assert "TESTDB" in url
-
-    def test_connector_tcps_url(self) -> None:
 
     def test_connector_tcps_url(self) -> None:
         """Test connector generates TCPS URLs correctly."""
@@ -133,8 +122,6 @@ class TestBasicFunctionality:
         assert "(PROTOCOL=TCPS)" in url
         assert "(HOST=secure.oracle.com)" in url
         assert "(PORT=2484)" in url
-
-    def test_sink_initialization(self) -> None:
 
     def test_sink_initialization(self) -> None:
         """Test sink can be initialized."""
@@ -163,8 +150,6 @@ class TestBasicFunctionality:
             assert sink.key_properties == ["id"]
 
     def test_type_mapping(self) -> None:
-
-    def test_type_mapping(self) -> None:
         """Test Singer type to Oracle type mapping."""
         config = {
             "host": "test-host",
@@ -172,7 +157,7 @@ class TestBasicFunctionality:
             "password": "test-pass"}
 
         target = OracleTarget(config=config)
-        schema = {"properties": {}}
+        schema: dict[str, Any] = {"properties": {}}
 
         with patch.object(OracleSink, "setup"):
             sink = OracleSink(
@@ -181,23 +166,21 @@ class TestBasicFunctionality:
                 schema=schema)
 
             # Test various type mappings
-            string_type = sink._singer_sdk_to_oracle_type(
+            string_type = sink._singer_sdk_to_oracle_type(  # type: ignore[attr-defined]
                 {"type": "string", "maxLength": 100},
             )
             assert "VARCHAR2" in str(
                 string_type) or "NVARCHAR2" in str(string_type)
 
-            integer_type = sink._singer_sdk_to_oracle_type({"type": "integer"})
+            integer_type = sink._singer_sdk_to_oracle_type({"type": "integer"})  # type: ignore[attr-defined]
             assert "NUMBER" in str(integer_type)
 
-            boolean_type = sink._singer_sdk_to_oracle_type({"type": "boolean"})
+            boolean_type = sink._singer_sdk_to_oracle_type({"type": "boolean"})  # type: ignore[attr-defined]
             assert "NUMBER" in str(
                 boolean_type) or "BOOLEAN" in str(boolean_type)
 
-            object_type = sink._singer_sdk_to_oracle_type({"type": "object"})
+            object_type = sink._singer_sdk_to_oracle_type({"type": "object"})  # type: ignore[attr-defined]
             assert "CLOB" in str(object_type) or "JSON" in str(object_type)
-
-    def test_record_conformance(self) -> None:
 
     def test_record_conformance(self) -> None:
         """Test record conformance for Oracle."""
@@ -227,14 +210,12 @@ class TestBasicFunctionality:
             # Test record conformance
             record = {"id": 123, "active": True, "data": {"key": "value"}}
 
-            conformed = sink._conform_record(record)
+            conformed = sink._conform_record(record)  # type: ignore[attr-defined]
 
             assert conformed["id"] == 123
             assert conformed["active"] == 1  # Boolean converted to number
             # Object serialized to JSON
             assert conformed["data"] == '{"key": "value"}'
-
-    def test_batch_config_parsing(self) -> None:
 
     def test_batch_config_parsing(self) -> None:
         """Test batch configuration parsing."""
@@ -256,8 +237,6 @@ class TestBasicFunctionality:
         assert target.config["batch_config"]["encoding"]["format"] == "jsonl"
 
     def test_parallel_configuration(self) -> None:
-
-    def test_parallel_configuration(self) -> None:
         """Test parallel processing configuration."""
         config = {
             "host": "test-host",
@@ -275,14 +254,12 @@ class TestBasicFunctionality:
                 target=target, stream_name="test_stream", schema={"properties": {}},
             )
 
-            assert sink._parallel_threads == 4
-            assert sink._chunk_size == 5000
+            assert sink._parallel_threads == 4  # type: ignore[attr-defined]
+            assert sink._chunk_size == 5000  # type: ignore[attr-defined]
 
             # Thread pool should be created for parallel processing
-            if sink._parallel_threads > 1:
-                assert sink._executor is not None
-
-    def test_wan_optimization_config(self) -> None:
+            if sink._parallel_threads > 1:  # type: ignore[attr-defined]
+                assert sink._executor is not None  # type: ignore[attr-defined]
 
     def test_wan_optimization_config(self) -> None:
         """Test WAN optimization configuration."""
@@ -315,8 +292,7 @@ class TestBasicFunctionality:
             ("overwrite", "truncate_then_insert"),
         ],
     )
-    def test_load_methods(self, load_method, _expected_behavior) -> None:
-        """Test different load methods are configured correctly."""
+    def test_load_methods(self, load_method: str, _expected_behavior: str) -> None:
         """Test different load methods are configured correctly."""
         # Note: _expected_behavior is parametrized but not used in logic
         config = {
@@ -328,8 +304,6 @@ class TestBasicFunctionality:
 
         target = OracleTarget(config=config)
         assert target.config["load_method"] == load_method
-
-    def test_error_handling_config(self) -> None:
 
     def test_error_handling_config(self) -> None:
         """Test error handling configuration."""

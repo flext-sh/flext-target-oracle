@@ -4,10 +4,9 @@ import pytest
 
 from flext_target_oracle import OracleTarget
 
+
 class TestConfiguration:
     """Test configuration validation."""
-
-    def test_minimal_config(self) -> None:
 
     def test_minimal_config(self) -> None:
         """Test minimal required configuration."""
@@ -24,16 +23,12 @@ class TestConfiguration:
         assert target.config.get("port", 1521) == 1521
 
     def test_missing_required_fields(self) -> None:
-
-    def test_missing_required_fields(self) -> None:
         """Test error on missing required fields."""
         # Missing host
         config = {"username": "test_user", "password": "test_password"}
 
         with pytest.raises((ValueError, ConnectionError, Exception)):
             OracleTarget(config=config)
-
-    def test_all_connection_parameters(self) -> None:
 
     def test_all_connection_parameters(self) -> None:
         """Test all connection parameters."""
@@ -55,8 +50,6 @@ class TestConfiguration:
         target = OracleTarget(config=config)
         assert target.config["protocol"] == "tcps"
         assert target.config["wallet_location"] == "/path/to/wallet"
-
-    def test_performance_parameters(self) -> None:
 
     def test_performance_parameters(self) -> None:
         """Test performance configuration parameters."""
@@ -82,8 +75,6 @@ class TestConfiguration:
         assert target.config["use_bulk_operations"] is True
 
     def test_oracle_specific_features(self) -> None:
-
-    def test_oracle_specific_features(self) -> None:
         """Test Oracle-specific feature configuration."""
         config = {
             "host": "localhost",
@@ -104,8 +95,6 @@ class TestConfiguration:
         target = OracleTarget(config=config)
         assert target.config["compression_type"] == "advanced"
         assert target.config["partition_type"] == "range"
-
-    def test_data_type_configuration(self) -> None:
 
     def test_data_type_configuration(self) -> None:
         """Test data type configuration parameters."""
@@ -131,8 +120,6 @@ class TestConfiguration:
         assert target.config["timestamp_timezone"] == "America/New_York"
 
     def test_sqlalchemy_configuration(self) -> None:
-
-    def test_sqlalchemy_configuration(self) -> None:
         """Test SQLAlchemy engine configuration."""
         config = {
             "host": "localhost",
@@ -155,8 +142,6 @@ class TestConfiguration:
         assert target.config["isolation_level"] == "SERIALIZABLE"
 
     def test_monitoring_configuration(self) -> None:
-
-    def test_monitoring_configuration(self) -> None:
         """Test monitoring and logging configuration."""
         config = {
             "host": "localhost",
@@ -175,8 +160,6 @@ class TestConfiguration:
         target = OracleTarget(config=config)
         assert target.config["log_level"] == "DEBUG"
         assert target.config["log_sql_statements"] is True
-
-    def test_load_method_configuration(self) -> None:
 
     def test_load_method_configuration(self) -> None:
         """Test different load method configurations."""
@@ -200,8 +183,6 @@ class TestConfiguration:
         config["load_method"] = "overwrite"
         target = OracleTarget(config=config)
         assert target.config["load_method"] == "overwrite"
-
-    def test_default_values(self) -> None:
 
     def test_default_values(self) -> None:
         """Test default configuration values."""

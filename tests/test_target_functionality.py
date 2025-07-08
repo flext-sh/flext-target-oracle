@@ -6,6 +6,7 @@ schema handling, record processing, and error management.
 
 import json
 from io import StringIO
+from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
@@ -37,7 +38,7 @@ class TestOracleTargetFunctionality:
                                        oracle_target: OracleTarget,
                                        sample_singer_schema: dict[str, Any],
                                        test_table_name: str,
-                                       table_cleanup,
+                                       table_cleanup: Any,
                                        ) -> None:
         """Test Singer SCHEMA message processing."""
         table_cleanup(test_table_name)
@@ -59,7 +60,7 @@ class TestOracleTargetFunctionality:
                                        sample_singer_records: list[dict[str, Any]],
                                        test_table_name: str,
                                        oracle_engine: Engine,
-                                       table_cleanup,
+                                       table_cleanup: Any,
                                        ) -> None:
         """Test Singer RECORD message processing."""
         table_cleanup(test_table_name)
@@ -87,7 +88,9 @@ class TestOracleTargetFunctionality:
         with oracle_engine.connect() as conn:
             result = conn.execute(
                 text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            count = row[0]
             assert count == len(test_records)
 
             # Verify specific record data
@@ -109,8 +112,8 @@ class TestOracleTargetFunctionality:
                               bulk_singer_records: list[dict[str, Any]],
                               test_table_name: str,
                               oracle_engine: Engine,
-                              table_cleanup,
-                              performance_timer,
+                              table_cleanup: Any,
+                              performance_timer: Any,
                               ) -> None:
         """Test batch processing with large datasets."""
         table_cleanup(test_table_name)
@@ -149,7 +152,9 @@ class TestOracleTargetFunctionality:
         with oracle_engine.connect() as conn:
             result = conn.execute(
                 text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            count = row[0]
             assert count == len(test_records)
 
         # Performance assertions
@@ -162,7 +167,7 @@ class TestOracleTargetFunctionality:
                                sample_singer_schema: dict[str, Any],
                                test_table_name: str,
                                oracle_engine: Engine,
-                               table_cleanup,
+                               table_cleanup: Any,
                                ) -> None:
         """Test upsert operations using Oracle MERGE."""
         table_cleanup(test_table_name)
@@ -221,7 +226,9 @@ class TestOracleTargetFunctionality:
         with oracle_engine.connect() as conn:
             result = conn.execute(
                 text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            assert result.fetchone()[0] == 2
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == 2
 
         # Update existing records and add new one
         updated_records = [
@@ -270,7 +277,9 @@ class TestOracleTargetFunctionality:
             # Should have 3 total records now (2 original + 1 new)
             result = conn.execute(
                 text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            assert result.fetchone()[0] == 3
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == 3
 
             # Verify updated record
             result = conn.execute(
@@ -280,6 +289,7 @@ class TestOracleTargetFunctionality:
                 ),
             )
             row = result.fetchone()
+            assert row is not None
             assert row.name == "John Smith"
             assert row.email == "john.smith@example.com"
             assert row.age == 31
@@ -290,13 +300,14 @@ class TestOracleTargetFunctionality:
                 text(f"SELECT name FROM {test_table_name} WHERE id = 3"),
             )
             row = result.fetchone()
+            assert row is not None
             assert row.name == "Bob Wilson"
 
     def test_data_type_handling(self,
                                 oracle_target: OracleTarget,
                                 test_table_name: str,
                                 oracle_engine: Engine,
-                                table_cleanup,
+                                table_cleanup: Any,
                                 ) -> None:
         """Test various data type handling."""
         table_cleanup(test_table_name)
@@ -360,6 +371,7 @@ class TestOracleTargetFunctionality:
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT * FROM {test_table_name}"))
             row = result.fetchone()
+            assert row is not None
 
             assert row.id == 1
             assert row.name == "Test User"
@@ -380,7 +392,7 @@ class TestOracleTargetFunctionality:
                                          oracle_config: dict[str, Any],
                                          test_table_name: str,
                                          oracle_engine: Engine,
-                                         table_cleanup,
+                                         table_cleanup: Any,
                                          ) -> None:
         """Test error handling and recovery mechanisms."""
         table_cleanup(test_table_name)
@@ -443,7 +455,9 @@ class TestOracleTargetFunctionality:
         with oracle_engine.connect() as conn:
             result = conn.execute(
                 text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            assert result.fetchone()[0] == 1
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == 1
 
         # Test handling of invalid record (should be handled gracefully)
         messages = [json.dumps(test_schema), json.dumps(invalid_record)]
@@ -455,7 +469,7 @@ class TestOracleTargetFunctionality:
         try:
             with patch("sys.stdin", StringIO(input_data)):
                 target_new.cli()
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             # Some errors are expected for invalid data
             assert "constraint" in str(e).lower() or "length" in str(e).lower()
 
@@ -463,8 +477,8 @@ class TestOracleTargetFunctionality:
                                  oracle_config: dict[str, Any],
                                  test_table_name: str,
                                  oracle_engine: Engine,
-                                 table_cleanup,
-                                 performance_timer,
+                                 table_cleanup: Any,
+                                 performance_timer: Any,
                                  ) -> None:
         """Test parallel processing capabilities."""
         table_cleanup(test_table_name)
@@ -519,7 +533,9 @@ class TestOracleTargetFunctionality:
         with oracle_engine.connect() as conn:
             result = conn.execute(
                 text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            count = row[0]
             assert count == len(test_records)
 
         # Performance check
@@ -556,14 +572,16 @@ class TestOracleTargetFunctionality:
         import json
 
         # Test that we can load config file
-        with open(temp_config_file, encoding="utf-8") as f:
+        config_path = Path(temp_config_file)
+        with config_path.open(encoding="utf-8") as f:
             config = json.load(f)
         assert config is not None
         assert config["host"] is not None
 
         # Test invalid configuration file handling
         try:
-            with open("/nonexistent/file.json", encoding="utf-8") as f:
+            nonexistent_path = Path("/nonexistent/file.json")
+            with nonexistent_path.open(encoding="utf-8") as f:
                 json.load(f)
             msg = "Should have raised an exception"
             raise AssertionError(msg) from None

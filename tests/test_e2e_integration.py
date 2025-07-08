@@ -1,23 +1,26 @@
-import logging
-
-log = logging.getLogger(__name__)
-
 """End-to-end integration tests for Oracle target.
 
 This module provides comprehensive end-to-end testing scenarios
 that simulate real-world usage patterns and complex data workflows.
 """
 
+from __future__ import annotations
+
 import json
+import logging
 from io import StringIO
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import patch
 
 from sqlalchemy import text
-from sqlalchemy.engine import Engine
 
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+
+log = logging.getLogger(__name__)
 
 
 @requires_oracle_connection
@@ -29,8 +32,8 @@ class TestE2EIntegration:
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
-        table_cleanup,
-        performance_timer,
+        table_cleanup: Any,
+        performance_timer: Any,
     ) -> None:
         """Test complete ETL workflow from schema to final data."""
         table_cleanup(test_table_name)
@@ -123,7 +126,9 @@ class TestE2EIntegration:
         # Verify initial load
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            initial_count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            initial_count = row[0]
             assert initial_count == 10000
 
             # Verify data integrity
@@ -140,6 +145,7 @@ class TestE2EIntegration:
                 ),
             )
             stats = result.fetchone()
+            assert stats is not None
             assert stats.unique_customers == 10000
             assert stats.total_records == 10000
             assert stats.min_id == 1
@@ -242,7 +248,9 @@ class TestE2EIntegration:
         with oracle_engine.connect() as conn:
             # Should have 12000 total customers now (10000 original + 2000 new)
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            final_count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            final_count = row[0]
             assert final_count == 12000
 
             # Verify updates were applied
@@ -255,7 +263,9 @@ class TestE2EIntegration:
             """,
                 ),
             )
-            updated_count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            updated_count = row[0]
             assert updated_count == 200  # 2000/10 updates
 
             # Verify new customers
@@ -268,7 +278,9 @@ class TestE2EIntegration:
             """,
                 ),
             )
-            new_count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            new_count = row[0]
             assert new_count == 2000
 
             # Verify premium upgrades
@@ -281,7 +293,9 @@ class TestE2EIntegration:
             """,
                 ),
             )
-            premium_count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            premium_count = row[0]
             assert premium_count >= 10  # At least 10 premium upgrades
 
         # Phase 4: Data quality validation
@@ -318,7 +332,9 @@ class TestE2EIntegration:
 
             for check_name, query in data_quality_checks:
                 result = conn.execute(text(query))
-                issue_count = result.fetchone()[0]
+                row = result.fetchone()
+                assert row is not None
+                issue_count = row[0]
                 assert issue_count == 0, f"Data quality issue: {check_name}"
 
         # Performance summary
@@ -337,8 +353,9 @@ class TestE2EIntegration:
         )
         log.error(
             f"Incremental load: {incremental_throughput:.2f} records/sec "
-            # Link: https://github.com/issue/todo
-            f"({incremental_load_time:.2f}s)  # TODO(@dev): Replace with proper logging",
+            f"({incremental_load_time:.2f}s)  "
+            "# TODO(@dev): Replace with proper logging  "
+            "# Link: https://github.com/issue/todo",
         )
         log.error(
             f"Overall throughput: {total_throughput:.2f} records/sec",
@@ -363,7 +380,7 @@ class TestE2EIntegration:
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test schema evolution with column additions."""
         table_cleanup(test_table_name)
@@ -409,7 +426,9 @@ class TestE2EIntegration:
         # Verify initial schema
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            assert result.fetchone()[0] == 2
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == 2
 
             # Check initial columns
             result = conn.execute(
@@ -488,7 +507,9 @@ class TestE2EIntegration:
         with oracle_engine.connect() as conn:
             # Should have 3 records total (1 updated, 1 new, 1 unchanged)
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            assert result.fetchone()[0] == 3
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == 3
 
             # Check evolved columns
             result = conn.execute(
@@ -517,6 +538,7 @@ class TestE2EIntegration:
                 ),
             )
             updated_record = result.fetchone()
+            assert updated_record is not None
             assert updated_record.name == "John Updated"
             assert updated_record.age == 25
             assert updated_record.phone == "+1-555-0001"
@@ -532,6 +554,7 @@ class TestE2EIntegration:
                 ),
             )
             new_record = result.fetchone()
+            assert new_record is not None
             assert new_record.name == "Bob"
             assert new_record.age == 30
 
@@ -540,7 +563,7 @@ class TestE2EIntegration:
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test error recovery and resilience workflow."""
         table_cleanup(test_table_name)
@@ -600,7 +623,9 @@ class TestE2EIntegration:
         # Verify valid records processed
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            assert result.fetchone()[0] == 2
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == 2
 
         # Phase 2: Process records that may cause constraint violations
         mixed_records = [
@@ -643,7 +668,7 @@ class TestE2EIntegration:
         try:
             with patch("sys.stdin", StringIO(input_data)):
                 target_recovery.cli()
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             # Some errors may be expected - verify they're constraint-related
             error_msg = str(e).lower()
             assert any(
@@ -654,7 +679,9 @@ class TestE2EIntegration:
         # Verify that valid records were still processed despite errors
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            count = row[0]
             # Should have at least the original 2 records, possibly more valid
             # ones
             assert count >= 2, f"Error recovery failed - only {count} records found"
@@ -664,7 +691,7 @@ class TestE2EIntegration:
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test monitoring and metrics collection workflow."""
         table_cleanup(test_table_name)
@@ -715,7 +742,9 @@ class TestE2EIntegration:
         # Verify monitoring data processed
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            count = row[0]
             assert count == 5000
 
             # Verify monitoring data distribution
@@ -739,6 +768,7 @@ class TestE2EIntegration:
             assert len(metrics) == 10  # Should have 10 different metric types
 
             for metric in metrics:
+                assert metric is not None
                 assert metric.record_count == 500  # 5000 records / 10 metrics
                 assert metric.avg_value > 0
                 assert metric.min_value >= 0
@@ -749,7 +779,7 @@ class TestE2EIntegration:
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test with realistic data patterns and edge cases."""
         table_cleanup(test_table_name)
@@ -905,7 +935,9 @@ class TestE2EIntegration:
         # Verify realistic data processing
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            total_count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            total_count = row[0]
             assert total_count == len(realistic_records)
 
             # Verify edge cases were handled correctly
@@ -920,6 +952,7 @@ class TestE2EIntegration:
                 ),
             )
             large_amount = result.fetchone()
+            assert large_amount is not None
             assert float(large_amount.amount) == 999999.99
 
             # Zero amount
@@ -932,6 +965,7 @@ class TestE2EIntegration:
                 ),
             )
             zero_amount = result.fetchone()
+            assert zero_amount is not None
             assert float(zero_amount.amount) == 0.0
 
             # Negative amount
@@ -944,6 +978,7 @@ class TestE2EIntegration:
                 ),
             )
             refund = result.fetchone()
+            assert refund is not None
             assert float(refund.amount) == -50.25
             assert refund.is_refund == 1
 
@@ -957,6 +992,7 @@ class TestE2EIntegration:
                 ),
             )
             unicode_desc = result.fetchone()
+            assert unicode_desc is not None
             assert "🛒" in unicode_desc.description
             assert "émojis" in unicode_desc.description
 
@@ -976,6 +1012,7 @@ class TestE2EIntegration:
             )
 
             summary = result.fetchone()
+            assert summary is not None
             assert summary.total_transactions == len(realistic_records)
             assert summary.unique_users > 0
             assert summary.total_positive > 0

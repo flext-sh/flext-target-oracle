@@ -1,10 +1,9 @@
-from typing import Any
+"""Test data type mapping and conversion."""
 
-"""
-Test data type mapping and conversion.
-"""
+from __future__ import annotations
 
 import json
+from typing import Any
 
 import pytest
 
@@ -55,7 +54,7 @@ class TestTypeMapping:
         assert sink.stream_name == "test_strings"
         assert "short_string" in sink.schema["properties"]
 
-    def test_numeric_type_mapping(self, oracle_target) -> None:
+    def test_numeric_type_mapping(self, oracle_target: OracleTarget) -> None:
         """Test numeric type mappings."""
         """Test numeric type mappings."""
         schema = {
@@ -75,7 +74,7 @@ class TestTypeMapping:
         assert "integer_field" in sink.schema["properties"]
         assert "number_field" in sink.schema["properties"]
 
-    def test_boolean_type_mapping(self, oracle_target) -> None:
+    def test_boolean_type_mapping(self, oracle_target: OracleTarget) -> None:
         """Test boolean type mapping."""
         """Test boolean type mapping."""
         schema = {
@@ -93,13 +92,13 @@ class TestTypeMapping:
 
         # Test boolean conversion
         record = {"is_active": True, "is_verified": False}
-        conformed = sink._conform_record(record)
+        conformed = sink._conform_record(record)  # type: ignore[attr-defined]
 
         # Should convert to configured values (default 1/0)
         assert conformed["is_active"] == 1
         assert conformed["is_verified"] == 0
 
-    def test_datetime_type_mapping(self, oracle_target) -> None:
+    def test_datetime_type_mapping(self, oracle_target: OracleTarget) -> None:
         """Test date/time type mappings."""
         """Test date/time type mappings."""
         schema = {
@@ -119,7 +118,7 @@ class TestTypeMapping:
         assert "date_field" in sink.schema["properties"]
         assert "datetime_field" in sink.schema["properties"]
 
-    def test_json_type_mapping(self, oracle_target) -> None:
+    def test_json_type_mapping(self, oracle_target: OracleTarget) -> None:
         """Test JSON/object type mappings."""
         """Test JSON/object type mappings."""
         schema = {
@@ -149,7 +148,7 @@ class TestTypeMapping:
             "config": {"key": "test", "value": 123},
         }
 
-        conformed = sink._conform_record(record)
+        conformed = sink._conform_record(record)  # type: ignore[attr-defined]
 
         # JSON fields should be serialized
         assert isinstance(conformed["metadata"], str)
@@ -160,7 +159,7 @@ class TestTypeMapping:
         assert json.loads(conformed["metadata"]) == record["metadata"]
         assert json.loads(conformed["tags"]) == record["tags"]
 
-    def test_nullable_types(self, oracle_target) -> None:
+    def test_nullable_types(self, oracle_target: OracleTarget) -> None:
         """Test nullable type handling."""
         """Test nullable type handling."""
         schema = {
@@ -183,7 +182,7 @@ class TestTypeMapping:
             "nullable_object": None,
         }
 
-        conformed = sink._conform_record(record)
+        conformed = sink._conform_record(record)  # type: ignore[attr-defined]
 
         assert conformed["nullable_string"] is None
         assert conformed["nullable_number"] is None
@@ -220,12 +219,12 @@ class TestTypeMapping:
 
         # Test custom boolean values
         record = {"text": "test", "flag": True}
-        conformed = sink._conform_record(record)
+        conformed = sink._conform_record(record)  # type: ignore[attr-defined]
 
         # Should use custom boolean values
         assert conformed["flag"] == "Y"
 
-    def test_complex_nested_types(self, oracle_target) -> None:
+    def test_complex_nested_types(self, oracle_target: OracleTarget) -> None:
         """Test complex nested data structures."""
         """Test complex nested data structures."""
         schema = {
@@ -280,7 +279,7 @@ class TestTypeMapping:
             ],
         }
 
-        conformed = sink._conform_record(record)
+        conformed = sink._conform_record(record)  # type: ignore[attr-defined]
 
         # Complex objects should be JSON serialized
         assert isinstance(conformed["user"], str)

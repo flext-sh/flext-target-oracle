@@ -1,26 +1,29 @@
-import logging
-
-log = logging.getLogger(__name__)
-
 """Comprehensive bulk operations and performance optimization tests.
 
 These tests validate high-volume data loading scenarios, parallel processing,
 and performance optimizations with real Oracle database connections.
 """
 
+from __future__ import annotations
+
 import json
+import logging
 import random
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from io import StringIO
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from sqlalchemy import text
-from sqlalchemy.engine import Engine
 
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+
+log = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
@@ -34,8 +37,8 @@ class TestBulkOperations:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
-        performance_timer,
+        table_cleanup: Any,
+        performance_timer: Any,
     ) -> None:
         """Test large batch insert performance with 10k+ records."""
         table_cleanup(test_table_name)
@@ -81,7 +84,7 @@ class TestBulkOperations:
         }
 
         # Generate bulk records
-        base_time = datetime.now(timezone.utc)
+        base_time = datetime.now(UTC)
         record_messages = []
 
         for i in range(record_count):
@@ -163,8 +166,8 @@ class TestBulkOperations:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
-        performance_timer,
+        table_cleanup: Any,
+        performance_timer: Any,
     ) -> None:
         """Test parallel processing with multiple threads."""
         table_cleanup(test_table_name)
@@ -210,9 +213,9 @@ class TestBulkOperations:
                     "id": i + 1,
                     "thread_id": (i % 4) + 1,  # Distribute across 4 threads
                     "data": f"Parallel data chunk {i + 1}",
-                    "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
+                    "timestamp": datetime.now(UTC).isoformat() + "Z",
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -244,7 +247,7 @@ class TestBulkOperations:
             """,
                 ),
             )
-            thread_counts = dict(result.fetchall())
+            thread_counts: dict[int, Any] = dict(result.fetchall())
 
             # Each thread should have processed approximately equal amounts
             expected_per_thread = record_count // 4
@@ -266,8 +269,8 @@ class TestBulkOperations:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
-        performance_timer,
+        table_cleanup: Any,
+        performance_timer: Any,
     ) -> None:
         """Test MERGE (upsert) performance with large dataset."""
         table_cleanup(test_table_name)
@@ -315,10 +318,10 @@ class TestBulkOperations:
                     "user_id": i + 1,
                     "username": f"user_{i + 1}",
                     "email": f"user_{i + 1}@example.com",
-                    "last_login": datetime.now(timezone.utc).isoformat() + "Z",
+                    "last_login": datetime.now(UTC).isoformat() + "Z",
                     "login_count": 1,
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             initial_messages.append(record)
 
@@ -349,12 +352,12 @@ class TestBulkOperations:
                     "username": f"user_{i + 1}",
                     "email": f"user_{i + 1}@example.com",
                     "last_login": (
-                        datetime.now(timezone.utc) + timedelta(hours=1)
+                        datetime.now(UTC) + timedelta(hours=1)
                     ).isoformat()
                     + "Z",
                     "login_count": 2,  # Updated
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             update_messages.append(record)
 
@@ -367,10 +370,10 @@ class TestBulkOperations:
                     "user_id": i + 1,
                     "username": f"user_{i + 1}",
                     "email": f"user_{i + 1}@example.com",
-                    "last_login": datetime.now(timezone.utc).isoformat() + "Z",
+                    "last_login": datetime.now(UTC).isoformat() + "Z",
                     "login_count": 1,
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             update_messages.append(record)
 
@@ -430,7 +433,7 @@ class TestBulkOperations:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test memory-efficient streaming for very large datasets."""
         table_cleanup(test_table_name)
@@ -486,7 +489,7 @@ class TestBulkOperations:
                         "description": f"JSON metadata for record {i + 1}",
                     },
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -536,7 +539,7 @@ class TestBulkOperations:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test connection pool efficiency under load."""
         table_cleanup(test_table_name)
@@ -588,7 +591,7 @@ class TestBulkOperations:
                         "batch_num": batch_num + 1,
                         "data": f"Batch {batch_num + 1} Record {i + 1}",
                     },
-                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                    "time_extracted": datetime.now(UTC).isoformat() + "Z",
                 }
                 record_messages.append(record)
 
@@ -626,7 +629,7 @@ class TestBulkOperations:
             """,
                 ),
             )
-            batch_counts = dict(result.fetchall())
+            batch_counts: dict[int, Any] = dict(result.fetchall())
 
             for batch_num in range(1, num_batches + 1):
                 assert batch_num in batch_counts, f"Batch {batch_num} not found"
@@ -640,7 +643,7 @@ class TestBulkOperations:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test error recovery during bulk operations."""
         table_cleanup(test_table_name)
@@ -689,7 +692,7 @@ class TestBulkOperations:
                         "name": "A" * 100,  # Exceeds maxLength of 50
                         "category": "problematic",
                     },
-                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                    "time_extracted": datetime.now(UTC).isoformat() + "Z",
                 }
             else:
                 # Normal valid record
@@ -701,7 +704,7 @@ class TestBulkOperations:
                         "name": f"User {i + 1}",
                         "category": random.choice(["standard", "premium", "basic"]),
                     },
-                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                    "time_extracted": datetime.now(UTC).isoformat() + "Z",
                 }
                 valid_record_count += 1
 
@@ -724,6 +727,8 @@ class TestBulkOperations:
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
+            if count is None:
+                count = 0
 
             # Should have most of the valid records
             assert (
@@ -740,7 +745,7 @@ class TestBulkOperations:
             """,
                 ),
             )
-            categories = dict(result.fetchall())
+            categories: dict[str, Any] = dict(result.fetchall())
 
             # Should have the valid categories
             expected_categories = ["standard", "premium", "basic"]
