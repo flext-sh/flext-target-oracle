@@ -1,11 +1,12 @@
-import logging
-
-log = logging.getLogger(__name__)
-
 """Test Oracle database connection.
 
 This module tests the basic connection to Oracle Database.
 """
+
+from __future__ import annotations
+
+import logging
+from typing import Any
 
 import pytest
 from sqlalchemy import text
@@ -14,14 +15,15 @@ from flext_target_oracle import OracleTarget
 from flext_target_oracle.connectors import OracleConnector
 from tests.helpers import requires_oracle_connection
 
+log = logging.getLogger(__name__)
+
 
 @requires_oracle_connection
 class TestOracleConnection:
     """Test Oracle database connection."""
 
     @pytest.mark.integration
-    def test_basic_connection(self, oracle_config: dict) -> None:
-        """Test basic database connection."""
+    def test_basic_connection(self, oracle_config: dict[str, Any]) -> None:
         """Test basic database connection."""
         # Create connector
         connector = OracleConnector(config=oracle_config)
@@ -34,8 +36,7 @@ class TestOracleConnection:
         engine.dispose()
 
     @pytest.mark.integration
-    def test_query_execution(self, oracle_config: dict) -> None:
-        """Test executing a simple query."""
+    def test_query_execution(self, oracle_config: dict[str, Any]) -> None:
         """Test executing a simple query."""
         connector = OracleConnector(config=oracle_config)
         engine = connector.create_engine()
@@ -49,8 +50,7 @@ class TestOracleConnection:
             engine.dispose()
 
     @pytest.mark.integration
-    def test_oracle_version_detection(self, oracle_config: dict) -> None:
-        """Test Oracle version detection."""
+    def test_oracle_version_detection(self, oracle_config: dict[str, Any]) -> None:
         """Test Oracle version detection."""
         connector = OracleConnector(config=oracle_config)
         engine = connector.create_engine()
@@ -79,8 +79,7 @@ class TestOracleConnection:
             engine.dispose()
 
     @pytest.mark.integration
-    def test_target_initialization(self, oracle_config: dict) -> None:
-        """Test target can be initialized with Oracle config."""
+    def test_target_initialization(self, oracle_config: dict[str, Any]) -> None:
         """Test target can be initialized with Oracle config."""
         target = OracleTarget(config=oracle_config)
         assert target.name == "flext-target-oracle"

@@ -8,13 +8,20 @@ from __future__ import annotations
 import os
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
+import structlog
 from dotenv import load_dotenv
 from sqlalchemy import text
 
-def has_valid_env_config() -> bool:
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+# Configure logger
+log = structlog.get_logger(__name__)
+
+
 def has_valid_env_config() -> bool:
     """Check if we have valid Oracle configuration in .env file."""
     # Try to load .env from various locations
@@ -42,10 +49,10 @@ def has_valid_env_config() -> bool:
             return False
 
     # Must have either service_name or database
-    return os.getenv("DATABASE__SERVICE_NAME") or os.getenv("DATABASE__DATABASE")
+    return bool(os.getenv("DATABASE__SERVICE_NAME") or os.getenv("DATABASE__DATABASE"))
 
-def get_test_config(include_licensed_features: bool = False) -> dict:
-    """Get test configuration from environment with safe defaults."""
+
+def get_test_config(include_licensed_features: bool = False) -> dict[str, Any]:
     """Get test configuration from environment with safe defaults."""
     if not has_valid_env_config():
         msg = "Valid Oracle configuration not found in .env file"
@@ -57,8 +64,8 @@ def get_test_config(include_licensed_features: bool = False) -> dict:
         "port": int(os.getenv("DATABASE__PORT", "1521")),
         "username": os.getenv("DATABASE__USERNAME"),
         "password": (
-            os.getenv("DATABASE__PASSWORD").strip('"')
-            if os.getenv("DATABASE__PASSWORD")
+            password.strip('"')
+            if (password := os.getenv("DATABASE__PASSWORD"))
             else None
         ),
         "protocol": os.getenv("DATABASE__PROTOCOL", "tcp"),
@@ -158,8 +165,8 @@ requires_inmemory_option = pytest.mark.skipif(
     reason="Oracle In-Memory option not licensed",
 )
 
-def validate_oracle_features(connection) -> dict[str, bool]:
-    """Check which Oracle features are available in the database."""
+
+def validate_oracle_features(connection: Any) -> dict[str, bool]:
     """Check which Oracle features are available in the database."""
     features = {
         "is_enterprise_edition": False,
@@ -178,12 +185,12 @@ def validate_oracle_features(connection) -> dict[str, bool]:
         """,
         ).fetchone()
         features["is_enterprise_edition"] = result is not None
-    except Exception:
+    except Exception as e:
         # If we can't check, assume it's not EE but log the issue
-        # TODO: Consider using else block
         log.exception(
-            f"⚠️ Could not detect Oracle edition: {e}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Could not detect Oracle edition",
+            error=str(e)
+        )
         features["is_enterprise_edition"] = False
 
     # Only check EE features if it's Enterprise Edition
@@ -199,12 +206,12 @@ def validate_oracle_features(connection) -> dict[str, bool]:
         """,
         ).scalar()
         features["partitioning"] = result > 0
-    except Exception:
+    except Exception as e:
         # Feature detection failed - log for debugging
-        # TODO: Consider using else block
         log.exception(
-            f"⚠️ Could not detect partitioning feature: {e}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Could not detect partitioning feature",
+            error=str(e)
+        )
 
     try:
         # Check for advanced compression
@@ -215,7 +222,7 @@ def validate_oracle_features(connection) -> dict[str, bool]:
         """,
         ).scalar()
         features["advanced_compression"] = result > 0
-    except Exception:
+    except Exception as e:
         # Feature detection failed - log for debugging
         # TODO: Consider using else block
         log.exception(
@@ -231,7 +238,7 @@ def validate_oracle_features(connection) -> dict[str, bool]:
         """,
         ).scalar()
         features["inmemory"] = result > 0
-    except Exception:
+    except Exception as e:
         # Feature detection failed - log for debugging
         # TODO: Consider using else block
         log.exception(
@@ -247,7 +254,7 @@ def validate_oracle_features(connection) -> dict[str, bool]:
         """,
         ).scalar()
         features["advanced_security"] = result > 0
-    except Exception:
+    except Exception as e:
         # Feature detection failed - log for debugging
         # TODO: Consider using else block
         log.exception(
@@ -256,9 +263,9 @@ def validate_oracle_features(connection) -> dict[str, bool]:
 
     return features
 
+
 @contextmanager
-def oracle_connection(config: dict[str, Any] | None = None) -> None:
-    """Context manager for Oracle connections."""
+def oracle_connection(config: dict[str, Any] | None = None) -> Generator[Any]:
     """Context manager for Oracle connections."""
     if config is None:
         config = get_test_config()
@@ -274,8 +281,8 @@ def oracle_connection(config: dict[str, Any] | None = None) -> None:
     finally:
         engine.dispose()
 
+
 def clean_test_table(table_name: str, config: dict[str, Any] | None = None) -> None:
-    """Clean up a specific test table."""
     """Clean up a specific test table."""
     if config is None:
         config = get_test_config()
@@ -286,14 +293,14 @@ def clean_test_table(table_name: str, config: dict[str, Any] | None = None) -> N
             log.error(
                 f"✅ Cleaned test table: {table_name}",
             )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
-    except Exception:
+    except Exception as e:
         # TODO: Consider using else block
         log.exception(
             f"⚠️ Could not clean table {table_name}: {e}",
         )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
+
 def clean_all_test_tables(config: dict[str, Any] | None = None) -> None:
-    """Clean up all test tables."""
     """Clean up all test tables."""
     if config is None:
         config = get_test_config()
@@ -309,7 +316,7 @@ def clean_all_test_tables(config: dict[str, Any] | None = None) -> None:
         with oracle_connection(config) as conn, conn.begin():
             # Find all test tables
             for pattern in test_table_patterns:
-                result = conn.execute(
+                result: Any = conn.execute(
                     text(
                         f"""
                         SELECT table_name
@@ -330,7 +337,7 @@ def clean_all_test_tables(config: dict[str, Any] | None = None) -> None:
                         # TODO(@dev): Replace with proper logging  # Link:
                         # https://github.com/issue/todo
                         )
-                    except Exception:
+                    except Exception as e:
                         # TODO: Consider using else block
                         log.exception(
                             f"⚠️ Could not clean table {table_name}: {e}",
@@ -338,13 +345,14 @@ def clean_all_test_tables(config: dict[str, Any] | None = None) -> None:
                         # https://github.com/issue/todo
                         )
 
-    except Exception:
+    except Exception as e:
         # TODO: Consider using else block
         # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
         log.exception(f"❌ Error during cleanup: {e}")
 
+
 def setup_test_table(
-    table_name: str, schema: dict, config: dict[str, Any] | None = None,
+    table_name: str, schema: dict[str, Any], config: dict[str, Any] | None = None,
 ) -> None:
     """Set up a test table with the given schema."""
     if config is None:
@@ -367,27 +375,29 @@ def setup_test_table(
         f"✅ Created test table: {table_name}",
     )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
+
 class TestTableManager:
     """Context manager for test table lifecycle."""
 
     def __init__(
-        self, table_name: str, schema: dict, config: dict[str, Any] | None = None,
+        self,
+        table_name: str,
+        schema: dict[str, Any],
+        config: dict[str, Any] | None = None,
     ) -> None:
         self.table_name = table_name
         self.schema = schema
         self.config = config or get_test_config()
 
-    def __enter__(self) -> None:
-
-    def __enter__(self) -> None:
-        """TODO: Add docstring."""
+    def __enter__(self) -> TestTableManager:
+        """Set up test table."""
         setup_test_table(self.table_name, self.schema, self.config)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        """TODO: Add docstring."""
-        """TODO: Add docstring."""
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        """Clean up test table."""
         clean_test_table(self.table_name, self.config)
+
 
 def count_test_tables(config: dict[str, Any] | None = None) -> int:
     """Count how many test tables exist."""
@@ -418,13 +428,14 @@ def count_test_tables(config: dict[str, Any] | None = None) -> int:
                 count = result.scalar()
                 total_count += count
 
-    except Exception:
+    except Exception as e:
         # TODO: Consider using else block
         log.exception(
             f"❌ Error counting test tables: {e}",
         )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
 
     return total_count
+
 
 def validate_table_structure(
     table_name: str, expected_columns: list[str], config: dict[str, Any] | None = None,
@@ -451,15 +462,15 @@ def validate_table_structure(
 
             return expected_columns_set.issubset(actual_columns)
 
-    except Exception:
+    except Exception as e:
         # TODO: Consider using else block
         log.exception(
             f"❌ Error validating table structure: {e}",
         )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
         return False
 
+
 def get_table_row_count(table_name: str, config: dict[str, Any] | None = None) -> int:
-    """Get the number of rows in a table."""
     """Get the number of rows in a table."""
     if config is None:
         config = get_test_config()
@@ -467,8 +478,9 @@ def get_table_row_count(table_name: str, config: dict[str, Any] | None = None) -
     try:
         with oracle_connection(config) as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
-            return result.scalar()
-    except Exception:
+            scalar_result = result.scalar()
+            return scalar_result if scalar_result is not None else 0
+    except Exception as e:
         # TODO: Consider using else block
         log.exception(
             f"❌ Error getting row count for {table_name}: {e}",

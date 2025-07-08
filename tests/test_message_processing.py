@@ -1,24 +1,25 @@
-from typing import Any
-
 """
 Test Singer message processing.
 """
 
 import contextlib
 import json
+import logging
 from io import StringIO
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from flext_target_oracle import OracleTarget
 
+log = logging.getLogger(__name__)
+
+
 class TestMessageProcessing:
     """Test Singer message processing."""
 
     @pytest.fixture
-    def oracle_config(self) -> Any:
-
     def oracle_config(self) -> Any:
         """Oracle configuration for testing."""
         return {
@@ -30,8 +31,6 @@ class TestMessageProcessing:
         }
 
     @pytest.fixture
-    def schema_message(self) -> Any:
-
     def schema_message(self) -> Any:
         """Sample SCHEMA message."""
         return {
@@ -49,8 +48,6 @@ class TestMessageProcessing:
         }
 
     @pytest.fixture
-    def record_messages(self) -> Any:
-
     def record_messages(self) -> Any:
         """Sample RECORD messages."""
         return [
@@ -83,11 +80,11 @@ class TestMessageProcessing:
                 # Process should handle schema message
                 try:
                     target.listen(file_input=StringIO(input_data))
-                except Exception:
+                except Exception as e:
                     # Expected when input ends - log for debugging
                     # TODO: Consider using else block
                     log.exception(
-                        f"ℹ️ Expected EOF after processing input: {e}",
+                        f"Expected EOF after processing input: {e}",
                     # TODO(@dev): Replace with proper logging  # Link:
                     # https://github.com/issue/todo
                     )
@@ -181,9 +178,7 @@ class TestMessageProcessing:
 
         # Create many records to trigger batching
         messages = [schema_message]
-        for i in range(10):
-            messages.append(
-                {
+        messages.extend({
                     "type": "RECORD",
                     "stream": "test_stream",
                     "record": {
@@ -191,8 +186,7 @@ class TestMessageProcessing:
                         "name": f"Record {i + 1}",
                         "value": float(i * 10),
                     },
-                },
-            )
+                } for i in range(10))
 
         input_data = "\n".join(json.dumps(msg) for msg in messages)
 

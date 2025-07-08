@@ -1,5 +1,4 @@
-"""
-Real-world data loading scenario tests.
+"""Real-world data loading scenario tests.
 
 These tests simulate actual production use cases including:
 - E-commerce transaction data
@@ -9,18 +8,26 @@ These tests simulate actual production use cases including:
 - Time-series data with partitioning
 """
 
+from __future__ import annotations
+
 import json
+import logging
 import random
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
 from io import StringIO
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
-from flext_target_oracle.target import OracleTarget
 from sqlalchemy import text
-from sqlalchemy.engine import Engine
 
+from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+
+log = logging.getLogger(__name__)
+
 
 @pytest.mark.integration
 @pytest.mark.slow
@@ -32,8 +39,8 @@ class TestRealWorldScenarios:
                                         oracle_config: dict[str, Any],
                                         oracle_engine: Engine,
                                         test_table_name: str,
-                                        table_cleanup,
-                                        performance_timer,
+                                        table_cleanup: Any,
+                                        performance_timer: Any,
                                         ) -> None:
         """Test loading e-commerce transaction data with complex schema."""
         table_cleanup(test_table_name)
@@ -110,7 +117,7 @@ class TestRealWorldScenarios:
             "delivered",
             "cancelled"]
 
-        base_time = datetime.now(timezone.utc) - timedelta(days=30)
+        base_time = datetime.now(UTC) - timedelta(days=30)
 
         for i in range(record_count):
             transaction_time = base_time + timedelta(
@@ -169,12 +176,12 @@ class TestRealWorldScenarios:
                     ).isoformat()
                     + "Z",
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             record_messages.append(record)
 
         # Process transaction data
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
@@ -206,6 +213,8 @@ class TestRealWorldScenarios:
                 )
             )
             stats = result.fetchone()
+            if stats is None:
+                raise AssertionError("No statistics found")
 
             assert stats[0] > 0, "No unique orders found"
             assert stats[1] > 0, "No unique customers found"
@@ -240,7 +249,7 @@ class TestRealWorldScenarios:
                                 oracle_config: dict[str, Any],
                                 oracle_engine: Engine,
                                 test_table_name: str,
-                                table_cleanup,
+                                table_cleanup: Any,
                                 ) -> None:
         """Test loading high-volume user activity logs."""
         table_cleanup(test_table_name)
@@ -310,7 +319,7 @@ class TestRealWorldScenarios:
             "Mozilla/5.0 (Android 11; Mobile; rv:68.0) Gecko/68.0 Firefox/88.0",
         ]
 
-        base_time = datetime.now(timezone.utc) - timedelta(hours=24)
+        base_time = datetime.now(UTC) - timedelta(hours=24)
 
         for i in range(record_count):
             log_time = base_time + timedelta(
@@ -372,12 +381,12 @@ class TestRealWorldScenarios:
                     "timestamp": log_time.isoformat() + "Z",
                     "duration_seconds": random.randint(1, 300),
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             record_messages.append(record)
 
         # Process activity logs
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
@@ -405,7 +414,7 @@ class TestRealWorldScenarios:
             """
                 )
             )
-            event_stats = dict(result.fetchall())
+            event_stats: dict[str, Any] = dict(result.fetchall())
 
             # Should have all event types
             assert len(event_stats) > 0, "No events found"
@@ -415,7 +424,7 @@ class TestRealWorldScenarios:
                                               oracle_config: dict[str, Any],
                                               oracle_engine: Engine,
                                               test_table_name: str,
-                                              table_cleanup,
+                                              table_cleanup: Any,
                                               ) -> None:
         """Test loading financial records requiring high precision."""
         table_cleanup(test_table_name)
@@ -490,7 +499,7 @@ class TestRealWorldScenarios:
         }
 
         running_balance = 100000.0  # Starting balance
-        base_time = datetime.now(timezone.utc) - timedelta(days=7)
+        base_time = datetime.now(UTC) - timedelta(days=7)
 
         for i in range(record_count):
             transaction_time = base_time + timedelta(
@@ -568,12 +577,12 @@ class TestRealWorldScenarios:
                         k=random.randint(2, 4),
                     ),
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             record_messages.append(record)
 
         # Process financial records
-        messages = [schema_message] + record_messages
+        messages = [schema_message, *record_messages]
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
@@ -602,6 +611,8 @@ class TestRealWorldScenarios:
                 )
             )
             totals = result.fetchone()
+            if totals is None:
+                raise AssertionError("No totals found")
 
             assert totals[0] > 0, "No amounts found"
             assert totals[1] >= 0, "Negative fees found"
@@ -627,8 +638,8 @@ class TestRealWorldScenarios:
                                              oracle_config: dict[str, Any],
                                              oracle_engine: Engine,
                                              test_schema_prefix: str,
-                                             table_cleanup,
-                                             performance_timer,
+                                             table_cleanup: Any,
+                                             performance_timer: Any,
                                              ) -> None:
         """Test concurrent loading of multiple data streams."""
         # Create multiple table names
@@ -681,9 +692,9 @@ class TestRealWorldScenarios:
                         "user_id": i + 1,
                         "username": f"user_{i + 1}",
                         "email": f"user_{i + 1}@example.com",
-                        "created_at": datetime.now(timezone.utc).isoformat() + "Z",
+                        "created_at": datetime.now(UTC).isoformat() + "Z",
                     },
-                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                    "time_extracted": datetime.now(UTC).isoformat() + "Z",
                 }
             )
 
@@ -719,9 +730,9 @@ class TestRealWorldScenarios:
                         "status": random.choice(
                             ["pending", "confirmed", "shipped", "delivered"]
                         ),
-                        "order_date": datetime.now(timezone.utc).isoformat() + "Z",
+                        "order_date": datetime.now(UTC).isoformat() + "Z",
                     },
-                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                    "time_extracted": datetime.now(UTC).isoformat() + "Z",
                 }
             )
 
@@ -758,7 +769,7 @@ class TestRealWorldScenarios:
                         "price": round(random.uniform(5.0, 200.0), 2),
                         "inventory": random.randint(0, 1000),
                     },
-                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                    "time_extracted": datetime.now(UTC).isoformat() + "Z",
                 }
             )
 
@@ -823,5 +834,6 @@ class TestRealWorldScenarios:
         throughput = total_records / performance_timer.duration
         log.error(
             f"Multi-stream loading: {throughput:.0f} records/second "
-            f"across {len(table_names)  # TODO(@dev): Replace with proper logging} streams"  # Link: https://github.com/issue/todo
-                      )
+            f"across {len(table_names)} streams"
+            # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )

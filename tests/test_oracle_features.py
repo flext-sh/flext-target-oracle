@@ -1,23 +1,26 @@
-import logging
-
-log = logging.getLogger(__name__)
-
 """Test Oracle-specific features and optimizations.
 
 This module tests Oracle-specific functionality including MERGE operations,
 partitioning, compression, and advanced Oracle features.
 """
 
+from __future__ import annotations
+
 import json
+import logging
 from io import StringIO
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import patch
 
 from sqlalchemy import text
-from sqlalchemy.engine import Engine
 
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+
+log = logging.getLogger(__name__)
 
 
 @requires_oracle_connection
@@ -92,7 +95,9 @@ class TestOracleSpecificFeatures:
         # Verify initial data
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            assert result.fetchone()[0] == 2
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == 2
 
         # MERGE operation: update existing + insert new
         merge_records = [
@@ -131,19 +136,25 @@ class TestOracleSpecificFeatures:
         with oracle_engine.connect() as conn:
             # Should have 3 total records
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            assert result.fetchone()[0] == 3
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == 3
 
             # Verify updated record
             result = conn.execute(
                 text(f"SELECT name FROM {test_table_name} WHERE id = 1"),
             )
-            assert result.fetchone()[0] == "Alice Updated"
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == "Alice Updated"
 
             # Verify inserted record
             result = conn.execute(
                 text(f"SELECT name FROM {test_table_name} WHERE id = 3"),
             )
-            assert result.fetchone()[0] == "Charlie"
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == "Charlie"
 
     def test_bulk_operations(
         self,
@@ -205,7 +216,9 @@ class TestOracleSpecificFeatures:
         # Verify bulk processing results
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            count = row[0]
             assert count == len(bulk_records)
 
         # Performance check for bulk operations
@@ -269,13 +282,16 @@ class TestOracleSpecificFeatures:
         # Verify parallel processing results
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            count = row[0]
             assert count == len(parallel_records)
 
             # Verify data distribution
             result = conn.execute(
                 text(
-                    f"SELECT DISTINCT category FROM {test_table_name} ORDER BY category",
+                    f"SELECT DISTINCT category "
+                    f"FROM {test_table_name} ORDER BY category",
                 ),
             )
             categories = [row[0] for row in result.fetchall()]
@@ -338,7 +354,9 @@ class TestOracleSpecificFeatures:
         # Verify compression was applied (check table exists and has data)
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            count = row[0]
             assert count == len(compression_records)
 
             # Try to check if compression is enabled (may require DBA
@@ -360,7 +378,7 @@ class TestOracleSpecificFeatures:
                 # for debug
                 # TODO: Consider using else block
                 log.exception(
-                    f"ℹ️ Could not access compression info (expected in some "
+                    f"Could not access compression info (expected in some "
                     # Link: https://github.com/issue/todo
                     f"environments)  # TODO(@dev): Replace with proper logging: {e}",
                 )
@@ -424,7 +442,9 @@ class TestOracleSpecificFeatures:
         # Verify array processing results
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            count = row[0]
             assert count == len(array_records)
 
         # Performance check
@@ -516,6 +536,7 @@ class TestOracleSpecificFeatures:
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT * FROM {test_table_name}"))
             row = result.fetchone()
+            assert row is not None
 
             # Verify basic data retrieval
             assert row.id == 1
@@ -604,7 +625,9 @@ class TestOracleSpecificFeatures:
         # Verify pooled connection results
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            total_count = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            total_count = row[0]
             assert total_count == 300  # 3 workers * 100 records each
 
             # Verify data from all workers
@@ -670,7 +693,9 @@ class TestOracleSpecificFeatures:
         # Verify valid record was inserted
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            assert result.fetchone()[0] == 1
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == 1
 
         # Test duplicate key error handling
         duplicate_record = {
@@ -692,6 +717,6 @@ class TestOracleSpecificFeatures:
         try:
             with patch("sys.stdin", StringIO(input_data)):
                 target_new.cli()
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             # Duplicate errors are expected and should be handled
             assert "unique" in str(e).lower() or "duplicate" in str(e).lower()

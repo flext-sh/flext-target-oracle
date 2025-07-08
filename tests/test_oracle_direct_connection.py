@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 # Load environment
 load_dotenv()
 
-def test_direct_connection() -> None:
+
 def test_direct_connection() -> None:
     """Test direct oracledb connection."""
     # Get connection parameters
@@ -16,7 +16,7 @@ def test_direct_connection() -> None:
     port = int(os.getenv("DATABASE__PORT", "1521"))
     service_name = os.getenv("DATABASE__SERVICE_NAME")
     username = os.getenv("DATABASE__USERNAME")
-    password = os.getenv("DATABASE__PASSWORD"  # noqa: S105)
+    password = os.getenv("DATABASE__PASSWORD")
     protocol = os.getenv("DATABASE__PROTOCOL", "tcp")
 
     # Build DSN
@@ -53,6 +53,7 @@ def test_direct_connection() -> None:
     except Exception:
         # TODO: Consider using else block
         raise
+
 
 if __name__ == "__main__":
     test_direct_connection()

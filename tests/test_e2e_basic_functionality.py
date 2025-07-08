@@ -1,15 +1,14 @@
-import logging
-
-log = logging.getLogger(__name__)
-
 """End-to-End tests for basic Oracle Target functionality without advanced options.
 
 These tests validate core Singer target functionality with real Oracle database
 connections, focusing on basic operations without Enterprise Edition features.
 """
 
+from __future__ import annotations
+
 import contextlib
 import json
+import logging
 import tempfile
 from io import StringIO
 from pathlib import Path
@@ -20,6 +19,8 @@ from sqlalchemy import text
 
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
+
+log = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
@@ -595,7 +596,7 @@ class TestBasicE2EFunctionality:
                     ),
                 )
                 initial_connections = result.scalar()
-        except Exception:  # noqa: BLE001
+        except Exception:
             # Skip this test if we can't access v$session (common in
             # cloud/autonomous)
             pytest.skip(
@@ -679,7 +680,9 @@ class TestBasicE2EFunctionality:
         }
 
         # Create temporary input file
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False, encoding="utf-8") as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".jsonl", delete=False, encoding="utf-8"
+        ) as f:
             f.write(json.dumps(schema_message) + "\n")
             f.write(json.dumps(record_message) + "\n")
             input_file = f.name
@@ -697,9 +700,14 @@ class TestBasicE2EFunctionality:
                 temp_config_file,
             ]
 
-            with open(input_file, encoding="utf-8") as input_stream:
+            with Path(input_file).open(encoding="utf-8") as input_stream:
                 result = subprocess.run(
-                    cmd, stdin=input_stream, capture_output=True, text=True, timeout=60, check=False,
+                    cmd,
+                    stdin=input_stream,
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                    check=False,
                 )
 
             # Check if execution was successful
@@ -733,10 +741,7 @@ class TestBasicE2EFunctionality:
 
         except Exception:
             # TODO: Consider using else block
-            pytest.skip("CLI execution timed out")
-        except Exception:
-            # TODO: Consider using else block
-            pytest.skip("CLI module not found")
+            pytest.skip("CLI execution failed - could be timeout or module not found")
         finally:
             # Cleanup
             with contextlib.suppress(OSError):

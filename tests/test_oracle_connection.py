@@ -4,6 +4,8 @@ This module tests TCPS connections to Oracle Autonomous Database
 and validates basic database operations.
 """
 
+from typing import Any
+
 import pytest
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
@@ -12,19 +14,22 @@ from flext_target_oracle.connectors import OracleConnector
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
 
+
 @requires_oracle_connection
 class TestOracleConnection:
     """Test Oracle database connection functionality."""
 
     def test_basic_connection(self, oracle_engine: Engine) -> None:
         """Test basic Oracle database connection."""
-        """Test basic Oracle database connection."""
         with oracle_engine.connect() as conn:
             result = conn.execute(text("SELECT 1 FROM DUAL"))
-            assert result.fetchone()[0] == 1
+            row = result.fetchone()
+            assert row is not None
+            assert row[0] == 1
 
-    def test_tcps_connection_details(self, oracle_config -> None: dict, oracle_engine: Engine,
-                                     ) -> None:
+    def test_tcps_connection_details(
+        self, oracle_config: dict[str, Any], oracle_engine: Engine
+    ) -> None:
         """Test TCPS connection protocol details."""
         # Verify we're using TCPS protocol
         assert oracle_config.get("protocol") == "tcps"
@@ -43,17 +48,17 @@ class TestOracleConnection:
                 ),
             )
             row = result.fetchone()
+            assert row is not None
 
             # Verify connection details
-            assert row.protocol in [
+            assert row.protocol in {
                 "TCP",
                 "TCPS",
-            ], f"Unexpected protocol: {row.protocol}"
+            }, f"Unexpected protocol: {row.protocol}"
             assert row.session_user.upper(
             ) == oracle_config["username"].upper()
 
     def test_autonomous_database_features(self, oracle_engine: Engine) -> None:
-        """Test Oracle Autonomous Database specific features."""
         """Test Oracle Autonomous Database specific features."""
         with oracle_engine.connect() as conn:
             # Check if we're on Autonomous Database
@@ -84,11 +89,13 @@ class TestOracleConnection:
             service_info = result.fetchone()
 
             # Verify Autonomous Database characteristics
+            assert version_info is not None
+            assert service_info is not None
             assert "Oracle Database" in version_info.banner
             assert service_info.service_name is not None
             assert service_info.db_name is not None
 
-    def test_connector_initialization(self, oracle_config: dict) -> None:
+    def test_connector_initialization(self, oracle_config: dict[str, Any]) -> None:
         """Test OracleConnector initialization."""
         """Test OracleConnector initialization."""
         connector = OracleConnector(config=oracle_config)
@@ -100,7 +107,7 @@ class TestOracleConnection:
         assert str(oracle_config["port"]) in str(url)
         assert oracle_config["service_name"] in str(url)
 
-    def test_connection_pool_settings(self, oracle_config: dict) -> None:
+    def test_connection_pool_settings(self, oracle_config: dict[str, Any]) -> None:
         """Test connection pool configuration."""
         """Test connection pool configuration."""
         connector = OracleConnector(config=oracle_config)
@@ -112,7 +119,7 @@ class TestOracleConnection:
             "max_overflow", 20,
         )
 
-    def test_ssl_configuration(self, oracle_config: dict) -> None:
+    def test_ssl_configuration(self, oracle_config: dict[str, Any]) -> None:
         """Test SSL/TCPS configuration."""
         """Test SSL/TCPS configuration."""
         connector = OracleConnector(config=oracle_config)
@@ -122,7 +129,7 @@ class TestOracleConnection:
             assert "protocol" in connector.config
             assert connector.config["protocol"] == "tcps"
 
-    def test_target_initialization(self, oracle_config: dict) -> None:
+    def test_target_initialization(self, oracle_config: dict[str, Any]) -> None:
         """Test OracleTarget initialization."""
         """Test OracleTarget initialization."""
         target = OracleTarget(config=oracle_config)
@@ -143,30 +150,33 @@ class TestOracleConnection:
             ("SELECT 42 FROM DUAL", "number"),
         ],
     )
-    def test_basic_queries(self, oracle_engine -> None: Engine, query: str, expected: str,
-                           ) -> None:
+    def test_basic_queries(
+        self, oracle_engine: Engine, query: str, expected: str
+    ) -> None:
         """Test basic Oracle SQL queries."""
         with oracle_engine.connect() as conn:
             result = conn.execute(text(query))
             row = result.fetchone()
 
+            assert row is not None
             if expected == "datetime":
                 assert row[0] is not None
             elif expected == "string":
                 assert isinstance(row[0], str)
             elif expected == "number":
-                assert isinstance(row[0], (int, float))
+                assert isinstance(row[0], int | float)
 
     def test_connection_health_check(self, oracle_engine: Engine) -> None:
-        """Test connection health validation."""
         """Test connection health validation."""
         # Test multiple connections to verify pool health
         for _i in range(5):
             with oracle_engine.connect() as conn:
                 result = conn.execute(text("SELECT 1 FROM DUAL"))
-                assert result.fetchone()[0] == 1
+                row = result.fetchone()
+                assert row is not None
+                assert row[0] == 1
 
-    def test_connection_error_handling(self, oracle_config: dict) -> None:
+    def test_connection_error_handling(self, oracle_config: dict[str, Any]) -> None:
         """Test connection error handling with invalid config."""
         """Test connection error handling with invalid config."""
         # Test with invalid host
@@ -182,8 +192,7 @@ class TestOracleConnection:
             with engine.connect():
                 pass
 
-    def test_schema_access(self, oracle_engine -> None: Engine,
-                           oracle_config: dict) -> None:
+    def test_schema_access(self, oracle_engine: Engine, oracle_config: dict[str, Any]) -> None:
         """Test schema access and permissions."""
         schema = oracle_config.get("schema")
         if schema:
@@ -198,7 +207,9 @@ class TestOracleConnection:
                 """,
                     ),
                 )
-                count = result.fetchone()[0]
+                row = result.fetchone()
+                assert row is not None
+                count = row[0]
                 assert isinstance(count, int)
 
                 # Test access to user objects
@@ -211,11 +222,12 @@ class TestOracleConnection:
                 """,
                     ),
                 )
-                count = result.fetchone()[0]
+                row = result.fetchone()
+                assert row is not None
+                count = row[0]
                 assert isinstance(count, int)
 
     def test_database_version_compatibility(self, oracle_engine: Engine) -> None:
-        """Test Oracle database version compatibility."""
         """Test Oracle database version compatibility."""
         with oracle_engine.connect() as conn:
             result = conn.execute(
@@ -229,6 +241,7 @@ class TestOracleConnection:
                 ),
             )
             version_info = result.fetchone()
+            assert version_info is not None
 
             # Extract major version
             if version_info.VERSION_FULL:
@@ -271,6 +284,8 @@ class TestOracleConnection:
             ncharset_info = result.fetchone()
 
             # Verify Unicode support
+            assert charset_info is not None
+            assert ncharset_info is not None
             assert charset_info.db_charset is not None
             assert ncharset_info.national_charset is not None
 
@@ -280,7 +295,9 @@ class TestOracleConnection:
                 text("SELECT :test_string FROM DUAL"), {
                     "test_string": unicode_test},
             )
-            retrieved = result.fetchone()[0]
+            row = result.fetchone()
+            assert row is not None
+            retrieved = row[0]
             assert retrieved == unicode_test
 
     def test_transaction_isolation(self, oracle_engine: Engine) -> None:
@@ -302,7 +319,7 @@ class TestOracleConnection:
                 ),
             )
             session_info = result.fetchone()
-
+            assert session_info is not None
             assert session_info.sid is not None
 
     def test_performance_monitoring_views(self, oracle_engine: Engine) -> None:
@@ -322,8 +339,10 @@ class TestOracleConnection:
                     result = conn.execute(
                         text(f"SELECT COUNT(*) FROM {view} WHERE ROWNUM = 1"),
                     )
-                    count = result.fetchone()[0]
+                    row = result.fetchone()
+                    assert row is not None
+                    count = row[0]
                     assert isinstance(count, int)
-                except Exception as e:  # noqa: BLE001
+                except Exception as e:
                     # Some views may not be accessible, which is acceptable
                     pytest.skip(f"Cannot access {view}: {e}")

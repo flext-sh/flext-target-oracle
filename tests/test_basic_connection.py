@@ -4,15 +4,13 @@ This test validates basic connectivity without testing licensed features.
 """
 
 from flext_target_oracle import OracleTarget
+from tests.helpers import get_test_config, requires_oracle_connection
 
-from .helpers import get_test_config, requires_oracle_connection
 
 class TestBasicConnection:
     """Test basic Oracle connectivity."""
 
     @requires_oracle_connection
-    def test_connection_and_simple_query(self) -> None:
-
     def test_connection_and_simple_query(self) -> None:
         """Test basic connection and simple query execution."""
         config = get_test_config(include_licensed_features=False)
@@ -44,17 +42,15 @@ class TestBasicConnection:
             conn.execute(text("SELECT USER FROM DUAL")).scalar()
 
             # Check if we're on Enterprise Edition
-            (
-                conn.execute(
-                    text(
-                        """
+            conn.execute(
+                text(
+                    """
                 SELECT COUNT(*) FROM v$version
                 WHERE BANNER LIKE '%Enterprise Edition%'
             """,
-                    ),
-                ).scalar()
-                > 0
-            )
+                ),
+            ).scalar()
+            # Note: enterprise_count > 0 indicates Enterprise Edition
 
             # Verify table was created
             table_count = conn.execute(
@@ -85,8 +81,6 @@ class TestBasicConnection:
             conn.execute(text("DROP TABLE test_connection"))
 
     @requires_oracle_connection
-    def test_basic_table_operations(self) -> None:
-
     def test_basic_table_operations(self) -> None:
         """Test basic table operations available in all editions."""
         config = get_test_config(include_licensed_features=False)
@@ -142,8 +136,6 @@ class TestBasicConnection:
             conn.execute(text(f"DROP TABLE {sink.full_table_name}"))
 
     @requires_oracle_connection
-    def test_merge_statement(self) -> None:
-
     def test_merge_statement(self) -> None:
         """Test MERGE statement (available in all editions)."""
         config = get_test_config(include_licensed_features=False)

@@ -1,25 +1,28 @@
-import logging
-
-log = logging.getLogger(__name__)
-
 """Comprehensive error handling and recovery mechanism tests.
 
 These tests validate robust error handling, retry logic, connection recovery,
 and graceful degradation under various failure scenarios.
 """
 
+from __future__ import annotations
+
 import json
+import logging
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from io import StringIO
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from sqlalchemy import text
-from sqlalchemy.engine import Engine
 
 from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import Engine
+
+log = logging.getLogger(__name__)
 
 
 @pytest.mark.integration
@@ -32,7 +35,7 @@ class TestErrorHandling:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test recovery from connection failures with retry logic."""
         table_cleanup(test_table_name)
@@ -77,7 +80,7 @@ class TestErrorHandling:
                     "name": f"Test Record {i + 1}",
                     "status": "active",
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -94,7 +97,7 @@ class TestErrorHandling:
         # simulated)
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            initial_count = result.scalar()
+            initial_count = result.scalar() or 0
             # In test environment, connection might be simulated
             log.error(
                 f"Initial record count: {initial_count}",
@@ -126,7 +129,7 @@ class TestErrorHandling:
         # Verify final state - should have most or all records
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            final_count = result.scalar()
+            final_count = result.scalar() or 0
 
             # Should have at least 80% of records (allowing for some failures)
             expected_min = len(record_messages) * 0.8
@@ -139,7 +142,7 @@ class TestErrorHandling:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test handling of schema validation and data type errors."""
         table_cleanup(test_table_name)
@@ -271,7 +274,7 @@ class TestErrorHandling:
         # Verify that valid records were processed despite errors
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.scalar()
+            count = result.scalar() or 0
 
             # Should have at least the clearly valid records (IDs 1, 2, 5)
             assert count >= 3, f"Too few valid records processed: {count}"
@@ -295,7 +298,7 @@ class TestErrorHandling:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test transaction rollback behavior on batch failures."""
         table_cleanup(test_table_name)
@@ -335,7 +338,7 @@ class TestErrorHandling:
                     "name": f"User {i + 1}",
                     "amount": 100.0 + i,
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             valid_records.append(record)
 
@@ -349,7 +352,7 @@ class TestErrorHandling:
         # Verify first batch
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.scalar()
+            count = result.scalar() or 0
             assert count == 10, f"First batch failed: expected 10, got {count}"
 
         # Create second batch with problematic records
@@ -363,7 +366,7 @@ class TestErrorHandling:
                     "name": "A" * 50,  # Exceeds maxLength of 20
                     "amount": 200.0 + i,
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             problematic_records.append(record)
 
@@ -377,7 +380,7 @@ class TestErrorHandling:
                     "name": f"User {i + 1}",
                     "amount": 300.0 + i,
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             problematic_records.append(record)
 
@@ -396,7 +399,7 @@ class TestErrorHandling:
         # Verify the state - first batch should still be there
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.scalar()
+            count = result.scalar() or 0
 
             # Should still have the first batch, but problematic batch behavior
             # depends on implementation
@@ -407,7 +410,7 @@ class TestErrorHandling:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test graceful handling under memory pressure."""
         table_cleanup(test_table_name)
@@ -461,7 +464,7 @@ class TestErrorHandling:
                         ],  # Additional memory usage
                     },
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -481,7 +484,7 @@ class TestErrorHandling:
         # Verify data was processed efficiently
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.scalar()
+            count = result.scalar() or 0
 
             # Should process most records despite memory constraints
             expected_min = record_count * 0.8
@@ -510,7 +513,7 @@ class TestErrorHandling:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test handling of concurrent access and locking conflicts."""
         table_cleanup(test_table_name)
@@ -554,9 +557,9 @@ class TestErrorHandling:
                     "id": i + 1,
                     "name": f"Record {i + 1}",
                     "counter": 1,
-                    "updated_at": datetime.now(timezone.utc).isoformat() + "Z",
+                    "updated_at": datetime.now(UTC).isoformat() + "Z",
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             initial_records.append(record)
 
@@ -569,7 +572,7 @@ class TestErrorHandling:
         # Verify initial load
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.scalar()
+            count = result.scalar() or 0
             assert count == 100, f"Initial load failed: {count}"
 
         # Simulate concurrent updates by updating same records multiple times
@@ -585,9 +588,9 @@ class TestErrorHandling:
                         "id": i + 1,
                         "name": f"Updated Record {i + 1} - Batch {batch_num + 1}",
                         "counter": batch_num + 2,
-                        "updated_at": datetime.now(timezone.utc).isoformat() + "Z",
+                        "updated_at": datetime.now(UTC).isoformat() + "Z",
                     },
-                    "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                    "time_extracted": datetime.now(UTC).isoformat() + "Z",
                 }
                 batch_records.append(record)
             update_batches.append(batch_records)
@@ -613,7 +616,7 @@ class TestErrorHandling:
         with oracle_engine.connect() as conn:
             # Should still have 100 records
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.scalar()
+            count = result.scalar() or 0
             assert count == 100, f"Concurrent updates corrupted data: {count}"
 
             # Verify updated records
@@ -629,18 +632,18 @@ class TestErrorHandling:
             )
 
             updated_records = result.fetchall()
-            for record in updated_records:
+            for row in updated_records:
                 # Counter should be > 1 (updated at least once)
                 assert (
-                    record[1] > 1
-                ), f"Record {record[0]} not updated: counter={record[1]}"
+                    row[1] > 1
+                ), f"Record {row[0]} not updated: counter={row[1]}"
 
     def test_network_timeout_recovery(
         self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test recovery from network timeouts and slow connections."""
         table_cleanup(test_table_name)
@@ -685,9 +688,9 @@ class TestErrorHandling:
                             i + 1} with substantial content "
                         * 10
                     ),
-                    "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
+                    "timestamp": datetime.now(UTC).isoformat() + "Z",
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -707,7 +710,7 @@ class TestErrorHandling:
         # Verify recovery
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.scalar()
+            count = result.scalar() or 0
 
             # Should have processed most records despite timeouts
             expected_min = len(record_messages) * 0.7
@@ -720,7 +723,7 @@ class TestErrorHandling:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test handling of invalid SQL generation and execution errors."""
         table_cleanup(test_table_name)
@@ -770,7 +773,7 @@ class TestErrorHandling:
                     "123numeric": round(100.5 + i, 2),
                     "case_sensitive": i % 2 == 0,
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             test_records.append(record)
 
@@ -790,7 +793,7 @@ class TestErrorHandling:
         # Verify that data was processed despite SQL complexities
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            count = result.scalar()
+            count = result.scalar() or 0
 
             # Should have processed most records
             expected_min = len(test_records) * 0.8
@@ -811,7 +814,7 @@ class TestErrorHandling:
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
-        table_cleanup,
+        table_cleanup: Any,
     ) -> None:
         """Test graceful handling of resource exhaustion scenarios."""
         table_cleanup(test_table_name)
@@ -855,9 +858,9 @@ class TestErrorHandling:
                 "record": {
                     "id": i + 1,
                     "resource_data": f"Resource test data {i + 1}: " + "R" * 1500,
-                    "timestamp": datetime.now(timezone.utc).isoformat() + "Z",
+                    "timestamp": datetime.now(UTC).isoformat() + "Z",
                 },
-                "time_extracted": datetime.now(timezone.utc).isoformat() + "Z",
+                "time_extracted": datetime.now(UTC).isoformat() + "Z",
             }
             record_messages.append(record)
 
@@ -900,7 +903,7 @@ class TestErrorHandling:
         # Verify recovery and data integrity
         with oracle_engine.connect() as conn:
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
-            total_count = result.scalar()
+            total_count = result.scalar() or 0
 
             # Should have processed most records despite resource constraints
             expected_min = record_count * 0.7
@@ -922,6 +925,7 @@ class TestErrorHandling:
             )
 
             stats = result.fetchone()
+            assert stats is not None, "No stats returned"
             assert (
                 stats[0] == total_count
             ), "Duplicate IDs found - data corruption detected"
