@@ -1,3 +1,9 @@
+from typing import Any
+
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Comprehensive error handling and recovery mechanism tests.
 
 These tests validate robust error handling, retry logic, connection recovery,
@@ -11,16 +17,15 @@ import logging
 import time
 from datetime import UTC, datetime
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pytest
+from flext_target_oracle.target import OracleTarget
 from sqlalchemy import text
 
-from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
 
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
+if TYPE_CHECKING: from sqlalchemy.engine import Engine
 
 log = logging.getLogger(__name__)
 
@@ -30,15 +35,13 @@ log = logging.getLogger(__name__)
 class TestErrorHandling:
     """Test comprehensive error handling and recovery mechanisms."""
 
+    @staticmethod
     def test_connection_failure_recovery(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
-    ) -> None:
-        """Test recovery from connection failures with retry logic."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure with aggressive retry settings
         config = oracle_config.copy()
@@ -71,8 +74,7 @@ class TestErrorHandling:
 
         # Create valid records
         record_messages = []
-        for i in range(100):
-            record = {
+        for i in range(100): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
@@ -93,20 +95,20 @@ class TestErrorHandling:
         input_stream = StringIO("".join(input_lines))
         oracle_target.process_lines(input_stream)
 
-        # Verify initial records were processed (may be 0 if connection
-        # simulated)
+        # Verify initial records were processed (may be 0 if connection: # simulated)
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             initial_count = result.scalar() or 0
             # In test environment, connection might be simulated
             log.error(
-                f"Initial record count: {initial_count}",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
-            if initial_count == 0:
-                log.error(
+                "Initial record count: %s",
+                initial_count,
+            )  # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
+            if initial_count == 0: log.error(
                     "Warning: No records inserted - likely simulated connection",
-                # TODO(@dev): Replace with proper logging  # Link:
-                # https://github.com/issue/todo
+                    # TODO(@dev): Replace with proper logging  # Link: # https://github.com/issue/todo
                 )
 
         # Now test with connection issues during processing
@@ -117,17 +119,18 @@ class TestErrorHandling:
         input_lines = [json.dumps(msg) + "\n" for msg in remaining_records]
         input_stream = StringIO("".join(input_lines))
 
-        try:
-            oracle_target.process_lines(input_stream)
-        except Exception as e:
+        try: oracle_target.process_lines(input_stream)
+        except Exception:
             # Log but don't fail - target should have retry logic
-            # TODO: Consider using else block
+            # TODO(@flext-team): Consider using else block
             log.exception(
-                f"Processing completed with potential recoverable errors: {e}",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+                "Processing completed with potential recoverable errors",
+            )  # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
 
         # Verify final state - should have most or all records
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             final_count = result.scalar() or 0
 
@@ -137,14 +140,13 @@ class TestErrorHandling:
                 final_count >= expected_min
             ), f"Too few records after recovery: {final_count}/{len(record_messages)}"
 
+    @staticmethod
     def test_schema_validation_errors(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
     ) -> None:
-        """Test handling of schema validation and data type errors."""
         table_cleanup(test_table_name)
 
         config = oracle_config.copy()
@@ -193,7 +195,7 @@ class TestErrorHandling:
             },
             # Invalid type - string for integer
             {
-                "type": "RECORD",
+                "type":  "RECORD",
                 "stream": test_table_name,
                 "record": {
                     "id": "not_a_number",
@@ -263,16 +265,19 @@ class TestErrorHandling:
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
-        try:
-            oracle_target.process_lines(input_stream)
-        except Exception as e:
-            # TODO: Consider using else block
+        try: oracle_target.process_lines(input_stream)
+        except Exception:
+
+            # TODO(@flext-team): Consider using else block
+
             log.exception(
-                f"Processing completed with expected validation errors: {e}",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+                "Processing completed with expected validation errors",
+            )  # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
 
         # Verify that valid records were processed despite errors
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar() or 0
 
@@ -282,26 +287,25 @@ class TestErrorHandling:
             # Verify specific valid records
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT id, name, score, active
                 FROM {test_table_name}
                 WHERE id IN (1, 2, 5)
                 ORDER BY id
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             valid_records = result.fetchall()
             assert len(valid_records) >= 2, "Valid records not found"
 
+    @staticmethod
     def test_transaction_rollback_on_failure(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
-    ) -> None:
-        """Test transaction rollback behavior on batch failures."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         config = oracle_config.copy()
         config.update(
@@ -329,8 +333,7 @@ class TestErrorHandling:
 
         # Create records that will succeed initially
         valid_records = []
-        for i in range(20):
-            record = {
+        for i in range(20): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
@@ -350,15 +353,13 @@ class TestErrorHandling:
         oracle_target.process_lines(input_stream)
 
         # Verify first batch
-        with oracle_engine.connect() as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+        with oracle_engine.connect() as conn: result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar() or 0
             assert count == 10, f"First batch failed: expected 10, got {count}"
 
         # Create second batch with problematic records
-        problematic_records = []
-        for i in range(10, 15):
-            record = {
+        problematic_records = {}
+        for i in range(10, 15): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
@@ -371,8 +372,7 @@ class TestErrorHandling:
             problematic_records.append(record)
 
         # Add some valid records after problematic ones
-        for i in range(15, 20):
-            record = {
+        for i in range(15, 20): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
@@ -388,16 +388,19 @@ class TestErrorHandling:
         input_lines = [json.dumps(msg) + "\n" for msg in problematic_records]
         input_stream = StringIO("".join(input_lines))
 
-        try:
-            oracle_target.process_lines(input_stream)
-        except Exception as e:
-            # TODO: Consider using else block
+        try: oracle_target.process_lines(input_stream)
+        except Exception:
+
+            # TODO(@flext-team): Consider using else block
+
             log.exception(
-                f"Expected failure in problematic batch: {e}",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+                "Expected failure in problematic batch",
+            )  # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
 
         # Verify the state - first batch should still be there
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar() or 0
 
@@ -405,15 +408,13 @@ class TestErrorHandling:
             # depends on implementation
             assert count >= 10, f"Transaction rollback affected previous data: {count}"
 
+    @staticmethod
     def test_memory_pressure_handling(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
-    ) -> None:
-        """Test graceful handling under memory pressure."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         config = oracle_config.copy()
         config.update(
@@ -445,8 +446,7 @@ class TestErrorHandling:
         record_count = 500
         record_messages = []
 
-        for i in range(record_count):
-            # Create large string data (each record ~3KB)
+        for i in range(record_count): # Create large string data (each record ~3KB)
             large_data = f"Large data block {i + 1}: " + "X" * 3000
 
             record = {
@@ -473,16 +473,19 @@ class TestErrorHandling:
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
-        try:
-            oracle_target.process_lines(input_stream)
-        except Exception as e:
-            # TODO: Consider using else block
+        try: oracle_target.process_lines(input_stream)
+        except Exception:
+
+            # TODO(@flext-team): Consider using else block
+
             log.exception(
-                f"Processing completed under memory pressure: {e}",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+                "Processing completed under memory pressure",
+            )  # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
 
         # Verify data was processed efficiently
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar() or 0
 
@@ -495,28 +498,26 @@ class TestErrorHandling:
             # Verify data integrity of processed records
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT id, LENGTH(large_data), metadata
                 FROM {test_table_name}
                 WHERE id IN (1, 250, 500)
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
 
-            for row in result:
-                assert row[1] > 3000, f"Large data truncated: {row[1]} chars"
+            for row in result: assert row[1] > 3000, f"Large data truncated: {row[1]} chars"
                 metadata = json.loads(row[2])
                 assert "block_id" in metadata, "Metadata corrupted"
 
+    @staticmethod
     def test_concurrent_access_conflicts(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
-    ) -> None:
-        """Test handling of concurrent access and locking conflicts."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         config = oracle_config.copy()
         config.update(
@@ -549,8 +550,7 @@ class TestErrorHandling:
         oracle_target = OracleTarget(config=config)
         initial_records = []
 
-        for i in range(100):
-            record = {
+        for i in range(100): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
@@ -570,17 +570,16 @@ class TestErrorHandling:
         oracle_target.process_lines(input_stream)
 
         # Verify initial load
-        with oracle_engine.connect() as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+        with oracle_engine.connect() as conn: result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar() or 0
             assert count == 100, f"Initial load failed: {count}"
 
         # Simulate concurrent updates by updating same records multiple times
-        update_batches = []
+        update_batches = {}
 
-        for batch_num in range(3):
-            batch_records = []
-            for i in range(50):  # Update first 50 records
+        for batch_num in range(3): batch_records = []
+            for i in range(50):
+            # Update first 50 records
                 record = {
                     "type": "RECORD",
                     "stream": test_table_name,
@@ -596,20 +595,19 @@ class TestErrorHandling:
             update_batches.append(batch_records)
 
         # Process updates concurrently (simulate by rapid succession)
-        for batch in update_batches:
-            input_lines = [json.dumps(msg) + "\n" for msg in batch]
+        for batch in update_batches: input_lines = [json.dumps(msg) + "\n" for msg in batch]
             input_stream = StringIO("".join(input_lines))
 
-            try:
-                oracle_target.process_lines(input_stream)
+            try: oracle_target.process_lines(input_stream)
                 time.sleep(0.1)  # Small delay between batches
-            except Exception as e:
-                # TODO: Consider using else block
+            except Exception:
+
+                # TODO(@flext-team): Consider using else block
+
                 log.exception(
-                    f"Concurrent processing batch completed with potential "
-                    f"conflicts: {e}",
-                # TODO(@dev): Replace with proper logging  # Link:
-                # https://github.com/issue/todo
+                    "Concurrent processing batch completed with potential conflicts",
+                    # TODO(@dev): Replace with proper logging  # Link:
+                    # https://github.com/issue/todo
                 )
 
         # Verify final state
@@ -622,31 +620,27 @@ class TestErrorHandling:
             # Verify updated records
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT id, counter, name
                 FROM {test_table_name}
                 WHERE id <= 10
                 ORDER BY id
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
 
             updated_records = result.fetchall()
-            for row in updated_records:
-                # Counter should be > 1 (updated at least once)
-                assert (
-                    row[1] > 1
-                ), f"Record {row[0]} not updated: counter={row[1]}"
+            for row in updated_records: # Counter should be > 1 (updated at least once)
+                assert row[1] > 1, f"Record {row[0]} not updated: counter ={row[1]}"
 
+    @staticmethod
     def test_network_timeout_recovery(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
-    ) -> None:
-        """Test recovery from network timeouts and slow connections."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         config = oracle_config.copy()
         config.update(
@@ -677,16 +671,13 @@ class TestErrorHandling:
 
         # Create records that should trigger timeout scenarios
         record_messages = []
-        for i in range(200):
-            record = {
+        for i in range(200): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
                     "id": i + 1,
                     "description": (
-                        f"Timeout test record {
-                            i + 1} with substantial content "
-                        * 10
+                        f"Timeout test record {i + 1} with substantial content " * 10
                     ),
                     "timestamp": datetime.now(UTC).isoformat() + "Z",
                 },
@@ -699,16 +690,19 @@ class TestErrorHandling:
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
-        try:
-            oracle_target.process_lines(input_stream)
-        except Exception as e:
-            # TODO: Consider using else block
+        try: oracle_target.process_lines(input_stream)
+        except Exception:
+
+            # TODO(@flext-team): Consider using else block
+
             log.exception(
-                f"Processing completed with potential timeout recovery: {e}",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+                "Processing completed with potential timeout recovery",
+            )  # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
 
         # Verify recovery
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar() or 0
 
@@ -718,15 +712,13 @@ class TestErrorHandling:
                 count >= expected_min
             ), f"Too many records lost to timeouts: {count}/{len(record_messages)}"
 
+    @staticmethod
     def test_invalid_sql_handling(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
-    ) -> None:
-        """Test handling of invalid SQL generation and execution errors."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         config = oracle_config.copy()
         config.update(
@@ -762,8 +754,7 @@ class TestErrorHandling:
 
         # Records with edge cases
         test_records = []
-        for i in range(50):
-            record = {
+        for i in range(50): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
@@ -782,16 +773,19 @@ class TestErrorHandling:
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
-        try:
-            oracle_target.process_lines(input_stream)
-        except Exception as e:
-            # TODO: Consider using else block
+        try: oracle_target.process_lines(input_stream)
+        except Exception:
+
+            # TODO(@flext-team): Consider using else block
+
             log.exception(
-                f"Processing completed with SQL generation challenges: {e}",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+                "Processing completed with SQL generation challenges",
+            )  # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
 
         # Verify that data was processed despite SQL complexities
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar() or 0
 
@@ -802,22 +796,19 @@ class TestErrorHandling:
             ), f"SQL issues caused too many failures: {count}/{len(test_records)}"
 
             # Verify column handling worked
-            if count > 0:
-                result = conn.execute(
+            if count > 0: result = conn.execute(
                     text(f"SELECT * FROM {test_table_name} WHERE ROWNUM <= 3"),
                 )
                 sample_rows = result.fetchall()
                 assert len(sample_rows) > 0, "No sample data retrieved"
 
+    @staticmethod
     def test_resource_exhaustion_recovery(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
-    ) -> None:
-        """Test graceful handling of resource exhaustion scenarios."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         config = oracle_config.copy()
         config.update(
@@ -851,8 +842,7 @@ class TestErrorHandling:
         record_count = 2000
         record_messages = []
 
-        for i in range(record_count):
-            record = {
+        for i in range(record_count): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
@@ -866,8 +856,7 @@ class TestErrorHandling:
 
         # Process multiple targets concurrently to stress resources
         targets = []
-        for _ in range(3):
-            target = OracleTarget(config=config)
+        for _ in range(3): target = OracleTarget(config=config)
             targets.append(target)
 
         # Process first batch to establish table
@@ -881,27 +870,30 @@ class TestErrorHandling:
         remaining_records = record_messages[100:]
         chunk_size = len(remaining_records) // 3
 
-        for i, target in enumerate(targets):
-            start_idx = i * chunk_size
-            end_idx = start_idx + chunk_size if i < 2 else len(remaining_records)
-            chunk = remaining_records[start_idx:end_idx]
+        for i, target in enumerate(targets): start_idx = i * chunk_size
+            end_idx = start_idx + chunk_size if i < 2 else len(remaining_records):
+                chunk = remaining_records[start_idx:
+            end_idx]
 
             if chunk:
                 input_lines = [json.dumps(msg) + "\n" for msg in chunk]
                 input_stream = StringIO("".join(input_lines))
 
-                try:
-                    target.process_lines(input_stream)
-                except Exception as e:
-                    # TODO: Consider using else block
+                try: target.process_lines(input_stream)
+                except Exception:
+
+                    # TODO(@flext-team): Consider using else block
+
                     log.exception(
-                        f"Target {i} completed with resource constraints: {e}",
-                    # TODO(@dev): Replace with proper logging  # Link:
-                    # https://github.com/issue/todo
+                        "Target %s completed with resource constraints",
+                        i,
+                        # TODO(@dev): Replace with proper logging  # Link:
+                        # https://github.com/issue/todo
                     )
 
         # Verify recovery and data integrity
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             total_count = result.scalar() or 0
 
@@ -917,10 +909,10 @@ class TestErrorHandling:
                 text(
                     f"""
                 SELECT COUNT(DISTINCT id) as unique_ids,
-                       MAX(id) as max_id,
-                       MIN(id) as min_id
+                        MAX(id) as max_id,
+                        MIN(id) as min_id
                 FROM {test_table_name}
-            """,
+            """
                 ),
             )
 

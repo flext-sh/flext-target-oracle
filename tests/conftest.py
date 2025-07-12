@@ -1,3 +1,7 @@
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Modern test configuration using pytest patterns.
 
 Clean, minimal test setup following enterprise standards.
@@ -14,12 +18,11 @@ import pytest
 # Add src directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from flext_target_oracle.config import OracleConfig
+from flext_db_oracle import OracleConfig
 
 
 @pytest.fixture
 def mock_oracle_config() -> dict[str, Any]:
-    """Mock Oracle configuration for testing."""
     return {
         "connection": {
             "host": "localhost",
@@ -43,13 +46,11 @@ def mock_oracle_config() -> dict[str, Any]:
 
 @pytest.fixture
 def oracle_config(mock_oracle_config: dict[str, Any]) -> OracleConfig:
-    """Create Oracle config instance for testing."""
     return OracleConfig(**mock_oracle_config)
 
 
 @pytest.fixture
 def flat_oracle_config() -> dict[str, Any]:
-    """Flat Oracle configuration for Singer SDK compatibility."""
     return {
         # Singer SDK expects flat configuration
         "host": "localhost",
@@ -67,7 +68,6 @@ def flat_oracle_config() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_schema() -> dict[str, Any]:
-    """Sample JSON schema for testing."""
     return {
         "type": "object",
         "properties": {
@@ -83,7 +83,6 @@ def sample_schema() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_records() -> list[dict[str, Any]]:
-    """Sample records for testing."""
     return [
         {
             "id": 1,
@@ -100,4 +99,3 @@ def sample_records() -> list[dict[str, Any]]:
             "active": False,
         },
     ]
-

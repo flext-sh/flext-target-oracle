@@ -1,8 +1,11 @@
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Test environment configuration validation.
 
 This module validates that the .env file contains the required configuration
-for connecting to Oracle Database and conditionally runs tests based on
-environment availability.
+for connecting to Oracle Database and conditionally runs tests based on: environment availability.
 """
 
 from pathlib import Path
@@ -10,71 +13,51 @@ from pathlib import Path
 import pytest
 
 
-class TestEnvironmentValidation:
-    """Test environment configuration validation."""
+class TestEnvironmentValidation:  """Test environment configuration validation."""
 
-    def test_env_file_exists(self, project_root: Path) -> None:
-        """Test that .env file exists."""
-        """Test that .env file exists."""
-        env_path = project_root / ".env"
-        if not env_path.exists():
-            pytest.skip(
-                ".env file not found - copy .env.example to .env and configure")
+    @staticmethod
+    def test_env_file_exists(project_root: Path) -> None: env_path = project_root / ".env"
+        if not env_path.exists(): pytest.skip(".env file not found - copy .env.example to .env and configure")
         assert env_path.exists(), "Environment file .env is required for tests"
 
-    def test_env_example_exists(self, project_root: Path) -> None:
-        """Test that .env.example file exists."""
-        """Test that .env.example file exists."""
-        env_example_path = project_root / ".env.example"
+    @staticmethod
+    def test_env_example_exists(project_root: Path) -> None: env_example_path = project_root / ".env.example"
         assert env_example_path.exists(), ".env.example file should exist"
 
-    def test_required_env_vars(self, env_config: dict[str, str]) -> None:
-        """Test that all required environment variables are set."""
-        """Test that all required environment variables are set."""
-        required_vars = ["host", "username", "password", "service_name"]
+    @staticmethod
+    def test_required_env_vars(env_config: dict[str, str]) -> None: required_vars = ["host", "username", "password", "service_name"]
 
-        for var in required_vars:
-            assert var in env_config, f"Required environment variable {var} is missing"
+        for var in required_vars: assert var in env_config, f"Required environment variable {var} is missing"
             assert env_config[var], f"Required environment variable {var} is empty"
 
-    def test_port_configuration(self, env_config: dict[str, str]) -> None:
-        """Test port configuration is valid."""
-        """Test port configuration is valid."""
-        port = env_config.get("port", 1521)
+    @staticmethod
+    def test_port_configuration(env_config: dict[str, str]) -> None:
+            port = env_config.get("port", 1521)
         assert isinstance(port, int), "Port must be an integer"
         assert 1 <= port <= 65535, f"Port {port} is out of valid range"
 
-    def test_protocol_configuration(self, env_config: dict[str, str]) -> None:
-        """Test protocol configuration is valid."""
-        """Test protocol configuration is valid."""
-        protocol = env_config.get("protocol", "tcp")
+    @staticmethod
+    def test_protocol_configuration(env_config: dict[str, str]) -> None:
+            protocol = env_config.get("protocol", "tcp")
         assert protocol in {"tcp", "tcps"}, f"Invalid protocol: {protocol}"
 
         # If using TCPS, additional fields might be required
-        if protocol == "tcps" and "wallet_location" in env_config:
-            # Check for SSL-related configuration
+        if protocol == "tcps" and "wallet_location" in env_config: # Check for SSL-related configuration
             assert env_config[
                 "wallet_location"
             ], "Wallet location cannot be empty for TCPS"
 
-    def test_optional_performance_settings(self, env_config: dict[str, str]) -> None:
-        """Test optional performance settings if present."""
-        """Test optional performance settings if present."""
-        # Check batch size if specified
-        if "batch_size" in env_config:
-            batch_size = int(env_config["batch_size"])
+    @staticmethod
+    def test_optional_performance_settings(env_config: dict[str, str]) -> None:
+        # Check batch size if specified: if "batch_size" in env_config: batch_size = int(env_config["batch_size"])
             assert batch_size > 0, "Batch size must be positive"
             assert batch_size <= 100000, "Batch size seems too large"
 
-        # Check parallel threads if specified
-        if "parallel_threads" in env_config:
-            threads = int(env_config["parallel_threads"])
+        # Check parallel threads if specified: if "parallel_threads" in env_config: threads = int(env_config["parallel_threads"])
             assert threads > 0, "Parallel threads must be positive"
             assert threads <= 32, "Too many parallel threads"
 
-        # Check pool size if specified
-        if "pool_size" in env_config:
-            pool_size = int(env_config["pool_size"])
+        # Check pool size if specified: if "pool_size" in env_config: pool_size = int(env_config["pool_size"])
             assert pool_size > 0, "Pool size must be positive"
             assert pool_size <= 100, "Pool size seems too large"
 
@@ -82,9 +65,9 @@ class TestEnvironmentValidation:
         not Path(".env").exists(),
         reason="Requires .env file with Oracle configuration",
     )
-    def test_connection_string_format(self, env_config: dict[str, str]) -> None:
-        """Test that connection string can be formed from config."""
-        """Test that connection string can be formed from config."""
+
+    @staticmethod
+    def test_connection_string_format(env_config: dict[str, str]) -> None:
         # Verify we can build a connection string
         host = env_config["host"]
         env_config.get("port", 1521)
@@ -96,37 +79,25 @@ class TestEnvironmentValidation:
             "database",
         ), "Either service_name or database (SID) must be provided"
 
-    def test_schema_configuration(self, env_config: dict[str, str]) -> None:
-        """Test schema configuration if present."""
-        """Test schema configuration if present."""
-        if "schema" in env_config:
-            schema = env_config["schema"]
+    @staticmethod
+    def test_schema_configuration(env_config: dict[str, str]) -> None:
+            if "schema" in env_config: schema =  env_config["schema"]
             assert schema, "Schema cannot be empty if specified"
-            assert len(
-                schema) <= 30, "Oracle schema name too long (max 30 chars)"
+            assert len(schema) <= 30, "Oracle schema name too long (max 30 chars)"
             assert (
-                schema.replace(
-                    "_",
-                    "").replace(
-                    "$",
-                    "").replace(
-                    "#",
-                    "").isalnum()
+                schema.replace("_", "").replace("$", "").replace("#", "").isalnum()
             ), "Schema name contains invalid characters"
 
-    def test_license_flags(self, env_config: dict[str, str]) -> None:
-        """Test Oracle license flags if present."""
-        """Test Oracle license flags if present."""
-        license_flags = [
+    @staticmethod
+    def test_license_flags(env_config: dict[str, str]) -> None:
+                license_flags = [
             "oracle_has_partitioning_option",
             "oracle_has_compression_option",
             "oracle_has_inmemory_option",
             "oracle_has_advanced_security_option",
         ]
 
-        for flag in license_flags:
-            if flag in env_config:
-                value = env_config[flag]
+        for flag in license_flags: if flag in env_config = env_config[flag]:
                 # Should be convertible to boolean
                 assert value.lower() in {
                     "true",
@@ -147,26 +118,23 @@ class TestEnvironmentValidation:
             ("merge_batch_size", 50000),
         ],
     )
+
+    @staticmethod
     def test_numeric_limits(
-        self, env_config: dict[str, str], config_key: str, max_value: int
-    ) -> None:
-        """Test numeric configuration values are within reasonable limits."""
-        if config_key in env_config:
-            try:
-                value = int(env_config[config_key])
+        env_config: dict[str, str],
+        config_key: str,
+        max_value: int,
+    ) -> None: if config_key in env_config:
+            value = int(env_config[config_key])
                 assert value > 0, f"{config_key} must be positive"
                 assert (
                     value <= max_value
                 ), f"{config_key} value {value} exceeds reasonable limit {max_value}"
-            except Exception:
-                # TODO: Consider using else block
+            except Exception: # TODO(@flext-team): Consider using else block
                 pytest.fail(f"{config_key} must be a valid integer")
 
-    def test_compression_settings(self, env_config: dict[str, str]) -> None:
-        """Test compression settings consistency."""
-        """Test compression settings consistency."""
-        if env_config.get("enable_compression", "").lower() == "true":
-            compression_type = env_config.get("compression_type", "basic")
+    @staticmethod
+    def test_compression_settings(env_config: dict[str, str]) -> None: if env_config.get("enable_compression", "").lower() == "true": compression_type = env_config.get("compression_type", "basic")
             assert compression_type in {
                 "basic",
                 "advanced",
@@ -175,11 +143,7 @@ class TestEnvironmentValidation:
             }, f"Invalid compression type: {compression_type}"
 
             # If advanced compression is used, license flag should be set
-            if (
-                compression_type != "basic"
-                and "oracle_has_compression_option" in env_config
-            ):
-                assert env_config["oracle_has_compression_option"].lower() in {
+            if compression_type != "basic" and "oracle_has_compression_option" in env_config: assert env_config["oracle_has_compression_option"].lower() in {
                     "true",
                     "1",
                     "yes",

@@ -2,27 +2,33 @@
 
 ## Overview
 
-The Oracle Target is a modern Singer SDK implementation that loads data into Oracle databases using SQLAlchemy 2.0. It follows SOLID principles and provides high-performance data loading with support for multiple load methods, parallel processing, and Oracle-specific optimizations.
+The Oracle Target is a modern Singer SDK implementation that loads data into Oracle databases
+using SQLAlchemy 2.0. It follows SOLID principles and provides high-performance data loading
+with support for multiple load methods, parallel processing, and Oracle-specific optimizations.
 
 ## Architecture Principles
 
 ### SOLID Principles Applied
 
 1. **Single Responsibility Principle (SRP)**
+
    - `OracleConnector`: Manages database connections and SQLAlchemy engine lifecycle
    - `OracleSink`: Handles data transformation and loading operations
    - `OracleTarget`: Orchestrates the overall target functionality
 
 2. **Open/Closed Principle (OCP)**
+
    - Extensible through configuration without modifying core code
    - Plugin-based architecture for custom transformations
    - Event system for adding behavior without changing existing code
 
 3. **Liskov Substitution Principle (LSP)**
+
    - Inherits from Singer SDK base classes maintaining all expected behaviors
    - Can be used anywhere a Singer target is expected
 
 4. **Interface Segregation Principle (ISP)**
+
    - Clean interfaces between components
    - Connector provides only database operations
    - Sink focuses only on data processing
@@ -47,7 +53,7 @@ Responsible for all database connectivity using SQLAlchemy 2.0:
 ```python
 class OracleConnector(SQLConnector):
     """Manages Oracle database connections with SQLAlchemy 2.0."""
-    
+
     # Key responsibilities:
     # - Connection URL generation using URL.create()
     # - Connection pool management (QueuePool, NullPool, StaticPool)
@@ -57,6 +63,7 @@ class OracleConnector(SQLConnector):
 ```
 
 **Features:**
+
 - Modern SQLAlchemy 2.0 patterns (URL.create(), future=True)
 - Intelligent pool selection based on workload
 - Column pattern recognition for optimal type mapping
@@ -69,7 +76,7 @@ Handles data processing and loading:
 ```python
 class OracleSink(SQLSink):
     """High-performance data sink for Oracle databases."""
-    
+
     # Key responsibilities:
     # - Batch processing with configurable size
     # - Parallel loading for large datasets
@@ -79,6 +86,7 @@ class OracleSink(SQLSink):
 ```
 
 **Features:**
+
 - Bulk operations using SQLAlchemy's executemany()
 - Oracle MERGE statements for upserts
 - Parallel processing with ThreadPoolExecutor
@@ -91,7 +99,7 @@ Main entry point and orchestrator:
 ```python
 class OracleTarget(Target):
     """Singer target for Oracle databases."""
-    
+
     # Key responsibilities:
     # - Configuration management
     # - Engine lifecycle (sync and async)
@@ -123,6 +131,7 @@ graph TD
 ### Connection Pooling
 
 Dynamic pool selection based on workload:
+
 - `pool_size=0`: NullPool for serverless/lambda
 - `pool_size=1`: StaticPool for single connection
 - `pool_size>1`: QueuePool for concurrent operations
@@ -142,8 +151,9 @@ Dynamic pool selection based on workload:
 ### Type Optimizations
 
 Intelligent column type mapping:
+
 - `*_ID` columns → NUMBER(38,0)
-- `*_FLG` columns → NUMBER(1,0) 
+- `*_FLG` columns → NUMBER(1,0)
 - `*_TS` columns → TIMESTAMP WITH TIME ZONE
 - `*_AMOUNT` columns → NUMBER(19,4)
 
@@ -211,6 +221,7 @@ Intelligent column type mapping:
 ### Audit Trail
 
 Automatic audit fields:
+
 - `CREATE_USER`: User who created the record
 - `CREATE_TS`: Creation timestamp
 - `MOD_USER`: User who last modified
@@ -261,6 +272,7 @@ def add_query_hints(conn, clauseelement, multiparams, params, execution_options)
 ### Health Checks
 
 Built-in health monitoring:
+
 - Database connectivity
 - Pool statistics
 - Performance metrics
@@ -269,6 +281,7 @@ Built-in health monitoring:
 ### Metrics
 
 Performance tracking:
+
 - Records per second
 - Batch processing time
 - Connection pool utilization

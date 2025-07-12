@@ -1,23 +1,53 @@
 """FLEXT Target Oracle - Modern Enterprise Singer Target.
 
-Clean implementation following SOLID, KISS, and DRY principles.
-Built with Pydantic v2, Python 3.13 typing, and modern patterns.
+Built on flext-core foundation with zero duplication.
+Uses flext-db-oracle for all Oracle database operations.
 """
 
 from __future__ import annotations
 
-__version__ = "2.0.0"
+# Version from flext-core
+__version__ = "0.7.0"
 
-from flext_target_oracle.config import OracleConfig
-from flext_target_oracle.connector import OracleConnector
-from flext_target_oracle.sink import OracleSink
+# Core imports from flext-core
+# Oracle operations from flext-db-oracle (no duplication)
+from flext_db_oracle import (
+    OracleConfig,
+    OracleConnectionService,
+    OracleQueryService,
+)
+
+from flext_core import DomainBaseModel, ServiceResult
+from flext_target_oracle.application.services import (
+    OracleLoaderService,
+    SingerTargetService,
+)
+
+# Target-specific implementations
+from flext_target_oracle.domain.models import (
+    SingerRecord,
+    SingerSchema,
+    TargetConfig,
+)
 from flext_target_oracle.target import OracleTarget
 
 __all__ = [
+    "BaseConfig",
+    # Re-exported from flext-core
+    "DomainBaseModel",
+    # Re-exported from flext-db-oracle
     "OracleConfig",
-    "OracleConnector",
-    "OracleSink",
+    "OracleConnectionService",
+    "OracleLoaderService",
+    "OracleQueryService",
+    # Main target
     "OracleTarget",
+    "ServiceResult",
+    # Target-specific models
+    "SingerRecord",
+    "SingerSchema",
+    # Target services
+    "SingerTargetService",
+    "TargetConfig",
     "__version__",
 ]
-

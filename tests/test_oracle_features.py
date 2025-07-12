@@ -1,3 +1,9 @@
+from typing import Any
+
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Test Oracle-specific features and optimizations.
 
 This module tests Oracle-specific functionality including MERGE operations,
@@ -9,16 +15,15 @@ from __future__ import annotations
 import json
 import logging
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 
+from flext_target_oracle.target import OracleTarget
 from sqlalchemy import text
 
-from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
 
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
+if TYPE_CHECKING: from sqlalchemy.engine import Engine
 
 log = logging.getLogger(__name__)
 
@@ -27,15 +32,13 @@ log = logging.getLogger(__name__)
 class TestOracleSpecificFeatures:
     """Test Oracle-specific features and optimizations."""
 
+    @staticmethod
     def test_merge_upsert_operations(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ) -> None:
-        """Test Oracle MERGE operations for efficient upserts."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure for MERGE operations
         merge_config = oracle_config.copy()
@@ -46,7 +49,7 @@ class TestOracleSpecificFeatures:
 
         # Create test schema
         test_schema = {
-            "type": "SCHEMA",
+            "type":  "SCHEMA",
             "stream": test_table_name,
             "schema": {
                 "type": "object",
@@ -89,11 +92,11 @@ class TestOracleSpecificFeatures:
         messages.extend([json.dumps(record) for record in initial_records])
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify initial data
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -129,8 +132,7 @@ class TestOracleSpecificFeatures:
         input_data = "\n".join(messages)
 
         target_new = OracleTarget(config=merge_config)
-        with patch("sys.stdin", StringIO(input_data)):
-            target_new.cli()
+        with patch("sys.stdin", StringIO(input_data)): target_new.cli()
 
         # Verify MERGE results
         with oracle_engine.connect() as conn:
@@ -156,16 +158,14 @@ class TestOracleSpecificFeatures:
             assert row is not None
             assert row[0] == "Charlie"
 
+    @staticmethod
     def test_bulk_operations(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
         performance_timer,
-    ) -> None:
-        """Test Oracle bulk operations for high performance."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure for bulk operations
         bulk_config = oracle_config.copy()
@@ -177,7 +177,7 @@ class TestOracleSpecificFeatures:
 
         # Create test schema
         test_schema = {
-            "type": "SCHEMA",
+            "type":  "SCHEMA",
             "stream": test_table_name,
             "schema": {
                 "type": "object",
@@ -191,15 +191,17 @@ class TestOracleSpecificFeatures:
         }
 
         # Generate large dataset for bulk testing
-        bulk_records = [{
-                    "type": "RECORD",
-                    "stream": test_table_name,
-                    "record": {
-                        "id": i + 1,
-                        "data": f"Bulk data item {i + 1}",
-                        "value": float(i * 0.5),
-                    },
-                } for i in range(5000)]
+        bulk_records = [
+            {
+                "type":  "RECORD",
+                "stream": test_table_name,
+                "record": {
+                    "id": i + 1,
+                    "data": f"Bulk data item {i + 1}",
+                    "value": float(i * 0.5),
+                },
+            }
+            for i in range(5000): ]
 
         # Process with timing
         messages = [json.dumps(test_schema)]
@@ -208,13 +210,13 @@ class TestOracleSpecificFeatures:
 
         performance_timer.start()
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         performance_timer.stop()
 
         # Verify bulk processing results
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -227,14 +229,13 @@ class TestOracleSpecificFeatures:
             throughput > 100
         ), f"Bulk operation throughput too low: {throughput:.2f} records/sec"
 
+    @staticmethod
     def test_parallel_processing_configuration(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
     ) -> None:
-        """Test Oracle parallel processing configuration."""
         table_cleanup(test_table_name)
 
         # Configure for parallel processing
@@ -247,7 +248,7 @@ class TestOracleSpecificFeatures:
 
         # Create test schema
         test_schema = {
-            "type": "SCHEMA",
+            "type":  "SCHEMA",
             "stream": test_table_name,
             "schema": {
                 "type": "object",
@@ -261,26 +262,28 @@ class TestOracleSpecificFeatures:
         }
 
         # Generate moderate dataset
-        parallel_records = [{
-                    "type": "RECORD",
-                    "stream": test_table_name,
-                    "record": {
-                        "id": i + 1,
-                        "category": f"Category {(i % 10) + 1}",
-                        "amount": float(i * 1.25),
-                    },
-                } for i in range(2000)]
+        parallel_records = [
+            {
+                "type": "RECORD",
+                "stream": test_table_name,
+                "record": {
+                    "id": i + 1,
+                    "category": f"Category {(i % 10) + 1}",
+                    "amount": float(i * 1.25),
+                },
+            }
+            for i in range(2000): ]
 
         # Process records
         messages = [json.dumps(test_schema)]
         messages.extend([json.dumps(record) for record in parallel_records])
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify parallel processing results
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -297,15 +300,13 @@ class TestOracleSpecificFeatures:
             categories = [row[0] for row in result.fetchall()]
             assert len(categories) == 10  # Should have 10 different categories
 
+    @staticmethod
     def test_table_compression_features(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ) -> None:
-        """Test Oracle table compression features."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure for compression
         compression_config = oracle_config.copy()
@@ -316,7 +317,7 @@ class TestOracleSpecificFeatures:
 
         # Create test schema with larger data
         test_schema = {
-            "type": "SCHEMA",
+            "type":  "SCHEMA",
             "stream": test_table_name,
             "schema": {
                 "type": "object",
@@ -330,69 +331,69 @@ class TestOracleSpecificFeatures:
         }
 
         # Generate records with larger text data
-        compression_records = [{
-                    "type": "RECORD",
-                    "stream": test_table_name,
-                    "record": {
-                        "id": i + 1,
-                        "large_text": "A" * 1000,  # 1KB of repeated data
-                        "description": (
-                            f"Description for record {i + 1} with lots of "
-                            "repeated text " * 10
-                        ),
-                    },
-                } for i in range(100)]
+        compression_records = [
+            {
+                "type": "RECORD",
+                "stream": test_table_name,
+                "record": {
+                    "id": i + 1,
+                    "large_text": "A" * 1000,  # 1KB of repeated data
+                    "description": (
+                        f"Description for record {i + 1} with lots of "
+                        "repeated text " * 10
+                    ),
+                },
+            }
+            for i in range(100): ]
 
         # Process records
         messages = [json.dumps(test_schema)]
         messages.extend([json.dumps(record) for record in compression_records])
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify compression was applied (check table exists and has data)
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
             count = row[0]
             assert count == len(compression_records)
 
-            # Try to check if compression is enabled (may require DBA
-            # privileges)
+            # Try to check if compression is enabled (may require DBA: # privileges)
             try:
+
                 result = conn.execute(
                     text(
-                        f"""
-                    SELECT compression, compress_for
+                f"""
+                SELECT compression, compress_for
                     FROM user_tables
                     WHERE table_name = UPPER('{test_table_name}')
-                """,
-                    ),
-                )
+                """
+                    )
+            """
+        )
                 table_info = result.fetchone()
-                if table_info and table_info.compression:
-                    assert table_info.compression in {"ENABLED", "DISABLED"}
-            except Exception as e:
-                # for debug
-                # TODO: Consider using else block
+                if table_info and table_info.compression: assert table_info.compression in {"ENABLED", "DISABLED"}
+            except Exception: # for debug
+                # TODO(@flext-team):
+            Consider using else block
                 log.exception(
-                    f"Could not access compression info (expected in some "
+                    "Could not access compression info (expected in some "
                     # Link: https://github.com/issue/todo
-                    f"environments)  # TODO(@dev): Replace with proper logging: {e}",
+                    "environments)  # TODO(@dev): Replace with proper logging",
                 )
 
+    @staticmethod
     def test_array_size_optimization(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
         performance_timer,
-    ) -> None:
-        """Test Oracle array size optimization for fetch operations."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure with optimized array size
         array_config = oracle_config.copy()
@@ -417,15 +418,17 @@ class TestOracleSpecificFeatures:
         }
 
         # Generate dataset for array size testing
-        array_records = [{
-                    "type": "RECORD",
-                    "stream": test_table_name,
-                    "record": {
-                        "id": i + 1,
-                        "name": f"Record {i + 1}",
-                        "timestamp": "2025-07-02T10:00:00Z",
-                    },
-                } for i in range(3000)]
+        array_records = [
+            {
+                "type":  "RECORD",
+                "stream": test_table_name,
+                "record": {
+                    "id": i + 1,
+                    "name": f"Record {i + 1}",
+                    "timestamp": "2025-07-02T10:00:00Z",
+                },
+            }
+            for i in range(3000): ]
 
         # Process with timing
         messages = [json.dumps(test_schema)]
@@ -434,13 +437,13 @@ class TestOracleSpecificFeatures:
 
         performance_timer.start()
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         performance_timer.stop()
 
         # Verify array processing results
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -453,15 +456,13 @@ class TestOracleSpecificFeatures:
             throughput > 200
         ), f"Array optimization throughput too low: {throughput:.2f} records/sec"
 
+    @staticmethod
     def test_oracle_data_type_mappings(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ) -> None:
-        """Test Oracle-specific data type mappings."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure with Oracle type settings
         type_config = oracle_config.copy()
@@ -529,11 +530,11 @@ class TestOracleSpecificFeatures:
         messages = [json.dumps(oracle_type_schema), json.dumps(oracle_type_record)]
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify Oracle type mapping results
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT * FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -550,14 +551,15 @@ class TestOracleSpecificFeatures:
             # Check column types in Oracle
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT column_name, data_type, data_length, data_precision, data_scale
                 FROM user_tab_columns
                 WHERE table_name = UPPER('{test_table_name}')
                 ORDER BY column_id
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
 
             columns = result.fetchall()
             column_types = {col.column_name: col.data_type for col in columns}
@@ -568,15 +570,13 @@ class TestOracleSpecificFeatures:
             assert column_types.get("LONG_TEXT") in {"CLOB", "NCLOB"}
             assert column_types.get("PRECISE_DECIMAL") == "NUMBER"
 
+    @staticmethod
     def test_connection_pooling_behavior(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ) -> None:
-        """Test Oracle connection pooling behavior."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure connection pooling
         pool_config = oracle_config.copy()
@@ -590,7 +590,7 @@ class TestOracleSpecificFeatures:
 
         # Create test schema
         test_schema = {
-            "type": "SCHEMA",
+            "type":  "SCHEMA",
             "stream": test_table_name,
             "schema": {
                 "type": "object",
@@ -604,26 +604,27 @@ class TestOracleSpecificFeatures:
         }
 
         # Process records with multiple targets (simulating concurrent access)
-        for worker_id, target in enumerate(targets):
-            worker_records = [{
-                        "type": "RECORD",
-                        "stream": test_table_name,
-                        "record": {
-                            "id": worker_id * 100 + i + 1,
-                            "worker_id": worker_id + 1,
-                            "data": f"Worker {worker_id + 1} Record {i + 1}",
-                        },
-                    } for i in range(100)]
+        for worker_id, target in enumerate(targets): worker_records = [
+                {
+                    "type": "RECORD",
+                    "stream": test_table_name,
+                    "record": {
+                        "id": worker_id * 100 + i + 1,
+                        "worker_id": worker_id + 1,
+                        "data": f"Worker {worker_id + 1} Record {i + 1}",
+                    },
+                }
+                for i in range(100): ]
 
             messages = [json.dumps(test_schema)]
             messages.extend([json.dumps(record) for record in worker_records])
             input_data = "\n".join(messages)
 
-            with patch("sys.stdin", StringIO(input_data)):
-                target.cli()
+            with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify pooled connection results
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -640,15 +641,13 @@ class TestOracleSpecificFeatures:
             worker_ids = [row[0] for row in result.fetchall()]
             assert worker_ids == [1, 2, 3]
 
+    @staticmethod
     def test_oracle_error_handling(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup,
-    ) -> None:
-        """Test Oracle-specific error handling."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure error handling
         error_config = oracle_config.copy()
@@ -687,11 +686,11 @@ class TestOracleSpecificFeatures:
         messages = [json.dumps(constraint_schema), json.dumps(valid_record)]
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify valid record was inserted
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -714,9 +713,7 @@ class TestOracleSpecificFeatures:
 
         # This should handle the duplicate gracefully depending on upsert
         # settings
-        try:
-            with patch("sys.stdin", StringIO(input_data)):
-                target_new.cli()
+        try: with patch("sys.stdin", StringIO(input_data)): target_new.cli()
         except Exception as e:
             # Duplicate errors are expected and should be handled
             assert "unique" in str(e).lower() or "duplicate" in str(e).lower()

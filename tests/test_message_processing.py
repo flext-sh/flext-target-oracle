@@ -1,6 +1,8 @@
-"""
-Test Singer message processing.
-"""
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
+"""Test Singer message processing.
 
 import contextlib
 import json
@@ -10,19 +12,16 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from flext_target_oracle import OracleTarget
 
 log = logging.getLogger(__name__)
 
 
-class TestMessageProcessing:
-    """Test Singer message processing."""
+class TestMessageProcessing:  """Test Singer message processing."""
 
+    @staticmethod
     @pytest.fixture
-    def oracle_config(self) -> Any:
-        """Oracle configuration for testing."""
-        return {
+    def oracle_config() -> Any: return {
             "host": "localhost",
             "username": "test",
             "password": "test",
@@ -30,10 +29,9 @@ class TestMessageProcessing:
             "add_record_metadata": True,
         }
 
+    @staticmethod
     @pytest.fixture
-    def schema_message(self) -> Any:
-        """Sample SCHEMA message."""
-        return {
+    def schema_message() -> Any: return {
             "type": "SCHEMA",
             "stream": "test_stream",
             "schema": {
@@ -47,10 +45,9 @@ class TestMessageProcessing:
             "key_properties": ["id"],
         }
 
+    @staticmethod
     @pytest.fixture
-    def record_messages(self) -> Any:
-        """Sample RECORD messages."""
-        return [
+    def record_messages() -> Any: return [
             {
                 "type": "RECORD",
                 "stream": "test_stream",
@@ -63,36 +60,35 @@ class TestMessageProcessing:
             },
         ]
 
-    def test_schema_message_processing(self, oracle_config, schema_message) -> None:
-        """Test SCHEMA message processing."""
-        """Test SCHEMA message processing."""
-        target = OracleTarget(config=oracle_config)
+    @staticmethod
+    def test_schema_message_processing(oracle_config, schema_message) -> None: target = OracleTarget(config=oracle_config)
 
         # Create input with schema message
         input_data = json.dumps(schema_message)
 
         # Mock connector to avoid actual DB connection
-        with patch.object(target, "default_sink_class") as mock_sink_class:
-            mock_sink = MagicMock()
+        with patch.object(target, "default_sink_class") as mock_sink_class: mock_sink = MagicMock()
             mock_sink_class.return_value = mock_sink
 
-            with patch("sys.stdin", StringIO(input_data)):
-                # Process should handle schema message
+            with patch("sys.stdin", StringIO(input_data)): # Process should handle schema message
                 try:
                     target.listen(file_input=StringIO(input_data))
-                except Exception as e:
-                    # Expected when input ends - log for debugging
-                    # TODO: Consider using else block
+                except Exception:
+            # Expected when input ends - log for debugging
+                    # TODO(@flext-team):
+            Consider using else block
                     log.exception(
-                        f"Expected EOF after processing input: {e}",
-                    # TODO(@dev): Replace with proper logging  # Link:
-                    # https://github.com/issue/todo
+                        "Expected EOF after processing input",
+                        # TODO(@dev): Replace with proper logging  # Link:
+                        # https://github.com/issue/todo
                     )
 
+    @staticmethod
     def test_record_message_processing(
-        self, oracle_config, schema_message, record_messages,
+        oracle_config,
+        schema_message,
+        record_messages,
     ) -> None:
-        """Test RECORD message processing."""
         target = OracleTarget(config=oracle_config)
 
         # Create input with schema and records
@@ -100,19 +96,18 @@ class TestMessageProcessing:
         input_data = "\n".join(json.dumps(msg) for msg in messages)
 
         # Mock sink to capture processed records
-        with patch.object(target, "default_sink_class") as mock_sink_class:
-            mock_sink = MagicMock()
+        with patch.object(target, "default_sink_class") as mock_sink_class: mock_sink = MagicMock()
             mock_sink_class.return_value = mock_sink
 
-            with (
+            with (:
+
+
                 patch("sys.stdin", StringIO(input_data)),
                 contextlib.suppress(EOFError),
-            ):
-                target.listen(file_input=StringIO(input_data))
+            ): target.listen(file_input=StringIO(input_data))
 
-    def test_state_message_processing(self, oracle_config) -> None:
-        """Test STATE message processing."""
-        """Test STATE message processing."""
+    @staticmethod
+    def test_state_message_processing(oracle_config) -> None:
         target = OracleTarget(config=oracle_config)
 
         state_message = {
@@ -129,22 +124,18 @@ class TestMessageProcessing:
 
         input_data = json.dumps(state_message)
 
-        with (
-            patch("sys.stdin", StringIO(input_data)),
+        with (: patch("sys.stdin", StringIO(input_data)),
             patch("sys.stdout", new_callable=StringIO) as mock_stdout,
             contextlib.suppress(EOFError),
-        ):
-            target.listen(file_input=StringIO(input_data))
+        ): target.listen(file_input=StringIO(input_data))
 
             # State should be written to stdout
             output = mock_stdout.getvalue()
             if output:
                 assert "STATE" in output or json.dumps(state_message["value"]) in output
 
-    def test_activate_version_message(self, oracle_config, schema_message) -> None:
-        """Test ACTIVATE_VERSION message processing."""
-        """Test ACTIVATE_VERSION message processing."""
-        target = OracleTarget(config=oracle_config)
+    @staticmethod
+    def test_activate_version_message(oracle_config, schema_message) -> None: target = OracleTarget(config=oracle_config)
 
         # First send schema
         messages = [
@@ -154,19 +145,18 @@ class TestMessageProcessing:
 
         input_data = "\n".join(json.dumps(msg) for msg in messages)
 
-        with patch.object(target, "default_sink_class") as mock_sink_class:
-            mock_sink = MagicMock()
+        with patch.object(target, "default_sink_class") as mock_sink_class: mock_sink = MagicMock()
             mock_sink_class.return_value = mock_sink
 
-            with (
+            with (:
+
+
                 patch("sys.stdin", StringIO(input_data)),
                 contextlib.suppress(EOFError),
-            ):
-                target.listen(file_input=StringIO(input_data))
+            ): target.listen(file_input=StringIO(input_data))
 
-    def test_batch_processing(self, oracle_config, schema_message) -> None:
-        """Test batch message processing."""
-        """Test batch message processing."""
+    @staticmethod
+    def test_batch_processing(oracle_config, schema_message) -> None:
         # Configure for batching
         batch_config = oracle_config.copy()
         batch_config["batch_config"] = {
@@ -178,38 +168,39 @@ class TestMessageProcessing:
 
         # Create many records to trigger batching
         messages = [schema_message]
-        messages.extend({
-                    "type": "RECORD",
-                    "stream": "test_stream",
-                    "record": {
-                        "id": i + 1,
-                        "name": f"Record {i + 1}",
-                        "value": float(i * 10),
-                    },
-                } for i in range(10))
+        messages.extend(
+            {
+                "type": "RECORD",
+                "stream": "test_stream",
+                "record": {
+                    "id": i + 1,
+                    "name": f"Record {i + 1}",
+                    "value": float(i * 10),
+                },
+            }
+            for i in range(10): )
 
         input_data = "\n".join(json.dumps(msg) for msg in messages)
 
-        with patch.object(target, "default_sink_class") as mock_sink_class:
-            mock_sink = MagicMock()
+        with patch.object(target, "default_sink_class") as mock_sink_class: mock_sink = MagicMock()
             mock_sink_class.return_value = mock_sink
 
-            with (
+            with (:
+
+
                 patch("sys.stdin", StringIO(input_data)),
                 contextlib.suppress(EOFError),
-            ):
-                target.listen(file_input=StringIO(input_data))
+            ): target.listen(file_input=StringIO(input_data))
 
-    def test_multiple_streams(self, oracle_config) -> None:
-        """Test processing multiple streams."""
-        """Test processing multiple streams."""
+    @staticmethod
+    def test_multiple_streams(oracle_config) -> None:
         target = OracleTarget(config=oracle_config)
 
         # Messages for multiple streams
         messages = [
             # Stream 1
             {
-                "type": "SCHEMA",
+                "type":  "SCHEMA",
                 "stream": "stream1",
                 "schema": {
                     "type": "object",
@@ -247,19 +238,18 @@ class TestMessageProcessing:
 
         input_data = "\n".join(json.dumps(msg) for msg in messages)
 
-        with patch.object(target, "default_sink_class") as mock_sink_class:
-            mock_sink = MagicMock()
+        with patch.object(target, "default_sink_class") as mock_sink_class: mock_sink = MagicMock()
             mock_sink_class.return_value = mock_sink
 
-            with (
+            with (:
+
+
                 patch("sys.stdin", StringIO(input_data)),
                 contextlib.suppress(EOFError),
-            ):
-                target.listen(file_input=StringIO(input_data))
+            ): target.listen(file_input=StringIO(input_data))
 
-    def test_invalid_message_handling(self, oracle_config) -> None:
-        """Test handling of invalid messages."""
-        """Test handling of invalid messages."""
+    @staticmethod
+    def test_invalid_message_handling(oracle_config) -> None:
         target = OracleTarget(config=oracle_config)
 
         # Invalid message (missing type)
@@ -272,19 +262,22 @@ class TestMessageProcessing:
             '{"type": "UNKNOWN", "stream": "test"}',  # Unknown message type
         ]
 
-        for msg in messages:
-            with (
-                patch("sys.stdin", StringIO(msg)),
+        for msg in messages: with (:
+    patch("sys.stdin", StringIO(msg)),
                 contextlib.suppress(
-                    json.JSONDecodeError, EOFError, KeyError, Exception,
+                    json.JSONDecodeError,
+                    EOFError,
+                    KeyError,
+                    Exception,
                 ),
-            ):
-                target.listen(file_input=StringIO(msg))
+            ): target.listen(file_input=StringIO(msg))
 
+    @staticmethod
     def test_record_metadata(
-        self, oracle_config, schema_message, record_messages,
+        oracle_config,
+        schema_message,
+        record_messages,
     ) -> None:
-        """Test Singer metadata column handling."""
         target = OracleTarget(config=oracle_config)
 
         # Add metadata to records
@@ -298,11 +291,12 @@ class TestMessageProcessing:
         messages = [schema_message, *records_with_metadata]
         input_data = "\n".join(json.dumps(msg) for msg in messages)
 
-        with patch.object(target, "default_sink_class") as mock_sink_class:
-            mock_sink = MagicMock()
+        with patch.object(target, "default_sink_class") as mock_sink_class: mock_sink = MagicMock()
             mock_sink_class.return_value = mock_sink
 
-            with (
+            with (:
+
+
                 patch("sys.stdin", StringIO(input_data)),
                 contextlib.suppress(EOFError),
             ):

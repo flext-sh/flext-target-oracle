@@ -1,16 +1,17 @@
-"""Test configuration validation and parameter handling."""
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
+"""Test configuration validation and parameter handling.
 
 import pytest
-
 from flext_target_oracle import OracleTarget
 
 
-class TestConfiguration:
-    """Test configuration validation."""
+class TestConfiguration:  """Test configuration validation."""
 
-    def test_minimal_config(self) -> None:
-        """Test minimal required configuration."""
-        config = {
+    @staticmethod
+    def test_minimal_config() -> None: config = {
             "host": "localhost",
             "username": "test_user",
             "password": "test_password",
@@ -22,16 +23,14 @@ class TestConfiguration:
         assert target.config["host"] == "localhost"
         assert target.config.get("port", 1521) == 1521
 
-    def test_missing_required_fields(self) -> None:
-        """Test error on missing required fields."""
-        # Missing host
+    @staticmethod
+    def test_missing_required_fields() -> None: # Missing host
         config = {"username": "test_user", "password": "test_password"}
 
-        with pytest.raises((ValueError, ConnectionError, Exception)):
-            OracleTarget(config=config)
+        with pytest.raises((ValueError, ConnectionError, Exception)): OracleTarget(config=config)
 
-    def test_all_connection_parameters(self) -> None:
-        """Test all connection parameters."""
+    @staticmethod
+    def test_all_connection_parameters() -> None:
         config = {
             "host": "oracle.example.com",
             "port": 1522,
@@ -51,9 +50,8 @@ class TestConfiguration:
         assert target.config["protocol"] == "tcps"
         assert target.config["wallet_location"] == "/path/to/wallet"
 
-    def test_performance_parameters(self) -> None:
-        """Test performance configuration parameters."""
-        config = {
+    @staticmethod
+    def test_performance_parameters() -> None: config = {
             "host": "localhost",
             "username": "test",
             "password": "test",
@@ -74,9 +72,8 @@ class TestConfiguration:
         assert target.config["parallel_degree"] == 4
         assert target.config["use_bulk_operations"] is True
 
-    def test_oracle_specific_features(self) -> None:
-        """Test Oracle-specific feature configuration."""
-        config = {
+    @staticmethod
+    def test_oracle_specific_features() -> None: config = {
             "host": "localhost",
             "username": "test",
             "password": "test",
@@ -96,9 +93,8 @@ class TestConfiguration:
         assert target.config["compression_type"] == "advanced"
         assert target.config["partition_type"] == "range"
 
-    def test_data_type_configuration(self) -> None:
-        """Test data type configuration parameters."""
-        config = {
+    @staticmethod
+    def test_data_type_configuration() -> None: config = {
             "host": "localhost",
             "username": "test",
             "password": "test",
@@ -119,9 +115,8 @@ class TestConfiguration:
         assert target.config["use_nvarchar"] is True
         assert target.config["timestamp_timezone"] == "America/New_York"
 
-    def test_sqlalchemy_configuration(self) -> None:
-        """Test SQLAlchemy engine configuration."""
-        config = {
+    @staticmethod
+    def test_sqlalchemy_configuration() -> None: config = {
             "host": "localhost",
             "username": "test",
             "password": "test",
@@ -141,9 +136,8 @@ class TestConfiguration:
         assert target.config["echo"] is True
         assert target.config["isolation_level"] == "SERIALIZABLE"
 
-    def test_monitoring_configuration(self) -> None:
-        """Test monitoring and logging configuration."""
-        config = {
+    @staticmethod
+    def test_monitoring_configuration() -> None: config = {
             "host": "localhost",
             "username": "test",
             "password": "test",
@@ -161,9 +155,8 @@ class TestConfiguration:
         assert target.config["log_level"] == "DEBUG"
         assert target.config["log_sql_statements"] is True
 
-    def test_load_method_configuration(self) -> None:
-        """Test different load method configurations."""
-        # Append-only (default)
+    @staticmethod
+    def test_load_method_configuration() -> None: # Append-only (default)
         config = {
             "host": "localhost",
             "username": "test",
@@ -184,9 +177,8 @@ class TestConfiguration:
         target = OracleTarget(config=config)
         assert target.config["load_method"] == "overwrite"
 
-    def test_default_values(self) -> None:
-        """Test default configuration values."""
-        config = {
+    @staticmethod
+    def test_default_values() -> None: config = {
             "host": "localhost",
             "username": "test",
             "password": "test",

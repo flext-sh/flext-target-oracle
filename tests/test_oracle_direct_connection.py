@@ -1,3 +1,7 @@
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Direct Oracle connection test without SQLAlchemy."""
 
 import os
@@ -9,9 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def test_direct_connection() -> None:
-    """Test direct oracledb connection."""
-    # Get connection parameters
+def test_direct_connection() -> None:  # Get connection parameters
     host = os.getenv("DATABASE__HOST")
     port = int(os.getenv("DATABASE__PORT", "1521"))
     service_name = os.getenv("DATABASE__SERVICE_NAME")
@@ -20,8 +22,9 @@ def test_direct_connection() -> None:
     protocol = os.getenv("DATABASE__PROTOCOL", "tcp")
 
     # Build DSN
-    if protocol == "tcps":
-        # For TCPS with IP address, we need to disable SSL verification
+    if (
+        protocol == "tcps"
+    ):  # For TCPS with IP address, we need to disable SSL verification
         dsn = f"""(DESCRIPTION=
             (ADDRESS=(PROTOCOL=TCPS)(HOST={host})(PORT={port}))
             (CONNECT_DATA=(SERVICE_NAME={service_name}))
@@ -30,8 +33,7 @@ def test_direct_connection() -> None:
     else:
         dsn = f"{host}:{port}/{service_name}"
 
-    try:
-        # Connect with ssl_server_dn_match=False for IP connections
+    try:  # Connect with ssl_server_dn_match=False for IP connections
         connection = oracledb.connect(
             user=username,
             password=password,
@@ -50,8 +52,7 @@ def test_direct_connection() -> None:
 
         connection.close()
 
-    except Exception:
-        # TODO: Consider using else block
+    except Exception:  # TODO(@flext-team): Consider using else block
         raise
 
 

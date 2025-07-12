@@ -1,3 +1,9 @@
+from typing import Any
+
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Comprehensive bulk operations and performance optimization tests.
 
 These tests validate high-volume data loading scenarios, parallel processing,
@@ -12,16 +18,15 @@ import random
 import time
 from datetime import UTC, datetime, timedelta
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import pytest
+from flext_target_oracle.target import OracleTarget
 from sqlalchemy import text
 
-from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
 
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
+if TYPE_CHECKING: from sqlalchemy.engine import Engine
 
 log = logging.getLogger(__name__)
 
@@ -32,16 +37,14 @@ log = logging.getLogger(__name__)
 class TestBulkOperations:
     """Test bulk operations and performance optimizations."""
 
+    @staticmethod
     def test_large_batch_insert_performance(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
         performance_timer: Any,
-    ) -> None:
-        """Test large batch insert performance with 10k+ records."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Generate large dataset
         record_count = 10000
@@ -87,8 +90,7 @@ class TestBulkOperations:
         base_time = datetime.now(UTC)
         record_messages = []
 
-        for i in range(record_count):
-            record_time = base_time + timedelta(seconds=i)
+        for i in range(record_count): record_time = base_time + timedelta(seconds=i)
             record = {
                 "type": "RECORD",
                 "stream": test_table_name,
@@ -121,8 +123,7 @@ class TestBulkOperations:
         performance_timer.stop()
 
         # Verify all records were loaded
-        with oracle_engine.connect() as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+        with oracle_engine.connect() as conn: result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert (
                 count == record_count
@@ -131,46 +132,46 @@ class TestBulkOperations:
             # Verify data sampling
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT id, name, score, active
                 FROM {test_table_name}
                 WHERE id IN (1, 5000, 10000)
                 ORDER BY id
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             rows = result.fetchall()
             assert len(rows) >= 2, "Sample records not found"
 
         # Performance validation
         throughput = record_count / performance_timer.duration
         log.error(
-            f"Large batch performance: {throughput:.0f} records/second",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Large batch performance: %.0f records/second",
+            throughput,
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
-            f"Total time: {performance_timer.duration:.2f}s",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Total time: %.2fs",
+            performance_timer.duration,
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
 
         # Should achieve reasonable throughput (adjust based on your Oracle
         # setup)
-        assert (
-            throughput > 100
-        ), f"Throughput too low: {
-            throughput:.0f} records/second"
+        assert throughput > 100, f"Throughput too low: {throughput:.0f} records/second"
         assert (
             performance_timer.duration < 120
         ), f"Load took too long: {performance_timer.duration:.2f}s"
 
+    @staticmethod
     def test_parallel_processing_performance(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
         performance_timer: Any,
-    ) -> None:
-        """Test parallel processing with multiple threads."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Create target with parallel processing
         config = oracle_config.copy()
@@ -205,8 +206,7 @@ class TestBulkOperations:
         }
 
         record_messages = []
-        for i in range(record_count):
-            record = {
+        for i in range(record_count): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
@@ -229,8 +229,7 @@ class TestBulkOperations:
         performance_timer.stop()
 
         # Verify results
-        with oracle_engine.connect() as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+        with oracle_engine.connect() as conn: result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert (
                 count == record_count
@@ -239,20 +238,20 @@ class TestBulkOperations:
             # Verify data distribution across threads
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT thread_id, COUNT(*)
                 FROM {test_table_name}
                 GROUP BY thread_id
                 ORDER BY thread_id
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             thread_counts: dict[int, Any] = dict(result.fetchall())
 
             # Each thread should have processed approximately equal amounts
             expected_per_thread = record_count // 4
-            for thread_id in range(1, 5):
-                assert thread_id in thread_counts, f"Thread {thread_id} data not found"
+            for thread_id in range(1, 5): assert thread_id in thread_counts, f"Thread {thread_id} data not found"
                 assert thread_counts[thread_id] == expected_per_thread, (
                     f"Thread {thread_id}: expected {expected_per_thread}, "
                     f"got {thread_counts[thread_id]}"
@@ -260,20 +259,19 @@ class TestBulkOperations:
 
         throughput = record_count / performance_timer.duration
         log.error(
-            f"Parallel processing performance: {
-                throughput:.0f} records/second",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Parallel processing performance: %.0f records/second",
+            throughput,
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
 
+    @staticmethod
     def test_upsert_performance_large_dataset(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
         performance_timer: Any,
-    ) -> None:
-        """Test MERGE (upsert) performance with large dataset."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Create target with upsert configuration
         config = oracle_config.copy()
@@ -310,8 +308,7 @@ class TestBulkOperations:
         initial_count = 5000
         initial_messages = []
 
-        for i in range(initial_count):
-            record = {
+        for i in range(initial_count): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
@@ -332,28 +329,24 @@ class TestBulkOperations:
         oracle_target.process_lines(input_stream)
 
         # Verify initial load
-        with oracle_engine.connect() as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+        with oracle_engine.connect() as conn: result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert (
                 count == initial_count
             ), f"Initial load failed: expected {initial_count}, got {count}"
 
         # Upsert load - update existing + add new records
-        update_messages = []
+        update_messages = {}
 
         # Update first 3000 records (increase login count)
-        for i in range(3000):
-            record = {
+        for i in range(3000): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
                     "user_id": i + 1,
                     "username": f"user_{i + 1}",
                     "email": f"user_{i + 1}@example.com",
-                    "last_login": (
-                        datetime.now(UTC) + timedelta(hours=1)
-                    ).isoformat()
+                    "last_login": (datetime.now(UTC) + timedelta(hours=1)).isoformat()
                     + "Z",
                     "login_count": 2,  # Updated
                 },
@@ -362,8 +355,7 @@ class TestBulkOperations:
             update_messages.append(record)
 
         # Add 2000 new records
-        for i in range(initial_count, initial_count + 2000):
-            record = {
+        for i in range(initial_count, initial_count + 2000): record = {
                 "type": "RECORD",
                 "stream": test_table_name,
                 "record": {
@@ -386,8 +378,7 @@ class TestBulkOperations:
         performance_timer.stop()
 
         # Verify upsert results
-        with oracle_engine.connect() as conn:
-            # Total count should be 7000 (5000 initial + 2000 new)
+        with oracle_engine.connect() as conn: # Total count should be 7000 (5000 initial + 2000 new)
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             total_count = result.scalar()
             expected_total = initial_count + 2000
@@ -398,12 +389,13 @@ class TestBulkOperations:
             # Check updated records
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT COUNT(*) FROM {test_table_name}
                 WHERE user_id <= 3000 AND login_count = 2
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             updated_count = result.scalar()
             assert (
                 updated_count == 3000
@@ -412,12 +404,13 @@ class TestBulkOperations:
             # Check new records
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT COUNT(*) FROM {test_table_name}
                 WHERE user_id > {initial_count}
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             new_count = result.scalar()
             assert new_count == 2000, f"Expected 2000 new records, got {new_count}"
 
@@ -425,18 +418,18 @@ class TestBulkOperations:
             3000 + 2000
         ) / performance_timer.duration  # Total processed records
         log.error(
-            f"Upsert performance: {throughput:.0f} records/second",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Upsert performance: %.0f records/second",
+            throughput,
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
 
+    @staticmethod
     def test_memory_efficient_streaming(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
-    ) -> None:
-        """Test memory-efficient streaming for very large datasets."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Create target with streaming configuration
         config = oracle_config.copy()
@@ -470,8 +463,7 @@ class TestBulkOperations:
         record_count = 5000
         record_messages = []
 
-        for i in range(record_count):
-            # Create large text data
+        for i in range(record_count): # Create large text data
             large_text = (
                 f"Large text data for record {i + 1}. " * 50
             )  # ~1.5KB per record
@@ -501,8 +493,7 @@ class TestBulkOperations:
         oracle_target.process_lines(input_stream)
 
         # Verify streaming results
-        with oracle_engine.connect() as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+        with oracle_engine.connect() as conn: result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert (
                 count == record_count
@@ -511,38 +502,33 @@ class TestBulkOperations:
             # Verify large data was stored correctly
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT id, LENGTH(large_text), json_data
                 FROM {test_table_name}
                 WHERE id IN (1, 2500, 5000)
                 ORDER BY id
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             rows = result.fetchall()
             assert len(rows) == 3, "Sample records not found"
 
-            for row in rows:
-                # Large text should be around 1500 characters
-                assert (
-                    row[1] > 1000
-                ), f"Large text too small: {
-                    row[1]} characters"
+            for row in rows: # Large text should be around 1500 characters
+                assert row[1] > 1000, f"Large text too small: {row[1]} characters"
 
                 # JSON data should be valid
                 json_data = json.loads(row[2])
                 assert "record_id" in json_data, "JSON data corrupted"
                 assert json_data["record_id"] == row[0], "JSON data mismatch"
 
+    @staticmethod
     def test_connection_pool_efficiency(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
-    ) -> None:
-        """Test connection pool efficiency under load."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Create target with optimized pool settings
         config = oracle_config.copy()
@@ -577,8 +563,7 @@ class TestBulkOperations:
         num_batches = 5
         records_per_batch = 1000
 
-        for batch_num in range(num_batches):
-            oracle_target = OracleTarget(config=config)
+        for batch_num in range(num_batches): oracle_target = OracleTarget(config=config)
 
             record_messages = []
             for i in range(records_per_batch):
@@ -596,8 +581,7 @@ class TestBulkOperations:
                 record_messages.append(record)
 
             # Process batch
-            if batch_num == 0:
-                messages = [schema_message, *record_messages]
+            if batch_num == 0: messages = [schema_message, *record_messages]
             else:
                 messages = record_messages
 
@@ -611,8 +595,7 @@ class TestBulkOperations:
             time.sleep(0.1)
 
         # Verify all batches were processed
-        with oracle_engine.connect() as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+        with oracle_engine.connect() as conn: result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
             assert (
                 count == total_records
@@ -621,32 +604,30 @@ class TestBulkOperations:
             # Verify batch distribution
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT batch_num, COUNT(*)
                 FROM {test_table_name}
                 GROUP BY batch_num
                 ORDER BY batch_num
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             batch_counts: dict[int, Any] = dict(result.fetchall())
 
-            for batch_num in range(1, num_batches + 1):
-                assert batch_num in batch_counts, f"Batch {batch_num} not found"
+            for batch_num in range(1, num_batches + 1): assert batch_num in batch_counts, f"Batch {batch_num} not found"
                 assert batch_counts[batch_num] == records_per_batch, (
                     f"Batch {batch_num}: expected {records_per_batch}, "
                     f"got {batch_counts[batch_num]}"
                 )
 
+    @staticmethod
     def test_error_recovery_bulk_operations(
-        self,
         oracle_config: dict[str, Any],
         oracle_engine: Engine,
         test_table_name: str,
         table_cleanup: Any,
-    ) -> None:
-        """Test error recovery during bulk operations."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Create target with error recovery settings
         config = oracle_config.copy()
@@ -681,9 +662,8 @@ class TestBulkOperations:
         record_messages = []
         valid_record_count = 0
 
-        for i in range(2000):
-            if i % 500 == 0 and i > 0:
-                # Every 500th record has potential issue (very long name)
+        for i in range(2000): if i % 500 == 0 and i > 0:
+     # Every 500th record has potential issue (very long name)
                 record = {
                     "type": "RECORD",
                     "stream": test_table_name,
@@ -694,8 +674,7 @@ class TestBulkOperations:
                     },
                     "time_extracted": datetime.now(UTC).isoformat() + "Z",
                 }
-            else:
-                # Normal valid record
+            else: # Normal valid record
                 record = {
                     "type": "RECORD",
                     "stream": test_table_name,
@@ -715,20 +694,20 @@ class TestBulkOperations:
         input_lines = [json.dumps(msg) + "\n" for msg in messages]
         input_stream = StringIO("".join(input_lines))
 
-        try:
-            oracle_target.process_lines(input_stream)
-        except Exception as e:
-            # TODO: Consider using else block
+        try: oracle_target.process_lines(input_stream)
+        except Exception:
+
+            # TODO(@flext-team): Consider using else block
+
             log.exception(
-                f"Processing completed with expected errors: {e}",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+                "Processing completed with expected errors",
+            )  # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
 
         # Verify that valid records were processed despite errors
-        with oracle_engine.connect() as conn:
-            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
+        with oracle_engine.connect() as conn: result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             count = result.scalar()
-            if count is None:
-                count = 0
+            if count is None: count = 0
 
             # Should have most of the valid records
             assert (
@@ -738,16 +717,16 @@ class TestBulkOperations:
             # Verify data quality
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT category, COUNT(*)
                 FROM {test_table_name}
                 GROUP BY category
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             categories: dict[str, Any] = dict(result.fetchall())
 
             # Should have the valid categories
             expected_categories = ["standard", "premium", "basic"]
-            for cat in expected_categories:
-                assert cat in categories, f"Category {cat} not found"
+            for cat in expected_categories: assert cat in categories, f"Category {cat} not found"

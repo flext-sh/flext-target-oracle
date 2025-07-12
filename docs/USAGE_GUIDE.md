@@ -57,15 +57,15 @@ tap-salesforce --state state.json | target-oracle --config config.json
   "user": "etl_user",
   "password": "${ORACLE_PASSWORD}",
   "service_name": "PRODDB",
-  
+
   "default_target_schema": "DW",
   "table_prefix": "SINGER_",
-  
+
   "batch_size_rows": 50000,
   "parallel_threads": 8,
   "pool_size": 20,
   "pool_recycle": 3600,
-  
+
   "load_method": "append-only",
   "add_record_metadata": true,
   "use_direct_path": true,
@@ -81,15 +81,15 @@ tap-salesforce --state state.json | target-oracle --config config.json
   "user": "bulk_loader",
   "password": "${ORACLE_PASSWORD}",
   "service_name": "DW",
-  
+
   "batch_size_rows": 100000,
   "parallel_threads": 16,
   "pool_size": 50,
-  
+
   "use_direct_path": true,
   "enable_parallel_dml": true,
   "optimizer_mode": "ALL_ROWS",
-  
+
   "alter_session": [
     "ALTER SESSION SET PARALLEL_DEGREE_POLICY = AUTO",
     "ALTER SESSION SET PARALLEL_MIN_TIME_THRESHOLD = 1"
@@ -110,6 +110,7 @@ Fastest method, always inserts new records:
 ```
 
 **Use when:**
+
 - Loading to staging tables
 - Processing immutable event streams
 - Performance is critical
@@ -125,6 +126,7 @@ Updates existing records, inserts new ones:
 ```
 
 **Use when:**
+
 - Loading dimension tables
 - Syncing master data
 - Need latest version of records
@@ -142,6 +144,7 @@ Truncates table before loading:
 ```
 
 **Use when:**
+
 - Full refreshes
 - Small reference tables
 - Testing environments
@@ -154,11 +157,12 @@ Adjust based on available memory:
 
 ```json
 {
-  "batch_size_rows": 10000  // Default, good for most cases
+  "batch_size_rows": 10000 // Default, good for most cases
 }
 ```
 
 **Guidelines:**
+
 - Small records: 50,000-100,000
 - Large records: 5,000-10,000
 - Limited memory: 1,000-5,000
@@ -175,6 +179,7 @@ Enable for large datasets:
 ```
 
 **Guidelines:**
+
 - CPU cores × 2 = good starting point
 - Monitor CPU usage and adjust
 - Diminishing returns above 16 threads
@@ -192,6 +197,7 @@ Configure based on parallelism:
 ```
 
 **Guidelines:**
+
 - pool_size = parallel_threads × 2
 - pool_recycle prevents stale connections
 - pool_timeout prevents hanging
@@ -208,11 +214,13 @@ Enable for bulk loads:
 ```
 
 **Benefits:**
+
 - Bypasses buffer cache
 - Faster for large batches
 - Less redo log generation
 
 **Limitations:**
+
 - No triggers fired
 - No foreign key checks during load
 - Exclusive table lock
@@ -243,6 +251,7 @@ Enable pattern recognition for better types:
 ```
 
 Automatically maps:
+
 - `customer_id` → NUMBER(38,0)
 - `active_flg` → NUMBER(1,0)
 - `created_ts` → TIMESTAMP WITH TIME ZONE
@@ -259,6 +268,7 @@ Automatically added when enabled:
 ```
 
 Adds columns:
+
 - `CREATE_USER`: Who created the record
 - `CREATE_TS`: When created
 - `MOD_USER`: Who last modified
@@ -311,7 +321,7 @@ Enable detailed logging:
 
 ```json
 {
-  "echo": true,  // Log SQL statements
+  "echo": true, // Log SQL statements
   "log_level": "DEBUG"
 }
 ```
@@ -421,6 +431,7 @@ tap-source | target-oracle --config config.json || {
 **Symptom:** Slow loading
 
 **Solutions:**
+
 1. Increase batch size
 2. Enable parallel processing
 3. Use direct path loading
@@ -431,6 +442,7 @@ tap-source | target-oracle --config config.json || {
 **Error:** `MemoryError`
 
 **Solutions:**
+
 1. Reduce batch size
 2. Disable parallelism
 3. Process streams separately
@@ -440,6 +452,7 @@ tap-source | target-oracle --config config.json || {
 **Error:** `ORA-01722: invalid number`
 
 **Solutions:**
+
 1. Check source data quality
 2. Enable type validation
 3. Use CLOB for mixed types

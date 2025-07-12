@@ -1,3 +1,7 @@
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Test modern Oracle target implementation.
 
 Unit tests for target orchestration and sink management.
@@ -17,28 +21,38 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from flext_target_oracle.target import OracleTarget
 
 
-class TestOracleTarget:
-    """Test Oracle target functionality."""
+class TestOracleTarget:  """Test Oracle target functionality."""
 
-    def test_target_initialization(self, flat_oracle_config: dict[str, Any]) -> None:
-        """Test target initialization with configuration."""
+    @staticmethod
+    def test_target_initialization(flat_oracle_config: dict[str, Any]) -> None:  """Test Oracle target initialization with configuration.
+
+        Args: flat_oracle_config: Flat configuration dictionary for Oracle target.
+
+        """
         target = OracleTarget(config=flat_oracle_config)
         assert target.name == "target-oracle"
         assert target.oracle_config.connection.host == "localhost"
 
-    def test_get_sink_requires_schema(self, flat_oracle_config: dict[str, Any]) -> None:
-        """Test that get_sink requires schema parameter."""
+    @staticmethod
+    def test_get_sink_requires_schema(flat_oracle_config: dict[str, Any]) -> None:  """Test that get_sink method requires schema parameter.
+
+        Args: flat_oracle_config: Flat configuration dictionary for Oracle target.
+
+        """
         target = OracleTarget(config=flat_oracle_config)
 
-        with pytest.raises(ValueError, match="Schema is required"):
-            target.get_sink("test_stream")
+        with pytest.raises(ValueError, match="Schema is required"): target.get_sink("test_stream")
 
+    @staticmethod
     def test_get_sink_with_schema(
-        self,
         flat_oracle_config: dict[str, Any],
         sample_schema: dict[str, Any],
-    ) -> None:
-        """Test sink creation with valid schema."""
+    ) -> None:  """Test get_sink method with valid schema parameter.
+
+        Args: flat_oracle_config: Flat configuration dictionary for Oracle target.
+            sample_schema: Sample JSON schema for testing.
+
+        """
         target = OracleTarget(config=flat_oracle_config)
 
         sink = target.get_sink(
@@ -53,8 +67,12 @@ class TestOracleTarget:
         assert hasattr(sink, "stream_name")
         assert hasattr(sink, "schema")
 
-    def test_config_jsonschema_includes_required_fields(self) -> None:
-        """Test that config schema includes required Oracle fields."""
+    @staticmethod
+    def test_config_jsonschema_includes_required_fields() -> None:  """Test that configuration JSON schema includes all required fields.
+
+        Validates that host, username, and password fields are present
+        and marked as required in the configuration schema.
+        """
         schema = OracleTarget.config_jsonschema
         properties = schema["properties"]
 
@@ -68,4 +86,3 @@ class TestOracleTarget:
         assert "host" in required
         assert "username" in required
         assert "password" in required
-
