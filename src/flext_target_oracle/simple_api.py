@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from flext_core import ServiceResult
 from flext_observability.logging import setup_logging
-from flext_target_oracle.config import TargetOracleConfig
+from flext_target_oracle.domain.models import TargetConfig as TargetOracleConfig
 
 
 def setup_oracle_target(

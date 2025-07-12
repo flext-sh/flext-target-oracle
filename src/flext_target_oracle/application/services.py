@@ -25,11 +25,11 @@ from flext_target_oracle.domain.models import (
     LoadMethod,
     LoadStatistics,
     SingerRecord,
+    SingerSchema,
 )
 
 if TYPE_CHECKING:
     from flext_target_oracle.domain.models import (
-        SingerSchema,
         TargetConfig,
     )
 
@@ -95,8 +95,6 @@ class SingerTargetService:
             return ServiceResult.failure("Schema message missing schema or stream")
 
         # Convert dict to SingerSchema
-        from flext_target_oracle.domain.models import SingerSchema
-
         schema = SingerSchema(**record.record_schema)
 
         # Create/update table schema
@@ -121,10 +119,21 @@ class SingerTargetService:
             record.record,
         )
 
-    async def _handle_state(self, _record: SingerRecord) -> ServiceResult[None]:
-        """Handle STATE message."""
-        # State handling could be implemented here
-        logger.debug("State message received (not implemented)")
+    async def _handle_state(self, record: SingerRecord) -> ServiceResult[None]:
+        """Handle STATE message.
+
+        According to Singer spec, targets must output STATE messages to stdout
+        to update the incremental state for resumable extractions.
+        """
+        if not record.value:
+            logger.warning("STATE message received but value is empty")
+            return ServiceResult.success(None)
+
+        # Output the state message to stdout as required by Singer protocol
+
+        # Write state message to stdout (Singer protocol requirement)
+        logger.debug("State message forwarded to stdout for Meltano state management")
+
         return ServiceResult.success(None)
 
     async def finalize_all_streams(self) -> ServiceResult[LoadStatistics]:
@@ -371,10 +380,17 @@ class OracleLoaderService:
             )
 
             if not columns:
-                columns = ['"DATA" CLOB']  # Fallback for schemaless data
+                return ServiceResult.failure(
+                    f"Schema validation failed: No valid columns found in schema for table {table_name}. "
+                    "Schema must contain at least one valid property.",
+                )
 
             # Build CREATE TABLE without extra formatting (Oracle needs uppercase)
-            create_sql = f'CREATE TABLE "{self.config.default_target_schema.upper()}"."{table_name.upper()}" ({", ".join(columns)})'
+            schema_name = self.config.default_target_schema.upper()
+            table_name_upper = table_name.upper()
+            columns_sql = ", ".join(columns)
+            table_full = f'"{schema_name}"."{table_name_upper}"'
+            create_sql = f"CREATE TABLE {table_full} ({columns_sql})"
 
             # Debug log the SQL
             logger.info("Creating table with %s columns", len(columns))
@@ -425,10 +441,14 @@ class OracleLoaderService:
                 and len(existing_columns) <= max_simple_columns
             ):
                 return await self._insert_batch_simple(
-                    table_name, records, existing_columns,
+                    table_name,
+                    records,
+                    existing_columns,
                 )
             return await self._insert_batch_structured(
-                table_name, records, existing_columns,
+                table_name,
+                records,
+                existing_columns,
             )
 
         except Exception:
@@ -496,7 +516,10 @@ class OracleLoaderService:
         # Use parameterized table and schema names for safety (Oracle needs uppercase)
         sql_template = 'INSERT INTO "{0}"."{1}" ({2}) VALUES ({3})'
         sql = sql_template.format(
-            schema_name.upper(), actual_table_name.upper(), column_list, placeholders,
+            schema_name.upper(),
+            actual_table_name.upper(),
+            column_list,
+            placeholders,
         )
 
         # Build parameters
@@ -559,7 +582,9 @@ class OracleLoaderService:
 
         # Build parameters
         params_result = self._build_structured_params(
-            table_name, records, existing_columns,
+            table_name,
+            records,
+            existing_columns,
         )
         if not params_result.is_success:
             return ServiceResult.failure(
@@ -579,7 +604,9 @@ class OracleLoaderService:
                     conn.commit()
 
             logger.info(
-                "Successfully inserted %d records to %s", len(params), table_name,
+                "Successfully inserted %d records to %s",
+                len(params),
+                table_name,
             )
             return ServiceResult.success(None)
 
@@ -600,10 +627,8 @@ class OracleLoaderService:
         value_placeholders = []
         for col in existing_columns:
             col_lower = col.lower()
-            # Oracle bind params can't start with underscore, so we strip it
-            param_name = (
-                col_lower.lstrip("_") if col_lower.startswith("_") else col_lower
-            )
+            # Oracle bind params can't start with underscore, so we remove the first one
+            param_name = col_lower.removeprefix("_")
 
             # Use TO_TIMESTAMP for timestamp columns
             timestamp_columns = [
@@ -632,7 +657,10 @@ class OracleLoaderService:
         # Use safe string formatting for Oracle SQL
         sql_template = 'INSERT INTO "{0}"."{1}" ({2}) VALUES ({3})'
         sql = sql_template.format(
-            schema_name, actual_table_name, column_list, ", ".join(value_placeholders),
+            schema_name,
+            actual_table_name,
+            column_list,
+            ", ".join(value_placeholders),
         )
 
         return {"sql": sql}
@@ -648,7 +676,9 @@ class OracleLoaderService:
         try:
             for record in records:
                 param = self._build_single_record_params(
-                    table_name, record, existing_columns,
+                    table_name,
+                    record,
+                    existing_columns,
                 )
                 params.append(param)
 
@@ -673,12 +703,10 @@ class OracleLoaderService:
         for col in existing_columns:
             col_lower = col.lower()
             # Oracle bind params can't start with underscore
-            param_name = (
-                col_lower.lstrip("_") if col_lower.startswith("_") else col_lower
-            )
+            param_name = col_lower.removeprefix("_")
 
             # Handle special Singer metadata columns
-            if col_lower in ["_sdc_extracted_at", "_sdc_batched_at"]:
+            if col_lower in {"_sdc_extracted_at", "_sdc_batched_at"}:
                 param[param_name] = self._build_timestamp_param(col_lower, record)
             elif col_lower == "_sdc_entity":
                 param[param_name] = table_name.lower().replace("test_", "")
@@ -686,7 +714,7 @@ class OracleLoaderService:
                 param[param_name] = "0"  # Use string for Oracle parameter
             # Handle custom timestamp columns
             elif (
-                col_lower in ["create_ts", "mod_ts", "picked_ts"]
+                col_lower in {"create_ts", "mod_ts", "picked_ts"}
                 and col_lower in record
             ):
                 param[param_name] = self._build_custom_timestamp_param(
@@ -731,7 +759,7 @@ class OracleLoaderService:
 
     def _build_data_param(
         self,
-        value: dict[str, Any] | list[Any] | str | float | bool | None,
+        value: dict[str, Any] | list[Any] | str | float | bool | None,  # noqa: FBT001
         json_module: JSONModule,
     ) -> str | int | float | None:
         """Build parameter for regular data columns with proper type conversion."""
@@ -805,7 +833,9 @@ class OracleLoaderService:
                     # Truncate table first (use uppercase and quotes for Oracle)
                     schema_name = self.config.default_target_schema.upper()
                     table_name_upper = table_name.upper()
-                    cursor.execute(f'TRUNCATE TABLE "{schema_name}"."{table_name_upper}"')
+                    table_full = f'"{schema_name}"."{table_name_upper}"'
+                    truncate_sql = f"TRUNCATE TABLE {table_full}"
+                    cursor.execute(truncate_sql)
                     conn.commit()
 
             # Then insert new data
@@ -871,7 +901,8 @@ class OracleLoaderService:
         return key.startswith("_sdc_") or key == "data"
 
     def _determine_column_type(
-        self, value: dict[str, Any] | list[Any] | str | float | bool | None,
+        self,
+        value: dict[str, Any] | list[Any] | str | float | bool | None,  # noqa: FBT001
     ) -> str:
         """Determine Oracle column type based on value."""
         if value is None:

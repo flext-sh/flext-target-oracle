@@ -19,18 +19,18 @@ repos:
         args: [--unsafe]
       - id: check-json
       - id: check-added-large-files
-        args: ["--maxkb=500"] # Strict file size limit
+        args: [--maxkb=500] # Strict file size limit
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: check-toml
       - id: debug-statements
       - id: mixed-line-ending
-        args: ["--fix=lf"]
+        args: [--fix=lf]
       - id: check-ast
       - id: check-docstring-first
       - id: detect-private-key
       - id: no-commit-to-branch
-        args: ["--branch", "main", "--branch", "master"]
+        args: [--branch, main, --branch, master]
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
       - id: check-merge-conflict
@@ -38,7 +38,7 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: check-added-large-files
-        args: ["--maxkb=500"]
+        args: [--maxkb=500]
 
   # ===== BLACK FORMATTING (STRICT) =====
   - repo: https://github.com/psf/black
@@ -46,14 +46,14 @@ repos:
     hooks:
       - id: black
         language_version: python3.13
-        args: ["--line-length=88", "--target-version=py313"]
+        args: [--line-length=88, --target-version=py313]
 
   # ===== ISORT IMPORT ORGANIZATION =====
   - repo: https://github.com/PyCQA/isort
     rev: 5.13.2
     hooks:
       - id: isort
-        args: ["--profile", "black", "--line-length=88"]
+        args: [--profile, black, --line-length=88]
 
   # ===== RUFF COMPREHENSIVE LINTING (ALL RULES) =====
   - repo: https://github.com/astral-sh/ruff-pre-commit
@@ -62,16 +62,16 @@ repos:
       - id: ruff
         args:
           [
-            "--fix",
-            "--exit-non-zero-on-fix",
-            "--line-length=88",
-            "--target-version=py313",
-            "--select=ALL",
-            "--preview",
-            "--ignore=COM812,ISC001,D203,D213,TD003,FIX002,ERA001,PLR0912,PLR0913,PLR0915,PLR2004,C901,BLE001,TRY003,EM101,EM102",
+            --fix,
+            --exit-non-zero-on-fix,
+            --line-length=88,
+            --target-version=py313,
+            --select=ALL,
+            --preview,
+            "--ignore=COM812,ISC001,D203,D213,TD003,FIX002,ERA001,PLR0912,PLR0913,PLR0915,PLR2004,C901,BLE001,TRY003,EM101,EM102"
           ]
       - id: ruff-format
-        args: ["--line-length=88"]
+        args: [--line-length=88]
 
   # ===== MYPY STRICT TYPE CHECKING =====
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -98,34 +98,34 @@ repos:
           ]
         args:
           [
-            "--strict",
-            "--warn-unreachable",
-            "--warn-unused-ignores",
-            "--no-implicit-reexport",
-            "--ignore-missing-imports",
-            "--show-error-codes",
-            "--show-column-numbers",
-            "--pretty",
-            "--disallow-untyped-calls",
-            "--disallow-untyped-defs",
-            "--disallow-incomplete-defs",
-            "--check-untyped-defs",
-            "--disallow-untyped-decorators",
-            "--no-implicit-optional",
-            "--warn-redundant-casts",
-            "--warn-unused-configs",
-            "--warn-return-any",
-            "--strict-equality",
-            "--strict-concatenate",
+            --strict,
+            --warn-unreachable,
+            --warn-unused-ignores,
+            --no-implicit-reexport,
+            --ignore-missing-imports,
+            --show-error-codes,
+            --show-column-numbers,
+            --pretty,
+            --disallow-untyped-calls,
+            --disallow-untyped-defs,
+            --disallow-incomplete-defs,
+            --check-untyped-defs,
+            --disallow-untyped-decorators,
+            --no-implicit-optional,
+            --warn-redundant-casts,
+            --warn-unused-configs,
+            --warn-return-any,
+            --strict-equality,
+            --strict-concatenate,
           ]
-        exclude: "^(tests/|docs/|build/|dist/|examples/|scripts/)"
+        exclude: ^(tests/|docs/|build/|dist/|examples/|scripts/)
 
   # ===== BANDIT SECURITY CHECKS =====
   - repo: https://github.com/PyCQA/bandit
     rev: 1.8.3
     hooks:
       - id: bandit
-        args: ["-r", "src/", "--severity-level=low", "--confidence-level=low"]
+        args: [-r, src/, --severity-level=low, --confidence-level=low]
         exclude: tests/
 
   # ===== POETRY DEPENDENCY MANAGEMENT =====
@@ -144,7 +144,7 @@ repos:
         args:
           [
             "--skip=*.json,*.lock,*.toml,*.yaml,*.yml,poetry.lock",
-            "--ignore-words-list=algar,oud,oid,ldap,ou,dn,cn,aci,acl,orclaci,attributetypes,objectclasses,flext",
+            "--ignore-words-list=algar,oud,oid,ldap,ou,dn,cn,aci,acl,orclaci,attributetypes,objectclasses,flext"
           ]
 
   # ===== SAFETY VULNERABILITY CHECK =====
@@ -175,7 +175,7 @@ repos:
     rev: 6.3.0
     hooks:
       - id: pydocstyle
-        args: ["--convention=google"]
+        args: [--convention=google]
         files: ^src/
 
   # ===== PYTHON UPGRADE =====
@@ -192,10 +192,10 @@ repos:
       - id: autoflake
         args:
           [
-            "--remove-all-unused-imports",
-            "--remove-unused-variables",
-            "--in-place",
-            "--recursive",
+            --remove-all-unused-imports,
+            --remove-unused-variables,
+            --in-place,
+            --recursive,
           ]
 
 # ===== CI SETTINGS =====

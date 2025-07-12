@@ -136,6 +136,8 @@ src = ["src", "tests"]
 select = ["ALL"]
 ignore = [
     "E501", # line too long (handled by formatter)
+    "D203", # 1 blank line required before class docstring (conflicts with D211)
+    "D213", # multi-line-summary-second-line (conflicts with D212)
 ]
 
 # Test-specific ignores
@@ -227,6 +229,8 @@ module = [
     "sqlalchemy.*",
     "jsonschema.*",
     "tenacity.*",
+    "flext_core.*",
+    "flext_observability.*",
     "flext_db_oracle.*",
 ]
 ignore_missing_imports = true

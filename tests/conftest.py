@@ -23,6 +23,7 @@ from flext_db_oracle import OracleConfig
 
 @pytest.fixture
 def mock_oracle_config() -> dict[str, Any]:
+    """Provide mock Oracle configuration for testing."""
     return {
         "connection": {
             "host": "localhost",
@@ -46,11 +47,13 @@ def mock_oracle_config() -> dict[str, Any]:
 
 @pytest.fixture
 def oracle_config(mock_oracle_config: dict[str, Any]) -> OracleConfig:
+    """Create OracleConfig instance from mock configuration."""
     return OracleConfig(**mock_oracle_config)
 
 
 @pytest.fixture
 def flat_oracle_config() -> dict[str, Any]:
+    """Provide flat Oracle configuration for Singer SDK compatibility."""
     return {
         # Singer SDK expects flat configuration
         "host": "localhost",
@@ -68,6 +71,7 @@ def flat_oracle_config() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_schema() -> dict[str, Any]:
+    """Provide sample Singer schema for testing."""
     return {
         "type": "object",
         "properties": {
@@ -83,6 +87,7 @@ def sample_schema() -> dict[str, Any]:
 
 @pytest.fixture
 def sample_records() -> list[dict[str, Any]]:
+    """Provide sample Singer records for testing."""
     return [
         {
             "id": 1,

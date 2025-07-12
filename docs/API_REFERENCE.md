@@ -1,431 +1,249 @@
-# Oracle Target API Reference
+# FLEXT Target Oracle API Reference
 
-## Table of Contents
+## FLEXT Architecture Components
 
-- [OracleTarget](#oracletarget)
-- [OracleConnector](#oracleconnector)
-- [OracleSink](#oraclesink)
-- [Configuration Options](#configuration-options)
-- [Type Mappings](#type-mappings)
+This API implements FLEXT enterprise patterns for Singer protocol compliance:
 
-## OracleTarget
+- [SingerTargetService](#singertargetservice) - FLEXT application service pattern
+- [OracleLoaderService](#oracleloaderservice) - flext-db-oracle integration
+- [Domain Models](#domain-models) - flext-core DDD patterns
+- [FLEXT Configuration](#flext-configuration) - Standard FLEXT config patterns
 
-Main Singer target class for Oracle databases.
+## SingerTargetService
 
-### Class Definition
+FLEXT application service implementing Singer message processing with enterprise patterns.
 
-```python
-class OracleTarget(Target):
-    """Target for Oracle databases using SQLAlchemy 2.0."""
-```
-
-### Properties
-
-#### name
+### FLEXT Service Pattern Usage
 
 ```python
-name: str = "target-oracle"
-```
+from flext_target_oracle.application.services import SingerTargetService
+from flext_target_oracle.domain.models import TargetConfig
+from flext_core import ServiceResult
 
-The canonical name of the target.
+# FLEXT configuration with validation
+config = TargetConfig(
+    oracle_config={"host": "localhost", "service_name": "XEPDB1"},
+    default_target_schema="FLEXT_DW"
+)
 
-#### config_jsonschema
+# Initialize service with FLEXT dependencies
+service = SingerTargetService(config)
 
-```python
-config_jsonschema: dict
-```
-
-JSON schema for configuration validation.
-
-#### default_sink_class
-
-```python
-default_sink_class: Type[OracleSink]
-```
-
-Default sink class for streams.
-
-### Methods
-
-#### **init**
-
-```python
-def __init__(self, config: dict | None = None, **kwargs) -> None
-```
-
-Initialize the Oracle target.
-
-**Parameters:**
-
-- `config`: Configuration dictionary
-- `**kwargs`: Additional keyword arguments passed to parent
-
-#### \_initialize_engines
-
-```python
-def _initialize_engines(self) -> None
-```
-
-Initialize both sync and async SQLAlchemy engines.
-
-**Internal method** for engine setup.
-
-#### \_build_connection_url
-
-```python
-def _build_connection_url(self) -> str
-```
-
-Build Oracle connection URL from configuration.
-
-**Returns:** Connection URL string
-
-#### \_check_engine_health
-
-```python
-def _check_engine_health(self) -> dict[str, Any]
-```
-
-Check health of database engines.
-
-**Returns:** Dictionary with health status
-
-## OracleConnector
-
-Database connector using SQLAlchemy 2.0.
-
-### Class Definition
-
-```python
-class OracleConnector(SQLConnector):
-    """Oracle database connector with SQLAlchemy 2.0."""
-```
-
-### Methods
-
-#### get_sqlalchemy_url
-
-```python
-def get_sqlalchemy_url(self, config: dict[str, Any]) -> URL
-```
-
-Construct SQLAlchemy URL using URL.create().
-
-**Parameters:**
-
-- `config`: Configuration dictionary
-
-**Returns:** SQLAlchemy URL object
-
-**Example:**
-
-```python
-url = connector.get_sqlalchemy_url({
-    "host": "localhost",
-    "user": "scott",
-    "password": "tiger",
-    "service_name": "ORCL"
+# Process Singer message with ServiceResult pattern
+result: ServiceResult[None] = await service.process_singer_message({
+    "type": "RECORD",
+    "stream": "users", 
+    "record": {"id": 1, "name": "Alice"}
 })
+
+# FLEXT error handling
+if result.is_success:
+    logger.info("Message processed successfully")
+else:
+    logger.error(f"Processing failed: {result.error}")
 ```
-
-#### create_engine
-
-```python
-def create_engine(self) -> Engine
-```
-
-Create SQLAlchemy engine with Oracle optimizations.
-
-**Returns:** Configured SQLAlchemy engine
-
-#### to_sql_type
-
-```python
-def to_sql_type(self, schema: dict[str, Any]) -> TypeEngine
-```
-
-Convert JSON Schema type to Oracle SQL type.
-
-**Parameters:**
-
-- `schema`: JSON Schema type definition
-
-**Returns:** SQLAlchemy TypeEngine
-
-**Example:**
-
-```python
-# Integer type
-sql_type = connector.to_sql_type({"type": "integer"})
-# Returns: NUMBER(38, 0)
-
-# String with length
-sql_type = connector.to_sql_type({"type": "string", "maxLength": 100})
-# Returns: VARCHAR2(100)
-```
-
-#### get_column_type
-
-```python
-def get_column_type(self, column_name: str, schema: dict[str, Any]) -> TypeEngine
-```
-
-Get Oracle type for column with pattern recognition.
-
-**Parameters:**
-
-- `column_name`: Name of the column
-- `schema`: JSON Schema definition
-
-**Returns:** Optimized Oracle type
-
-#### \_get_pool_class
-
-```python
-def _get_pool_class(self) -> Type[Pool]
-```
-
-Select appropriate connection pool class.
-
-**Returns:** SQLAlchemy pool class
-
-## OracleSink
-
-High-performance data sink for Oracle.
-
-### Class Definition
-
-```python
-class OracleSink(SQLSink[OracleConnector]):
-    """Oracle sink with bulk operations and parallelism."""
-```
-
-### Properties
-
-#### connector_class
-
-```python
-connector_class = OracleConnector
-```
-
-Connector class to use.
-
-#### full_table_name
-
-```python
-@property
-def full_table_name(self) -> str
-```
-
-Get fully qualified table name with schema.
 
 ### Methods
 
-#### **init**
+#### process_singer_message
 
 ```python
-def __init__(
+async def process_singer_message(
+    self, 
+    message: dict[str, Any]
+) -> ServiceResult[None]
+```
+
+Process RECORD, SCHEMA, or STATE messages according to Singer protocol.
+
+#### finalize_all_streams
+
+```python
+async def finalize_all_streams(self) -> ServiceResult[LoadStatistics]
+```
+
+Flush all pending batches and return load statistics.
+
+## OracleLoaderService
+
+Oracle data loading service implementing flext-db-oracle patterns for enterprise performance.
+
+### Methods
+
+#### ensure_table_exists
+
+```python
+async def ensure_table_exists(
     self,
-    target: Target,
     stream_name: str,
-    schema: dict[str, Any],
-    key_properties: list[str] | None = None,
-) -> None
+    schema: SingerSchema
+) -> ServiceResult[None]
 ```
 
-Initialize Oracle sink.
+Create table if it doesn't exist based on Singer schema.
 
-**Parameters:**
-
-- `target`: Parent target instance
-- `stream_name`: Name of the stream
-- `schema`: JSON Schema for the stream
-- `key_properties`: Primary key columns
-
-#### process_batch
+#### load_record
 
 ```python
-def process_batch(self, context: dict[str, Any]) -> None
+async def load_record(
+    self,
+    stream_name: str, 
+    record_data: dict[str, Any]
+) -> ServiceResult[None]
 ```
 
-Process a batch of records.
+Buffer record for batch processing. Automatically flushes when batch size reached.
 
-**Parameters:**
+## FLEXT Domain Models
 
-- `context`: Batch context with records
+### TargetConfig (DomainValueObject)
 
-**Example:**
+FLEXT-compliant configuration using flext-core patterns.
 
 ```python
-sink.process_batch({
-    "records": [
-        {"id": 1, "name": "Alice"},
-        {"id": 2, "name": "Bob"}
-    ]
-})
+class TargetConfig(DomainValueObject):
+    """Target configuration following FLEXT domain modeling."""
+    oracle_config: dict[str, Any] = Field(..., description="Oracle connection settings")
+    default_target_schema: str = Field(..., description="Target schema (e.g., FLEXT_DW)")
+    batch_size: int = Field(10000, description="Records per batch")
+    load_method: LoadMethod = Field(LoadMethod.APPEND_ONLY, description="Load strategy")
+    table_prefix: str = Field("", description="Table name prefix")
 ```
 
-#### \_prepare_records
+### LoadJob (DomainEntity)
 
 ```python
-def _prepare_records(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]
+class LoadJob(DomainEntity):
+    """Load job entity with FLEXT patterns."""
+    stream_name: str
+    table_name: str
+    status: LoadJobStatus
+    records_processed: int = 0
+    records_failed: int = 0
+    started_at: datetime
+    completed_at: datetime | None = None
 ```
 
-Prepare records for database insertion.
-
-**Parameters:**
-
-- `records`: Raw records from stream
-
-**Returns:** Prepared records with audit fields
-
-#### clean_up
+### LoadMethod (StrEnum)
 
 ```python
-def clean_up(self) -> None
+class LoadMethod(StrEnum):
+    """FLEXT standard load methods."""
+    APPEND_ONLY = "append_only"  # FLEXT default for high performance
+    UPSERT = "upsert"           # Oracle MERGE operations
+    OVERWRITE = "overwrite"     # Full table refresh
 ```
 
-Clean up resources after processing.
+### SingerRecord (DomainValueObject)
 
-## Configuration Options
+```python
+class SingerRecord(DomainValueObject):
+    """Singer message following FLEXT value object patterns."""
+    type: str
+    stream: str | None = None
+    record: dict[str, Any] | None = None
+    record_schema: dict[str, Any] | None = None
+    value: dict[str, Any] | None = None
+```
 
-### Connection Settings
+## FLEXT Configuration
 
-| Option              | Type    | Required | Default | Description                              |
-| ------------------- | ------- | -------- | ------- | ---------------------------------------- |
-| `host`              | string  | Yes      | -       | Oracle server hostname                   |
-| `port`              | integer | No       | 1521    | Oracle server port                       |
-| `user` / `username` | string  | Yes      | -       | Database username                        |
-| `password`          | string  | Yes      | -       | Database password                        |
-| `service_name`      | string  | Yes\*    | -       | Oracle service name                      |
-| `sid`               | string  | Yes\*    | -       | Oracle SID (alternative to service_name) |
-| `dsn`               | string  | No       | -       | Full connection string                   |
+### FLEXT Environment Standards
 
-\*Either `service_name` or `sid` is required
+Environment variables following FLEXT workspace patterns:
 
-### Performance Settings
+| Variable | Type | Description | FLEXT Standard |
+|----------|------|-------------|----------------|
+| `DATABASE__HOST` | string | Oracle hostname | Standard FLEXT env pattern |
+| `DATABASE__SERVICE_NAME` | string | Oracle service | Standard FLEXT env pattern |
+| `DATABASE__USERNAME` | string | Database user | Standard FLEXT env pattern |
+| `DATABASE__PASSWORD` | string | Database password | Standard FLEXT env pattern |
+| `DATABASE__SCHEMA` | string | Target schema | Typically FLEXT_DW |
 
-| Option                | Type    | Default | Description                        |
-| --------------------- | ------- | ------- | ---------------------------------- |
-| `batch_size_rows`     | integer | 10000   | Records per batch                  |
-| `parallel_threads`    | integer | 1       | Number of parallel threads         |
-| `pool_size`           | integer | 10      | Connection pool size               |
-| `pool_recycle`        | integer | 3600    | Pool connection lifetime (seconds) |
-| `pool_timeout`        | integer | 30      | Pool timeout (seconds)             |
-| `use_direct_path`     | boolean | False   | Enable direct path loading         |
-| `enable_parallel_dml` | boolean | False   | Enable parallel DML                |
+### FLEXT Target Configuration
 
-### Table Settings
+Configuration following FLEXT patterns:
 
-| Option                  | Type    | Default       | Description                                 |
-| ----------------------- | ------- | ------------- | ------------------------------------------- |
-| `default_target_schema` | string  | None          | Default schema for tables                   |
-| `table_prefix`          | string  | None          | Prefix for all table names                  |
-| `load_method`           | string  | "append-only" | Load method: append-only, upsert, overwrite |
-| `add_record_metadata`   | boolean | True          | Add audit fields                            |
+| Option | Type | Default | FLEXT Standard |
+|--------|------|---------|----------------|
+| `oracle_config` | object | required | flext-db-oracle connection config |
+| `default_target_schema` | string | required | Use FLEXT_DW for data warehouse |
+| `batch_size` | int | 10000 | FLEXT performance standard |
+| `load_method` | enum | append_only | FLEXT default for performance |
 
-### Advanced Settings
+### FLEXT Integration Example
 
-| Option                   | Type    | Default | Description                     |
-| ------------------------ | ------- | ------- | ------------------------------- |
-| `enable_column_patterns` | boolean | True    | Enable intelligent type mapping |
-| `echo`                   | boolean | False   | Log SQL statements              |
-| `optimizer_mode`         | string  | None    | Oracle optimizer mode           |
-| `alter_session`          | list    | []      | Session parameters to set       |
+```json
+{
+  "oracle_config": {
+    "host": "oracle.flext.local",
+    "service_name": "FLEXT_DB",
+    "username": "flext_etl",
+    "password": "${DATABASE__PASSWORD}"
+  },
+  "default_target_schema": "FLEXT_DW",
+  "batch_size": 10000,
+  "load_method": "append_only"
+}
+```
 
 ## Type Mappings
 
-### JSON Schema to Oracle
+Intelligent Oracle type selection based on column names and JSON schema:
 
-| JSON Schema Type     | Oracle Type              | Notes                  |
-| -------------------- | ------------------------ | ---------------------- |
-| `integer`            | NUMBER(38,0)             | Full precision integer |
-| `number`             | NUMBER                   | Floating point         |
-| `boolean`            | NUMBER(1,0)              | 0 or 1                 |
-| `string`             | VARCHAR2(n)              | n from maxLength       |
-| `string` (>4000)     | CLOB                     | Large text             |
-| `string` + date-time | TIMESTAMP WITH TIME ZONE | ISO 8601 dates         |
-| `array`              | CLOB                     | JSON serialized        |
-| `object`             | CLOB                     | JSON serialized        |
+| JSON Schema | Column Pattern | Oracle Type | Example |
+|-------------|---------------|-------------|---------|
+| `integer` | `*_ID` | NUMBER(38,0) | USER_ID |
+| `boolean` | `*_FLG` | NUMBER(1,0) | ACTIVE_FLG |
+| `string` | `*_TS` | TIMESTAMP | CREATE_TS |
+| `number` | `*_AMOUNT` | NUMBER(19,4) | TOTAL_AMOUNT |
+| `string` | default | VARCHAR2(4000) | NAME |
+| `object/array` | any | CLOB | JSON_DATA |
 
-### Column Pattern Recognition
+## Example Usage
 
-When `enable_column_patterns` is true:
-
-| Pattern        | Oracle Type              | Example Columns          |
-| -------------- | ------------------------ | ------------------------ |
-| `*_ID`         | NUMBER(38,0)             | USER_ID, ORDER_ID        |
-| `*_FLG`        | NUMBER(1,0)              | ACTIVE_FLG, DELETED_FLG  |
-| `*_FLAG`       | NUMBER(1,0)              | IS_ACTIVE_FLAG           |
-| `*_TS`         | TIMESTAMP WITH TIME ZONE | CREATE_TS, UPDATE_TS     |
-| `*_DATE`       | DATE                     | BIRTH_DATE, ORDER_DATE   |
-| `*_TIME`       | TIMESTAMP                | START_TIME, END_TIME     |
-| `*_AMOUNT`     | NUMBER(19,4)             | TOTAL_AMOUNT, TAX_AMOUNT |
-| `*_QTY`        | NUMBER(19,4)             | ORDER_QTY, STOCK_QTY     |
-| `*_QUANTITY`   | NUMBER(19,4)             | ITEM_QUANTITY            |
-| `*_PCT`        | NUMBER(5,2)              | DISCOUNT_PCT             |
-| `*_PERCENT`    | NUMBER(5,2)              | TAX_PERCENT              |
-| `*_PERCENTAGE` | NUMBER(5,2)              | COMPLETION_PERCENTAGE    |
-
-## Examples
-
-### Basic Usage
+### FLEXT Implementation Example
 
 ```python
-from flext_target_oracle import OracleTarget
+from flext_target_oracle.application.services import SingerTargetService
+from flext_target_oracle.domain.models import TargetConfig, LoadMethod
+from flext_core import ServiceResult
+from flext_observability.logging import get_logger
 
-# Initialize target
-target = OracleTarget({
-    "host": "oracle.example.com",
-    "user": "etl_user",
-    "password": "secure_password",
-    "service_name": "PROD",
-    "default_target_schema": "DW"
+logger = get_logger(__name__)
+
+# FLEXT-standard configuration
+config = TargetConfig(
+    oracle_config={
+        "host": "oracle.flext.local",
+        "service_name": "FLEXT_DB", 
+        "username": "flext_etl",
+        "password": "secure_password"
+    },
+    default_target_schema="FLEXT_DW",
+    batch_size=10000,
+    load_method=LoadMethod.APPEND_ONLY
+)
+
+# Initialize with FLEXT dependencies
+service = SingerTargetService(config)
+
+# Process with ServiceResult pattern
+result: ServiceResult[None] = await service.process_singer_message({
+    "type": "RECORD",
+    "stream": "users",
+    "record": {"id": 1, "name": "Alice", "active_flg": 1}
 })
 
-# Process Singer messages
-target.listen(file_input=sys.stdin)
-```
+# FLEXT error handling
+if result.is_success:
+    logger.info("Message processed successfully")
+else:
+    logger.error(f"Processing failed: {result.error}")
 
-### Custom Configuration
-
-```python
-config = {
-    # Connection
-    "host": "oracle.example.com",
-    "port": 1521,
-    "user": "etl_user",
-    "password": "secure_password",
-    "service_name": "PROD",
-
-    # Performance
-    "batch_size_rows": 50000,
-    "parallel_threads": 8,
-    "pool_size": 20,
-    "use_direct_path": True,
-
-    # Table settings
-    "default_target_schema": "DW",
-    "table_prefix": "SINGER_",
-    "load_method": "upsert",
-
-    # Advanced
-    "enable_parallel_dml": True,
-    "alter_session": [
-        "ALTER SESSION SET NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'"
-    ]
-}
-
-target = OracleTarget(config)
-```
-
-### Error Handling
-
-```python
-try:
-    target = OracleTarget(config)
-    target.listen(file_input=sys.stdin)
-except Exception as e:
-    logger.error(f"Target failed: {e}")
-    sys.exit(1)
+# Finalize with statistics
+stats_result = await service.finalize_all_streams()
+if stats_result.is_success:
+    stats = stats_result.value
+    logger.info(f"FLEXT target completed: {stats.successful_records} records loaded")
 ```

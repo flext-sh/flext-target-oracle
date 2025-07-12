@@ -49,7 +49,7 @@ class SimpleMonitor:
         """Initialize monitoring with empty metrics dictionary."""
         self.metrics: dict[str, Any] = {}
 
-    def record_metric(self, name: str, value: str | float | bool) -> None:
+    def record_metric(self, name: str, value: str | float | bool) -> None:  # noqa: FBT001
         """Record a metric value.
 
         Args:
