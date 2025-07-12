@@ -1,3 +1,9 @@
+from typing import Any
+
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """End-to-end integration tests for Oracle target.
 
 This module provides comprehensive end-to-end testing scenarios
@@ -9,16 +15,15 @@ from __future__ import annotations
 import json
 import logging
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 
+from flext_target_oracle.target import OracleTarget
 from sqlalchemy import text
 
-from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
 
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
+if TYPE_CHECKING: from sqlalchemy.engine import Engine
 
 log = logging.getLogger(__name__)
 
@@ -27,16 +32,14 @@ log = logging.getLogger(__name__)
 class TestE2EIntegration:
     """End-to-end integration tests."""
 
+    @staticmethod
     def test_complete_etl_workflow(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup: Any,
         performance_timer: Any,
-    ) -> None:
-        """Test complete ETL workflow from schema to final data."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure target for production-like scenario
         etl_config = oracle_config.copy()
@@ -76,39 +79,40 @@ class TestE2EIntegration:
         }
 
         # Phase 2: Initial data load (simulate historical data)
-        historical_customers = [{
-                    "type": "RECORD",
-                    "stream": test_table_name,
-                    "record": {
-                        "customer_id": i + 1,
-                        "first_name": f"FirstName{i + 1}",
-                        "last_name": f"LastName{i + 1}",
-                        "email": f"customer{i + 1}@example.com",
-                        "phone": f"+1-555-{(i + 1000):04d}",
-                        "address": {
-                            "street": f"{i + 1} Main St",
-                            "city": "Sample City",
-                            "state": "CA",
-                            "zip": f"{90000 + (i % 1000):05d}",
-                            "country": "USA",
-                        },
-                        "registration_date": "2024-01-01T10:00:00Z",
-                        "last_login": "2025-07-01T10:00:00Z",
-                        "status": "active" if i % 4 != 3 else "inactive",
-                        "lifetime_value": float((i + 1) * 25.50),
-                        "preferences": {
-                            "email_notifications": True,
-                            "sms_notifications": i % 3 == 0,
-                            "language": "en",
-                            "timezone": "UTC-8",
-                        },
-                        "tags": [f"segment_{(i % 5) + 1}", f"cohort_{(i % 10) + 1}"],
-                        "is_premium": i % 7 == 0,
-                        "created_at": "2024-01-01T10:00:00Z",
-                        "updated_at": "2025-07-02T10:00:00Z",
+        historical_customers = [
+            {
+                "type": "RECORD",
+                "stream": test_table_name,
+                "record": {
+                    "customer_id": i + 1,
+                    "first_name": f"FirstName{i + 1}",
+                    "last_name": f"LastName{i + 1}",
+                    "email": f"customer{i + 1}@example.com",
+                    "phone": f"+1-555-{(i + 1000):04d}",
+                    "address": {
+                        "street": f"{i + 1} Main St",
+                        "city": "Sample City",
+                        "state": "CA",
+                        "zip": f"{90000 + (i % 1000):05d}",
+                        "country": "USA",
                     },
-                    "time_extracted": "2025-07-02T10:00:00Z",
-                } for i in range(10000)]
+                    "registration_date": "2024-01-01T10:00:00Z",
+                    "last_login": "2025-07-01T10:00:00Z",
+                    "status": "active" if i % 4 != 3 else "inactive",:  "lifetime_value": float((i + 1) * 25.50),
+                    "preferences": {
+                        "email_notifications": True,
+                        "sms_notifications": i % 3 == 0,
+                        "language": "en",
+                        "timezone": "UTC-8",
+                    },
+                    "tags": [f"segment_{(i % 5) + 1}", f"cohort_{(i % 10) + 1}"],
+                    "is_premium": i % 7 == 0,
+                    "created_at": "2024-01-01T10:00:00Z",
+                    "updated_at": "2025-07-02T10:00:00Z",
+                },
+                "time_extracted": "2025-07-02T10:00:00Z",
+            }
+            for i in range(10000): ]
 
         # Process initial load
         messages = [json.dumps(customer_schema)]
@@ -117,14 +121,14 @@ class TestE2EIntegration:
 
         performance_timer.start()
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         performance_timer.stop()
         initial_load_time = performance_timer.duration
 
         # Verify initial load
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -141,7 +145,7 @@ class TestE2EIntegration:
                     MIN(customer_id) as min_id,
                     MAX(customer_id) as max_id
                 FROM {test_table_name}
-            """,
+            """
                 ),
             )
             stats = result.fetchone()
@@ -155,79 +159,82 @@ class TestE2EIntegration:
 
         # Update existing customers (simulate profile updates)
         # Update every 10th customer in first 2000
-        incremental_updates = [{
-                    "type": "RECORD",
-                    "stream": test_table_name,
-                    "record": {
-                        "customer_id": i + 1,
-                        "first_name": f"UpdatedFirst{i + 1}",
-                        "last_name": f"UpdatedLast{i + 1}",
-                        "email": f"updated.customer{i + 1}@example.com",
-                        "phone": f"+1-555-{(i + 2000):04d}",
-                        "address": {
-                            "street": f"{i + 1} Updated St",
-                            "city": "Updated City",
-                            "state": "NY",
-                            "zip": f"{10000 + (i % 1000):05d}",
-                            "country": "USA",
-                        },
-                        "registration_date": "2024-01-01T10:00:00Z",
-                        "last_login": "2025-07-02T11:00:00Z",  # Updated login
-                        "status": "premium" if i % 20 == 0 else "active",
-                        # Increased value
-                        "lifetime_value": float((i + 1) * 35.75),
-                        "preferences": {
-                            "email_notifications": True,
-                            "sms_notifications": True,  # Updated preference
-                            "language": "en",
-                            "timezone": "UTC-5",  # Updated timezone
-                        },
-                        "tags": [
-                            f"segment_{(i % 5) + 1}",
-                            f"cohort_{(i % 10) + 1}",
-                            "updated",
-                        ],
-                        "is_premium": True,  # Upgraded to premium
-                        "created_at": "2024-01-01T10:00:00Z",
-                        "updated_at": "2025-07-02T11:00:00Z",  # Updated timestamp
+        incremental_updates = [
+            {
+                "type": "RECORD",
+                "stream": test_table_name,
+                "record": {
+                    "customer_id": i + 1,
+                    "first_name": f"UpdatedFirst{i + 1}",
+                    "last_name": f"UpdatedLast{i + 1}",
+                    "email": f"updated.customer{i + 1}@example.com",
+                    "phone": f"+1-555-{(i + 2000):04d}",
+                    "address": {
+                        "street": f"{i + 1} Updated St",
+                        "city": "Updated City",
+                        "state": "NY",
+                        "zip": f"{10000 + (i % 1000):05d}",
+                        "country": "USA",
                     },
-                    "time_extracted": "2025-07-02T11:00:00Z",
-                } for i in range(0, 2000, 10)]
+                    "registration_date": "2024-01-01T10:00:00Z",
+                    "last_login": "2025-07-02T11:00:00Z",  # Updated login
+                    "status": "premium" if i % 20 == 0 else "active",: # Increased value
+                    "lifetime_value": float((i + 1) * 35.75),
+                    "preferences": {
+                        "email_notifications": True,
+                        "sms_notifications": True,  # Updated preference
+                        "language": "en",
+                        "timezone": "UTC-5",  # Updated timezone
+                    },
+                    "tags": [
+                        f"segment_{(i % 5) + 1}",
+                        f"cohort_{(i % 10) + 1}",
+                        "updated",
+                    ],
+                    "is_premium": True,  # Upgraded to premium
+                    "created_at": "2024-01-01T10:00:00Z",
+                    "updated_at": "2025-07-02T11:00:00Z",  # Updated timestamp
+                },
+                "time_extracted": "2025-07-02T11:00:00Z",
+            }
+            for i in range(0, 2000, 10): ]
 
         # Add new customers (simulate new registrations)
-        incremental_updates.extend({
-                    "type": "RECORD",
-                    "stream": test_table_name,
-                    "record": {
-                        "customer_id": i + 1,
-                        "first_name": f"NewCustomer{i + 1}",
-                        "last_name": f"NewLast{i + 1}",
-                        "email": f"new.customer{i + 1}@example.com",
-                        "phone": f"+1-555-{(i + 3000):04d}",
-                        "address": {
-                            "street": f"{i + 1} New St",
-                            "city": "New City",
-                            "state": "TX",
-                            "zip": f"{75000 + (i % 1000):05d}",
-                            "country": "USA",
-                        },
-                        "registration_date": "2025-07-02T11:00:00Z",
-                        "last_login": "2025-07-02T11:00:00Z",
-                        "status": "active",
-                        "lifetime_value": 0.0,  # New customer
-                        "preferences": {
-                            "email_notifications": True,
-                            "sms_notifications": False,
-                            "language": "en",
-                            "timezone": "UTC-6",
-                        },
-                        "tags": ["new_customer", f"segment_{(i % 5) + 1}"],
-                        "is_premium": False,
-                        "created_at": "2025-07-02T11:00:00Z",
-                        "updated_at": "2025-07-02T11:00:00Z",
+        incremental_updates.extend(
+            {
+                "type":  "RECORD",
+                "stream": test_table_name,
+                "record": {
+                    "customer_id": i + 1,
+                    "first_name": f"NewCustomer{i + 1}",
+                    "last_name": f"NewLast{i + 1}",
+                    "email": f"new.customer{i + 1}@example.com",
+                    "phone": f"+1-555-{(i + 3000):04d}",
+                    "address": {
+                        "street": f"{i + 1} New St",
+                        "city": "New City",
+                        "state": "TX",
+                        "zip": f"{75000 + (i % 1000):05d}",
+                        "country": "USA",
                     },
-                    "time_extracted": "2025-07-02T11:00:00Z",
-                } for i in range(10000, 12000))
+                    "registration_date": "2025-07-02T11:00:00Z",
+                    "last_login": "2025-07-02T11:00:00Z",
+                    "status": "active",
+                    "lifetime_value": 0.0,  # New customer
+                    "preferences": {
+                        "email_notifications": True,
+                        "sms_notifications": False,
+                        "language": "en",
+                        "timezone": "UTC-6",
+                    },
+                    "tags": ["new_customer", f"segment_{(i % 5) + 1}"],
+                    "is_premium": False,
+                    "created_at": "2025-07-02T11:00:00Z",
+                    "updated_at": "2025-07-02T11:00:00Z",
+                },
+                "time_extracted": "2025-07-02T11:00:00Z",
+            }
+            for i in range(10000, 12000): )
 
         # Process incremental updates
         messages = [json.dumps(customer_schema)]
@@ -238,8 +245,7 @@ class TestE2EIntegration:
 
         performance_timer.start()
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target_incremental.cli()
+        with patch("sys.stdin", StringIO(input_data)): target_incremental.cli()
 
         performance_timer.stop()
         incremental_load_time = performance_timer.duration
@@ -256,13 +262,14 @@ class TestE2EIntegration:
             # Verify updates were applied
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT COUNT(*)
                 FROM {test_table_name}
                 WHERE first_name LIKE 'UpdatedFirst%'
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             row = result.fetchone()
             assert row is not None
             updated_count = row[0]
@@ -271,12 +278,12 @@ class TestE2EIntegration:
             # Verify new customers
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT COUNT(*)
                 FROM {test_table_name}
                 WHERE first_name LIKE 'NewCustomer%'
-            """,
-                ),
+            """
+        ),
             )
             row = result.fetchone()
             assert row is not None
@@ -286,12 +293,12 @@ class TestE2EIntegration:
             # Verify premium upgrades
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT COUNT(*)
                 FROM {test_table_name}
-                WHERE status = 'premium'
-            """,
-                ),
+                WHERE status = \'premium\'
+            """
+            ),
             )
             row = result.fetchone()
             assert row is not None
@@ -299,8 +306,7 @@ class TestE2EIntegration:
             assert premium_count >= 10  # At least 10 premium upgrades
 
         # Phase 4: Data quality validation
-        with oracle_engine.connect() as conn:
-            # Check for data integrity issues
+        with oracle_engine.connect() as conn: # Check for data integrity issues
             data_quality_checks = [
                 (
                     "No duplicate customer IDs",
@@ -330,8 +336,7 @@ class TestE2EIntegration:
                 ),
             ]
 
-            for check_name, query in data_quality_checks:
-                result = conn.execute(text(query))
+            for check_name, query in data_quality_checks: result = conn.execute(text(query))
                 row = result.fetchone()
                 assert row is not None
                 issue_count = row[0]
@@ -359,13 +364,17 @@ class TestE2EIntegration:
         )
         log.error(
             f"Overall throughput: {total_throughput:.2f} records/sec",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
             "Total records processed: 12,200",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
-            f"Final customer count: {final_count:,}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Final customer count: %s",
+            f"{final_count:,}",
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
 
         # Performance assertions
         assert (
@@ -375,15 +384,13 @@ class TestE2EIntegration:
             incremental_throughput > 200
         ), f"Incremental load too slow: {incremental_throughput:.2f} records/sec"
 
+    @staticmethod
     def test_schema_evolution_workflow(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup: Any,
-    ) -> None:
-        """Test schema evolution with column additions."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         target = OracleTarget(config=oracle_config)
 
@@ -420,11 +427,11 @@ class TestE2EIntegration:
         messages.extend([json.dumps(record) for record in initial_records])
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify initial schema
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -433,18 +440,18 @@ class TestE2EIntegration:
             # Check initial columns
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT column_name
                 FROM user_tab_columns
                 WHERE table_name = UPPER('{test_table_name}')
                 ORDER BY column_id
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             initial_columns = [row[0] for row in result.fetchall()]
             expected_initial = ["ID", "NAME", "EMAIL"]
-            for col in expected_initial:
-                assert col in initial_columns
+            for col in expected_initial: assert col in initial_columns
 
         # Phase 2: Evolved schema with additional columns
         evolved_schema = {
@@ -500,8 +507,7 @@ class TestE2EIntegration:
         input_data = "\n".join(messages)
 
         target_evolved = OracleTarget(config=oracle_config)
-        with patch("sys.stdin", StringIO(input_data)):
-            target_evolved.cli()
+        with patch("sys.stdin", StringIO(input_data)): target_evolved.cli()
 
         # Verify schema evolution
         with oracle_engine.connect() as conn:
@@ -514,29 +520,30 @@ class TestE2EIntegration:
             # Check evolved columns
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT column_name
                 FROM user_tab_columns
                 WHERE table_name = UPPER('{test_table_name}')
                 ORDER BY column_id
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             evolved_columns = [row[0] for row in result.fetchall()]
             expected_evolved = ["AGE", "PHONE", "METADATA", "IS_ACTIVE"]
-            for col in expected_evolved:
-                assert col in evolved_columns, f"Missing evolved column: {col}"
+            for col in expected_evolved: assert col in evolved_columns, f"Missing evolved column: {col}"
 
             # Verify data integrity
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT id, name, age, phone
                 FROM {test_table_name}
                 WHERE id = 1
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             updated_record = result.fetchone()
             assert updated_record is not None
             assert updated_record.name == "John Updated"
@@ -546,27 +553,26 @@ class TestE2EIntegration:
             # Verify new record
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT id, name, age
                 FROM {test_table_name}
                 WHERE id = 3
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             new_record = result.fetchone()
             assert new_record is not None
             assert new_record.name == "Bob"
             assert new_record.age == 30
 
+    @staticmethod
     def test_error_recovery_workflow(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup: Any,
-    ) -> None:
-        """Test error recovery and resilience workflow."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure with retry settings
         resilient_config = oracle_config.copy()
@@ -617,11 +623,11 @@ class TestE2EIntegration:
         messages.extend([json.dumps(record) for record in valid_records])
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify valid records processed
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -644,7 +650,7 @@ class TestE2EIntegration:
                 "record": {
                     "id": 4,
                     "short_text": "This text is too long for column",  # Error expected
-                    "required_field": "Present4",
+                    "required_field":  "Present4",
                 },
             },
             {
@@ -665,19 +671,17 @@ class TestE2EIntegration:
         target_recovery = OracleTarget(config=resilient_config)
 
         # This should handle errors gracefully
-        try:
-            with patch("sys.stdin", StringIO(input_data)):
-                target_recovery.cli()
+        try: with patch("sys.stdin", StringIO(input_data)): target_recovery.cli()
         except Exception as e:
             # Some errors may be expected - verify they're constraint-related
             error_msg = str(e).lower()
             assert any(
                 keyword in error_msg
-                for keyword in ["constraint", "length", "value", "invalid"]
-            )
+                for keyword in ["constraint", "length", "value", "invalid"]: )
 
         # Verify that valid records were still processed despite errors
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -686,15 +690,13 @@ class TestE2EIntegration:
             # ones
             assert count >= 2, f"Error recovery failed - only {count} records found"
 
+    @staticmethod
     def test_monitoring_and_metrics_workflow(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup: Any,
-    ) -> None:
-        """Test monitoring and metrics collection workflow."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure with monitoring enabled
         monitoring_config = oracle_config.copy()
@@ -720,27 +722,29 @@ class TestE2EIntegration:
         }
 
         # Generate monitoring test data
-        monitoring_records = [{
-                    "type": "RECORD",
-                    "stream": test_table_name,
-                    "record": {
-                        "id": i + 1,
-                        "metric_name": f"metric_{(i % 10) + 1}",
-                        "metric_value": float(i * 1.5),
-                        "timestamp": "2025-07-02T10:00:00Z",
-                    },
-                } for i in range(5000)]
+        monitoring_records = [
+            {
+                "type": "RECORD",
+                "stream": test_table_name,
+                "record": {
+                    "id": i + 1,
+                    "metric_name": f"metric_{(i % 10) + 1}",
+                    "metric_value": float(i * 1.5),
+                    "timestamp": "2025-07-02T10:00:00Z",
+                },
+            }
+            for i in range(5000): ]
 
         # Process with monitoring
         messages = [json.dumps(monitoring_schema)]
         messages.extend([json.dumps(record) for record in monitoring_records])
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify monitoring data processed
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -760,28 +764,26 @@ class TestE2EIntegration:
                 FROM {test_table_name}
                 GROUP BY metric_name
                 ORDER BY metric_name
-            """,
+            """
                 ),
             )
 
             metrics = result.fetchall()
             assert len(metrics) == 10  # Should have 10 different metric types
 
-            for metric in metrics:
-                assert metric is not None
+            for metric in metrics: assert metric is not None
                 assert metric.record_count == 500  # 5000 records / 10 metrics
                 assert metric.avg_value > 0
                 assert metric.min_value >= 0
                 assert metric.max_value > metric.min_value
 
+    @staticmethod
     def test_real_world_data_patterns(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup: Any,
     ) -> None:
-        """Test with realistic data patterns and edge cases."""
         table_cleanup(test_table_name)
 
         target = OracleTarget(config=oracle_config)
@@ -811,26 +813,28 @@ class TestE2EIntegration:
         # Generate realistic data with edge cases
 
         # Regular transactions
-        realistic_records = [{
-                    "type": "RECORD",
-                    "stream": test_table_name,
-                    "record": {
-                        "transaction_id": f"TXN-{i + 1:06d}",
-                        "user_id": (i % 100) + 1,
-                        "amount": round(10.0 + (i * 0.75), 2),
-                        "currency": "USD",
-                        "description": f"Purchase transaction {i + 1}",
-                        "metadata": {
-                            "payment_method": "credit_card",
-                            "merchant_id": f"MERCH-{(i % 50) + 1:03d}",
-                            "ip_address": f"192.168.1.{(i % 254) + 1}",
-                        },
-                        "tags": ["purchase", "online"],
-                        "processed_at": "2025-07-02T10:00:00Z",
-                        "is_refund": False,
-                        "source_system": "web_app",
+        realistic_records = [
+            {
+                "type": "RECORD",
+                "stream": test_table_name,
+                "record": {
+                    "transaction_id": f"TXN-{i + 1:06d}",
+                    "user_id": (i % 100) + 1,
+                    "amount": round(10.0 + (i * 0.75), 2),
+                    "currency": "USD",
+                    "description": f"Purchase transaction {i + 1}",
+                    "metadata": {
+                        "payment_method": "credit_card",
+                        "merchant_id": f"MERCH-{(i % 50) + 1:03d}",
+                        "ip_address": f"192.168.1.{(i % 254) + 1}",
                     },
-                } for i in range(1000)]
+                    "tags": ["purchase", "online"],
+                    "processed_at": "2025-07-02T10:00:00Z",
+                    "is_refund": False,
+                    "source_system": "web_app",
+                },
+            }
+            for i in range(1000): ]
 
         # Edge case: Very large amounts
         realistic_records.extend(
@@ -913,7 +917,7 @@ class TestE2EIntegration:
                         "metadata": {
                             "merchant_name": "Café Münchën & Co.",
                             "location": "São Paulo, Brasil",
-                            "notes": "Special characters: @#$%^&*()[]{}|\\:;\"'<>,.?/",
+                            "notes": "Special characters: @#$%^&*()[]{}|\\: \"'<>,.?/",
                         },
                         "tags": ["international", "unicode", "special"],
                         "processed_at": "2025-07-02T10:00:00Z",
@@ -929,11 +933,11 @@ class TestE2EIntegration:
         messages.extend([json.dumps(record) for record in realistic_records])
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify realistic data processing
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -945,12 +949,13 @@ class TestE2EIntegration:
             # Large amount
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT amount FROM {test_table_name}
                 WHERE transaction_id = 'TXN-LARGE-001'
-            """,
-                ),
-            )
+            """
+                )
+            """
+        )
             large_amount = result.fetchone()
             assert large_amount is not None
             assert float(large_amount.amount) == 999999.99
@@ -958,11 +963,11 @@ class TestE2EIntegration:
             # Zero amount
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT amount FROM {test_table_name}
                 WHERE transaction_id = 'TXN-ZERO-001'
-            """,
-                ),
+            """
+        ),
             )
             zero_amount = result.fetchone()
             assert zero_amount is not None
@@ -971,11 +976,11 @@ class TestE2EIntegration:
             # Negative amount
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT amount, is_refund FROM {test_table_name}
-                WHERE transaction_id = 'TXN-REFUND-001'
-            """,
-                ),
+                WHERE transaction_id = \'TXN-REFUND-001\'
+            """
+            ),
             )
             refund = result.fetchone()
             assert refund is not None
@@ -985,12 +990,13 @@ class TestE2EIntegration:
             # Unicode handling
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT description FROM {test_table_name}
                 WHERE transaction_id = 'TXN-UNICODE-001'
-            """,
-                ),
+            """
             )
+            """
+        )
             unicode_desc = result.fetchone()
             assert unicode_desc is not None
             assert "🛒" in unicode_desc.description
@@ -1007,7 +1013,7 @@ class TestE2EIntegration:
                     SUM(CASE WHEN amount < 0 THEN amount ELSE 0 END) as total_negative,
                     AVG(amount) as avg_amount
                 FROM {test_table_name}
-            """,
+            """
                 ),
             )
 
@@ -1020,19 +1026,30 @@ class TestE2EIntegration:
 
         log.error(
             "\nRealistic Data Processing Summary:",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
-            f"Total transactions: {summary.total_transactions}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Total transactions: %s",
+            summary.total_transactions,
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
-            f"Unique users: {summary.unique_users}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Unique users: %s",
+            summary.unique_users,
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
-            f"Total positive amount: ${summary.total_positive:.2f}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Total positive amount: $%.2f",
+            summary.total_positive,
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
-            f"Total negative amount: ${summary.total_negative:.2f}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Total negative amount: $%.2f",
+            summary.total_negative,
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
-            f"Average transaction: ${summary.avg_amount:.2f}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Average transaction: $%.2f",
+            summary.avg_amount,
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo

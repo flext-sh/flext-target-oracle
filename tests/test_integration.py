@@ -1,23 +1,24 @@
-"""Integration tests for Oracle Target."""
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
+"""Integration tests for Oracle Target.
 
 from datetime import datetime
 from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from sqlalchemy.pool import QueuePool
-
 from flext_target_oracle.sinks import OracleSink
 from flext_target_oracle.target import OracleTarget
+from sqlalchemy.pool import QueuePool
 
 
-class TestOracleTargetIntegration:
-    """Integration tests for Oracle Target."""
+class TestOracleTargetIntegration:  """Integration tests for Oracle Target."""
 
+    @staticmethod
     @pytest.fixture
-    def basic_config(self) -> Any:
-        """Basic configuration for testing."""
-        return {
+    def basic_config() -> Any: return {
             "host": "localhost",
             "port": 1521,
             "username": "test_user",
@@ -27,10 +28,9 @@ class TestOracleTargetIntegration:
             "add_record_metadata": True,
         }
 
+    @staticmethod
     @pytest.fixture
-    def singer_schema(self) -> Any:
-        """Sample Singer schema."""
-        return {
+    def singer_schema() -> Any: return {
             "type": "object",
             "properties": {
                 "id": {"type": "integer"},
@@ -42,10 +42,9 @@ class TestOracleTargetIntegration:
             },
         }
 
+    @staticmethod
     @pytest.fixture
-    def sample_records(self) -> Any:
-        """Sample records for testing."""
-        return [
+    def sample_records() -> Any: return [
             {
                 "id": 1,
                 "name": "John Doe",
@@ -66,13 +65,12 @@ class TestOracleTargetIntegration:
 
     @patch("flext_target_oracle.target.create_engine")
     @patch("flext_target_oracle.target.create_async_engine")
-    def test_target_initialization(self,
-                                   mock_async_engine: Any,
-                                   mock_sync_engine: Any,
-                                   basic_config: Any,
-                                   ) -> None:
-        """Test target initializes with proper configuration."""
-        # Mock engines
+    @staticmethod
+    def test_target_initialization(
+        mock_async_engine: Any,
+        mock_sync_engine: Any,
+        basic_config: Any,
+    ) -> None: # Mock engines
         mock_engine = Mock()
         mock_sync_engine.return_value = mock_engine
         mock_async_engine.return_value = Mock()
@@ -92,14 +90,13 @@ class TestOracleTargetIntegration:
 
     @patch("flext_target_oracle.target.create_engine")
     @patch("flext_target_oracle.target.create_async_engine")
-    def test_sink_creation(self,
-                           mock_async_engine: Any,
-                           mock_sync_engine: Any,
-                           basic_config: Any,
-                           singer_schema: Any,
-                           ) -> None:
-        """Test sink creation with proper configuration."""
-        mock_engine = Mock()
+    @staticmethod
+    def test_sink_creation(
+        mock_async_engine: Any,
+        mock_sync_engine: Any,
+        basic_config: Any,
+        singer_schema: Any,
+    ) -> None: mock_engine = Mock()
         mock_sync_engine.return_value = mock_engine
         mock_async_engine.return_value = Mock()
 
@@ -117,14 +114,13 @@ class TestOracleTargetIntegration:
         assert sink.key_properties == ["id"]
 
     @patch("flext_target_oracle.sinks.create_engine")
-    def test_end_to_end_data_flow(self,
-                                  mock_create_engine: Any,
-                                  basic_config: Any,
-                                  singer_schema: Any,
-                                  sample_records: Any,
-                                  ) -> None:
-        """Test end-to-end data flow from Singer messages to database."""
-        # Mock database engine and connection
+    @staticmethod
+    def test_end_to_end_data_flow(
+        mock_create_engine: Any,
+        basic_config: Any,
+        singer_schema: Any,
+        sample_records: Any,
+    ) -> None: # Mock database engine and connection
         mock_engine = Mock()
         mock_conn = MagicMock()
         mock_trans = MagicMock()
@@ -139,11 +135,9 @@ class TestOracleTargetIntegration:
         mock_table.schema = "TEST"
 
         # Create target
-        with (
-            patch("flext_target_oracle.target.create_engine") as mock_target_engine,
+        with (: patch("flext_target_oracle.target.create_engine") as mock_target_engine,
             patch("flext_target_oracle.target.create_async_engine"),
-        ):
-            mock_target_engine.return_value = mock_engine
+        ): mock_target_engine.return_value = mock_engine
             target = OracleTarget(config=basic_config)
 
             # Create sink
@@ -154,11 +148,10 @@ class TestOracleTargetIntegration:
             )
 
             # Mock the table - using setattr to avoid mypy error
-            setattr(sink, "_table", mock_table)
+            sink._table = mock_table
 
             # Process records
-            for record in sample_records:
-                sink.process_record(record, {})
+            for record in sample_records: sink.process_record(record, {})
 
             # Process batch
             sink.process_batch({})
@@ -174,10 +167,11 @@ class TestOracleTargetIntegration:
                 assert "MOD_TS" in record
                 assert record["CREATE_USER"] == "SINGER"
 
-    def test_sql_type_mapping(self, basic_config: Any) -> None:
-        """Test SQL type mapping for various JSON Schema types."""
-        """Test SQL type mapping for various JSON Schema types."""
-        from flext_target_oracle.connectors import OracleConnector
+    @staticmethod
+    def test_sql_type_mapping(basic_config: Any) -> None:
+            from flext_target_oracle.connectors import (  # TODO: Move import to module level
+            OracleConnector,
+        )
 
         connector = OracleConnector(basic_config)
 
@@ -193,14 +187,14 @@ class TestOracleTargetIntegration:
             ({"type": "object"}, "CLOB"),
         ]
 
-        for schema, expected_type in test_cases:
-            sql_type = connector.to_sql_type(schema)  # type: ignore[arg-type]
+        for schema, expected_type in test_cases: sql_type = connector.to_sql_type(schema)  # type: ignore[arg-type]
             assert str(sql_type) == expected_type
 
-    def test_column_pattern_recognition(self, basic_config: Any) -> None:
-        """Test intelligent column type mapping based on patterns."""
-        """Test intelligent column type mapping based on patterns."""
-        from flext_target_oracle.connectors import OracleConnector
+    @staticmethod
+    def test_column_pattern_recognition(basic_config: Any) -> None:
+            from flext_target_oracle.connectors import (  # TODO: Move import to module level
+            OracleConnector,
+        )
 
         config = basic_config.copy()
         config["enable_column_patterns"] = True
@@ -211,23 +205,22 @@ class TestOracleTargetIntegration:
             ("user_id", {"type": "integer"}, "NUMBER(precision=38, scale=0)"),
             ("active_flg", {"type": "string"}, "NUMBER(precision=1, scale=0)"),
             ("created_ts", {"type": "string"}, "TIMESTAMP(timezone=True)"),
-            ("total_amount", {"type": "number"},
-             "NUMBER(precision=19, scale=4)"),
+            ("total_amount", {"type": "number"}, "NUMBER(precision=19, scale=4)"),
             ("order_qty", {"type": "number"}, "NUMBER(precision=19, scale=4)"),
-            ("discount_pct", {"type": "number"},
-             "NUMBER(precision=5, scale=2)"),
+            ("discount_pct", {"type": "number"}, "NUMBER(precision=5, scale=2)"),
         ]
 
-        for column_name, schema, expected_type in test_cases:
-            sql_type = connector.get_column_type(column_name, schema)  # type: ignore[attr-defined]
+        for column_name, schema, expected_type in test_cases: sql_type = connector.get_column_type(column_name, schema)  # type: ignore[attr-defined]
             assert str(sql_type) == expected_type
 
     @patch("flext_target_oracle.target.create_engine")
     @patch("flext_target_oracle.target.create_async_engine")
-    def test_bulk_operations(self, mock_async_engine: Any,
-                             mock_sync_engine: Any, basic_config: Any) -> None:
-        """Test bulk insert operations."""
-        mock_engine = Mock()
+    @staticmethod
+    def test_bulk_operations(
+        mock_async_engine: Any,
+        mock_sync_engine: Any,
+        basic_config: Any,
+    ) -> None: mock_engine = Mock()
         mock_conn = MagicMock()
         mock_engine.begin.return_value.__enter__.return_value = mock_conn
         mock_sync_engine.return_value = mock_engine
@@ -240,7 +233,7 @@ class TestOracleTargetIntegration:
         sink = target.get_sink(
             stream_name="users",
             schema={
-                "type": "object",
+                "type":  "object",
                 "properties": {
                     "id": {"type": "integer"},
                     "name": {"type": "string"},
@@ -250,13 +243,12 @@ class TestOracleTargetIntegration:
         )
 
         # Mock table
-        setattr(sink, "_table", Mock())
-        setattr(sink, "connector", Mock())
+        sink._table = Mock()
+        sink.connector = Mock()
         sink.connector._engine = mock_engine  # type: ignore[attr-defined]
 
         # Process large batch
-        if hasattr(sink, "_process_batch_append"):
-            sink._process_batch_append(large_batch)
+        if hasattr(sink, "_process_batch_append"): sink._process_batch_append(large_batch)
 
         # Verify bulk insert was used
         mock_conn.execute.assert_called_once()
@@ -267,12 +259,12 @@ class TestOracleTargetIntegration:
 
     @patch("flext_target_oracle.target.create_engine")
     @patch("flext_target_oracle.target.create_async_engine")
-    def test_upsert_operations(self,
-                               mock_async_engine: Any,
-                               mock_sync_engine: Any,
-                               basic_config: Any) -> None:
-        """Test upsert operations using MERGE."""
-        mock_engine = Mock()
+    @staticmethod
+    def test_upsert_operations(
+        mock_async_engine: Any,
+        mock_sync_engine: Any,
+        basic_config: Any,
+    ) -> None: mock_engine = Mock()
         mock_conn = MagicMock()
         mock_engine.begin.return_value.__enter__.return_value = mock_conn
         mock_sync_engine.return_value = mock_engine
@@ -299,8 +291,8 @@ class TestOracleTargetIntegration:
         mock_table = Mock()
         mock_table.name = "CUSTOMERS"
         mock_table.schema = "TEST"
-        setattr(sink, "_table", mock_table)
-        setattr(sink, "connector", Mock())
+        sink._table = mock_table
+        sink.connector = Mock()
         sink.connector._engine = mock_engine  # type: ignore[attr-defined]
 
         # Process upsert
@@ -309,8 +301,7 @@ class TestOracleTargetIntegration:
             {"id": 3, "name": "New User", "email": "new@example.com"},
         ]
 
-        if hasattr(sink, "_process_batch_upsert"):
-            sink._process_batch_upsert(records)
+        if hasattr(sink, "_process_batch_upsert"): sink._process_batch_upsert(records)
 
         # Verify MERGE was executed
         assert mock_conn.execute.called
@@ -323,11 +314,12 @@ class TestOracleTargetIntegration:
 
     @patch("flext_target_oracle.target.create_engine")
     @patch("flext_target_oracle.target.create_async_engine")
+    @staticmethod
     def test_parallel_processing(
-        self, mock_async_engine: Any, mock_sync_engine: Any, basic_config: Any
-    ) -> None:
-        """Test parallel processing for large batches."""
-        mock_engine = Mock()
+        mock_async_engine: Any,
+        mock_sync_engine: Any,
+        basic_config: Any,
+    ) -> None: mock_engine = Mock()
         mock_conn = MagicMock()
         mock_engine.begin.return_value.__enter__.return_value = mock_conn
         mock_sync_engine.return_value = mock_engine
@@ -347,16 +339,15 @@ class TestOracleTargetIntegration:
         )
 
         # Mock table and connector
-        setattr(sink, "_table", Mock())
-        setattr(sink, "connector", Mock())
+        sink._table = Mock()
+        sink.connector = Mock()
         sink.connector._engine = mock_engine  # type: ignore[attr-defined]
 
         # Large batch that should trigger parallel processing
         large_batch = [{"id": i} for i in range(5000)]
 
         # Mock ThreadPoolExecutor
-        with patch("flext_target_oracle.sinks.ThreadPoolExecutor") as mock_executor:
-            mock_pool = Mock()
+        with patch("flext_target_oracle.sinks.ThreadPoolExecutor") as mock_executor: mock_pool = Mock()
             mock_executor.return_value = mock_pool
 
             # Re-initialize sink to get mocked executor
@@ -366,21 +357,21 @@ class TestOracleTargetIntegration:
                 schema=sink.schema,
                 key_properties=["id"],
             )
-            setattr(sink, "_table", Mock())
-            setattr(sink, "connector", Mock())
+            sink._table = Mock()
+            sink.connector = Mock()
             sink.connector._engine = mock_engine  # type: ignore[attr-defined]
 
-            if hasattr(sink, "_process_batch_append"):
-                sink._process_batch_append(large_batch)
+            if hasattr(sink, "_process_batch_append"): sink._process_batch_append(large_batch)
 
             # Verify parallel execution was used
             assert mock_executor.called
             assert mock_executor.call_args[1]["max_workers"] == 4
 
-    def test_audit_fields(self, basic_config: Any) -> None:
-        """Test audit field generation."""
-        """Test audit field generation."""
-        from flext_target_oracle.sinks import OracleSink
+    @staticmethod
+    def test_audit_fields(basic_config: Any) -> None:
+            from flext_target_oracle.sinks import (  # TODO: Move import to module level
+            OracleSink,
+        )
 
         target = Mock()
         target.config = basic_config
@@ -388,20 +379,15 @@ class TestOracleTargetIntegration:
         sink = OracleSink(
             target=target,
             stream_name="test",
-            schema={
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"}}},
+            schema={"type": "object", "properties": {"id": {"type": "integer"}}},
             key_properties=["id"],
         )
 
         # Test record preparation
         records = [{"id": 1, "data": "test"}]
-        if hasattr(sink, "_prepare_records"):
-            prepared = sink._prepare_records(records)
+        if hasattr(sink, "_prepare_records"): prepared = sink._prepare_records(records)
         else:
-            prepared = []
+            prepared = {}
 
         assert len(prepared) == 1
         record = prepared[0]
@@ -419,14 +405,13 @@ class TestOracleTargetIntegration:
     @patch("flext_target_oracle.target.text")
     @patch("flext_target_oracle.target.create_engine")
     @patch("flext_target_oracle.target.create_async_engine")
-    def test_health_check(self,
-                          mock_async_engine: Any,
-                          mock_sync_engine: Any,
-                          mock_text: Any,
-                          basic_config: Any,
-                          ) -> None:
-        """Test health check functionality."""
-        # Mock engine with pool
+    @staticmethod
+    def test_health_check(
+        mock_async_engine: Any,
+        mock_sync_engine: Any,
+        mock_text: Any,
+        basic_config: Any,
+    ) -> None: # Mock engine with pool
         mock_engine = Mock()
         mock_pool = Mock()
         mock_pool.size.return_value = 10
@@ -455,15 +440,16 @@ class TestOracleTargetIntegration:
 
     @patch("flext_target_oracle.target.create_engine")
     @patch("flext_target_oracle.target.create_async_engine")
-    def test_error_handling(self, mock_async_engine: Any,
-                            mock_sync_engine: Any, basic_config: Any) -> None:
-        """Test error handling and recovery."""
-        mock_engine = Mock()
+    @staticmethod
+    def test_error_handling(
+        mock_async_engine: Any,
+        mock_sync_engine: Any,
+        basic_config: Any,
+    ) -> None: mock_engine = Mock()
         mock_conn = MagicMock()
 
         # Simulate connection error
-        mock_conn.execute.side_effect = Exception(
-            "ORA-12154: TNS could not resolve")
+        mock_conn.execute.side_effect = Exception("ORA-12154: TNS could not resolve")
         mock_engine.begin.return_value.__enter__.return_value = mock_conn
 
         mock_sync_engine.return_value = mock_engine
@@ -472,26 +458,19 @@ class TestOracleTargetIntegration:
         target = OracleTarget(config=basic_config)
         sink = target.get_sink(
             stream_name="test",
-            schema={
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"}}},
+            schema={"type": "object", "properties": {"id": {"type": "integer"}}},
             key_properties=["id"],
         )
 
         # Mock table
-        setattr(sink, "_table", Mock())
-        setattr(sink, "connector", Mock())
+        sink._table = Mock()
+        sink.connector = Mock()
         sink.connector._engine = mock_engine  # type: ignore[attr-defined]
 
         # Attempt to process batch - should raise
-        with pytest.raises(Exception) as exc_info:
-            if hasattr(sink, "_process_batch_append"):
-                sink._process_batch_append([{"id": 1}])
+        with pytest.raises(Exception) as exc_info: if hasattr(sink, "_process_batch_append"): sink._process_batch_append([{"id": 1}])
 
         assert "ORA-12154" in str(exc_info.value)
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+if __name__ == "__main__": pytest.main([__file__, "-v"])

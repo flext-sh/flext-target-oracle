@@ -5,6 +5,7 @@ A high-performance [Singer](https://singer.io) target for Oracle Database, built
 ## Features
 
 ### 🚀 Performance
+
 - **Parallel Processing**: Multi-threaded batch processing for maximum throughput
 - **Direct Path Loading**: Oracle direct path inserts for bulk operations
 - **Intelligent Batching**: Configurable batch sizes with automatic optimization
@@ -12,12 +13,14 @@ A high-performance [Singer](https://singer.io) target for Oracle Database, built
 - **Lazy Connections**: No database connection until data arrives
 
 ### 🎯 Type Mapping
+
 - **Intelligent Type Detection**: Pattern-based column type mapping
 - **Configurable Rules**: Custom type mapping via configuration
 - **JSON Schema Support**: Full JSON schema to Oracle type conversion
 - **Large Text Handling**: Automatic VARCHAR2/CLOB selection
 
 ### 🔧 Enterprise Features
+
 - **Historical Versioning**: Optional time-series data support
 - **Audit Fields**: Configurable audit column addition
 - **Compression Support**: Table and index compression options
@@ -25,6 +28,7 @@ A high-performance [Singer](https://singer.io) target for Oracle Database, built
 - **Performance Monitoring**: Built-in metrics and logging
 
 ### 🔒 Reliability
+
 - **Transaction Management**: ACID compliance with rollback support
 - **Error Handling**: Detailed error reporting and recovery
 - **Schema Evolution**: Automatic schema updates
@@ -90,35 +94,35 @@ Create a `config.json`:
 
 ### Essential Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `host` | string | **required** | Oracle host |
-| `port` | integer | 1521 | Oracle port |
-| `service_name` | string | | Oracle service name |
-| `database` | string | | Oracle SID (alternative) |
-| `username` | string | **required** | Username |
-| `password` | string | **required** | Password |
-| `schema` | string | | Default schema |
+| Parameter      | Type    | Default      | Description              |
+| -------------- | ------- | ------------ | ------------------------ |
+| `host`         | string  | **required** | Oracle host              |
+| `port`         | integer | 1521         | Oracle port              |
+| `service_name` | string  |              | Oracle service name      |
+| `database`     | string  |              | Oracle SID (alternative) |
+| `username`     | string  | **required** | Username                 |
+| `password`     | string  | **required** | Password                 |
+| `schema`       | string  |              | Default schema           |
 
 ### Performance Optimization
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `batch_config.batch_size` | integer | 10000 | Records per batch |
-| `pool_size` | integer | 10 | Connection pool size |
-| `use_bulk_operations` | boolean | true | Use bulk operations |
-| `use_merge_statements` | boolean | true | Use MERGE for upserts |
-| `parallel_degree` | integer | 1 | Oracle parallel degree |
+| Parameter                 | Type    | Default | Description            |
+| ------------------------- | ------- | ------- | ---------------------- |
+| `batch_config.batch_size` | integer | 10000   | Records per batch      |
+| `pool_size`               | integer | 10      | Connection pool size   |
+| `use_bulk_operations`     | boolean | true    | Use bulk operations    |
+| `use_merge_statements`    | boolean | true    | Use MERGE for upserts  |
+| `parallel_degree`         | integer | 1       | Oracle parallel degree |
 
 ### Advanced Features
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `load_method` | string | append-only | Load method: append-only, upsert, overwrite |
-| `enable_compression` | boolean | false | Enable table compression |
-| `compression_type` | string | basic | Compression: basic, advanced, hybrid |
-| `create_table_indexes` | boolean | true | Create indexes on keys |
-| `add_record_metadata` | boolean | true | Add Singer metadata |
+| Parameter              | Type    | Default     | Description                                 |
+| ---------------------- | ------- | ----------- | ------------------------------------------- |
+| `load_method`          | string  | append-only | Load method: append-only, upsert, overwrite |
+| `enable_compression`   | boolean | false       | Enable table compression                    |
+| `compression_type`     | string  | basic       | Compression: basic, advanced, hybrid        |
+| `create_table_indexes` | boolean | true        | Create indexes on keys                      |
+| `add_record_metadata`  | boolean | true        | Add Singer metadata                         |
 
 ## Advanced Usage
 
@@ -131,22 +135,22 @@ Create a `config.json`:
   "service_name": "PROD",
   "username": "etl_user",
   "password": "secure_password",
-  
+
   "batch_config": {
     "batch_size": 50000,
     "batch_wait_limit_seconds": 30
   },
-  
+
   "pool_size": 20,
   "max_overflow": 40,
   "use_bulk_operations": true,
   "use_merge_statements": true,
   "parallel_degree": 4,
-  
+
   "enable_compression": true,
   "compression_type": "advanced",
   "use_direct_path": true,
-  
+
   "load_method": "upsert"
 }
 ```
@@ -212,7 +216,7 @@ Utilize Oracle parallel processing:
 make install         # Install package
 make clean          # Clean build files
 
-# Testing  
+# Testing
 make test-unit      # Unit tests (no database)
 make test-integration # Integration tests (needs Oracle)
 make test-all       # All tests
@@ -242,13 +246,15 @@ make full           # Complete validation
 ## Testing
 
 ### Unit Tests
+
 No Oracle database required. Tests configuration, type mapping, and basic functionality.
 
 ```bash
 make test-unit
 ```
 
-### Integration Tests  
+### Integration Tests
+
 Requires Oracle database connection configured in `.env`.
 
 ```bash
@@ -256,6 +262,7 @@ make test-integration
 ```
 
 ### Complete Test Suite
+
 Runs all tests including performance and enterprise features.
 
 ```bash
@@ -283,6 +290,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Credits
 
 Built with:
+
 - [Singer SDK](https://sdk.meltano.com/) - The best way to build Singer taps and targets
 - [SQLAlchemy](https://www.sqlalchemy.org/) - The Python SQL toolkit
 - [oracledb](https://oracle.github.io/python-oracledb/) - Python driver for Oracle Database

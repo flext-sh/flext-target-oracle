@@ -1,3 +1,7 @@
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Test Oracle database connection.
 
 This module tests the basic connection to Oracle Database.
@@ -9,23 +13,21 @@ import logging
 from typing import Any
 
 import pytest
-from sqlalchemy import text
-
 from flext_target_oracle import OracleTarget
 from flext_target_oracle.connectors import OracleConnector
+from sqlalchemy import text
+
 from tests.helpers import requires_oracle_connection
 
 log = logging.getLogger(__name__)
 
 
 @requires_oracle_connection
-class TestOracleConnection:
-    """Test Oracle database connection."""
+class TestOracleConnection:  """Test Oracle database connection."""
 
+    @staticmethod
     @pytest.mark.integration
-    def test_basic_connection(self, oracle_config: dict[str, Any]) -> None:
-        """Test basic database connection."""
-        # Create connector
+    def test_basic_connection(oracle_config: dict[str, Any]) -> None: # Create connector
         connector = OracleConnector(config=oracle_config)
 
         # Test we can create engine
@@ -35,23 +37,22 @@ class TestOracleConnection:
         # Clean up
         engine.dispose()
 
+    @staticmethod
     @pytest.mark.integration
-    def test_query_execution(self, oracle_config: dict[str, Any]) -> None:
-        """Test executing a simple query."""
+    def test_query_execution(oracle_config: dict[str, Any]) -> None:
         connector = OracleConnector(config=oracle_config)
         engine = connector.create_engine()
 
         try:
             with engine.connect() as conn:
-                result = conn.execute(text("SELECT 1 FROM DUAL"))
+    result = conn.execute(text("SELECT 1 FROM DUAL"))
                 row = result.fetchone()
                 assert row[0] == 1
-        finally:
-            engine.dispose()
+        finally: engine.dispose()
 
+    @staticmethod
     @pytest.mark.integration
-    def test_oracle_version_detection(self, oracle_config: dict[str, Any]) -> None:
-        """Test Oracle version detection."""
+    def test_oracle_version_detection(oracle_config: dict[str, Any]) -> None:
         connector = OracleConnector(config=oracle_config)
         engine = connector.create_engine()
 
@@ -64,36 +65,34 @@ class TestOracleConnection:
                     SELECT BANNER
                     FROM V$VERSION
                     WHERE ROWNUM = 1
-                """,
+                """
                     ),
                 )
                 banner = result.fetchone()
                 assert banner is not None
                 assert "Oracle" in banner[0]
                 log.error(
-                    f"\nOracle Version: {banner[0]}",
-                # TODO(@dev): Replace with proper logging  # Link:
-                # https://github.com/issue/todo
+                    "\nOracle Version: %s",
+                    banner[0],
+                    # TODO(@dev): Replace with proper logging  # Link: # https://github.com/issue/todo
                 )
         finally:
             engine.dispose()
 
+    @staticmethod
     @pytest.mark.integration
-    def test_target_initialization(self, oracle_config: dict[str, Any]) -> None:
-        """Test target can be initialized with Oracle config."""
+    def test_target_initialization(oracle_config: dict[str, Any]) -> None:
         target = OracleTarget(config=oracle_config)
         assert target.name == "flext-target-oracle"
         assert target.config["host"] == oracle_config["host"]
 
+    @staticmethod
     @pytest.mark.integration
     def test_table_creation(
-        self,
         oracle_engine,
         test_table_name: str,
         table_cleanup,
-    ) -> None:
-        """Test creating a table."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         with oracle_engine.connect() as conn:
             # Create simple table
@@ -104,7 +103,7 @@ class TestOracleConnection:
                     id NUMBER PRIMARY KEY,
                     name VARCHAR2(100)
                 )
-            """,
+            """
                 ),
             )
             conn.commit()
@@ -112,25 +111,24 @@ class TestOracleConnection:
             # Verify table exists
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT COUNT(*)
                 FROM USER_TABLES
                 WHERE TABLE_NAME = UPPER('{test_table_name}')
-            """,
-                ),
+            """
+            """
+        ),
             )
             count = result.fetchone()[0]
             assert count == 1
 
+    @staticmethod
     @pytest.mark.integration
     def test_insert_and_select(
-        self,
         oracle_engine,
         test_table_name: str,
         table_cleanup,
-    ) -> None:
-        """Test basic insert and select operations."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         with oracle_engine.connect() as conn:
             # Create table
@@ -141,7 +139,7 @@ class TestOracleConnection:
                     id NUMBER PRIMARY KEY,
                     value VARCHAR2(100)
                 )
-            """,
+            ,
                 ),
             )
             conn.commit()
@@ -149,24 +147,26 @@ class TestOracleConnection:
             # Insert data
             conn.execute(
                 text(
-                    f"""
+                f"""
                 INSERT INTO {test_table_name} (id, value)
                 VALUES (1, 'test_value')
-            """,
-                ),
+            """
+            """
+        ),
             )
             conn.commit()
 
             # Select data
             result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT id, value
                 FROM {test_table_name}
                 WHERE id = 1
-            """,
-                ),
+            """
             )
+            """
+        )
             row = result.fetchone()
             assert row[0] == 1
             assert row[1] == "test_value"

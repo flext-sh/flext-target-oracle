@@ -7,6 +7,7 @@ Comprehensive test suite for the FLEXT Oracle target implementation using Oracle
 ### Test Categories
 
 #### **Connection Tests** (`test_oracle_connection.py`)
+
 - TCPS/SSL connection validation
 - Oracle Autonomous Database features
 - Connection pooling and health checks
@@ -14,6 +15,7 @@ Comprehensive test suite for the FLEXT Oracle target implementation using Oracle
 - Database version compatibility
 
 #### **Core Functionality** (`test_target_functionality.py`)
+
 - Singer SDK message processing
 - Schema and record handling
 - Batch processing and parallelization
@@ -22,6 +24,7 @@ Comprehensive test suite for the FLEXT Oracle target implementation using Oracle
 - Error handling and recovery
 
 #### **Oracle Features** (`test_oracle_features.py`)
+
 - Oracle MERGE operations
 - Bulk operations and array processing
 - Parallel processing configuration
@@ -30,6 +33,7 @@ Comprehensive test suite for the FLEXT Oracle target implementation using Oracle
 - Oracle-specific error handling
 
 #### **Performance Benchmarks** (`test_performance_benchmarks.py`)
+
 - High-throughput ingestion testing
 - Bulk vs individual operation comparison
 - Parallel degree scaling analysis
@@ -38,6 +42,7 @@ Comprehensive test suite for the FLEXT Oracle target implementation using Oracle
 - Large record handling
 
 #### **End-to-End Integration** (`test_e2e_integration.py`)
+
 - Complete ETL workflow simulation
 - Schema evolution scenarios
 - Error recovery workflows
@@ -50,6 +55,7 @@ Comprehensive test suite for the FLEXT Oracle target implementation using Oracle
 
 1. **Oracle Autonomous Database** access with TCPS connection
 2. **Environment configuration** in `.env` file:
+
    ```env
    DATABASE__HOST=your-autonomous-db.adb.region.oraclecloud.com
    DATABASE__PORT=1522
@@ -61,6 +67,7 @@ Comprehensive test suite for the FLEXT Oracle target implementation using Oracle
    ```
 
 3. **Python dependencies** installed:
+
    ```bash
    pip install -e .
    pip install pytest pytest-cov pytest-timeout pytest-benchmark
@@ -69,6 +76,7 @@ Comprehensive test suite for the FLEXT Oracle target implementation using Oracle
 ### Test Execution
 
 #### **All Tests**
+
 ```bash
 # Run complete test suite
 pytest
@@ -81,6 +89,7 @@ pytest --cov=flext_target_oracle --cov-report=html
 ```
 
 #### **By Category**
+
 ```bash
 # Connection tests only
 pytest tests/test_oracle_connection.py -v
@@ -99,6 +108,7 @@ pytest tests/test_e2e_integration.py -v
 ```
 
 #### **By Markers**
+
 ```bash
 # Integration tests (require database)
 pytest -m integration
@@ -117,6 +127,7 @@ pytest -m connection
 ```
 
 #### **Specific Test Functions**
+
 ```bash
 # Test TCPS connection
 pytest tests/test_oracle_connection.py::TestOracleConnection::test_tcps_connection_details -v
@@ -134,6 +145,7 @@ pytest tests/test_performance_benchmarks.py::TestPerformanceBenchmarks::test_hig
 ### Test Configuration
 
 #### **Pytest Configuration** (`pytest.ini`)
+
 - Test discovery patterns
 - Marker definitions
 - Output formatting
@@ -141,6 +153,7 @@ pytest tests/test_performance_benchmarks.py::TestPerformanceBenchmarks::test_hig
 - Logging configuration
 
 #### **Test Fixtures** (`conftest.py`)
+
 - Oracle connection management
 - Test data generation
 - Configuration loading
@@ -150,6 +163,7 @@ pytest tests/test_performance_benchmarks.py::TestPerformanceBenchmarks::test_hig
 ## 📊 Test Coverage
 
 ### **Functional Coverage**
+
 - ✅ **Connection Management**: TCPS, pooling, failover
 - ✅ **Data Processing**: All Singer message types
 - ✅ **Oracle Features**: MERGE, bulk ops, compression
@@ -159,6 +173,7 @@ pytest tests/test_performance_benchmarks.py::TestPerformanceBenchmarks::test_hig
 - ✅ **Data Types**: Complete Oracle type mapping
 
 ### **Test Data Patterns**
+
 - **Small datasets**: 100-1,000 records for functional testing
 - **Medium datasets**: 5,000-10,000 records for integration
 - **Large datasets**: 20,000-50,000 records for performance
@@ -167,17 +182,18 @@ pytest tests/test_performance_benchmarks.py::TestPerformanceBenchmarks::test_hig
 
 ### **Performance Baselines**
 
-| Test Scenario | Expected Throughput | Timeout |
-|---------------|-------------------|---------|
-| Basic ingestion | >1,000 records/sec | 60s |
-| Bulk operations | >2,000 records/sec | 120s |
-| High-throughput | >1,000 records/sec | 180s |
-| Large records (~10KB) | >50 records/sec | 300s |
-| Parallel processing | 2x+ baseline | 180s |
+| Test Scenario         | Expected Throughput | Timeout |
+| --------------------- | ------------------- | ------- |
+| Basic ingestion       | >1,000 records/sec  | 60s     |
+| Bulk operations       | >2,000 records/sec  | 120s    |
+| High-throughput       | >1,000 records/sec  | 180s    |
+| Large records (~10KB) | >50 records/sec     | 300s    |
+| Parallel processing   | 2x+ baseline        | 180s    |
 
 ## 🔧 Test Configuration
 
 ### **Environment Variables**
+
 ```bash
 # Test execution
 ORACLE_TARGET_LOG_LEVEL=DEBUG
@@ -194,6 +210,7 @@ DATABASE__PROTOCOL=tcps
 ```
 
 ### **Target Configuration for Tests**
+
 ```json
 {
   "batch_size": 5000,
@@ -214,6 +231,7 @@ DATABASE__PROTOCOL=tcps
 ### **Common Issues**
 
 #### **Connection Failures**
+
 ```bash
 # Verify .env file exists and has correct values
 cat .env
@@ -230,6 +248,7 @@ print('Connection successful')
 ```
 
 #### **Test Failures**
+
 ```bash
 # Run specific failing test with maximum verbosity
 pytest tests/test_oracle_connection.py::test_basic_connection -vvv -s
@@ -242,6 +261,7 @@ pytest --pdb tests/test_target_functionality.py::test_schema_message_processing
 ```
 
 #### **Performance Issues**
+
 ```bash
 # Run performance tests individually
 pytest tests/test_performance_benchmarks.py::test_high_throughput_ingestion -v --durations=0
@@ -251,6 +271,7 @@ pytest tests/test_performance_benchmarks.py::test_high_throughput_ingestion -v -
 ```
 
 ### **Database Cleanup**
+
 Tests automatically clean up tables, but manual cleanup may be needed:
 
 ```sql
@@ -264,6 +285,7 @@ DROP TABLE test_table_name CASCADE CONSTRAINTS;
 ## 📈 Continuous Integration
 
 ### **GitHub Actions**
+
 ```yaml
 name: Oracle Target Tests
 on: [push, pull_request]
@@ -275,7 +297,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
+          python-version: "3.9"
       - name: Install dependencies
         run: |
           pip install -e .
@@ -294,6 +316,7 @@ jobs:
 ```
 
 ### **Test Reports**
+
 - **Coverage**: HTML and XML reports
 - **Performance**: Benchmark results
 - **JUnit**: XML output for CI integration
@@ -311,6 +334,7 @@ jobs:
 6. **Document test purpose**: Clear docstrings
 
 ### **Test Template**
+
 ```python
 def test_new_feature(
     oracle_config: Dict[str, Any],
@@ -321,25 +345,26 @@ def test_new_feature(
 ):
     """Test description with expected behavior."""
     table_cleanup(test_table_name)
-    
+
     # Setup
     target = OracleTarget(config=oracle_config)
-    
+
     # Test execution
     performance_timer.start()
     # ... test logic ...
     performance_timer.stop()
-    
+
     # Verification
     with oracle_engine.connect() as conn:
         # ... verify results ...
         pass
-    
+
     # Assertions
     assert condition, "Error message"
 ```
 
 ### **Best Practices**
+
 - **Isolated tests**: Each test should be independent
 - **Meaningful assertions**: Clear success/failure criteria
 - **Performance expectations**: Include throughput requirements

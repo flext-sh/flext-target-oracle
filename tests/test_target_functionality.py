@@ -1,3 +1,7 @@
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Test Oracle target core functionality with Singer SDK patterns.
 
 This module tests the complete target functionality including
@@ -11,20 +15,19 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+from flext_target_oracle.target import OracleTarget
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
-from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
 
 
 @requires_oracle_connection
-class TestOracleTargetFunctionality:
-    """Test Oracle target core functionality."""
+class TestOracleTargetFunctionality:  """Test Oracle target core functionality."""
 
-    def test_target_name_and_capabilities(self, oracle_target: OracleTarget) -> None:
-        """Test target name and capabilities."""
-        assert oracle_target.name == "flext-target-oracle"
+    @staticmethod
+    def test_target_name_and_capabilities(oracle_target: OracleTarget) -> None:
+            assert oracle_target.name == "flext-target-oracle"
 
         capabilities = oracle_target.capabilities
         assert len(capabilities) > 0
@@ -34,14 +37,13 @@ class TestOracleTargetFunctionality:
         assert "about" in cap_values  # This capability should exist
         assert "stream-maps" in cap_values  # This capability should exist
 
-    def test_schema_message_processing(self,
-                                       oracle_target: OracleTarget,
-                                       sample_singer_schema: dict[str, Any],
-                                       test_table_name: str,
-                                       table_cleanup: Any,
-                                       ) -> None:
-        """Test Singer SCHEMA message processing."""
-        table_cleanup(test_table_name)
+    @staticmethod
+    def test_schema_message_processing(
+        oracle_target: OracleTarget,
+        sample_singer_schema: dict[str, Any],
+        test_table_name: str,
+        table_cleanup: Any,
+    ) -> None: table_cleanup(test_table_name)
 
         # Modify schema to use test table name
         test_schema = sample_singer_schema.copy()
@@ -50,19 +52,18 @@ class TestOracleTargetFunctionality:
         # Process schema message
         schema_message = json.dumps(test_schema)
 
-        with patch("sys.stdin", StringIO(schema_message)):
-            # This should process the schema without errors
+        with patch("sys.stdin", StringIO(schema_message)): # This should process the schema without errors
             oracle_target._process_schema_message(test_schema)
 
-    def test_record_message_processing(self,
-                                       oracle_target: OracleTarget,
-                                       sample_singer_schema: dict[str, Any],
-                                       sample_singer_records: list[dict[str, Any]],
-                                       test_table_name: str,
-                                       oracle_engine: Engine,
-                                       table_cleanup: Any,
-                                       ) -> None:
-        """Test Singer RECORD message processing."""
+    @staticmethod
+    def test_record_message_processing(
+        oracle_target: OracleTarget,
+        sample_singer_schema: dict[str, Any],
+        sample_singer_records: list[dict[str, Any]],
+        test_table_name: str,
+        oracle_engine: Engine,
+        table_cleanup: Any,
+    ) -> None:
         table_cleanup(test_table_name)
 
         # Modify schema and records to use test table name
@@ -70,8 +71,7 @@ class TestOracleTargetFunctionality:
         test_schema["stream"] = test_table_name
 
         test_records = []
-        for record in sample_singer_records:
-            test_record = record.copy()
+        for record in sample_singer_records: test_record = record.copy()
             test_record["stream"] = test_table_name
             test_records.append(test_record)
 
@@ -81,13 +81,12 @@ class TestOracleTargetFunctionality:
         input_data = "\n".join(messages)
 
         # Process messages
-        with patch("sys.stdin", StringIO(input_data)):
-            oracle_target.cli()
+        with patch("sys.stdin", StringIO(input_data)): oracle_target.cli()
 
         # Verify records were inserted
         with oracle_engine.connect() as conn:
-            result = conn.execute(
-                text(f"SELECT COUNT(*) FROM {test_table_name}"))
+
+            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
             count = row[0]
@@ -95,28 +94,25 @@ class TestOracleTargetFunctionality:
 
             # Verify specific record data
             result = conn.execute(
-                text(
-                    f"SELECT id, name, email FROM {test_table_name} ORDER BY id"),
+                text(f"SELECT id, name, email FROM {test_table_name} ORDER BY id"),
             )
             rows = result.fetchall()
 
-            for i, row in enumerate(rows):
-                expected_record = test_records[i]["record"]
+            for i, row in enumerate(rows): expected_record = test_records[i]["record"]
                 assert row.id == expected_record["id"]
                 assert row.name == expected_record["name"]
                 assert row.email == expected_record["email"]
 
-    def test_batch_processing(self,
-                              oracle_config: dict[str, Any],
-                              bulk_singer_schema: dict[str, Any],
-                              bulk_singer_records: list[dict[str, Any]],
-                              test_table_name: str,
-                              oracle_engine: Engine,
-                              table_cleanup: Any,
-                              performance_timer: Any,
-                              ) -> None:
-        """Test batch processing with large datasets."""
-        table_cleanup(test_table_name)
+    @staticmethod
+    def test_batch_processing(
+        oracle_config: dict[str, Any],
+        bulk_singer_schema: dict[str, Any],
+        bulk_singer_records: list[dict[str, Any]],
+        test_table_name: str,
+        oracle_engine: Engine,
+        table_cleanup: Any,
+        performance_timer: Any,
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure for batch testing
         batch_config = oracle_config.copy()
@@ -130,8 +126,7 @@ class TestOracleTargetFunctionality:
         test_schema["stream"] = test_table_name
 
         test_records = []
-        for record in bulk_singer_records:
-            test_record = record.copy()
+        for record in bulk_singer_records: test_record = record.copy()
             test_record["stream"] = test_table_name
             test_records.append(test_record)
 
@@ -143,15 +138,14 @@ class TestOracleTargetFunctionality:
         # Process with performance timing
         performance_timer.start()
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         performance_timer.stop()
 
         # Verify all records were processed
         with oracle_engine.connect() as conn:
-            result = conn.execute(
-                text(f"SELECT COUNT(*) FROM {test_table_name}"))
+
+            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
             count = row[0]
@@ -159,18 +153,16 @@ class TestOracleTargetFunctionality:
 
         # Performance assertions
         throughput = len(test_records) / performance_timer.duration
-        assert throughput > 10, f"Throughput too low: {
-            throughput:.2f} records/sec"
+        assert throughput > 10, f"Throughput too low: {throughput:.2f} records/sec"
 
-    def test_upsert_operations(self,
-                               oracle_config: dict[str, Any],
-                               sample_singer_schema: dict[str, Any],
-                               test_table_name: str,
-                               oracle_engine: Engine,
-                               table_cleanup: Any,
-                               ) -> None:
-        """Test upsert operations using Oracle MERGE."""
-        table_cleanup(test_table_name)
+    @staticmethod
+    def test_upsert_operations(
+        oracle_config: dict[str, Any],
+        sample_singer_schema: dict[str, Any],
+        test_table_name: str,
+        oracle_engine: Engine,
+        table_cleanup: Any,
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure for MERGE upserts
         upsert_config = oracle_config.copy()
@@ -185,7 +177,7 @@ class TestOracleTargetFunctionality:
 
         initial_records = [
             {
-                "type": "RECORD",
+                "type":  "RECORD",
                 "stream": test_table_name,
                 "record": {
                     "id": 1,
@@ -219,13 +211,12 @@ class TestOracleTargetFunctionality:
         messages.extend([json.dumps(record) for record in initial_records])
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify initial insert
         with oracle_engine.connect() as conn:
-            result = conn.execute(
-                text(f"SELECT COUNT(*) FROM {test_table_name}"))
+
+            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
             assert row[0] == 2
@@ -267,16 +258,13 @@ class TestOracleTargetFunctionality:
         messages.extend([json.dumps(record) for record in updated_records])
         input_data = "\n".join(messages)
 
-        target_new = OracleTarget(
-            config=upsert_config)  # Fresh target instance
-        with patch("sys.stdin", StringIO(input_data)):
-            target_new.cli()
+        target_new = OracleTarget(config=upsert_config)  # Fresh target instance
+        with patch("sys.stdin", StringIO(input_data)): target_new.cli()
 
         # Verify upsert results
         with oracle_engine.connect() as conn:
             # Should have 3 total records now (2 original + 1 new)
-            result = conn.execute(
-                text(f"SELECT COUNT(*) FROM {test_table_name}"))
+            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
             assert row[0] == 3
@@ -303,14 +291,13 @@ class TestOracleTargetFunctionality:
             assert row is not None
             assert row.name == "Bob Wilson"
 
-    def test_data_type_handling(self,
-                                oracle_target: OracleTarget,
-                                test_table_name: str,
-                                oracle_engine: Engine,
-                                table_cleanup: Any,
-                                ) -> None:
-        """Test various data type handling."""
-        table_cleanup(test_table_name)
+    @staticmethod
+    def test_data_type_handling(
+        oracle_target: OracleTarget,
+        test_table_name: str,
+        oracle_engine: Engine,
+        table_cleanup: Any,
+    ) -> None: table_cleanup(test_table_name)
 
         # Create comprehensive schema with various data types
         comprehensive_schema = {
@@ -364,11 +351,11 @@ class TestOracleTargetFunctionality:
         messages = [json.dumps(comprehensive_schema), json.dumps(test_record)]
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            oracle_target.cli()
+        with patch("sys.stdin", StringIO(input_data)): oracle_target.cli()
 
         # Verify data was stored correctly
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT * FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -388,14 +375,13 @@ class TestOracleTargetFunctionality:
             assert row.metadata is not None
             assert row.tags is not None
 
-    def test_error_handling_and_recovery(self,
-                                         oracle_config: dict[str, Any],
-                                         test_table_name: str,
-                                         oracle_engine: Engine,
-                                         table_cleanup: Any,
-                                         ) -> None:
-        """Test error handling and recovery mechanisms."""
-        table_cleanup(test_table_name)
+    @staticmethod
+    def test_error_handling_and_recovery(
+        oracle_config: dict[str, Any],
+        test_table_name: str,
+        oracle_engine: Engine,
+        table_cleanup: Any,
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure with retry settings
         error_config = oracle_config.copy()
@@ -407,7 +393,7 @@ class TestOracleTargetFunctionality:
 
         # Create schema
         test_schema = {
-            "type": "SCHEMA",
+            "type":  "SCHEMA",
             "stream": test_table_name,
             "schema": {
                 "type": "object",
@@ -440,7 +426,7 @@ class TestOracleTargetFunctionality:
             "record": {
                 "id": 2,
                 "name": "A" * 20,  # Too long for column
-                "email": "jane@example.com",
+                "email":  "jane@example.com",
             },
         }
 
@@ -448,13 +434,12 @@ class TestOracleTargetFunctionality:
         messages = [json.dumps(test_schema), json.dumps(valid_record)]
         input_data = "\n".join(messages)
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         # Verify valid record was inserted
         with oracle_engine.connect() as conn:
-            result = conn.execute(
-                text(f"SELECT COUNT(*) FROM {test_table_name}"))
+
+            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
             assert row[0] == 1
@@ -466,22 +451,19 @@ class TestOracleTargetFunctionality:
         target_new = OracleTarget(config=error_config)
 
         # This should not crash the target, depending on configuration
-        try:
-            with patch("sys.stdin", StringIO(input_data)):
-                target_new.cli()
+        try: with patch("sys.stdin", StringIO(input_data)): target_new.cli()
         except Exception as e:
             # Some errors are expected for invalid data
             assert "constraint" in str(e).lower() or "length" in str(e).lower()
 
-    def test_parallel_processing(self,
-                                 oracle_config: dict[str, Any],
-                                 test_table_name: str,
-                                 oracle_engine: Engine,
-                                 table_cleanup: Any,
-                                 performance_timer: Any,
-                                 ) -> None:
-        """Test parallel processing capabilities."""
-        table_cleanup(test_table_name)
+    @staticmethod
+    def test_parallel_processing(
+        oracle_config: dict[str, Any],
+        test_table_name: str,
+        oracle_engine: Engine,
+        table_cleanup: Any,
+        performance_timer: Any,
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure for parallel processing
         parallel_config = oracle_config.copy()
@@ -493,7 +475,7 @@ class TestOracleTargetFunctionality:
 
         # Generate large dataset
         test_schema = {
-            "type": "SCHEMA",
+            "type":  "SCHEMA",
             "stream": test_table_name,
             "schema": {
                 "type": "object",
@@ -507,15 +489,17 @@ class TestOracleTargetFunctionality:
         }
 
         # Generate 2000 test records
-        test_records = [{
-                    "type": "RECORD",
-                    "stream": test_table_name,
-                    "record": {
-                        "id": i + 1,
-                        "name": f"User {i + 1}",
-                        "value": float(i * 1.5),
-                    },
-                } for i in range(2000)]
+        test_records = [
+            {
+                "type": "RECORD",
+                "stream": test_table_name,
+                "record": {
+                    "id": i + 1,
+                    "name": f"User {i + 1}",
+                    "value": float(i * 1.5),
+                },
+            }
+            for i in range(2000): ]
 
         # Process with timing
         messages = [json.dumps(test_schema)]
@@ -524,15 +508,14 @@ class TestOracleTargetFunctionality:
 
         performance_timer.start()
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         performance_timer.stop()
 
         # Verify all records processed
         with oracle_engine.connect() as conn:
-            result = conn.execute(
-                text(f"SELECT COUNT(*) FROM {test_table_name}"))
+
+            result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
             count = row[0]
@@ -544,10 +527,8 @@ class TestOracleTargetFunctionality:
             throughput > 50
         ), f"Parallel processing throughput too low: {throughput:.2f} records/sec"
 
-    def test_configuration_validation(self, oracle_config: dict[str, Any]) -> None:
-        """Test configuration validation functionality."""
-        """Test configuration validation functionality."""
-        # Test valid configuration
+    @staticmethod
+    def test_configuration_validation(oracle_config: dict[str, Any]) -> None: # Test valid configuration
         target = OracleTarget(config=oracle_config)
         assert target.config is not None
 
@@ -555,8 +536,7 @@ class TestOracleTargetFunctionality:
         invalid_config = oracle_config.copy()
         del invalid_config["host"]
 
-        with pytest.raises((ValueError, ConnectionError, Exception)):
-            OracleTarget(config=invalid_config)
+        with pytest.raises((ValueError, ConnectionError, Exception)): OracleTarget(config=invalid_config)
 
         # Test that target accepts valid config without errors
         valid_config = oracle_config.copy()
@@ -566,25 +546,21 @@ class TestOracleTargetFunctionality:
         target_valid = OracleTarget(config=valid_config)
         assert target_valid.config["batch_size"] == 1000
 
-    def test_cli_functionality(self, temp_config_file: str) -> None:
-        """Test CLI functionality and commands."""
-        """Test CLI functionality and commands."""
-        import json
+    @staticmethod
+    def test_cli_functionality(temp_config_file: str) -> None:
+            import json  # TODO: Move import to module level
 
         # Test that we can load config file
         config_path = Path(temp_config_file)
-        with config_path.open(encoding="utf-8") as f:
-            config = json.load(f)
+        with config_path.open(encoding="utf-8") as f: config = json.load(f)
         assert config is not None
         assert config["host"] is not None
 
         # Test invalid configuration file handling
-        try:
-            nonexistent_path = Path("/nonexistent/file.json")
-            with nonexistent_path.open(encoding="utf-8") as f:
-                json.load(f)
+        try: nonexistent_path = Path("/nonexistent/file.json")
+            with nonexistent_path.open(encoding="utf-8") as f: json.load(f)
             msg = "Should have raised an exception"
             raise AssertionError(msg) from None
         except Exception:
-            # TODO: Consider using else block
+        # TODO(@flext-team): Consider using else block
             pass  # This is expected

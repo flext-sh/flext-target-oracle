@@ -1,3 +1,6 @@
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
 
 """Test suite for FLEXT Target Oracle.
 

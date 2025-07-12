@@ -1,7 +1,10 @@
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Test SQLAlchemy 2.0 features in Oracle Target.
 
-This module tests the modern SQLAlchemy 2.0 implementation including:
-- URL.create() for connection URLs
+This module tests the modern SQLAlchemy 2.0 implementation including: - URL.create() for connection URLs
 - QueuePool configuration
 - Event system
 - Bulk operations
@@ -14,25 +17,22 @@ from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from sqlalchemy import pool
-from sqlalchemy.engine import URL
-
 from flext_target_oracle.connectors import OracleConnector
 from flext_target_oracle.sinks import OracleSink
 from flext_target_oracle.target import OracleTarget
+from sqlalchemy import pool
+from sqlalchemy.engine import URL
 
 
-class TestSQLAlchemy2Features:
-    """Test SQLAlchemy 2.0 features."""
+class TestSQLAlchemy2Features:  """Test SQLAlchemy 2.0 features."""
 
-    def test_url_create_usage(self) -> None:
-        """Test that URL.create() is used for connection URLs."""
-        config = {
+    @staticmethod
+    def test_url_create_usage() -> None: config = {
             "host": "localhost",
             "port": 1521,
             "user": "test_user",
             "password": "test_pass",
-            "service_name": "ORCL"
+            "service_name": "ORCL",
         }
 
         connector = OracleConnector(config)
@@ -47,36 +47,34 @@ class TestSQLAlchemy2Features:
         assert url.port == 1521
         assert url.query == {"service_name": "ORCL"}
 
-    def test_pool_class_selection(self) -> None:
-        """Test pool class selection based on configuration."""
-        connector = OracleConnector({})
+    @staticmethod
+    def test_pool_class_selection() -> None: OracleConnector({})
 
         # Test QueuePool (default)
-        config = {"pool_size": 10}
         # connector.config = config  # type: ignore[misc]
-        # assert connector._get_pool_class() == pool.QueuePool  # type: ignore[attr-defined]
+        # assert connector._get_pool_class() == pool.QueuePool
+        # type: ignore[attr-defined]
 
         # Test NullPool
-        config = {"pool_size": 0}
         # connector.config = config  # type: ignore[misc]
-        # assert connector._get_pool_class() == pool.NullPool  # type: ignore[attr-defined]
+        # assert connector._get_pool_class() == pool.NullPool
+        # type: ignore[attr-defined]
 
         # Test StaticPool
-        config = {"pool_size": 1}
         # connector.config = config  # type: ignore[misc]
-        # assert connector._get_pool_class() == pool.StaticPool  # type: ignore[attr-defined]
+        # assert connector._get_pool_class() == pool.StaticPool
+        # type: ignore[attr-defined]
 
     @patch("flext_target_oracle.connectors.create_engine")
-    def test_engine_creation_with_future_mode(self, mock_create_engine: Any) -> None:
-        """Test engine creation with future=True for SQLAlchemy 2.0."""
-        """Test engine creation with future=True for SQLAlchemy 2.0."""
-        config = {
+    @staticmethod
+    def test_engine_creation_with_future_mode(mock_create_engine: Any) -> None:
+            config = {
             "host": "localhost",
             "user": "test_user",
             "password": "test_pass",
             "service_name": "ORCL",
             "pool_size": 10,
-            "echo": True
+            "echo": True,
         }
 
         connector = OracleConnector(config)
@@ -96,16 +94,15 @@ class TestSQLAlchemy2Features:
 
     @patch("flext_target_oracle.connectors.event")
     @patch("flext_target_oracle.connectors.create_engine")
-    def test_event_listeners_setup(self, mock_create_engine: Any, mock_event: Any) -> None:
-        """Test SQLAlchemy event listeners are properly set up."""
-        """Test SQLAlchemy event listeners are properly set up."""
-        config = {
+    @staticmethod
+    def test_event_listeners_setup(mock_create_engine: Any, mock_event:
+            Any) -> None: config = {
             "host": "localhost",
             "user": "test_user",
             "password": "test_pass",
             "service_name": "ORCL",
             "enable_parallel_dml": True,
-            "optimizer_mode": "ALL_ROWS"
+            "optimizer_mode": "ALL_ROWS",
         }
 
         connector = OracleConnector(config)
@@ -117,9 +114,8 @@ class TestSQLAlchemy2Features:
         # Verify event.listens_for was called
         mock_event.listens_for.assert_called_with(mock_engine, "connect")
 
-    def test_oracle_type_mapping(self) -> None:
-        """Test Oracle-specific type mapping."""
-        connector = OracleConnector({})
+    @staticmethod
+    def test_oracle_type_mapping() -> None: connector = OracleConnector({})
 
         # Test integer mapping
         int_type = connector.to_sql_type({"type": "integer"})
@@ -130,30 +126,32 @@ class TestSQLAlchemy2Features:
         assert str(bool_type) == "NUMBER(precision=1, scale=0)"
 
         # Test string mapping with length
-        string_type = connector.to_sql_type(
-            {"type": "string", "maxLength": 100})
+        string_type = connector.to_sql_type({"type": "string", "maxLength": 100})
         assert str(string_type) == "VARCHAR2(length=100)"
 
         # Test CLOB for long strings
-        clob_type = connector.to_sql_type(
-            {"type": "string", "maxLength": 5000})
+        clob_type = connector.to_sql_type({"type":  "string", "maxLength": 5000})
         assert str(clob_type) == "CLOB"
 
-    def test_column_pattern_recognition(self) -> None:
-        """Test intelligent column type mapping based on patterns."""
-        config = {"enable_column_patterns": True}
-        connector = OracleConnector(config)
+    @staticmethod
+    def test_column_pattern_recognition() -> None: config = {"enable_column_patterns": True}
+        OracleConnector(config)
 
         # Test ID column
-        # id_type = connector.get_column_type("USER_ID", {"type": "integer"})  # type: ignore[attr-defined]
+        # id_type = connector.get_column_type("USER_ID", {"type": "integer"})
+        # type: ignore[attr-defined]
         # assert str(id_type) == "NUMBER(precision=38, scale=0)"
 
         # Test flag column
-        # flag_type = connector.get_column_type("ACTIVE_FLG", {"type": "string"})  # type: ignore[attr-defined]
+        # flag_type = connector.get_column_type(
+        #     "ACTIVE_FLG", {"type": "string"}
+        # )  # type: ignore[attr-defined]
         # assert str(flag_type) == "NUMBER(precision=1, scale=0)"
 
         # Test timestamp column
-        # ts_type = connector.get_column_type("CREATE_TS", {"type": "string"})  # type: ignore[attr-defined]
+        # ts_type = connector.get_column_type(
+        #     "CREATE_TS", {"type": "string"}
+        # )  # type: ignore[attr-defined]
         # assert "TIMESTAMP" in str(ts_type)
 
         # Test amount column
@@ -162,45 +160,41 @@ class TestSQLAlchemy2Features:
         # assert str(amt_type) == "NUMBER(precision=19, scale=4)"
 
 
-class TestOracleSinkSQLAlchemy2:
-    """Test Oracle Sink with SQLAlchemy 2.0 features."""
+class TestOracleSinkSQLAlchemy2:  """Test Oracle Sink with SQLAlchemy 2.0 features."""
 
+    @staticmethod
     @pytest.fixture
-    def mock_target(self) -> Any:
-        """Create mock target."""
-        target = Mock()
+    def mock_target() -> Any: target = Mock()
         target.config = {
             "batch_size_rows": 10000,
             "parallel_threads": 4,
             "load_method": "append-only",
             "add_record_metadata": True,
-            "use_direct_path": True
+            "use_direct_path": True,
         }
         return target
 
+    @staticmethod
     @pytest.fixture
-    def mock_connector(self) -> Any:
-        """Create mock connector with engine."""
-        connector = Mock()
+    def mock_connector() -> Any: connector = Mock()
         connector._engine = Mock()
         return connector
 
-    def test_bulk_insert_with_sqlalchemy2(self, mock_target: Any, mock_connector: Any) -> None:
-        """Test bulk insert using SQLAlchemy 2.0 insert()."""
-        """Test bulk insert using SQLAlchemy 2.0 insert()."""
+    @staticmethod
+    def test_bulk_insert_with_sqlalchemy2(
+        mock_target: Any,
+        mock_connector: Any,
+    ) -> None:
         schema = {
             "type": "object",
-            "properties": {
-                "id": {"type": "integer"},
-                "name": {"type": "string"}
-            }
+            "properties": {"id": {"type": "integer"}, "name": {"type": "string"}},
         }
 
         sink = OracleSink(
             target=mock_target,
             stream_name="test_stream",
             schema=schema,
-            key_properties=["id"]
+            key_properties=["id"],
         )
         sink.connector = mock_connector  # type: ignore[misc]
 
@@ -209,19 +203,13 @@ class TestOracleSinkSQLAlchemy2:
         sink._table = mock_table
 
         # Test records
-        records = [
-            {"id": 1, "name": "Test 1"},
-            {"id": 2, "name": "Test 2"}
-        ]
 
         # Mock connection context manager
         mock_conn = MagicMock()
         mock_connector._engine.begin.return_value.__enter__.return_value = mock_conn
 
         # Process batch
-        with patch("flext_target_oracle.sinks.insert") as mock_insert:
-            # sink._process_batch_append(records)  # type: ignore[attr-defined]
-            pass
+        with patch("flext_target_oracle.sinks.insert") as mock_insert: # sink._process_batch_append(records)  # type: ignore[attr-defined]
 
             # Verify insert was called
             mock_insert.assert_called_once_with(mock_table)
@@ -233,18 +221,17 @@ class TestOracleSinkSQLAlchemy2:
             call_args = mock_conn.execute.call_args[0][1]
             assert all("CREATE_TS" in record for record in call_args)
             assert all("MOD_TS" in record for record in call_args)
-            assert all(record["CREATE_USER"] ==
-                       "SINGER" for record in call_args)
+            assert all(record["CREATE_USER"] == "SINGER" for record in call_args)
 
-    def test_event_handler_for_bulk_operations(self,
-                                               mock_target: Any,
-                                               mock_connector: Any) -> None:
-        """Test event handler adds Oracle hints for bulk operations."""
-        sink = OracleSink(
+    @staticmethod
+    def test_event_handler_for_bulk_operations(
+        mock_target: Any,
+        mock_connector: Any,
+    ) -> None: sink = OracleSink(
             target=mock_target,
             stream_name="test_stream",
             schema={},
-            key_properties=[]
+            key_properties=[],
         )
         sink.connector = mock_connector  # type: ignore[misc]
 
@@ -255,32 +242,28 @@ class TestOracleSinkSQLAlchemy2:
         # This would be tested in integration tests with real engine
 
 
-class TestOracleTargetSQLAlchemy2:
-    """Test Oracle Target with SQLAlchemy 2.0 features."""
+class TestOracleTargetSQLAlchemy2:  """Test Oracle Target with SQLAlchemy 2.0 features."""
 
     @patch("flext_target_oracle.target.create_async_engine")
     @patch("flext_target_oracle.target.create_engine")
-    def test_initialize_engines_with_modern_patterns(self,
-                                                     mock_create_engine: Any,
-                                                     mock_create_async_engine: Any
-                                                     ) -> None:
-        """Test engine initialization with SQLAlchemy 2.0 patterns."""
-        config = {
+    @staticmethod
+    def test_initialize_engines_with_modern_patterns(
+        mock_create_engine: Any,
+        mock_create_async_engine: Any,
+    ) -> None: config = {
             "host": "localhost",
             "port": 1521,
             "username": "test_user",
             "password": "test_pass",
             "service_name": "ORCL",
             "pool_size": 20,
-            "pool_recycle": 7200
+            "pool_recycle": 7200,
         }
 
         # Mock logger and monitor
-        with (
-            patch("flext_target_oracle.target.create_logger") as mock_create_logger,
+        with (: patch("flext_target_oracle.target.create_logger") as mock_create_logger,
             patch("flext_target_oracle.target.create_monitor"),
-        ):
-            mock_logger = Mock()
+        ): mock_logger = Mock()
             mock_create_logger.return_value = mock_logger
 
             OracleTarget(config=config)
@@ -296,46 +279,42 @@ class TestOracleTargetSQLAlchemy2:
             assert engine_kwargs["pool_recycle"] == 7200
             assert engine_kwargs["future"] is True
 
-    def test_connection_url_building(self) -> None:
-        """Test connection URL building with modern patterns."""
-        config = {
+    @staticmethod
+    def test_connection_url_building() -> None: config = {
             "host": "oracle.example.com",
             "port": 1522,
             "username": "app_user",
             "password": "secure_pass",
-            "service_name": "PROD_DB"
+            "service_name": "PROD_DB",
         }
 
-        with (
-            patch("flext_target_oracle.target.create_logger"),
+        with (: patch("flext_target_oracle.target.create_logger"),
             patch("flext_target_oracle.target.create_monitor"),
             patch("flext_target_oracle.target.create_engine"),
             patch("flext_target_oracle.target.create_async_engine"),
-        ):
-            target = OracleTarget(config=config)
+        ): OracleTarget(config=config)
             # url = target._build_connection_url()  # type: ignore[attr-defined]
-            url = "oracle+oracledb://app_user:secure_pass@oracle.example.com:1522/PROD_DB"
+            url = (
+                "oracle+oracledb://app_user:secure_pass@oracle.example.com:1522/PROD_DB"
+            )
 
             assert url == (
                 "oracle+oracledb://app_user:secure_pass@oracle.example.com:1522/PROD_DB"
             )
 
-    def test_health_check_with_sqlalchemy2(self) -> None:
-        """Test health check using SQLAlchemy 2.0 text()."""
-        config = {
+    @staticmethod
+    def test_health_check_with_sqlalchemy2() -> None: config = {
             "host": "localhost",
             "username": "test",
             "password": "test",
-            "service_name": "ORCL"
+            "service_name": "ORCL",
         }
 
-        with (
-            patch("flext_target_oracle.target.create_logger"),
+        with (: patch("flext_target_oracle.target.create_logger"),
             patch("flext_target_oracle.target.create_monitor"),
             patch("flext_target_oracle.target.create_engine") as mock_create_engine,
             patch("flext_target_oracle.target.create_async_engine"),
-        ):
-            # Mock engine and connection
+        ): # Mock engine and connection
             mock_engine = Mock()
             mock_conn = MagicMock()
             mock_engine.connect.return_value.__enter__.return_value = mock_conn
@@ -344,17 +323,17 @@ class TestOracleTargetSQLAlchemy2:
             mock_engine.pool.checkedout.return_value = 2
             mock_create_engine.return_value = mock_engine
 
-            target = OracleTarget(config=config)
+            OracleTarget(config=config)
 
             # Perform health check
-            with patch("flext_target_oracle.target.text") as mock_text:
-                # health_status = target._check_engine_health()  # type: ignore[attr-defined]
+            with patch("flext_target_oracle.target.text") as mock_text: # health_status = target._check_engine_health()
+                # type: ignore[attr-defined]
                 health_status = {
                     "sync_engine": {
                         "status": "healthy",
                         "pool_size": 10,
-                        "checked_out": 2
-                    }
+                        "checked_out": 2,
+                    },
                 }
 
                 # Verify text() was used for SQL
@@ -367,5 +346,4 @@ class TestOracleTargetSQLAlchemy2:
                 assert health_status["sync_engine"]["checked_out"] == 2
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+if __name__ == "__main__": pytest.main([__file__, "-v"])

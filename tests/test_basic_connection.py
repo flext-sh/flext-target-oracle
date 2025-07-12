@@ -1,35 +1,33 @@
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Basic connection test for Oracle Target.
 
 This test validates basic connectivity without testing licensed features.
 """
 
 from flext_target_oracle import OracleTarget
+
 from tests.helpers import get_test_config, requires_oracle_connection
 
 
-class TestBasicConnection:
-    """Test basic Oracle connectivity."""
+class TestBasicConnection:  """Test basic Oracle connectivity."""
 
+    @staticmethod
     @requires_oracle_connection
-    def test_connection_and_simple_query(self) -> None:
-        """Test basic connection and simple query execution."""
-        config = get_test_config(include_licensed_features=False)
+    def test_connection_and_simple_query() -> None: config = get_test_config(include_licensed_features=False)
         target = OracleTarget(config=config)
 
         # Create a sink to establish connection
         # Need to provide a schema for Singer SDK
-        test_schema = {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"}}}
+        test_schema = {"type": "object", "properties": {"id": {"type": "integer"}}}
         sink = target.get_sink("test_connection", schema=test_schema)
 
         # Test basic query
-        from sqlalchemy import text
+        from sqlalchemy import text  # TODO: Move import to module level
 
-        with sink.connector._engine.connect() as conn:
-            # Simple query that works on all Oracle editions
+        with sink.connector._engine.connect() as conn: # Simple query that works on all Oracle editions
             result = conn.execute(text("SELECT 1 FROM DUAL")).scalar()
             assert result == 1
 
@@ -42,12 +40,12 @@ class TestBasicConnection:
             conn.execute(text("SELECT USER FROM DUAL")).scalar()
 
             # Check if we're on Enterprise Edition
-            conn.execute(
+            enterprise_count = conn.execute(
                 text(
                     """
-                SELECT COUNT(*) FROM v$version
-                WHERE BANNER LIKE '%Enterprise Edition%'
-            """,
+                    SELECT COUNT(*) FROM v$version
+                    WHERE BANNER LIKE '%Enterprise Edition%'
+                    """
                 ),
             ).scalar()
             # Note: enterprise_count > 0 indicates Enterprise Edition
@@ -56,9 +54,9 @@ class TestBasicConnection:
             table_count = conn.execute(
                 text(
                     """
-                SELECT COUNT(*) FROM user_tables
-                WHERE table_name = 'TEST_CONNECTION'
-            """,
+                    SELECT COUNT(*) FROM user_tables
+                    WHERE table_name = 'TEST_CONNECTION'
+                    """
                 ),
             ).scalar()
             assert table_count == 1
@@ -67,23 +65,21 @@ class TestBasicConnection:
             column_types = conn.execute(
                 text(
                     """
-                SELECT column_name, data_type
-                FROM user_tab_columns
-                WHERE table_name = 'TEST_CONNECTION'
-                ORDER BY column_name
-            """,
+                    SELECT column_name, data_type
+                    FROM user_tab_columns
+                    WHERE table_name = 'TEST_CONNECTION'
+                    ORDER BY column_name
+                    """
                 ),
             ).fetchall()
-            for _col_name, _data_type in column_types:
-                pass
+            for _col_name, _data_type in column_types: pass
 
             # Clean up
             conn.execute(text("DROP TABLE test_connection"))
 
+    @staticmethod
     @requires_oracle_connection
-    def test_basic_table_operations(self) -> None:
-        """Test basic table operations available in all editions."""
-        config = get_test_config(include_licensed_features=False)
+    def test_basic_table_operations() -> None: config = get_test_config(include_licensed_features=False)
         # Ensure we're using basic features only
         config["enable_compression"] = False
         config["enable_partitioning"] = False
@@ -114,10 +110,10 @@ class TestBasicConnection:
         }
 
         # Process messages
-        import json
-        from io import StringIO
+        import json  # TODO: Move import to module level
+        from io import StringIO  # TODO: Move import to module level
 
-        from sqlalchemy import text
+        from sqlalchemy import text  # TODO: Move import to module level
 
         messages = [schema, record]
         input_data = "\n".join(json.dumps(msg) for msg in messages)
@@ -126,8 +122,7 @@ class TestBasicConnection:
 
         # Verify data
         sink = target.get_sink("test_basic")
-        with sink.connector._engine.connect() as conn:
-            result = conn.execute(
+        with sink.connector._engine.connect() as conn: result = conn.execute(
                 text(f"SELECT COUNT(*) FROM {sink.full_table_name}"),
             ).scalar()
             assert result == 1
@@ -135,10 +130,9 @@ class TestBasicConnection:
             # Clean up
             conn.execute(text(f"DROP TABLE {sink.full_table_name}"))
 
+    @staticmethod
     @requires_oracle_connection
-    def test_merge_statement(self) -> None:
-        """Test MERGE statement (available in all editions)."""
-        config = get_test_config(include_licensed_features=False)
+    def test_merge_statement() -> None: config = get_test_config(include_licensed_features=False)
         config["load_method"] = "upsert"
         config["use_merge_statements"] = True
 
@@ -164,8 +158,8 @@ class TestBasicConnection:
             },
         ]
 
-        import json
-        from io import StringIO
+        import json  # TODO: Move import to module level
+        from io import StringIO  # TODO: Move import to module level
 
         input_data = "\n".join(json.dumps(msg) for msg in messages)
         target.listen(file_input=StringIO(input_data))
@@ -180,18 +174,15 @@ class TestBasicConnection:
             },
         ]
 
-        from sqlalchemy import text as sql_text
+        from sqlalchemy import text as sql_text  # TODO: Move import to module level
 
         input_data = "\n".join(json.dumps(msg) for msg in messages)
         target.listen(file_input=StringIO(input_data))
 
         # Verify update
         sink = target.get_sink("test_merge")
-        with sink.connector._engine.connect() as conn:
-            result = conn.execute(
-                sql_text(
-                    f"SELECT status FROM {
-                        sink.full_table_name} WHERE id = 1"),
+        with sink.connector._engine.connect() as conn: result = conn.execute(
+                sql_text(f"SELECT status FROM {sink.full_table_name} WHERE id = 1"),
             ).scalar()
             assert result == "updated"
 

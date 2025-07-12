@@ -1,5 +1,8 @@
-"""
-End-to-end test using Oracle Autonomous Database with TCPS connection.
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
+"""End-to-end test using Oracle Autonomous Database with TCPS connection.
 
 This test validates the complete Oracle target functionality using a real
 Oracle Autonomous Database connection from the .env file.
@@ -15,25 +18,23 @@ from io import StringIO
 from typing import Any
 
 import pytest
-
 from flext_target_oracle import OracleTarget
 from flext_target_oracle.connectors import OracleConnector
+
 from tests.helpers import get_test_config, requires_oracle_connection
 
 log = logging.getLogger(__name__)
 
 
-class TestOracleAutonomousE2E:
-    """End-to-end tests using Oracle Autonomous Database."""
+class TestOracleAutonomousE2E:  """End-to-end tests using Oracle Autonomous Database."""
 
+    @staticmethod
     @pytest.fixture
-    def oracle_config(self) -> Any:
-        """Get Oracle configuration from environment."""
-        return get_test_config(include_licensed_features=False)
+    def oracle_config() -> Any: return get_test_config(include_licensed_features=False)
 
+    @staticmethod
     @pytest.fixture
-    def sample_schema(self) -> Any:
-        """Sample Singer schema for testing."""
+    def sample_schema() -> Any:
         return {
             "type": "SCHEMA",
             "stream": "test_orders",
@@ -72,10 +73,9 @@ class TestOracleAutonomousE2E:
             "key_properties": ["order_id"],
         }
 
+    @staticmethod
     @pytest.fixture
-    def sample_records(self) -> Any:
-        """Sample records for testing."""
-        return [
+    def sample_records() -> Any: return [
             {
                 "type": "RECORD",
                 "stream": "test_orders",
@@ -122,10 +122,8 @@ class TestOracleAutonomousE2E:
         ]
 
     @requires_oracle_connection
-    def test_connection_verification(self, oracle_config: dict[str, Any]) -> None:
-        """Test basic connection to Oracle Autonomous Database."""
-        """Test basic connection to Oracle Autonomous Database."""
-        target = OracleTarget(config=oracle_config)
+    @staticmethod
+    def test_connection_verification(oracle_config: dict[str, Any]) -> None: target = OracleTarget(config=oracle_config)
 
         # Test that we can create a sink (which creates connector)
         sink = target.get_sink("test_connection")
@@ -136,16 +134,17 @@ class TestOracleAutonomousE2E:
         assert isinstance(connector, OracleConnector)
 
         # Test actual connection
-        with connector._conn.begin() as conn:  # type: ignore[attr-defined]
+        with connector._conn.begin() as conn: # type: ignore[attr-defined]
             result = conn.execute("SELECT 1 FROM DUAL").scalar()
             assert result == 1
 
     @requires_oracle_connection
+    @staticmethod
     def test_complete_data_pipeline(
-        self, oracle_config: dict[str, Any], sample_schema: dict[str, Any], sample_records: list[dict[str, Any]],
-    ) -> None:
-        """Test complete data pipeline from Singer messages to Oracle."""
-        target = OracleTarget(config=oracle_config)
+        oracle_config: dict[str, Any],
+        sample_schema: dict[str, Any],
+        sample_records: list[dict[str, Any]],
+    ) -> None: target = OracleTarget(config=oracle_config)
 
         # Prepare input messages
         messages = [sample_schema, *sample_records]
@@ -168,25 +167,25 @@ class TestOracleAutonomousE2E:
         input_data = "\n".join(json.dumps(msg) for msg in messages)
 
         # Process messages
-        with StringIO():
-            target.listen(file_input=StringIO(input_data))
+        with StringIO(): target.listen(file_input=StringIO(input_data))
 
         # Verify data was loaded
         sink = target.get_sink("test_orders")
-        with sink.connector._conn.begin() as conn:  # type: ignore[attr-defined]
+        with sink.connector._conn.begin() as conn: # type: ignore[attr-defined]
             # Check record count
             count_result = conn.execute(
-                f"SELECT COUNT(*) FROM {sink.full_table_name}",  # type: ignore[attr-defined]
+                f"SELECT COUNT(*) FROM {sink.full_table_name}",
+                # type: ignore[attr-defined]
             ).scalar()
             assert count_result == 2
 
             # Check specific record
             order_result = conn.execute(
-                f"""
+                f"""  # noqa: S608
                 SELECT order_id, customer_id, order_status, total_amount, is_priority
                 FROM {sink.full_table_name}  # type: ignore[attr-defined]
                 WHERE order_id = 1001
-                """,
+                """
             ).fetchone()
 
             assert order_result is not None
@@ -196,24 +195,23 @@ class TestOracleAutonomousE2E:
             assert float(order_result[3]) == 1250.50
             assert order_result[4] == 1  # boolean as 1/0
 
-            # Check metadata columns if enabled
-            if oracle_config.get("add_record_metadata", True):
-                metadata_result = conn.execute(
-                    f"""
+            # Check metadata columns if enabled: if oracle_config.get("add_record_metadata", True): metadata_result = conn.execute(
+                    f"""  # noqa: S608
                     SELECT _SDC_EXTRACTED_AT, _SDC_BATCHED_AT, _SDC_RECEIVED_AT
                     FROM {sink.full_table_name}  # type: ignore[attr-defined]
                     WHERE order_id = 1001
-                    """,
+                    """
                 ).fetchone()
 
                 assert metadata_result is not None
                 assert all(col is not None for col in metadata_result)
 
     @requires_oracle_connection
-    def test_upsert_functionality(self, oracle_config: dict[str, Any], sample_schema: dict[str, Any]) -> None:
-        """Test UPSERT (MERGE) functionality."""
-        """Test UPSERT (MERGE) functionality."""
-        # Enable upsert mode
+    @staticmethod
+    def test_upsert_functionality(
+        oracle_config: dict[str, Any],
+        sample_schema: dict[str, Any],
+    ) -> None: # Enable upsert mode
         oracle_config["load_method"] = "upsert"
         target = OracleTarget(config=oracle_config)
 
@@ -249,7 +247,7 @@ class TestOracleAutonomousE2E:
         # Update record
         updated_records = [
             {
-                "type": "RECORD",
+                "type":  "RECORD",
                 "stream": "test_orders",
                 "record": {
                     "order_id": 2001,  # Same ID
@@ -277,20 +275,21 @@ class TestOracleAutonomousE2E:
 
         # Verify update
         sink = target.get_sink("test_orders")
-        with sink.connector._conn.begin() as conn:  # type: ignore[attr-defined]
+        with sink.connector._conn.begin() as conn: # type: ignore[attr-defined]
             # Should still have only 1 record
             count_result = conn.execute(
-                f"SELECT COUNT(*) FROM {sink.full_table_name}",  # type: ignore[attr-defined]
+                f"SELECT COUNT(*) FROM {sink.full_table_name}",
+                # type: ignore[attr-defined]
             ).scalar()
             assert count_result == 1
 
             # Check updated values
             result = conn.execute(
-                f"""
+                f"""  # noqa: S608
                 SELECT order_status, total_amount, is_priority, notes
                 FROM {sink.full_table_name}  # type: ignore[attr-defined]
                 WHERE order_id = 2001
-                """,
+                """
             ).fetchone()
             assert result is not None
 
@@ -300,10 +299,8 @@ class TestOracleAutonomousE2E:
             assert result[3] == "Updated order"
 
     @requires_oracle_connection
-    def test_data_type_handling(self, oracle_config: dict[str, Any]) -> None:
-        """Test various data type conversions."""
-        """Test various data type conversions."""
-        target = OracleTarget(config=oracle_config)
+    @staticmethod
+    def test_data_type_handling(oracle_config: dict[str, Any]) -> None: target = OracleTarget(config=oracle_config)
 
         # Schema with various data types
         schema = {
@@ -373,14 +370,14 @@ class TestOracleAutonomousE2E:
 
         # Verify
         sink = target.get_sink("test_types")
-        with sink.connector._conn.begin() as conn:  # type: ignore[attr-defined]
+        with sink.connector._conn.begin() as conn: # type: ignore[attr-defined]
             results = conn.execute(
                 f"""
                 SELECT id, text_short, LENGTH(text_long), number_int, number_float,
-                       boolean_field, json_field, array_field, nullable_field
+                        boolean_field, json_field, array_field, nullable_field
                 FROM {sink.full_table_name}  # type: ignore[attr-defined]
                 ORDER BY id
-                """,
+                """
             ).fetchall()
 
             assert len(results) == 2
@@ -405,10 +402,8 @@ class TestOracleAutonomousE2E:
             assert results[1][8] is None  # Null value
 
     @requires_oracle_connection
-    def test_batch_performance(self, oracle_config: dict[str, Any]) -> None:
-        """Test batch processing performance."""
-        """Test batch processing performance."""
-        # Configure for larger batches
+    @staticmethod
+    def test_batch_performance(oracle_config: dict[str, Any]) -> None: # Configure for larger batches
         oracle_config["batch_config"]["batch_size"] = 1000
         oracle_config["use_bulk_operations"] = True
         oracle_config["array_size"] = 1000
@@ -417,7 +412,7 @@ class TestOracleAutonomousE2E:
 
         # Schema
         schema = {
-            "type": "SCHEMA",
+            "type":  "SCHEMA",
             "stream": "test_batch_perf",
             "schema": {
                 "type": "object",
@@ -433,19 +428,21 @@ class TestOracleAutonomousE2E:
 
         # Generate many records
         messages = [schema]
-        messages.extend({
-                    "type": "RECORD",
-                    "stream": "test_batch_perf",
-                    "record": {
-                        "id": i + 1,
-                        "value": float(i * 10.5),
-                        "category": f"CAT_{i % 10}",
-                        "created_at": datetime.now(UTC).isoformat(),
-                    },
-                } for i in range(1000))
+        messages.extend(
+            {
+                "type": "RECORD",
+                "stream": "test_batch_perf",
+                "record": {
+                    "id": i + 1,
+                    "value": float(i * 10.5),
+                    "category": f"CAT_{i % 10}",
+                    "created_at": datetime.now(UTC).isoformat(),
+                },
+            }
+            for i in range(1000): )
 
         # Time the processing
-        import time
+        import time  # TODO: Move import to module level
 
         start_time = time.time()
 
@@ -456,9 +453,10 @@ class TestOracleAutonomousE2E:
 
         # Verify all records loaded
         sink = target.get_sink("test_batch_perf")
-        with sink.connector._conn.begin() as conn:  # type: ignore[attr-defined]
+        with sink.connector._conn.begin() as conn: # type: ignore[attr-defined]
             count = conn.execute(
-                f"SELECT COUNT(*) FROM {sink.full_table_name}",  # type: ignore[attr-defined]
+                f"SELECT COUNT(*) FROM {sink.full_table_name}",
+                # type: ignore[attr-defined]
             ).scalar()
             assert count == 1000
 
@@ -466,14 +464,14 @@ class TestOracleAutonomousE2E:
         # time)
         assert elapsed_time < 30.0  # Should complete in less than 30 seconds
         log.error(
-            f"Processed 1000 records in {elapsed_time:.2f} seconds",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "Processed 1000 records in %.2f seconds",
+            elapsed_time,
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
 
     @requires_oracle_connection
-    def test_error_handling(self, oracle_config: dict[str, Any]) -> None:
-        """Test error handling and recovery."""
-        """Test error handling and recovery."""
-        target = OracleTarget(config=oracle_config)
+    @staticmethod
+    def test_error_handling(oracle_config: dict[str, Any]) -> None: target = OracleTarget(config=oracle_config)
 
         # Schema with constraints
         schema = {
@@ -505,9 +503,8 @@ class TestOracleAutonomousE2E:
         # Invalid records (various error conditions)
         # Note: Singer SDK validates schema, so we test database-level errors
 
-        # Duplicate key (if we try to insert same ID)
-        duplicate_record = {
-            "type": "RECORD",
+        # Duplicate key (if we try to insert same ID): duplicate_record = {
+            "type":  "RECORD",
             "stream": "test_errors",
             "record": {
                 "id": 1,  # Duplicate
@@ -523,34 +520,32 @@ class TestOracleAutonomousE2E:
 
         # This might raise an error or handle it gracefully
         # depending on error handling configuration
-        try:
-            target.listen(file_input=StringIO(input_data))
-        except Exception as e:
+        try: target.listen(file_input=StringIO(input_data))
+        except Exception:
             # debugging
-            # TODO: Consider using else block
+            # TODO(@flext-team): Consider using else block
             log.exception(
-                f"Expected error in append-only mode with duplicate key: {e}",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
-            # Check if it's actually the expected duplicate key error
-            error_str = str(e).lower()
+                "Expected error in append-only mode with duplicate key",
+            )  # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
+            # Check if it's actually the expected duplicate key error: error_str = str(e).lower()
             assert any(
                 keyword in error_str
-                for keyword in ["unique", "duplicate", "constraint"]
-            ), f"Unexpected error type: {e}"
+                for keyword in ["unique", "duplicate", "constraint"]: ), f"Unexpected error type:
+            {e}"
 
         # Verify original record is still there
         sink = target.get_sink("test_errors")
-        with sink.connector._conn.begin() as conn:  # type: ignore[attr-defined]
+        with sink.connector._conn.begin() as conn: # type: ignore[attr-defined]
             count = conn.execute(
-                f"SELECT COUNT(*) FROM {sink.full_table_name}",  # type: ignore[attr-defined]
+                f"SELECT COUNT(*) FROM {sink.full_table_name}",
+                # type: ignore[attr-defined]
             ).scalar()
             assert count >= 1  # At least the valid record
 
     @requires_oracle_connection
-    def test_cleanup(self, oracle_config: dict[str, Any]) -> None:
-        """Clean up test tables after tests."""
-        """Clean up test tables after tests."""
-        target = OracleTarget(config=oracle_config)
+    @staticmethod
+    def test_cleanup(oracle_config: dict[str, Any]) -> None: target = OracleTarget(config=oracle_config)
 
         test_tables = [
             "test_orders",
@@ -560,27 +555,26 @@ class TestOracleAutonomousE2E:
             "test_connection",
         ]
 
-        for table_name in test_tables:
-            try:
-                sink = target.get_sink(table_name)
-                with sink.connector._conn.begin() as conn:  # type: ignore[attr-defined]
-                    # Use proper schema prefix if configured
-                    full_table = sink.full_table_name
+        for table_name in test_tables: sink = target.get_sink(table_name)
+                with sink.connector._conn.begin() as conn:
+                    # type: ignore[attr-defined]
+                    # Use proper schema prefix if configured: full_table = sink.full_table_name
                     conn.execute(f"DROP TABLE {full_table}")
                     log.error(
-                        f"Dropped table: {full_table}",
+                        "Dropped table: %s",
+                        full_table,
+                        # TODO(@dev): Replace with proper logging  # Link:
+                        # https://github.com/issue/todo
+                    )
+            except Exception:
+            # Table might not exist, which is fine
+                # TODO(@flext-team): Consider using else block
+                log.exception(
+                    "Could not drop table %s",
+                    table_name,
                     # TODO(@dev): Replace with proper logging  # Link:
                     # https://github.com/issue/todo
-                    )
-            except Exception as e:
-                # Table might not exist, which is fine
-                # TODO: Consider using else block
-                log.exception(
-                    f"Could not drop table {table_name}: {e}",
-                # TODO(@dev): Replace with proper logging  # Link:
-                # https://github.com/issue/todo
                 )
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+if __name__ == "__main__": pytest.main([__file__, "-v"])

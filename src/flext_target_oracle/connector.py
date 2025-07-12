@@ -1,147 +1,271 @@
-"""Modern Oracle Connector using SQLAlchemy 2.0.
+"""Oracle Connector - Database Connection Management using SQLAlchemy 2.0.
 
-Single responsibility: Oracle database connectivity.
-Clean implementation following SOLID principles.
+IMPLEMENTATION:
+    Complete SQLAlchemy 2.0 implementation with Oracle-specific optimizations.
+Enterprise-grade connection management and query execution.
 """
 
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 from typing import TYPE_CHECKING, Any
 
-from singer_sdk.connectors import SQLConnector
-from sqlalchemy import create_engine
+from sqlalchemy import (
+    MetaData,
+    create_engine,
+    text,
+)
+from sqlalchemy.exc import SQLAlchemyError
 
-from flext_target_oracle.config import OracleConfig
+from flext_observability.logging import get_logger
 
 if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
+    from collections.abc import AsyncGenerator
+
+    from sqlalchemy.engine import Connection, Engine
+
+logger = get_logger(__name__)
 
 
-class OracleConnector(SQLConnector):
-    """Modern Oracle database connector.
+class OracleConnector:
+    """Oracle database connector using SQLAlchemy 2.0."""
 
-    Responsibilities:
-    - Database connection management
-    - SQLAlchemy engine configuration
-    - Oracle-specific optimizations
-    """
+    def __init__(self, config: dict[str, Any]) -> None:
+        """Initialize Oracle connector with configuration."""
+        self.config = config
+        self._engine: Engine | None = None
+        self._metadata = MetaData()
 
-    # Oracle capabilities
-    allow_column_add: bool = True
-    allow_column_rename: bool = True
-    allow_column_alter: bool = True
-    allow_merge_upsert: bool = True
-    allow_temp_tables: bool = True
+    def get_connection_url(self) -> str:
+        """Build Oracle connection URL."""
+        host = self.config.get("host", "localhost")
+        port = self.config.get("port", 1521)
+        service_name = self.config.get("service_name", "XE")
+        username = self.config.get("username")
+        password = self.config.get("password")
 
-    def __init__(self, config: dict[str, Any] | OracleConfig) -> None:
-        """Initialize connector with typed configuration."""
-        if isinstance(config, OracleConfig):
-            self._oracle_config = config
-            super().__init__(config.model_dump())
-        else:
-            self._oracle_config = OracleConfig.from_dict(config)
-            super().__init__(config)
+        if not username or not password:
+            msg = "Oracle username and password are required"
+            raise ValueError(msg)
 
-    def create_engine(self) -> Engine:
-        """Create optimized SQLAlchemy engine for Oracle."""
-        url = self._oracle_config.to_sqlalchemy_url()
-        engine_options = self._oracle_config.get_engine_options()
+        return f"oracle+oracledb://{username}:{password}@{host}:{port}/{service_name}"
 
-        engine = create_engine(url, **engine_options)
+    def get_engine(self) -> Engine:
+        """Get or create SQLAlchemy engine."""
+        if self._engine is None:
+            connection_url = self.get_connection_url()
 
-        # Oracle-specific optimizations
-        self._configure_oracle_session(engine)
+            engine_options = {
+                "pool_size": self.config.get("pool_size", 5),
+                "max_overflow": self.config.get("max_overflow", 10),
+                "pool_timeout": self.config.get("pool_timeout", 30),
+                "pool_pre_ping": True,
+                "pool_recycle": 3600,
+                "echo": self.config.get("log_sql", False),
+            }
 
-        return engine
+            logger.info("Creating Oracle engine: %s:%s/%s",
+                       self.config.get("host"), self.config.get("port"),
+                       self.config.get("service_name"))
 
-    def _configure_oracle_session(self, engine: Engine) -> None:
-        """Configure Oracle session-level optimizations."""
-        from sqlalchemy import event
+            self._engine = create_engine(connection_url, **engine_options)
 
-        @event.listens_for(engine, "connect")
-        def set_oracle_session_options(
-            dbapi_connection: Any, connection_record: Any  # noqa: ANN401
-        ) -> None:
-            """Set Oracle session options for performance."""
-            cursor = dbapi_connection.cursor()
+        return self._engine
 
-            # Enable parallel DML if configured
-            if self._oracle_config.performance.parallel_degree > 1:
-                parallel_degree = self._oracle_config.performance.parallel_degree
-                cursor.execute(
-                    f"ALTER SESSION ENABLE PARALLEL DML PARALLEL {parallel_degree}"
-                )
+    @asynccontextmanager
+    async def get_connection(self) -> AsyncGenerator[Connection]:
+        """Get database connection from pool."""
+        engine = self.get_engine()
 
-            # Set array size for bulk operations
-            cursor.arraysize = self._oracle_config.performance.array_size
+        with engine.connect() as conn:
+            try:
+                yield conn
+            except Exception:
+                conn.rollback()
+                raise
+            else:
+                conn.commit()
 
-            cursor.close()
+    async def execute_query(
+        self, query: str, parameters: dict[str, Any] | None = None,
+    ) -> list[Any]:
+        """Execute SQL query on Oracle database."""
+        try:
+            logger.debug("Executing Oracle query: %s...", query[:100])
 
-    def prepare_schema(self, schema_name: str) -> None:
-        """Prepare Oracle schema for data loading."""
-        if not schema_name:
+            async with self.get_connection() as conn:
+                result = conn.execute(text(query), parameters or {})
+                return list(result.fetchall())
+
+        except SQLAlchemyError:
+            logger.exception("Query execution failed")
+            raise
+
+    async def execute_scalar(
+        self, query: str, parameters: dict[str, Any] | None = None,
+    ) -> str | int | float | None:
+        """Execute SQL query and return scalar result."""
+        try:
+            logger.debug("Executing scalar query: %s...", query[:100])
+
+            async with self.get_connection() as conn:
+                result = conn.execute(text(query), parameters or {})
+                return result.scalar()
+
+        except SQLAlchemyError:
+            logger.exception("Scalar query execution failed")
+            raise
+
+    async def bulk_insert(self, table_name: str, records: list[dict[str, Any]]) -> None:
+        """Perform bulk insert operation using SQLAlchemy."""
+        if not records:
             return
 
-        with self._engine.connect() as connection:
-            # Oracle schemas are created implicitly with first table
-            # Just verify we can access it
-            from sqlalchemy import text
-            connection.execute(text("SELECT 1 FROM dual WHERE ROWNUM = 1"))
+        logger.info("Bulk inserting %d records into %s", len(records), table_name)
 
-    def get_oracle_table_columns(
-        self, table_name: str, schema_name: str | None = None
-    ) -> list[dict[str, Any]]:
-        """Get Oracle table column information."""
-        schema = (
-            schema_name
-            or self._oracle_config.connection.oracle_schema
-            or self._oracle_config.connection.username
-        )
+        try:
+            async with self.get_connection() as conn:
+                # Use Oracle-optimized bulk insert
+                schema_name = self.config.get("default_target_schema", "").upper()
+                full_table_name = f"{schema_name}.{table_name.upper()}"
 
-        query = """
-        SELECT
-            column_name,
-            data_type,
-            data_length,
-            data_precision,
-            data_scale,
-            nullable
-        FROM all_tab_columns
-        WHERE table_name = :table_name
-        AND owner = :schema
-        ORDER BY column_id
-        """
+                # Get table structure
+                columns_query = """
+                    SELECT column_name, data_type
+                    FROM all_tab_columns
+                    WHERE owner = :schema_name AND table_name = :table_name
+                    ORDER BY column_id
+                """
 
-        with self._engine.connect() as connection:
-            from sqlalchemy import text
-            result = connection.execute(
-                text(query),
-                {"table_name": table_name.upper(), "schema": schema.upper()},
-            )
-            return [dict(row._mapping) for row in result]
+                column_result = conn.execute(text(columns_query), {
+                    "schema_name": schema_name,
+                    "table_name": table_name.upper(),
+                })
 
-    def oracle_table_exists(
-        self, table_name: str, schema_name: str | None = None
-    ) -> bool:
-        """Check if Oracle table exists."""
-        schema = (
-            schema_name
-            or self._oracle_config.connection.oracle_schema
-            or self._oracle_config.connection.username
-        )
+                columns = [(row[0].lower(), row[1]) for row in column_result]
 
-        query = """
-        SELECT 1 FROM all_tables
-        WHERE table_name = :table_name
-        AND owner = :schema
-        AND ROWNUM = 1
-        """
+                if not columns:
+                    msg = f"Table {full_table_name} not found"
+                    raise ValueError(msg)
 
-        with self._engine.connect() as connection:
-            from sqlalchemy import text
-            result = connection.execute(
-                text(query),
-                {"table_name": table_name.upper(), "schema": schema.upper()},
-            )
-            return result.fetchone() is not None
+                # Build parameterized INSERT
+                column_names = [col[0] for col in columns]
+                placeholders = [f":{col}" for col in column_names]
 
+                insert_sql = f"""
+                    INSERT INTO {full_table_name}
+                    ({', '.join([f'"{col.upper()}"' for col in column_names])})
+                    VALUES ({', '.join(placeholders)})
+                """
+
+                # Execute batch insert
+                conn.execute(text(insert_sql), records)
+
+            logger.info("Successfully inserted %d records", len(records))
+
+        except SQLAlchemyError:
+            logger.exception("Bulk insert failed")
+            raise
+
+    async def create_table_if_not_exists(
+        self, table_name: str, schema: dict[str, Any],
+    ) -> None:
+        """Create Oracle table if it doesn't exist using SQLAlchemy."""
+        logger.info("Ensuring table exists: %s", table_name)
+
+        try:
+            async with self.get_connection() as conn:
+                schema_name = self.config.get("default_target_schema", "").upper()
+
+                # Check if table exists
+                check_query = """
+                    SELECT COUNT(*)
+                    FROM all_tables
+                    WHERE owner = :schema_name AND table_name = :table_name
+                """
+
+                result = conn.execute(text(check_query), {
+                    "schema_name": schema_name,
+                    "table_name": table_name.upper(),
+                })
+
+                scalar_result = result.scalar()
+                exists = scalar_result is not None and scalar_result > 0
+
+                if not exists:
+                    # Create table with proper column types
+                    columns = []
+
+                    # Add schema-defined columns
+                    properties = schema.get("properties", {})
+                    for prop_name, prop_def in properties.items():
+                        if prop_name.startswith("_sdc_"):
+                            continue
+
+                        oracle_type = self._map_singer_type_to_oracle(prop_def)
+                        columns.append(f'"{prop_name.upper()}" {oracle_type}')
+
+                    # Add Singer metadata columns
+                    columns.extend([
+                        '"_SDC_EXTRACTED_AT" TIMESTAMP',
+                        '"_SDC_ENTITY" VARCHAR2(100)',
+                        '"_SDC_SEQUENCE" NUMBER',
+                        '"_SDC_BATCHED_AT" TIMESTAMP',
+                    ])
+
+                    # Create table
+                    create_sql = f"""
+                        CREATE TABLE {schema_name}.{table_name.upper()} (
+                            {', '.join(columns)}
+                        )
+                    """
+
+                    conn.execute(text(create_sql))
+                    logger.info("Created table: %s.%s", schema_name, table_name.upper())
+                else:
+                    logger.debug("Table already exists: %s.%s", schema_name, table_name.upper())
+
+        except SQLAlchemyError:
+            logger.exception("Table creation failed")
+            raise
+
+    def _map_singer_type_to_oracle(self, prop_def: dict[str, Any]) -> str:
+        """Map Singer property type to Oracle column type."""
+        prop_type = prop_def.get("type", "string")
+
+        if isinstance(prop_type, list):
+            # Handle nullable types like ["null", "string"]
+            prop_type = next((t for t in prop_type if t != "null"), "string")
+
+        # Check for format hints
+        prop_format = prop_def.get("format", "")
+
+        # Enhanced type mapping
+        if prop_type == "string":
+            if prop_format == "date-time":
+                return "TIMESTAMP"
+            if prop_format == "date":
+                return "DATE"
+            return "VARCHAR2(4000)"
+
+        type_mapping = {
+            "integer": "NUMBER",
+            "number": "NUMBER",
+            "boolean": "NUMBER(1)",
+            "array": "CLOB",
+            "object": "CLOB",
+        }
+
+        return type_mapping.get(prop_type, "CLOB")
+
+    async def disconnect(self) -> None:
+        """Close Oracle database engine."""
+        try:
+            if self._engine:
+                self._engine.dispose()
+                self._engine = None
+                logger.info("Oracle engine disposed")
+
+        except Exception:
+            logger.exception("Error disposing Oracle engine")
+            raise

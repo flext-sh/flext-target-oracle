@@ -2,120 +2,256 @@
 requires = ["poetry-core>=1.9.0"]
 build-backend = "poetry.core.masonry.api"
 
+[project]
+name = "flext-target-oracle"
+version = "0.7.0"
+description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
+authors = [{ name = "FLEXT Team", email = "team@flext.sh" }]
+maintainers = [{ name = "FLEXT Team", email = "team@flext.sh" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    # Singer SDK and Oracle dependencies
+    "singer-sdk>=0.47.0",
+    "oracledb>=2.4.1",
+    "sqlalchemy>=2.0.0",
+    "python-dateutil>=2.9.0",
+    "jsonschema>=4.23.0",
+    "tenacity>=9.0.0",
+]
+keywords = ["flext", "singer", "target", "oracle", "database", "enterprise"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Database",
+    "Topic :: Database :: Database Engines/Servers",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/flext-sh/flext"
+Repository = "https://github.com/flext-sh/flext"
+Documentation = "https://github.com/flext-sh/flext/blob/main/README.md"
+
+[project.scripts]
+target-oracle = "flext_target_oracle.target:main"
+flext-target-oracle = "flext_target_oracle.target:main"
+
 [tool.poetry]
 name = "flext-target-oracle"
-version = "2.0.0"
-description = "Modern Enterprise Oracle Singer Target - Clean, Fast, Reliable"
+version = "0.7.0"
+description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
 authors = ["FLEXT Team <team@flext.sh>"]
-license = "MIT"
 readme = "README.md"
-packages = [{include = "flext_target_oracle", from = "src"}]
+packages = [{ include = "flext_target_oracle", from = "src" }]
 
 [tool.poetry.dependencies]
-python = "^3.13"
-# Core dependencies - minimal and modern
-singer-sdk = "^0.44.0"
-pydantic = "^2.11.0"
-pydantic-settings = "^2.5.0"
-sqlalchemy = "^2.0.0"
-oracledb = "^2.4.0"
-click = "^8.1.7"
-structlog = "^24.0.0"
+python = ">=3.13,<3.14"
+
+# Core FLEXT dependencies - primary source of truth
+flext-core = { path = "../flext-core", develop = true }
+flext-observability = { path = "../flext-observability", develop = true }
+flext-db-oracle = { path = "../flext-db-oracle", develop = true }
+
+# Singer SDK and Oracle dependencies
+singer-sdk = ">=0.47.0"
+oracledb = ">=2.4.1"
+sqlalchemy = ">=2.0.0"
+python-dateutil = ">=2.9.0"
+jsonschema = ">=4.23.0"
+tenacity = ">=9.0.0"
+
+# Core dependencies are managed by flext-core - no duplication
+# pydantic, pydantic-settings, click, structlog, etc.
 
 [tool.poetry.group.dev.dependencies]
-# Testing - lean but comprehensive
-pytest = "^8.4.0"
-pytest-cov = "^6.2.0"
-pytest-asyncio = "^0.24.0"
-pytest-mock = "^3.14.0"
+# Development dependencies
+pytest = ">=8.0.0"
+pytest-asyncio = ">=0.23.0"
+pytest-cov = ">=4.0.0"
+pytest-mock = ">=3.12.0"
+pytest-xdist = ">=3.6.0"
+pytest-timeout = ">=2.3.1"
+pytest-sugar = ">=1.0.0"
+pytest-clarity = ">=1.0.1"
+pytest-benchmark = ">=4.0.0"
 
-# Code quality - strict standards
-ruff = "^0.12.2"
-mypy = "^1.16.1"
-black = "^25.1.0"
+# Code quality
+ruff = ">=0.8.0"
+mypy = ">=1.13.0"
+pre-commit = ">=4.0.0"
+bandit = ">=1.8.0"
 
-# Type checking
-types-setuptools = "^75.8.2"
+# Documentation
+mkdocs = ">=1.6.0"
+mkdocs-material = ">=9.5.0"
+mkdocs-mermaid2-plugin = ">=1.1.0"
 
 [tool.poetry.scripts]
-target-oracle = "flext_target_oracle.cli:main"
+target-oracle = "flext_target_oracle.target:main"
 
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=flext_target_oracle",
+    "--cov-branch",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html:reports/coverage",
+    "--cov-report=xml:reports/coverage.xml",
+    "--cov-fail-under=90",
+    "--maxfail=1",
+    "--tb=short",
+    "--dist=auto",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow tests",
+    "smoke: Smoke tests",
+    "e2e: End-to-end tests",
+    "oracle: marks tests as Oracle database tests",
+    "singer: marks tests as Singer protocol tests",
+    "target: marks tests as target tests",
+    "requires_oracle: tests that need Oracle database access",
+]
+filterwarnings = ["error", "ignore::UserWarning", "ignore::DeprecationWarning"]
+asyncio_mode = "auto"
+
+# Ruff configuration - focused on src/ and tests/
 [tool.ruff]
-src = ["src"]
 target-version = "py313"
 line-length = 88
-fix = true
+src = ["src", "tests"]
 
 [tool.ruff.lint]
-select = [
-    "E",  # pycodestyle errors
-    "W",  # pycodestyle warnings
-    "F",  # Pyflakes
-    "I",  # isort
-    "B",  # flake8-bugbear
-    "C4", # flake8-comprehensions
-    "UP", # pyupgrade
-    "ANN", # flake8-annotations
-    "SIM", # flake8-simplify
-    "TCH", # flake8-type-checking
-    "PTH", # flake8-use-pathlib
-    "RUF", # Ruff-specific rules
-]
+select = ["ALL"]
 ignore = [
-    "ANN101", # missing-type-self
-    "ANN102", # missing-type-cls
-    "B008",   # function-call-in-default-argument
+    "E501", # line too long (handled by formatter)
 ]
 
+# Test-specific ignores
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["ANN", "S101"]
+"**/tests/*.py" = [
+    "S101",
+    "D102",
+    "N801",
+    "N802",
+    "N806",
+    "PLR2004",
+    "F401",
+    "PLC0415",
+    "G004",
+    "T201",
+]
+"test_*.py" = [
+    "S101",
+    "D102",
+    "N801",
+    "N802",
+    "N806",
+    "PLR2004",
+    "F401",
+    "PLC0415",
+    "G004",
+    "T201",
+]
 
+
+# Auto-generated files - exclude from ALL linting
+"**/proto/*_pb2.py" = ["ALL"]
+"**/proto/*_pb2_grpc.py" = ["ALL"]
+"**/*_pb2.py" = ["ALL"]
+"**/*_pb2_grpc.py" = ["ALL"]
+"**/generated/**/*.py" = ["ALL"]
+[tool.ruff.lint.isort]
+known-first-party = ["flext_target_oracle", "flext_core", "flext_observability"]
+force-single-line = false
+split-on-trailing-comma = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# MyPy configuration - focused on src/ and tests/
 [tool.mypy]
 python_version = "3.13"
 strict = true
 warn_return_any = true
 warn_unused_configs = true
-show_error_codes = true
-explicit_package_bases = true
-mypy_path = "src"
-namespace_packages = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
 
+# Paths to check
+files = ["src"]
+
+# Import discovery
+namespace_packages = true
+explicit_package_bases = true
+
+# Error output
+show_error_codes = true
+show_column_numbers = true
+show_error_context = true
+pretty = true
+
+# Disable specific checks for tests
 [[tool.mypy.overrides]]
-module = ["oracledb.*", "singer.*"]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+# External library stubs
+[[tool.mypy.overrides]]
+module = [
+    "singer_sdk.*",
+    "oracledb.*",
+    "sqlalchemy.*",
+    "jsonschema.*",
+    "tenacity.*",
+    "flext_db_oracle.*",
+]
 ignore_missing_imports = true
 
-[tool.black]
-target-version = ["py313"]
-line-length = 88
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
-addopts = [
-    "--strict-markers",
-    "--strict-config",
-    "--cov=src/flext_target_oracle",
-    "--cov-report=term-missing",
-    "--cov-report=html:reports/coverage",
-    "--cov-fail-under=90",
-]
-markers = [
-    "unit: Unit tests",
-    "integration: Integration tests requiring Oracle",
-    "slow: Slow running tests",
-]
-
+# Coverage configuration
 [tool.coverage.run]
 source = ["src"]
 branch = true
+omit = ["*/tests/*", "*/test_*", "*/__pycache__/*", "*/site-packages/*"]
 
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",
-    "if TYPE_CHECKING:",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
     "raise NotImplementedError",
+    "if 0:",
     "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
 ]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"

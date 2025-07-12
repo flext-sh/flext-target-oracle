@@ -1,3 +1,9 @@
+from typing import Any
+
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Performance benchmark tests for Oracle target.
 
 This module provides comprehensive performance testing including
@@ -9,17 +15,16 @@ from __future__ import annotations
 import json
 import logging
 from io import StringIO
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 from unittest.mock import patch
 
 import pytest
+from flext_target_oracle.target import OracleTarget
 from sqlalchemy import text
 
-from flext_target_oracle.target import OracleTarget
 from tests.helpers import requires_oracle_connection
 
-if TYPE_CHECKING:
-    from sqlalchemy.engine import Engine
+if TYPE_CHECKING: from sqlalchemy.engine import Engine
 
 log = logging.getLogger(__name__)
 
@@ -29,16 +34,14 @@ class TestPerformanceBenchmarks:
     """Performance benchmark tests for Oracle target."""
 
     @pytest.mark.performance
+    @staticmethod
     def test_high_throughput_ingestion(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup: Any,
         performance_timer: Any,
-    ) -> None:
-        """Test high-throughput data ingestion performance."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure for maximum throughput
         perf_config = oracle_config.copy()
@@ -52,7 +55,7 @@ class TestPerformanceBenchmarks:
 
         # Create performance test schema
         perf_schema = {
-            "type": "SCHEMA",
+            "type":  "SCHEMA",
             "stream": test_table_name,
             "schema": {
                 "type": "object",
@@ -72,8 +75,7 @@ class TestPerformanceBenchmarks:
         record_count = 50000
         perf_records = []
 
-        for i in range(record_count):
-            perf_records.append(
+        for i in range(record_count): perf_records.append(
                 {
                     "type": "RECORD",
                     "stream": test_table_name,
@@ -83,8 +85,7 @@ class TestPerformanceBenchmarks:
                         "email": f"user{i + 1}@example.com",
                         "timestamp": "2025-07-02T10:00:00Z",
                         "value": float(i * 1.5),
-                        "status": "active" if i % 2 == 0 else "inactive",
-                    },
+                        "status": "active" if i % 2 == 0 else "inactive",: },
                 },
             )
 
@@ -95,13 +96,13 @@ class TestPerformanceBenchmarks:
 
         performance_timer.start()
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         performance_timer.stop()
 
         # Verify all records were processed
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -112,42 +113,39 @@ class TestPerformanceBenchmarks:
         duration = performance_timer.duration
         throughput = record_count / duration
 
-        # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error("\nPerformance Results:")
         log.error(
             f"Records processed: {record_count:,}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
             f"Duration: {duration:.2f} seconds",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
             f"Throughput: {throughput:.2f} records/second",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
             f"Throughput: {throughput * 60:.2f} records/minute",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
 
         # Performance assertions
-        assert (
-            throughput > 1000
-        ), f"Throughput too low: {
-            throughput:.2f} records/sec"
-        assert (
-            duration < 120
-        ), f"Processing took too long: {
-            duration:.2f} seconds"
+        assert throughput > 1000, f"Throughput too low: {throughput:.2f} records/sec"
+        assert duration < 120, f"Processing took too long: {duration:.2f} seconds"
 
     @pytest.mark.performance
+    @staticmethod
     def test_bulk_vs_individual_performance(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup: Any,
         performance_timer: Any,
-    ) -> None:
-        """Compare bulk operations vs individual insert performance."""
-        record_count = 10000
+    ) -> None: record_count = 10000
 
         # Test schema
         test_schema = {
@@ -166,8 +164,7 @@ class TestPerformanceBenchmarks:
 
         # Generate test data
         test_records = []
-        for i in range(record_count):
-            test_records.append(
+        for i in range(record_count): test_records.append(
                 {
                     "type": "RECORD",
                     "stream": test_table_name,
@@ -192,8 +189,7 @@ class TestPerformanceBenchmarks:
         bulk_schema = test_schema.copy()
         bulk_schema["stream"] = f"{test_table_name}_bulk"
         bulk_records = []
-        for record in test_records:
-            bulk_record = record.copy()
+        for record in test_records: bulk_record = record.copy()
             bulk_record["stream"] = f"{test_table_name}_bulk"
             bulk_records.append(bulk_record)
 
@@ -204,8 +200,7 @@ class TestPerformanceBenchmarks:
         target_bulk = OracleTarget(config=bulk_config)
 
         performance_timer.start()
-        with patch("sys.stdin", StringIO(bulk_input)):
-            target_bulk.cli()
+        with patch("sys.stdin", StringIO(bulk_input)): target_bulk.cli()
         performance_timer.stop()
 
         bulk_duration = performance_timer.duration
@@ -220,8 +215,7 @@ class TestPerformanceBenchmarks:
         individual_schema = test_schema.copy()
         individual_schema["stream"] = f"{test_table_name}_individual"
         individual_records = []
-        for record in test_records:
-            individual_record = record.copy()
+        for record in test_records: individual_record = record.copy()
             individual_record["stream"] = f"{test_table_name}_individual"
             individual_records.append(individual_record)
 
@@ -234,8 +228,7 @@ class TestPerformanceBenchmarks:
         target_individual = OracleTarget(config=individual_config)
 
         performance_timer.start()
-        with patch("sys.stdin", StringIO(individual_input)):
-            target_individual.cli()
+        with patch("sys.stdin", StringIO(individual_input)): target_individual.cli()
         performance_timer.stop()
 
         individual_duration = performance_timer.duration
@@ -243,6 +236,7 @@ class TestPerformanceBenchmarks:
 
         # Verify both processed correctly
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}_bulk"))
             row = result.fetchone()
             assert row is not None
@@ -260,19 +254,23 @@ class TestPerformanceBenchmarks:
 
         log.error(
             "\nBulk vs Individual Performance:",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
-            f"Bulk operations: {bulk_throughput:.2f} records/sec ({bulk_duration:.2f}s)"
-            # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            f"Bulk operations: {bulk_throughput:.2f} records/sec ({bulk_duration:.2f}s)",
+            # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
         )
         log.error(
             f"Individual operations: {individual_throughput:.2f} records/sec "
-            f"({individual_duration:.2f}s)"
-            # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            f"({individual_duration:.2f}s)",
+            # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
         )
         log.error(
             f"Bulk is {performance_ratio:.1f}x faster",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
 
         # Bulk should be significantly faster
         assert (
@@ -284,16 +282,14 @@ class TestPerformanceBenchmarks:
         table_cleanup(f"{test_table_name}_individual")
 
     @pytest.mark.performance
+    @staticmethod
     def test_parallel_degree_scaling(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup: Any,
         performance_timer: Any,
-    ) -> None:
-        """Test performance scaling with different parallel degrees."""
-        record_count = 20000
+    ) -> None: record_count = 20000
 
         # Test schema
         test_schema = {
@@ -313,8 +309,7 @@ class TestPerformanceBenchmarks:
 
         # Generate test data
         test_records = []
-        for i in range(record_count):
-            test_records.append(
+        for i in range(record_count): test_records.append(
                 {
                     "type": "RECORD",
                     "stream": test_table_name,
@@ -323,8 +318,7 @@ class TestPerformanceBenchmarks:
                         "category": f"Category {(i % 5) + 1}",
                         "amount": float(i * 2.5),
                         "description": (
-                            f"Description for record {
-                                i + 1} with some text data"
+                            f"Description for record {i + 1} with some text data"
                         ),
                     },
                 },
@@ -334,8 +328,7 @@ class TestPerformanceBenchmarks:
         parallel_degrees = [1, 2, 4]
         results = {}
 
-        for degree in parallel_degrees:
-            table_name = f"{test_table_name}_parallel_{degree}"
+        for degree in parallel_degrees: table_name = f"{test_table_name}_parallel_{degree}"
             table_cleanup(table_name)
 
             # Configure for this parallel degree
@@ -352,8 +345,7 @@ class TestPerformanceBenchmarks:
             parallel_schema["stream"] = table_name
 
             parallel_records = []
-            for record in test_records:
-                parallel_record = record.copy()
+            for record in test_records: parallel_record = record.copy()
                 parallel_record["stream"] = table_name
                 parallel_records.append(parallel_record)
 
@@ -364,8 +356,7 @@ class TestPerformanceBenchmarks:
             # Measure performance
             performance_timer.start()
 
-            with patch("sys.stdin", StringIO(input_data)):
-                target.cli()
+            with patch("sys.stdin", StringIO(input_data)): target.cli()
 
             performance_timer.stop()
 
@@ -374,8 +365,7 @@ class TestPerformanceBenchmarks:
             results[degree] = {"duration": duration, "throughput": throughput}
 
             # Verify processing
-            with oracle_engine.connect() as conn:
-                result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+            with oracle_engine.connect() as conn: result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
                 row = result.fetchone()
             assert row is not None
             assert row[0] == record_count
@@ -392,15 +382,15 @@ class TestPerformanceBenchmarks:
         # Analyze scaling
         log.error(
             "\nParallel Degree Scaling Results:",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         baseline_throughput = results[1]["throughput"]
 
-        for degree in parallel_degrees:
-            scaling_factor = results[degree]["throughput"] / baseline_throughput
+        for degree in parallel_degrees: scaling_factor = results[degree]["throughput"] / baseline_throughput
             log.error(
-                f"Degree {degree}: {
-                    scaling_factor:.2f}x baseline performance",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+                f"Degree {degree}: {scaling_factor:.2f}x baseline performance",
+            )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
 
         # Higher parallel degrees should generally perform better
         assert (
@@ -411,16 +401,14 @@ class TestPerformanceBenchmarks:
         ), "Degree 4 significant regression"
 
     @pytest.mark.performance
+    @staticmethod
     def test_memory_usage_scaling(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup: Any,
         performance_timer: Any,
-    ) -> None:
-        """Test memory usage with different batch sizes."""
-        # Test different batch sizes
+    ) -> None: # Test different batch sizes
         batch_sizes = [1000, 5000, 10000]
         record_count = 30000
 
@@ -442,8 +430,7 @@ class TestPerformanceBenchmarks:
 
         # Generate test data
         test_records = []
-        for i in range(record_count):
-            test_records.append(
+        for i in range(record_count): test_records.append(
                 {
                     "type": "RECORD",
                     "stream": test_table_name,
@@ -458,8 +445,7 @@ class TestPerformanceBenchmarks:
 
         batch_results = {}
 
-        for batch_size in batch_sizes:
-            table_name = f"{test_table_name}_batch_{batch_size}"
+        for batch_size in batch_sizes: table_name = f"{test_table_name}_batch_{batch_size}"
             table_cleanup(table_name)
 
             # Configure for this batch size
@@ -474,8 +460,7 @@ class TestPerformanceBenchmarks:
             batch_schema["stream"] = table_name
 
             batch_records = []
-            for record in test_records:
-                batch_record = record.copy()
+            for record in test_records: batch_record = record.copy()
                 batch_record["stream"] = table_name
                 batch_records.append(batch_record)
 
@@ -486,8 +471,7 @@ class TestPerformanceBenchmarks:
             # Measure performance
             performance_timer.start()
 
-            with patch("sys.stdin", StringIO(input_data)):
-                target.cli()
+            with patch("sys.stdin", StringIO(input_data)): target.cli()
 
             performance_timer.stop()
 
@@ -496,8 +480,7 @@ class TestPerformanceBenchmarks:
             batch_results[batch_size] = {"duration": duration, "throughput": throughput}
 
             # Verify processing
-            with oracle_engine.connect() as conn:
-                result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+            with oracle_engine.connect() as conn: result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
                 row = result.fetchone()
             assert row is not None
             assert row[0] == record_count
@@ -512,10 +495,11 @@ class TestPerformanceBenchmarks:
             table_cleanup(table_name)
 
         # Analyze batch size scaling
-        # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+
+        # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error("\nBatch Size Scaling Results:")
-        for batch_size in batch_sizes:
-            batch_result = batch_results[batch_size]
+        for batch_size in batch_sizes: batch_result = batch_results[batch_size]
             efficiency = (
                 batch_result["throughput"] / batch_size
             )  # Records per second per batch item
@@ -536,16 +520,14 @@ class TestPerformanceBenchmarks:
         )
 
     @pytest.mark.performance
+    @staticmethod
     def test_connection_pool_performance(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup: Any,
         performance_timer: Any,
-    ) -> None:
-        """Test performance impact of connection pool settings."""
-        record_count = 15000
+    ) -> None: record_count = 15000
 
         # Test schema
         test_schema = {
@@ -571,8 +553,7 @@ class TestPerformanceBenchmarks:
 
         pool_results = {}
 
-        for i, pool_config in enumerate(pool_configs):
-            table_name = f"{test_table_name}_pool_{i + 1}"
+        for i, pool_config in enumerate(pool_configs): table_name = f"{test_table_name}_pool_{i + 1}"
             table_cleanup(table_name)
 
             # Configure for this pool setup
@@ -585,8 +566,7 @@ class TestPerformanceBenchmarks:
 
             # Generate test data
             test_records = []
-            for j in range(record_count):
-                test_records.append(
+            for j in range(record_count): test_records.append(
                     {
                         "type": "RECORD",
                         "stream": table_name,
@@ -612,8 +592,7 @@ class TestPerformanceBenchmarks:
             # Measure performance
             performance_timer.start()
 
-            with patch("sys.stdin", StringIO(input_data)):
-                target.cli()
+            with patch("sys.stdin", StringIO(input_data)): target.cli()
 
             performance_timer.stop()
 
@@ -626,20 +605,17 @@ class TestPerformanceBenchmarks:
             }
 
             # Verify processing
-            with oracle_engine.connect() as conn:
-                result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+            with oracle_engine.connect() as conn: result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
                 row = result.fetchone()
             assert row is not None
             assert row[0] == record_count
 
-            config_desc = f"Pool:{
-                    pool_config['pool_size']}, Workers:{
-                    pool_config['max_workers']}"
+            config_desc = (
+                f"Pool:{pool_config['pool_size']}, Workers:{pool_config['max_workers']}"
+            )
             log.error(
-                f"{config_desc}: {
-    throughput:.2f} records/sec ({
-        duration:.2f}s)  # TODO(@dev): Replace with proper logging",
-          # Link: https://github.com/issue/todo
+                f"{config_desc}: {throughput:.2f} records/sec ({duration:.2f}s)  # TODO(@dev): Replace with proper logging",  # TODO: Break long line
+                # Link: https://github.com/issue/todo
             )
 
             # Cleanup
@@ -648,34 +624,32 @@ class TestPerformanceBenchmarks:
         # Analyze pool scaling
         log.error(
             "\nConnection Pool Performance Results:",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
-        for _i, pool_result in pool_results.items():
-            config = pool_result["config"]
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
+        for _i, pool_result in pool_results.items(): config = pool_result["config"]
             log.error(
                 f"Pool {config['pool_size']}/Workers {config['max_workers']}: "
                 f"{pool_result['throughput']:.2f} records/sec",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
 
         # Verify reasonable performance scaling
         baseline = pool_results[0]["throughput"]
-        for i in range(1, len(pool_results)):
-            scaling = pool_results[i]["throughput"] / baseline
+        for i in range(1, len(pool_results)): scaling = pool_results[i]["throughput"] / baseline
             assert scaling >= 0.5, (
                 f"Pool config {_i} shows significant performance regression: "
                 f"{scaling:.2f}x"
             )
 
     @pytest.mark.performance
+    @staticmethod
     def test_large_record_handling(
-        self,
         oracle_config: dict[str, Any],
         test_table_name: str,
         oracle_engine: Engine,
         table_cleanup: Any,
         performance_timer: Any,
-    ) -> None:
-        """Test performance with large individual records."""
-        table_cleanup(test_table_name)
+    ) -> None: table_cleanup(test_table_name)
 
         # Configure for large records
         large_config = oracle_config.copy()
@@ -686,7 +660,7 @@ class TestPerformanceBenchmarks:
 
         # Create schema for large records
         large_schema = {
-            "type": "SCHEMA",
+            "type":  "SCHEMA",
             "stream": test_table_name,
             "schema": {
                 "type": "object",
@@ -704,20 +678,18 @@ class TestPerformanceBenchmarks:
         record_count = 2000
         large_records = []
 
-        for i in range(record_count):
-            large_text = "Large text content " * 500  # ~10KB
+        for i in range(record_count): large_text = "Large text content " * 500  # ~10KB
             metadata = {
                 "tags": ["tag" + str(j) for j in range(100)],
                 "attributes": {f"attr_{j}": f"value_{j}" for j in range(50)},
                 "history": [
                     {"event": f"event_{j}", "timestamp": "2025-07-02T10:00:00Z"}
-                    for j in range(20)
-                ],
+                    for j in range(20): ],
             }
 
             large_records.append(
                 {
-                    "type": "RECORD",
+                    "type":  "RECORD",
                     "stream": test_table_name,
                     "record": {
                         "id": i + 1,
@@ -738,13 +710,13 @@ class TestPerformanceBenchmarks:
 
         performance_timer.start()
 
-        with patch("sys.stdin", StringIO(input_data)):
-            target.cli()
+        with patch("sys.stdin", StringIO(input_data)): target.cli()
 
         performance_timer.stop()
 
         # Verify processing
         with oracle_engine.connect() as conn:
+
             result = conn.execute(text(f"SELECT COUNT(*) FROM {test_table_name}"))
             row = result.fetchone()
             assert row is not None
@@ -758,30 +730,33 @@ class TestPerformanceBenchmarks:
         data_size_mb = (record_count * 10) / 1024
         mb_per_second = data_size_mb / duration
 
-        # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error("\nLarge Record Performance:")
         log.error(
-            f"Records: {record_count:,} (~10KB each)"
-            # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            f"Records: {record_count:,} (~10KB each)",
+            # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
         )
         log.error(
             f"Total data: ~{data_size_mb:.1f} MB",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
             f"Duration: {duration:.2f} seconds",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
             f"Throughput: {throughput:.2f} records/second",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
         log.error(
             f"Data rate: {mb_per_second:.2f} MB/second",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
 
         # Performance assertions for large records
         assert (
             throughput > 50
         ), f"Large record throughput too low: {throughput:.2f} records/sec"
-        assert (
-            mb_per_second > 2
-        ), f"Data rate too low: {
-            mb_per_second:.2f} MB/sec"
+        assert mb_per_second > 2, f"Data rate too low: {mb_per_second:.2f} MB/sec"

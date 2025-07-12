@@ -1,14 +1,21 @@
+from typing import Any
+
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
+
 """Test helpers for Oracle Target tests.
 
 This module provides utilities for testing Oracle functionality including
 connection management, table cleanup, and test configuration.
 """
+
 from __future__ import annotations
 
 import os
 from contextlib import contextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Self
 
 import pytest
 import structlog
@@ -23,8 +30,7 @@ log = structlog.get_logger(__name__)
 
 
 def has_valid_env_config() -> bool:
-    """Check if we have valid Oracle configuration in .env file."""
-    # Try to load .env from various locations
+        # Try to load .env from various locations
     env_locations = [
         Path(".env"),
         Path(__file__).parent.parent / ".env",
@@ -53,7 +59,6 @@ def has_valid_env_config() -> bool:
 
 
 def get_test_config(include_licensed_features: bool = False) -> dict[str, Any]:
-    """Get test configuration from environment with safe defaults."""
     if not has_valid_env_config():
         msg = "Valid Oracle configuration not found in .env file"
         raise ValueError(msg) from None
@@ -75,7 +80,8 @@ def get_test_config(include_licensed_features: bool = False) -> dict[str, Any]:
         "database": os.getenv("DATABASE__DATABASE"),
         # SSL/TCPS settings
         "ssl_server_dn_match": os.getenv(
-            "DATABASE__SSL_SERVER_DN_MATCH", "false",
+            "DATABASE__SSL_SERVER_DN_MATCH",
+            "false",
         ).lower()
         == "true",
         "ssl_server_cert_dn": os.getenv("DATABASE__SSL_SERVER_CERT_DN"),
@@ -85,7 +91,8 @@ def get_test_config(include_licensed_features: bool = False) -> dict[str, Any]:
         "add_record_metadata": True,
         "validate_records": True,
         "default_target_schema": os.getenv(
-            "DEFAULT_TARGET_SCHEMA", os.getenv("DATABASE__USERNAME"),
+            "DEFAULT_TARGET_SCHEMA",
+            os.getenv("DATABASE__USERNAME"),
         ),
         # Performance settings (safe defaults)
         "pool_size": 5,
@@ -94,10 +101,13 @@ def get_test_config(include_licensed_features: bool = False) -> dict[str, Any]:
         "prefetch_rows": 100,
         "batch_config": {"batch_size": 100, "batch_wait_limit_seconds": 1.0},
         # Check if EE from environment or default to True for Autonomous DB
-        "oracle_is_enterprise_edition": os.getenv(
-            "ORACLE_IS_ENTERPRISE_EDITION", "true",
-        ).lower()
-        == "true",
+        "oracle_is_enterprise_edition": (
+            os.getenv(
+                "ORACLE_IS_ENTERPRISE_EDITION",
+                "true",
+            ).lower()
+            == "true"
+        ),
         "oracle_has_partitioning_option": include_licensed_features,
         "oracle_has_compression_option": include_licensed_features,
         "oracle_has_inmemory_option": include_licensed_features,
@@ -167,7 +177,6 @@ requires_inmemory_option = pytest.mark.skipif(
 
 
 def validate_oracle_features(connection: Any) -> dict[str, bool]:
-    """Check which Oracle features are available in the database."""
     features = {
         "is_enterprise_edition": False,
         "partitioning": False,
@@ -182,20 +191,15 @@ def validate_oracle_features(connection: Any) -> dict[str, bool]:
             """
             SELECT BANNER FROM v$version
             WHERE BANNER LIKE '%Enterprise Edition%'
-        """,
+            """
         ).fetchone()
         features["is_enterprise_edition"] = result is not None
-    except Exception as e:
-        # If we can't check, assume it's not EE but log the issue
-        log.exception(
-            "Could not detect Oracle edition",
-            error=str(e)
-        )
+    except Exception: # If we can't check, assume it's not EE but log the issue
+        log.exception("Could not detect Oracle edition")
         features["is_enterprise_edition"] = False
 
     # Only check EE features if it's Enterprise Edition
-    if not features["is_enterprise_edition"]:
-        return features
+    if not features["is_enterprise_edition"]: return features
 
     try:
         # Check for partitioning
@@ -203,74 +207,59 @@ def validate_oracle_features(connection: Any) -> dict[str, bool]:
             """
             SELECT COUNT(*) FROM v$option
             WHERE parameter = 'Partitioning' AND value = 'TRUE'
-        """,
+            """
         ).scalar()
         features["partitioning"] = result > 0
-    except Exception as e:
-        # Feature detection failed - log for debugging
-        log.exception(
-            "Could not detect partitioning feature",
-            error=str(e)
-        )
+    except Exception: # Feature detection failed - log for debugging
+        log.exception("Could not detect partitioning feature")
 
-    try:
-        # Check for advanced compression
+    try: # Check for advanced compression
         result = connection.execute(
             """
             SELECT COUNT(*) FROM v$option
             WHERE parameter = 'Advanced Compression' AND value = 'TRUE'
-        """,
+            """
         ).scalar()
         features["advanced_compression"] = result > 0
-    except Exception as e:
-        # Feature detection failed - log for debugging
-        # TODO: Consider using else block
-        log.exception(
-            f"⚠️ Could not detect advanced compression feature: {e}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+    except Exception: # Feature detection failed - log for debugging
+        # TODO(@flext-team): Consider using else block
+        log.exception("Could not detect advanced compression feature")
 
-    try:
-        # Check for in-memory
+    try: # Check for in-memory
         result = connection.execute(
             """
             SELECT COUNT(*) FROM v$option
             WHERE parameter = 'In-Memory Column Store' AND value = 'TRUE'
-        """,
+            """
         ).scalar()
         features["inmemory"] = result > 0
-    except Exception as e:
-        # Feature detection failed - log for debugging
-        # TODO: Consider using else block
-        log.exception(
-            f"⚠️ Could not detect in-memory feature: {e}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+    except Exception: # Feature detection failed - log for debugging
+        # TODO(@flext-team): Consider using else block
+        log.exception("Could not detect in-memory feature")
 
-    try:
-        # Check for advanced security
+    try: # Check for advanced security
         result = connection.execute(
             """
             SELECT COUNT(*) FROM v$option
             WHERE parameter = 'Advanced Security' AND value = 'TRUE'
-        """,
+            """
         ).scalar()
         features["advanced_security"] = result > 0
-    except Exception as e:
-        # Feature detection failed - log for debugging
-        # TODO: Consider using else block
-        log.exception(
-            f"⚠️ Could not detect advanced security feature: {e}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+    except Exception: # Feature detection failed - log for debugging
+        # TODO(@flext-team): Consider using else block
+        log.exception("Could not detect advanced security feature")
 
     return features
 
 
 @contextmanager
 def oracle_connection(config: dict[str, Any] | None = None) -> Generator[Any]:
-    """Context manager for Oracle connections."""
     if config is None:
         config = get_test_config()
 
-    from flext_target_oracle.connectors import OracleConnector
+    from flext_target_oracle.connectors import (  # TODO: Move import to module level
+        OracleConnector,
+    )
 
     connector = OracleConnector(config)
     engine = connector._engine
@@ -283,7 +272,6 @@ def oracle_connection(config: dict[str, Any] | None = None) -> Generator[Any]:
 
 
 def clean_test_table(table_name: str, config: dict[str, Any] | None = None) -> None:
-    """Clean up a specific test table."""
     if config is None:
         config = get_test_config()
 
@@ -291,17 +279,19 @@ def clean_test_table(table_name: str, config: dict[str, Any] | None = None) -> N
         with oracle_connection(config) as conn, conn.begin():
             conn.execute(text(f"DROP TABLE {table_name} CASCADE CONSTRAINTS"))
             log.error(
-                f"✅ Cleaned test table: {table_name}",
-            )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
-    except Exception as e:
-        # TODO: Consider using else block
+                "✅ Cleaned test table: %s",
+                table_name,
+            )  # TODO(@dev): Replace with proper logging
+            # Link: https://github.com/issue/todo
+    except Exception: # TODO(@flext-team): Consider using else block
         log.exception(
-            f"⚠️ Could not clean table {table_name}: {e}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+            "⚠️ Could not clean table %s",
+            table_name,
+        )  # TODO(@dev): Replace with proper logging
+        # Link: https://github.com/issue/todo
 
 
 def clean_all_test_tables(config: dict[str, Any] | None = None) -> None:
-    """Clean up all test tables."""
     if config is None:
         config = get_test_config()
 
@@ -316,14 +306,14 @@ def clean_all_test_tables(config: dict[str, Any] | None = None) -> None:
         with oracle_connection(config) as conn, conn.begin():
             # Find all test tables
             for pattern in test_table_patterns:
-                result: Any = conn.execute(
+                result = conn.execute(
                     text(
                         f"""
                         SELECT table_name
                         FROM user_tables
                         WHERE table_name LIKE '{pattern}'
-                    """,
-                    ),
+                        """
+                    )
                 )
 
                 for row in result:
@@ -333,28 +323,25 @@ def clean_all_test_tables(config: dict[str, Any] | None = None) -> None:
                             text(f"DROP TABLE {table_name} CASCADE CONSTRAINTS"),
                         )
                         log.error(
-                            f"✅ Cleaned test table: {table_name}",
-                        # TODO(@dev): Replace with proper logging  # Link:
-                        # https://github.com/issue/todo
+                            "✅ Cleaned test table: %s",
+                            table_name,
+                            # TODO(@dev): Replace with proper logging  # Link: # https://github.com/issue/todo
                         )
-                    except Exception as e:
-                        # TODO: Consider using else block
-                        log.exception(
-                            f"⚠️ Could not clean table {table_name}: {e}",
-                        # TODO(@dev): Replace with proper logging  # Link:
-                        # https://github.com/issue/todo
-                        )
+                    except Exception:
 
-    except Exception as e:
-        # TODO: Consider using else block
-        # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
-        log.exception(f"❌ Error during cleanup: {e}")
+                        # TODO(@flext-team): Consider using else block
+
+                        log.exception("Could not clean table %s", table_name)
+
+    except Exception: # TODO(@flext-team): Consider using else block
+        log.exception("Error during cleanup")
 
 
 def setup_test_table(
-    table_name: str, schema: dict[str, Any], config: dict[str, Any] | None = None,
+    table_name: str,
+    schema: dict[str, Any],
+    config: dict[str, Any] | None = None,
 ) -> None:
-    """Set up a test table with the given schema."""
     if config is None:
         config = get_test_config()
 
@@ -372,12 +359,13 @@ def setup_test_table(
         as_temp_table=False,
     )
     log.error(
-        f"✅ Created test table: {table_name}",
-    )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+        "✅ Created test table: %s",
+        table_name,
+    )  # TODO(@dev): Replace with proper logging
+    # Link: https://github.com/issue/todo
 
 
-class TestTableManager:
-    """Context manager for test table lifecycle."""
+class TestTableManager:  """Context manager for test table lifecycle."""
 
     def __init__(
         self,
@@ -389,19 +377,15 @@ class TestTableManager:
         self.schema = schema
         self.config = config or get_test_config()
 
-    def __enter__(self) -> TestTableManager:
-        """Set up test table."""
+    def __enter__(self) -> Self:
         setup_test_table(self.table_name, self.schema, self.config)
         return self
 
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        """Clean up test table."""
         clean_test_table(self.table_name, self.config)
 
 
 def count_test_tables(config: dict[str, Any] | None = None) -> int:
-    """Count how many test tables exist."""
-    """Count how many test tables exist."""
     if config is None:
         config = get_test_config()
 
@@ -413,65 +397,59 @@ def count_test_tables(config: dict[str, Any] | None = None) -> int:
     ]
 
     total_count = 0
-    try:
-        with oracle_connection(config) as conn:
+    try: with oracle_connection(config) as conn:
             for pattern in test_table_patterns:
                 result = conn.execute(
                     text(
-                        f"""
-                    SELECT COUNT(*)
-                    FROM user_tables
-                    WHERE table_name LIKE '{pattern}'
-                """,
-                    ),
-                )
+                f"""
+                SELECT COUNT(*)
+                        FROM user_tables
+                        WHERE table_name LIKE '{pattern}'
+                        """
+                    )
+            """
+        )
                 count = result.scalar()
                 total_count += count
 
-    except Exception as e:
-        # TODO: Consider using else block
-        log.exception(
-            f"❌ Error counting test tables: {e}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+    except Exception: # TODO(@flext-team): Consider using else block
+        log.exception("Error counting test tables")
 
     return total_count
 
 
 def validate_table_structure(
-    table_name: str, expected_columns: list[str], config: dict[str, Any] | None = None,
-) -> bool:
-    """Validate that a table has the expected structure."""
-    if config is None:
+    table_name: str,
+    expected_columns: list[str],
+    config: dict[str, Any] | None = None,
+) -> bool: if config is None:
         config = get_test_config()
 
     try:
         with oracle_connection(config) as conn:
-            result = conn.execute(
+    result = conn.execute(
                 text(
-                    f"""
+                f"""
                 SELECT column_name
-                FROM user_tab_columns
-                WHERE table_name = '{table_name.upper()}'
-                ORDER BY column_name
-            """,
-                ),
-            )
+                    FROM user_tab_columns
+                    WHERE table_name = '{table_name.upper()}'
+                    ORDER BY column_name
+                    """
+                )
+            """
+        )
 
             actual_columns = {row[0] for row in result}
             expected_columns_set = {col.upper() for col in expected_columns}
 
             return expected_columns_set.issubset(actual_columns)
 
-    except Exception as e:
-        # TODO: Consider using else block
-        log.exception(
-            f"❌ Error validating table structure: {e}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+    except Exception: # TODO(@flext-team): Consider using else block
+        log.exception("Error validating table structure")
         return False
 
 
 def get_table_row_count(table_name: str, config: dict[str, Any] | None = None) -> int:
-    """Get the number of rows in a table."""
     if config is None:
         config = get_test_config()
 
@@ -480,9 +458,6 @@ def get_table_row_count(table_name: str, config: dict[str, Any] | None = None) -
             result = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
             scalar_result = result.scalar()
             return scalar_result if scalar_result is not None else 0
-    except Exception as e:
-        # TODO: Consider using else block
-        log.exception(
-            f"❌ Error getting row count for {table_name}: {e}",
-        )  # TODO(@dev): Replace with proper logging  # Link: https://github.com/issue/todo
+    except Exception: # TODO(@flext-team): Consider using else block
+        log.exception("Error getting row count for %s", table_name)
         return 0
