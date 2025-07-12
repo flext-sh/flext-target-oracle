@@ -6,9 +6,12 @@ Zero duplication, enterprise-grade performance.
 
 from __future__ import annotations
 
+import argparse
 import asyncio
 import json
+import os
 import sys
+from pathlib import Path
 from typing import Any
 
 from flext_core import ServiceResult
@@ -62,6 +65,10 @@ class OracleTarget:
             if not stripped_line:
                 continue
 
+            # Skip non-JSON lines (log messages, etc.)
+            if not stripped_line.startswith("{"):
+                continue
+
             try:
                 # Parse and process message
                 message = json.loads(stripped_line)
@@ -77,8 +84,9 @@ class OracleTarget:
                     logger.info("Processed %d messages (%d errors)", line_count, error_count)
 
             except json.JSONDecodeError:
-                logger.exception("Invalid JSON message")
-                error_count += 1
+                logger.debug("Skipped invalid JSON line: %s", stripped_line[:100])
+                # Don't count as error since it might be a log message
+                continue
             except Exception:
                 logger.exception("Unexpected error processing message")
                 error_count += 1
@@ -164,10 +172,6 @@ class OracleTarget:
 
 def main() -> int:
     """Run Singer target with CLI arguments."""
-    import argparse
-    import os
-    from pathlib import Path
-
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Oracle Singer Target")
     parser.add_argument("--config", type=str, help="Path to configuration file")

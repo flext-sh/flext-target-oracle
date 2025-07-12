@@ -2059,17 +2059,19 @@ files = [
 
 [[package]]
 name = "singer-sdk"
-version = "0.47.5.dev36+g9a31d56e"
+version = "0.47.4"
 description = "A framework for building Singer taps"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "singer_sdk-0.47.4-py3-none-any.whl", hash = "sha256:9522f92e7c14dc5773bc4d83dee456ad4760869957f718bc053f75c43121107e"},
+    {file = "singer_sdk-0.47.4.tar.gz", hash = "sha256:d70642f2f5d55f794fe3b311ccacabb86a41c3a3bb37260b3119d3aadce0459c"},
+]
 
 [package.dependencies]
-backoff = ">=2.0.0"
-click = ">=8.0,<9"
+backoff = {version = ">=2.0.0", markers = "python_version < \"4\""}
+click = ">=8.0,<9.0"
 fsspec = ">=2024.9.0"
 inflection = ">=0.5.1"
 joblib = ">=1.3.0"
@@ -2082,24 +2084,18 @@ referencing = ">=0.30.0"
 requests = ">=2.25.1"
 simpleeval = ">=0.9.13,<1.0.1 || >1.0.1"
 simplejson = ">=3.17.6"
-sqlalchemy = ">=2"
+sqlalchemy = ">=1.4,<3.0"
 typing-extensions = ">=4.5.0"
 universal-pathlib = ">=0.2.6"
 
 [package.extras]
 faker = ["faker (>=22.5)"]
-jwt = ["cryptography (>=3.4.6)", "pyjwt (>=2.4.0)"]
+jwt = ["cryptography (>=3.4.6)", "pyjwt (>=2.4,<3.0)"]
 msgspec = ["msgspec (>=0.19.0)"]
 parquet = ["pyarrow (>=15)"]
 s3 = ["s3fs (>=2024.9.0)"]
 ssh = ["paramiko (>=3.3.0)"]
-testing = ["pytest (>=7.5)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/meltano/sdk.git"
-reference = "9a31d56"
-resolved_reference = "9a31d56e4a402d936b9d2e0a9a5562cf4a07e480"
+testing = ["pytest (>=7.2.1)"]
 
 [[package]]
 name = "six"

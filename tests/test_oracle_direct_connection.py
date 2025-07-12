@@ -13,7 +13,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def test_direct_connection() -> None:  # Get connection parameters
+def test_direct_connection() -> None:
+    """Test direct Oracle database connection with environment configuration."""
     host = os.getenv("DATABASE__HOST")
     port = int(os.getenv("DATABASE__PORT", "1521"))
     service_name = os.getenv("DATABASE__SERVICE_NAME")
@@ -52,8 +53,9 @@ def test_direct_connection() -> None:  # Get connection parameters
 
         connection.close()
 
-    except Exception:  # TODO(@flext-team): Consider using else block
-        raise
+    except Exception as e:
+        msg = f"Connection failed: {e}"
+        raise AssertionError(msg) from e
 
 
 if __name__ == "__main__":
