@@ -24,14 +24,18 @@ def setup_oracle_target(
     """
     try:
         if config is None:
-            config = TargetOracleConfig()
+            config = TargetOracleConfig.model_validate({
+                "host": "localhost",
+                "username": "oracle_user",
+                "password": "oracle_password",
+            })
 
         # Setup logging using flext-observability
         setup_logging()
 
         return ServiceResult.ok(config)
 
-    except Exception as e:  # noqa: BLE001
+    except Exception as e:
         return ServiceResult.fail(f"Failed to setup Oracle target: {e}")
 
 
