@@ -80,16 +80,16 @@ class OracleSink:
         self._connector = self.connection_service
 
         # Create target config for the actual service
-        target_config = TargetConfig(
-            host=oracle_config.host,
-            port=oracle_config.port,
-            service_name=oracle_config.service_name,
-            username=oracle_config.username,
-            password=oracle_config.password,
-            protocol=oracle_config.protocol,
-            default_target_schema=self.config.get("default_target_schema", "SINGER_DATA"),
-            batch_size=self.config.get("batch_size", 10000),
-        )
+        target_config = TargetConfig.model_validate({
+            "host": oracle_config.host,
+            "port": oracle_config.port,
+            "service_name": oracle_config.service_name,
+            "username": oracle_config.username,
+            "password": oracle_config.password,
+            "protocol": oracle_config.protocol,
+            "default_target_schema": self.config.get("default_target_schema", "SINGER_DATA"),
+            "batch_size": self.config.get("batch_size", 10000),
+        })
 
         from flext_target_oracle.application.services import OracleLoaderService
         self._service = OracleLoaderService(

@@ -39,7 +39,7 @@ logger = get_logger(__name__)
 class JSONModule(Protocol):
     """Protocol for JSON module."""
 
-    def dumps(self, obj: Any) -> str:  # noqa: ANN401
+    def dumps(self, obj: Any) -> str:
         """Serialize obj to a JSON formatted str."""
         ...
 
@@ -125,8 +125,8 @@ class SingerTargetService:
         According to Singer spec, targets must output STATE messages to stdout
         to update the incremental state for resumable extractions.
         """
-        if not record.value:
-            logger.warning("STATE message received but value is empty")
+        if not record.record:
+            logger.warning("STATE message received but record is empty")
             return ServiceResult.success(None)
 
         # Output the state message to stdout as required by Singer protocol
@@ -343,7 +343,7 @@ class OracleLoaderService:
                 job.error_message = result.error
                 logger.error("Batch failed: %s", result.error)
 
-            return result  # noqa: TRY300
+            return result
 
         except Exception as e:
             logger.exception("Failed to flush batch for stream %s", stream_name)
@@ -759,7 +759,7 @@ class OracleLoaderService:
 
     def _build_data_param(
         self,
-        value: dict[str, Any] | list[Any] | str | float | bool | None,  # noqa: FBT001
+        value: dict[str, Any] | list[Any] | str | float | bool | None,
         json_module: JSONModule,
     ) -> str | int | float | None:
         """Build parameter for regular data columns with proper type conversion."""
@@ -902,7 +902,7 @@ class OracleLoaderService:
 
     def _determine_column_type(
         self,
-        value: dict[str, Any] | list[Any] | str | float | bool | None,  # noqa: FBT001
+        value: dict[str, Any] | list[Any] | str | float | bool | None,
     ) -> str:
         """Determine Oracle column type based on value."""
         if value is None:

@@ -138,6 +138,9 @@ ignore = [
     "E501", # line too long (handled by formatter)
     "D203", # 1 blank line required before class docstring (conflicts with D211)
     "D213", # multi-line-summary-second-line (conflicts with D212)
+    
+    # Target Oracle specific patterns
+    "PLC0415", # import-outside-top-level - Lazy imports for performance
 ]
 
 # Test-specific ignores
