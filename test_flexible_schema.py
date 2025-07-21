@@ -91,7 +91,7 @@ def test_schema_conventions():
 
         try:
             # Process with this convention
-            result = target.process_lines(io.StringIO(test_data))
+            target.process_lines(io.StringIO(test_data))
             print(f"  ✅ {convention_name.upper()}: Table created successfully")
 
             # Analyze the table structure
@@ -129,13 +129,13 @@ def analyze_table_structure(table_name, config):
 
     with engine.connect() as conn:
         columns_query = text(f"""
-            SELECT 
+            SELECT
                 column_name,
                 data_type,
                 data_length,
                 data_precision,
                 data_scale
-            FROM user_tab_columns 
+            FROM user_tab_columns
             WHERE table_name = '{table_name}'
             AND column_name NOT LIKE '_SDC_%'
             AND column_name NOT LIKE '_LOADED_%'

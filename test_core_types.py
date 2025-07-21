@@ -88,13 +88,13 @@ def check_oracle_types(table_name, config):
 
     with engine.connect() as conn:
         columns = conn.execute(text(f"""
-            SELECT 
+            SELECT
                 column_name,
                 data_type,
                 data_length,
                 data_precision,
                 data_scale
-            FROM user_tab_columns 
+            FROM user_tab_columns
             WHERE table_name = '{table_name}'
             AND column_name IN ('TEST_INTEGER', 'TEST_NUMBER', 'TEST_DATETIME', 'TEST_STRING')
             ORDER BY column_id
