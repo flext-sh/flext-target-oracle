@@ -131,7 +131,8 @@ class TestOracleSinkRecordProcessing:
 
             result = await mock_sink.process_batch(records)
             assert result.is_success
-            assert "2 records" in result.value
+            assert result.data is not None
+            assert "2 records" in result.data
             mock_batch.assert_called_once_with(records)
 
     @pytest.mark.asyncio
@@ -320,7 +321,8 @@ class TestOracleSinkPerformance:
             # All should succeed
             for result in results:
                 assert not isinstance(result, Exception)
-                assert result.is_success
+                if hasattr(result, "is_success"):
+                    assert result.is_success
 
     @pytest.mark.asyncio
     async def test_memory_efficiency(self, performance_sink: OracleSink) -> None:

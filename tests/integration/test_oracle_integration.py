@@ -5,7 +5,7 @@ These tests verify Oracle database integration functionality.
 
 import asyncio
 import os
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 import pytest
@@ -72,7 +72,8 @@ class TestOracleConnection:
                 async with connection_service.get_connection() as conn:
                     with conn.cursor() as cursor:
                         cursor.execute("SELECT 1 FROM DUAL")
-                        return cursor.fetchone()[0]
+                        result = cursor.fetchone()
+                        return int(result[0]) if result else 0
 
             tasks = [get_connection() for _ in range(5)]
             results = await asyncio.gather(*tasks)
@@ -95,7 +96,7 @@ class TestOracleConnection:
             # Test scalar query
             result = await query_service.execute_scalar("SELECT COUNT(*) FROM DUAL")
             assert result.is_success
-            assert result.value == 1
+            assert result.data == 1
 
             # Test query with parameters
             param_result = await query_service.execute_scalar(
@@ -103,7 +104,7 @@ class TestOracleConnection:
                 {"value": 42},
             )
             assert param_result.is_success
-            assert param_result.value == 42
+            assert param_result.data == 42
         except (ConnectionError, OSError, ValueError, AssertionError) as e:
             pytest.fail(f"Oracle query service failed: {e}")
 
@@ -176,7 +177,8 @@ class TestTableOperations:
                 },
             )
             assert check_result.is_success
-            assert check_result.value > 0
+            assert check_result.data is not None
+            assert check_result.data > 0
         except (ConnectionError, OSError, ValueError, AssertionError) as e:
             pytest.fail(f"Table creation test failed: {e}")
 
@@ -229,7 +231,8 @@ class TestTableOperations:
                 {"schema_name": schema_name},
             )
             assert verify_result.is_success
-            assert verify_result.value >= 1
+            assert verify_result.data is not None
+            assert verify_result.data >= 1
         except (ConnectionError, OSError, ValueError, AssertionError) as e:
             pytest.fail(f"Record insertion test failed: {e}")
 
@@ -284,7 +287,7 @@ class TestTableOperations:
                 {"schema_name": schema_name},
             )
             assert count_result.is_success
-            assert count_result.value == 150
+            assert count_result.data == 150
         except (ConnectionError, OSError, ValueError, AssertionError) as e:
             pytest.fail(f"Batch processing test failed: {e}")
 
@@ -345,7 +348,7 @@ class TestDataTypes:
                 "name": "Test Product",
                 "price": 29.99,
                 "active": True,
-                "created_at": datetime.now(datetime.UTC).isoformat(),
+                "created_at": datetime.now(UTC).isoformat(),
                 "metadata": {"category": "test", "priority": 1},
                 "tags": ["integration", "test"],
             },
@@ -371,7 +374,7 @@ class TestDataTypes:
                 {"schema_name": schema_name},
             )
             assert verify_result.is_success
-            assert verify_result.value == 1
+            assert verify_result.data == 1
         except (ConnectionError, OSError, ValueError, AssertionError, TypeError) as e:
             pytest.fail(f"Data types test failed: {e}")
 

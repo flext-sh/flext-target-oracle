@@ -42,6 +42,32 @@ class OracleConnector:
             self._oracle_config = None
             self._service = None
 
+    @property
+    def _engine(self) -> Any:
+        """Get the underlying SQLAlchemy engine for compatibility."""
+        if self._service is None:
+            msg = "No database connection configured"
+            raise RuntimeError(msg)
+
+        # Return the engine from the connection service
+        return self._service._engine if hasattr(self._service, "_engine") else None  # noqa: SLF001
+
+    def prepare_table(
+        self,
+        *,
+        full_table_name: str,
+        schema: dict[str, Any],
+        primary_keys: list[str],
+        as_temp_table: bool = False,
+    ) -> None:
+        """Prepare table for data loading (compatibility method)."""
+        if self._service is None:
+            msg = "No database connection configured"
+            raise RuntimeError(msg)
+
+        # This is a compatibility method that doesn't do anything in the new architecture
+        # The actual table creation is handled by the schema service
+
     def get_sqlalchemy_url(self, config: dict[str, Any] | None = None) -> str:
         """Build SQLAlchemy URL for backward compatibility."""
         cfg = config or self.config
