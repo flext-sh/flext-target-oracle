@@ -250,7 +250,7 @@ class TestMonitoringSystem:
 
         monitor = create_monitor(config)
 
-        assert monitor.enabled == True
+        assert monitor.enabled
         assert monitor.check_interval == 10
         assert monitor.thresholds["memory_usage_percent"] == 80
         assert monitor.thresholds["cpu_usage_percent"] == 75
@@ -260,7 +260,7 @@ class TestMonitoringSystem:
         config = {"enable_monitoring": False}
         monitor = create_monitor(config)
 
-        assert monitor.enabled == False
+        assert not monitor.enabled
 
     def test_system_metrics_collection(self):
         """Test system metrics collection."""
@@ -487,7 +487,7 @@ class TestLoggingMonitoringIntegration:
             monitor = create_monitor(config, logger)
 
             # Simulate Oracle target activity
-            with logger.operation_context("data_loading", stream="orders") as context:
+            with logger.operation_context("data_loading", stream="orders"):
                 logger.log_record_batch("orders", 5000, "insert")
                 logger.log_oracle_performance(
                     {
@@ -534,7 +534,7 @@ class TestLoggingMonitoringIntegration:
         logger = create_logger(config)
         monitor = create_monitor(config, logger)
 
-        with patch.object(logger, "info") as mock_info:
+        with patch.object(logger, "info"):
             health = monitor.perform_health_check()
 
             # Health check should log results
