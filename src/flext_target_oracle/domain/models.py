@@ -10,14 +10,8 @@ from enum import StrEnum
 from typing import Any, ClassVar
 from uuid import uuid4
 
+from flext_core import DomainBaseModel, DomainEntity, DomainValueObject, EntityId
 from pydantic import ConfigDict, Field, field_validator, model_validator
-
-from flext_core import (
-    DomainBaseModel,
-    DomainEntity,
-    DomainValueObject,
-    EntityId,
-)
 
 
 class LoadMethod(StrEnum):
@@ -76,7 +70,7 @@ class SingerRecord(DomainValueObject):
         """Validate record type."""
         valid_types = {"RECORD", "SCHEMA", "STATE"}
         if v not in valid_types:
-            msg = f"Record type must be one of {valid_types}"
+            msg = f"Invalid record type '{v}'. Must be one of {valid_types}"
             raise ValueError(msg)
         return v
 
@@ -88,7 +82,7 @@ class TargetConfig(DomainBaseModel):
         extra="allow",  # Allow extra fields for backward compatibility
     )
 
-    # Oracle connection (delegate to flext-db-oracle)
+    # Oracle connection (delegate to flext-infrastructure.databases.flext-db-oracle)
     host: str = Field(..., description="Oracle host")
     port: int = Field(1521, description="Oracle port")
     service_name: str | None = Field(None, description="Oracle service name")
@@ -133,7 +127,7 @@ class TargetConfig(DomainBaseModel):
 
     @property
     def oracle_config(self) -> dict[str, Any]:
-        """Get Oracle configuration for flext-db-oracle."""
+        """Get Oracle configuration for flext-infrastructure.databases.flext-db-oracle."""
         return {
             "host": self.host,
             "port": self.port,

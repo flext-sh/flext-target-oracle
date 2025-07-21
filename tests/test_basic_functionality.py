@@ -7,8 +7,6 @@
 These tests validate the target's core functionality using the real architecture.
 """
 
-from typing import Any
-
 import pytest
 
 from flext_target_oracle import OracleTarget
@@ -19,7 +17,7 @@ from flext_target_oracle.sinks import OracleSink
 # Test constants to avoid hardcoded password warnings
 TEST_HOST = "test-host"
 TEST_USER = "test-user"
-TEST_PASSWORD = "test-pass"  # noqa: S105
+TEST_PASSWORD = "test-pass"
 
 
 class TestTargetConfig:
@@ -106,7 +104,10 @@ class TestOracleTarget:
     @staticmethod
     def test_empty_config() -> None:
         """Test target with empty config."""
-        with pytest.raises((ValueError, TypeError), match="required"):  # Should fail validation
+        with pytest.raises(
+            (ValueError, TypeError),
+            match="required",
+        ):  # Should fail validation
             OracleTarget(config={})
 
 

@@ -1,0 +1,50 @@
+{
+  "host": "localhost",
+  "port": 1521,
+  "service_name": "XEPDB1",
+  "username": "system",
+  "password": "oracle",
+  "schema": "TARGET_SCHEMA",
+  "protocol": "tcp",
+
+  "batch_config": {
+    "batch_size": 5000,
+    "batch_wait_limit_seconds": 30.0
+  },
+
+  "pool_size": 5,
+  "max_overflow": 10,
+  "pool_pre_ping": true,
+  "pool_timeout": 30,
+  "pool_recycle": 3600,
+
+  "load_method": "append-only",
+  "add_record_metadata": true,
+
+  "use_bulk_operations": true,
+  "use_merge_statements": true,
+  "parallel_degree": 1,
+
+  "varchar_max_length": 4000,
+  "number_precision": 38,
+  "number_scale": 10,
+
+  "retry_config": {
+    "max_retries": 3,
+    "retry_delay": 1.0,
+    "exponential_backoff": true
+  },
+
+  "performance_config": {
+    "enable_metrics": true,
+    "log_sql_statements": false,
+    "optimize_for_throughput": true
+  },
+
+  "test_config": {
+    "test_mode": true,
+    "auto_cleanup_tables": true,
+    "test_table_prefix": "TEST_",
+    "max_test_records": 10000
+  }
+}

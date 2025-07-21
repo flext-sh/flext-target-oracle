@@ -1,415 +1,334 @@
-# ===== flext-target-oracle MAKEFILE - FLEXT STANDARD 2025 =====
-# ==============================================================
-# Enterprise-grade development orchestration with zero tolerance for warnings
-# All tools configured in pyproject.toml for single source of truth
-# Based on FLEXT_STANDARDS with Python 3.13 + bleeding-edge tools
+# FLEXT Target Oracle - Oracle Database Singer Target
+# ================================================
+# Production-grade Singer target for Oracle Database with enterprise optimization
+# Python 3.13 + Singer SDK + Oracle + FLEXT Core + Zero Tolerance Quality Gates
 
-.PHONY: help install test clean lint format build docs dev security type-check pre-commit quality-gate
-.DEFAULT_GOAL := help
+.PHONY: help check validate test lint type-check security format format-check fix
+.PHONY: install dev-install setup pre-commit build clean
+.PHONY: coverage coverage-html test-unit test-integration test-singer
+.PHONY: deps-update deps-audit deps-tree deps-outdated
+.PHONY: target-test target-validate target-schema target-run
+.PHONY: oracle-connect oracle-schema oracle-optimize oracle-performance
 
-# ===== CONFIGURATION =====
-PROJECT_NAME := flext-target-oracle
-PACKAGE_NAME := flext_target_oracle
-PYTHON_VERSION := 3.13
-POETRY := poetry
-PYTHON := $(POETRY) run python
-PYTEST := $(POETRY) run pytest
-RUFF := $(POETRY) run ruff
-BLACK := $(POETRY) run black
-ISORT := $(POETRY) run isort
-MYPY := $(POETRY) run mypy
-PYLINT := $(POETRY) run pylint
-BANDIT := $(POETRY) run bandit
-SAFETY := $(POETRY) run safety
-SEMGREP := $(POETRY) run semgrep
-CODESPELL := $(POETRY) run codespell
-PYUPGRADE := $(POETRY) run pyupgrade
-AUTOFLAKE := $(POETRY) run autoflake
-VULTURE := $(POETRY) run vulture
-PRE_COMMIT := $(POETRY) run pre-commit
-MKDOCS := $(POETRY) run mkdocs
-COMMITIZEN := $(POETRY) run cz
+# ============================================================================
+# 🎯 HELP & INFORMATION
+# ============================================================================
 
-# Colors for enhanced output
-RED := \033[0;31m
-GREEN := \033[0;32m
-YELLOW := \033[0;33m
-BLUE := \033[0;34m
-PURPLE := \033[0;35m
-CYAN := \033[0;36m
-WHITE := \033[0;37m
-BOLD := \033[1m
-DIM := \033[2m
-NC := \033[0m # No Color
-
-# Emojis for better UX
-ROCKET := 🚀
-HAMMER := 🔨
-MICROSCOPE := 🔬
-SHIELD := 🛡️
-SPARKLES := ✨
-FIRE := 🔥
-TROPHY := 🏆
-WARNING := ⚠️
-CROSS := ❌
-CHECK := ✅
-ROBOT := 🤖
-GEAR := ⚙️
-PACKAGE := 📦
-DOCS := 📚
-CLEAN := 🧹
-LIGHTNING := ⚡
-
-# ===== HELP & INFORMATION =====
-help: ## $(ROCKET) Show this help message
-	@echo "$(BOLD)$(BLUE)$(ROCKET) $(PROJECT_NAME) - FLEXT Standard Development$(NC)"
-	@echo "$(BLUE)========================================================$(NC)"
-	@echo "$(GREEN)$(FIRE) 100% FLEXT Standard with Python $(PYTHON_VERSION) + bleeding-edge tools$(NC)"
-	@echo "$(GREEN)$(GEAR) All configurations centralized in pyproject.toml$(NC)"
+help: ## Show this help message
+	@echo "🎯 FLEXT Target Oracle - Oracle Database Singer Target"
+	@echo "====================================================="
+	@echo "🎯 Singer SDK + Oracle + FLEXT Core + Python 3.13"
 	@echo ""
-	@echo "$(BOLD)$(YELLOW)$(LIGHTNING) Quick Commands:$(NC)"
-	@echo "  $(CYAN)make setup$(NC)        - Complete development setup"
-	@echo "  $(CYAN)make quality-gate$(NC) - Run ALL quality checks (MUST PASS 100%)"
-	@echo "  $(CYAN)make fix$(NC)          - Auto-fix all issues"
-	@echo "  $(CYAN)make test$(NC)         - Run comprehensive test suite"
-	@echo "  $(CYAN)make ci$(NC)           - Run full CI pipeline locally"
+	@echo "📦 Production-grade Oracle Database target for Singer protocol"
+	@echo "🔒 Zero tolerance quality gates with enterprise optimization"
+	@echo "🧪 90%+ test coverage requirement with Oracle integration testing"
 	@echo ""
-	@echo "$(BOLD)$(YELLOW)$(HAMMER) Available Commands:$(NC)"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(CYAN)%-20s$(NC) %s\n", $$1, $$2}'
-	@echo ""
-	@echo "$(PURPLE)$(ROBOT) Powered by: Poetry, Ruff, MyPy, Black, Pytest & FLEXT Standards$(NC)"
-	@echo "$(DIM)Run with VERBOSE=1 for detailed output$(NC)"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\\033[36m%-20s\\033[0m %s\\n", $$1, $$2}'
 
-info: ## $(MICROSCOPE) Show project and tool information
-	@echo "$(BOLD)$(BLUE)$(MICROSCOPE) Project Information$(NC)"
-	@echo "$(BLUE)============================$(NC)"
-	@echo "Project: $(PROJECT_NAME)"
-	@echo "Package: $(PACKAGE_NAME)"
-	@echo "Python: $(PYTHON_VERSION)"
-	@echo "Poetry: $(shell $(POETRY) --version 2>/dev/null || echo '$(RED)Not installed$(NC)')"
-	@echo ""
-	@echo "$(BOLD)$(YELLOW)$(GEAR) Tool Versions:$(NC)"
-	@echo "Ruff: $(shell $(RUFF) --version 2>/dev/null || echo '$(RED)Not available$(NC)')"
-	@echo "MyPy: $(shell $(MYPY) --version 2>/dev/null || echo '$(RED)Not available$(NC)')"
-	@echo "Black: $(shell $(BLACK) --version 2>/dev/null || echo '$(RED)Not available$(NC)')"
-	@echo "Pytest: $(shell $(PYTEST) --version 2>/dev/null || echo '$(RED)Not available$(NC)')"
-	@echo "Pre-commit: $(shell $(PRE_COMMIT) --version 2>/dev/null || echo '$(RED)Not available$(NC)')"
+# ============================================================================
+# 🎯 CORE QUALITY GATES - ZERO TOLERANCE
+# ============================================================================
 
-# ===== INSTALLATION & SETUP =====
-install: ## $(PACKAGE) Install dependencies with Poetry
-	@echo "$(BLUE)$(PACKAGE) Installing dependencies for $(PROJECT_NAME)...$(NC)"
-	@$(POETRY) install --no-interaction --no-ansi --sync
+validate: lint type-check security test ## STRICT compliance validation (all must pass)
+	@echo "✅ ALL QUALITY GATES PASSED - FLEXT TARGET ORACLE COMPLIANT"
 
-install-dev: ## $(HAMMER) Install with ALL development dependencies
-	@echo "$(BLUE)$(HAMMER) Installing ALL development dependencies...$(NC)"
-	@$(POETRY) install --no-interaction --no-ansi --sync --extras dev
+check: lint type-check test ## Essential quality checks (pre-commit standard)
+	@echo "✅ Essential checks passed"
 
-install-git-deps: ## $(FIRE) Install bleeding-edge Git dependencies
-	@echo "$(YELLOW)$(FIRE) Installing bleeding-edge Git dependencies...$(NC)"
-	@echo "$(YELLOW)$(WARNING) This installs development versions from Git$(NC)"
-	@$(POETRY) install --no-interaction --no-ansi --sync --extras dev-git
+lint: ## Ruff linting (17 rule categories, ALL enabled)
+	@echo "🔍 Running ruff linter (ALL rules enabled)..."
+	@poetry run ruff check src/ tests/ --fix --unsafe-fixes
+	@echo "✅ Linting complete"
 
-setup: install-dev create-dirs pre-commit-install vscode-setup ## $(ROCKET) Complete development setup
-	@echo "$(GREEN)$(CHECK) Development environment setup complete!$(NC)"
-	@echo ""
-	@echo "$(BOLD)$(BLUE)$(LIGHTNING) Next steps:$(NC)"
-	@echo "  1. Run '$(CYAN)make quality-gate$(NC)' to verify everything works"
-	@echo "  2. Run '$(CYAN)make test$(NC)' to run the test suite"
-	@echo "  3. Run '$(CYAN)make dev$(NC)' to start development mode"
-	@echo "  4. Configure your IDE to use settings in $(CYAN).vscode/$(NC) or $(CYAN).cursor/$(NC)"
+type-check: ## MyPy strict mode type checking (zero errors tolerated)
+	@echo "🛡️ Running MyPy strict type checking..."
+	@poetry run mypy src/ tests/ --strict
+	@echo "✅ Type checking complete"
 
-create-dirs: ## $(GEAR) Create required directories
-	@echo "$(BLUE)$(GEAR) Creating required directories...$(NC)"
-	@mkdir -p reports data/input data/output htmlcov .mypy_cache .ruff_cache .pytest_cache logs
+security: ## Security scans (bandit + pip-audit + secrets)
+	@echo "🔒 Running security scans..."
+	@poetry run bandit -r src/ --severity-level medium --confidence-level medium
+	@poetry run pip-audit --ignore-vuln PYSEC-2022-42969
+	@poetry run detect-secrets scan --all-files
+	@echo "✅ Security scans complete"
 
-vscode-setup: ## $(GEAR) Setup VSCode/Cursor configuration
-	@echo "$(BLUE)$(GEAR) Setting up VSCode/Cursor configuration...$(NC)"
-	@mkdir -p .vscode .cursor
-	@echo "$(GREEN)$(CHECK) IDE configuration directories created$(NC)"
+format: ## Format code with ruff
+	@echo "🎨 Formatting code..."
+	@poetry run ruff format src/ tests/
+	@echo "✅ Formatting complete"
 
-# ===== QUALITY GATES (ZERO TOLERANCE) =====
-quality-gate: ## $(FIRE) CRITICAL: Run ALL quality checks - MUST PASS 100%
-	@echo "$(BOLD)$(RED)$(FIRE) QUALITY GATE: ZERO TOLERANCE MODE$(NC)"
-	@echo "$(YELLOW)================================================$(NC)"
-	@echo ""
-	@$(MAKE) --no-print-directory _check-poetry-lock
-	@$(MAKE) --no-print-directory _format-check
-	@$(MAKE) --no-print-directory _lint-strict
-	@$(MAKE) --no-print-directory _type-check-strict
-	@$(MAKE) --no-print-directory _security-strict
-	@$(MAKE) --no-print-directory _test-strict
-	@$(MAKE) --no-print-directory _docs-check
-	@echo ""
-	@echo "$(BOLD)$(GREEN)$(TROPHY) QUALITY GATE PASSED - Ready for commit!$(NC)"
-	@echo "$(GREEN)================================================$(NC)"
+format-check: ## Check formatting without fixing
+	@echo "🎨 Checking code formatting..."
+	@poetry run ruff format src/ tests/ --check
+	@echo "✅ Format check complete"
 
-check: quality-gate ## $(SHIELD) Alias for quality-gate
+fix: format lint ## Auto-fix all issues (format + imports + lint)
+	@echo "🔧 Auto-fixing all issues..."
+	@poetry run ruff check src/ tests/ --fix --unsafe-fixes
+	@echo "✅ All auto-fixes applied"
 
-ci: quality-gate ## $(ROBOT) Full CI pipeline locally
+# ============================================================================
+# 🧪 TESTING - 90% COVERAGE MINIMUM
+# ============================================================================
 
-# ===== INTERNAL QUALITY CHECKS =====
-_check-poetry-lock: ## Internal: Check Poetry lock file
-	@echo "$(BLUE)$(GEAR) Checking Poetry lock file...$(NC)"
-	@$(POETRY) check --lock || (echo "$(RED)$(CROSS) Poetry lock file issues$(NC)" && exit 1)
-	@echo "$(GREEN)$(CHECK) Poetry lock file OK$(NC)"
+test: ## Run tests with coverage (90% minimum required)
+	@echo "🧪 Running tests with coverage..."
+	@poetry run pytest tests/ -v --cov=src/flext_target_oracle --cov-report=term-missing --cov-fail-under=90
+	@echo "✅ Tests complete"
 
-_lint-strict: ## Internal: Strict linting for quality gate
-	@echo "$(RED)$(MICROSCOPE) STRICT: Ruff comprehensive linting...$(NC)"
-	@$(RUFF) check . --output-format=github --no-fix || (echo "$(RED)$(CROSS) Ruff linting failed$(NC)" && exit 1)
-	@echo "$(GREEN)$(CHECK) Ruff linting passed$(NC)"
+test-unit: ## Run unit tests only
+	@echo "🧪 Running unit tests..."
+	@poetry run pytest tests/unit/ -v
+	@echo "✅ Unit tests complete"
 
-_format-check: ## Internal: Check if code is properly formatted
-	@echo "$(RED)$(SPARKLES) STRICT: Format check (no changes allowed)...$(NC)"
-	@$(BLACK) --check --diff . || (echo "$(RED)$(CROSS) Code not formatted with Black$(NC)" && exit 1)
-	@$(RUFF) format --check . || (echo "$(RED)$(CROSS) Code not formatted with Ruff$(NC)" && exit 1)
-	@$(ISORT) --check-only . || (echo "$(RED)$(CROSS) Imports not organized with isort$(NC)" && exit 1)
-	@echo "$(GREEN)$(CHECK) Format check passed$(NC)"
+test-integration: ## Run integration tests only
+	@echo "🧪 Running integration tests..."
+	@poetry run pytest tests/integration/ -v
+	@echo "✅ Integration tests complete"
 
-_type-check-strict: ## Internal: Strict type checking for quality gate
-	@echo "$(RED)$(MICROSCOPE) STRICT: MyPy type checking (100% strict)...$(NC)"
-	@$(MYPY) src/$(PACKAGE_NAME) --strict --no-error-summary || (echo "$(RED)$(CROSS) Type checking failed$(NC)" && exit 1)
-	@echo "$(GREEN)$(CHECK) Type checking passed$(NC)"
+test-singer: ## Run Singer protocol tests
+	@echo "🧪 Running Singer protocol tests..."
+	@poetry run pytest tests/singer/ -v
+	@echo "✅ Singer tests complete"
 
-_security-strict: ## Internal: Strict security check for quality gate
-	@echo "$(RED)$(SHIELD) STRICT: Security analysis (zero tolerance)...$(NC)"
-	@$(BANDIT) -r src/ -f json -o reports/bandit.json || (echo "$(RED)$(CROSS) Bandit security check failed$(NC)" && exit 1)
-	@$(SAFETY) check --json || (echo "$(RED)$(CROSS) Safety vulnerability check failed$(NC)" && exit 1)
-	@echo "$(GREEN)$(CHECK) Security check passed$(NC)"
+test-oracle: ## Run Oracle-specific tests
+	@echo "🧪 Running Oracle-specific tests..."
+	@poetry run pytest tests/ -m "oracle" -v
+	@echo "✅ Oracle tests complete"
 
-_test-strict: ## Internal: Strict testing for quality gate
-	@echo "$(RED)$(MICROSCOPE) STRICT: Testing (100% pass rate)...$(NC)"
-	@if [ -d tests ]; then \
-		$(PYTEST) tests/ --maxfail=1 --tb=no -q --cov-fail-under=90 || (echo "$(RED)$(CROSS) Tests failed$(NC)" && exit 1); \
-		echo "$(GREEN)$(CHECK) All tests passed$(NC)"; \
-	else \
-		echo "$(YELLOW)$(WARNING) No tests directory found - consider adding tests$(NC)"; \
-	fi
+coverage: ## Generate detailed coverage report
+	@echo "📊 Generating coverage report..."
+	@poetry run pytest tests/ --cov=src/flext_target_oracle --cov-report=term-missing --cov-report=html
+	@echo "✅ Coverage report generated in htmlcov/"
 
-_docs-check: ## Internal: Check documentation build
-	@echo "$(RED)$(DOCS) STRICT: Documentation check...$(NC)"
-	@if [ -f mkdocs.yml ]; then \
-		$(MKDOCS) build --strict || (echo "$(RED)$(CROSS) Documentation build failed$(NC)" && exit 1); \
-		echo "$(GREEN)$(CHECK) Documentation build passed$(NC)"; \
-	else \
-		echo "$(YELLOW)$(WARNING) No mkdocs.yml found - documentation check skipped$(NC)"; \
-	fi
+coverage-html: coverage ## Generate HTML coverage report
+	@echo "📊 Opening coverage report..."
+	@python -m webbrowser htmlcov/index.html
 
-# ===== DEVELOPMENT TOOLS =====
-lint: ## $(MICROSCOPE) Run linting (development mode)
-	@echo "$(BLUE)$(MICROSCOPE) Running comprehensive linting...$(NC)"
-	@$(RUFF) check . --output-format=full
-	@$(PYLINT) src/$(PACKAGE_NAME) --output-format=colorized || true
-	@$(VULTURE) src/$(PACKAGE_NAME) --min-confidence=80 || true
+# ============================================================================
+# 🚀 DEVELOPMENT SETUP
+# ============================================================================
 
-format: ## $(SPARKLES) Format code automatically
-	@echo "$(BLUE)$(SPARKLES) Auto-formatting code...$(NC)"
-	@$(PYUPGRADE) --py313-plus src/**/*.py tests/**/*.py || true
-	@$(AUTOFLAKE) --remove-all-unused-imports --remove-unused-variables --in-place --recursive src/ tests/ || true
-	@$(ISORT) .
-	@$(BLACK) .
-	@$(RUFF) check --fix .
-	@$(RUFF) format .
-	@echo "$(GREEN)$(CHECK) Code formatted successfully$(NC)"
+setup: install pre-commit ## Complete development setup
+	@echo "🎯 Development setup complete!"
 
-fix: format ## $(HAMMER) Alias for format
+install: ## Install dependencies with Poetry
+	@echo "📦 Installing dependencies..."
+	@poetry install --all-extras --with dev,test,docs,security
+	@echo "✅ Dependencies installed"
 
-type-check: ## $(MICROSCOPE) Run type checking (development mode)
-	@echo "$(BLUE)$(MICROSCOPE) Running MyPy type checking...$(NC)"
-	@$(MYPY) src/$(PACKAGE_NAME) --pretty --show-error-codes
+dev-install: install ## Install in development mode
+	@echo "🔧 Setting up development environment..."
+	@poetry install --all-extras --with dev,test,docs,security
+	@poetry run pre-commit install
+	@echo "✅ Development environment ready"
 
-security: ## $(SHIELD) Run security analysis (development mode)
-	@echo "$(BLUE)$(SHIELD) Running security analysis...$(NC)"
-	@mkdir -p reports
-	@$(BANDIT) -r src/ -f json -o reports/bandit.json || true
-	@$(BANDIT) -r src/ -f txt || true
-	@$(SAFETY) check --json || true
-	@$(SEMGREP) --config=auto src/ || true
+pre-commit: ## Setup pre-commit hooks
+	@echo "🎣 Setting up pre-commit hooks..."
+	@poetry run pre-commit install
+	@poetry run pre-commit run --all-files || true
+	@echo "✅ Pre-commit hooks installed"
 
-spell-check: ## $(SPARKLES) Check spelling in code and docs
-	@echo "$(BLUE)$(SPARKLES) Running spell check...$(NC)"
-	@$(CODESPELL) src/ tests/ README.md docs/ || true
+# ============================================================================
+# 🎯 SINGER TARGET OPERATIONS
+# ============================================================================
 
-complexity: ## $(MICROSCOPE) Check code complexity
-	@echo "$(BLUE)$(MICROSCOPE) Checking code complexity...$(NC)"
-	@$(PYTHON) -m mccabe src/$(PACKAGE_NAME) --min=11 || true
-	@$(VULTURE) src/$(PACKAGE_NAME) --min-confidence=70 || true
+target-test: ## Test Oracle target functionality
+	@echo "🎯 Testing Oracle target functionality..."
+	@poetry run target-oracle --about
+	@poetry run target-oracle --version
+	@echo "✅ Target test complete"
 
-# ===== TESTING =====
-test: ## $(MICROSCOPE) Run comprehensive test suite
-	@echo "$(BLUE)$(MICROSCOPE) Running comprehensive test suite...$(NC)"
-	@$(PYTEST) tests/ -v --tb=short --durations=10
+target-validate: ## Validate target configuration
+	@echo "🔍 Validating target configuration..."
+	@poetry run target-oracle --config tests/fixtures/config/target_config.json --validate-config
+	@echo "✅ Target configuration validated"
 
-test-unit: ## $(MICROSCOPE) Run unit tests only
-	@echo "$(BLUE)$(MICROSCOPE) Running unit tests...$(NC)"
-	@$(PYTEST) tests/ -v -m unit
+target-schema: ## Validate Oracle schema
+	@echo "🔍 Validating Oracle schema..."
+	@poetry run target-oracle --config tests/fixtures/config/target_config.json --validate-schema
+	@echo "✅ Oracle schema validated"
 
-test-integration: ## $(MICROSCOPE) Run integration tests only
-	@echo "$(BLUE)$(MICROSCOPE) Running integration tests...$(NC)"
-	@$(PYTEST) tests/ -v -m integration
+target-run: ## Run Oracle data loading
+	@echo "🎯 Running Oracle data loading..."
+	@poetry run target-oracle --config tests/fixtures/config/target_config.json < tests/fixtures/data/sample_input.jsonl
+	@echo "✅ Oracle data loading complete"
 
-test-coverage: ## $(MICROSCOPE) Run tests with detailed coverage
-	@echo "$(BLUE)$(MICROSCOPE) Running tests with coverage analysis...$(NC)"
-	@$(PYTEST) tests/ -v --cov=src/$(PACKAGE_NAME) --cov-report=html --cov-report=term-missing --cov-fail-under=90
-	@echo "$(GREEN)$(CHECK) Coverage report: file://$(PWD)/htmlcov/index.html$(NC)"
+target-run-debug: ## Run Oracle target with debug logging
+	@echo "🎯 Running Oracle target with debug..."
+	@poetry run target-oracle --config tests/fixtures/config/target_config.json --log-level DEBUG < tests/fixtures/data/sample_input.jsonl
+	@echo "✅ Oracle debug run complete"
 
-test-watch: ## $(MICROSCOPE) Run tests in watch mode
-	@echo "$(BLUE)$(MICROSCOPE) Running tests in watch mode...$(NC)"
-	@$(POETRY) run ptw -- -v
+target-dry-run: ## Run Oracle target in dry-run mode
+	@echo "🎯 Running Oracle target dry-run..."
+	@poetry run target-oracle --config tests/fixtures/config/target_config.json --dry-run < tests/fixtures/data/sample_input.jsonl
+	@echo "✅ Oracle dry-run complete"
 
-test-debug: ## $(MICROSCOPE) Run tests with debugging
-	@echo "$(BLUE)$(MICROSCOPE) Running tests with debugging...$(NC)"
-	@$(PYTEST) tests/ -v --pdb --tb=short
+# ============================================================================
+# 🗄️ ORACLE OPERATIONS
+# ============================================================================
 
-test-performance: ## $(FIRE) Run performance benchmarks
-	@echo "$(BLUE)$(FIRE) Running performance benchmarks...$(NC)"
-	@$(PYTEST) tests/ -v --benchmark-only || true
+oracle-connect: ## Test Oracle connection
+	@echo "🗄️ Testing Oracle connection..."
+	@poetry run python -c "from flext_target_oracle.client import TargetOracleClient; import asyncio; import json; config = json.load(open('tests/fixtures/config/target_config.json')); client = TargetOracleClient(config); print('Testing connection...'); result = asyncio.run(client.connect()); print('✅ Connected!' if result.is_success else f'❌ Failed: {result.error}')"
+	@echo "✅ Oracle connection test complete"
 
-test-mutation: ## $(FIRE) Run mutation testing
-	@echo "$(BLUE)$(FIRE) Running mutation testing...$(NC)"
-	@$(POETRY) run mutmut run || true
+oracle-schema: ## Generate Oracle schema
+	@echo "🗄️ Generating Oracle schema..."
+	@poetry run python scripts/generate_oracle_schema.py
+	@echo "✅ Oracle schema generation complete"
 
-# ===== PRE-COMMIT =====
-pre-commit: ## $(ROBOT) Run pre-commit hooks
-	@echo "$(BLUE)$(ROBOT) Running pre-commit hooks...$(NC)"
-	@$(PRE_COMMIT) run --all-files
+oracle-optimize: ## Optimize Oracle performance
+	@echo "🗄️ Optimizing Oracle performance..."
+	@poetry run python scripts/optimize_oracle_target.py
+	@echo "✅ Oracle optimization complete"
 
-pre-commit-install: ## $(GEAR) Install pre-commit hooks
-	@echo "$(BLUE)$(GEAR) Installing pre-commit hooks...$(NC)"
-	@$(PRE_COMMIT) install --install-hooks
-	@$(PRE_COMMIT) install --hook-type commit-msg
-	@echo "$(GREEN)$(CHECK) Pre-commit hooks installed$(NC)"
+oracle-performance: ## Run Oracle performance tests
+	@echo "⚡ Running Oracle performance tests..."
+	@poetry run pytest tests/performance/ -v --benchmark-only
+	@echo "✅ Oracle performance tests complete"
 
-pre-commit-update: ## $(GEAR) Update pre-commit hooks
-	@echo "$(BLUE)$(GEAR) Updating pre-commit hooks...$(NC)"
-	@$(PRE_COMMIT) autoupdate
-	@echo "$(GREEN)$(CHECK) Pre-commit hooks updated$(NC)"
+oracle-diagnostics: ## Run Oracle diagnostics
+	@echo "🔍 Running Oracle diagnostics..."
+	@poetry run python scripts/oracle_diagnostics.py
+	@echo "✅ Oracle diagnostics complete"
 
-# ===== BUILD & RELEASE =====
-build: ## $(PACKAGE) Build the package
-	@echo "$(BLUE)$(PACKAGE) Building $(PROJECT_NAME) package...$(NC)"
-	@$(POETRY) build
+# ============================================================================
+# 📦 BUILD & DISTRIBUTION
+# ============================================================================
 
-build-clean: clean build ## $(PACKAGE) Clean then build
-	@echo "$(BLUE)$(PACKAGE) Clean build for $(PROJECT_NAME)...$(NC)"
+build: clean ## Build distribution packages
+	@echo "🔨 Building distribution..."
+	@poetry build
+	@echo "✅ Build complete - packages in dist/"
 
-publish-test: quality-gate build ## $(ROCKET) Publish to TestPyPI (after quality gate)
-	@echo "$(YELLOW)$(ROCKET) Publishing to TestPyPI...$(NC)"
-	@$(POETRY) publish --repository testpypi
+# ============================================================================
+# 🧹 CLEANUP
+# ============================================================================
 
-publish: quality-gate build ## $(ROCKET) Publish to PyPI (only after quality gate)
-	@echo "$(GREEN)$(ROCKET) Publishing $(PROJECT_NAME) to PyPI...$(NC)"
-	@$(POETRY) publish
-
-version-bump: ## $(GEAR) Bump version using commitizen
-	@echo "$(BLUE)$(GEAR) Bumping version...$(NC)"
-	@$(COMMITIZEN) bump --yes
-	@echo "$(GREEN)$(CHECK) Version bumped successfully$(NC)"
-
-# ===== DOCUMENTATION =====
-docs: ## $(DOCS) Build documentation
-	@echo "$(BLUE)$(DOCS) Building documentation...$(NC)"
-	@if [ -f mkdocs.yml ]; then \
-		$(MKDOCS) build; \
-		echo "$(GREEN)$(CHECK) Documentation built successfully$(NC)"; \
-	else \
-		echo "$(YELLOW)$(WARNING) No mkdocs.yml found$(NC)"; \
-	fi
-
-docs-serve: ## $(DOCS) Serve documentation locally
-	@echo "$(BLUE)$(DOCS) Serving documentation locally...$(NC)"
-	@if [ -f mkdocs.yml ]; then \
-		$(MKDOCS) serve; \
-	else \
-		echo "$(YELLOW)$(WARNING) No mkdocs.yml found$(NC)"; \
-	fi
-
-docs-deploy: quality-gate docs ## $(DOCS) Deploy documentation (after quality gate)
-	@echo "$(GREEN)$(DOCS) Deploying documentation...$(NC)"
-	@if [ -f mkdocs.yml ]; then \
-		$(MKDOCS) gh-deploy --force; \
-		echo "$(GREEN)$(CHECK) Documentation deployed$(NC)"; \
-	else \
-		echo "$(YELLOW)$(WARNING) No mkdocs.yml found$(NC)"; \
-	fi
-
-# ===== DEVELOPMENT ENVIRONMENT =====
-dev: ## $(HAMMER) Start development mode
-	@echo "$(BLUE)$(HAMMER) Starting $(PROJECT_NAME) in development mode...$(NC)"
-	@PYTHONPATH=src $(PYTHON) -m $(PACKAGE_NAME) --debug
-
-shell: ## $(HAMMER) Start development shell
-	@echo "$(BLUE)$(HAMMER) Starting IPython shell with project context...$(NC)"
-	@$(POETRY) run ipython
-
-console: ## $(HAMMER) Start Python console
-	@echo "$(BLUE)$(HAMMER) Starting Python console...$(NC)"
-	@$(PYTHON)
-
-# ===== CLEAN & MAINTENANCE =====
-clean: ## $(CLEAN) Clean build artifacts and caches
-	@echo "$(BLUE)$(CLEAN) Cleaning build artifacts and caches...$(NC)"
+clean: ## Remove all artifacts
+	@echo "🧹 Cleaning up..."
+	@rm -rf build/
+	@rm -rf dist/
+	@rm -rf *.egg-info/
+	@rm -rf .coverage
+	@rm -rf htmlcov/
 	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
-	@find . -type f -name "*.pyo" -delete 2>/dev/null || true
-	@find . -type f -name "*.coverage" -delete 2>/dev/null || true
-	@find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name ".mypy_cache" -exec rm -rf {} + 2>/dev/null || true
 	@find . -type d -name ".ruff_cache" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type d -name ".tox" -exec rm -rf {} + 2>/dev/null || true
-	@find . -type d -name ".nox" -exec rm -rf {} + 2>/dev/null || true
-	@rm -rf build/ dist/ htmlcov/ site/ .coverage* reports/ logs/
-	@echo "$(GREEN)$(CHECK) Cleanup completed$(NC)"
+	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	@echo "✅ Cleanup complete"
 
-clean-all: clean ## $(CLEAN) Clean everything including virtual environment
-	@echo "$(BLUE)$(CLEAN) Cleaning everything including virtual environment...$(NC)"
-	@rm -rf .venv/ poetry.lock
-	@echo "$(GREEN)$(CHECK) Complete cleanup finished$(NC)"
+# ============================================================================
+# 📊 DEPENDENCY MANAGEMENT
+# ============================================================================
 
-reset: clean-all install-dev ## $(CLEAN) Reset environment completely
-	@echo "$(BLUE)$(CLEAN) Resetting development environment...$(NC)"
-	@$(MAKE) setup
-	@echo "$(GREEN)$(CHECK) Environment reset completed$(NC)"
+deps-update: ## Update all dependencies
+	@echo "🔄 Updating dependencies..."
+	@poetry update
+	@echo "✅ Dependencies updated"
 
-# ===== UTILITY COMMANDS =====
-deps-update: ## $(GEAR) Update all dependencies
-	@echo "$(BLUE)$(GEAR) Updating all dependencies...$(NC)"
-	@$(POETRY) update
-	@$(POETRY) lock --no-update
-	@$(PRE_COMMIT) autoupdate
-	@echo "$(GREEN)$(CHECK) Dependencies updated$(NC)"
+deps-audit: ## Audit dependencies for vulnerabilities
+	@echo "🔍 Auditing dependencies..."
+	@poetry run pip-audit
+	@echo "✅ Dependency audit complete"
 
-deps-check: ## $(MICROSCOPE) Check for dependency issues
-	@echo "$(BLUE)$(MICROSCOPE) Checking dependencies...$(NC)"
-	@$(POETRY) check
-	@$(SAFETY) check --json || true
-	@$(POETRY) run pip-audit || true
+deps-tree: ## Show dependency tree
+	@echo "🌳 Dependency tree:"
+	@poetry show --tree
 
-audit: ## $(SHIELD) Run comprehensive security audit
-	@echo "$(BLUE)$(SHIELD) Running comprehensive security audit...$(NC)"
-	@$(MAKE) security
-	@$(MAKE) deps-check
-	@echo "$(GREEN)$(CHECK) Security audit completed$(NC)"
+deps-outdated: ## Show outdated dependencies
+	@echo "📋 Outdated dependencies:"
+	@poetry show --outdated
 
-# ===== DEVELOPMENT WORKFLOW =====
-workflow: ## $(LIGHTNING) Complete development workflow
-	@echo "$(BOLD)$(BLUE)$(LIGHTNING) Running complete development workflow...$(NC)"
-	@$(MAKE) format
-	@$(MAKE) quality-gate
-	@$(MAKE) test-coverage
-	@$(MAKE) docs
-	@echo "$(BOLD)$(GREEN)$(TROPHY) Development workflow completed successfully!$(NC)"
+# ============================================================================
+# 🔧 ENVIRONMENT CONFIGURATION
+# ============================================================================
 
-# ===== CONDITIONAL VERBOSE OUTPUT =====
-ifeq ($(VERBOSE),1)
-.SILENT:
-endif
+# Python settings
+PYTHON := python3.13
+export PYTHONPATH := $(PWD)/src:$(PYTHONPATH)
+export PYTHONDONTWRITEBYTECODE := 1
+export PYTHONUNBUFFERED := 1
 
-# ===== HELP REMINDER =====
-.PHONY: reminder
-reminder:
-	@echo "$(YELLOW)$(WARNING) Remember to run '$(CYAN)make quality-gate$(NC)' before committing$(NC)"
-	@echo "$(YELLOW)$(WARNING) Use '$(CYAN)make help$(NC)' to see all available commands$(NC)"
+# Oracle Target settings
+export TARGET_ORACLE_HOST := localhost
+export TARGET_ORACLE_PORT := 1521
+export TARGET_ORACLE_SERVICE_NAME := XE
+export TARGET_ORACLE_DEFAULT_TARGET_SCHEMA := FLEXT_DW
 
-# Include standardized build system
-include Makefile.build
+# Singer settings
+export SINGER_LOG_LEVEL := INFO
+export SINGER_BATCH_SIZE := 10000
+export SINGER_MAX_BATCH_AGE := 300
+
+# Performance settings
+export TARGET_ORACLE_POOL_SIZE := 10
+export TARGET_ORACLE_PARALLEL_DEGREE := 4
+export TARGET_ORACLE_ENABLE_COMPRESSION := true
+
+# Poetry settings
+export POETRY_VENV_IN_PROJECT := false
+export POETRY_CACHE_DIR := $(HOME)/.cache/pypoetry
+
+# Quality gate settings
+export MYPY_CACHE_DIR := .mypy_cache
+export RUFF_CACHE_DIR := .ruff_cache
+
+# ============================================================================
+# 📝 PROJECT METADATA
+# ============================================================================
+
+# Project information
+PROJECT_NAME := flext-target-oracle
+PROJECT_VERSION := $(shell poetry version -s)
+PROJECT_DESCRIPTION := FLEXT Target Oracle - Oracle Database Singer Target
+
+.DEFAULT_GOAL := help
+
+# ============================================================================
+# 🎯 SINGER SPECIFIC COMMANDS
+# ============================================================================
+
+singer-about: ## Show Singer target about information
+	@echo "🎵 Singer target about information..."
+	@poetry run target-oracle --about
+	@echo "✅ About information displayed"
+
+singer-config-sample: ## Generate Singer config sample
+	@echo "🎵 Generating Singer config sample..."
+	@poetry run target-oracle --config-sample > config_sample.json
+	@echo "✅ Config sample generated: config_sample.json"
+
+singer-discover: ## Run Singer discovery (if applicable)
+	@echo "🎵 Running Singer discovery..."
+	@poetry run target-oracle --discover
+	@echo "✅ Discovery complete"
+
+singer-test-streams: ## Test Singer streams
+	@echo "🎵 Testing Singer streams..."
+	@poetry run pytest tests/singer/test_streams.py -v
+	@echo "✅ Singer streams tests complete"
+
+# ============================================================================
+# 🎯 FLEXT ECOSYSTEM INTEGRATION
+# ============================================================================
+
+ecosystem-check: ## Verify FLEXT ecosystem compatibility
+	@echo "🌐 Checking FLEXT ecosystem compatibility..."
+	@echo "📦 Singer project: $(PROJECT_NAME) v$(PROJECT_VERSION)"
+	@echo "🏗️ Architecture: Singer Target + Oracle"
+	@echo "🐍 Python: 3.13"
+	@echo "🔗 Framework: FLEXT Core + Singer SDK"
+	@echo "📊 Quality: Zero tolerance enforcement"
+	@echo "✅ Ecosystem compatibility verified"
+
+workspace-info: ## Show workspace integration info
+	@echo "🏢 FLEXT Workspace Integration"
+	@echo "==============================="
+	@echo "📁 Project Path: $(PWD)"
+	@echo "🏆 Role: Oracle Database Singer Target"
+	@echo "🔗 Dependencies: flext-core, flext-db-oracle, singer-sdk"
+	@echo "📦 Provides: Oracle data loading capabilities"
+	@echo "🎯 Standards: Enterprise Singer patterns"

@@ -52,7 +52,6 @@ def main(
         return
 
     if test:
-        # Test configuration and connection
         try:
             target = OracleTarget(config=_load_config(config) if config else None)
             # Simple config validation test (connection test would need engine)
@@ -74,7 +73,7 @@ def _load_config(config_path: str) -> dict[str, Any]:
         msg = f"Configuration file not found: {config_path}"
         raise FileNotFoundError(msg)
 
-    config_data: dict[str, Any] = json.loads(config_file.read_text())
+    config_data: dict[str, Any] = json.loads(config_file.read_text(encoding="utf-8"))
     return config_data
 
 
