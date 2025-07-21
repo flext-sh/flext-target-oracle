@@ -119,6 +119,7 @@ output = "reports/coverage.xml"
 [tool.poetry.dependencies]
 python = ">=3.13,<3.14"
 singer-sdk = ">=0.47.0"
+flext-dbt-oracle = "0.7.0"
 
 
 [tool.ruff.lint.isort]
