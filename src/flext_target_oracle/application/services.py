@@ -207,7 +207,7 @@ class OracleLoaderService:
                     f"Failed to check table existence: {result.error}",
                 )
 
-            table_exists = result.value and result.value > 0
+            table_exists = result.data and result.data > 0
             logger.debug("Table exists check result: %s", table_exists)
 
             if not table_exists:
@@ -433,7 +433,7 @@ class OracleLoaderService:
                     columns_result.error or "Failed to get table columns",
                 )
 
-            existing_columns = columns_result.value
+            existing_columns = columns_result.data
             if existing_columns is None:
                 return ServiceResult.fail("No columns returned from table query")
 
@@ -594,7 +594,7 @@ class OracleLoaderService:
                 params_result.error or "Failed to build parameters",
             )
 
-        params = params_result.value
+        params = params_result.data
         if params is None:
             return ServiceResult.fail("No parameters returned from build process")
 

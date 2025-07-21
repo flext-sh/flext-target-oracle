@@ -9,11 +9,14 @@ Provides a compatibility wrapper around the new application services.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any, Self
 
 from flext_core import ServiceResult
 
 from flext_target_oracle.domain.models import TargetConfig
+
+if TYPE_CHECKING:
+    import types
 
 
 class OracleSink:
@@ -120,6 +123,19 @@ class OracleSink:
             self.query_service,
             target_config,
         )
+
+    async def __aenter__(self) -> Self:
+        """Enter async context manager."""
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: types.TracebackType | None,
+    ) -> None:
+        """Exit async context manager."""
+        # Cleanup any resources if needed
 
     async def process_records(self, records: list[dict[str, Any]]) -> None:
         """Process records using the underlying service."""

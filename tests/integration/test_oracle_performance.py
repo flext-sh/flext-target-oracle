@@ -238,12 +238,11 @@ class TestConcurrentProcessing:
                     ),
                 )
                 assert result.is_success
-                assert result.value == query_id
+                assert result.data == query_id
 
                 return time.time() - start_time
             except (ConnectionError, OSError, ValueError, AssertionError) as e:
                 pytest.fail(f"Query execution failed: {e}")
-                return 0.0
 
         try:
             # Test concurrent queries
@@ -468,8 +467,8 @@ class TestResourceCleanup:
                 {"schema_name": test_schema},
             )
 
-            if query_result.is_success and query_result.value:
-                test_tables = [row[0] for row in query_result.value]
+            if query_result.is_success and query_result.data:
+                test_tables = [row[0] for row in query_result.data]
 
                 # Clean up test tables to prevent residual data issues
                 for table_name in test_tables:

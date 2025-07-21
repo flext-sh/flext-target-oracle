@@ -5,13 +5,18 @@ Following flext-core DDD patterns for Singer-specific entities.
 
 from __future__ import annotations
 
-from datetime import datetime  # noqa: TC003
 from enum import StrEnum
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 from uuid import uuid4
 
 from flext_core import DomainBaseModel, DomainEntity, DomainValueObject, EntityId
 from pydantic import ConfigDict, Field, field_validator, model_validator
+
+if TYPE_CHECKING:
+    from datetime import datetime
+else:
+    # Import datetime for runtime to fix Pydantic model_rebuild issue
+    pass
 
 
 class LoadMethod(StrEnum):

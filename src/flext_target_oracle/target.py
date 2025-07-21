@@ -140,7 +140,7 @@ class OracleTarget:
         finalize_result = await self.target_service.finalize_all_streams()
 
         if finalize_result.is_success:
-            stats = finalize_result.value
+            stats = finalize_result.data
             if stats is not None:
                 self._log_completion_stats(stats)
             return ServiceResult.ok(None)
