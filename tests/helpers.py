@@ -29,7 +29,7 @@ log = structlog.get_logger(__name__)
 
 def has_valid_env_config() -> bool:
     """Check if valid Oracle environment configuration exists in .env files."""
-        # Try to load .env from various locations
+    # Try to load .env from various locations
     env_locations = [
         Path(".env"),
         Path(__file__).parent.parent / ".env",
@@ -176,7 +176,7 @@ requires_inmemory_option = pytest.mark.skipif(
 )
 
 
-def validate_oracle_features(connection: Any) -> dict[str, bool]:  # noqa: ANN401
+def validate_oracle_features(connection: Any) -> dict[str, bool]:
     """Validate Oracle database features and capabilities."""
     features = {
         "is_enterprise_edition": False,
@@ -257,12 +257,10 @@ def oracle_connection(config: dict[str, Any] | None = None) -> Generator[Any]:
     if config is None:
         config = get_test_config()
 
-    from flext_target_oracle.connectors import (
-        OracleConnector,
-    )
+    from flext_target_oracle.connectors import OracleConnector
 
     connector = OracleConnector(config)
-    engine = connector._engine  # noqa: SLF001
+    engine = connector._engine
 
     try:
         with engine.connect() as conn:
@@ -309,11 +307,13 @@ def clean_all_test_tables(config: dict[str, Any] | None = None) -> None:
             # Find all test tables
             for pattern in test_table_patterns:
                 result = conn.execute(
-                    text("""
+                    text(
+                        """
                         SELECT table_name
                         FROM user_tables
                         WHERE table_name LIKE :pattern
-                        """),
+                        """,
+                    ),
                     {"pattern": pattern},
                 )
 
@@ -328,7 +328,6 @@ def clean_all_test_tables(config: dict[str, Any] | None = None) -> None:
                             table_name,
                         )
                     except Exception:
-
                         log.exception("Could not clean table %s", table_name)
 
     except Exception:
@@ -409,11 +408,13 @@ def count_test_tables(config: dict[str, Any] | None = None) -> int:
         with oracle_connection(config) as conn:
             for pattern in test_table_patterns:
                 result = conn.execute(
-                    text("""
+                    text(
+                        """
                         SELECT COUNT(*)
                         FROM user_tables
                         WHERE table_name LIKE :pattern
-                        """),
+                        """,
+                    ),
                     {"pattern": pattern},
                 )
                 count = result.scalar()
@@ -437,12 +438,14 @@ def validate_table_structure(
     try:
         with oracle_connection(config) as conn:
             result = conn.execute(
-                text("""
+                text(
+                    """
                     SELECT column_name
                     FROM user_tab_columns
                     WHERE table_name = :table_name
                     ORDER BY column_name
-                """),
+                """,
+                ),
                 {"table_name": table_name.upper()},
             )
 

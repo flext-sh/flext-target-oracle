@@ -1,16 +1,164 @@
 """Modern monitoring setup for Oracle target.
 
-Simple metrics and health monitoring following KISS principle.
+Real implementations following production patterns.
 """
 
 from __future__ import annotations
 
+import threading
 import time
-from typing import Any
+from collections import deque
+from typing import TYPE_CHECKING, Any, Self
+
+if TYPE_CHECKING:
+    from types import TracebackType
+
+from flext_observability.logging import get_logger
+
+logger = get_logger(__name__)
 
 # Copyright (c) 2025 FLEXT Team
 # Licensed under the MIT License
 # SPDX-License-Identifier: MIT
+
+
+class MetricsCollector:
+    """Metrics collection with statistics and history management."""
+
+    def __init__(self, max_history: int = 1000) -> None:
+        """Initialize metrics collector.
+
+        Args:
+            max_history: Maximum number of values to keep per metric
+
+        """
+        self._metrics: dict[str, deque[float]] = {}
+        self._max_history = max_history
+        self._lock = threading.Lock()
+
+    def record_metric(self, name: str, value: float) -> None:
+        """Record a metric value.
+
+        Args:
+            name: The metric name
+            value: The metric value
+
+        """
+        with self._lock:
+            if name not in self._metrics:
+                self._metrics[name] = deque(maxlen=self._max_history)
+            self._metrics[name].append(float(value))
+
+    def get_all_metrics(self) -> dict[str, dict[str, Any]]:
+        """Get all metrics with statistics.
+
+        Returns:
+            Dictionary of metrics with stats (count, min, max, avg, sum, latest, first)
+
+        """
+        with self._lock:
+            result = {}
+            for name, values in self._metrics.items():
+                if values:
+                    result[name] = {
+                        "count": len(values),
+                        "min": min(values),
+                        "max": max(values),
+                        "avg": sum(values) / len(values),
+                        "sum": sum(values),
+                        "latest": values[-1],
+                        "first": values[0],
+                    }
+            return result
+
+    def get_metric_stats(self, name: str) -> dict[str, Any]:
+        """Get statistics for a specific metric.
+
+        Args:
+            name: The metric name
+
+        Returns:
+            Dictionary with stats or empty dict if metric doesn't exist
+
+        """
+        with self._lock:
+            if name not in self._metrics or not self._metrics[name]:
+                return {}
+
+            values = self._metrics[name]
+            return {
+                "count": len(values),
+                "min": min(values),
+                "max": max(values),
+                "avg": sum(values) / len(values),
+                "sum": sum(values),
+                "latest": values[-1],
+                "first": values[0],
+            }
+
+
+class PerformanceTracker:
+    """Performance tracking with context manager support."""
+
+    def __init__(self, operation_name: str = "") -> None:
+        """Initialize performance tracker.
+
+        Args:
+            operation_name: Name of the operation being tracked
+
+        """
+        self.operation_name = operation_name
+        self.start_time: float | None = None
+        self.end_time: float | None = None
+
+    def start(self) -> None:
+        """Start timing the operation."""
+        self.start_time = time.time()
+
+    def stop(self) -> None:
+        """Stop timing the operation."""
+        self.end_time = time.time()
+
+    @property
+    def duration(self) -> float:
+        """Get operation duration.
+
+        Returns:
+            Duration in seconds
+
+        """
+        if self.start_time is None:
+            return 0.0
+        end = self.end_time if self.end_time is not None else time.time()
+        return end - self.start_time
+
+    def get_duration(self) -> float:
+        """Get current duration without stopping.
+
+        Returns:
+            Current duration in seconds
+
+        """
+        return self.duration
+
+    def __enter__(self) -> Self:
+        """Start tracking when entering context."""
+        self.start()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        """Stop tracking and log when exiting context."""
+        self.stop()
+        if self.operation_name:
+            logger.info(
+                f"Operation {self.operation_name} completed in "
+                f"{self.duration:.4f} seconds duration",
+            )
 
 
 class PerformanceTimer:
@@ -49,7 +197,11 @@ class SimpleMonitor:
         """Initialize monitoring with empty metrics dictionary."""
         self.metrics: dict[str, Any] = {}
 
-    def record_metric(self, name: str, value: str | float | bool) -> None:  # noqa: FBT001
+    def record_metric(
+        self,
+        name: str,
+        value: str | float | bool,
+    ) -> None:
         """Record a metric value.
 
         Args:
@@ -82,4 +234,10 @@ def create_monitor(_config: dict[str, Any] | None = None) -> SimpleMonitor:
     return SimpleMonitor()
 
 
-__all__ = ["PerformanceTimer", "SimpleMonitor", "create_monitor"]
+__all__ = [
+    "MetricsCollector",
+    "PerformanceTimer",
+    "PerformanceTracker",
+    "SimpleMonitor",
+    "create_monitor",
+]

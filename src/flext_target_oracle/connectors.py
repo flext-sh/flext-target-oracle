@@ -4,7 +4,7 @@
 
 """Compatibility module for legacy connector imports.
 
-Provides a compatibility wrapper around flext-db-oracle.
+Provides a compatibility wrapper around flext-infrastructure.databases.flext-db-oracle.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ class OracleConnector:
         """Initialize with backward compatibility."""
         self.config = config
 
-        # Convert config format for flext-db-oracle
+        # Convert config format for flext-infrastructure.databases.flext-db-oracle
         oracle_config = {
             "host": config.get("host", "localhost"),
             "port": config.get("port", 1521),
@@ -34,8 +34,10 @@ class OracleConnector:
 
         # Create the actual service (only if credentials provided)
         if oracle_config.get("username") and oracle_config.get("password"):
-            self._oracle_config = OracleConfig(**oracle_config)
-            self._service = OracleConnectionService(self._oracle_config)
+            self._oracle_config: OracleConfig | None = OracleConfig(**oracle_config)
+            self._service: OracleConnectionService | None = OracleConnectionService(
+                self._oracle_config,
+            )
         else:
             self._oracle_config = None
             self._service = None
@@ -52,7 +54,7 @@ class OracleConnector:
         protocol = cfg.get("protocol", "tcp")
 
         if not username or not password:
-            msg = "Oracle username and password are required"
+            msg = "Username and password are required"
             raise ValueError(msg)
 
         # Build appropriate URL based on protocol

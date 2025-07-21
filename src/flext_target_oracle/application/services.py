@@ -1,6 +1,7 @@
 """Singer Target Application Services.
 
-Using flext-core patterns and flext-db-oracle for Oracle operations.
+Using flext-core patterns and flext-infrastructure.databases.flext-db-oracle for
+Oracle operations.
 Zero duplication, clean architecture.
 """
 
@@ -10,15 +11,15 @@ import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Protocol
 
+from flext_core import ServiceResult
 from flext_db_oracle import (
     OracleConfig,
     OracleConnectionService,
     OracleQueryService,
     OracleSchemaService,
 )
-
-from flext_core import ServiceResult
 from flext_observability.logging import get_logger
+
 from flext_target_oracle.domain.models import (
     LoadJob,
     LoadJobStatus,
@@ -29,9 +30,7 @@ from flext_target_oracle.domain.models import (
 )
 
 if TYPE_CHECKING:
-    from flext_target_oracle.domain.models import (
-        TargetConfig,
-    )
+    from flext_target_oracle.domain.models import TargetConfig
 
 logger = get_logger(__name__)
 
@@ -39,7 +38,7 @@ logger = get_logger(__name__)
 class JSONModule(Protocol):
     """Protocol for JSON module."""
 
-    def dumps(self, obj: Any) -> str:
+    def dumps(self, obj: Any, **kwargs: Any) -> str:
         """Serialize obj to a JSON formatted str."""
         ...
 
@@ -56,7 +55,7 @@ class SingerTargetService:
         """
         self.config = config
 
-        # Create Oracle services using flext-db-oracle
+        # Create Oracle services using flext-infrastructure.databases.flext-db-oracle
         oracle_config = OracleConfig(**config.oracle_config)
         self.connection_service = OracleConnectionService(oracle_config)
         self.query_service = OracleQueryService(self.connection_service)
@@ -83,16 +82,16 @@ class SingerTargetService:
                 return await self._handle_record(record)
             if record.type == "STATE":
                 return await self._handle_state(record)
-            return ServiceResult.failure(f"Unknown message type: {record.type}")
+            return ServiceResult.fail(f"Unknown message type: {record.type}")
 
         except Exception as e:
             logger.exception("Failed to process Singer message")
-            return ServiceResult.failure(f"Message processing failed: {e}")
+            return ServiceResult.fail(f"Message processing failed: {e}")
 
     async def _handle_schema(self, record: SingerRecord) -> ServiceResult[None]:
         """Handle SCHEMA message."""
         if not record.record_schema or not record.stream:
-            return ServiceResult.failure("Schema message missing schema or stream")
+            return ServiceResult.fail("Schema message missing schema or stream")
 
         # Convert dict to SingerSchema
         schema = SingerSchema(**record.record_schema)
@@ -111,7 +110,7 @@ class SingerTargetService:
     async def _handle_record(self, record: SingerRecord) -> ServiceResult[None]:
         """Handle RECORD message."""
         if not record.record or not record.stream:
-            return ServiceResult.failure("Record message missing data or stream")
+            return ServiceResult.fail("Record message missing data or stream")
 
         # Load record data
         return await self.loader_service.load_record(
@@ -127,14 +126,14 @@ class SingerTargetService:
         """
         if not record.record:
             logger.warning("STATE message received but record is empty")
-            return ServiceResult.success(None)
+            return ServiceResult.ok(None)
 
         # Output the state message to stdout as required by Singer protocol
 
         # Write state message to stdout (Singer protocol requirement)
         logger.debug("State message forwarded to stdout for Meltano state management")
 
-        return ServiceResult.success(None)
+        return ServiceResult.ok(None)
 
     async def finalize_all_streams(self) -> ServiceResult[LoadStatistics]:
         """Finalize all active streams and return statistics."""
@@ -142,7 +141,10 @@ class SingerTargetService:
 
 
 class OracleLoaderService:
-    """Service for loading data into Oracle using flext-db-oracle."""
+    """Service for loading data into Oracle using flext-infrastructure.databases.flext-db-oracle.
+
+    This service provides enterprise-grade Oracle data loading capabilities.
+    """
 
     def __init__(
         self,
@@ -201,7 +203,7 @@ class OracleLoaderService:
             )
 
             if not result.is_success:
-                return ServiceResult.failure(
+                return ServiceResult.fail(
                     f"Failed to check table existence: {result.error}",
                 )
 
@@ -226,14 +228,14 @@ class OracleLoaderService:
                     table_name,
                 )
 
-            return ServiceResult.success(None)
+            return ServiceResult.ok(None)
 
         except Exception as e:
             logger.exception(
                 "Failed to ensure table exists for stream %s",
                 stream_name,
             )
-            return ServiceResult.failure(f"Table creation failed: {e}")
+            return ServiceResult.fail(f"Table creation failed: {e}")
 
     async def load_record(
         self,
@@ -261,11 +263,11 @@ class OracleLoaderService:
                 logger.info("Buffer full, flushing batch for stream: %s", stream_name)
                 return await self._flush_batch(stream_name)
 
-            return ServiceResult.success(None)
+            return ServiceResult.ok(None)
 
         except Exception as e:
             logger.exception("Failed to load record for stream %s", stream_name)
-            return ServiceResult.failure(f"Record loading failed: {e}")
+            return ServiceResult.fail(f"Record loading failed: {e}")
 
     async def finalize_all_streams(self) -> ServiceResult[LoadStatistics]:
         """Flush all pending batches and return statistics."""
@@ -295,11 +297,11 @@ class OracleLoaderService:
                 "Finalization complete: %d records processed",
                 total_stats.total_records,
             )
-            return ServiceResult.success(total_stats)
+            return ServiceResult.ok(total_stats)
 
         except Exception as e:
             logger.exception("Failed to finalize streams")
-            return ServiceResult.failure(f"Finalization failed: {e}")
+            return ServiceResult.fail(f"Finalization failed: {e}")
 
     async def _flush_batch(self, stream_name: str) -> ServiceResult[None]:
         """Flush pending records for a stream."""
@@ -308,7 +310,7 @@ class OracleLoaderService:
                 stream_name not in self._record_buffers
                 or not self._record_buffers[stream_name]
             ):
-                return ServiceResult.success(None)
+                return ServiceResult.ok(None)
 
             records = self._record_buffers[stream_name]
             table_name = self._get_table_name(stream_name)
@@ -347,7 +349,7 @@ class OracleLoaderService:
 
         except Exception as e:
             logger.exception("Failed to flush batch for stream %s", stream_name)
-            return ServiceResult.failure(f"Batch flush failed: {e}")
+            return ServiceResult.fail(f"Batch flush failed: {e}")
 
     async def _create_table(
         self,
@@ -380,8 +382,9 @@ class OracleLoaderService:
             )
 
             if not columns:
-                return ServiceResult.failure(
-                    f"Schema validation failed: No valid columns found in schema for table {table_name}. "
+                return ServiceResult.fail(
+                    f"Schema validation failed: No valid columns found in schema "
+                    f"for table {table_name}. "
                     "Schema must contain at least one valid property.",
                 )
 
@@ -407,11 +410,11 @@ class OracleLoaderService:
                 self.config.default_target_schema,
                 table_name,
             )
-            return ServiceResult.success(None)
+            return ServiceResult.ok(None)
 
         except Exception:
             logger.exception("Failed to create table %s", table_name)
-            return ServiceResult.failure("Table creation failed")
+            return ServiceResult.fail("Table creation failed")
 
     async def _insert_batch(
         self,
@@ -421,18 +424,18 @@ class OracleLoaderService:
         """Insert batch of records (append-only)."""
         try:
             if not records:
-                return ServiceResult.success(None)
+                return ServiceResult.ok(None)
 
             # Get table structure
             columns_result = await self._get_table_columns(table_name)
             if not columns_result.is_success:
-                return ServiceResult.failure(
+                return ServiceResult.fail(
                     columns_result.error or "Failed to get table columns",
                 )
 
             existing_columns = columns_result.value
             if existing_columns is None:
-                return ServiceResult.failure("No columns returned from table query")
+                return ServiceResult.fail("No columns returned from table query")
 
             # Choose insert strategy based on table structure
             max_simple_columns = 3
@@ -453,7 +456,7 @@ class OracleLoaderService:
 
         except Exception:
             logger.exception("Failed to insert batch to %s", table_name)
-            return ServiceResult.failure("Batch insert failed")
+            return ServiceResult.fail("Batch insert failed")
 
     async def _get_table_columns(self, table_name: str) -> ServiceResult[list[str]]:
         """Get table column names."""
@@ -482,15 +485,15 @@ class OracleLoaderService:
                         full_table_name = (
                             f"{self.config.default_target_schema}.{table_name}"
                         )
-                        return ServiceResult.failure(
+                        return ServiceResult.fail(
                             f"No columns found for table {full_table_name}",
                         )
 
-                    return ServiceResult.success(existing_columns)
+                    return ServiceResult.ok(existing_columns)
 
         except Exception:
             logger.exception("Failed to get table columns for %s", table_name)
-            return ServiceResult.failure("Failed to get table structure")
+            return ServiceResult.fail("Failed to get table structure")
 
     async def _insert_batch_simple(
         self,
@@ -554,11 +557,11 @@ class OracleLoaderService:
                 len(params),
                 table_name,
             )
-            return ServiceResult.success(None)
+            return ServiceResult.ok(None)
 
         except Exception as e:
             logger.exception("Failed to insert simple batch")
-            return ServiceResult.failure(f"Simple batch insert failed: {e}")
+            return ServiceResult.fail(f"Simple batch insert failed: {e}")
 
     async def _insert_batch_structured(
         self,
@@ -587,13 +590,13 @@ class OracleLoaderService:
             existing_columns,
         )
         if not params_result.is_success:
-            return ServiceResult.failure(
+            return ServiceResult.fail(
                 params_result.error or "Failed to build parameters",
             )
 
         params = params_result.value
         if params is None:
-            return ServiceResult.failure("No parameters returned from build process")
+            return ServiceResult.fail("No parameters returned from build process")
 
         # Execute insert using direct Oracle connection
         try:
@@ -608,11 +611,11 @@ class OracleLoaderService:
                 len(params),
                 table_name,
             )
-            return ServiceResult.success(None)
+            return ServiceResult.ok(None)
 
         except Exception as e:
             logger.exception("Failed to insert structured batch")
-            return ServiceResult.failure(f"Batch insert failed: {e}")
+            return ServiceResult.fail(f"Batch insert failed: {e}")
 
     def _build_structured_sql(
         self,
@@ -686,11 +689,11 @@ class OracleLoaderService:
             if params:
                 self._log_param_debug_info(params)
 
-            return ServiceResult.success(params)
+            return ServiceResult.ok(params)
 
         except Exception as e:
             logger.exception("Error building params")
-            return ServiceResult.failure(f"Parameter building failed: {e}")
+            return ServiceResult.fail(f"Parameter building failed: {e}")
 
     def _build_single_record_params(
         self,
@@ -785,6 +788,7 @@ class OracleLoaderService:
         # Check if it's a numeric string that should be converted
         if value.strip() == "":
             return None  # Empty string -> NULL
+
         try:
             # Try integer first
             if "." not in value:
@@ -843,7 +847,7 @@ class OracleLoaderService:
 
         except Exception:
             logger.exception("Failed to overwrite table %s", table_name)
-            return ServiceResult.failure("Table overwrite failed")
+            return ServiceResult.fail("Table overwrite failed")
 
     def _get_table_name(self, stream_name: str) -> str:
         """Convert stream name to Oracle table name."""

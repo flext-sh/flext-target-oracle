@@ -7,10 +7,8 @@
 These tests validate the complete Singer message processing workflow.
 """
 
-import asyncio
-import json
 from io import StringIO
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -48,11 +46,16 @@ class TestSingerIntegration:
         }
 
         # Mock the service to avoid database calls
-        with patch.object(target.target_service, "process_singer_message", new_callable=AsyncMock) as mock_process:
+        with patch.object(
+            target.target_service,
+            "process_singer_message",
+            new_callable=AsyncMock,
+        ) as mock_process:
             from flext_core import ServiceResult
-            mock_process.return_value = ServiceResult.success(None)
 
-            await target._process_single_message(schema_message, 1)  # noqa: SLF001
+            mock_process.return_value = ServiceResult.ok(None)
+
+            await target._process_single_message(schema_message, 1)
 
             assert mock_process.called
             assert mock_process.call_args[0][0] == schema_message
@@ -80,11 +83,16 @@ class TestSingerIntegration:
         }
 
         # Mock the service
-        with patch.object(target.target_service, "process_singer_message", new_callable=AsyncMock) as mock_process:
+        with patch.object(
+            target.target_service,
+            "process_singer_message",
+            new_callable=AsyncMock,
+        ) as mock_process:
             from flext_core import ServiceResult
-            mock_process.return_value = ServiceResult.success(None)
 
-            await target._process_single_message(record_message, 1)  # noqa: SLF001
+            mock_process.return_value = ServiceResult.ok(None)
+
+            await target._process_single_message(record_message, 1)
 
             assert mock_process.called
             assert mock_process.call_args[0][0] == record_message
@@ -113,11 +121,16 @@ class TestSingerIntegration:
         }
 
         # Mock the service
-        with patch.object(target.target_service, "process_singer_message", new_callable=AsyncMock) as mock_process:
+        with patch.object(
+            target.target_service,
+            "process_singer_message",
+            new_callable=AsyncMock,
+        ) as mock_process:
             from flext_core import ServiceResult
-            mock_process.return_value = ServiceResult.success(None)
 
-            await target._process_single_message(state_message, 1)  # noqa: SLF001
+            mock_process.return_value = ServiceResult.ok(None)
+
+            await target._process_single_message(state_message, 1)
 
             assert mock_process.called
             assert mock_process.call_args[0][0] == state_message
@@ -165,13 +178,21 @@ class TestSingerIntegration:
         ]
 
         # Mock the service
-        with patch.object(target.target_service, "process_singer_message", new_callable=AsyncMock) as mock_process:
+        with patch.object(
+            target.target_service,
+            "process_singer_message",
+            new_callable=AsyncMock,
+        ) as mock_process:
             from flext_core import ServiceResult
-            mock_process.return_value = ServiceResult.success(None)
+
+            mock_process.return_value = ServiceResult.ok(None)
 
             # Process each message
             for i, message in enumerate(messages):
-                result = await target._process_single_message(message, i + 1)  # noqa: SLF001
+                result = await target._process_single_message(
+                    message,
+                    i + 1,
+                )
                 assert result  # Should succeed
 
             # Verify all messages were processed
@@ -213,14 +234,15 @@ class TestTargetService:
             patch("sys.stdin", StringIO("")),
             patch.object(target, "run_async", new_callable=AsyncMock) as mock_run_async,
         ):
-                # Mock successful result
-                from flext_core import ServiceResult
-                mock_run_async.return_value = ServiceResult.success(None)
+            # Mock successful result
+            from flext_core import ServiceResult
 
-                result = target.run()
+            mock_run_async.return_value = ServiceResult.ok(None)
 
-                assert result == 0  # Success exit code
-                mock_run_async.assert_called_once()
+            result = target.run()
+
+            assert result == 0  # Success exit code
+            mock_run_async.assert_called_once()
 
     @staticmethod
     def test_target_stop() -> None:
@@ -232,8 +254,8 @@ class TestTargetService:
         }
 
         target = OracleTarget(config=config)
-        target._running = True  # noqa: SLF001
+        target._running = True
 
         target.stop()
 
-        assert target._running is False  # noqa: SLF001
+        assert target._running is False

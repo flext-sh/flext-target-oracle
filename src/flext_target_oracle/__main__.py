@@ -1,4 +1,4 @@
-"""Entry point for flext-target-oracle when run as a module.
+"""Entry point for flext-data.targets.flext-target-oracle when run as a module.
 
 Copyright (c) 2025 Flext. All rights reserved.
 SPDX-License-Identifier: MIT

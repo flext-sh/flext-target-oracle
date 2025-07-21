@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from flext_core import ServiceResult
 from flext_observability.logging import setup_logging
+
 from flext_target_oracle.domain.models import TargetConfig as TargetOracleConfig
 
 
@@ -24,18 +25,20 @@ def setup_oracle_target(
     """
     try:
         if config is None:
-            config = TargetOracleConfig.model_validate({
-                "host": "localhost",
-                "username": "oracle_user",
-                "password": "oracle_password",
-            })
+            config = TargetOracleConfig.model_validate(
+                {
+                    "host": "localhost",
+                    "username": "oracle_user",
+                    "password": "oracle_password",
+                },
+            )
 
-        # Setup logging using flext-observability
+        # Setup logging using flext-infrastructure.monitoring.flext-observability
         setup_logging()
 
         return ServiceResult.ok(config)
 
-    except Exception as e:
+    except (ValueError, TypeError, RuntimeError, ImportError) as e:
         return ServiceResult.fail(f"Failed to setup Oracle target: {e}")
 
 

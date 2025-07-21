@@ -1,6 +1,6 @@
 """Oracle Target - Main Singer Target Implementation.
 
-Clean implementation using flext-core and flext-db-oracle foundations.
+Clean implementation using flext-core and flext-infrastructure.databases.flext-db-oracle foundations.
 Zero duplication, enterprise-grade performance.
 """
 
@@ -16,6 +16,7 @@ from typing import Any
 
 from flext_core import ServiceResult
 from flext_observability.logging import get_logger
+
 from flext_target_oracle.application.services import SingerTargetService
 from flext_target_oracle.domain.models import LoadStatistics, TargetConfig
 
@@ -47,7 +48,7 @@ class OracleTarget:
 
         except Exception as e:
             logger.exception("Target execution failed")
-            return ServiceResult.failure(f"Target execution failed: {e}")
+            return ServiceResult.fail(f"Target execution failed: {e}")
         finally:
             self._running = False
 
@@ -72,7 +73,10 @@ class OracleTarget:
             try:
                 # Parse and process message
                 message = json.loads(stripped_line)
-                process_result = await self._process_single_message(message, line_count + 1)
+                process_result = await self._process_single_message(
+                    message,
+                    line_count + 1,
+                )
 
                 if not process_result.is_success:
                     error_count += 1
@@ -81,7 +85,11 @@ class OracleTarget:
 
                 # Log progress periodically
                 if line_count % progress_interval == 0:
-                    logger.info("Processed %d messages (%d errors)", line_count, error_count)
+                    logger.info(
+                        "Processed %d messages (%d errors)",
+                        line_count,
+                        error_count,
+                    )
 
             except json.JSONDecodeError:
                 logger.debug("Skipped invalid JSON line: %s", stripped_line[:100])
@@ -91,9 +99,13 @@ class OracleTarget:
                 logger.exception("Unexpected error processing message")
                 error_count += 1
 
-        return ServiceResult.success(None)
+        return ServiceResult.ok(None)
 
-    async def _process_single_message(self, message: dict[str, Any], message_number: int) -> ServiceResult[None]:
+    async def _process_single_message(
+        self,
+        message: dict[str, Any],
+        message_number: int,
+    ) -> ServiceResult[None]:
         """Process a single Singer message."""
         msg_type = message.get("type", "UNKNOWN")
         logger.debug("Processing message %d: type=%s", message_number, msg_type)
@@ -131,10 +143,10 @@ class OracleTarget:
             stats = finalize_result.value
             if stats is not None:
                 self._log_completion_stats(stats)
-            return ServiceResult.success(None)
+            return ServiceResult.ok(None)
         error_msg = f"Finalization failed: {finalize_result.error}"
         logger.error("Finalization failed: %s", finalize_result.error)
-        return ServiceResult.failure(error_msg)
+        return ServiceResult.fail(error_msg)
 
     def _log_completion_stats(self, stats: LoadStatistics) -> None:
         """Log completion statistics."""
@@ -154,7 +166,7 @@ class OracleTarget:
                 logger.info("Oracle target completed successfully")
                 return 0
             logger.error("Oracle target failed: %s", result.error)
-            return 1  # noqa: TRY300
+            return 1
 
         except KeyboardInterrupt:
             logger.info("Target interrupted by user")
@@ -185,7 +197,7 @@ def main() -> int:
     if args.config:
         config_path = Path(args.config)
         if config_path.exists():
-            with config_path.open() as f:
+            with config_path.open(encoding="utf-8") as f:
                 config = json.load(f)
             logger.info("Loaded config from file: %s", args.config)
 
@@ -229,7 +241,6 @@ def main() -> int:
     config.setdefault("max_parallelism", 4)
 
     # Debug print
-
     try:
         target = OracleTarget(config)
         return target.run()
