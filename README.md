@@ -1,270 +1,170 @@
-# FLEXT Target Oracle
+# flext-target-oracle
 
-A high-performance Singer target for Oracle Database with comprehensive monitoring and enterprise features.
+Production-grade Singer target for Oracle Database implementing FLEXT enterprise patterns.
 
-## Features
+## FLEXT Integration
 
-- **Oracle Database Support**: Full connectivity including Oracle Autonomous Database (TCPS)
-- **Singer SDK 0.47.4**: Latest Singer specification compatibility
-- **SQLAlchemy 2.0+**: Modern SQLAlchemy with Oracle dialect
-- **Enterprise Features**: Partitioning, compression, In-Memory, parallel processing
-- **High Performance**: Bulk operations, direct path inserts, connection pooling
-- **Comprehensive Monitoring**: System metrics, performance tracking, health checks
-- **Production Ready**: Structured logging, error handling, configuration validation
+Part of the comprehensive FLEXT data platform ecosystem:
+
+- **flext-core**: Domain-driven design, ServiceResult patterns, entity modeling
+- **flext-db-oracle**: Oracle-specific database operations, connection management, query optimization
+- **flext-observability**: Structured logging, metrics collection, health monitoring
+- **flext-meltano**: Singer/Meltano protocol standardization across FLEXT ecosystem
+
+## Key Features
+
+- **Enterprise Architecture**: DDD patterns with domain models, services, and repositories
+- **Oracle Optimization**: MERGE upserts, bulk operations, intelligent type mapping
+- **Production Ready**: Async operations, transaction management, comprehensive error handling
+- **FLEXT Standards**: Consistent patterns across all FLEXT Singer implementations
 
 ## Quick Start
 
-### Installation
+### FLEXT Workspace Setup
 
 ```bash
-# Setup development environment
+# Install in FLEXT workspace environment
 make install
 
-# Copy and configure environment
+# Configure Oracle connection (FLEXT standard)
 cp .env.example .env
-# Edit .env with your Oracle database credentials
+# Edit with Oracle credentials following FLEXT naming conventions
 ```
 
-### Basic Usage
+### Usage Within FLEXT Ecosystem
 
 ```bash
-# Run unit tests (no database needed)
+# Unit tests (no Oracle required)
 make test-unit
 
-# Run integration tests (needs Oracle)
+# Integration tests (Oracle via .env)
 make test-integration
 
-# Run the target
-make run
+# Use with other FLEXT components
+flext-tap-oracle | flext-target-oracle --config config.json
 ```
 
-### Configuration
-
-Create a `config.json`:
+### FLEXT-Standard Configuration
 
 ```json
 {
-  "host": "localhost",
-  "port": 1521,
-  "service_name": "XEPDB1",
-  "username": "target_user",
-  "password": "secure_password",
-  "schema": "TARGET_SCHEMA"
-}
-```
-
-### Oracle Autonomous Database
-
-```json
-{
-  "host": "your-adb.adb.region.oraclecloud.com",
-  "port": 1522,
-  "service_name": "your_service_high",
-  "protocol": "tcps",
-  "username": "your_user",
-  "password": "your_password",
-  "wallet_location": "/path/to/wallet",
-  "wallet_password": "wallet_password"
-}
-```
-
-## Configuration Reference
-
-### Essential Parameters
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `host` | string | **required** | Oracle host |
-| `port` | integer | 1521 | Oracle port |
-| `service_name` | string | | Oracle service name |
-| `database` | string | | Oracle SID (alternative) |
-| `username` | string | **required** | Username |
-| `password` | string | **required** | Password |
-| `schema` | string | | Default schema |
-
-### Performance Optimization
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `batch_config.batch_size` | integer | 10000 | Records per batch |
-| `pool_size` | integer | 10 | Connection pool size |
-| `use_bulk_operations` | boolean | true | Use bulk operations |
-| `use_merge_statements` | boolean | true | Use MERGE for upserts |
-| `parallel_degree` | integer | 1 | Oracle parallel degree |
-
-### Advanced Features
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `load_method` | string | append-only | Load method: append-only, upsert, overwrite |
-| `enable_compression` | boolean | false | Enable table compression |
-| `compression_type` | string | basic | Compression: basic, advanced, hybrid |
-| `create_table_indexes` | boolean | true | Create indexes on keys |
-| `add_record_metadata` | boolean | true | Add Singer metadata |
-
-## Advanced Usage
-
-### High-Performance Configuration
-
-```json
-{
-  "host": "oracle-server",
-  "port": 1521,
-  "service_name": "PROD",
-  "username": "etl_user",
-  "password": "secure_password",
-  
-  "batch_config": {
-    "batch_size": 50000,
-    "batch_wait_limit_seconds": 30
+  "oracle_config": {
+    "host": "localhost",
+    "service_name": "XEPDB1", 
+    "username": "etl_user",
+    "password": "secure_password"
   },
-  
-  "pool_size": 20,
-  "max_overflow": 40,
-  "use_bulk_operations": true,
-  "use_merge_statements": true,
-  "parallel_degree": 4,
-  
-  "enable_compression": true,
-  "compression_type": "advanced",
-  "use_direct_path": true,
-  
-  "load_method": "upsert"
+  "default_target_schema": "FLEXT_DW",
+  "batch_size": 10000,
+  "load_method": "append_only"
 }
 ```
 
-### All Configuration Parameters
+## Configuration
 
-The target supports 100+ configuration parameters. Key categories:
+### Core Settings
 
-- **Connection**: host, port, service_name, protocol, wallet settings
-- **SQLAlchemy Engine**: pool settings, echo, isolation level
-- **Oracle Driver**: array_size, prefetch_rows, statement cache
-- **Singer SDK**: batch_config, stream_maps, flattening
-- **Performance**: parallel processing, compression, direct path
-- **Data Types**: varchar length, number precision, JSON storage
-- **Error Handling**: retries, backoff, error tolerance
-- **Table Management**: prefixes, indexes, statistics
-- **Monitoring**: logging, metrics, profiling
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `oracle_config.host` | Oracle server hostname | required |
+| `oracle_config.port` | Oracle port | 1521 |
+| `oracle_config.service_name` | Oracle service name | required |
+| `oracle_config.username` | Database username | required |
+| `oracle_config.password` | Database password | required |
+| `default_target_schema` | Target schema for tables | required |
 
-See `config.json.example` for a complete example.
+### Performance Options
 
-## Oracle-Specific Features
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `batch_size` | Records per batch | 10000 |
+| `load_method` | append_only, upsert, overwrite | append_only |
+| `pool_size` | Connection pool size | 10 |
 
-### MERGE Operations
+### Advanced Configuration
 
-Automatically uses Oracle MERGE for upserts when `load_method` is "upsert":
+See `.env.example` for complete configuration options including:
+- Oracle Autonomous Database with wallet support
+- Performance tuning parameters  
+- Oracle-specific features (compression, partitioning)
+- Monitoring and logging configuration
 
-```sql
-MERGE INTO target_table
-USING (SELECT :id, :name, :email FROM dual) source
-ON (target_table.id = source.id)
-WHEN MATCHED THEN UPDATE SET name = source.name, email = source.email
-WHEN NOT MATCHED THEN INSERT (id, name, email) VALUES (source.id, source.name, source.email)
+## FLEXT Architecture Implementation
+
+### Domain-Driven Design (flext-core)
+
+```python
+# Domain entities with proper modeling
+class LoadJob(DomainEntity):
+    stream_name: str
+    status: LoadJobStatus
+    records_processed: int
+
+# Service patterns with consistent error handling  
+class SingerTargetService:
+    async def process_singer_message(self, message) -> ServiceResult[None]
 ```
 
-### Compression
+### Oracle Integration (flext-db-oracle)
 
-Enable table compression for storage efficiency:
+- **OracleConnectionService**: Managed connections with health monitoring
+- **OracleQueryService**: Parameterized queries with performance optimization
+- **OracleSchemaService**: Schema operations following Oracle best practices
 
-```json
-{
-  "enable_compression": true,
-  "compression_type": "advanced"
-}
-```
+### Observability (flext-observability)
 
-### Parallel Processing
+- **Structured Logging**: Consistent log format across FLEXT ecosystem
+- **Metrics Collection**: Load statistics, performance monitoring
+- **Health Checks**: Database connectivity and operational status
 
-Utilize Oracle parallel processing:
+### Load Strategies
 
-```json
-{
-  "parallel_degree": 4,
-  "use_parallel_dml": true
-}
-```
+- **append_only**: High-performance bulk inserts (FLEXT default)
+- **upsert**: Oracle MERGE with conflict resolution
+- **overwrite**: Transactional table refresh
 
-## Development
+## Development (FLEXT Standards)
 
-### Available Commands
+### FLEXT Workspace Commands
 
 ```bash
-# Setup
-make install         # Install package
-make clean          # Clean build files
+# Development setup (uses /home/marlonsc/flext/.venv)
+make install
+make setup
 
-# Testing  
-make test-unit      # Unit tests (no database)
-make test-integration # Integration tests (needs Oracle)
-make test-all       # All tests
-make test           # Alias for test-all
-
-# Quality
-make lint           # Code linting
-make format         # Code formatting
-make check          # Quick check (lint + unit tests)
-make validate       # Full validation (format + lint + all tests)
-
-# Usage
-make run            # Run the target (needs .env)
-
-# Shortcuts
-make dev            # Setup + check
-make quick          # Format + unit tests
-make full           # Complete validation
+# Testing (FLEXT standard patterns)
+make test-unit         # Domain logic, no dependencies
+make test-integration  # Oracle integration via .env
+make quality-gate      # Required before commits to FLEXT ecosystem
 ```
 
-### Requirements
+### FLEXT Requirements
 
-- Python 3.9+
-- Oracle Database (any edition)
-- Virtual environment at `/home/marlonsc/flext/.venv`
+- **Python 3.13**: FLEXT enterprise standard
+- **FLEXT Workspace**: Located at `/home/marlonsc/flext/`
+- **Oracle Database**: Any edition, including Autonomous
+- **FLEXT Dependencies**: flext-core, flext-db-oracle, flext-observability
 
-## Testing
+## Testing Strategy
 
-### Unit Tests
-No Oracle database required. Tests configuration, type mapping, and basic functionality.
+### FLEXT Test Organization
+- **Unit**: Pure domain logic testing (DDD patterns)
+- **Integration**: Oracle connectivity and flext-db-oracle integration
+- **E2E**: Full Singer protocol workflows
 
-```bash
-make test-unit
-```
+### FLEXT Compliance Testing
+Tests verify compliance with FLEXT standards:
+- Domain entity validation
+- ServiceResult pattern usage
+- Error handling consistency
+- Observability integration
 
-### Integration Tests  
-Requires Oracle database connection configured in `.env`.
+## FLEXT Ecosystem Integration
 
-```bash
-make test-integration
-```
+This target integrates seamlessly with other FLEXT components:
+- **flext-tap-oracle-***: Oracle data extraction
+- **flext-web**: Web interface and monitoring
+- **flext-api**: REST API integration
+- **flext-observability**: Centralized monitoring
 
-### Complete Test Suite
-Runs all tests including performance and enterprise features.
-
-```bash
-make test-all
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make changes with tests
-4. Run code quality checks
-5. Submit a pull request
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
-
-## Support
-
-- Issues: [GitHub Issues](https://github.com/flext/flext-target-oracle/issues)
-- Documentation: [Singer SDK Docs](https://sdk.meltano.com/)
-- Oracle Docs: [Oracle Database Documentation](https://docs.oracle.com/en/database/)
-
-## Credits
-
-Built with:
-- [Singer SDK](https://sdk.meltano.com/) - The best way to build Singer taps and targets
-- [SQLAlchemy](https://www.sqlalchemy.org/) - The Python SQL toolkit
-- [oracledb](https://oracle.github.io/python-oracledb/) - Python driver for Oracle Database
+See `docs/ARCHITECTURE.md` for detailed FLEXT patterns implementation.
