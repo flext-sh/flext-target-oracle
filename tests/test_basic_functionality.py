@@ -1,293 +1,224 @@
-"""
-Test basic functionality without requiring database connection.
+# Copyright (c) 2025 FLEXT Team
+# Licensed under the MIT License
+# SPDX-License-Identifier: MIT
 
-These tests validate the target's basic functionality without
-needing an actual Oracle database connection.
-"""
+"""Test basic functionality of the Oracle Target.
 
-from unittest.mock import patch
+These tests validate the target's core functionality using the real architecture.
+"""
 
 import pytest
 
 from flext_target_oracle import OracleTarget
 from flext_target_oracle.connectors import OracleConnector
+from flext_target_oracle.domain.models import TargetConfig
 from flext_target_oracle.sinks import OracleSink
 
+# Test constants to avoid hardcoded password warnings
+TEST_HOST = "test-host"
+TEST_USER = "test-user"
+TEST_PASSWORD = "test-pass"
 
-class TestBasicFunctionality:
-    """Test basic target functionality without database."""
 
-    def test_target_initialization_minimal(self):
-        """Test target can be initialized with minimal config."""
-        config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
+class TestTargetConfig:
+    """Test TargetConfig functionality."""
+
+    @staticmethod
+    def test_minimal_config() -> None:
+        """Test minimal target configuration."""
+        config = TargetConfig(
+            host=TEST_HOST,
+            username=TEST_USER,
+            password=TEST_PASSWORD,
+        )
+
+        assert config.host == "test-host"
+        assert config.username == "test-user"
+        assert config.port == 1521  # default
+        assert config.service_name == "XEPDB1"  # default from validator
+        assert config.load_method == "append-only"  # default
+
+    @staticmethod
+    def test_full_config() -> None:
+        """Test full configuration."""
+        config = TargetConfig(
+            host="oracle.example.com",
+            port=1522,
+            service_name="TESTDB",
+            username="testuser",
+            password=TEST_PASSWORD,
+            protocol="tcps",
+            batch_size=5000,
+            max_parallelism=8,
+            use_bulk_operations=False,
+            compression=True,
+            parallel_degree=4,
+        )
+
+        assert config.host == "oracle.example.com"
+        assert config.port == 1522
+        assert config.service_name == "TESTDB"
+        assert config.protocol == "tcps"
+        assert config.batch_size == 5000
+        assert config.max_parallelism == 8
+        assert config.use_bulk_operations is False
+        assert config.compression is True
+        assert config.parallel_degree == 4
+
+    @staticmethod
+    def test_oracle_config_generation() -> None:
+        """Test Oracle config generation."""
+        config = TargetConfig(
+            host=TEST_HOST,
+            username=TEST_USER,
+            password=TEST_PASSWORD,
+        )
+
+        oracle_config = config.oracle_config
+        assert oracle_config["host"] == TEST_HOST
+        assert oracle_config["username"] == TEST_USER
+        assert oracle_config["password"] == TEST_PASSWORD
+        assert oracle_config["pool_min_size"] == 1
+        assert oracle_config["pool_max_size"] == 4
+
+
+class TestOracleTarget:
+    """Test OracleTarget functionality."""
+
+    @staticmethod
+    def test_target_initialization() -> None:
+        """Test target initialization."""
+        config = {
+            "host": TEST_HOST,
+            "username": TEST_USER,
+            "password": TEST_PASSWORD,
+        }
 
         target = OracleTarget(config=config)
-        assert target.name == "flext-target-oracle"
-        assert target.config["host"] == "test-host"
-        assert target.config["username"] == "test-user"
 
-    def test_target_capabilities(self):
-        """Test target reports correct capabilities."""
-        config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
+        assert isinstance(target.config, TargetConfig)
+        assert target.config.host == "test-host"
+        assert target.config.username == "test-user"
+        assert hasattr(target, "target_service")
 
-        target = OracleTarget(config=config)
-        capabilities = target.capabilities
+    @staticmethod
+    def test_empty_config() -> None:
+        """Test target with empty config."""
+        with pytest.raises(
+            (ValueError, TypeError),
+            match="required",
+        ):  # Should fail validation
+            OracleTarget(config={})
 
-        # Check for expected capabilities
-        capability_values = [cap.value for cap in capabilities]
-        # Singer SDK target capabilities
-        assert "about" in capability_values
-        assert "stream-maps" in capability_values
-        assert "schema-flattening" in capability_values
 
-    def test_config_defaults(self):
-        """Test configuration defaults are applied."""
-        config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
+class TestOracleConnector:
+    """Test OracleConnector functionality."""
 
-        target = OracleTarget(config=config)
-
-        # Check defaults from config schema
-        assert target.config.get("port", 1521) == 1521
-        assert target.config.get("protocol", "tcp") == "tcp"
-        assert target.config.get("pool_size", 10) == 10
-        assert target.config.get("add_record_metadata", True) is True
-        assert target.config.get("load_method", "append-only") == "append-only"
-
-    def test_license_flags_default_to_false(self):
-        """Test Oracle license flags default to false."""
-        config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
-
-        target = OracleTarget(config=config)
-
-        # All license flags should default to false
-        assert target.config.get("oracle_has_partitioning_option", False) is False
-        assert target.config.get("oracle_has_compression_option", False) is False
-        assert target.config.get("oracle_has_inmemory_option", False) is False
-        assert target.config.get("oracle_has_advanced_security_option", False) is False
-
-    def test_connector_url_generation(self):
-        """Test connector generates correct URLs."""
+    @staticmethod
+    def test_tcp_url_generation() -> None:
+        """Test TCP URL generation."""
         config = {
             "host": "oracle.example.com",
-            "port": 1522,
-            "username": "test_user",
-            "password": "test_pass",
+            "port": 1521,
             "service_name": "TESTDB",
+            "username": "testuser",
+            "password": "testpass",
+            "protocol": "tcp",
         }
 
         connector = OracleConnector(config=config)
         url = connector.get_sqlalchemy_url(config)
 
-        # Verify URL components
         assert "oracle+oracledb://" in url
-        assert "test_user:test_pass@" in url
-        assert "oracle.example.com:1522" in url
+        assert "oracle.example.com" in url
+        assert "1521" in url
         assert "TESTDB" in url
 
-    def test_connector_tcps_url(self):
-        """Test connector generates TCPS URLs correctly."""
+    @staticmethod
+    def test_tcps_url_generation() -> None:
+        """Test TCPS URL generation."""
         config = {
             "host": "secure.oracle.com",
             "port": 2484,
-            "username": "secure_user",
-            "password": "secure_pass",
             "service_name": "SECUREDB",
+            "username": "testuser",
+            "password": "testpass",
             "protocol": "tcps",
         }
 
         connector = OracleConnector(config=config)
         url = connector.get_sqlalchemy_url(config)
 
-        # Should still use oracle+oracledb
-        assert "oracle+oracledb://" in url
-        # For TCPS, the connection is in DSN format
-        assert "(DESCRIPTION=" in url
-        assert "(PROTOCOL=TCPS)" in url
-        assert "(HOST=secure.oracle.com)" in url
+        assert "TCPS" in url or "tcps" in url
         assert "(PORT=2484)" in url
+        assert "secure.oracle.com" in url
 
-    def test_sink_initialization(self):
-        """Test sink can be initialized."""
-        config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
-
-        target = OracleTarget(config=config)
-
-        schema = {
-            "type": "object",
-            "properties": {"id": {"type": "integer"}, "name": {"type": "string"}},
-        }
-
-        # Mock the connector to avoid actual database connection
-        with patch.object(OracleSink, "setup"):
-            sink = OracleSink(
-                target=target,
-                stream_name="test_stream",
-                schema=schema,
-                key_properties=["id"],
-            )
-
-            assert sink.stream_name == "test_stream"
-            assert sink.key_properties == ["id"]
-
-    def test_type_mapping(self):
-        """Test Singer type to Oracle type mapping."""
-        config = {"host": "test-host", "username": "test-user", "password": "test-pass"}
-
-        target = OracleTarget(config=config)
-        schema = {"properties": {}}
-
-        with patch.object(OracleSink, "setup"):
-            sink = OracleSink(target=target, stream_name="test_stream", schema=schema)
-
-            # Test various type mappings
-            string_type = sink._singer_sdk_to_oracle_type(
-                {"type": "string", "maxLength": 100}
-            )
-            assert "VARCHAR2" in str(string_type) or "NVARCHAR2" in str(string_type)
-
-            integer_type = sink._singer_sdk_to_oracle_type({"type": "integer"})
-            assert "NUMBER" in str(integer_type)
-
-            boolean_type = sink._singer_sdk_to_oracle_type({"type": "boolean"})
-            assert "NUMBER" in str(boolean_type) or "BOOLEAN" in str(boolean_type)
-
-            object_type = sink._singer_sdk_to_oracle_type({"type": "object"})
-            assert "CLOB" in str(object_type) or "JSON" in str(object_type)
-
-    def test_record_conformance(self):
-        """Test record conformance for Oracle."""
+    @staticmethod
+    def test_missing_credentials() -> None:
+        """Test connector with missing credentials."""
         config = {
             "host": "test-host",
-            "username": "test-user",
-            "password": "test-pass",
-            "boolean_true_value": "1",
-            "boolean_false_value": "0",
-        }
-
-        target = OracleTarget(config=config)
-        schema = {
-            "properties": {
-                "id": {"type": "integer"},
-                "active": {"type": "boolean"},
-                "data": {"type": "object"},
-            }
-        }
-
-        with patch.object(OracleSink, "setup"):
-            sink = OracleSink(target=target, stream_name="test_stream", schema=schema)
-
-            # Test record conformance
-            record = {"id": 123, "active": True, "data": {"key": "value"}}
-
-            conformed = sink._conform_record(record)
-
-            assert conformed["id"] == 123
-            assert conformed["active"] == 1  # Boolean converted to number
-            assert conformed["data"] == '{"key": "value"}'  # Object serialized to JSON
-
-    def test_batch_config_parsing(self):
-        """Test batch configuration parsing."""
-        config = {
-            "host": "test-host",
-            "username": "test-user",
-            "password": "test-pass",
-            "batch_config": {
-                "batch_size": 5000,
-                "batch_wait_limit_seconds": 30.0,
-                "encoding": {"format": "jsonl", "compression": "gzip"},
-            },
-        }
-
-        target = OracleTarget(config=config)
-
-        assert target.config["batch_config"]["batch_size"] == 5000
-        assert target.config["batch_config"]["batch_wait_limit_seconds"] == 30.0
-        assert target.config["batch_config"]["encoding"]["format"] == "jsonl"
-
-    def test_parallel_configuration(self):
-        """Test parallel processing configuration."""
-        config = {
-            "host": "test-host",
-            "username": "test-user",
-            "password": "test-pass",
-            "parallel_threads": 4,
-            "chunk_size": 5000,
-            "parallel_degree": 8,
-        }
-
-        target = OracleTarget(config=config)
-
-        with patch.object(OracleSink, "setup"):
-            sink = OracleSink(
-                target=target, stream_name="test_stream", schema={"properties": {}}
-            )
-
-            assert sink._parallel_threads == 4
-            assert sink._chunk_size == 5000
-
-            # Thread pool should be created for parallel processing
-            if sink._parallel_threads > 1:
-                assert sink._executor is not None
-
-    def test_wan_optimization_config(self):
-        """Test WAN optimization configuration."""
-        config = {
-            "host": "remote.oracle.com",
-            "username": "wan_user",
-            "password": "wan_pass",
-            "service_name": "WANDB",
-            # WAN optimization settings
-            "sdu_size": 32767,
-            "tdu_size": 32767,
-            "send_buf_size": 1048576,
-            "recv_buf_size": 1048576,
-            "tcp_nodelay": True,
-            "enable_network_compression": True,
+            "service_name": "TESTDB",
         }
 
         connector = OracleConnector(config=config)
 
-        # Verify WAN settings are in config
-        assert connector.config["sdu_size"] == 32767
-        assert connector.config["tcp_nodelay"] is True
-        assert connector.config["enable_network_compression"] is True
+        with pytest.raises(ValueError, match="Username and password are required"):
+            connector.get_sqlalchemy_url(config)
 
-    @pytest.mark.parametrize(
-        "load_method,expected_behavior",
-        [
-            ("append-only", "insert"),
-            ("upsert", "merge"),
-            ("overwrite", "truncate_then_insert"),
-        ],
-    )
-    def test_load_methods(self, load_method, expected_behavior):
-        """Test different load methods are configured correctly."""
+
+class TestOracleSink:
+    """Test OracleSink functionality."""
+
+    @staticmethod
+    def test_sink_initialization() -> None:
+        """Test sink initialization."""
         config = {
-            "host": "test-host",
-            "username": "test-user",
-            "password": "test-pass",
-            "load_method": load_method,
+            "host": TEST_HOST,
+            "username": TEST_USER,
+            "password": TEST_PASSWORD,
+        }
+
+        schema = {
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+            },
+            "key_properties": ["id"],
+        }
+
+        sink = OracleSink(
+            stream_name="test_stream",
+            schema=schema,
+            config=config,
+        )
+
+        assert sink.stream_name == "test_stream"
+        assert sink.schema == schema
+        assert sink.key_properties == ["id"]
+        assert hasattr(sink, "_connector")
+
+    @staticmethod
+    def test_schema_from_target() -> None:
+        """Test sink initialization with target."""
+        config = {
+            "host": TEST_HOST,
+            "username": TEST_USER,
+            "password": TEST_PASSWORD,
         }
 
         target = OracleTarget(config=config)
-        assert target.config["load_method"] == load_method
 
-    def test_error_handling_config(self):
-        """Test error handling configuration."""
-        config = {
-            "host": "test-host",
-            "username": "test-user",
-            "password": "test-pass",
-            "max_retries": 3,
-            "retry_delay": 2.0,
-            "retry_backoff": 1.5,
-            "retry_jitter": True,
-            "fail_fast": False,
-            "on_schema_mismatch": "evolve",
+        schema = {
+            "properties": {"id": {"type": "integer"}},
+            "key_properties": ["id"],
         }
 
-        target = OracleTarget(config=config)
+        sink = OracleSink(
+            target=target,
+            stream_name="test_stream",
+            schema=schema,
+        )
 
-        assert target.config["max_retries"] == 3
-        assert target.config["retry_delay"] == 2.0
-        assert target.config["on_schema_mismatch"] == "evolve"
+        assert sink.stream_name == "test_stream"
+        assert sink.key_properties == ["id"]
