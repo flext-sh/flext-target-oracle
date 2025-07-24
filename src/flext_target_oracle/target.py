@@ -9,18 +9,29 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+
+# Removed circular dependency - use DI pattern
+import logging
 import os
 import sys
 from pathlib import Path
 from typing import Any
 
-from flext_core import ServiceResult
-from flext_observability.logging import get_logger
+# 🚨 ARCHITECTURAL COMPLIANCE
+from flext_target_oracle.infrastructure.di_container import (
+    get_domain_entity,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
 
 from flext_target_oracle.application.services import SingerTargetService
 from flext_target_oracle.domain.models import LoadStatistics, TargetConfig
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class OracleTarget:
@@ -28,6 +39,29 @@ class OracleTarget:
 
     def __init__(self, config: dict[str, Any] | None = None) -> None:
         """Initialize Oracle target with configuration."""
+        # Handle nested oracle_config structure from Meltano
+        if config and "oracle_config" in config:
+            oracle_config = config.pop("oracle_config")
+            # Keep username as is (TargetConfig expects username)
+            config.update(oracle_config)
+
+        # Convert port to int if it's a string
+        if config and "port" in config and isinstance(config["port"], str):
+            try:
+                config["port"] = int(config["port"])
+            except ValueError:
+                logger.warning("Invalid port value: %s", config["port"])
+                config["port"] = 1521
+
+        # Fix load_method enum values
+        if config and "load_method" in config:
+            if config["load_method"] == "append_only":
+                config["load_method"] = "append-only"
+            elif config["load_method"] == "upsert":
+                config["load_method"] = "upsert"
+            elif config["load_method"] == "overwrite":
+                config["load_method"] = "overwrite"
+
         self.config = TargetConfig(**(config or {}))
         self.target_service = SingerTargetService(self.config)
         self._running = False
@@ -242,10 +276,15 @@ def main() -> int:
 
     # Debug print
     try:
+        logger.info(
+            "Creating OracleTarget with config: %s",
+            {k: v for k, v in config.items() if k != "password"},
+        )
         target = OracleTarget(config)
+        logger.info("OracleTarget created successfully")
         return target.run()
-    except Exception:
-        logger.exception("Failed to start Oracle target")
+    except Exception as e:
+        logger.exception("Failed to start Oracle target: %s", e)
         return 1
 
 

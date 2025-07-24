@@ -13,9 +13,10 @@ from typing import TYPE_CHECKING, Any, Self
 if TYPE_CHECKING:
     from types import TracebackType
 
-from flext_observability.logging import get_logger
+# Removed circular dependency - use DI pattern
+import logging
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 # Copyright (c) 2025 FLEXT Team
 # Licensed under the MIT License
