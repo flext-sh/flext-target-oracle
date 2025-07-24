@@ -119,6 +119,25 @@ warn_required_dynamic_aliases = true
 include = "flext_target_oracle"
 from = "src"
 
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.2.0"
+black = "^25.1.0"
+isort = "^6.0.1"
+vulture = "^2.14"
+radon = "^6.0.1"
+detect-secrets = "^1.5.0"
+pytest-cov = "^6.2.1"
+pytest-asyncio = "^1.1.0"
+pytest-mock = "^3.14.1"
+pytest-xdist = "^3.8.0"
+pytest-timeout = "^2.4.0"
+pytest-sugar = "^1.0.0"
+pytest-clarity = "^1.0.1"
+pytest-benchmark = "^5.1.0"
+pip-audit = "^2.9.0"
+commitizen = "^4.8.3"
+
 [tool.deptry]
 known_first_party = ["flext_target_oracle"]
 
@@ -206,6 +225,9 @@ ignore = [
     "TRY301",
     "TRY401",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "SLF001"]  # Allow assert statements and private member access in tests
 
 [tool.ruff.format]
 quote-style = "double"

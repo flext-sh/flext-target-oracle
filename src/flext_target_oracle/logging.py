@@ -9,10 +9,12 @@ standardized logging.
 
 from __future__ import annotations
 
-from typing import Any
+# Removed circular dependency - use DI pattern
+import logging
 
-from flext_observability import setup_logging as obs_setup_logging
-from flext_observability.logging import get_logger
+# Removed circular dependency - use DI pattern
+import logging as obs_setup_logging
+from typing import Any
 
 
 def configure_logger(
@@ -34,7 +36,7 @@ def configure_logger(
     # Logging is configured globally by
     # flext-infrastructure.monitoring.flext-observability
     # Just return the logger for the given name
-    return get_logger(name)
+    return logging.getLogger(name)
 
 
 def setup_logging(config: dict[str, Any]) -> Any:
@@ -54,7 +56,7 @@ def setup_logging(config: dict[str, Any]) -> Any:
     obs_setup_logging()
 
     # Return logger for this module
-    return get_logger("flext_target_oracle")
+    return logging.getLogger("flext_target_oracle")
 
 
 __all__ = ["configure_logger", "setup_logging"]

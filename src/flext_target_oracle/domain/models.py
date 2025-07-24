@@ -9,14 +9,20 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, Any, ClassVar
 from uuid import uuid4
 
-from flext_core import DomainBaseModel, DomainEntity, DomainValueObject, EntityId
+# 🚨 ARCHITECTURAL COMPLIANCE
+from flext_target_oracle.infrastructure.di_container import (
+    get_domain_entity,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
 if TYPE_CHECKING:
     from datetime import datetime
-else:
-    # Import datetime for runtime to fix Pydantic model_rebuild issue
-    pass
 
 
 class LoadMethod(StrEnum):

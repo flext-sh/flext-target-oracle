@@ -5,8 +5,19 @@ Provides a simple interface for setting up Oracle Database data loading.
 
 from __future__ import annotations
 
-from flext_core import ServiceResult
-from flext_observability.logging import setup_logging
+# Removed circular dependency - use DI pattern
+import logging
+
+# 🚨 ARCHITECTURAL COMPLIANCE
+from flext_target_oracle.infrastructure.di_container import (
+    get_domain_entity,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
 
 from flext_target_oracle.domain.models import TargetConfig as TargetOracleConfig
 
@@ -34,7 +45,8 @@ def setup_oracle_target(
             )
 
         # Setup logging using flext-infrastructure.monitoring.flext-observability
-        setup_logging()
+        # Note: Logging setup is handled globally by flext-observability
+        logging.getLogger(__name__)
 
         return ServiceResult.ok(config)
 

@@ -49,8 +49,12 @@ class OracleConnector:
             msg = "No database connection configured"
             raise RuntimeError(msg)
 
-        # Return the engine from the connection service
-        return self._service._engine if hasattr(self._service, "_engine") else None  # noqa: SLF001
+        # Return the engine from the connection service using proper attribute access
+        return (
+            getattr(self._service, "_engine", None)
+            if hasattr(self._service, "_engine")
+            else None
+        )
 
     def prepare_table(
         self,

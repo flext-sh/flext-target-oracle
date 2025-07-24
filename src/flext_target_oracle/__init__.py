@@ -9,7 +9,16 @@ from __future__ import annotations
 # Version from flext-core
 __version__ = "0.7.0"
 
-from flext_core import DomainBaseModel, ServiceResult
+# 🚨 ARCHITECTURAL COMPLIANCE
+from flext_target_oracle.infrastructure.di_container import (
+    get_domain_entity,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
 
 # Core imports from flext-core
 # Oracle operations from flext-infrastructure.databases.flext-db-oracle (no duplication)

@@ -11,7 +11,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Self
 
-from flext_core import ServiceResult
+# 🚨 ARCHITECTURAL COMPLIANCE
+from flext_target_oracle.infrastructure.di_container import (
+    get_domain_entity,
+    get_field,
+    get_service_result,
+)
+
+ServiceResult = get_service_result()
+DomainEntity = get_domain_entity()
+Field = get_field()
 
 from flext_target_oracle.domain.models import TargetConfig
 
