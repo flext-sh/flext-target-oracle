@@ -4,11 +4,11 @@ Following flext-core application service patterns.
 """
 
 from flext_target_oracle.application.services import (
-    OracleLoaderService,
-    SingerTargetService,
+    FlextOracleLoaderService,
+    FlextSingerTargetService,
 )
 
 __all__ = [
-    "OracleLoaderService",
-    "SingerTargetService",
+    "FlextOracleLoaderService",
+    "FlextSingerTargetService",
 ]

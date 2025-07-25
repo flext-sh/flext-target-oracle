@@ -1,14 +1,14 @@
 # FLEXT Target Oracle - Oracle Database Singer Target
 # ================================================
-# Production-grade Singer target for Oracle Database with enterprise optimization
+# Enterprise-grade Singer target for Oracle Database data loading
 # Python 3.13 + Singer SDK + Oracle + FLEXT Core + Zero Tolerance Quality Gates
 
-.PHONY: help check validate test lint type-check security format format-check fix
+.PHONY: help info diagnose check validate test lint type-check security format format-check fix
 .PHONY: install dev-install setup pre-commit build clean
 .PHONY: coverage coverage-html test-unit test-integration test-singer
 .PHONY: deps-update deps-audit deps-tree deps-outdated
-.PHONY: target-test target-validate target-schema target-run
-.PHONY: oracle-connect oracle-schema oracle-optimize oracle-performance
+.PHONY: sync validate-config target-test target-validate target-schema target-run
+.PHONY: oracle-write-test oracle-schema-check oracle-performance
 
 # ============================================================================
 # 🎯 HELP & INFORMATION
@@ -19,11 +19,43 @@ help: ## Show this help message
 	@echo "====================================================="
 	@echo "🎯 Singer SDK + Oracle + FLEXT Core + Python 3.13"
 	@echo ""
-	@echo "📦 Production-grade Oracle Database target for Singer protocol"
-	@echo "🔒 Zero tolerance quality gates with enterprise optimization"
+	@echo "📦 Enterprise-grade Oracle Database target for Singer protocol"
+	@echo "🔒 Zero tolerance quality gates with Oracle optimization"
 	@echo "🧪 90%+ test coverage requirement with Oracle integration testing"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\\033[36m%-20s\\033[0m %s\\n", $$1, $$2}'
+
+
+info: ## Show project information
+	@echo "📊 Project Information"
+	@echo "======================"
+	@echo "Name: flext-target-oracle"
+	@echo "Type: singer-target"
+	@echo "Title: FLEXT TARGET ORACLE"
+	@echo "Version: $(shell poetry version -s 2>/dev/null || echo "0.7.0")"
+	@echo "Python: $(shell python3.13 --version 2>/dev/null || echo "Not found")"
+	@echo "Poetry: $(shell poetry --version 2>/dev/null || echo "Not installed")"
+	@echo "Venv: $(shell poetry env info --path 2>/dev/null || echo "Not activated")"
+	@echo "Directory: $(CURDIR)"
+	@echo "Git Branch: $(shell git branch --show-current 2>/dev/null || echo "Not a git repo")"
+	@echo "Git Status: $(shell git status --porcelain 2>/dev/null | wc -l | xargs echo) files changed"
+
+diagnose: ## Run complete diagnostics
+	@echo "🔍 Running diagnostics for flext-target-oracle..."
+	@echo "System Information:"
+	@echo "OS: $(shell uname -s)"
+	@echo "Architecture: $(shell uname -m)"
+	@echo "Python: $(shell python3.13 --version 2>/dev/null || echo "Not found")"
+	@echo "Poetry: $(shell poetry --version 2>/dev/null || echo "Not installed")"
+	@echo ""
+	@echo "Project Structure:"
+	@ls -la
+	@echo ""
+	@echo "Poetry Configuration:"
+	@poetry config --list 2>/dev/null || echo "Poetry not configured"
+	@echo ""
+	@echo "Dependencies Status:"
+	@poetry show --outdated 2>/dev/null || echo "No outdated dependencies"
 
 # ============================================================================
 # 🎯 CORE QUALITY GATES - ZERO TOLERANCE
@@ -91,11 +123,6 @@ test-singer: ## Run Singer protocol tests
 	@poetry run pytest tests/singer/ -v
 	@echo "✅ Singer tests complete"
 
-test-oracle: ## Run Oracle-specific tests
-	@echo "🧪 Running Oracle-specific tests..."
-	@poetry run pytest tests/ -m "oracle" -v
-	@echo "✅ Oracle tests complete"
-
 coverage: ## Generate detailed coverage report
 	@echo "📊 Generating coverage report..."
 	@poetry run pytest tests/ --cov=src/flext_target_oracle --cov-report=term-missing --cov-report=html
@@ -133,6 +160,16 @@ pre-commit: ## Setup pre-commit hooks
 # 🎯 SINGER TARGET OPERATIONS
 # ============================================================================
 
+sync: ## Sync data to Oracle target
+	@echo "🎯 Running Oracle data sync..."
+	@poetry run target-oracle --config $(TARGET_CONFIG) < $(TARGET_STATE)
+	@echo "✅ Oracle sync complete"
+
+validate-config: ## Validate target configuration
+	@echo "🔍 Validating target configuration..."
+	@poetry run target-oracle --config $(TARGET_CONFIG) --validate-config
+	@echo "✅ Target configuration validated"
+
 target-test: ## Test Oracle target functionality
 	@echo "🎯 Testing Oracle target functionality..."
 	@poetry run target-oracle --about
@@ -165,8 +202,23 @@ target-dry-run: ## Run Oracle target in dry-run mode
 	@echo "✅ Oracle dry-run complete"
 
 # ============================================================================
-# 🗄️ ORACLE OPERATIONS
+# 🗄️ ORACLE-SPECIFIC OPERATIONS
 # ============================================================================
+
+oracle-write-test: ## Test Oracle write operations
+	@echo "🗄️ Testing Oracle write operations..."
+	@poetry run python -c "from flext_target_oracle.client import TargetOracleClient; import asyncio; import json; config = json.load(open('tests/fixtures/config/target_config.json')); client = TargetOracleClient(config); print('Testing write operations...'); result = asyncio.run(client.test_write()); print('✅ Write test passed!' if result.is_success else f'❌ Write test failed: {result.error}')"
+	@echo "✅ Oracle write test complete"
+
+oracle-schema-check: ## Check Oracle schema compatibility
+	@echo "🗄️ Checking Oracle schema compatibility..."
+	@poetry run python scripts/validate_oracle_schema.py
+	@echo "✅ Oracle schema check complete"
+
+oracle-performance: ## Run Oracle performance tests
+	@echo "⚡ Running Oracle performance tests..."
+	@poetry run pytest tests/performance/ -v --benchmark-only
+	@echo "✅ Oracle performance tests complete"
 
 oracle-connect: ## Test Oracle connection
 	@echo "🗄️ Testing Oracle connection..."
@@ -183,15 +235,44 @@ oracle-optimize: ## Optimize Oracle performance
 	@poetry run python scripts/optimize_oracle_target.py
 	@echo "✅ Oracle optimization complete"
 
-oracle-performance: ## Run Oracle performance tests
-	@echo "⚡ Running Oracle performance tests..."
-	@poetry run pytest tests/performance/ -v --benchmark-only
-	@echo "✅ Oracle performance tests complete"
-
 oracle-diagnostics: ## Run Oracle diagnostics
 	@echo "🔍 Running Oracle diagnostics..."
 	@poetry run python scripts/oracle_diagnostics.py
 	@echo "✅ Oracle diagnostics complete"
+
+oracle-bulk-load: ## Test Oracle bulk loading
+	@echo "🗄️ Testing Oracle bulk loading..."
+	@poetry run python scripts/test_bulk_load.py
+	@echo "✅ Oracle bulk load test complete"
+
+oracle-parallel-load: ## Test Oracle parallel loading
+	@echo "🗄️ Testing Oracle parallel loading..."
+	@poetry run python scripts/test_parallel_load.py
+	@echo "✅ Oracle parallel load test complete"
+
+# ============================================================================
+# 🔍 DATABASE VALIDATION
+# ============================================================================
+
+validate-tables: ## Validate Oracle table structures
+	@echo "🔍 Validating Oracle table structures..."
+	@poetry run python scripts/validate_tables.py
+	@echo "✅ Table validation complete"
+
+validate-data-types: ## Validate Oracle data type mappings
+	@echo "🔍 Validating Oracle data type mappings..."
+	@poetry run python scripts/validate_data_types.py
+	@echo "✅ Data type validation complete"
+
+validate-constraints: ## Validate Oracle constraints
+	@echo "🔍 Validating Oracle constraints..."
+	@poetry run python scripts/validate_constraints.py
+	@echo "✅ Constraint validation complete"
+
+validate-indexes: ## Validate Oracle indexes
+	@echo "🔍 Validating Oracle indexes..."
+	@poetry run python scripts/validate_indexes.py
+	@echo "✅ Index validation complete"
 
 # ============================================================================
 # 📦 BUILD & DISTRIBUTION
@@ -252,16 +333,20 @@ export PYTHONPATH := $(PWD)/src:$(PYTHONPATH)
 export PYTHONDONTWRITEBYTECODE := 1
 export PYTHONUNBUFFERED := 1
 
-# Oracle Target settings
-export TARGET_ORACLE_HOST := localhost
-export TARGET_ORACLE_PORT := 1521
-export TARGET_ORACLE_SERVICE_NAME := XE
-export TARGET_ORACLE_DEFAULT_TARGET_SCHEMA := FLEXT_DW
+# Target settings
+TARGET_CONFIG := config.json
+TARGET_STATE := state.json
 
 # Singer settings
 export SINGER_LOG_LEVEL := INFO
 export SINGER_BATCH_SIZE := 10000
 export SINGER_MAX_BATCH_AGE := 300
+
+# Oracle Target settings
+export TARGET_ORACLE_HOST := localhost
+export TARGET_ORACLE_PORT := 1521
+export TARGET_ORACLE_SERVICE_NAME := XE
+export TARGET_ORACLE_DEFAULT_TARGET_SCHEMA := FLEXT_DW
 
 # Performance settings
 export TARGET_ORACLE_POOL_SIZE := 10
@@ -282,6 +367,7 @@ export RUFF_CACHE_DIR := .ruff_cache
 
 # Project information
 PROJECT_NAME := flext-target-oracle
+PROJECT_TYPE := meltano-plugin
 PROJECT_VERSION := $(shell poetry version -s)
 PROJECT_DESCRIPTION := FLEXT Target Oracle - Oracle Database Singer Target
 
@@ -300,11 +386,6 @@ singer-config-sample: ## Generate Singer config sample
 	@echo "🎵 Generating Singer config sample..."
 	@poetry run target-oracle --config-sample > config_sample.json
 	@echo "✅ Config sample generated: config_sample.json"
-
-singer-discover: ## Run Singer discovery (if applicable)
-	@echo "🎵 Running Singer discovery..."
-	@poetry run target-oracle --discover
-	@echo "✅ Discovery complete"
 
 singer-test-streams: ## Test Singer streams
 	@echo "🎵 Testing Singer streams..."
@@ -331,4 +412,4 @@ workspace-info: ## Show workspace integration info
 	@echo "🏆 Role: Oracle Database Singer Target"
 	@echo "🔗 Dependencies: flext-core, flext-db-oracle, singer-sdk"
 	@echo "📦 Provides: Oracle data loading capabilities"
-	@echo "🎯 Standards: Enterprise Singer patterns"
+	@echo "🎯 Standards: Enterprise Oracle integration patterns"

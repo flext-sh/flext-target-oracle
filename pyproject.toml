@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "flext-target-oracle"
-version = "0.7.0"
+version = "0.8.0"
 description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
@@ -13,8 +13,9 @@ keywords = [
     "enterprise",
     "async",
     "typed",
-    "singer",
-    "target",
+    "oracle",
+    "database",
+    "library",
     "data-loading",
     "etl",
 ]
@@ -32,6 +33,7 @@ classifiers = [
 ]
 dependencies = [
     "flext-core @ file:///home/marlonsc/flext/flext-core",
+    "flext-meltano @ file:///home/marlonsc/flext/flext-meltano",
     "flext-db-oracle @ file:///home/marlonsc/flext/flext-db-oracle",
     "flext-observability @ file:///home/marlonsc/flext/flext-observability",
     "pydantic>=2.11.7,<3.0.0",
@@ -54,14 +56,13 @@ Homepage = "https://github.com/flext-sh/flext"
 Repository = "https://github.com/flext-sh/flext"
 Documentation = "https://github.com/flext-sh/flext/blob/main/README.md"
 
-[project.scripts]
-target-oracle = "flext_target_oracle.target:main"
-flext-target-oracle = "flext_target_oracle.target:main"
+# Entry points removed - flext-target-oracle is a library, not a CLI tool
+# CLI functionality is provided by flext-meltano for Singer orchestration
 
 [tool.ruff]
 target-version = "py313"
 line-length = 88
-fix = true
+fix = false
 show-fixes = true
 respect-gitignore = true
 src = ["src", "tests"]
@@ -77,6 +78,7 @@ extend-exclude = [
     "dist",
     "htmlcov",
 ]
+extend = "../.ruff-shared.toml"
 
 [tool.mypy]
 python_version = "3.13"
