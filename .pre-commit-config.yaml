@@ -44,7 +44,7 @@ repos:
         language: system
         types: [python]
         require_serial: true
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [--exit-non-zero-on-fix]
 
       # isort import sorting
       - id: isort

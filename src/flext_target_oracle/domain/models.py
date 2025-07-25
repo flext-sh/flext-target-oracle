@@ -9,17 +9,17 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, Any, ClassVar
 from uuid import uuid4
 
-# 🚨 ARCHITECTURAL COMPLIANCE
-from flext_target_oracle.infrastructure.di_container import (
-    get_domain_entity,
-    get_field,
-    get_service_result,
+from flext_core.domain import (
+    FlextEntity as DomainEntity,
+    FlextValueObject,
+    FlextValueObject as FlextDomainBaseModel,
 )
-
-ServiceResult = get_service_result()
-DomainEntity = get_domain_entity()
-Field = get_field()
 from pydantic import ConfigDict, Field, field_validator, model_validator
+
+from flext_target_oracle.exceptions import (
+    FlextOracleTargetSchemaError,
+    FlextOracleTargetSingerRecordError,
+)
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -33,12 +33,14 @@ class LoadMethod(StrEnum):
     OVERWRITE = "overwrite"
 
 
-class SingerSchema(DomainValueObject):
+class SingerSchema(FlextValueObject):
     """Singer schema definition."""
 
     model_config: ClassVar[ConfigDict] = ConfigDict(
-        extra="allow",
-    )  # Allow extra fields like additionalProperties
+        extra="forbid",  # No backward compatibility
+        frozen=True,  # Immutable value object
+        validate_assignment=True,
+    )
 
     type: str = Field("object", description="Schema type")
     properties: dict[str, Any] = Field(
@@ -57,13 +59,56 @@ class SingerSchema(DomainValueObject):
         table_name = self.properties.get("table_name")
         return table_name if isinstance(table_name, str) else "unknown_table"
 
+    def validate_domain_rules(self) -> None:
+        """Validate Singer schema domain rules."""
+        if not self.type:
+            raise FlextOracleTargetSchemaError(
+                schema_name="unknown",
+                message="Schema type is required",
+                schema_data=self.model_dump(),
+            )
 
-class SingerRecord(DomainValueObject):
+        if self.type not in {
+            "object",
+            "array",
+            "string",
+            "number",
+            "integer",
+            "boolean",
+            "null",
+        }:
+            raise FlextOracleTargetSchemaError(
+                schema_name="unknown",
+                message=f"Invalid schema type: {self.type}",
+                schema_data=self.model_dump(),
+            )
+
+        if self.type == "object" and not isinstance(self.properties, dict):
+            raise FlextOracleTargetSchemaError(
+                schema_name="unknown",
+                message="Properties must be a dictionary for object type schemas",
+                schema_data=self.model_dump(),
+            )
+
+        # Validate key_properties are in properties
+        if self.key_properties and self.properties:
+            for key_prop in self.key_properties:
+                if key_prop not in self.properties:
+                    raise FlextOracleTargetSchemaError(
+                        schema_name="unknown",
+                        message=f"Key property '{key_prop}' not found in schema properties",
+                        schema_data=self.model_dump(),
+                    )
+
+
+class SingerRecord(FlextValueObject):
     """Singer record data."""
 
     model_config: ClassVar[ConfigDict] = ConfigDict(
-        extra="allow",
-    )  # Allow extra fields like key_properties
+        extra="forbid",  # No backward compatibility
+        frozen=True,  # Immutable value object
+        validate_assignment=True,
+    )
 
     type: str = Field(..., description="Record type (RECORD, SCHEMA, STATE)")
     stream: str | None = Field(None, description="Stream name")
@@ -82,15 +127,46 @@ class SingerRecord(DomainValueObject):
         valid_types = {"RECORD", "SCHEMA", "STATE"}
         if v not in valid_types:
             msg = f"Invalid record type '{v}'. Must be one of {valid_types}"
-            raise ValueError(msg)
+            raise FlextOracleTargetSingerRecordError(
+                record_type=str(v),
+                message=msg,
+                record_data={"type": v},
+            )
         return v
 
+    def validate_domain_rules(self) -> None:
+        """Validate Singer record domain rules."""
+        if not self.type:
+            raise FlextOracleTargetSingerRecordError(
+                record_type="unknown",
+                message="Record type is required",
+                record_data=self.model_dump(),
+            )
 
-class TargetConfig(DomainBaseModel):
+        # Validate type-specific requirements
+        if self.type == "RECORD":
+            if not self.stream:
+                msg = "Stream name is required for RECORD type"
+                raise ValueError(msg)
+            if self.record is None:
+                msg = "Record data is required for RECORD type"
+                raise ValueError(msg)
+        elif self.type == "SCHEMA":
+            if not self.stream:
+                msg = "Stream name is required for SCHEMA type"
+                raise ValueError(msg)
+            if not self.record_schema:
+                msg = "Schema definition is required for SCHEMA type"
+                raise ValueError(msg)
+
+
+class FlextTargetOracleConfig(FlextDomainBaseModel):
     """Target configuration combining Oracle and Singer settings."""
 
     model_config: ClassVar[ConfigDict] = ConfigDict(
-        extra="allow",  # Allow extra fields for backward compatibility
+        extra="forbid",  # Strict validation - no extra fields
+        frozen=False,  # Allow mutations during validation
+        validate_assignment=True,
     )
 
     # Oracle connection (delegate to flext-infrastructure.databases.flext-db-oracle)
@@ -129,16 +205,16 @@ class TargetConfig(DomainBaseModel):
     )
 
     @model_validator(mode="after")
-    def validate_service_or_sid(self) -> TargetConfig:
+    def validate_service_or_sid(self) -> FlextTargetOracleConfig:
         """Ensure either service_name or sid is provided."""
         if not self.service_name and not self.sid:
-            # For backward compatibility, provide default service name
-            self.service_name = "XEPDB1"  # Default Oracle Express service
+            msg = "Either service_name or sid must be provided"
+            raise ValueError(msg)
         return self
 
     @property
     def oracle_config(self) -> dict[str, Any]:
-        """Get Oracle configuration for flext-infrastructure.databases.flext-db-oracle."""
+        """Get Oracle configuration for flext-db-oracle."""
         return {
             "host": self.host,
             "port": self.port,
@@ -150,6 +226,54 @@ class TargetConfig(DomainBaseModel):
             "pool_min_size": 1,
             "pool_max_size": self.max_parallelism,
         }
+
+    def validate_domain_rules(self) -> None:
+        """Validate Oracle target configuration domain rules."""
+        # Validate Oracle connection parameters
+        if not self.host:
+            msg = "Oracle host is required"
+            raise ValueError(msg)
+
+        if not (1 <= self.port <= 65535):
+            msg = f"Invalid Oracle port: {self.port}"
+            raise ValueError(msg)
+
+        if not self.username:
+            msg = "Oracle username is required"
+            raise ValueError(msg)
+
+        if not self.password:
+            msg = "Oracle password is required"
+            raise ValueError(msg)
+
+        # Validate performance settings
+        if self.batch_size <= 0:
+            msg = "Batch size must be positive"
+            raise ValueError(msg)
+
+        if self.max_parallelism <= 0:
+            msg = "Max parallelism must be positive"
+            raise ValueError(msg)
+
+    def to_connection_config(self) -> dict[str, Any]:
+        """Convert to connection config for flext-db-oracle.
+
+        Returns:
+            Dictionary with connection parameters
+
+        """
+        return {
+            "host": self.host,
+            "port": self.port,
+            "service_name": self.service_name,
+            "sid": self.sid,
+            "username": self.username,
+            "password": self.password,
+        }
+
+
+# Compatibility alias
+TargetConfig = FlextTargetOracleConfig
 
 
 class LoadJobStatus(StrEnum):
@@ -164,7 +288,12 @@ class LoadJobStatus(StrEnum):
 class LoadJob(DomainEntity):
     """Data loading job entity."""
 
-    id: EntityId = Field(default_factory=uuid4)
+    model_config: ClassVar[ConfigDict] = ConfigDict(
+        frozen=False,  # Allow field mutations
+        validate_assignment=True,
+    )
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
     stream_name: str = Field(..., description="Singer stream name")
     table_name: str = Field(..., description="Target table name")
     status: LoadJobStatus = Field(
@@ -201,9 +330,40 @@ class LoadJob(DomainEntity):
             return 0.0
         return (self.records_processed / total) * 100.0
 
+    def validate_domain_rules(self) -> None:
+        """Validate load job domain rules."""
+        if not self.stream_name:
+            msg = "Stream name is required"
+            raise ValueError(msg)
+        if not self.table_name:
+            msg = "Table name is required"
+            raise ValueError(msg)
+        if self.records_processed < 0:
+            msg = "Records processed cannot be negative"
+            raise ValueError(msg)
+        if self.records_failed < 0:
+            msg = "Records failed cannot be negative"
+            raise ValueError(msg)
 
-class LoadStatistics(DomainBaseModel):
+        # Validate status consistency
+        if self.status == LoadJobStatus.COMPLETED and self.completed_at is None:
+            msg = "Completed jobs must have completion time"
+            raise ValueError(msg)
+        if (
+            self.status in {LoadJobStatus.RUNNING, LoadJobStatus.COMPLETED}
+            and self.started_at is None
+        ):
+            msg = "Running/completed jobs must have start time"
+            raise ValueError(msg)
+
+
+class LoadStatistics(FlextDomainBaseModel):
     """Load operation statistics."""
+
+    model_config: ClassVar[ConfigDict] = ConfigDict(
+        frozen=False,  # Allow field mutations
+        validate_assignment=True,
+    )
 
     total_records: int = Field(default=0, ge=0, description="Total records processed")
     successful_records: int = Field(
@@ -226,6 +386,32 @@ class LoadStatistics(DomainBaseModel):
         if self.total_records == 0:
             return 0.0
         return (self.successful_records / self.total_records) * 100.0
+
+    def validate_domain_rules(self) -> None:
+        """Validate load statistics domain rules."""
+        if self.total_records < 0:
+            msg = "Total records cannot be negative"
+            raise ValueError(msg)
+        if self.successful_records < 0:
+            msg = "Successful records cannot be negative"
+            raise ValueError(msg)
+        if self.failed_records < 0:
+            msg = "Failed records cannot be negative"
+            raise ValueError(msg)
+        if self.total_batches < 0:
+            msg = "Total batches cannot be negative"
+            raise ValueError(msg)
+        if self.duration_seconds < 0:
+            msg = "Duration cannot be negative"
+            raise ValueError(msg)
+        if self.records_per_second < 0:
+            msg = "Records per second cannot be negative"
+            raise ValueError(msg)
+
+        # Validate consistency
+        if self.successful_records + self.failed_records != self.total_records:
+            msg = "Successful + failed records must equal total records"
+            raise ValueError(msg)
 
 
 # Rebuild models after imports are resolved

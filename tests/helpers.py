@@ -257,16 +257,11 @@ def oracle_connection(config: dict[str, Any] | None = None) -> Generator[Any]:
     if config is None:
         config = get_test_config()
 
-    from flext_target_oracle.connectors import OracleConnector
-
-    connector = OracleConnector(config)
-    engine = connector._engine
-
-    try:
-        with engine.connect() as conn:
-            yield conn
-    finally:
-        engine.dispose()
+    # NOTE: OracleConnector module was removed as it was duplicated functionality
+    # Now using centralized flext-db-oracle connection service
+    # TODO: Implement proper test connection using flext-db-oracle
+    msg = "Test connection needs to be updated to use flext-db-oracle"
+    raise NotImplementedError(msg)
 
 
 def clean_test_table(table_name: str, config: dict[str, Any] | None = None) -> None:
@@ -346,20 +341,11 @@ def setup_test_table(
     # Clean up first
     clean_test_table(table_name, config)
 
-    # Create table using connector
-    from flext_target_oracle.connectors import OracleConnector
-
-    connector = OracleConnector(config)
-    connector.prepare_table(
-        full_table_name=table_name,
-        schema=schema,
-        primary_keys=[],
-        as_temp_table=False,
-    )
-    log.error(
-        "✅ Created test table: %s",
-        table_name,
-    )
+    # NOTE: OracleConnector module was removed as it was duplicated functionality
+    # Now using centralized flext-db-oracle connection service
+    # TODO: Implement proper table setup using flext-db-oracle
+    msg = "Test table setup needs to be updated to use flext-db-oracle"
+    raise NotImplementedError(msg)
 
 
 class TestTableManager:

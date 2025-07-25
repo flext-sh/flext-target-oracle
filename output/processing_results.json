@@ -1,0 +1,22 @@
+{
+  "processing_summary": {
+    "total_records_processed": 0,
+    "successful_inserts": 0,
+    "failed_inserts": 0,
+    "total_streams": 0,
+    "processing_time_seconds": 0.0,
+    "last_processed_at": null
+  },
+  "streams": {},
+  "errors": [],
+  "performance_metrics": {
+    "records_per_second": 0.0,
+    "peak_memory_usage_mb": 0.0,
+    "database_connections_used": 0
+  },
+  "configuration": {
+    "batch_size": 10000,
+    "target_schema": "TARGET_SCHEMA",
+    "load_method": "append-only"
+  }
+}

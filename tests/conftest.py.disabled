@@ -21,7 +21,7 @@ import pytest
 # Add src directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from flext_db_oracle import OracleConfig
+from flext_db_oracle import FlextDbOracleConfig
 
 
 @pytest.fixture(scope="session")
@@ -152,11 +152,11 @@ def oracle_config() -> dict[str, Any]:
 
 
 @pytest.fixture
-def oracle_config_instance(oracle_config: dict[str, Any]) -> OracleConfig:
+def oracle_config_instance(oracle_config: dict[str, Any]) -> FlextDbOracleConfig:
     """Create OracleConfig instance from REAL Oracle configuration."""
     # Extract flat configuration from nested structure
     connection = oracle_config["connection"]
-    return OracleConfig(
+    return FlextDbOracleConfig(
         host=connection["host"],
         port=connection["port"],
         service_name=connection["service_name"],
