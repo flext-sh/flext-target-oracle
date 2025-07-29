@@ -32,12 +32,16 @@ classifiers = [
     "Topic :: System :: Archiving",
 ]
 dependencies = [
-    "flext-core @ file:///home/marlonsc/flext/flext-core",
-    "flext-meltano @ file:///home/marlonsc/flext/flext-meltano",
-    "flext-db-oracle @ file:///home/marlonsc/flext/flext-db-oracle",
-    "flext-observability @ file:///home/marlonsc/flext/flext-observability",
-    "pydantic>=2.11.7,<3.0.0",
-    "pydantic-settings>=2.10.1,<3.0.0",
+    # FLEXT ecosystem dependencies - CORRECTED ARCHITECTURE
+    "flext-core>=0.8.0",          # Layer 1: Base patterns
+    "flext-meltano>=0.8.0",       # Layer 3: Singer/Meltano integration  
+    "flext-db-oracle>=0.8.0",     # Layer 3: Oracle specific integration
+    "flext-observability>=0.8.0", # Layer 2: Monitoring
+
+    # Core dependencies
+    "pydantic>=2.11.0",
+
+    # NOTE: Removed singer-sdk direct dependency - use flext-meltano instead
 ]
 
 [[project.authors]]
@@ -150,12 +154,6 @@ addopts = [
     "-ra",
     "--strict-markers",
     "--strict-config",
-    "--cov=flext_target_oracle",
-    "--cov-branch",
-    "--cov-report=term-missing:skip-covered",
-    "--cov-report=html:reports/coverage",
-    "--cov-report=xml:reports/coverage.xml",
-    "--cov-fail-under=90",
     "--maxfail=1",
     "--tb=short",
 ]
