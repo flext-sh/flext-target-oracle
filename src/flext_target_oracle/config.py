@@ -1,6 +1,7 @@
-"""Oracle Target Configuration - Simple and clean.
+"""Configuration classes for FLEXT Target Oracle using flext-core patterns.
 
-Uses flext-core patterns for configuration management.
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
@@ -9,107 +10,101 @@ from enum import StrEnum
 from typing import Any
 
 from flext_core import FlextResult, FlextValueObject
+from pydantic import Field, field_validator
 
 
 class LoadMethod(StrEnum):
     """Oracle load methods."""
 
-    APPEND_ONLY = "append-only"
-    UPSERT = "upsert"
-    TRUNCATE_INSERT = "truncate-insert"
+    INSERT = "insert"
+    MERGE = "merge"
+    BULK_INSERT = "bulk_insert"
+    BULK_MERGE = "bulk_merge"
 
 
 class FlextOracleTargetConfig(FlextValueObject):
-    """Oracle target configuration using flext-core patterns."""
+    """Configuration for FLEXT Target Oracle using flext-core patterns."""
 
-    # Oracle connection settings
-    oracle_host: str
-    oracle_port: int = 1521
-    oracle_service_name: str | None = None
-    oracle_sid: str | None = None
-    oracle_username: str
-    oracle_password: str
-    oracle_protocol: str = "tcp"
-    oracle_pool_min_size: int = 1
-    oracle_pool_max_size: int = 2
+    oracle_host: str = Field(..., description="Oracle host")
+    oracle_port: int = Field(default=1521, description="Oracle port")
+    oracle_service: str = Field(..., description="Oracle service name")
+    oracle_user: str = Field(..., description="Oracle username")
+    oracle_password: str = Field(..., description="Oracle password")
+    default_target_schema: str = Field(default="target", description="Default target schema")
+    load_method: LoadMethod = Field(default=LoadMethod.INSERT, description="Load method")
+    use_bulk_operations: bool = Field(default=True, description="Use bulk operations")
+    batch_size: int = Field(default=1000, description="Batch size for operations")
+    connection_timeout: int = Field(default=30, description="Connection timeout in seconds")
 
-    # Target settings
-    default_target_schema: str = "SINGER_DATA"
-    table_prefix: str = ""
-    batch_size: int = 1000
-    max_parallel_streams: int = 1
-    load_method: LoadMethod = LoadMethod.APPEND_ONLY
-    use_bulk_operations: bool = True
+    @field_validator("oracle_port")
+    @classmethod
+    def validate_oracle_port(cls, v: int) -> int:
+        """Validate Oracle port is in valid range."""
+        if not (1 <= v <= 65535):
+            msg = "Oracle port must be between 1 and 65535"
+            raise ValueError(msg)
+        return v
+
+    @field_validator("batch_size")
+    @classmethod
+    def validate_batch_size(cls, v: int) -> int:
+        """Validate batch size is positive."""
+        if v <= 0:
+            msg = "Batch size must be positive"
+            raise ValueError(msg)
+        return v
+
+    @field_validator("connection_timeout")
+    @classmethod
+    def validate_connection_timeout(cls, v: int) -> int:
+        """Validate connection timeout is positive."""
+        if v <= 0:
+            msg = "Connection timeout must be positive"
+            raise ValueError(msg)
+        return v
 
     def validate_domain_rules(self) -> FlextResult[None]:
-        """Validate Oracle configuration rules."""
-        # Validate Oracle connection
-        if not self.oracle_host:
-            return FlextResult.fail("Oracle host is required")
+        """Validate domain-specific business rules."""
+        try:
+            # Validate required connection fields
+            if not self.oracle_host:
+                return FlextResult.fail("Oracle host is required")
 
-        if not (1 <= self.oracle_port <= 65535):
-            return FlextResult.fail("Oracle port must be between 1 and 65535")
+            if not self.oracle_service:
+                return FlextResult.fail("Oracle service is required")
 
-        if not self.oracle_username:
-            return FlextResult.fail("Oracle username is required")
+            if not self.oracle_user:
+                return FlextResult.fail("Oracle username is required")
 
-        if not self.oracle_password:
-            return FlextResult.fail("Oracle password is required")
+            if not self.oracle_password:
+                return FlextResult.fail("Oracle password is required")
 
-        if not self.oracle_service_name and not self.oracle_sid:
-            return FlextResult.fail("Either service_name or sid is required")
+            # Validate schema name
+            if not self.default_target_schema:
+                return FlextResult.fail("Target schema is required")
 
-        # Validate target settings
-        if self.batch_size <= 0:
-            return FlextResult.fail("Batch size must be positive")
-
-        if self.max_parallel_streams <= 0:
-            return FlextResult.fail("Max parallel streams must be positive")
-
-        return FlextResult.ok(None)
+            return FlextResult.ok(None)
+        except Exception as e:
+            return FlextResult.fail(f"Configuration validation failed: {e}")
 
     def get_oracle_config(self) -> dict[str, Any]:
-        """Get Oracle connection configuration."""
+        """Get Oracle configuration for flext-db-oracle."""
         return {
             "host": self.oracle_host,
             "port": self.oracle_port,
-            "service_name": self.oracle_service_name,
-            "sid": self.oracle_sid,
-            "username": self.oracle_username,
+            "service": self.oracle_service,
+            "user": self.oracle_user,
             "password": self.oracle_password,
-            "protocol": self.oracle_protocol,
-            "pool_min_size": self.oracle_pool_min_size,
-            "pool_max_size": self.oracle_pool_max_size,
+            "connection_timeout": self.connection_timeout,
         }
 
     def get_table_name(self, stream_name: str) -> str:
-        """Generate table name from stream name."""
-        # Clean stream name
-        clean_name = stream_name.upper().replace("-", "_").replace(".", "_")
+        """Get table name for a stream."""
+        # Simple mapping - could be enhanced with custom table naming
+        return stream_name.replace("-", "_").replace(".", "_").upper()
 
-        # Add prefix if configured
-        if self.table_prefix:
-            return f"{self.table_prefix}{clean_name}"
 
-        return clean_name
-
-    def get_raw_config(self) -> dict[str, Any]:
-        """Get raw configuration as dict for compatibility with flext-meltano."""
-        return {
-            "host": self.oracle_host,
-            "port": self.oracle_port,
-            "service_name": self.oracle_service_name,
-            "sid": self.oracle_sid,
-            "username": self.oracle_username,
-            "password": self.oracle_password,
-            "protocol": self.oracle_protocol,
-            "pool_min_size": self.oracle_pool_min_size,
-            "pool_max_size": self.oracle_pool_max_size,
-            "default_target_schema": self.default_target_schema,
-            "table_prefix": self.table_prefix,
-            "batch_size": self.batch_size,
-            "max_parallel_streams": self.max_parallel_streams,
-            "load_method": self.load_method.value
-            if self.load_method
-            else "append-only",
-        }
+__all__ = [
+    "FlextOracleTargetConfig",
+    "LoadMethod",
+]

@@ -10,11 +10,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from flext_core import FlextResult, get_logger
-from flext_db_oracle import FlextDbOracleConfig
-from flext_db_oracle.application.services import (
-    FlextDbOracleConnectionService,
-    FlextDbOracleQueryService,
-)
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 
 if TYPE_CHECKING:
     from flext_target_oracle.config import FlextOracleTargetConfig
@@ -29,10 +25,9 @@ class FlextOracleTargetLoader:
         """Initialize Oracle loader."""
         self.config = config
 
-        # Oracle services from flext-db-oracle
+        # Oracle API from flext-db-oracle
         oracle_config = FlextDbOracleConfig(**config.get_oracle_config())
-        self.connection_service = FlextDbOracleConnectionService(oracle_config)
-        self.query_service = FlextDbOracleQueryService(self.connection_service)
+        self.oracle_api = FlextDbOracleApi(oracle_config)
 
         # Buffers for batch processing
         self._record_buffers: dict[str, list[dict[str, Any]]] = {}
@@ -56,7 +51,7 @@ class FlextOracleTargetLoader:
             AND table_name = UPPER(:table_name)
             """
 
-            result = await self.query_service.execute_scalar(
+            result = self.oracle_api.query_one(
                 check_sql,
                 {
                     "schema_name": self.config.default_target_schema,
@@ -69,7 +64,7 @@ class FlextOracleTargetLoader:
                     f"Failed to check table existence: {result.error}",
                 )
 
-            table_exists = result.data and result.data > 0
+            table_exists = result.data and len(result.data) > 0 and result.data[0] > 0
 
             if not table_exists:
                 # Create table using simple JSON storage
@@ -194,11 +189,13 @@ class FlextOracleTargetLoader:
                 }
                 params.append(param)
 
-            # Execute insert using flext-db-oracle
-            async with self.connection_service.get_connection() as conn:
-                with conn.cursor() as cursor:
-                    cursor.executemany(sql, params)
-                    conn.commit()
+            # Execute insert using flext-db-oracle API - simplified approach
+            # For now, use execute_ddl for each record individually
+            for param in params:
+                parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(":extracted_at", f"'{param['extracted_at']}'")
+                result = self.oracle_api.execute_ddl(parameterized_sql)
+                if not result.is_success:
+                    return FlextResult.fail(f"Insert failed: {result.error}")
 
             return FlextResult.ok(None)
 
@@ -224,11 +221,10 @@ class FlextOracleTargetLoader:
             """
             create_sql = create_sql_template.format(table_full)
 
-            # Execute via flext-db-oracle
-            async with self.connection_service.get_connection() as conn:
-                with conn.cursor() as cursor:
-                    cursor.execute(create_sql)
-                    conn.commit()
+            # Execute via flext-db-oracle API
+            result = self.oracle_api.execute_ddl(create_sql)
+            if not result.is_success:
+                return FlextResult.fail(f"Table creation failed: {result.error}")
 
             return FlextResult.ok(None)
 
