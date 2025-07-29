@@ -1,13 +1,7 @@
-"""FLEXT Target Oracle - Wrapper for flext-meltano consolidated implementation.
+"""FLEXT Target Oracle - Self-contained Oracle target implementation.
 
-CONSOLIDATION: This project is now a library wrapper that imports the real
-Singer/Meltano/DBT consolidated implementations from flext-meltano to eliminate
-code duplication across the FLEXT ecosystem.
-
-This follows the architectural principle:
-- flext-* projects are LIBRARIES, not services
-- tap/target/dbt/ext are Meltano plugins
-- Real implementations are in flext-meltano
+This project provides a complete Singer target for Oracle Database using flext-core
+patterns and flext-db-oracle infrastructure.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -18,13 +12,10 @@ from __future__ import annotations
 # Import flext-core patterns for consistency
 from flext_core import FlextError, FlextResult
 
-# Import consolidated implementations from flext-meltano
-# MIGRATED: Singer SDK imports centralized via flext-meltano
-from flext_meltano.targets.oracle import (
-    FlextOracleTarget,
-    FlextOracleTargetConfig,
-    LoadMethod,
-)
+from flext_target_oracle.config import FlextOracleTargetConfig, LoadMethod
+
+# Import local implementations
+from flext_target_oracle.target import FlextOracleTarget
 
 
 # Local exceptions for backward compatibility

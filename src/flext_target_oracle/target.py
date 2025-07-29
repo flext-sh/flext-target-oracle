@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Any
 
 from flext_core import FlextResult, get_logger
-from flext_meltano import FlextBatchTarget
+from flext_meltano import Target
 
 from flext_target_oracle.config import FlextOracleTargetConfig
 from flext_target_oracle.loader import FlextOracleTargetLoader
@@ -16,15 +16,32 @@ from flext_target_oracle.loader import FlextOracleTargetLoader
 logger = get_logger(__name__)
 
 
-class FlextOracleTarget(FlextBatchTarget):
+class FlextOracleTarget(Target):
     """Oracle Singer Target using flext-meltano patterns."""
 
     name = "flext-oracle-target"
     config_class = FlextOracleTargetConfig
 
-    def __init__(self, config: dict[str, Any] | FlextOracleTargetConfig) -> None:
+    def __init__(self, config: dict[str, Any] | FlextOracleTargetConfig | None = None) -> None:
         """Initialize Oracle target."""
-        super().__init__(config=config)
+        # Initialize base Singer Target with dict config
+        dict_config = config if isinstance(config, dict) else {}
+        super().__init__(config=dict_config)
+
+        # Convert config to FlextOracleTargetConfig if needed
+        if isinstance(config, FlextOracleTargetConfig):
+            self.target_config = config
+        elif isinstance(config, dict):
+            self.target_config = FlextOracleTargetConfig.model_validate(config)
+        else:
+            # Create a minimal config for testing
+            self.target_config = FlextOracleTargetConfig(
+                oracle_host="localhost",
+                oracle_service="xe",
+                oracle_user="test",
+                oracle_password="test",
+            )
+
         self._loader = FlextOracleTargetLoader(self.target_config)
 
     def _test_connection_impl(self) -> bool:
