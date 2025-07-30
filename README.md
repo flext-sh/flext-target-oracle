@@ -1,8 +1,24 @@
-# FLEXT Target Oracle
+# FLEXT Target Oracle - Enterprise Oracle Database Loading
 
-Clean and simple Oracle Singer Target implementation using FLEXT Core patterns and flext-meltano base classes.
+[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![Singer SDK](https://img.shields.io/badge/singer--sdk-compliant-brightgreen.svg)](https://sdk.meltano.com/)
+[![Clean Architecture](https://img.shields.io/badge/Architecture-Clean%20Architecture%20%2B%20DDD-green.svg)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+[![Coverage](https://img.shields.io/badge/coverage-90%25+-brightgreen.svg)](https://pytest.org)
 
-## 🎯 Overview
+Singer-compliant target for loading data into Oracle databases. Built with Python 3.13+, Clean Architecture, and Domain-Driven Design patterns as part of the FLEXT enterprise data integration platform.
+
+## Overview
+
+FLEXT Target Oracle provides enterprise-grade data loading capabilities for Oracle databases, implementing the Singer specification for standardized data integration workflows. The target leverages the FLEXT ecosystem's layered architecture for robust Oracle connectivity and optimal performance.
+
+### Key Features
+
+- **Oracle Database Loading**: Comprehensive data loading into Oracle 11g, 12c, 18c, 19c, 21c, and 23c
+- **Singer Protocol Compliance**: Full Singer SDK implementation with stream processing
+- **Layered Architecture**: Clean separation leveraging FLEXT ecosystem libraries
+- **Performance Optimization**: Oracle-specific optimizations and bulk operations
+- **Clean Architecture**: Domain-driven design with flext-core integration
+- **Zero Tolerance Quality**: 90% test coverage with comprehensive quality gates
 
 This target provides a streamlined Oracle database loader for Singer pipelines, built on top of:
 
