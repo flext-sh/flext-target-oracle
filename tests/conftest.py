@@ -11,14 +11,14 @@ from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, Load
 def sample_config() -> FlextOracleTargetConfig:
     """Sample configuration for testing."""
     return FlextOracleTargetConfig(
-        host="localhost",
-        port=1521,
-        service_name="XE",
-        username="test_user",
-        password="test_pass",
+        oracle_host="localhost",
+        oracle_port=1521,
+        oracle_service="XE",
+        oracle_user="test_user",
+        oracle_password="test_pass",
         default_target_schema="TEST_SCHEMA",
         batch_size=1000,
-        load_method=LoadMethod.APPEND_ONLY,
+        load_method=LoadMethod.INSERT,
     )
 
 

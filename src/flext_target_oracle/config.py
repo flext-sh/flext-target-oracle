@@ -92,10 +92,10 @@ class FlextOracleTargetConfig(FlextValueObject):
         return {
             "host": self.oracle_host,
             "port": self.oracle_port,
-            "service": self.oracle_service,
-            "user": self.oracle_user,
+            "service_name": self.oracle_service,
+            "username": self.oracle_user,
             "password": self.oracle_password,
-            "connection_timeout": self.connection_timeout,
+            # connection_timeout is not supported by FlextDbOracleConfig
         }
 
     def get_table_name(self, stream_name: str) -> str:
