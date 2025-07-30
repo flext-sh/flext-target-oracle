@@ -199,7 +199,8 @@ class FlextOracleTargetLoader:
             # For now, use execute_ddl for each record individually
             for param in params:
                 parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
-                    ":extracted_at", f"'{param['extracted_at']}'",
+                    ":extracted_at",
+                    f"'{param['extracted_at']}'",
                 )
                 result = self.oracle_api.execute_ddl(parameterized_sql)
                 if not result.is_success:

@@ -161,7 +161,10 @@ class TestFlextOracleTargetExceptions:
                 raise FlextOracleTargetConnectionError(msg)
 
             def __exit__(
-                self, exc_type: object, exc_val: object, exc_tb: object,
+                self,
+                exc_type: object,
+                exc_val: object,
+                exc_tb: object,
             ) -> None:
                 pass
 

@@ -12,7 +12,8 @@ sys.path.insert(0, os.path.join(pathlib.Path(__file__).parent, "src"))
 import importlib.util
 
 spec = importlib.util.spec_from_file_location(
-    "exceptions", "src/flext_target_oracle/exceptions.py",
+    "exceptions",
+    "src/flext_target_oracle/exceptions.py",
 )
 exceptions_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(exceptions_module)

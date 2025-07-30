@@ -23,7 +23,8 @@ class FlextOracleTarget(Target):
     config_class = FlextOracleTargetConfig
 
     def __init__(
-        self, config: dict[str, Any] | FlextOracleTargetConfig | None = None,
+        self,
+        config: dict[str, Any] | FlextOracleTargetConfig | None = None,
     ) -> None:
         """Initialize Oracle target."""
         # Initialize base Singer Target with dict config
