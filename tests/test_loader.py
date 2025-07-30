@@ -1,17 +1,14 @@
 """Unit tests for Oracle Loader using flext-db-oracle."""
 
-from unittest.mock import AsyncMock, MagicMock, patch
-
 import pytest
-from flext_core import FlextResult
 
 from flext_target_oracle.config import FlextOracleTargetConfig, LoadMethod
 from flext_target_oracle.loader import FlextOracleTargetLoader
 
-
 # Constants
 EXPECTED_BULK_SIZE = 2
 EXPECTED_DATA_COUNT = 3
+
 
 class TestFlextOracleTargetLoader:
     """Test Oracle Loader implementation."""
@@ -32,16 +29,17 @@ class TestFlextOracleTargetLoader:
 
     @pytest.fixture
     def mock_loader(
-        self, sample_config: FlextOracleTargetConfig
+        self,
+        sample_config: FlextOracleTargetConfig,
     ) -> FlextOracleTargetLoader:
         """Mock loader with mocked Oracle services."""
         # Since flext-db-oracle imports are commented out, we don't need to mock them
-        loader = FlextOracleTargetLoader(sample_config)
-        return loader
+        return FlextOracleTargetLoader(sample_config)
 
     @pytest.mark.asyncio
     async def test_loader_initialization(
-        self, sample_config: FlextOracleTargetConfig
+        self,
+        sample_config: FlextOracleTargetConfig,
     ) -> None:
         """Test loader initialization."""
         # Since flext-db-oracle imports are commented out, we just test basic initialization
@@ -49,14 +47,17 @@ class TestFlextOracleTargetLoader:
 
         # Verify buffers are initialized
         if loader._record_buffers != {}:
-            raise AssertionError(f"Expected {{}}, got {loader._record_buffers}")
+            msg = f"Expected {{}}, got {loader._record_buffers}"
+            raise AssertionError(msg)
         assert loader._total_records == 0
         if loader.config != sample_config:
-            raise AssertionError(f"Expected {sample_config}, got {loader.config}")
+            msg = f"Expected {sample_config}, got {loader.config}"
+            raise AssertionError(msg)
 
     @pytest.mark.asyncio
     async def test_ensure_table_exists_success(
-        self, mock_loader: FlextOracleTargetLoader
+        self,
+        mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test ensure_table_exists when table already exists."""
         stream_name = "users"
@@ -68,21 +69,25 @@ class TestFlextOracleTargetLoader:
 
     @pytest.mark.asyncio
     async def test_load_record_buffering(
-        self, mock_loader: FlextOracleTargetLoader
+        self,
+        mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test record loading with buffering."""
         result = await mock_loader.load_record("users", {"id": 1, "name": "John"})
 
         assert result.is_success
         if "users" not in mock_loader._record_buffers:
-            raise AssertionError(f"Expected {"users"} in {mock_loader._record_buffers}")
+            msg = f"Expected {'users'} in {mock_loader._record_buffers}"
+            raise AssertionError(msg)
         if len(mock_loader._record_buffers["users"]) != 1:
-            raise AssertionError(f"Expected {1}, got {len(mock_loader._record_buffers["users"])}")
+            msg = f"Expected {1}, got {len(mock_loader._record_buffers['users'])}"
+            raise AssertionError(msg)
         assert mock_loader._record_buffers["users"][0] == {"id": 1, "name": "John"}
 
     @pytest.mark.asyncio
     async def test_load_record_batch_flush(
-        self, mock_loader: FlextOracleTargetLoader
+        self,
+        mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test record loading that triggers batch flush."""
         # Set batch size to 1 to trigger immediate flush
@@ -102,11 +107,13 @@ class TestFlextOracleTargetLoader:
         assert result.is_success
         # Buffer should be empty after flush
         if mock_loader._record_buffers["users"] != []:
-            raise AssertionError(f"Expected {[]}, got {mock_loader._record_buffers["users"]}")
+            msg = f"Expected {[]}, got {mock_loader._record_buffers['users']}"
+            raise AssertionError(msg)
 
     @pytest.mark.asyncio
     async def test_finalize_all_streams_success(
-        self, mock_loader: FlextOracleTargetLoader
+        self,
+        mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test successful finalization of all streams."""
         # Add some records to buffers
@@ -119,14 +126,17 @@ class TestFlextOracleTargetLoader:
         # Check result.data is not None before indexing
         assert result.data is not None, "Result data should not be None"
         if result.data["total_records"] != EXPECTED_DATA_COUNT:
-            raise AssertionError(f"Expected {3}, got {result.data["total_records"]}")
+            msg = f"Expected {3}, got {result.data['total_records']}"
+            raise AssertionError(msg)
         assert result.data["successful_records"] == EXPECTED_DATA_COUNT
         if result.data["failed_records"] != 0:
-            raise AssertionError(f"Expected {0}, got {result.data["failed_records"]}")
+            msg = f"Expected {0}, got {result.data['failed_records']}"
+            raise AssertionError(msg)
 
     @pytest.mark.asyncio
     async def test_flush_batch_empty_buffer(
-        self, mock_loader: FlextOracleTargetLoader
+        self,
+        mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test flushing empty buffer."""
         result = await mock_loader._flush_batch("users")
@@ -135,7 +145,8 @@ class TestFlextOracleTargetLoader:
 
     @pytest.mark.asyncio
     async def test_flush_batch_success(
-        self, mock_loader: FlextOracleTargetLoader
+        self,
+        mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test successful batch flush."""
         # Add records to buffer
@@ -145,12 +156,14 @@ class TestFlextOracleTargetLoader:
 
         assert result.is_success
         if mock_loader._total_records != EXPECTED_BULK_SIZE:
-            raise AssertionError(f"Expected {2}, got {mock_loader._total_records}")
+            msg = f"Expected {2}, got {mock_loader._total_records}"
+            raise AssertionError(msg)
         assert mock_loader._record_buffers["users"] == []  # Buffer cleared
 
     @pytest.mark.asyncio
     async def test_insert_batch_success(
-        self, mock_loader: FlextOracleTargetLoader
+        self,
+        mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test successful batch insert."""
         records = [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}]
@@ -161,7 +174,8 @@ class TestFlextOracleTargetLoader:
 
     @pytest.mark.asyncio
     async def test_insert_batch_empty_records(
-        self, mock_loader: FlextOracleTargetLoader
+        self,
+        mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test batch insert with empty records."""
         result = await mock_loader._insert_batch("users", [])
@@ -170,7 +184,8 @@ class TestFlextOracleTargetLoader:
 
     @pytest.mark.asyncio
     async def test_create_table_success(
-        self, mock_loader: FlextOracleTargetLoader
+        self,
+        mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test successful table creation."""
         result = await mock_loader._create_table("users")
@@ -181,25 +196,31 @@ class TestFlextOracleTargetLoader:
         """Test basic table name generation."""
         table_name = mock_loader.config.get_table_name("users")
         if table_name != "USERS":
-            raise AssertionError(f"Expected {"USERS"}, got {table_name}")
+            msg = f"Expected {'USERS'}, got {table_name}"
+            raise AssertionError(msg)
 
     def test_get_table_name_with_prefix(
-        self, mock_loader: FlextOracleTargetLoader
+        self,
+        mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test table name generation with prefix."""
         # table_prefix doesn't exist in real API - test standard behavior
         table_name = mock_loader.config.get_table_name("users")
         if table_name != "USERS":
-            raise AssertionError(f"Expected {"USERS"}, got {table_name}")
+            msg = f"Expected {'USERS'}, got {table_name}"
+            raise AssertionError(msg)
 
     def test_get_table_name_special_chars(
-        self, mock_loader: FlextOracleTargetLoader
+        self,
+        mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test table name generation with special characters."""
         table_name = mock_loader.config.get_table_name("user-profiles")
         if table_name != "USER_PROFILES":
-            raise AssertionError(f"Expected {"USER_PROFILES"}, got {table_name}")
+            msg = f"Expected {'USER_PROFILES'}, got {table_name}"
+            raise AssertionError(msg)
 
         table_name = mock_loader.config.get_table_name("orders.items")
         if table_name != "ORDERS_ITEMS":
-            raise AssertionError(f"Expected {"ORDERS_ITEMS"}, got {table_name}")
+            msg = f"Expected {'ORDERS_ITEMS'}, got {table_name}"
+            raise AssertionError(msg)

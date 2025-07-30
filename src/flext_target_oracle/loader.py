@@ -34,7 +34,9 @@ class FlextOracleTargetLoader:
         self._total_records = 0
 
     async def ensure_table_exists(
-        self, stream_name: str, schema: dict[str, Any],
+        self,
+        stream_name: str,
+        schema: dict[str, Any],
     ) -> FlextResult[None]:
         """Ensure target table exists with correct schema."""
         try:
@@ -82,7 +84,9 @@ class FlextOracleTargetLoader:
             return FlextResult.fail(f"Table creation failed: {e}")
 
     async def load_record(
-        self, stream_name: str, record_data: dict[str, Any],
+        self,
+        stream_name: str,
+        record_data: dict[str, Any],
     ) -> FlextResult[None]:
         """Load a single record (buffered for batch processing)."""
         try:
@@ -165,7 +169,9 @@ class FlextOracleTargetLoader:
             return FlextResult.fail(f"Batch flush failed: {e}")
 
     async def _insert_batch(
-        self, table_name: str, records: list[dict[str, Any]],
+        self,
+        table_name: str,
+        records: list[dict[str, Any]],
     ) -> FlextResult[None]:
         """Insert batch of records using flext-db-oracle."""
         try:
@@ -192,7 +198,9 @@ class FlextOracleTargetLoader:
             # Execute insert using flext-db-oracle API - simplified approach
             # For now, use execute_ddl for each record individually
             for param in params:
-                parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(":extracted_at", f"'{param['extracted_at']}'")
+                parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
+                    ":extracted_at", f"'{param['extracted_at']}'",
+                )
                 result = self.oracle_api.execute_ddl(parameterized_sql)
                 if not result.is_success:
                     return FlextResult.fail(f"Insert failed: {result.error}")

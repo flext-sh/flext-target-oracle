@@ -23,7 +23,7 @@ FLEXT Target Oracle provides enterprise-grade data loading capabilities for Orac
 This target provides a streamlined Oracle database loader for Singer pipelines, built on top of:
 
 - **flext-core**: Core patterns and utilities
-- **flext-meltano**: Singer SDK integration and base classes  
+- **flext-meltano**: Singer SDK integration and base classes
 - **flext-db-oracle**: Oracle database operations
 
 ## 🏗️ Architecture
@@ -82,10 +82,10 @@ schema_msg = {
     "schema": {"type": "object", "properties": {...}}
 }
 
-# Record message  
+# Record message
 record_msg = {
     "type": "RECORD",
-    "stream": "users", 
+    "stream": "users",
     "record": {"id": 1, "name": "John"}
 }
 
@@ -97,22 +97,22 @@ await target.finalize()
 
 ## 📋 Configuration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `host` | str | - | Oracle host |
-| `port` | int | 1521 | Oracle port |
-| `service_name` | str | - | Oracle service name |
-| `sid` | str | - | Oracle SID (alternative to service_name) |
-| `username` | str | - | Oracle username |
-| `password` | str | - | Oracle password |
-| `protocol` | str | "tcp" | Connection protocol |
-| `default_target_schema` | str | "SINGER_DATA" | Target schema for tables |
-| `table_prefix` | str | "" | Prefix for table names |
-| `load_method` | LoadMethod | APPEND_ONLY | Data loading strategy |
-| `batch_size` | int | 10000 | Records per batch |
-| `use_bulk_operations` | bool | True | Enable Oracle bulk operations |
-| `compression` | bool | False | Enable Oracle compression |
-| `parallel_degree` | int | 1 | Oracle parallel processing degree |
+| Option                  | Type       | Default       | Description                              |
+| ----------------------- | ---------- | ------------- | ---------------------------------------- |
+| `host`                  | str        | -             | Oracle host                              |
+| `port`                  | int        | 1521          | Oracle port                              |
+| `service_name`          | str        | -             | Oracle service name                      |
+| `sid`                   | str        | -             | Oracle SID (alternative to service_name) |
+| `username`              | str        | -             | Oracle username                          |
+| `password`              | str        | -             | Oracle password                          |
+| `protocol`              | str        | "tcp"         | Connection protocol                      |
+| `default_target_schema` | str        | "SINGER_DATA" | Target schema for tables                 |
+| `table_prefix`          | str        | ""            | Prefix for table names                   |
+| `load_method`           | LoadMethod | APPEND_ONLY   | Data loading strategy                    |
+| `batch_size`            | int        | 10000         | Records per batch                        |
+| `use_bulk_operations`   | bool       | True          | Enable Oracle bulk operations            |
+| `compression`           | bool       | False         | Enable Oracle compression                |
+| `parallel_degree`       | int        | 1             | Oracle parallel processing degree        |
 
 ## 🔧 Development
 

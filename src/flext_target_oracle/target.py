@@ -22,7 +22,9 @@ class FlextOracleTarget(Target):
     name = "flext-oracle-target"
     config_class = FlextOracleTargetConfig
 
-    def __init__(self, config: dict[str, Any] | FlextOracleTargetConfig | None = None) -> None:
+    def __init__(
+        self, config: dict[str, Any] | FlextOracleTargetConfig | None = None,
+    ) -> None:
         """Initialize Oracle target."""
         # Initialize base Singer Target with dict config
         dict_config = config if isinstance(config, dict) else {}
@@ -65,7 +67,8 @@ class FlextOracleTarget(Target):
             return False
 
     async def _write_records_impl(
-        self, records: list[dict[str, Any]],
+        self,
+        records: list[dict[str, Any]],
     ) -> FlextResult[None]:
         """Write records to Oracle using loader."""
         try:
@@ -89,7 +92,8 @@ class FlextOracleTarget(Target):
             return FlextResult.fail(f"Record writing failed: {e}")
 
     async def process_singer_message(
-        self, message: dict[str, Any],
+        self,
+        message: dict[str, Any],
     ) -> FlextResult[None]:
         """Process a Singer message."""
         try:

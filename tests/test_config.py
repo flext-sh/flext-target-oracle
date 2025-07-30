@@ -1,7 +1,6 @@
 """Tests for FlextOracleTargetConfig."""
 
 import pytest
-from flext_core import FlextResult
 from pydantic import ValidationError
 
 from flext_target_oracle.config import FlextOracleTargetConfig, LoadMethod
@@ -26,14 +25,17 @@ class TestFlextOracleTargetConfig:
         )
 
         if config.oracle_host != "localhost":
-            raise AssertionError(f"Expected {'localhost'}, got {config.oracle_host}")
+            msg = f"Expected {'localhost'}, got {config.oracle_host}"
+            raise AssertionError(msg)
         assert config.oracle_port == 1521
         if config.oracle_service != "XE":
-            raise AssertionError(f"Expected {'XE'}, got {config.oracle_service}")
+            msg = f"Expected {'XE'}, got {config.oracle_service}"
+            raise AssertionError(msg)
         assert config.oracle_user == "test_user"
         if config.oracle_password != "test_pass":
+            msg = f"Expected {'test_pass'}, got {config.oracle_password}"
             raise AssertionError(
-                f"Expected {'test_pass'}, got {config.oracle_password}"
+                msg,
             )
         assert config.default_target_schema == "TEST_SCHEMA"
 
@@ -47,15 +49,18 @@ class TestFlextOracleTargetConfig:
         )
 
         if config.oracle_port != 1521:
-            raise AssertionError(f"Expected {1521}, got {config.oracle_port}")
+            msg = f"Expected {1521}, got {config.oracle_port}"
+            raise AssertionError(msg)
         if config.default_target_schema != "target":
+            msg = f"Expected {'target'}, got {config.default_target_schema}"
             raise AssertionError(
-                f"Expected {'target'}, got {config.default_target_schema}"
+                msg,
             )
         assert config.batch_size == 1000
         assert config.load_method == LoadMethod.INSERT
         if not config.use_bulk_operations:
-            raise AssertionError(f"Expected True, got {config.use_bulk_operations}")
+            msg = f"Expected True, got {config.use_bulk_operations}"
+            raise AssertionError(msg)
         assert config.connection_timeout == 30
 
     def test_custom_values(self) -> None:
@@ -74,27 +79,34 @@ class TestFlextOracleTargetConfig:
         )
 
         if config.oracle_host != "oracle.example.com":
+            msg = f"Expected {'oracle.example.com'}, got {config.oracle_host}"
             raise AssertionError(
-                f"Expected {'oracle.example.com'}, got {config.oracle_host}"
+                msg,
             )
         assert config.oracle_port == 1522
         if config.oracle_service != "PROD":
-            raise AssertionError(f"Expected {'PROD'}, got {config.oracle_service}")
+            msg = f"Expected {'PROD'}, got {config.oracle_service}"
+            raise AssertionError(msg)
         assert config.oracle_user == "REDACTED_LDAP_BIND_PASSWORD"
         if config.oracle_password != "secret":
-            raise AssertionError(f"Expected {'secret'}, got {config.oracle_password}")
+            msg = f"Expected {'secret'}, got {config.oracle_password}"
+            raise AssertionError(msg)
         if config.default_target_schema != "DATA_WAREHOUSE":
+            msg = f"Expected {'DATA_WAREHOUSE'}, got {config.default_target_schema}"
             raise AssertionError(
-                f"Expected {'DATA_WAREHOUSE'}, got {config.default_target_schema}"
+                msg,
             )
         if config.batch_size != 5000:
-            raise AssertionError(f"Expected {5000}, got {config.batch_size}")
+            msg = f"Expected {5000}, got {config.batch_size}"
+            raise AssertionError(msg)
         if config.load_method != LoadMethod.MERGE:
+            msg = f"Expected {LoadMethod.MERGE}, got {config.load_method}"
             raise AssertionError(
-                f"Expected {LoadMethod.MERGE}, got {config.load_method}"
+                msg,
             )
         if config.use_bulk_operations:
-            raise AssertionError(f"Expected False, got {config.use_bulk_operations}")
+            msg = f"Expected False, got {config.use_bulk_operations}"
+            raise AssertionError(msg)
         assert config.connection_timeout == 60
 
     def test_validate_oracle_config_success(self) -> None:
@@ -123,8 +135,9 @@ class TestFlextOracleTargetConfig:
         result = config.validate_domain_rules()
         assert not result.is_success
         if result.error and "Oracle host is required" not in result.error:
+            msg = f"Expected 'Oracle host is required' in {result.error}"
             raise AssertionError(
-                f"Expected 'Oracle host is required' in {result.error}"
+                msg,
             )
 
     def test_validate_oracle_config_invalid_port(self) -> None:
@@ -140,8 +153,9 @@ class TestFlextOracleTargetConfig:
         result = config.validate_domain_rules()
         assert not result.is_success
         if result.error and "port must be between 1 and 65535" not in result.error:
+            msg = f"Expected 'port must be between 1 and 65535' in {result.error}"
             raise AssertionError(
-                f"Expected 'port must be between 1 and 65535' in {result.error}"
+                msg,
             )
 
     def test_validate_oracle_config_missing_username(self) -> None:
@@ -158,7 +172,8 @@ class TestFlextOracleTargetConfig:
         assert not result.is_success
         if result.error and "Oracle username is required" not in result.error:
             expected_msg = "Oracle username is required"
-            raise AssertionError(f"Expected '{expected_msg}' in {result.error}")
+            msg = f"Expected '{expected_msg}' in {result.error}"
+            raise AssertionError(msg)
 
     def test_validate_oracle_config_missing_password(self) -> None:
         """Test Oracle configuration validation with missing password."""
@@ -174,7 +189,8 @@ class TestFlextOracleTargetConfig:
         assert not result.is_success
         if result.error and "Oracle password is required" not in result.error:
             expected_msg = "Oracle password is required"
-            raise AssertionError(f"Expected '{expected_msg}' in {result.error}")
+            msg = f"Expected '{expected_msg}' in {result.error}"
+            raise AssertionError(msg)
 
     def test_validate_oracle_config_missing_service(self) -> None:
         """Test Oracle configuration validation with missing service."""
@@ -202,13 +218,16 @@ class TestFlextOracleTargetConfig:
         oracle_config = config.get_oracle_config()
 
         if oracle_config["host"] != "localhost":
-            raise AssertionError(f"Expected 'localhost', got {oracle_config['host']}")
+            msg = f"Expected 'localhost', got {oracle_config['host']}"
+            raise AssertionError(msg)
         assert oracle_config["port"] == 1521
         if oracle_config["service_name"] != "XE":
-            raise AssertionError(f"Expected 'XE', got {oracle_config['service_name']}")
+            msg = f"Expected 'XE', got {oracle_config['service_name']}"
+            raise AssertionError(msg)
         assert oracle_config["username"] == "test"
         if oracle_config["password"] != "test":
-            raise AssertionError(f"Expected 'test', got {oracle_config['password']}")
+            msg = f"Expected 'test', got {oracle_config['password']}"
+            raise AssertionError(msg)
         # connection_timeout is not included in FlextDbOracleConfig
 
     def test_get_table_name_basic(self) -> None:
@@ -222,7 +241,8 @@ class TestFlextOracleTargetConfig:
 
         table_name = config.get_table_name("users")
         if table_name != "USERS":
-            raise AssertionError(f"Expected {'USERS'}, got {table_name}")
+            msg = f"Expected {'USERS'}, got {table_name}"
+            raise AssertionError(msg)
 
     def test_get_table_name_uppercase(self) -> None:
         """Test table name generation with uppercase conversion."""
@@ -235,7 +255,8 @@ class TestFlextOracleTargetConfig:
 
         table_name = config.get_table_name("users")
         if table_name != "USERS":
-            raise AssertionError(f"Expected {'USERS'}, got {table_name}")
+            msg = f"Expected {'USERS'}, got {table_name}"
+            raise AssertionError(msg)
 
     def test_get_table_name_special_chars(self) -> None:
         """Test table name generation with special characters."""
@@ -248,7 +269,8 @@ class TestFlextOracleTargetConfig:
 
         table_name = config.get_table_name("user-profiles")
         if table_name != "USER_PROFILES":
-            raise AssertionError(f"Expected {'USER_PROFILES'}, got {table_name}")
+            msg = f"Expected {'USER_PROFILES'}, got {table_name}"
+            raise AssertionError(msg)
 
     def test_get_table_name_with_special_chars_only(self) -> None:
         """Test table name generation with special characters."""
@@ -261,16 +283,19 @@ class TestFlextOracleTargetConfig:
 
         table_name = config.get_table_name("user-profiles.data")
         if table_name != "USER_PROFILES_DATA":
-            raise AssertionError(f"Expected {'USER_PROFILES_DATA'}, got {table_name}")
+            msg = f"Expected {'USER_PROFILES_DATA'}, got {table_name}"
+            raise AssertionError(msg)
 
     def test_load_method_enum_values(self) -> None:
         """Test LoadMethod enum values."""
         if LoadMethod.INSERT.value != "insert":
-            raise AssertionError(f"Expected {'insert'}, got {LoadMethod.INSERT.value}")
+            msg = f"Expected {'insert'}, got {LoadMethod.INSERT.value}"
+            raise AssertionError(msg)
         assert LoadMethod.MERGE.value == "merge"
         if LoadMethod.BULK_INSERT.value != "bulk_insert":
+            msg = f"Expected {'bulk_insert'}, got {LoadMethod.BULK_INSERT.value}"
             raise AssertionError(
-                f"Expected {'bulk_insert'}, got {LoadMethod.BULK_INSERT.value}"
+                msg,
             )
         assert LoadMethod.BULK_MERGE.value == "bulk_merge"
 
@@ -285,7 +310,8 @@ class TestFlextOracleTargetConfig:
         )
 
         if config.load_method != LoadMethod.MERGE:
+            msg = f"Expected {LoadMethod.MERGE}, got {config.load_method}"
             raise AssertionError(
-                f"Expected {LoadMethod.MERGE}, got {config.load_method}"
+                msg,
             )
         assert config.load_method.value == "merge"
