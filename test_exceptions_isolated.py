@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """Isolated test for exceptions hierarchy without external dependencies."""
 
-import traceback
-
-
 import os
 import pathlib
 import sys
+import traceback
 
 sys.path.insert(0, os.path.join(pathlib.Path(__file__).parent, "src"))
 
 # Import directly from the exceptions module file
 import importlib.util
 
-spec = importlib.util.spec_from_file_location("exceptions", "src/flext_target_oracle/exceptions.py")
+spec = importlib.util.spec_from_file_location(
+    "exceptions", "src/flext_target_oracle/exceptions.py",
+)
 exceptions_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(exceptions_module)
 
@@ -30,7 +30,9 @@ OracleTargetApplicationException = exceptions_module.OracleTargetApplicationExce
 StreamProcessingException = exceptions_module.StreamProcessingException
 BatchProcessingException = exceptions_module.BatchProcessingException
 LoadOperationException = exceptions_module.LoadOperationException
-OracleTargetInfrastructureException = exceptions_module.OracleTargetInfrastructureException
+OracleTargetInfrastructureException = (
+    exceptions_module.OracleTargetInfrastructureException
+)
 OracleConnectionException = exceptions_module.OracleConnectionException
 OracleQueryException = exceptions_module.OracleQueryException
 OracleTableException = exceptions_module.OracleTableException
@@ -73,15 +75,18 @@ def test_domain_exceptions() -> None:
     )
 
     if exc.record_type != "INVALID":
-
-        raise AssertionError(f"Expected {"INVALID"}, got {exc.record_type}")
+        msg = f"Expected {'INVALID'}, got {exc.record_type}"
+        raise AssertionError(msg)
     assert exc.record_data == record_data
     if exc.code != "INVALID_SINGER_RECORD":
-        raise AssertionError(f"Expected {"INVALID_SINGER_RECORD"}, got {exc.code}")
+        msg = f"Expected {'INVALID_SINGER_RECORD'}, got {exc.code}"
+        raise AssertionError(msg)
     if "Invalid Singer record of type 'INVALID'" not in str(exc):
-        raise AssertionError(f"Expected {"Invalid Singer record of type 'INVALID'"} in {str(exc)}")
+        msg = f"Expected {"Invalid Singer record of type 'INVALID'"} in {exc!s}"
+        raise AssertionError(msg)
     if exc.context["record_type"] != "INVALID":
-        raise AssertionError(f"Expected {"INVALID"}, got {exc.context["record_type"]}")
+        msg = f"Expected {'INVALID'}, got {exc.context['record_type']}"
+        raise AssertionError(msg)
     assert exc.context["record_data"] == record_data
 
     # Test InvalidSchemaException
@@ -93,13 +98,15 @@ def test_domain_exceptions() -> None:
     )
 
     if exc.schema_name != "test_schema":
-
-        raise AssertionError(f"Expected {"test_schema"}, got {exc.schema_name}")
+        msg = f"Expected {'test_schema'}, got {exc.schema_name}"
+        raise AssertionError(msg)
     assert exc.schema_data == schema_data
     if exc.code != "INVALID_SCHEMA":
-        raise AssertionError(f"Expected {"INVALID_SCHEMA"}, got {exc.code}")
+        msg = f"Expected {'INVALID_SCHEMA'}, got {exc.code}"
+        raise AssertionError(msg)
     if "Invalid schema 'test_schema'" not in str(exc):
-        raise AssertionError(f"Expected {"Invalid schema 'test_schema'"} in {str(exc)}")
+        msg = f"Expected {"Invalid schema 'test_schema'"} in {exc!s}"
+        raise AssertionError(msg)
 
     # Test TargetConfigurationException
     config_data = {"host": "", "port": 1521}
@@ -110,13 +117,15 @@ def test_domain_exceptions() -> None:
     )
 
     if exc.field != "host":
-
-        raise AssertionError(f"Expected {"host"}, got {exc.field}")
+        msg = f"Expected {'host'}, got {exc.field}"
+        raise AssertionError(msg)
     assert exc.config_data == config_data
     if exc.code != "INVALID_TARGET_CONFIG":
-        raise AssertionError(f"Expected {"INVALID_TARGET_CONFIG"}, got {exc.code}")
+        msg = f"Expected {'INVALID_TARGET_CONFIG'}, got {exc.code}"
+        raise AssertionError(msg)
     if "Invalid configuration for field 'host'" not in str(exc):
-        raise AssertionError(f"Expected {"Invalid configuration for field 'host'"} in {str(exc)}")
+        msg = f"Expected {"Invalid configuration for field 'host'"} in {exc!s}"
+        raise AssertionError(msg)
 
 
 def test_application_exceptions() -> None:
@@ -130,13 +139,15 @@ def test_application_exceptions() -> None:
     )
 
     if exc.stream_name != "test_stream":
-
-        raise AssertionError(f"Expected {"test_stream"}, got {exc.stream_name}")
+        msg = f"Expected {'test_stream'}, got {exc.stream_name}"
+        raise AssertionError(msg)
     assert exc.error_details == error_details
     if exc.code != "STREAM_PROCESSING_ERROR":
-        raise AssertionError(f"Expected {"STREAM_PROCESSING_ERROR"}, got {exc.code}")
+        msg = f"Expected {'STREAM_PROCESSING_ERROR'}, got {exc.code}"
+        raise AssertionError(msg)
     if "Stream processing error for 'test_stream'" not in str(exc):
-        raise AssertionError(f"Expected {"Stream processing error for 'test_stream'"} in {str(exc)}")
+        msg = f"Expected {"Stream processing error for 'test_stream'"} in {exc!s}"
+        raise AssertionError(msg)
 
     # Test BatchProcessingException
     batch_data = {"batch_size": 1000, "processed": 800}
@@ -148,14 +159,16 @@ def test_application_exceptions() -> None:
     )
 
     if exc.batch_id != "batch_001":
-
-        raise AssertionError(f"Expected {"batch_001"}, got {exc.batch_id}")
+        msg = f"Expected {'batch_001'}, got {exc.batch_id}"
+        raise AssertionError(msg)
     assert exc.record_count == 1000
     if exc.batch_data != batch_data:
-        raise AssertionError(f"Expected {batch_data}, got {exc.batch_data}")
+        msg = f"Expected {batch_data}, got {exc.batch_data}"
+        raise AssertionError(msg)
     assert exc.code == "BATCH_PROCESSING_ERROR"
     if "Batch processing error for batch 'batch_001'" not in str(exc):
-        raise AssertionError(f"Expected {"Batch processing error for batch 'batch_001'"} in {str(exc)}")
+        msg = f"Expected {"Batch processing error for batch 'batch_001'"} in {exc!s}"
+        raise AssertionError(msg)
 
     # Test LoadOperationException
     operation_data = {"rows_affected": 0, "sql_state": "23000"}
@@ -167,14 +180,16 @@ def test_application_exceptions() -> None:
     )
 
     if exc.table_name != "test_table":
-
-        raise AssertionError(f"Expected {"test_table"}, got {exc.table_name}")
+        msg = f"Expected {'test_table'}, got {exc.table_name}"
+        raise AssertionError(msg)
     assert exc.operation == "INSERT"
     if exc.operation_data != operation_data:
-        raise AssertionError(f"Expected {operation_data}, got {exc.operation_data}")
+        msg = f"Expected {operation_data}, got {exc.operation_data}"
+        raise AssertionError(msg)
     assert exc.code == "LOAD_OPERATION_ERROR"
     if "Load operation 'INSERT' failed for table 'test_table'" not in str(exc):
-        raise AssertionError(f"Expected {"Load operation 'INSERT' failed for table 'test_table'"} in {str(exc)}")
+        msg = f"Expected {"Load operation 'INSERT' failed for table 'test_table'"} in {exc!s}"
+        raise AssertionError(msg)
 
 
 def test_infrastructure_exceptions() -> None:
@@ -190,16 +205,19 @@ def test_infrastructure_exceptions() -> None:
     )
 
     if exc.host != "localhost":
-
-        raise AssertionError(f"Expected {"localhost"}, got {exc.host}")
+        msg = f"Expected {'localhost'}, got {exc.host}"
+        raise AssertionError(msg)
     assert exc.port == 1521
     if exc.service_name != "XE":
-        raise AssertionError(f"Expected {"XE"}, got {exc.service_name}")
+        msg = f"Expected {'XE'}, got {exc.service_name}"
+        raise AssertionError(msg)
     assert exc.connection_details == connection_details
     if exc.code != "ORACLE_CONNECTION_ERROR":
-        raise AssertionError(f"Expected {"ORACLE_CONNECTION_ERROR"}, got {exc.code}")
+        msg = f"Expected {'ORACLE_CONNECTION_ERROR'}, got {exc.code}"
+        raise AssertionError(msg)
     if "Oracle connection error to localhost:1521/XE" not in str(exc):
-        raise AssertionError(f"Expected {"Oracle connection error to localhost:1521/XE"} in {str(exc)}")
+        msg = f"Expected {'Oracle connection error to localhost:1521/XE'} in {exc!s}"
+        raise AssertionError(msg)
 
     # Test OracleQueryException
     query = "SELECT * FROM non_existent_table"
@@ -211,13 +229,15 @@ def test_infrastructure_exceptions() -> None:
     )
 
     if exc.query != query:
-
-        raise AssertionError(f"Expected {query}, got {exc.query}")
+        msg = f"Expected {query}, got {exc.query}"
+        raise AssertionError(msg)
     assert exc.query_params == query_params
     if exc.code != "ORACLE_QUERY_ERROR":
-        raise AssertionError(f"Expected {"ORACLE_QUERY_ERROR"}, got {exc.code}")
+        msg = f"Expected {'ORACLE_QUERY_ERROR'}, got {exc.code}"
+        raise AssertionError(msg)
     if "Oracle query execution error" not in str(exc):
-        raise AssertionError(f"Expected {"Oracle query execution error"} in {str(exc)}")
+        msg = f"Expected {'Oracle query execution error'} in {exc!s}"
+        raise AssertionError(msg)
 
     # Test OracleTableException
     table_details = {"column_count": 10, "row_count": 1000}
@@ -230,16 +250,21 @@ def test_infrastructure_exceptions() -> None:
     )
 
     if exc.table_name != "test_table":
-
-        raise AssertionError(f"Expected {"test_table"}, got {exc.table_name}")
+        msg = f"Expected {'test_table'}, got {exc.table_name}"
+        raise AssertionError(msg)
     assert exc.schema_name == "test_schema"
     if exc.operation != "CREATE":
-        raise AssertionError(f"Expected {"CREATE"}, got {exc.operation}")
+        msg = f"Expected {'CREATE'}, got {exc.operation}"
+        raise AssertionError(msg)
     assert exc.table_details == table_details
     if exc.code != "ORACLE_TABLE_ERROR":
-        raise AssertionError(f"Expected {"ORACLE_TABLE_ERROR"}, got {exc.code}")
-    if "Oracle table operation 'CREATE' failed for test_schema.test_table" not in str(exc):
-        raise AssertionError(f"Expected {"Oracle table operation 'CREATE' failed for test_schema.test_table"} in {str(exc)}")
+        msg = f"Expected {'ORACLE_TABLE_ERROR'}, got {exc.code}"
+        raise AssertionError(msg)
+    if "Oracle table operation 'CREATE' failed for test_schema.test_table" not in str(
+        exc,
+    ):
+        msg = f"Expected {"Oracle table operation 'CREATE' failed for test_schema.test_table"} in {exc!s}"
+        raise AssertionError(msg)
 
 
 def test_minimal_instantiation() -> None:
@@ -247,19 +272,22 @@ def test_minimal_instantiation() -> None:
     # Test domain exceptions
     exc1 = InvalidSingerRecordException("RECORD", "Invalid format")
     if exc1.record_type != "RECORD":
-        raise AssertionError(f"Expected {"RECORD"}, got {exc1.record_type}")
+        msg = f"Expected {'RECORD'}, got {exc1.record_type}"
+        raise AssertionError(msg)
     assert exc1.record_data is None
 
     # Test application exceptions
     exc2 = StreamProcessingException("stream1", "Processing failed")
     if exc2.stream_name != "stream1":
-        raise AssertionError(f"Expected {"stream1"}, got {exc2.stream_name}")
+        msg = f"Expected {'stream1'}, got {exc2.stream_name}"
+        raise AssertionError(msg)
     assert exc2.error_details is None
 
     # Test infrastructure exceptions
     exc3 = OracleConnectionException("host", 1521, "XE", "Connection failed")
     if exc3.host != "host":
-        raise AssertionError(f"Expected {"host"}, got {exc3.host}")
+        msg = f"Expected {'host'}, got {exc3.host}"
+        raise AssertionError(msg)
     assert exc3.connection_details is None
 
 
@@ -275,7 +303,6 @@ def main() -> int | None:
         return 0
 
     except (RuntimeError, ValueError, TypeError):
-
         traceback.print_exc()
         return 1
 

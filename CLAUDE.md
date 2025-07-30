@@ -9,12 +9,13 @@ FLEXT Target Oracle is a production-grade Singer target for Oracle Database data
 ## Architecture
 
 ### Clean Structure Architecture
+
 The project follows a simplified, clean architecture after migrating from a complex domain/application layer structure:
 
 ```
 src/flext_target_oracle/
 ├── __init__.py          # Main exports and exceptions
-├── config.py            # Configuration (FlextOracleTargetConfig)  
+├── config.py            # Configuration (FlextOracleTargetConfig)
 ├── target.py            # Main target (inherits from flext-meltano Target)
 ├── loader.py            # Oracle loader (uses flext-db-oracle)
 ├── exceptions.py        # Oracle-specific exceptions
@@ -24,6 +25,7 @@ src/flext_target_oracle/
 ```
 
 ### Key Dependencies
+
 - **flext-core**: Base patterns, FlextResult, logging, FlextValueObject
 - **flext-meltano**: Singer SDK integration and Target base class
 - **flext-db-oracle**: Oracle database operations and connectivity
@@ -32,58 +34,71 @@ src/flext_target_oracle/
 ## TODO: GAPS DE ARQUITETURA IDENTIFICADOS - PRIORIDADE ALTA
 
 ### 🚨 GAP 1: Oracle DB Integration Optimization
+
 **Status**: ALTO - Integration com flext-db-oracle pode ser optimized
 **Problema**:
+
 - Loader implementation pode não fully leverage flext-db-oracle capabilities
 - Connection management patterns podem be optimized
 - Oracle-specific features podem não be fully utilized
 
 **TODO**:
+
 - [ ] Optimize integration com flext-db-oracle para performance
 - [ ] Leverage advanced Oracle features via DB library
 - [ ] Consolidate connection management patterns
 - [ ] Document Oracle optimization strategies
 
 ### 🚨 GAP 2: Legacy Architecture Cleanup
+
 **Status**: ALTO - Legacy backup files indicate architectural transition
 **Problema**:
+
 - domain.bak/ e application.bak/ indicate incomplete refactoring
 - Target.py.bak suggests architectural changes in progress
 - Legacy patterns podem still be referenced
 
 **TODO**:
+
 - [ ] Complete architectural migration cleanup
 - [ ] Remove legacy backup files após validation
 - [ ] Document architectural decisions e migration rationale
 - [ ] Ensure no references to legacy patterns
 
 ### 🚨 GAP 3: Singer Target Data Loading Patterns
+
 **Status**: ALTO - Oracle data loading patterns podem não be optimal
 **Problema**:
+
 - Bulk loading strategies não documented
 - Oracle-specific loading optimizations podem be missing
 - Error handling para data loading failures pode be incomplete
 
 **TODO**:
+
 - [ ] Implement Oracle bulk loading optimizations
 - [ ] Add comprehensive error handling para loading failures
 - [ ] Document data loading performance patterns
 - [ ] Add data validation e quality checks
 
 ### 🚨 GAP 4: Oracle WMS Integration Opportunity
+
 **Status**: MEDIUM - Oracle target pode leverage WMS capabilities
 **Problema**:
+
 - Oracle target não integrated com flext-oracle-wms capabilities
 - WMS-specific loading patterns podem be beneficial
 - Integration opportunities com WMS ecosystem podem be missed
 
 **TODO**:
+
 - [ ] Evaluate integration opportunities com flext-oracle-wms
 - [ ] Document WMS-specific Oracle loading patterns
 - [ ] Consider WMS data validation patterns
 - [ ] Align com broader Oracle WMS ecosystem
 
 ### Design Patterns
+
 - **Inherits from flext-meltano Target**: Uses established Singer patterns
 - **FlextResult Pattern**: Railway-oriented programming for error handling
 - **FlextValueObject**: Configuration with built-in validation
@@ -92,6 +107,7 @@ src/flext_target_oracle/
 ## Development Commands
 
 ### Core Quality Gates (Zero Tolerance)
+
 ```bash
 make validate           # Complete validation (lint + type + security + test)
 make check             # Essential checks (lint + type + test)
@@ -104,6 +120,7 @@ make fix               # Auto-fix all issues (format + lint)
 ```
 
 ### Testing Commands
+
 ```bash
 make test              # All tests with 90% coverage requirement
 make test-unit         # Unit tests only
@@ -114,6 +131,7 @@ make coverage-html     # Generate HTML coverage report
 ```
 
 ### Singer Target Operations
+
 ```bash
 make singer-about            # Show Singer target information
 make singer-config-sample    # Generate config sample
@@ -126,6 +144,7 @@ make target-dry-run         # Run in dry-run mode
 ```
 
 ### Oracle-Specific Operations
+
 ```bash
 make oracle-connect         # Test Oracle connection
 make oracle-write-test      # Test write operations
@@ -137,9 +156,10 @@ make oracle-diagnostics     # Run diagnostics
 ```
 
 ### Development Setup
+
 ```bash
 make setup              # Complete development setup
-make install            # Install dependencies with Poetry  
+make install            # Install dependencies with Poetry
 make dev-install        # Install in development mode
 make pre-commit         # Setup pre-commit hooks
 make build              # Build distribution packages
@@ -147,6 +167,7 @@ make clean              # Remove all artifacts
 ```
 
 ### Dependency Management
+
 ```bash
 make deps-update        # Update all dependencies
 make deps-audit         # Audit for vulnerabilities
@@ -157,6 +178,7 @@ make deps-outdated      # Show outdated dependencies
 ## Configuration
 
 ### Core Configuration Class
+
 The `FlextOracleTargetConfig` class extends `FlextValueObject` and provides:
 
 ```python
@@ -165,7 +187,7 @@ from flext_target_oracle import FlextOracleTargetConfig, LoadMethod
 config = FlextOracleTargetConfig(
     oracle_host="localhost",
     oracle_port=1521,
-    oracle_service="XE", 
+    oracle_service="XE",
     oracle_user="singer_user",
     oracle_password="password",
     default_target_schema="SINGER_DATA",
@@ -175,7 +197,9 @@ config = FlextOracleTargetConfig(
 ```
 
 ### Environment Variables
+
 Key environment variables for development and testing:
+
 ```bash
 TARGET_ORACLE_HOST=localhost
 TARGET_ORACLE_PORT=1521
@@ -189,6 +213,7 @@ TARGET_ORACLE_ENABLE_COMPRESSION=true
 ## Testing Strategy
 
 ### Test Structure
+
 ```
 tests/
 ├── unit/              # Unit tests (no external dependencies)
@@ -202,6 +227,7 @@ tests/
 ```
 
 ### Test Markers
+
 ```bash
 pytest -m unit                    # Unit tests only
 pytest -m integration            # Integration tests only
@@ -211,6 +237,7 @@ pytest -m performance            # Performance tests
 ```
 
 ### Coverage Requirements
+
 - **Minimum 90% test coverage required**
 - HTML coverage reports generated in `htmlcov/`
 - Coverage enforcement in CI/CD pipeline
@@ -218,6 +245,7 @@ pytest -m performance            # Performance tests
 ## Code Quality Standards
 
 ### Zero Tolerance Quality Gates
+
 1. **Ruff Linting**: ALL rule categories enabled, comprehensive checks
 2. **MyPy Type Checking**: Strict mode with zero errors tolerated
 3. **Security Scanning**: bandit + pip-audit + detect-secrets
@@ -225,6 +253,7 @@ pytest -m performance            # Performance tests
 5. **Pre-commit Hooks**: Automated quality checks on every commit
 
 ### Python Requirements
+
 - **Python 3.13+**: Required version for compatibility
 - **Type Hints**: All code must include comprehensive type annotations
 - **Pydantic Models**: Use for all configuration and data validation
@@ -233,17 +262,20 @@ pytest -m performance            # Performance tests
 ## Integration Patterns
 
 ### FLEXT Ecosystem Integration
+
 - **flext-core**: Use FlextResult, FlextValueObject, get_logger
 - **flext-meltano**: Inherit from Target base class for Singer integration
 - **flext-db-oracle**: Use for all Oracle database operations
 
 ### Singer Protocol Compliance
+
 - Implements standard Singer target interface
 - Handles SCHEMA, RECORD, and STATE messages
 - Supports Singer configuration and discovery patterns
 - Compatible with Meltano orchestration
 
 ### Oracle Integration
+
 - **Connection Management**: Uses flext-db-oracle connection patterns
 - **Batch Processing**: Configurable batch sizes for performance
 - **Load Methods**: INSERT, MERGE, BULK_INSERT, BULK_MERGE options
@@ -252,6 +284,7 @@ pytest -m performance            # Performance tests
 ## Error Handling
 
 ### Exception Hierarchy
+
 ```python
 FlextOracleTargetError                    # Base exception
 ├── FlextOracleTargetConnectionError      # Connection issues
@@ -261,7 +294,9 @@ FlextOracleTargetError                    # Base exception
 ```
 
 ### FlextResult Pattern
+
 All operations return FlextResult for consistent error handling:
+
 ```python
 result = await target.process_batch(records)
 if result.is_failure:
@@ -272,6 +307,7 @@ if result.is_failure:
 ## Performance Considerations
 
 ### Oracle-Specific Optimizations
+
 - **Bulk Operations**: Use Oracle bulk insert capabilities
 - **Parallel Processing**: Configurable parallel degree
 - **Connection Pooling**: Efficient connection management
@@ -279,6 +315,7 @@ if result.is_failure:
 - **Batch Sizing**: Tunable batch sizes for optimal throughput
 
 ### Monitoring and Observability
+
 - Structured logging with correlation IDs
 - Performance metrics and benchmarking
 - Health check endpoints
@@ -287,13 +324,15 @@ if result.is_failure:
 ## Migration Notes
 
 ### Legacy Architecture
+
 The project was migrated from a complex domain/application layer architecture to a simplified structure. Legacy code is preserved in `.bak` directories for reference:
 
 - `domain.bak/`: Original domain models and entities
-- `application.bak/`: Original service layer  
+- `application.bak/`: Original service layer
 - `target.py.bak`: Original target implementation
 
 ### Key Changes in Migration
+
 1. **Simplified Structure**: Removed complex layering
 2. **Base Class Inheritance**: Now inherits from flext-meltano Target
 3. **External Dependencies**: Uses flext-db-oracle for Oracle operations
@@ -303,6 +342,7 @@ The project was migrated from a complex domain/application layer architecture to
 ## Common Development Workflows
 
 ### Adding New Features
+
 1. Follow existing patterns from flext-core and flext-meltano
 2. Use FlextResult for error handling
 3. Add comprehensive unit and integration tests
@@ -310,12 +350,14 @@ The project was migrated from a complex domain/application layer architecture to
 5. Run full validation suite before committing
 
 ### Debugging Oracle Issues
+
 1. Use `make oracle-diagnostics` for system checks
 2. Test connection with `make oracle-connect`
 3. Enable debug logging with `make target-run-debug`
 4. Check Oracle schema compatibility with `make oracle-schema-check`
 
 ### Performance Testing
+
 1. Run benchmarks with `make oracle-performance`
 2. Test bulk operations with `make oracle-bulk-load`
 3. Test parallel loading with `make oracle-parallel-load`

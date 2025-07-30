@@ -30,11 +30,17 @@ class FlextOracleTargetConfig(FlextValueObject):
     oracle_service: str = Field(..., description="Oracle service name")
     oracle_user: str = Field(..., description="Oracle username")
     oracle_password: str = Field(..., description="Oracle password")
-    default_target_schema: str = Field(default="target", description="Default target schema")
-    load_method: LoadMethod = Field(default=LoadMethod.INSERT, description="Load method")
+    default_target_schema: str = Field(
+        default="target", description="Default target schema",
+    )
+    load_method: LoadMethod = Field(
+        default=LoadMethod.INSERT, description="Load method",
+    )
     use_bulk_operations: bool = Field(default=True, description="Use bulk operations")
     batch_size: int = Field(default=1000, description="Batch size for operations")
-    connection_timeout: int = Field(default=30, description="Connection timeout in seconds")
+    connection_timeout: int = Field(
+        default=30, description="Connection timeout in seconds",
+    )
 
     @field_validator("oracle_port")
     @classmethod
