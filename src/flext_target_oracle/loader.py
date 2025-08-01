@@ -38,50 +38,49 @@ class FlextOracleTargetLoader:
         stream_name: str,
         schema: dict[str, Any],
     ) -> FlextResult[None]:
-        """Ensure target table exists with correct schema."""
+        """Ensure target table exists with correct schema using flext-db-oracle patterns."""
         try:
             table_name = self.config.get_table_name(stream_name)
             logger.info(
                 f"Ensuring table exists: stream={stream_name}, table={table_name}",
             )
 
-            # Check if table exists using flext-db-oracle
-            check_sql = """
-            SELECT COUNT(*)
-            FROM all_tables
-            WHERE owner = UPPER(:schema_name)
-            AND table_name = UPPER(:table_name)
-            """
+            # Use context manager pattern from flext-db-oracle
+            with self.oracle_api as connected_api:
+                # Use flext-db-oracle get_tables method instead of manual SQL
+                tables_result = connected_api.get_tables(schema=self.config.default_target_schema)
 
-            result = self.oracle_api.query_one(
-                check_sql,
-                {
-                    "schema_name": self.config.default_target_schema,
-                    "table_name": table_name,
-                },
-            )
-
-            if not result.is_success:
-                return FlextResult.fail(
-                    f"Failed to check table existence: {result.error}",
+                return await self._process_table_existence_result(
+                    tables_result, table_name, stream_name
                 )
-
-            table_exists = result.data and len(result.data) > 0 and result.data[0] > 0
-
-            if not table_exists:
-                # Create table using simple JSON storage
-                create_result = await self._create_table(table_name)
-                if not create_result.is_success:
-                    return create_result
-                logger.info(
-                    f"Created table: {self.config.default_target_schema}.{table_name}",
-                )
-
-            return FlextResult.ok(None)
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception(f"Failed to ensure table exists for stream {stream_name}")
             return FlextResult.fail(f"Table creation failed: {e}")
+
+    async def _process_table_existence_result(
+        self,
+        tables_result: FlextResult[list[str]],
+        table_name: str,
+        stream_name: str,
+    ) -> FlextResult[None]:
+        """Process table existence result using Railway Pattern - Single Responsibility."""
+        if not tables_result.is_success:
+            return FlextResult.fail(f"Failed to check table existence: {tables_result.error}")
+
+        existing_tables = tables_result.data or []
+        table_exists = table_name.upper() in [table.upper() for table in existing_tables]
+
+        if not table_exists:
+            # Create table using flext-db-oracle patterns
+            create_result = await self._create_table(table_name)
+            if not create_result.is_success:
+                return create_result
+            logger.info(
+                f"Created table: {self.config.default_target_schema}.{table_name}",
+            )
+
+        return FlextResult.ok(None)
 
     async def load_record(
         self,
