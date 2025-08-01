@@ -1,6 +1,9 @@
 """Unit tests for Oracle Loader using flext-db-oracle."""
 
+from unittest.mock import Mock, patch
+
 import pytest
+from flext_core import FlextResult
 
 from flext_target_oracle.config import FlextOracleTargetConfig, LoadMethod
 from flext_target_oracle.loader import FlextOracleTargetLoader
@@ -168,7 +171,9 @@ class TestFlextOracleTargetLoader:
         """Test successful batch insert."""
         records = [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}]
 
-        result = await mock_loader._insert_batch("users", records)
+        # Mock the Oracle API execute_ddl method to return success
+        with patch.object(mock_loader.oracle_api, 'execute_ddl', return_value=FlextResult.ok(None)):
+            result = await mock_loader._insert_batch("users", records)
 
         assert result.is_success
 

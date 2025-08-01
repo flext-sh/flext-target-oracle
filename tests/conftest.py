@@ -1,10 +1,27 @@
 """Pytest configuration for flext-target-oracle tests."""
 
+import os
 from unittest.mock import AsyncMock
 
 import pytest
 
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+
+
+@pytest.fixture(scope="session", autouse=True)
+def oracle_test_environment():
+    """Setup Oracle test environment variables for shared container."""
+    # Set Oracle environment variables for shared container (pytest-oracle-xe on port 10521)
+    os.environ.update({
+        "FLEXT_TARGET_ORACLE_HOST": "localhost",
+        "FLEXT_TARGET_ORACLE_PORT": "10521",
+        "FLEXT_TARGET_ORACLE_USERNAME": "system",
+        "FLEXT_TARGET_ORACLE_PASSWORD": "oracle",
+        "FLEXT_TARGET_ORACLE_SERVICE_NAME": "XE",
+        "FLEXT_TARGET_ORACLE_DEFAULT_TARGET_SCHEMA": "FLEXT_TEST",
+    })
+    yield
+    # Cleanup is optional since these are test variables
 
 
 @pytest.fixture

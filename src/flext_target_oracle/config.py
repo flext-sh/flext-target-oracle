@@ -81,7 +81,7 @@ class FlextOracleTargetConfig(FlextValueObject):
         except Exception as e:
             return FlextResult.fail(f"Configuration validation failed: {e}")
 
-    def get_oracle_config(self) -> dict[str, Any]:
+    def get_oracle_config(self) -> dict[str, object]:
         """Get Oracle configuration for flext-db-oracle."""
         return {
             "host": self.oracle_host,
