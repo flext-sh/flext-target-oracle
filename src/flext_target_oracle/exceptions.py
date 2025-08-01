@@ -1,17 +1,30 @@
 """Oracle Target Exceptions - Simple and clean.
 
-Uses flext-core patterns for exception handling.
+Uses flext-core Singer base patterns for exception handling.
+Eliminates duplication by using centralized Singer exception patterns.
 """
 
-from flext_core.exceptions import FlextError
+# 🚨 ARCHITECTURAL COMPLIANCE: Use Singer base exceptions to eliminate duplication
+from flext_core import FlextTargetError
 
 
-class FlextOracleTargetError(FlextError):
+class FlextOracleTargetError(FlextTargetError):
     """Base exception for Oracle target operations."""
 
-    def __init__(self, message: str, **kwargs: object) -> None:
+    def __init__(
+        self,
+        message: str,
+        stream_name: str | None = None,
+        **kwargs: object,
+    ) -> None:
         """Initialize Oracle target error."""
-        super().__init__(message, context=kwargs)
+        super().__init__(
+            message,
+            component_type="target",
+            stream_name=stream_name,
+            destination_system="oracle",
+            **kwargs,
+        )
 
 
 class FlextOracleTargetConnectionError(FlextOracleTargetError):
