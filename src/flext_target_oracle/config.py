@@ -73,26 +73,11 @@ class FlextOracleTargetConfig(FlextValueObject):
         return v
 
     def validate_domain_rules(self) -> FlextResult[None]:
-        """Validate domain-specific business rules."""
+        """Validate domain-specific business rules using Chain of Responsibility Pattern."""
         try:
-            # Validate required connection fields
-            if not self.oracle_host:
-                return FlextResult.fail("Oracle host is required")
-
-            if not self.oracle_service:
-                return FlextResult.fail("Oracle service is required")
-
-            if not self.oracle_user:
-                return FlextResult.fail("Oracle username is required")
-
-            if not self.oracle_password:
-                return FlextResult.fail("Oracle password is required")
-
-            # Validate schema name
-            if not self.default_target_schema:
-                return FlextResult.fail("Target schema is required")
-
-            return FlextResult.ok(None)
+            # Use validation chain to eliminate multiple returns
+            validator = _ConfigurationValidator()
+            return validator.validate(self)
         except Exception as e:
             return FlextResult.fail(f"Configuration validation failed: {e}")
 
@@ -111,6 +96,97 @@ class FlextOracleTargetConfig(FlextValueObject):
         """Get table name for a stream."""
         # Simple mapping - could be enhanced with custom table naming
         return stream_name.replace("-", "_").replace(".", "_").upper()
+
+
+class _ConfigurationValidator:
+    """Configuration validator using Chain of Responsibility Pattern - Single Responsibility."""
+
+    def validate(self, config: FlextOracleTargetConfig) -> FlextResult[None]:
+        """Validate configuration using validation chain."""
+        # Define validation rules as a list of validators
+        validators = [
+            _HostValidator(),
+            _ServiceValidator(),
+            _UserValidator(),
+            _PasswordValidator(),
+            _SchemaValidator(),
+        ]
+
+        # Execute validation chain
+        for validator in validators:
+            result = validator.validate(config)
+            if result.is_failure:
+                return result
+
+        return FlextResult.ok(None)
+
+
+class _BaseValidator:
+    """Base validator using Template Method Pattern."""
+
+    def validate(self, config: FlextOracleTargetConfig) -> FlextResult[None]:
+        """Template method for validation."""
+        if not self._is_valid(config):
+            return FlextResult.fail(self._get_error_message())
+        return FlextResult.ok(None)
+
+    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+        """Check if configuration is valid - to be implemented by subclasses."""
+        raise NotImplementedError
+
+    def _get_error_message(self) -> str:
+        """Get error message - to be implemented by subclasses."""
+        raise NotImplementedError
+
+
+class _HostValidator(_BaseValidator):
+    """Validate Oracle host - Single Responsibility."""
+
+    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+        return bool(config.oracle_host)
+
+    def _get_error_message(self) -> str:
+        return "Oracle host is required"
+
+
+class _ServiceValidator(_BaseValidator):
+    """Validate Oracle service - Single Responsibility."""
+
+    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+        return bool(config.oracle_service)
+
+    def _get_error_message(self) -> str:
+        return "Oracle service is required"
+
+
+class _UserValidator(_BaseValidator):
+    """Validate Oracle user - Single Responsibility."""
+
+    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+        return bool(config.oracle_user)
+
+    def _get_error_message(self) -> str:
+        return "Oracle username is required"
+
+
+class _PasswordValidator(_BaseValidator):
+    """Validate Oracle password - Single Responsibility."""
+
+    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+        return bool(config.oracle_password)
+
+    def _get_error_message(self) -> str:
+        return "Oracle password is required"
+
+
+class _SchemaValidator(_BaseValidator):
+    """Validate target schema - Single Responsibility."""
+
+    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+        return bool(config.default_target_schema)
+
+    def _get_error_message(self) -> str:
+        return "Target schema is required"
 
 
 __all__ = [
