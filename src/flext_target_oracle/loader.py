@@ -30,13 +30,13 @@ class FlextOracleTargetLoader:
         self.oracle_api = FlextDbOracleApi(oracle_config)
 
         # Buffers for batch processing
-        self._record_buffers: dict[str, list[dict[str, Any]]] = {}
+        self._record_buffers: dict[str, list[dict[str, object]]] = {}
         self._total_records = 0
 
     async def ensure_table_exists(
         self,
         stream_name: str,
-        schema: dict[str, Any],
+        schema: dict[str, object],
     ) -> FlextResult[None]:
         """Ensure target table exists with correct schema using flext-db-oracle patterns."""
         try:
@@ -48,7 +48,9 @@ class FlextOracleTargetLoader:
             # Use context manager pattern from flext-db-oracle
             with self.oracle_api as connected_api:
                 # Use flext-db-oracle get_tables method instead of manual SQL
-                tables_result = connected_api.get_tables(schema=self.config.default_target_schema)
+                tables_result = connected_api.get_tables(
+                    schema=self.config.default_target_schema
+                )
 
                 return await self._process_table_existence_result(
                     tables_result, table_name, stream_name
@@ -66,10 +68,14 @@ class FlextOracleTargetLoader:
     ) -> FlextResult[None]:
         """Process table existence result using Railway Pattern - Single Responsibility."""
         if not tables_result.is_success:
-            return FlextResult.fail(f"Failed to check table existence: {tables_result.error}")
+            return FlextResult.fail(
+                f"Failed to check table existence: {tables_result.error}"
+            )
 
         existing_tables = tables_result.data or []
-        table_exists = table_name.upper() in [table.upper() for table in existing_tables]
+        table_exists = table_name.upper() in [
+            table.upper() for table in existing_tables
+        ]
 
         if not table_exists:
             # Create table using flext-db-oracle patterns
@@ -85,7 +91,7 @@ class FlextOracleTargetLoader:
     async def load_record(
         self,
         stream_name: str,
-        record_data: dict[str, Any],
+        record_data: dict[str, object],
     ) -> FlextResult[None]:
         """Load a single record (buffered for batch processing)."""
         try:
@@ -107,7 +113,7 @@ class FlextOracleTargetLoader:
             logger.exception(f"Failed to load record for stream {stream_name}")
             return FlextResult.fail(f"Record loading failed: {e}")
 
-    async def finalize_all_streams(self) -> FlextResult[dict[str, Any]]:
+    async def finalize_all_streams(self) -> FlextResult[dict[str, object]]:
         """Flush all pending batches and return statistics."""
         try:
             # Flush all remaining batches
@@ -170,7 +176,7 @@ class FlextOracleTargetLoader:
     async def _insert_batch(
         self,
         table_name: str,
-        records: list[dict[str, Any]],
+        records: list[dict[str, object]],
     ) -> FlextResult[None]:
         """Insert batch of records using flext-db-oracle."""
         try:
@@ -194,16 +200,17 @@ class FlextOracleTargetLoader:
                 }
                 params.append(param)
 
-            # Execute insert using flext-db-oracle API - simplified approach
-            # For now, use execute_ddl for each record individually
-            for param in params:
-                parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
-                    ":extracted_at",
-                    f"'{param['extracted_at']}'",
-                )
-                result = self.oracle_api.execute_ddl(parameterized_sql)
-                if not result.is_success:
-                    return FlextResult.fail(f"Insert failed: {result.error}")
+            # Execute insert using flext-db-oracle API with context manager
+            # Use context manager to ensure connection is active
+            with self.oracle_api as connected_api:
+                for param in params:
+                    parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
+                        ":extracted_at",
+                        f"'{param['extracted_at']}'",
+                    )
+                    result = connected_api.execute_ddl(parameterized_sql)
+                    if not result.is_success:
+                        return FlextResult.fail(f"Insert failed: {result.error}")
 
             return FlextResult.ok(None)
 
@@ -229,10 +236,11 @@ class FlextOracleTargetLoader:
             """
             create_sql = create_sql_template.format(table_full)
 
-            # Execute via flext-db-oracle API
-            result = self.oracle_api.execute_ddl(create_sql)
-            if not result.is_success:
-                return FlextResult.fail(f"Table creation failed: {result.error}")
+            # Execute via flext-db-oracle API with context manager
+            with self.oracle_api as connected_api:
+                result = connected_api.execute_ddl(create_sql)
+                if not result.is_success:
+                    return FlextResult.fail(f"Table creation failed: {result.error}")
 
             return FlextResult.ok(None)
 

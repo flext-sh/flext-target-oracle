@@ -34,11 +34,10 @@ class TestFlextOracleTarget:
         sample_target: FlextOracleTarget,
     ) -> None:
         """Test successful connection test."""
-        # Mock the validation to return True
-        with patch.object(
-            sample_target.target_config,
-            "validate_oracle_config",
-            return_value=True,
+        # Mock the domain validation to return success
+        with patch(
+            "flext_target_oracle.config.FlextOracleTargetConfig.validate_domain_rules",
+            return_value=FlextResult.ok(None),
         ):
             result = sample_target._test_connection_impl()
             if not (result):
@@ -51,11 +50,10 @@ class TestFlextOracleTarget:
         sample_target: FlextOracleTarget,
     ) -> None:
         """Test failed connection test."""
-        # Mock the validation to return False
-        with patch.object(
-            sample_target.target_config,
-            "validate_oracle_config",
-            return_value=False,
+        # Mock the domain validation to return failure
+        with patch(
+            "flext_target_oracle.config.FlextOracleTargetConfig.validate_domain_rules",
+            return_value=FlextResult.fail("Validation failed"),
         ):
             result = sample_target._test_connection_impl()
             if result:

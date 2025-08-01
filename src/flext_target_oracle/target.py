@@ -24,7 +24,7 @@ class FlextOracleTarget(Target):
 
     def __init__(
         self,
-        config: dict[str, Any] | FlextOracleTargetConfig | None = None,
+        config: dict[str, object] | FlextOracleTargetConfig | None = None,
     ) -> None:
         """Initialize Oracle target."""
         # Initialize base Singer Target with dict config
@@ -69,7 +69,7 @@ class FlextOracleTarget(Target):
 
     async def _write_records_impl(
         self,
-        records: list[dict[str, Any]],
+        records: list[dict[str, object]],
     ) -> FlextResult[None]:
         """Write records to Oracle using loader."""
         try:
@@ -88,13 +88,13 @@ class FlextOracleTarget(Target):
 
             return FlextResult.ok(None)
 
-        except (RuntimeError, ValueError, TypeError) as e:
+        except Exception as e:
             logger.exception("Failed to write records")
             return FlextResult.fail(f"Record writing failed: {e}")
 
     async def process_singer_message(
         self,
-        message: dict[str, Any],
+        message: dict[str, object],
     ) -> FlextResult[None]:
         """Process a Singer message."""
         try:
@@ -112,7 +112,7 @@ class FlextOracleTarget(Target):
             logger.exception("Failed to process Singer message")
             return FlextResult.fail(f"Message processing failed: {e}")
 
-    async def _handle_schema(self, message: dict[str, Any]) -> FlextResult[None]:
+    async def _handle_schema(self, message: dict[str, object]) -> FlextResult[None]:
         """Handle SCHEMA message."""
         try:
             stream_name = message.get("stream")
@@ -131,7 +131,7 @@ class FlextOracleTarget(Target):
             logger.exception("Failed to handle schema message")
             return FlextResult.fail(f"Schema handling failed: {e}")
 
-    async def _handle_record(self, message: dict[str, Any]) -> FlextResult[None]:
+    async def _handle_record(self, message: dict[str, object]) -> FlextResult[None]:
         """Handle RECORD message."""
         try:
             stream_name = message.get("stream")
@@ -146,7 +146,7 @@ class FlextOracleTarget(Target):
             logger.exception("Failed to handle record message")
             return FlextResult.fail(f"Record handling failed: {e}")
 
-    async def _handle_state(self, message: dict[str, Any]) -> FlextResult[None]:
+    async def _handle_state(self, message: dict[str, object]) -> FlextResult[None]:
         """Handle STATE message."""
         try:
             # State messages are typically handled by Meltano
@@ -157,7 +157,7 @@ class FlextOracleTarget(Target):
             logger.exception("Failed to handle state message")
             return FlextResult.fail(f"State handling failed: {e}")
 
-    async def finalize(self) -> FlextResult[dict[str, Any]]:
+    async def finalize(self) -> FlextResult[dict[str, object]]:
         """Finalize all streams and return statistics."""
         try:
             result = await self._loader.finalize_all_streams()
@@ -169,7 +169,7 @@ class FlextOracleTarget(Target):
             logger.exception("Failed to finalize target")
             return FlextResult.fail(f"Finalization failed: {e}")
 
-    def _get_implementation_metrics(self) -> dict[str, Any]:
+    def _get_implementation_metrics(self) -> dict[str, object]:
         """Get Oracle-specific metrics."""
         return {
             "oracle_host": self.target_config.oracle_host,
