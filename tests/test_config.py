@@ -142,21 +142,20 @@ class TestFlextOracleTargetConfig:
 
     def test_validate_oracle_config_invalid_port(self) -> None:
         """Test Oracle configuration validation with invalid port."""
-        config = FlextOracleTargetConfig(
-            oracle_host="localhost",
-            oracle_port=0,  # Invalid port
-            oracle_service="XE",
-            oracle_user="test",
-            oracle_password="test",
-        )
+        # Pydantic validates at creation time, so we expect ValidationError
+        from pydantic import ValidationError
 
-        result = config.validate_domain_rules()
-        assert not result.is_success
-        if result.error and "port must be between 1 and 65535" not in result.error:
-            msg = f"Expected 'port must be between 1 and 65535' in {result.error}"
-            raise AssertionError(
-                msg,
+        with pytest.raises(ValidationError) as exc_info:
+            FlextOracleTargetConfig(
+                oracle_host="localhost",
+                oracle_port=0,  # Invalid port
+                oracle_service="XE",
+                oracle_user="test",
+                oracle_password="test",
             )
+
+        # Verify the error is about port validation
+        assert "port must be between 1 and 65535" in str(exc_info.value)
 
     def test_validate_oracle_config_missing_username(self) -> None:
         """Test Oracle configuration validation with missing username."""

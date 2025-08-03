@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from flext_core import FlextResult, get_logger
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
@@ -25,8 +25,25 @@ class FlextOracleTargetLoader:
         """Initialize Oracle loader."""
         self.config = config
 
-        # Oracle API from flext-db-oracle
-        oracle_config = FlextDbOracleConfig(**config.get_oracle_config())
+        # Oracle API from flext-db-oracle - create config directly
+        from pydantic import SecretStr
+
+        oracle_config = FlextDbOracleConfig(
+            host=config.oracle_host,
+            port=config.oracle_port,
+            service_name=config.oracle_service,
+            username=config.oracle_user,
+            password=SecretStr(config.oracle_password),
+            sid=None,
+            timeout=config.connection_timeout,
+            pool_min=1,
+            pool_max=10,
+            pool_increment=1,
+            encoding="UTF-8",
+            ssl_enabled=False,
+            autocommit=False,
+            ssl_server_dn_match=True,
+        )
         self.oracle_api = FlextDbOracleApi(oracle_config)
 
         # Buffers for batch processing
@@ -49,11 +66,13 @@ class FlextOracleTargetLoader:
             with self.oracle_api as connected_api:
                 # Use flext-db-oracle get_tables method instead of manual SQL
                 tables_result = connected_api.get_tables(
-                    schema=self.config.default_target_schema
+                    schema=self.config.default_target_schema,
                 )
 
                 return await self._process_table_existence_result(
-                    tables_result, table_name, stream_name
+                    tables_result,
+                    table_name,
+                    stream_name,
                 )
 
         except (RuntimeError, ValueError, TypeError) as e:
@@ -69,7 +88,7 @@ class FlextOracleTargetLoader:
         """Process table existence result using Railway Pattern - Single Responsibility."""
         if not tables_result.is_success:
             return FlextResult.fail(
-                f"Failed to check table existence: {tables_result.error}"
+                f"Failed to check table existence: {tables_result.error}",
             )
 
         existing_tables = tables_result.data or []
@@ -126,7 +145,7 @@ class FlextOracleTargetLoader:
                         )
 
             # Return simple statistics
-            stats = {
+            stats: dict[str, object] = {
                 "total_records": self._total_records,
                 "successful_records": self._total_records,
                 "failed_records": 0,
@@ -204,7 +223,10 @@ class FlextOracleTargetLoader:
             # Use context manager to ensure connection is active
             with self.oracle_api as connected_api:
                 for param in params:
-                    parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
+                    parameterized_sql = sql.replace(
+                        ":data",
+                        f"'{param['data']}'",
+                    ).replace(
                         ":extracted_at",
                         f"'{param['extracted_at']}'",
                     )

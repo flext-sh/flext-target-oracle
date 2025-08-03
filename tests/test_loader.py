@@ -66,7 +66,14 @@ class TestFlextOracleTargetLoader:
         stream_name = "users"
         schema = {"type": "object", "properties": {"id": {"type": "integer"}}}
 
-        result = await mock_loader.ensure_table_exists(stream_name, schema)
+        # Mock the Oracle API completely for unit test
+        mock_api = Mock()
+        mock_api.__enter__ = Mock(return_value=mock_api)
+        mock_api.__exit__ = Mock(return_value=None)
+        mock_api.get_tables = Mock(return_value=FlextResult.ok(["USERS"]))
+
+        with patch.object(mock_loader, "oracle_api", mock_api):
+            result = await mock_loader.ensure_table_exists(stream_name, schema)
 
         assert result.is_success
 
@@ -105,7 +112,14 @@ class TestFlextOracleTargetLoader:
         )
         mock_loader.config = new_config
 
-        result = await mock_loader.load_record("users", {"id": 1, "name": "John"})
+        # Mock the Oracle API completely for unit test
+        mock_api = Mock()
+        mock_api.__enter__ = Mock(return_value=mock_api)
+        mock_api.__exit__ = Mock(return_value=None)
+        mock_api.execute_ddl = Mock(return_value=FlextResult.ok(None))
+
+        with patch.object(mock_loader, "oracle_api", mock_api):
+            result = await mock_loader.load_record("users", {"id": 1, "name": "John"})
 
         assert result.is_success
         # Buffer should be empty after flush
@@ -123,7 +137,14 @@ class TestFlextOracleTargetLoader:
         mock_loader._record_buffers["users"] = [{"id": 1}, {"id": 2}]
         mock_loader._record_buffers["products"] = [{"id": 1}]
 
-        result = await mock_loader.finalize_all_streams()
+        # Mock the Oracle API completely for unit test
+        mock_api = Mock()
+        mock_api.__enter__ = Mock(return_value=mock_api)
+        mock_api.__exit__ = Mock(return_value=None)
+        mock_api.execute_ddl = Mock(return_value=FlextResult.ok(None))
+
+        with patch.object(mock_loader, "oracle_api", mock_api):
+            result = await mock_loader.finalize_all_streams()
 
         assert result.is_success
         # Check result.data is not None before indexing
@@ -155,7 +176,14 @@ class TestFlextOracleTargetLoader:
         # Add records to buffer
         mock_loader._record_buffers["users"] = [{"id": 1}, {"id": 2}]
 
-        result = await mock_loader._flush_batch("users")
+        # Mock the Oracle API completely for unit test
+        mock_api = Mock()
+        mock_api.__enter__ = Mock(return_value=mock_api)
+        mock_api.__exit__ = Mock(return_value=None)
+        mock_api.execute_ddl = Mock(return_value=FlextResult.ok(None))
+
+        with patch.object(mock_loader, "oracle_api", mock_api):
+            result = await mock_loader._flush_batch("users")
 
         assert result.is_success
         if mock_loader._total_records != EXPECTED_BULK_SIZE:
@@ -171,8 +199,13 @@ class TestFlextOracleTargetLoader:
         """Test successful batch insert."""
         records = [{"id": 1, "name": "John"}, {"id": 2, "name": "Jane"}]
 
-        # Mock the Oracle API execute_ddl method to return success
-        with patch.object(mock_loader.oracle_api, 'execute_ddl', return_value=FlextResult.ok(None)):
+        # Mock the Oracle API completely for unit test
+        mock_api = Mock()
+        mock_api.__enter__ = Mock(return_value=mock_api)
+        mock_api.__exit__ = Mock(return_value=None)
+        mock_api.execute_ddl = Mock(return_value=FlextResult.ok(None))
+
+        with patch.object(mock_loader, "oracle_api", mock_api):
             result = await mock_loader._insert_batch("users", records)
 
         assert result.is_success
@@ -193,9 +226,17 @@ class TestFlextOracleTargetLoader:
         mock_loader: FlextOracleTargetLoader,
     ) -> None:
         """Test successful table creation."""
-        result = await mock_loader._create_table("users")
+        # Mock the Oracle API completely for unit test
+        mock_api = Mock()
+        mock_api.__enter__ = Mock(return_value=mock_api)
+        mock_api.__exit__ = Mock(return_value=None)
+        mock_api.execute_ddl = Mock(return_value=FlextResult.ok(None))
+
+        with patch.object(mock_loader, "oracle_api", mock_api):
+            result = await mock_loader._create_table("users")
 
         assert result.is_success
+        mock_api.execute_ddl.assert_called_once()
 
     def test_get_table_name_basic(self, mock_loader: FlextOracleTargetLoader) -> None:
         """Test basic table name generation."""

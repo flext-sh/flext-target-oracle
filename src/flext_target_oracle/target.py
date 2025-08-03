@@ -5,8 +5,6 @@ Uses flext-meltano patterns and flext-db-oracle for Oracle operations.
 
 from __future__ import annotations
 
-from typing import Any
-
 from flext_core import FlextResult, get_logger
 from flext_meltano import Target
 
@@ -77,7 +75,7 @@ class FlextOracleTarget(Target):
                 stream_name = record.get("stream")
                 record_data = record.get("record")
 
-                if stream_name and record_data:
+                if isinstance(stream_name, str) and isinstance(record_data, dict):
                     result = await self._loader.load_record(stream_name, record_data)
                     if not result.is_success:
                         return FlextResult.fail(
@@ -98,7 +96,10 @@ class FlextOracleTarget(Target):
     ) -> FlextResult[None]:
         """Process a Singer message."""
         try:
-            message_type = message.get("type", "").upper()
+            message_type_raw = message.get("type", "")
+            message_type = (
+                message_type_raw.upper() if isinstance(message_type_raw, str) else ""
+            )
 
             if message_type == "SCHEMA":
                 return await self._handle_schema(message)
@@ -118,8 +119,11 @@ class FlextOracleTarget(Target):
             stream_name = message.get("stream")
             schema = message.get("schema", {})
 
-            if not stream_name:
+            if not isinstance(stream_name, str):
                 return FlextResult.fail("Schema message missing stream name")
+
+            if not isinstance(schema, dict):
+                return FlextResult.fail("Schema message missing valid schema")
 
             result = await self._loader.ensure_table_exists(stream_name, schema)
             if result.is_success:
@@ -137,12 +141,12 @@ class FlextOracleTarget(Target):
             stream_name = message.get("stream")
             record_data = message.get("record")
 
-            if not stream_name or not record_data:
+            if not isinstance(stream_name, str) or not isinstance(record_data, dict):
                 return FlextResult.fail("Record message missing stream or data")
 
             return await self._loader.load_record(stream_name, record_data)
 
-        except (RuntimeError, ValueError, TypeError) as e:
+        except Exception as e:
             logger.exception("Failed to handle record message")
             return FlextResult.fail(f"Record handling failed: {e}")
 
