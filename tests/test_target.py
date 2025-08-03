@@ -317,12 +317,12 @@ class TestFlextOracleTarget:
             msg = f"Expected {'localhost'}, got {metrics['oracle_host']}"
             raise AssertionError(msg)
         assert metrics["oracle_port"] == 1521
-        # The default_schema comes from FlextBaseConfig, not FlextOracleTargetConfig
+        # The default_schema comes from the test fixture configuration
         assert (
-            metrics["default_schema"] == "SINGER_DATA"
-        )  # Default value from FlextBaseConfig
-        if metrics["load_method"] != "append-only":
-            msg = f"Expected {'append-only'}, got {metrics['load_method']}"
+            metrics["default_schema"] == "TEST_SCHEMA"
+        )  # Value from sample_config fixture
+        if metrics["load_method"] != "insert":
+            msg = f"Expected {'insert'}, got {metrics['load_method']}"
             raise AssertionError(msg)
         if not (metrics["use_bulk_operations"]):
             msg = f"Expected True, got {metrics['use_bulk_operations']}"

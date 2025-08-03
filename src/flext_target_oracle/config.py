@@ -7,10 +7,22 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Any
+from typing import Final
 
 from flext_core import FlextResult, FlextValueObject
-from pydantic import Field, field_validator
+from pydantic import Field, SecretStr, field_validator
+
+
+# Constants to eliminate magic numbers - SOLID DRY principle
+class OracleTargetConstants:
+    """Oracle Target configuration constants."""
+
+    DEFAULT_PORT: Final = 1521
+    DEFAULT_BATCH_SIZE: Final = 1000
+    DEFAULT_CONNECTION_TIMEOUT: Final = 30
+    DEFAULT_MAX_PARALLEL_STREAMS: Final = 4
+    MIN_PORT: Final = 1
+    MAX_PORT: Final = 65535
 
 
 class LoadMethod(StrEnum):
@@ -26,7 +38,10 @@ class FlextOracleTargetConfig(FlextValueObject):
     """Configuration for FLEXT Target Oracle using flext-core patterns."""
 
     oracle_host: str = Field(..., description="Oracle host")
-    oracle_port: int = Field(default=1521, description="Oracle port")
+    oracle_port: int = Field(
+        default=OracleTargetConstants.DEFAULT_PORT,
+        description="Oracle port",
+    )
     oracle_service: str = Field(..., description="Oracle service name")
     oracle_user: str = Field(..., description="Oracle username")
     oracle_password: str = Field(..., description="Oracle password")
@@ -39,9 +54,12 @@ class FlextOracleTargetConfig(FlextValueObject):
         description="Load method",
     )
     use_bulk_operations: bool = Field(default=True, description="Use bulk operations")
-    batch_size: int = Field(default=1000, description="Batch size for operations")
+    batch_size: int = Field(
+        default=OracleTargetConstants.DEFAULT_BATCH_SIZE,
+        description="Batch size for operations",
+    )
     connection_timeout: int = Field(
-        default=30,
+        default=OracleTargetConstants.DEFAULT_CONNECTION_TIMEOUT,
         description="Connection timeout in seconds",
     )
 
@@ -49,8 +67,8 @@ class FlextOracleTargetConfig(FlextValueObject):
     @classmethod
     def validate_oracle_port(cls, v: int) -> int:
         """Validate Oracle port is in valid range."""
-        if not (1 <= v <= 65535):
-            msg = "Oracle port must be between 1 and 65535"
+        if not (OracleTargetConstants.MIN_PORT <= v <= OracleTargetConstants.MAX_PORT):
+            msg = f"Oracle port must be between {OracleTargetConstants.MIN_PORT} and {OracleTargetConstants.MAX_PORT}"
             raise ValueError(msg)
         return v
 
@@ -81,15 +99,24 @@ class FlextOracleTargetConfig(FlextValueObject):
         except Exception as e:
             return FlextResult.fail(f"Configuration validation failed: {e}")
 
-    def get_oracle_config(self) -> dict[str, object]:
-        """Get Oracle configuration for flext-db-oracle."""
+    def get_oracle_config(self) -> dict[str, str | int | SecretStr | None | bool]:
+        """Get Oracle configuration for flext-db-oracle with proper types."""
         return {
             "host": self.oracle_host,
             "port": self.oracle_port,
             "service_name": self.oracle_service,
             "username": self.oracle_user,
-            "password": self.oracle_password,
-            # connection_timeout is not supported by FlextDbOracleConfig
+            "password": SecretStr(self.oracle_password),
+            "sid": None,  # Required field
+            "timeout": self.connection_timeout,
+            "pool_min": 1,
+            "pool_max": 10,
+            "pool_increment": 1,
+            "encoding": "UTF-8",
+            "ssl_enabled": False,
+            # Additional required fields for extended config
+            "autocommit": False,
+            "ssl_server_dn_match": True,
         }
 
     def get_table_name(self, stream_name: str) -> str:
