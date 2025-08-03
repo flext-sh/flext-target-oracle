@@ -114,14 +114,14 @@ redis = ["redis (>=2.10.5)"]
 
 [[package]]
 name = "certifi"
-version = "2025.7.14"
+version = "2025.8.3"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.7"
 groups = ["dev"]
 files = [
-    {file = "certifi-2025.7.14-py3-none-any.whl", hash = "sha256:6b31f564a415d79ee77df69d757bb49a5bb53bd9f756cbbe24394ffd6fc1f4b2"},
-    {file = "certifi-2025.7.14.tar.gz", hash = "sha256:8ea99dbdfaaf2ba2f9bac77b9249ef62ec5218e7c2b2e903378ed5fccf765995"},
+    {file = "certifi-2025.8.3-py3-none-any.whl", hash = "sha256:f6c12493cfb1b06ba2ff328595af9350c65d6644968e5d3a2ffd78699af217a5"},
+    {file = "certifi-2025.8.3.tar.gz", hash = "sha256:e564105f78ded564e3ae7c923924435e1daa7463faeab5bb932bc53ffae63407"},
 ]
 
 [[package]]
@@ -841,14 +841,14 @@ files = [
 
 [[package]]
 name = "packageurl-python"
-version = "0.17.2"
+version = "0.17.3"
 description = "A purl aka. Package URL parser and builder"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "packageurl_python-0.17.2-py3-none-any.whl", hash = "sha256:863a903bb9fffd17c367c836903a46ee68942966d0600fdf26449630d8bf344c"},
-    {file = "packageurl_python-0.17.2.tar.gz", hash = "sha256:dc087e3a3340656c6966a3d651f12c7f689f01dc9fb8a28f1150f7be823c688e"},
+    {file = "packageurl_python-0.17.3-py3-none-any.whl", hash = "sha256:f51b5aab570159f07258c8e998e9972ff3bf060da16b7334a42bd9f9737777d9"},
+    {file = "packageurl_python-0.17.3.tar.gz", hash = "sha256:719995f0c7f706890277ba57ec95afcaa9696c836a7675770a1279b01a41f7be"},
 ]
 
 [package.extras]
@@ -883,14 +883,14 @@ files = [
 
 [[package]]
 name = "pip"
-version = "25.1.1"
+version = "25.2"
 description = "The PyPA recommended tool for installing Python packages."
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "pip-25.1.1-py3-none-any.whl", hash = "sha256:2913a38a2abf4ea6b64ab507bd9e967f3b53dc1ede74b01b0931e1ce548751af"},
-    {file = "pip-25.1.1.tar.gz", hash = "sha256:3de45d411d308d5054c2168185d8da7f9a2cd753dbac8acbfa88a8909ecd9077"},
+    {file = "pip-25.2-py3-none-any.whl", hash = "sha256:6d67a2b4e7f14d8b31b8b52648866fa717f45a1eb70e83002f4331d07e953717"},
+    {file = "pip-25.2.tar.gz", hash = "sha256:578283f006390f85bb6282dffb876454593d637f5d1be494b5202ce4877e71f2"},
 ]
 
 [[package]]
@@ -1647,14 +1647,14 @@ zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
 name = "virtualenv"
-version = "20.32.0"
+version = "20.33.0"
 description = "Virtual Python Environment builder"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "virtualenv-20.32.0-py3-none-any.whl", hash = "sha256:2c310aecb62e5aa1b06103ed7c2977b81e042695de2697d01017ff0f1034af56"},
-    {file = "virtualenv-20.32.0.tar.gz", hash = "sha256:886bf75cadfdc964674e6e33eb74d787dff31ca314ceace03ca5810620f4ecf0"},
+    {file = "virtualenv-20.33.0-py3-none-any.whl", hash = "sha256:106b6baa8ab1b526d5a9b71165c85c456fbd49b16976c88e2bc9352ee3bc5d3f"},
+    {file = "virtualenv-20.33.0.tar.gz", hash = "sha256:47e0c0d2ef1801fce721708ccdf2a28b9403fa2307c3268aebd03225976f61d2"},
 ]
 
 [package.dependencies]
@@ -1713,4 +1713,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<3.14"
-content-hash = "58f5701c6a4cfdfcba917e334e6ea71e45fa636f56872f8ddfe31da3bc09cbc3"
+content-hash = "e361ad5c10beb0c26ea385a9f3ce394e719faca9a9cac6c1ec8c3e0f70b8a0a8"
