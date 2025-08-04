@@ -1,4 +1,19 @@
-"""Pytest configuration for flext-target-oracle tests."""
+"""Pytest Configuration and Test Fixtures - FLEXT Target Oracle.
+
+This module provides pytest configuration, fixtures, and test utilities for
+the Oracle target test suite. Includes configuration fixtures, mock objects,
+and test data generators for comprehensive testing.
+
+Key Fixtures:
+    - sample_config: Basic Oracle target configuration
+    - mock_oracle_api: Mocked flext-db-oracle API
+    - test_data_generators: Sample Singer messages and data
+
+Configuration:
+    - Test markers for different test categories
+    - Environment variable handling for Oracle connections
+    - Mock setup for external dependencies
+"""
 
 import os
 from unittest.mock import AsyncMock

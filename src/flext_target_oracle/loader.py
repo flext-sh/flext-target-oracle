@@ -1,6 +1,65 @@
-"""Oracle Loader - Simple and clean data loading.
+"""Oracle Data Loading Infrastructure with FLEXT Database Integration.
 
-Uses flext-db-oracle for Oracle operations and flext-core for patterns.
+This module provides the core Oracle data loading functionality for the FLEXT
+Target Oracle Singer target, implementing production-grade database operations
+through the flext-db-oracle library. The loader handles batch processing,
+table management, and data persistence with enterprise reliability standards.
+
+The implementation follows Clean Architecture principles with clear separation
+between data loading concerns and business logic, using railway-oriented
+programming patterns for consistent error handling and flext-db-oracle for
+production-grade Oracle connectivity.
+
+Key Components:
+    FlextOracleTargetLoader: Main data loading service with batch processing
+    Table Management: Dynamic table creation and schema management
+    Batch Processing: Configurable batch sizes for optimal Oracle performance
+    Error Handling: Comprehensive error context with recovery strategies
+
+Architecture Integration:
+    Infrastructure Layer: Database operations and external system integration
+    Railway-Oriented Programming: FlextResult pattern for consistent error handling
+    Connection Management: Production-grade connection pooling through flext-db-oracle
+    Batch Processing: Memory-efficient processing with configurable batch sizes
+
+Data Loading Strategy:
+    The loader implements a JSON-based storage approach where Singer records
+    are stored as JSON documents in Oracle CLOB columns. This provides flexibility
+    for varying schema structures while maintaining performance.
+
+Example:
+    Basic loader setup and record processing:
+    
+    >>> config = FlextOracleTargetConfig(
+    ...     oracle_host="localhost",
+    ...     oracle_service="XE",
+    ...     oracle_user="data_loader",
+    ...     oracle_password="secure_password",
+    ...     batch_size=1000
+    ... )
+    >>> loader = FlextOracleTargetLoader(config)
+    >>> 
+    >>> # Ensure table exists for stream
+    >>> schema = {"type": "object", "properties": {"id": {"type": "integer"}}}
+    >>> result = await loader.ensure_table_exists("users", schema)
+    >>> 
+    >>> # Load records with automatic batching
+    >>> for record in user_records:
+    ...     result = await loader.load_record("users", record)
+    ...     if result.is_failure:
+    ...         print(f"Record loading failed: {result.error}")
+    >>> 
+    >>> # Finalize and get statistics
+    >>> stats_result = await loader.finalize_all_streams()
+    >>> print(f"Loaded {stats_result.data['total_records']} records")
+
+Note:
+    SECURITY WARNING: Current implementation contains SQL injection vulnerabilities
+    in the _insert_batch method. See docs/TODO.md for remediation plan before
+    production deployment.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
@@ -19,10 +78,105 @@ logger = get_logger(__name__)
 
 
 class FlextOracleTargetLoader:
-    """Simple Oracle loader using flext-db-oracle."""
+    """Oracle data loading service with batch processing and error handling.
+    
+    This class provides comprehensive Oracle data loading functionality for Singer
+    targets, implementing enterprise-grade reliability patterns with batch processing,
+    connection management, and comprehensive error handling. The loader integrates
+    with flext-db-oracle for production-grade Oracle connectivity.
+    
+    The loader implements a JSON-based storage strategy where Singer records are
+    stored as JSON documents in Oracle CLOB columns, providing flexibility for
+    varying schema structures while maintaining Oracle performance characteristics.
+    
+    Key Features:
+        - Batch Processing: Configurable batch sizes for optimal Oracle performance
+        - Automatic Table Creation: Dynamic table creation based on Singer streams
+        - Connection Management: Production-grade connection pooling and error handling
+        - JSON Storage: Flexible schema handling with CLOB-based JSON storage
+        - Error Recovery: Comprehensive error handling with detailed context
+        - Statistics Tracking: Detailed processing statistics and performance metrics
+    
+    Architecture:
+        The loader follows Clean Architecture principles as an infrastructure component:
+        - Infrastructure Layer: Oracle database operations and connection management
+        - Railway-Oriented: FlextResult pattern for consistent error handling
+        - Dependency Injection: Configuration-driven initialization and operation
+        - Single Responsibility: Focused on data loading with clear boundaries
+    
+    Performance Characteristics:
+        - Batch Size: Configurable batch processing (default: 1000 records)
+        - Connection Pooling: Managed through flext-db-oracle (1-10 connections)
+        - Memory Management: Efficient record buffering with automatic flushing
+        - Transaction Management: Automatic transaction handling per batch
+    
+    Attributes:
+        config: Oracle target configuration with connection and performance settings
+        oracle_api: FlextDbOracleApi instance for database operations
+        _record_buffers: Per-stream record buffers for batch processing
+        _total_records: Total number of records processed for statistics
+    
+    Example:
+        Production-ready loader configuration and usage:
+        
+        >>> config = FlextOracleTargetConfig(
+        ...     oracle_host="prod-oracle.company.com",
+        ...     oracle_service="PRODDB",
+        ...     oracle_user="data_loader",
+        ...     oracle_password="secure_password",
+        ...     default_target_schema="DATA_WAREHOUSE",
+        ...     batch_size=2000,
+        ...     connection_timeout=60
+        ... )
+        >>> loader = FlextOracleTargetLoader(config)
+        >>> 
+        >>> # Process Singer data loading workflow
+        >>> table_result = await loader.ensure_table_exists("customer_orders", schema)
+        >>> record_result = await loader.load_record("customer_orders", record_data)
+        >>> stats_result = await loader.finalize_all_streams()
+        >>> 
+        >>> if all(r.is_success for r in [table_result, record_result, stats_result]):
+        ...     print(f"Successfully loaded {stats_result.data['total_records']} records")
+    
+    Security Note:
+        Current implementation contains SQL injection vulnerabilities in the
+        _insert_batch method. These must be addressed before production deployment.
+        See docs/TODO.md for detailed remediation plan.
+    """
 
     def __init__(self, config: FlextOracleTargetConfig) -> None:
-        """Initialize Oracle loader."""
+        """Initialize Oracle loader with configuration and connection setup.
+        
+        Sets up the Oracle data loader with validated configuration, establishes
+        the Oracle API connection through flext-db-oracle, and initializes
+        internal state for batch processing and statistics tracking.
+        
+        The initialization process includes:
+        1. Store validated configuration for operational use
+        2. Create flext-db-oracle configuration from target config
+        3. Initialize Oracle API client with connection pooling
+        4. Setup internal data structures for batch processing
+        
+        Args:
+            config: Validated FlextOracleTargetConfig with Oracle connection
+                   parameters, batch processing settings, and operational configuration
+        
+        Example:
+            >>> config = FlextOracleTargetConfig(
+            ...     oracle_host="localhost",
+            ...     oracle_service="XE", 
+            ...     oracle_user="test_user",
+            ...     oracle_password="test_password",
+            ...     batch_size=500
+            ... )
+            >>> loader = FlextOracleTargetLoader(config)
+            >>> # Loader is ready for table creation and record loading
+        
+        Note:
+            The Oracle API client is initialized but not connected during __init__.
+            Actual database connections are established when using the context
+            manager pattern in database operations.
+        """
         self.config = config
 
         # Oracle API from flext-db-oracle - create config directly
@@ -55,7 +209,56 @@ class FlextOracleTargetLoader:
         stream_name: str,
         schema: dict[str, object],
     ) -> FlextResult[None]:
-        """Ensure target table exists with correct schema using flext-db-oracle patterns."""
+        """Ensure target Oracle table exists for Singer stream data loading.
+        
+        Creates or verifies the existence of Oracle tables required for storing
+        Singer stream data. This method implements dynamic table creation based
+        on stream names while using a standardized JSON storage approach for
+        flexibility across varying schema structures.
+        
+        The table creation process includes:
+        1. Convert stream name to valid Oracle table name
+        2. Check for existing table in target schema
+        3. Create table if it doesn't exist using JSON storage structure
+        4. Log table creation or verification status
+        
+        Table Structure:
+            The created tables use a standardized structure optimized for Singer data:
+            - DATA: CLOB column containing JSON representation of the record
+            - _SDC_EXTRACTED_AT: Timestamp when record was processed
+            - _SDC_BATCHED_AT: Timestamp when record was inserted (auto-generated)
+            - _SDC_SEQUENCE: Sequence number for record ordering
+        
+        Args:
+            stream_name: Singer stream identifier used for table naming
+            schema: JSON Schema definition of the stream structure (informational)
+                   Note: Currently used for logging only; actual storage uses JSON approach
+                   
+        Returns:
+            FlextResult[None]: Success if table exists or was created successfully,
+            failure with detailed error if table operations fail
+            
+        Example:
+            >>> schema = {
+            ...     "type": "object",
+            ...     "properties": {
+            ...         "user_id": {"type": "integer"},
+            ...         "username": {"type": "string"},
+            ...         "email": {"type": "string"},
+            ...         "created_at": {"type": "string", "format": "date-time"}
+            ...     }
+            ... }
+            >>> result = await loader.ensure_table_exists("user_profiles", schema)
+            >>> if result.is_success:
+            ...     print("Table USER_PROFILES ready for data loading")
+            ... else:
+            ...     print(f"Table creation failed: {result.error}")
+        
+        Note:
+            The schema parameter is currently used for logging and future
+            enhancement planning. The actual table structure uses a JSON-based
+            approach for maximum flexibility with Singer data variations.
+        """
         try:
             table_name = self.config.get_table_name(stream_name)
             logger.info(
@@ -112,7 +315,53 @@ class FlextOracleTargetLoader:
         stream_name: str,
         record_data: dict[str, object],
     ) -> FlextResult[None]:
-        """Load a single record (buffered for batch processing)."""
+        """Load individual record with automatic batch processing and error handling.
+        
+        Processes individual Singer records by adding them to stream-specific buffers
+        for batch processing. When the buffer reaches the configured batch size,
+        automatically flushes the batch to Oracle for optimal performance.
+        
+        This method implements memory-efficient batch processing by:
+        1. Adding the record to the appropriate stream buffer
+        2. Checking if the buffer has reached the configured batch size
+        3. Automatically flushing full batches to Oracle
+        4. Providing detailed error context for troubleshooting
+        
+        The buffering strategy ensures optimal Oracle performance by minimizing
+        the number of database round trips while maintaining reasonable memory usage.
+        
+        Args:
+            stream_name: Singer stream identifier for buffer and table identification
+            record_data: Dictionary containing the record's field values to load
+                        Must be JSON-serializable for Oracle CLOB storage
+                        
+        Returns:
+            FlextResult[None]: Success if record was buffered successfully or
+            batch was flushed successfully. Failure with detailed error context
+            if buffering or batch processing fails.
+            
+        Example:
+            Loading individual records with automatic batching:
+            
+            >>> # Configure with batch size of 100 records
+            >>> loader = FlextOracleTargetLoader(config_with_batch_size_100)
+            >>> 
+            >>> # Load records - batches flush automatically
+            >>> for i in range(250):
+            ...     record = {"id": i, "name": f"User {i}", "email": f"user{i}@example.com"}
+            ...     result = await loader.load_record("users", record)
+            ...     if result.is_failure:
+            ...         print(f"Record {i} failed: {result.error}")
+            >>> 
+            >>> # Batches flush at records 100 and 200 automatically
+            >>> # Final 50 records remain buffered until finalize()
+        
+        Performance Notes:
+            - Records are buffered in memory until batch size is reached
+            - Automatic flushing minimizes memory usage and provides regular progress
+            - Failed records are logged but don't stop processing of subsequent records
+            - Buffer sizes can be tuned via configuration for optimal performance
+        """
         try:
             # Add to buffer
             if stream_name not in self._record_buffers:
@@ -133,7 +382,60 @@ class FlextOracleTargetLoader:
             return FlextResult.fail(f"Record loading failed: {e}")
 
     async def finalize_all_streams(self) -> FlextResult[dict[str, object]]:
-        """Flush all pending batches and return statistics."""
+        """Finalize data loading operations and return comprehensive statistics.
+        
+        Completes all pending data loading operations by flushing remaining
+        buffered records to Oracle and collecting comprehensive statistics
+        about the entire loading session. This method must be called after
+        all records have been processed to ensure data consistency.
+        
+        The finalization process includes:
+        1. Flush all remaining buffered records to Oracle
+        2. Handle any flush failures with detailed error reporting
+        3. Collect comprehensive statistics about the loading session
+        4. Generate summary report with performance and reliability metrics
+        
+        Statistics collected include:
+        - Total records processed across all streams
+        - Successful vs failed record counts
+        - Number of batches processed
+        - Stream-specific processing details
+        
+        Returns:
+            FlextResult[dict[str, object]]: Success contains comprehensive statistics
+            dictionary with processing metrics. Failure contains detailed error
+            information about finalization issues.
+            
+        Statistics Dictionary Format:
+            {
+                "total_records": int,      # Total records processed
+                "successful_records": int, # Successfully loaded records
+                "failed_records": int,     # Failed record count
+                "total_batches": int,      # Number of batches processed
+                "streams_processed": int,  # Number of unique streams
+                "processing_status": str   # Overall processing status
+            }
+            
+        Example:
+            Finalizing after record processing:
+            
+            >>> # After processing all records
+            >>> stats_result = await loader.finalize_all_streams()
+            >>> if stats_result.is_success:
+            ...     stats = stats_result.data
+            ...     print(f"Loading completed successfully:")
+            ...     print(f"  Total records: {stats['total_records']}")
+            ...     print(f"  Successful: {stats['successful_records']}")
+            ...     print(f"  Failed: {stats['failed_records']}")
+            ...     print(f"  Batches: {stats['total_batches']}")
+            ... else:
+            ...     print(f"Finalization failed: {stats_result.error}")
+        
+        Note:
+            This method attempts to flush all remaining batches even if some
+            fail, providing as complete statistics as possible. Check the
+            failed_records count to determine if any data was lost.
+        """
         try:
             # Flush all remaining batches
             for stream_name in list(self._record_buffers.keys()):
@@ -219,18 +521,12 @@ class FlextOracleTargetLoader:
                 }
                 params.append(param)
 
-            # Execute insert using flext-db-oracle API with context manager
+            # Execute insert using flext-db-oracle API with parameterized queries
             # Use context manager to ensure connection is active
             with self.oracle_api as connected_api:
                 for param in params:
-                    parameterized_sql = sql.replace(
-                        ":data",
-                        f"'{param['data']}'",
-                    ).replace(
-                        ":extracted_at",
-                        f"'{param['extracted_at']}'",
-                    )
-                    result = connected_api.execute_ddl(parameterized_sql)
+                    # Use parameterized query to prevent SQL injection
+                    result = connected_api.execute_dml(sql, param)
                     if not result.is_success:
                         return FlextResult.fail(f"Insert failed: {result.error}")
 
