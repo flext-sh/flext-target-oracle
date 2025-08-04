@@ -95,6 +95,7 @@ class FlextOracleTarget(Target):
 ```
 
 **Key Patterns**:
+
 - **FlextResult Railway Pattern**: All operations return `FlextResult<T>`
 - **Message Type Routing**: Dispatch based on Singer message type
 - **Dependency Injection**: Uses `FlextOracleTargetLoader` for data operations
@@ -126,6 +127,7 @@ class FlextOracleTargetConfig(FlextValueObject):
 ```
 
 **Key Patterns**:
+
 - **Value Object Pattern**: Immutable, validated configuration
 - **Chain of Responsibility**: Modular validation rules
 - **Builder Pattern**: Configuration conversion for flext-db-oracle
@@ -152,6 +154,7 @@ class FlextOracleTargetLoader:
 ```
 
 **Key Patterns**:
+
 - **Batch Processing**: Configurable batch sizes for performance
 - **Context Manager**: Safe resource management with `with` statements
 - **Template Method**: Consistent error handling and logging
@@ -289,6 +292,7 @@ with self.oracle_api as connected_api:
 > ⚠️ **Critical Security Issue**: SQL injection vulnerability in manual SQL construction
 
 **Current Problematic Code**:
+
 ```python
 # SECURITY RISK - Manual string replacement
 parameterized_sql = sql.replace(":data", f"'{param['data']}'")
@@ -296,6 +300,7 @@ result = connected_api.execute_ddl(parameterized_sql)
 ```
 
 **Required Fix**:
+
 ```python
 # SECURE - Use proper parameterized queries
 result = connected_api.execute_dml(sql, param)
@@ -326,7 +331,7 @@ tests/
 # FlextResult testing pattern
 def test_operation_success():
     result = operation()
-    assert result.is_success
+    assert result.success
     assert result.data == expected_value
 
 def test_operation_failure():

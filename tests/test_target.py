@@ -13,6 +13,7 @@ Test Categories:
 Note:
     Integration tests with actual Oracle database are in tests/integration/.
     Performance tests are in tests/performance/.
+
 """
 
 from unittest.mock import patch
@@ -35,11 +36,11 @@ class TestFlextOracleTarget:
         target = FlextOracleTarget(config=sample_config)
 
         if target.name != "flext-oracle-target":
-            msg = f"Expected {'flext-oracle-target'}, got {target.name}"
+            msg: str = f"Expected {'flext-oracle-target'}, got {target.name}"
             raise AssertionError(msg)
         assert isinstance(target.target_config, FlextOracleTargetConfig)
         if target.target_config.oracle_host != "localhost":
-            msg = f"Expected {'localhost'}, got {target.target_config.oracle_host}"
+            msg: str = f"Expected {'localhost'}, got {target.target_config.oracle_host}"
             raise AssertionError(msg)
         assert target.target_config.oracle_port == 1521
 
@@ -56,7 +57,7 @@ class TestFlextOracleTarget:
         ):
             result = sample_target._test_connection_impl()
             if not (result):
-                msg = f"Expected True, got {result}"
+                msg: str = f"Expected True, got {result}"
                 raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -72,7 +73,7 @@ class TestFlextOracleTarget:
         ):
             result = sample_target._test_connection_impl()
             if result:
-                msg = f"Expected False, got {result}"
+                msg: str = f"Expected False, got {result}"
                 raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -89,7 +90,7 @@ class TestFlextOracleTarget:
             return_value=FlextResult.ok(None),
         ):
             result = await sample_target._write_records_impl(batch_records)
-            assert result.is_success
+            assert result.success
 
     @pytest.mark.asyncio
     async def test_write_records_failure(
@@ -105,10 +106,10 @@ class TestFlextOracleTarget:
             return_value=FlextResult.fail("Load failed"),
         ):
             result = await sample_target._write_records_impl(batch_records)
-            assert not result.is_success
+            assert not result.success
             error_msg = result.error or ""
             if "Load failed" not in error_msg:
-                msg = f"Expected 'Load failed' in {error_msg}"
+                msg: str = f"Expected 'Load failed' in {error_msg}"
                 raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -124,7 +125,7 @@ class TestFlextOracleTarget:
         ]
 
         result = await sample_target._write_records_impl(invalid_records)
-        assert result.is_success  # Should continue processing other records
+        assert result.success  # Should continue processing other records
 
     @pytest.mark.asyncio
     async def test_process_singer_message_schema(
@@ -140,7 +141,7 @@ class TestFlextOracleTarget:
             return_value=FlextResult.ok(None),
         ):
             result = await sample_target.process_singer_message(schema)
-            assert result.is_success
+            assert result.success
 
     @pytest.mark.asyncio
     async def test_process_singer_message_record(
@@ -156,7 +157,7 @@ class TestFlextOracleTarget:
             return_value=FlextResult.ok(None),
         ):
             result = await sample_target.process_singer_message(record)
-            assert result.is_success
+            assert result.success
 
     @pytest.mark.asyncio
     async def test_process_singer_message_state(
@@ -166,7 +167,7 @@ class TestFlextOracleTarget:
     ) -> None:
         """Test processing STATE message."""
         result = await sample_target.process_singer_message(state)
-        assert result.is_success
+        assert result.success
 
     @pytest.mark.asyncio
     async def test_process_singer_message_unknown_type(
@@ -176,10 +177,10 @@ class TestFlextOracleTarget:
         """Test processing unknown message type."""
         unknown_message = {"type": "UNKNOWN", "data": "test"}
         result = await sample_target.process_singer_message(unknown_message)
-        assert not result.is_success
+        assert not result.success
         error_msg = result.error or ""
         if "Unknown message type" not in error_msg:
-            msg = f"Expected 'Unknown message type' in {error_msg}"
+            msg: str = f"Expected 'Unknown message type' in {error_msg}"
             raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -201,7 +202,7 @@ class TestFlextOracleTarget:
             return_value=FlextResult.ok(None),
         ):
             result = await sample_target._handle_schema(schema_message)
-            assert result.is_success
+            assert result.success
 
     @pytest.mark.asyncio
     async def test_handle_schema_missing_stream(
@@ -216,10 +217,10 @@ class TestFlextOracleTarget:
         }
 
         result = await sample_target._handle_schema(schema_message)
-        assert not result.is_success
+        assert not result.success
         error_msg = result.error or ""
         if "missing stream name" not in error_msg:
-            msg = f"Expected 'missing stream name' in {error_msg}"
+            msg: str = f"Expected 'missing stream name' in {error_msg}"
             raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -241,7 +242,7 @@ class TestFlextOracleTarget:
             return_value=FlextResult.ok(None),
         ):
             result = await sample_target._handle_record(record_message)
-            assert result.is_success
+            assert result.success
 
     @pytest.mark.asyncio
     async def test_handle_record_missing_data(
@@ -256,10 +257,10 @@ class TestFlextOracleTarget:
         }
 
         result = await sample_target._handle_record(record_message)
-        assert not result.is_success
+        assert not result.success
         error_msg = result.error or ""
         if "missing stream or data" not in error_msg:
-            msg = f"Expected 'missing stream or data' in {error_msg}"
+            msg: str = f"Expected 'missing stream or data' in {error_msg}"
             raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -271,7 +272,7 @@ class TestFlextOracleTarget:
         }
 
         result = await sample_target._handle_state(state_message)
-        assert result.is_success
+        assert result.success
 
     @pytest.mark.asyncio
     async def test_finalize_success(self, sample_target: FlextOracleTarget) -> None:
@@ -290,10 +291,10 @@ class TestFlextOracleTarget:
             return_value=FlextResult.ok(mock_stats),
         ):
             result = await sample_target.finalize()
-            assert result.is_success
+            assert result.success
             assert result.data is not None, "Result data should not be None"
             if result.data["total_records"] != 100:
-                msg = f"Expected {100}, got {result.data['total_records']}"
+                msg: str = f"Expected {100}, got {result.data['total_records']}"
                 raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -306,10 +307,10 @@ class TestFlextOracleTarget:
             return_value=FlextResult.fail("Finalization failed"),
         ):
             result = await sample_target.finalize()
-            assert not result.is_success
+            assert not result.success
             error_msg = result.error or ""
             if "Finalization failed" not in error_msg:
-                msg = f"Expected 'Finalization failed' in {error_msg}"
+                msg: str = f"Expected 'Finalization failed' in {error_msg}"
                 raise AssertionError(msg)
 
     def test_get_implementation_metrics(self, sample_target: FlextOracleTarget) -> None:
@@ -317,19 +318,19 @@ class TestFlextOracleTarget:
         metrics = sample_target._get_implementation_metrics()
 
         if "oracle_host" not in metrics:
-            msg = f"Expected {'oracle_host'} in {metrics}"
+            msg: str = f"Expected {'oracle_host'} in {metrics}"
             raise AssertionError(msg)
         assert "oracle_port" in metrics
         if "default_schema" not in metrics:
-            msg = f"Expected {'default_schema'} in {metrics}"
+            msg: str = f"Expected {'default_schema'} in {metrics}"
             raise AssertionError(msg)
         assert "load_method" in metrics
         if "use_bulk_operations" not in metrics:
-            msg = f"Expected {'use_bulk_operations'} in {metrics}"
+            msg: str = f"Expected {'use_bulk_operations'} in {metrics}"
             raise AssertionError(msg)
 
         if metrics["oracle_host"] != "localhost":
-            msg = f"Expected {'localhost'}, got {metrics['oracle_host']}"
+            msg: str = f"Expected {'localhost'}, got {metrics['oracle_host']}"
             raise AssertionError(msg)
         assert metrics["oracle_port"] == 1521
         # The default_schema comes from the test fixture configuration
@@ -337,22 +338,22 @@ class TestFlextOracleTarget:
             metrics["default_schema"] == "TEST_SCHEMA"
         )  # Value from sample_config fixture
         if metrics["load_method"] != "insert":
-            msg = f"Expected {'insert'}, got {metrics['load_method']}"
+            msg: str = f"Expected {'insert'}, got {metrics['load_method']}"
             raise AssertionError(msg)
         if not (metrics["use_bulk_operations"]):
-            msg = f"Expected True, got {metrics['use_bulk_operations']}"
+            msg: str = f"Expected True, got {metrics['use_bulk_operations']}"
             raise AssertionError(msg)
 
     def test_target_config_class(self) -> None:
         """Test that target uses correct config class."""
         if FlextOracleTarget.config_class != FlextOracleTargetConfig:
-            msg = f"Expected {FlextOracleTargetConfig}, got {FlextOracleTarget.config_class}"
+            msg: str = f"Expected {FlextOracleTargetConfig}, got {FlextOracleTarget.config_class}"
             raise AssertionError(msg)
 
     def test_target_name(self) -> None:
         """Test target name."""
         if FlextOracleTarget.name != "flext-oracle-target":
-            msg = f"Expected {'flext-oracle-target'}, got {FlextOracleTarget.name}"
+            msg: str = f"Expected {'flext-oracle-target'}, got {FlextOracleTarget.name}"
             raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -370,10 +371,10 @@ class TestFlextOracleTarget:
             side_effect=Exception("Database error"),
         ):
             result = await sample_target._write_records_impl(batch_records)
-            assert not result.is_success
+            assert not result.success
             error_msg = result.error or ""
             if "Database error" not in error_msg:
-                msg = f"Expected 'Database error' in {error_msg}"
+                msg: str = f"Expected 'Database error' in {error_msg}"
                 raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -391,8 +392,8 @@ class TestFlextOracleTarget:
             side_effect=Exception("Processing error"),
         ):
             result = await sample_target.process_singer_message(record_message)
-            assert not result.is_success
+            assert not result.success
             error_msg = result.error or ""
             if "Processing error" not in error_msg:
-                msg = f"Expected 'Processing error' in {error_msg}"
+                msg: str = f"Expected 'Processing error' in {error_msg}"
                 raise AssertionError(msg)
