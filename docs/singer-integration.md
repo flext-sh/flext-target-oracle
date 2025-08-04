@@ -11,6 +11,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
 ### Message Types Supported
 
 #### SCHEMA Messages
+
 ```json
 {
   "type": "SCHEMA",
@@ -28,6 +29,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
 ```
 
 **Implementation**:
+
 ```python
 async def _handle_schema(self, message: dict[str, object]) -> FlextResult[None]:
     """Handle SCHEMA message with table creation/evolution."""
@@ -36,13 +38,14 @@ async def _handle_schema(self, message: dict[str, object]) -> FlextResult[None]:
     
     # Ensure target table exists
     result = await self._loader.ensure_table_exists(stream_name, schema)
-    if result.is_success:
+    if result.success:
         logger.info(f"Schema processed for stream: {stream_name}")
     
     return result
 ```
 
 #### RECORD Messages
+
 ```json
 {
   "type": "RECORD",
@@ -57,6 +60,7 @@ async def _handle_schema(self, message: dict[str, object]) -> FlextResult[None]:
 ```
 
 **Implementation**:
+
 ```python
 async def _handle_record(self, message: dict[str, object]) -> FlextResult[None]:
     """Handle RECORD message with batched loading."""
@@ -70,6 +74,7 @@ async def _handle_record(self, message: dict[str, object]) -> FlextResult[None]:
 ```
 
 #### STATE Messages
+
 ```json
 {
   "type": "STATE",
@@ -84,6 +89,7 @@ async def _handle_record(self, message: dict[str, object]) -> FlextResult[None]:
 ```
 
 **Implementation**:
+
 ```python
 async def _handle_state(self, message: dict[str, object]) -> FlextResult[None]:
     """Handle STATE message - forwarded to orchestrator."""
@@ -119,6 +125,7 @@ async def _handle_state(self, message: dict[str, object]) -> FlextResult[None]:
 | `.name` property | Medium | Target name identifier |
 
 **Current Non-Standard Implementation**:
+
 ```python
 # ❌ Custom method - not Singer SDK compliant
 async def process_singer_message(self, message: dict) -> FlextResult[None]:
@@ -126,6 +133,7 @@ async def process_singer_message(self, message: dict) -> FlextResult[None]:
 ```
 
 **Required Singer SDK Methods**:
+
 ```python
 # ✅ Standard Singer SDK interface
 class FlextOracleTarget(Target):
@@ -254,11 +262,13 @@ CREATE TABLE "SCHEMA"."STREAM_NAME" (
 ```
 
 **Benefits**:
+
 - **Schema Flexibility**: No need for complex schema evolution
 - **Fast Implementation**: Minimal DDL operations
 - **JSON Querying**: Oracle JSON functions for data access
 
 **Trade-offs**:
+
 - **Storage Efficiency**: Less optimal than normalized tables
 - **Query Performance**: May require JSON extraction for complex queries
 - **Indexing Limitations**: Limited indexing options on JSON data
@@ -419,7 +429,7 @@ async def _insert_batch(self, table_name: str, records: list) -> FlextResult[Non
             # Each record inserted individually (not optimal)
             for record in records:
                 result = connected_api.execute_ddl(sql)  # Should be execute_dml
-                if not result.is_success:
+                if not result.success:
                     return FlextResult.fail(f"Insert failed: {result.error}")
         
         return FlextResult.ok(None)
@@ -476,7 +486,7 @@ class TestSingerIntegration:
         }
         
         result = await target.process_singer_message(schema_msg)
-        assert result.is_success
+        assert result.success
     
     async def test_record_message_processing(self, target):
         """Test RECORD message handling."""
@@ -487,7 +497,7 @@ class TestSingerIntegration:
         }
         
         result = await target.process_singer_message(record_msg)
-        assert result.is_success
+        assert result.success
     
     async def test_state_message_processing(self, target):
         """Test STATE message handling."""
@@ -497,7 +507,7 @@ class TestSingerIntegration:
         }
         
         result = await target.process_singer_message(state_msg)
-        assert result.is_success
+        assert result.success
     
     async def test_invalid_message_handling(self, target):
         """Test invalid message handling."""
@@ -543,7 +553,7 @@ async def test_singer_tap_integration():
     
     # Finalize processing
     final_result = await target.finalize()
-    assert final_result.is_success
+    assert final_result.success
     
     tap_process.wait()
 ```

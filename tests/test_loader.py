@@ -66,11 +66,11 @@ class TestFlextOracleTargetLoader:
 
         # Verify buffers are initialized
         if loader._record_buffers != {}:
-            msg = f"Expected {{}}, got {loader._record_buffers}"
+            msg: str = f"Expected {{}}, got {loader._record_buffers}"
             raise AssertionError(msg)
         assert loader._total_records == 0
         if loader.config != sample_config:
-            msg = f"Expected {sample_config}, got {loader.config}"
+            msg: str = f"Expected {sample_config}, got {loader.config}"
             raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -91,7 +91,7 @@ class TestFlextOracleTargetLoader:
         with patch.object(mock_loader, "oracle_api", mock_api):
             result = await mock_loader.ensure_table_exists(stream_name, schema)
 
-        assert result.is_success
+        assert result.success
 
     @pytest.mark.asyncio
     async def test_load_record_buffering(
@@ -101,12 +101,12 @@ class TestFlextOracleTargetLoader:
         """Test record loading with buffering."""
         result = await mock_loader.load_record("users", {"id": 1, "name": "John"})
 
-        assert result.is_success
+        assert result.success
         if "users" not in mock_loader._record_buffers:
-            msg = f"Expected {'users'} in {mock_loader._record_buffers}"
+            msg: str = f"Expected {'users'} in {mock_loader._record_buffers}"
             raise AssertionError(msg)
         if len(mock_loader._record_buffers["users"]) != 1:
-            msg = f"Expected {1}, got {len(mock_loader._record_buffers['users'])}"
+            msg: str = f"Expected {1}, got {len(mock_loader._record_buffers['users'])}"
             raise AssertionError(msg)
         assert mock_loader._record_buffers["users"][0] == {"id": 1, "name": "John"}
 
@@ -137,10 +137,10 @@ class TestFlextOracleTargetLoader:
         with patch.object(mock_loader, "oracle_api", mock_api):
             result = await mock_loader.load_record("users", {"id": 1, "name": "John"})
 
-        assert result.is_success
+        assert result.success
         # Buffer should be empty after flush
         if mock_loader._record_buffers["users"] != []:
-            msg = f"Expected {[]}, got {mock_loader._record_buffers['users']}"
+            msg: str = f"Expected {[]}, got {mock_loader._record_buffers['users']}"
             raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -162,15 +162,15 @@ class TestFlextOracleTargetLoader:
         with patch.object(mock_loader, "oracle_api", mock_api):
             result = await mock_loader.finalize_all_streams()
 
-        assert result.is_success
+        assert result.success
         # Check result.data is not None before indexing
         assert result.data is not None, "Result data should not be None"
         if result.data["total_records"] != EXPECTED_DATA_COUNT:
-            msg = f"Expected {3}, got {result.data['total_records']}"
+            msg: str = f"Expected {3}, got {result.data['total_records']}"
             raise AssertionError(msg)
         assert result.data["successful_records"] == EXPECTED_DATA_COUNT
         if result.data["failed_records"] != 0:
-            msg = f"Expected {0}, got {result.data['failed_records']}"
+            msg: str = f"Expected {0}, got {result.data['failed_records']}"
             raise AssertionError(msg)
 
     @pytest.mark.asyncio
@@ -181,7 +181,7 @@ class TestFlextOracleTargetLoader:
         """Test flushing empty buffer."""
         result = await mock_loader._flush_batch("users")
 
-        assert result.is_success
+        assert result.success
 
     @pytest.mark.asyncio
     async def test_flush_batch_success(
@@ -201,9 +201,9 @@ class TestFlextOracleTargetLoader:
         with patch.object(mock_loader, "oracle_api", mock_api):
             result = await mock_loader._flush_batch("users")
 
-        assert result.is_success
+        assert result.success
         if mock_loader._total_records != EXPECTED_BULK_SIZE:
-            msg = f"Expected {2}, got {mock_loader._total_records}"
+            msg: str = f"Expected {2}, got {mock_loader._total_records}"
             raise AssertionError(msg)
         assert mock_loader._record_buffers["users"] == []  # Buffer cleared
 
@@ -224,7 +224,7 @@ class TestFlextOracleTargetLoader:
         with patch.object(mock_loader, "oracle_api", mock_api):
             result = await mock_loader._insert_batch("users", records)
 
-        assert result.is_success
+        assert result.success
 
     @pytest.mark.asyncio
     async def test_insert_batch_empty_records(
@@ -234,7 +234,7 @@ class TestFlextOracleTargetLoader:
         """Test batch insert with empty records."""
         result = await mock_loader._insert_batch("users", [])
 
-        assert result.is_success
+        assert result.success
 
     @pytest.mark.asyncio
     async def test_create_table_success(
@@ -251,14 +251,14 @@ class TestFlextOracleTargetLoader:
         with patch.object(mock_loader, "oracle_api", mock_api):
             result = await mock_loader._create_table("users")
 
-        assert result.is_success
+        assert result.success
         mock_api.execute_ddl.assert_called_once()
 
     def test_get_table_name_basic(self, mock_loader: FlextOracleTargetLoader) -> None:
         """Test basic table name generation."""
         table_name = mock_loader.config.get_table_name("users")
         if table_name != "USERS":
-            msg = f"Expected {'USERS'}, got {table_name}"
+            msg: str = f"Expected {'USERS'}, got {table_name}"
             raise AssertionError(msg)
 
     def test_get_table_name_with_prefix(
@@ -269,7 +269,7 @@ class TestFlextOracleTargetLoader:
         # table_prefix doesn't exist in real API - test standard behavior
         table_name = mock_loader.config.get_table_name("users")
         if table_name != "USERS":
-            msg = f"Expected {'USERS'}, got {table_name}"
+            msg: str = f"Expected {'USERS'}, got {table_name}"
             raise AssertionError(msg)
 
     def test_get_table_name_special_chars(
@@ -279,10 +279,10 @@ class TestFlextOracleTargetLoader:
         """Test table name generation with special characters."""
         table_name = mock_loader.config.get_table_name("user-profiles")
         if table_name != "USER_PROFILES":
-            msg = f"Expected {'USER_PROFILES'}, got {table_name}"
+            msg: str = f"Expected {'USER_PROFILES'}, got {table_name}"
             raise AssertionError(msg)
 
         table_name = mock_loader.config.get_table_name("orders.items")
         if table_name != "ORDERS_ITEMS":
-            msg = f"Expected {'ORDERS_ITEMS'}, got {table_name}"
+            msg: str = f"Expected {'ORDERS_ITEMS'}, got {table_name}"
             raise AssertionError(msg)

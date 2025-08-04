@@ -308,7 +308,7 @@ loader = FlextOracleTargetLoader(config)
 # Verify with context manager
 with loader.oracle_api as connected_api:
     tables_result = connected_api.get_tables("TEST_SCHEMA")
-    if tables_result.is_success:
+    if tables_result.success:
         print(f"Connected! Found {len(tables_result.data)} tables")
     else:
         print(f"Connection failed: {tables_result.error}")
@@ -345,7 +345,7 @@ async def test_table_management():
     }
     
     result = await loader.load_record("test_stream", test_record)
-    if result.is_success:
+    if result.success:
         print("Record loaded successfully")
     else:
         print(f"Record loading failed: {result.error}")
@@ -503,7 +503,7 @@ class TestNewFeature:
         result = new_feature_operation(config) 
         
         # Assert
-        assert result.is_success
+        assert result.success
         assert result.data == expected_value
     
     def test_failure_case(self):
@@ -549,16 +549,16 @@ class TestOracleIntegration:
         # Schema message
         schema_msg = {...}
         result = await oracle_target.process_singer_message(schema_msg)
-        assert result.is_success
+        assert result.success
         
         # Record messages
         record_msg = {...}
         result = await oracle_target.process_singer_message(record_msg)
-        assert result.is_success
+        assert result.success
         
         # Finalization
         stats_result = await oracle_target.finalize()
-        assert stats_result.is_success
+        assert stats_result.success
         assert stats_result.data["total_records"] > 0
 ```
 
