@@ -1,4 +1,28 @@
-"""Tests for FlextOracleTargetConfig."""
+"""Unit Tests for FlextOracleTargetConfig - Enterprise Configuration Management.
+
+This module provides comprehensive unit tests for the FlextOracleTargetConfig class,
+validating configuration creation, validation, domain rules, and Oracle integration
+patterns. Tests ensure type safety, business rule compliance, and proper FLEXT
+ecosystem integration.
+
+The test suite covers:
+    - Configuration creation with various parameter combinations
+    - Field validation including edge cases and error conditions  
+    - Domain validation rules using Chain of Responsibility pattern
+    - Oracle configuration generation for flext-db-oracle integration
+    - Table name generation and Oracle naming convention compliance
+    - LoadMethod enumeration usage and validation
+
+Test Categories:
+    - Basic Configuration: Core configuration creation and defaults
+    - Validation Tests: Pydantic and domain validation rule testing
+    - Integration Tests: Oracle config generation and compatibility
+    - Business Logic Tests: Table naming and load method selection
+
+Note:
+    These tests validate the configuration layer in isolation. Integration
+    tests with actual Oracle connectivity are located in tests/integration/.
+"""
 
 import pytest
 from pydantic import ValidationError
@@ -11,7 +35,13 @@ EXPECTED_DATA_COUNT = 3
 
 
 class TestFlextOracleTargetConfig:
-    """Test FlextOracleTargetConfig."""
+    """Comprehensive test suite for FlextOracleTargetConfig validation and functionality.
+    
+    This test class validates all aspects of the Oracle target configuration including
+    creation, validation, domain rules, and integration with the FLEXT ecosystem.
+    Tests ensure the configuration class properly handles various scenarios from
+    basic setup to edge cases and error conditions.
+    """
 
     def test_basic_config_creation(self) -> None:
         """Test basic configuration creation."""

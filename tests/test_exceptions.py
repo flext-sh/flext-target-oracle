@@ -1,4 +1,19 @@
-"""Unit tests for Oracle Target Exceptions."""
+"""Unit Tests for Oracle Target Exception Hierarchy.
+
+This module tests the Oracle-specific exception classes and error handling patterns.
+Tests validate exception hierarchy, error context preservation, and integration
+with FLEXT error handling patterns.
+
+Test Categories:
+    - Exception creation and hierarchy
+    - Error context preservation
+    - FLEXT error pattern integration
+    - Exception handling in various scenarios
+
+Note:
+    Tests validate the exception classes defined in exceptions.py.
+    Integration with actual error scenarios tested in integration tests.
+"""
 
 import logging
 

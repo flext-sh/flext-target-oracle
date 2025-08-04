@@ -1,4 +1,20 @@
-"""Unit tests for Oracle Loader using flext-db-oracle."""
+"""Unit Tests for FlextOracleTargetLoader - Oracle Data Loading Infrastructure.
+
+This module tests the Oracle data loading operations including batch processing,
+table creation, and integration with flext-db-oracle. Tests validate data loading
+patterns and error handling for Oracle operations.
+
+Test Categories:
+    - Oracle data loading operations
+    - Batch processing and performance
+    - Table creation and schema management
+    - Error handling and recovery
+
+Critical Notes:
+    - Tests mock flext-db-oracle to avoid actual Oracle connections
+    - Security: Some tests validate SQL injection prevention
+    - Integration tests with real Oracle in tests/integration/
+"""
 
 from unittest.mock import Mock, patch
 

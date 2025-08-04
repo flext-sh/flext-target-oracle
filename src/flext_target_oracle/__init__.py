@@ -1,7 +1,45 @@
-"""FLEXT Target Oracle - Self-contained Oracle target implementation.
+"""FLEXT Target Oracle - Production-Grade Singer Target for Oracle Database.
 
-This project provides a complete Singer target for Oracle Database using flext-core
-patterns and flext-db-oracle infrastructure.
+This module provides a complete Singer specification-compliant target for Oracle 
+Database data loading, built using FLEXT ecosystem patterns and enterprise-grade 
+reliability standards.
+
+The target implements Clean Architecture principles with Domain-Driven Design 
+patterns, leveraging the FLEXT ecosystem's foundational components for consistent 
+error handling, configuration management, and database operations.
+
+Key Components:
+    FlextOracleTarget: Main Singer target implementation with async processing
+    FlextOracleTargetConfig: Type-safe configuration with domain validation  
+    LoadMethod: Enumeration of supported Oracle loading strategies
+    Exception Hierarchy: Comprehensive error handling with context preservation
+
+Architecture Integration:
+    Built on flext-core foundations (FlextResult, FlextValueObject patterns)
+    Integrates with flext-meltano for Singer SDK compliance
+    Uses flext-db-oracle for production-grade Oracle connectivity
+    Follows railway-oriented programming for error handling
+
+Example:
+    Basic target initialization and configuration:
+    
+    >>> from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig
+    >>> config = FlextOracleTargetConfig(
+    ...     oracle_host="localhost",
+    ...     oracle_service="XE", 
+    ...     oracle_user="target_user",
+    ...     oracle_password="secure_password"
+    ... )
+    >>> target = FlextOracleTarget(config)
+    >>> # Process Singer messages
+    >>> result = await target.process_singer_message(schema_message)
+    >>> if result.is_success:
+    ...     print("Schema processed successfully")
+
+Note:
+    Version 0.9.0 is pre-production. See docs/TODO.md for known issues including
+    SQL injection vulnerabilities and missing Singer SDK methods that must be 
+    addressed before production deployment.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -9,50 +47,40 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-# Import flext-core patterns for consistency
+# Import FLEXT core patterns for ecosystem consistency
 from flext_core import FlextError, FlextResult
 
-from flext_target_oracle.config import FlextOracleTargetConfig, LoadMethod
-
 # Import local implementations
+from flext_target_oracle.config import FlextOracleTargetConfig, LoadMethod
 from flext_target_oracle.target import FlextOracleTarget
-
-
-# Local exceptions for backward compatibility
-class FlextOracleTargetError(FlextError):
-    """Base exception for Oracle target operations."""
-
-
-class FlextOracleTargetConnectionError(FlextOracleTargetError):
-    """Oracle connection-related errors."""
-
-
-class FlextOracleTargetAuthenticationError(FlextOracleTargetError):
-    """Oracle authentication-related errors."""
-
-
-class FlextOracleTargetSchemaError(FlextOracleTargetError):
-    """Oracle schema-related errors."""
-
-
-class FlextOracleTargetProcessingError(FlextOracleTargetError):
-    """Oracle data processing errors."""
+from flext_target_oracle.exceptions import (
+    FlextOracleTargetError,
+    FlextOracleTargetConnectionError,
+    FlextOracleTargetAuthenticationError,
+    FlextOracleTargetSchemaError,
+    FlextOracleTargetProcessingError,
+)
 
 
 __version__ = "0.9.0"
+"""Current version - pre-production with known critical issues."""
 
 __all__ = [
-    # Main implementation (from flext-meltano)
+    # Primary implementation classes  
     "FlextOracleTarget",
-    "FlextOracleTargetAuthenticationError",
     "FlextOracleTargetConfig",
-    "FlextOracleTargetConnectionError",
-    # Local exceptions (backward compatibility)
-    "FlextOracleTargetError",
-    "FlextOracleTargetProcessingError",
-    "FlextOracleTargetSchemaError",
-    # Core patterns
-    "FlextResult",
     "LoadMethod",
+    
+    # Exception hierarchy (TODO: consolidate with exceptions.py)
+    "FlextOracleTargetError",
+    "FlextOracleTargetConnectionError", 
+    "FlextOracleTargetAuthenticationError",
+    "FlextOracleTargetSchemaError",
+    "FlextOracleTargetProcessingError",
+    
+    # FLEXT core re-exports for convenience
+    "FlextResult",
+    
+    # Version information
     "__version__",
 ]

@@ -1,4 +1,19 @@
-"""Unit tests for Oracle Target implementation."""
+"""Unit Tests for FlextOracleTarget - Singer Target Implementation.
+
+This module tests the main Singer Target implementation including message processing,
+FLEXT ecosystem integration, and error handling patterns. Tests validate Singer
+protocol compliance and Oracle data loading operations.
+
+Test Categories:
+    - Target initialization and configuration
+    - Singer message processing (SCHEMA, RECORD, STATE)
+    - FlextResult error handling patterns
+    - Oracle loader integration
+
+Note:
+    Integration tests with actual Oracle database are in tests/integration/.
+    Performance tests are in tests/performance/.
+"""
 
 from unittest.mock import patch
 
