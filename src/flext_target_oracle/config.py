@@ -712,7 +712,9 @@ class FlextOracleTargetConfig(FlextValueObject):
         return False
 
     def get_column_transform(
-        self, stream_name: str, column_name: str,
+        self,
+        stream_name: str,
+        column_name: str,
     ) -> dict[str, object] | None:
         """Get transformation configuration for a column.
 

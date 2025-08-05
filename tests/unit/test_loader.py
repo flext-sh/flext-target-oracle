@@ -63,11 +63,15 @@ class TestTableManagement:
         )
         mock_oracle_api.__enter__.return_value = mock_oracle_api
 
-        with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
-        ), patch(
-            "flext_target_oracle.loader.FlextDbOracleMetadataManager"
-        ) as mock_metadata:
+        with (
+            patch(
+                "flext_target_oracle.loader.FlextDbOracleApi",
+                return_value=mock_oracle_api,
+            ),
+            patch(
+                "flext_target_oracle.loader.FlextDbOracleMetadataManager"
+            ) as mock_metadata,
+        ):
             loader = FlextOracleTargetLoader(oracle_config)
             loader.oracle_api = mock_oracle_api
             loader._metadata_manager = mock_metadata
@@ -75,9 +79,7 @@ class TestTableManagement:
             schema = simple_schema["schema"]
             key_properties = simple_schema["key_properties"]
 
-            result = await loader.ensure_table_exists(
-                "users", schema, key_properties
-            )
+            result = await loader.ensure_table_exists("users", schema, key_properties)
 
             assert result.is_success
             # The loader creates DDL locally and executes it

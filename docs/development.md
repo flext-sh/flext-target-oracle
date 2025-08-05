@@ -151,7 +151,7 @@ def operation() -> FlextResult[Data]:
 # ✅ GOOD: Configuration with validation
 class Config(FlextValueObject):
     field: str = Field(..., description="Required field")
-    
+
     @field_validator("field")
     @classmethod
     def validate_field(cls, v: str) -> str:
@@ -181,14 +181,14 @@ async def process_record(record: dict) -> FlextResult[None]:
         # Validate input
         if not record:
             return FlextResult.fail("Record cannot be empty")
-        
+
         # Process record
         result = await some_operation(record)
         if result.is_failure:
             return result  # Propagate failure
-        
+
         return FlextResult.ok(None)
-        
+
     except Exception as e:
         logger.exception("Record processing failed")
         return FlextResult.fail(f"Processing failed: {e}")
@@ -197,14 +197,14 @@ async def process_record(record: dict) -> FlextResult[None]:
 async def process_batch(records: list[dict]) -> FlextResult[Stats]:
     """Process batch of records with early termination on failure."""
     stats = Stats()
-    
+
     for record in records:
         result = await process_record(record)
         if result.is_failure:
             return FlextResult.fail(f"Batch failed on record: {result.error}")
-        
+
         stats.increment()
-    
+
     return FlextResult.ok(stats)
 ```
 
@@ -214,16 +214,16 @@ async def process_batch(records: list[dict]) -> FlextResult[Stats]:
 # ✅ FlextValueObject with domain validation
 class FlextOracleTargetConfig(FlextValueObject):
     """Type-safe configuration with business rule validation."""
-    
+
     # Required fields with clear validation
     oracle_host: str = Field(..., description="Oracle host")
     oracle_port: int = Field(
-        default=1521, 
-        ge=1, 
+        default=1521,
+        ge=1,
         le=65535,
         description="Oracle port"
     )
-    
+
     # Custom validation
     @field_validator("oracle_host")
     @classmethod
@@ -231,7 +231,7 @@ class FlextOracleTargetConfig(FlextValueObject):
         if not v or v.isspace():
             raise ValueError("Oracle host is required")
         return v.strip()
-    
+
     # Domain rule validation
     def validate_domain_rules(self) -> FlextResult[None]:
         """Validate business rules using Chain of Responsibility."""
@@ -249,7 +249,7 @@ logger = get_logger(__name__)
 
 def process_with_logging(stream_name: str, batch_size: int):
     """Example of proper logging with context."""
-    
+
     # Structured logging with extra context
     logger.info(
         "Starting batch processing",
@@ -259,11 +259,11 @@ def process_with_logging(stream_name: str, batch_size: int):
             "operation": "batch_processing"
         }
     )
-    
+
     try:
         # Process batch
         result = process_batch()
-        
+
         logger.info(
             "Batch processing completed",
             extra={
@@ -272,7 +272,7 @@ def process_with_logging(stream_name: str, batch_size: int):
                 "duration_ms": result.duration
             }
         )
-        
+
     except Exception as e:
         logger.exception(
             "Batch processing failed",
@@ -320,7 +320,7 @@ with loader.oracle_api as connected_api:
 # Test table creation and schema evolution
 async def test_table_management():
     """Test table operations during development."""
-    
+
     # Schema definition
     schema = {
         "type": "object",
@@ -330,20 +330,20 @@ async def test_table_management():
             "created_at": {"type": "string", "format": "date-time"}
         }
     }
-    
+
     # Ensure table exists
     result = await loader.ensure_table_exists("test_stream", schema)
     if result.is_failure:
         print(f"Table creation failed: {result.error}")
         return
-    
+
     # Test record insertion
     test_record = {
         "id": 1,
         "name": "Test Record",
         "created_at": "2025-08-04T10:00:00Z"
     }
-    
+
     result = await loader.load_record("test_stream", test_record)
     if result.success:
         print("Record loaded successfully")
@@ -420,12 +420,12 @@ try:
         oracle_user="system",
         oracle_password="oracle"
     )
-    
+
     # Test domain rules
     validation_result = config.validate_domain_rules()
     if validation_result.is_failure:
         print(f"Validation failed: {validation_result.error}")
-    
+
 except ValidationError as e:
     print(f"Configuration error: {e}")
 ```
@@ -466,15 +466,15 @@ import pstats
 
 def profile_batch_processing():
     """Profile batch processing for performance optimization."""
-    
+
     pr = cProfile.Profile()
     pr.enable()
-    
+
     # Your batch processing code here
     result = process_large_batch(records)
-    
+
     pr.disable()
-    
+
     stats = pstats.Stats(pr)
     stats.sort_stats('cumulative')
     stats.print_stats(20)  # Top 20 functions by time
@@ -493,31 +493,31 @@ from flext_target_oracle import FlextOracleTargetConfig, FlextResult
 
 class TestNewFeature:
     """Test suite for new feature."""
-    
+
     def test_success_case(self):
         """Test successful operation."""
         # Arrange
         config = FlextOracleTargetConfig(...)
-        
+
         # Act
-        result = new_feature_operation(config) 
-        
+        result = new_feature_operation(config)
+
         # Assert
         assert result.success
         assert result.data == expected_value
-    
+
     def test_failure_case(self):
         """Test failure handling."""
         # Arrange
         invalid_config = FlextOracleTargetConfig(...)
-        
+
         # Act
         result = new_feature_operation(invalid_config)
-        
+
         # Assert
         assert result.is_failure
         assert "expected error message" in result.error
-    
+
     @pytest.mark.parametrize("input_value,expected", [
         ("valid_input", "expected_output"),
         ("another_input", "another_output"),
@@ -538,24 +538,24 @@ from flext_target_oracle import FlextOracleTarget
 @pytest.mark.integration
 class TestOracleIntegration:
     """Integration tests requiring Oracle database."""
-    
+
     @pytest.fixture
     def oracle_target(self, sample_config):
         """Create target with Oracle connection."""
         return FlextOracleTarget(sample_config)
-    
+
     async def test_end_to_end_processing(self, oracle_target):
         """Test complete Singer message processing."""
         # Schema message
         schema_msg = {...}
         result = await oracle_target.process_singer_message(schema_msg)
         assert result.success
-        
+
         # Record messages
         record_msg = {...}
         result = await oracle_target.process_singer_message(record_msg)
         assert result.success
-        
+
         # Finalization
         stats_result = await oracle_target.finalize()
         assert stats_result.success
@@ -578,7 +578,7 @@ def sample_schema():
         }
     }
 
-@pytest.fixture  
+@pytest.fixture
 def sample_records():
     """Standard test records."""
     return [
@@ -598,36 +598,36 @@ from typing import List
 
 async def benchmark_batch_sizes(records: List[dict]):
     """Benchmark different batch sizes."""
-    
+
     batch_sizes = [100, 500, 1000, 2000, 5000]
     results = {}
-    
+
     for batch_size in batch_sizes:
         config = FlextOracleTargetConfig(
             # ... other config
             batch_size=batch_size
         )
-        
+
         target = FlextOracleTarget(config)
-        
+
         start_time = time.time()
-        
+
         # Process all records
         for record in records:
             await target.process_singer_message({
                 "type": "RECORD",
-                "stream": "test_stream", 
+                "stream": "test_stream",
                 "record": record
             })
-        
+
         await target.finalize()
-        
+
         duration = time.time() - start_time
         results[batch_size] = {
             "duration": duration,
             "records_per_second": len(records) / duration
         }
-    
+
     # Print results
     for batch_size, stats in results.items():
         print(f"Batch size {batch_size}: "
@@ -642,17 +642,17 @@ import os
 
 def monitor_memory_usage():
     """Monitor memory usage during processing."""
-    
+
     process = psutil.Process(os.getpid())
-    
+
     def get_memory_mb():
         return process.memory_info().rss / 1024 / 1024
-    
+
     print(f"Initial memory: {get_memory_mb():.1f} MB")
-    
+
     # Your processing code here
     # ...
-    
+
     print(f"Final memory: {get_memory_mb():.1f} MB")
 ```
 
@@ -663,7 +663,7 @@ def monitor_memory_usage():
 Before submitting a pull request:
 
 - [ ] **Code Quality**: `make validate` passes with zero issues
-- [ ] **Tests**: All existing tests pass, new tests added for new functionality  
+- [ ] **Tests**: All existing tests pass, new tests added for new functionality
 - [ ] **Documentation**: Updated relevant documentation (architecture, API)
 - [ ] **Security**: No new security vulnerabilities introduced
 - [ ] **FLEXT Patterns**: Follows established FLEXT ecosystem patterns
@@ -686,7 +686,7 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `chore`
 
 1. **Automated Checks**: CI/CD pipeline runs quality gates
 2. **Architecture Review**: Ensure FLEXT pattern compliance
-3. **Security Review**: Check for vulnerabilities  
+3. **Security Review**: Check for vulnerabilities
 4. **Performance Review**: Validate no performance regressions
 5. **Documentation Review**: Ensure documentation is updated
 

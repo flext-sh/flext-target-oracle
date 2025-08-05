@@ -292,7 +292,8 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             return FlextResult.fail(f"Failed to discover catalog: {e}")
 
     def execute(
-        self, input_data: object | None = None,
+        self,
+        input_data: object | None = None,
     ) -> FlextResult[FlextSingerUnifiedResult]:
         """Execute the target operation - process Singer messages.
 
@@ -515,7 +516,9 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             return FlextResult.fail(f"Record writing failed: {e}")
 
     def _apply_schema_mappings(
-        self, stream_name: str, schema: dict[str, object],
+        self,
+        stream_name: str,
+        schema: dict[str, object],
     ) -> dict[str, object]:
         """Apply column mappings to schema.
 
@@ -565,7 +568,9 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         return {**schema, "properties": new_properties}
 
     def _apply_record_mappings(
-        self, stream_name: str, record: dict[str, object],
+        self,
+        stream_name: str,
+        record: dict[str, object],
     ) -> dict[str, object]:
         """Apply column mappings and transformations to a record.
 
@@ -597,7 +602,9 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         return new_record
 
     def _apply_value_transform(
-        self, value: object, transform: dict[str, object],
+        self,
+        value: object,
+        transform: dict[str, object],
     ) -> object:
         """Apply transformation to a value.
 
@@ -772,7 +779,9 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             key_properties = message.get("key_properties", [])
 
             result = await self._loader.ensure_table_exists(
-                stream_name, schema, key_properties,
+                stream_name,
+                schema,
+                key_properties,
             )
             if result.success:
                 logger.info(f"Schema processed for stream: {stream_name}")

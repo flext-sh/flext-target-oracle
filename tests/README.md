@@ -197,10 +197,10 @@ class TestNewFeature:
         """Test description."""
         # Arrange
         loader = OracleLoader(config)
-        
+
         # Act
         result = loader.some_method()
-        
+
         # Assert
         assert result.is_success
         mock_oracle_api.some_call.assert_called_once()
@@ -215,10 +215,10 @@ async def test_real_database_operation(oracle_loader, oracle_engine):
     """Test with real Oracle database."""
     # Create table
     await oracle_loader.ensure_table_exists("test", schema, keys)
-    
+
     # Insert data
     await oracle_loader.insert_records("test", records)
-    
+
     # Verify in database
     with oracle_engine.connect() as conn:
         count = conn.execute(text("SELECT COUNT(*) FROM test")).scalar()

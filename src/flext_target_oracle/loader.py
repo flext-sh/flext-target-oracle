@@ -98,6 +98,286 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
+# ============================================================================
+# SOLID Architecture Services - Following Single Responsibility Principle
+# ============================================================================
+
+
+class OracleConnectionManager:
+    """Oracle connection lifecycle management following Single Responsibility."""
+
+    def __init__(self, oracle_api: FlextDbOracleApi, config: FlextOracleTargetConfig) -> None:
+        """Initialize connection manager."""
+        self.oracle_api = oracle_api
+        self.config = config
+        self._connection: FlextDbOracleConnection | None = None
+        self._metadata_manager: FlextDbOracleMetadataManager | None = None
+
+    def connect(self) -> FlextResult[None]:
+        """Establish Oracle connection."""
+        try:
+            connect_result = self.oracle_api.connect()
+            if connect_result.is_failure:
+                msg = f"Failed to establish Oracle connection: {connect_result.error}"
+                raise FlextOracleTargetConnectionError(
+                    msg,
+                    host=self.config.oracle_host,
+                    port=self.config.oracle_port,
+                    service_name=self.config.oracle_service,
+                )
+
+            self._connection = self.oracle_api.connection
+            if not self._connection:
+                msg = "Connected but no connection object available"
+                raise FlextOracleTargetConnectionError(
+                    msg,
+                    host=self.config.oracle_host,
+                    port=self.config.oracle_port,
+                )
+
+            self._metadata_manager = FlextDbOracleMetadataManager(self._connection)
+            logger.info(
+                f"Connected to Oracle: {self.config.oracle_host}:{self.config.oracle_port}/{self.config.oracle_service}",
+            )
+            return FlextResult.ok(None)
+
+        except FlextOracleTargetConnectionError:
+            raise
+        except Exception as e:
+            msg = f"Unexpected error during connection: {e}"
+            raise FlextOracleTargetConnectionError(
+                msg,
+                host=self.config.oracle_host,
+                port=self.config.oracle_port,
+                service_name=self.config.oracle_service,
+            )
+
+    @property
+    def connection(self) -> FlextDbOracleConnection | None:
+        """Get current connection."""
+        return self._connection
+
+    @property
+    def metadata_manager(self) -> FlextDbOracleMetadataManager | None:
+        """Get metadata manager."""
+        return self._metadata_manager
+
+
+class OracleSchemaManager:
+    """Oracle schema operations following Single Responsibility."""
+
+    def __init__(self, metadata: MetaData) -> None:
+        """Initialize schema manager."""
+        self._metadata = metadata
+        self._schema_cache: dict[str, dict[str, object]] = {}
+        self._tables: dict[str, Table] = {}
+
+    def map_json_type_to_oracle(self, json_type: str, format_type: str | None = None) -> object:
+        """Map JSON schema type to Oracle column type."""
+        if json_type == "string":
+            if format_type == "date":
+                return DATE()
+            if format_type in {"date-time", "datetime"}:
+                return TIMESTAMP()
+            return VARCHAR2(4000)
+        if json_type == "integer":
+            return NUMBER(precision=38, scale=0)
+        if json_type == "number":
+            return NUMBER(precision=38, scale=6)
+        if json_type == "boolean":
+            return NUMBER(precision=1, scale=0)
+        if json_type in {"object", "array"}:
+            return CLOB()
+        return VARCHAR2(4000)
+
+    def flatten_schema_properties(
+        self, properties: dict[str, object], prefix: str = "",
+    ) -> dict[str, object]:
+        """Flatten nested schema properties for Oracle table structure."""
+        flattened = {}
+
+        for key, value in properties.items():
+            if not isinstance(value, dict):
+                continue
+
+            full_key = f"{prefix}{key}" if prefix else key
+            value_type = value.get("type")
+
+            if value_type == "object" and "properties" in value:
+                nested_props = value["properties"]
+                if isinstance(nested_props, dict):
+                    flattened.update(
+                        self.flatten_schema_properties(nested_props, f"{full_key}_"),
+                    )
+            else:
+                flattened[full_key] = value
+
+        return flattened
+
+    def get_cached_schema(self, stream_name: str) -> dict[str, object] | None:
+        """Get cached schema for stream."""
+        return self._schema_cache.get(stream_name)
+
+    def cache_schema(self, stream_name: str, schema: dict[str, object]) -> None:
+        """Cache schema for stream."""
+        self._schema_cache[stream_name] = schema
+
+    def get_table(self, table_name: str) -> Table | None:
+        """Get cached table object."""
+        return self._tables.get(table_name)
+
+    def cache_table(self, table_name: str, table: Table) -> None:
+        """Cache table object."""
+        self._tables[table_name] = table
+
+
+class OracleSQLGenerator:
+    """Oracle SQL generation following Single Responsibility."""
+
+    def __init__(self, config: FlextOracleTargetConfig) -> None:
+        """Initialize SQL generator."""
+        self.config = config
+
+    def build_merge_statement(
+        self,
+        table_name: str,
+        merge_keys: list[str],
+        all_columns: list[str],
+    ) -> str:
+        """Build MERGE statement for upsert operations."""
+        if not merge_keys:
+            msg = f"No merge keys defined for table {table_name}"
+            raise FlextOracleTargetProcessingError(
+                msg,
+            )
+
+        # Build the ON condition
+        on_conditions = [f"target.{key} = source.{key}" for key in merge_keys]
+        on_clause = " AND ".join(on_conditions)
+
+        # Build UPDATE SET clause
+        update_columns = [col for col in all_columns if col not in merge_keys]
+        if update_columns:
+            update_sets = [f"{col} = source.{col}" for col in update_columns]
+            update_clause = f"UPDATE SET {', '.join(update_sets)}"
+        else:
+            update_clause = ""
+
+        # Build INSERT clause
+        insert_columns = ", ".join(all_columns)
+        insert_values = ", ".join([f"source.{col}" for col in all_columns])
+        insert_clause = f"INSERT ({insert_columns}) VALUES ({insert_values})"
+
+        # Combine into MERGE statement
+        merge_sql = f"""
+        MERGE INTO {table_name} target
+        USING (SELECT {', '.join([f':{col} as {col}' for col in all_columns])} FROM dual) source
+        ON ({on_clause})
+        WHEN MATCHED THEN {update_clause}
+        WHEN NOT MATCHED THEN {insert_clause}
+        """
+
+        return merge_sql.strip()
+
+    def format_index_name(self, table_name: str, column_names: list[str]) -> str:
+        """Format index name following Oracle naming conventions."""
+        base_name = f"idx_{table_name}_" + "_".join(column_names)
+        # Oracle identifier limit is 128 characters in 12.2+, 30 in earlier versions
+        max_length = 30  # Conservative for compatibility
+        if len(base_name) > max_length:
+            # Truncate and add hash for uniqueness
+            import hashlib
+            hash_suffix = hashlib.md5(base_name.encode()).hexdigest()[:6]
+            truncated = base_name[:max_length - 7]  # -7 for underscore + hash
+            return f"{truncated}_{hash_suffix}"
+        return base_name
+
+
+class OracleRecordTransformer:
+    """Oracle record transformation following Single Responsibility."""
+
+    def __init__(self, config: FlextOracleTargetConfig) -> None:
+        """Initialize record transformer."""
+        self.config = config
+
+    def flatten_record(self, record: dict[str, object], prefix: str = "") -> dict[str, object]:
+        """Flatten nested record for Oracle table structure."""
+        flattened = {}
+
+        for key, value in record.items():
+            full_key = f"{prefix}{key}" if prefix else key
+
+            if isinstance(value, dict):
+                flattened.update(self.flatten_record(value, f"{full_key}_"))
+            elif isinstance(value, list):
+                # Convert arrays to JSON strings
+                flattened[full_key] = json.dumps(value)
+            else:
+                flattened[full_key] = value
+
+        return flattened
+
+    def prepare_row_data(
+        self,
+        record: dict[str, object],
+        table_columns: list[str],
+    ) -> dict[str, object]:
+        """Prepare record data for Oracle insertion."""
+        flattened = self.flatten_record(record)
+        prepared_data: dict[str, object] = {}
+
+        for column in table_columns:
+            value = flattened.get(column)
+            if value is None:
+                prepared_data[column] = None
+            elif isinstance(value, (dict, list)):
+                prepared_data[column] = json.dumps(value)
+            else:
+                prepared_data[column] = value
+
+        return prepared_data
+
+
+class OracleBatchProcessor:
+    """Oracle batch processing following Single Responsibility."""
+
+    def __init__(self, config: FlextOracleTargetConfig) -> None:
+        """Initialize batch processor."""
+        self.config = config
+        self._record_buffers: dict[str, list[dict[str, object]]] = {}
+        self._total_records = 0
+
+    def add_record(self, stream_name: str, record: dict[str, object]) -> None:
+        """Add record to batch buffer."""
+        if stream_name not in self._record_buffers:
+            self._record_buffers[stream_name] = []
+
+        self._record_buffers[stream_name].append(record)
+        self._total_records += 1
+
+    def is_batch_ready(self, stream_name: str) -> bool:
+        """Check if batch is ready for processing."""
+        buffer = self._record_buffers.get(stream_name, [])
+        return len(buffer) >= self.config.batch_size
+
+    def get_batch(self, stream_name: str) -> list[dict[str, object]]:
+        """Get and clear batch for stream."""
+        batch = self._record_buffers.get(stream_name, [])
+        self._record_buffers[stream_name] = []
+        return batch
+
+    def get_all_pending_batches(self) -> dict[str, list[dict[str, object]]]:
+        """Get all pending batches."""
+        batches = self._record_buffers.copy()
+        self._record_buffers.clear()
+        return batches
+
+    @property
+    def total_records(self) -> int:
+        """Get total record count."""
+        return self._total_records
+
+
 class FlextOracleTargetLoader:
     """Oracle data loading service with batch processing and error handling.
 
@@ -209,69 +489,28 @@ class FlextOracleTargetLoader:
         oracle_config = FlextDbOracleConfig(**oracle_config_dict)
         self.oracle_api = FlextDbOracleApi(oracle_config)
 
-        # Initialize connection and metadata components
-        self._connection: FlextDbOracleConnection | None = None
-        self._metadata_manager: FlextDbOracleMetadataManager | None = None
-        self._metadata = MetaData()
-        self._schema_cache: dict[str, dict[str, object]] = {}
-        self._tables: dict[str, Table] = {}
+        # SOLID Architecture Services - Dependency Injection
+        self._connection_manager = OracleConnectionManager(self.oracle_api, config)
+        self._schema_manager = OracleSchemaManager(MetaData())
+        self._sql_generator = OracleSQLGenerator(config)
+        self._record_transformer = OracleRecordTransformer(config)
+        self._batch_processor = OracleBatchProcessor(config)
+
+        # Legacy support for existing interface
         self._key_properties_cache: dict[str, list[str]] = {}
-
-        # Buffers for batch processing
-        self._record_buffers: dict[str, list[dict[str, object]]] = {}
-        self._total_records = 0
-
-        # Bulk operation support
         self._bulk_prepared: dict[str, object] = {}
         self._use_bulk_operations = config.use_bulk_operations
         self._use_direct_path = config.use_direct_path
         self._parallel_degree = config.parallel_degree
 
     def connect(self) -> FlextResult[None]:
-        """Establish connection to Oracle database.
+        """Establish connection to Oracle database using SOLID connection manager.
 
         Returns:
             FlextResult indicating success/failure
 
         """
-        try:
-            # Connect via API
-            connect_result = self.oracle_api.connect()
-            if connect_result.is_failure:
-                msg = f"Failed to establish Oracle connection: {connect_result.error}"
-                raise FlextOracleTargetConnectionError(
-                    msg,
-                    host=self.config.oracle_host,
-                    port=self.config.oracle_port,
-                    service_name=self.config.oracle_service,
-                )
-
-            # Get connection for metadata operations
-            self._connection = self.oracle_api.connection
-            if not self._connection:
-                msg = "Connected but no connection object available"
-                raise FlextOracleTargetConnectionError(
-                    msg,
-                    host=self.config.oracle_host,
-                    port=self.config.oracle_port,
-                )
-
-            self._metadata_manager = FlextDbOracleMetadataManager(self._connection)
-            logger.info(
-                f"Connected to Oracle: {self.config.oracle_host}:{self.config.oracle_port}/{self.config.oracle_service}",
-            )
-            return FlextResult.ok(None)
-
-        except FlextOracleTargetConnectionError:
-            raise
-        except Exception as e:
-            msg = f"Unexpected error during connection: {e}"
-            raise FlextOracleTargetConnectionError(
-                msg,
-                host=self.config.oracle_host,
-                port=self.config.oracle_port,
-                service_name=self.config.oracle_service,
-            ) from e
+        return self._connection_manager.connect()
 
     async def ensure_table_exists(
         self,
@@ -459,10 +698,9 @@ class FlextOracleTargetLoader:
                     properties = schema.get("properties", {})
                     for key_prop in key_properties:
                         if key_prop in properties:
-                            col_type = self._map_json_type_to_oracle(
-                                properties[key_prop],
-                                stream_name,
-                                key_prop,
+                            col_type = self._schema_manager.map_json_type_to_oracle(
+                                properties[key_prop].get("type", "string"),
+                                properties[key_prop].get("format"),
                             )
                             columns.append(
                                 Column(
@@ -490,7 +728,9 @@ class FlextOracleTargetLoader:
                 for prop_name, prop_def in flattened_props.items():
                     col_name = prop_name.upper()
                     col_type = self._map_json_type_to_oracle(
-                        prop_def, stream_name, prop_name,
+                        prop_def,
+                        stream_name,
+                        prop_name,
                     )
 
                     # Check if it's a primary key (only in merge mode)
@@ -771,7 +1011,9 @@ class FlextOracleTargetLoader:
         return VARCHAR2(self.config.default_string_length)
 
     def _order_columns(
-        self, columns: list[Column], key_properties: list[str] | None,
+        self,
+        columns: list[Column],
+        key_properties: list[str] | None,
     ) -> list[Column]:
         """Order columns according to configuration rules.
 
@@ -968,7 +1210,10 @@ class FlextOracleTargetLoader:
             logger.warning(f"Failed to create indexes for {table_name}: {e}")
 
     def _format_index_name(
-        self, table_name: str, columns: list[str], idx_type: str = "",
+        self,
+        table_name: str,
+        columns: list[str],
+        idx_type: str = "",
     ) -> str:
         """Format index name using configured template.
 
@@ -1107,7 +1352,9 @@ class FlextOracleTargetLoader:
 
             for prop_name, prop_def in flattened_props.items():
                 col_type = self._map_json_type_to_oracle(
-                    prop_def, stream_name, prop_name,
+                    prop_def,
+                    stream_name,
+                    prop_name,
                 )
                 expected[prop_name.upper()] = str(
                     col_type.compile(dialect=oracle.dialect()),
@@ -1213,15 +1460,11 @@ class FlextOracleTargetLoader:
 
         """
         try:
-            # Add to buffer
-            if stream_name not in self._record_buffers:
-                self._record_buffers[stream_name] = []
+            # Use SOLID batch processor service
+            self._batch_processor.add_record(stream_name, record_data)
 
-            self._record_buffers[stream_name].append(record_data)
-            buffer_size = len(self._record_buffers[stream_name])
-
-            # Check if batch is ready
-            if buffer_size >= self.config.batch_size:
+            # Check if batch is ready using SOLID service
+            if self._batch_processor.is_batch_ready(stream_name):
                 logger.info(f"Buffer full, flushing batch for stream: {stream_name}")
                 return await self._flush_batch(stream_name)
 
@@ -1288,21 +1531,22 @@ class FlextOracleTargetLoader:
 
         """
         try:
-            # Flush all remaining batches
-            for stream_name in list(self._record_buffers.keys()):
-                if self._record_buffers[stream_name]:
-                    result = await self._flush_batch(stream_name)
+            # Flush all remaining batches using SOLID batch processor
+            pending_batches = self._batch_processor.get_all_pending_batches()
+            for stream_name, records in pending_batches.items():
+                if records:
+                    result = await self._flush_batch_records(stream_name, records)
                     if not result.success:
                         logger.error(
                             f"Failed to flush final batch for {stream_name}: {result.error}",
                         )
 
-            # Return simple statistics
+            # Return statistics from SOLID batch processor
             stats: dict[str, object] = {
-                "total_records": self._total_records,
-                "successful_records": self._total_records,
+                "total_records": self._batch_processor.total_records,
+                "successful_records": self._batch_processor.total_records,
                 "failed_records": 0,
-                "total_batches": len(self._record_buffers),
+                "total_batches": len(pending_batches),
             }
 
             logger.info(
@@ -1315,26 +1559,29 @@ class FlextOracleTargetLoader:
             return FlextResult.fail(f"Finalization failed: {e}")
 
     async def _flush_batch(self, stream_name: str) -> FlextResult[None]:
-        """Flush pending records for a stream."""
+        """Flush pending records for a stream using SOLID batch processor."""
         try:
-            if (
-                stream_name not in self._record_buffers
-                or not self._record_buffers[stream_name]
-            ):
+            # Get batch from SOLID batch processor
+            records = self._batch_processor.get_batch(stream_name)
+            if not records:
                 return FlextResult.ok(None)
 
-            records = self._record_buffers[stream_name]
+            return await self._flush_batch_records(stream_name, records)
+
+        except (RuntimeError, ValueError, TypeError) as e:
+            logger.exception(f"Failed to flush batch for stream {stream_name}")
+            return FlextResult.fail(f"Batch flush failed: {e}")
+
+    async def _flush_batch_records(self, stream_name: str, records: list[dict[str, object]]) -> FlextResult[None]:
+        """Helper method to flush specific records."""
+        try:
             table_name = self.config.get_table_name(stream_name)
 
             # Execute batch insert
             result = await self._insert_batch(table_name, records)
 
-            # Clear buffer and update stats
             record_count = len(records)
-            self._record_buffers[stream_name] = []
-
             if result.success:
-                self._total_records += record_count
                 logger.info(f"Batch loaded: {record_count} records to {table_name}")
             else:
                 logger.error(f"Batch failed: {result.error}")
@@ -1342,7 +1589,7 @@ class FlextOracleTargetLoader:
             return result
 
         except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception(f"Failed to flush batch for stream {stream_name}")
+            logger.exception(f"Failed to flush batch records for stream {stream_name}")
             return FlextResult.fail(f"Batch flush failed: {e}")
 
     async def _insert_batch(
@@ -1390,7 +1637,10 @@ class FlextOracleTargetLoader:
             # Check if we need merge or append mode
             if self.config.sdc_mode == "merge":
                 return await self._standard_merge(
-                    schema_name, table_name, records, table,
+                    schema_name,
+                    table_name,
+                    records,
+                    table,
                 )
 
             # Build INSERT statement using flext-db-oracle
@@ -1477,7 +1727,10 @@ class FlextOracleTargetLoader:
 
             # Build merge statement
             merge_sql = self._build_merge_statement(
-                schema_name, table_name, table, merge_keys,
+                schema_name,
+                table_name,
+                table,
+                merge_keys,
             )
 
             # Execute merges
@@ -1553,7 +1806,10 @@ class FlextOracleTargetLoader:
                 # Check if we need to do merge or append
                 if self.config.sdc_mode == "merge":
                     return await self._bulk_merge(
-                        schema_name, table_name, records, table,
+                        schema_name,
+                        table_name,
+                        records,
+                        table,
                     )
                 return await self._bulk_append(schema_name, table_name, records, table)
 
@@ -1665,7 +1921,10 @@ class FlextOracleTargetLoader:
 
             # Build MERGE statement
             merge_sql = self._build_merge_statement(
-                schema_name, table_name, table, merge_keys,
+                schema_name,
+                table_name,
+                table,
+                merge_keys,
             )
 
             # Prepare merge operations
@@ -1712,70 +1971,12 @@ class FlextOracleTargetLoader:
         sequence: int,
         loaded_at: datetime,
     ) -> dict[str, object]:
-        """Prepare row data for insertion."""
-        row_data = {}
+        """Prepare row data for insertion using SOLID record transformer."""
+        # Delegate to the SOLID record transformer service
+        table_columns = [col.name for col in table.columns]
+        row_data = self._record_transformer.prepare_row_data(record, table_columns)
 
-        # Check if we're in JSON storage mode
-        if self.config.storage_mode == "json":
-            # Store entire record as JSON
-            json_col_name = self.config.json_column_name
-            # Remove SDC metadata from the record for clean JSON storage
-            clean_record = {
-                k: v for k, v in record.items() if not k.startswith("_sdc_")
-            }
-            row_data[json_col_name] = json.dumps(clean_record)
-
-            # Add key columns if in merge mode
-            for col in table.columns:
-                col_name = col.name
-                if col_name != json_col_name and col_name not in {
-                    self.config.sdc_extracted_at_column,
-                    self.config.sdc_loaded_at_column,
-                    self.config.sdc_deleted_at_column,
-                    self.config.sdc_sequence_column,
-                }:
-                    # This is a key column, extract from record
-                    value = record.get(col_name.lower(), record.get(col_name))
-                    if isinstance(value, bool):
-                        value = 1 if value else 0
-                    row_data[col_name] = value
-        else:
-            # Flattened or hybrid mode
-            if self.config.storage_mode == "flattened":
-                # Flatten the record
-                flattened_record = self._flatten_record(record)
-            else:
-                # Hybrid mode - flatten to max depth
-                flattened_record = self._flatten_record(
-                    record,
-                    max_depth=self.config.max_flattening_depth,
-                )
-
-            # Map flattened data to columns
-            for col in table.columns:
-                col_name = col.name
-                if col_name not in {
-                    self.config.sdc_extracted_at_column,
-                    self.config.sdc_loaded_at_column,
-                    self.config.sdc_deleted_at_column,
-                    self.config.sdc_sequence_column,
-                }:
-                    # Get value from flattened record (case-insensitive)
-                    value = None
-                    for k, v in flattened_record.items():
-                        if k.upper() == col_name:
-                            value = v
-                            break
-
-                    # Convert complex types to JSON
-                    if isinstance(value, (dict, list)):
-                        value = json.dumps(value)
-                    elif isinstance(value, bool):
-                        value = 1 if value else 0
-
-                    row_data[col_name] = value
-
-        # Add SDC metadata columns with custom names
+        # Add SDC metadata columns
         for col in table.columns:
             col_name = col.name
             if col_name == self.config.sdc_loaded_at_column:

@@ -16,13 +16,13 @@ echo -e "${BLUE}=====================================${NC}"
 # Check if Oracle is running
 echo -e "${YELLOW}Checking Oracle container...${NC}"
 if ! docker ps | grep -q "flext-oracle-test"; then
-    echo -e "${YELLOW}Starting Oracle container...${NC}"
-    cd .. && make oracle-start && cd examples
+	echo -e "${YELLOW}Starting Oracle container...${NC}"
+	cd .. && make oracle-start && cd examples
 fi
 
 # Create example config
 echo -e "${BLUE}Creating example configuration...${NC}"
-cat > config.json <<EOF
+cat >config.json <<EOF
 {
     "oracle_host": "localhost",
     "oracle_port": 1521,
@@ -46,7 +46,7 @@ EOF
 
 # Create example Singer data
 echo -e "${BLUE}Creating example Singer data...${NC}"
-cat > singer_data.jsonl <<EOF
+cat >singer_data.jsonl <<EOF
 {"type": "SCHEMA", "stream": "users", "schema": {"type": "object", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}, "email": {"type": "string", "format": "email"}, "age": {"type": "integer"}, "address": {"type": "object", "properties": {"street": {"type": "string"}, "city": {"type": "string"}, "country": {"type": "string"}}}, "created_at": {"type": "string", "format": "date-time"}}}, "key_properties": ["id"]}
 {"type": "RECORD", "stream": "users", "record": {"id": 1, "name": "John Doe", "email": "john@example.com", "age": 30, "address": {"street": "123 Main St", "city": "New York", "country": "USA"}, "created_at": "2025-01-20T12:00:00Z"}}
 {"type": "RECORD", "stream": "users", "record": {"id": 2, "name": "Jane Smith", "email": "jane@example.com", "age": 25, "address": {"street": "456 Oak Ave", "city": "Los Angeles", "country": "USA"}, "created_at": "2025-01-20T12:01:00Z"}}

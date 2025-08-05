@@ -4,13 +4,13 @@
 
 ## Quick Navigation
 
-| Example | Use Case | Complexity |
-|---------|----------|------------|
-| [Basic Usage](basic_usage.py) | Simple target setup and record processing | Beginner |
-| [Meltano Integration](meltano_integration/) | Complete Meltano project configuration | Intermediate |
-| [Production Setup](production_setup.py) | Enterprise configuration with error handling | Advanced |
-| [Performance Tuning](performance_tuning.py) | Batch optimization and monitoring | Advanced |
-| [Error Handling](error_handling.py) | Comprehensive error scenarios | Intermediate |
+| Example                                     | Use Case                                     | Complexity   |
+| ------------------------------------------- | -------------------------------------------- | ------------ |
+| [Basic Usage](basic_usage.py)               | Simple target setup and record processing    | Beginner     |
+| [Meltano Integration](meltano_integration/) | Complete Meltano project configuration       | Intermediate |
+| [Production Setup](production_setup.py)     | Enterprise configuration with error handling | Advanced     |
+| [Performance Tuning](performance_tuning.py) | Batch optimization and monitoring            | Advanced     |
+| [Error Handling](error_handling.py)         | Comprehensive error scenarios                | Intermediate |
 
 ## Getting Started
 
@@ -45,18 +45,23 @@ export ORACLE_PASSWORD=oracle
 ## Examples Overview
 
 ### 1. Basic Usage
+
 Simple target initialization and Singer message processing with FLEXT patterns.
 
 ### 2. Meltano Integration
+
 Complete Meltano project setup with target configuration and pipeline execution.
 
 ### 3. Production Setup
+
 Enterprise-grade configuration with comprehensive error handling, monitoring, and security considerations.
 
 ### 4. Performance Tuning
+
 Optimization techniques for high-volume data loading with batch tuning and connection management.
 
 ### 5. Error Handling
+
 Comprehensive error scenarios and recovery strategies using FLEXT error patterns.
 
 ## Running Examples
@@ -75,6 +80,7 @@ python examples/performance_tuning.py
 ## Common Patterns
 
 ### FlextResult Error Handling
+
 All examples demonstrate railway-oriented programming with FlextResult patterns:
 
 ```python
@@ -85,6 +91,7 @@ if result.is_failure:
 ```
 
 ### Configuration Management
+
 Type-safe configuration with domain validation:
 
 ```python
@@ -101,6 +108,7 @@ if validation_result.is_failure:
 ```
 
 ### FLEXT Ecosystem Integration
+
 Integration with FLEXT core patterns and flext-db-oracle:
 
 ```python
@@ -130,7 +138,7 @@ pytest examples/tests/ -m integration
 
 ## Security Notes
 
-⚠️ **Important**: These examples include placeholder credentials for demonstration purposes. 
+⚠️ **Important**: These examples include placeholder credentials for demonstration purposes.
 **Never** use default credentials in production environments.
 
 - Use environment variables for sensitive configuration

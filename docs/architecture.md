@@ -83,13 +83,13 @@ class FlextOracleTargetConfig(FlextValueObject):
 ```python
 class FlextOracleTarget(Target):
     """Singer Target implementation with FLEXT patterns."""
-    
+
     # Singer protocol compliance
     async def process_singer_message(self, message: dict) -> FlextResult[None]
     async def _handle_schema(self, message: dict) -> FlextResult[None]
     async def _handle_record(self, message: dict) -> FlextResult[None]
     async def _handle_state(self, message: dict) -> FlextResult[None]
-    
+
     # Lifecycle management
     async def finalize(self) -> FlextResult[dict[str, object]]
 ```
@@ -107,21 +107,21 @@ class FlextOracleTarget(Target):
 ```python
 class FlextOracleTargetConfig(FlextValueObject):
     """Type-safe configuration with business rule validation."""
-    
+
     # Required Oracle connection parameters
     oracle_host: str
     oracle_port: int = 1521
     oracle_service: str
     oracle_user: str
     oracle_password: str
-    
+
     # Business configuration
     default_target_schema: str = "target"
     load_method: LoadMethod = LoadMethod.INSERT
     batch_size: int = 1000
     use_bulk_operations: bool = True
     connection_timeout: int = 30
-    
+
     def validate_domain_rules(self) -> FlextResult[None]:
         """Chain of Responsibility validation pattern."""
 ```
@@ -139,15 +139,15 @@ class FlextOracleTargetConfig(FlextValueObject):
 ```python
 class FlextOracleTargetLoader:
     """Oracle data loading with batch processing."""
-    
+
     def __init__(self, config: FlextOracleTargetConfig):
         # flext-db-oracle integration
         self.oracle_api = FlextDbOracleApi(oracle_config)
         self._record_buffers: dict[str, list[dict]] = {}
-    
+
     # Table management
     async def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[None]
-    
+
     # Data loading with batching
     async def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]
     async def finalize_all_streams(self) -> FlextResult[dict[str, object]]
@@ -178,14 +178,14 @@ sequenceDiagram
     API->>DB: SELECT table_name FROM all_tables
     DB-->>API: Table list
     API-->>FL: FlextResult[List[str]]
-    
+
     alt Table doesn't exist
         FL->>API: execute_ddl(CREATE TABLE)
         API->>DB: CREATE TABLE statement
         DB-->>API: Success/Error
         API-->>FL: FlextResult[None]
     end
-    
+
     FL-->>FT: FlextResult[None]
     FT-->>ST: Processing result
 
@@ -194,7 +194,7 @@ sequenceDiagram
         ST->>FT: RECORD message
         FT->>FL: load_record(stream, data)
         FL->>FL: Add to batch buffer
-        
+
         alt Batch size reached
             FL->>API: execute_dml(INSERT batch)
             API->>DB: Batch INSERT
@@ -202,7 +202,7 @@ sequenceDiagram
             API-->>FL: FlextResult[None]
             FL->>FL: Clear buffer
         end
-        
+
         FL-->>FT: FlextResult[None]
         FT-->>ST: Processing result
     end
@@ -210,14 +210,14 @@ sequenceDiagram
     Note over ST,DB: Finalization
     ST->>FT: End of stream / STATE
     FT->>FL: finalize_all_streams()
-    
+
     loop For each buffered stream
         FL->>API: execute_dml(Final batch)
         API->>DB: INSERT remaining records
         DB-->>API: Success/Error
         API-->>FL: FlextResult[None]
     end
-    
+
     FL-->>FT: FlextResult[Statistics]
     FT-->>ST: Final statistics
 ```
@@ -246,20 +246,20 @@ flowchart TD
 ```python
 class BatchProcessor:
     """Configurable batch processing for optimal performance."""
-    
+
     def __init__(self, batch_size: int = 1000):
         self._buffers: dict[str, list[Record]] = {}
         self._batch_size = batch_size
-    
+
     async def add_record(self, stream: str, record: dict) -> FlextResult[None]:
         # Add to buffer
         buffer = self._buffers.setdefault(stream, [])
         buffer.append(record)
-        
+
         # Flush if batch size reached
         if len(buffer) >= self._batch_size:
             return await self._flush_batch(stream)
-        
+
         return FlextResult.ok(None)
 ```
 
@@ -348,29 +348,29 @@ def test_operation_failure():
 graph TB
     subgraph "FLEXT Core"
         FC[flext-core]
-        FM[flext-meltano] 
+        FM[flext-meltano]
         FDB[flext-db-oracle]
     end
-    
+
     subgraph "FLEXT Target Oracle"
         FTO[FlextOracleTarget]
         FTL[FlextOracleTargetLoader]
         FTC[FlextOracleTargetConfig]
     end
-    
+
     subgraph "External Systems"
         SINGER[Singer Ecosystem]
         ORACLE[Oracle Database]
         MELTANO[Meltano Orchestrator]
     end
-    
+
     FC --> FTC
     FM --> FTO
     FDB --> FTL
-    
+
     FTO --> FTL
     FTO --> FTC
-    
+
     SINGER --> FTO
     FTL --> ORACLE
     MELTANO --> FTO
@@ -383,7 +383,7 @@ graph TB
 config = FlextOracleTargetConfig(...)
 validation_result = config.validate_domain_rules()
 
-# flext-db-oracle integration  
+# flext-db-oracle integration
 oracle_config = config.get_oracle_config()
 api = FlextDbOracleApi(oracle_config)
 
@@ -397,7 +397,7 @@ target = FlextOracleTarget(config)
 
 ```yaml
 # Docker Compose example
-version: '3.8'
+version: "3.8"
 services:
   flext-target-oracle:
     image: flext/target-oracle:latest
@@ -446,7 +446,7 @@ metrics.histogram("oracle_target.batch_duration").observe(duration)
 ### Planned Improvements
 
 1. **Singer SDK Compliance**: Implement missing Singer Target methods
-2. **Security Hardening**: Fix SQL injection vulnerabilities  
+2. **Security Hardening**: Fix SQL injection vulnerabilities
 3. **Schema Evolution**: Dynamic schema modification support
 4. **Performance Optimization**: Advanced Oracle features (partitioning, compression)
 5. **Observability Enhancement**: Distributed tracing integration

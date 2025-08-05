@@ -71,22 +71,22 @@ __version__ = "0.9.0"
 """Current version - pre-production with known critical issues."""
 
 __all__: list[str] = [
-    # Primary implementation classes
-    "FlextOracleTarget",
-    "FlextOracleTargetConfig",
-    "LoadMethod",
-    # Legacy exception hierarchy (TODO: consolidate with exceptions.py)
-    "FlextOracleTargetAuthenticationError",
-    "FlextOracleTargetConnectionError",
-    "FlextOracleTargetError", 
-    "FlextOracleTargetProcessingError",
-    "FlextOracleTargetSchemaError",
     # SEMANTIC PATTERN OBSERVABILITY - New namespace classes
     "FlextOracleError",
     "FlextOracleObs",
-    "configure_oracle_observability",
+    # Primary implementation classes
+    "FlextOracleTarget",
+    # Legacy exception hierarchy (TODO: consolidate with exceptions.py)
+    "FlextOracleTargetAuthenticationError",
+    "FlextOracleTargetConfig",
+    "FlextOracleTargetConnectionError",
+    "FlextOracleTargetError",
+    "FlextOracleTargetProcessingError",
+    "FlextOracleTargetSchemaError",
     # FLEXT core re-exports for convenience
     "FlextResult",
+    "LoadMethod",
     # Version information
     "__version__",
+    "configure_oracle_observability",
 ]
