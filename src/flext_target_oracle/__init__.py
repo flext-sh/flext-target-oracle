@@ -60,6 +60,11 @@ from flext_target_oracle.exceptions import (
     FlextOracleTargetProcessingError,
     FlextOracleTargetSchemaError,
 )
+from flext_target_oracle.observability import (
+    FlextOracleError,
+    FlextOracleObs,
+    configure_oracle_observability,
+)
 from flext_target_oracle.target import FlextOracleTarget
 
 __version__ = "0.9.0"
@@ -68,16 +73,20 @@ __version__ = "0.9.0"
 __all__: list[str] = [
     # Primary implementation classes
     "FlextOracleTarget",
-    "FlextOracleTargetAuthenticationError",
     "FlextOracleTargetConfig",
+    "LoadMethod",
+    # Legacy exception hierarchy (TODO: consolidate with exceptions.py)
+    "FlextOracleTargetAuthenticationError",
     "FlextOracleTargetConnectionError",
-    # Exception hierarchy (TODO: consolidate with exceptions.py)
-    "FlextOracleTargetError",
+    "FlextOracleTargetError", 
     "FlextOracleTargetProcessingError",
     "FlextOracleTargetSchemaError",
+    # SEMANTIC PATTERN OBSERVABILITY - New namespace classes
+    "FlextOracleError",
+    "FlextOracleObs",
+    "configure_oracle_observability",
     # FLEXT core re-exports for convenience
     "FlextResult",
-    "LoadMethod",
     # Version information
     "__version__",
 ]

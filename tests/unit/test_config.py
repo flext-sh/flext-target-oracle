@@ -26,9 +26,8 @@ Note:
 """
 
 import pytest
-from pydantic import ValidationError
-
 from flext_target_oracle.config import FlextOracleTargetConfig, LoadMethod
+from pydantic import ValidationError
 
 # Constants
 EXPECTED_BULK_SIZE = 2

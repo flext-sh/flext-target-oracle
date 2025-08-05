@@ -198,7 +198,6 @@ init_typed = true
 warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
-[tool.ruff]
 extend = "../.ruff-shared.toml"
 lint.isort.known-first-party = ["flext_target_oracle"]
 

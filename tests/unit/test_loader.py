@@ -7,15 +7,14 @@ data insertion, and bulk operations using mocked dependencies.
 from unittest.mock import MagicMock, patch
 
 import pytest
-from sqlalchemy import Column
-from sqlalchemy.dialects.oracle import CLOB, NUMBER, TIMESTAMP, VARCHAR2
-
 from flext_target_oracle import LoadMethod
 from flext_target_oracle.exceptions import (
     FlextOracleTargetConnectionError,
     FlextOracleTargetProcessingError,
 )
 from flext_target_oracle.loader import FlextOracleTargetLoader
+from sqlalchemy import Column
+from sqlalchemy.dialects.oracle import CLOB, NUMBER, TIMESTAMP, VARCHAR2
 
 
 class TestFlextOracleTargetLoaderConnection:

@@ -12,9 +12,8 @@ from datetime import UTC, datetime
 from decimal import Decimal
 
 import pytest
-from sqlalchemy import text
-
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+from sqlalchemy import text
 
 
 @pytest.mark.e2e

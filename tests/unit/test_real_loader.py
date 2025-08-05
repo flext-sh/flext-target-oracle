@@ -1,20 +1,31 @@
 """Real Oracle Loader Tests - Using Docker Oracle Container.
 
 Tests loader functionality against a real Oracle container for maximum coverage.
+
+Note: S608 warnings about SQL injection are suppressed for this test file as:
+1. All table names come from controlled test variables, not user input
+2. We use safe_table_name() function for proper Oracle identifier quoting
+3. Oracle DDL statements cannot use parameterized queries
+4. These are test scenarios with known-safe hardcoded values
 """
+# ruff: noqa: S608
 
 from datetime import UTC, datetime
 from decimal import Decimal
 
 import pytest
-from sqlalchemy import text
-
 from flext_target_oracle import FlextOracleTargetConfig, LoadMethod
 from flext_target_oracle.exceptions import (
     FlextOracleTargetConnectionError,
     FlextOracleTargetSchemaError,
 )
 from flext_target_oracle.loader import FlextOracleTargetLoader
+from sqlalchemy import text
+
+
+def safe_table_name(name: str) -> str:
+    """Create a safe quoted Oracle table name for testing."""
+    return f'"{name.upper()}"'
 
 
 @pytest.mark.oracle
@@ -117,9 +128,10 @@ class TestRealOracleLoader:
 
         # Create table first
         with oracle_engine.connect() as conn:
+            table_name = safe_table_name(stream_name)
             conn.execute(
                 text(
-                    f"CREATE TABLE {stream_name} (id NUMBER PRIMARY KEY, name VARCHAR2(100))"
+                    f"CREATE TABLE {table_name} (id NUMBER PRIMARY KEY, name VARCHAR2(100))"
                 )
             )
             conn.commit()
@@ -155,14 +167,16 @@ class TestRealOracleLoader:
 
         # Create table with data first
         with oracle_engine.connect() as conn:
+            # Use quoted identifier for safety in test environment
+            safe_table_name = f'"{stream_name.upper()}"'
             conn.execute(
                 text(
-                    f"CREATE TABLE {stream_name} (id NUMBER PRIMARY KEY, old_column VARCHAR2(50))"
+                    f"CREATE TABLE {safe_table_name} (id NUMBER PRIMARY KEY, old_column VARCHAR2(50))"
                 )
             )
             conn.execute(
                 text(
-                    f"INSERT INTO {stream_name} (id, old_column) VALUES (1, 'old_data')"
+                    f"INSERT INTO {safe_table_name} (id, old_column) VALUES (1, 'old_data')"
                 )
             )
             conn.commit()
@@ -177,7 +191,8 @@ class TestRealOracleLoader:
         # Verify old data is gone and new structure exists
         with oracle_engine.connect() as conn:
             # Check no data
-            count = conn.execute(text(f"SELECT COUNT(*) FROM {stream_name}")).scalar()
+            table_name = safe_table_name(stream_name)
+            count = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}")).scalar()
             assert count == 0
 
             # Check new columns exist
@@ -217,20 +232,21 @@ class TestRealOracleLoader:
 
         # Create table with data first
         with oracle_engine.connect() as conn:
+            table_name = safe_table_name(stream_name)
             conn.execute(
                 text(
-                    f"CREATE TABLE {stream_name} (id NUMBER PRIMARY KEY, name VARCHAR2(100))"
+                    f"CREATE TABLE {table_name} (id NUMBER PRIMARY KEY, name VARCHAR2(100))"
                 )
             )
             conn.execute(
                 text(
-                    f"INSERT INTO {stream_name} (id, name) VALUES (1, 'existing_data')"
+                    f"INSERT INTO {table_name} (id, name) VALUES (1, 'existing_data')"
                 )
             )
             conn.commit()
 
             # Verify data exists
-            count = conn.execute(text(f"SELECT COUNT(*) FROM {stream_name}")).scalar()
+            count = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}")).scalar()
             assert count == 1
 
         schema = simple_schema["schema"]
@@ -242,7 +258,8 @@ class TestRealOracleLoader:
 
         # Verify table is empty
         with oracle_engine.connect() as conn:
-            count = conn.execute(text(f"SELECT COUNT(*) FROM {stream_name}")).scalar()
+            table_name = safe_table_name(stream_name)
+            count = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}")).scalar()
             assert count == 0
 
     @pytest.mark.asyncio
@@ -272,8 +289,9 @@ class TestRealOracleLoader:
 
         # Verify in database
         with oracle_engine.connect() as conn:
+            table_name = safe_table_name(stream_name)
             result = conn.execute(
-                text(f"SELECT id, name, email FROM {stream_name} WHERE id = 1")
+                text(f"SELECT id, name, email FROM {table_name} WHERE id = 1")
             )
             row = result.fetchone()
             assert row is not None
@@ -308,7 +326,8 @@ class TestRealOracleLoader:
 
         # Verify in database
         with oracle_engine.connect() as conn:
-            count = conn.execute(text(f"SELECT COUNT(*) FROM {stream_name}")).scalar()
+            table_name = safe_table_name(stream_name)
+            count = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}")).scalar()
             assert count == 10
 
     @pytest.mark.asyncio
@@ -352,7 +371,8 @@ class TestRealOracleLoader:
 
         # Verify all records
         with oracle_engine.connect() as conn:
-            count = conn.execute(text(f"SELECT COUNT(*) FROM {stream_name}")).scalar()
+            table_name = safe_table_name(stream_name)
+            count = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}")).scalar()
             assert count == 12
 
     @pytest.mark.asyncio
@@ -399,15 +419,16 @@ class TestRealOracleLoader:
 
         # Verify update
         with oracle_engine.connect() as conn:
+            table_name = safe_table_name(stream_name)
             result = conn.execute(
-                text(f"SELECT name, email FROM {stream_name} WHERE id = 1")
+                text(f"SELECT name, email FROM {table_name} WHERE id = 1")
             )
             row = result.fetchone()
             assert row[0] == "Updated Name"
             assert row[1] == "updated@example.com"
 
             # Should still have only one record
-            count = conn.execute(text(f"SELECT COUNT(*) FROM {stream_name}")).scalar()
+            count = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}")).scalar()
             assert count == 1
 
     @pytest.mark.asyncio
@@ -448,8 +469,9 @@ class TestRealOracleLoader:
 
         # Verify flattened columns
         with oracle_engine.connect() as conn:
+            table_name = safe_table_name(stream_name)
             result = conn.execute(
-                text(f"SELECT * FROM {stream_name} WHERE order_id = 'ORD-001'")
+                text(f"SELECT * FROM {table_name} WHERE order_id = 'ORD-001'")
             )
             row = result.fetchone()
             assert row is not None
@@ -513,11 +535,12 @@ class TestRealOracleLoader:
 
         # Verify types in database
         with oracle_engine.connect() as conn:
+            table_name = safe_table_name(stream_name)
             result = conn.execute(
                 text(
                     f"""
                     SELECT id, name, price, is_active, created_at
-                    FROM {stream_name}
+                    FROM {table_name}
                     WHERE id = 1
                     """
                 )
@@ -760,5 +783,6 @@ class TestRealOracleLoader:
 
         # Verify all records loaded
         with oracle_engine.connect() as conn:
-            count = conn.execute(text(f"SELECT COUNT(*) FROM {stream_name}")).scalar()
+            table_name = safe_table_name(stream_name)
+            count = conn.execute(text(f"SELECT COUNT(*) FROM {table_name}")).scalar()
             assert count == 200

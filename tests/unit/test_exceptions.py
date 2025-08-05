@@ -19,7 +19,6 @@ Note:
 import logging
 
 import pytest
-
 from flext_target_oracle.exceptions import (
     FlextOracleTargetAuthenticationError,
     FlextOracleTargetConnectionError,
@@ -236,7 +235,7 @@ class TestFlextOracleTargetExceptions:
             raise FlextOracleTargetSchemaError(msg)
         except FlextOracleTargetSchemaError as e:
             # This should not raise an exception
-            logger.exception(f"Oracle schema error: {e}")
+            logger.exception("Oracle schema error")
             if "Schema validation failed" not in str(e):
                 msg: str = f"Expected {'Schema validation failed'} in {e!s}"
                 raise AssertionError(msg) from None

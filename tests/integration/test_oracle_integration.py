@@ -7,10 +7,9 @@ actual database operations including DDL, DML, and bulk operations.
 import json
 
 import pytest
-from sqlalchemy import text
-
 from flext_target_oracle import FlextOracleTarget, LoadMethod
 from flext_target_oracle.loader import FlextOracleTargetLoader
+from sqlalchemy import text
 
 
 @pytest.mark.integration

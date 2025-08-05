@@ -37,7 +37,6 @@ import sys
 from typing import Any
 
 from flext_core import FlextResult, get_logger
-
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
 # Configure production-grade logging
@@ -456,8 +455,8 @@ async def demonstrate_production_setup() -> None:
         else:
             logger.error("Shutdown issues: %s", shutdown_result.error)
 
-    except Exception as e:
-        logger.exception("Production demonstration failed: %s", e)
+    except Exception:
+        logger.exception("Production demonstration failed")
         raise
 
 
@@ -581,8 +580,8 @@ def main() -> None:
 
     except KeyboardInterrupt:
         logger.info("Example interrupted by user")
-    except Exception as e:
-        logger.exception("Production setup example failed: %s", e)
+    except Exception:
+        logger.exception("Production setup example failed")
         sys.exit(1)
 
 

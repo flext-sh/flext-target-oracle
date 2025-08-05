@@ -9,7 +9,6 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from flext_core import FlextResult
-
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig
 
 
@@ -94,8 +93,8 @@ class TestFlextOracleTargetCoverage:
             result = target._test_connection_impl()
             assert result is True
 
-    def test_test_connection_impl_success(self) -> None:
-        """Test _test_connection_impl success path."""
+    def test_test_connection_impl_basic(self) -> None:
+        """Test _test_connection_impl basic functionality."""
         config = FlextOracleTargetConfig(
             oracle_host="localhost",
             oracle_service="xe",

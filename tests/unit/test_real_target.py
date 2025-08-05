@@ -7,13 +7,12 @@ import json
 from datetime import UTC, datetime
 
 import pytest
-from sqlalchemy import text
-
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 from flext_target_oracle.exceptions import (
     FlextOracleTargetProcessingError,
     FlextOracleTargetSchemaError,
 )
+from sqlalchemy import text
 
 
 @pytest.mark.oracle

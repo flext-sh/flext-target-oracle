@@ -345,7 +345,7 @@ class FlextOracleTargetLoader:
 
                 if tables_result.is_failure:
                     return FlextResult.fail(
-                        f"Failed to check existing tables: {tables_result.error}"
+                        f"Failed to check existing tables: {tables_result.error}",
                     )
 
                 existing_tables = [t.upper() for t in tables_result.value or []]
@@ -356,11 +356,11 @@ class FlextOracleTargetLoader:
                 if table_exists and self.config.force_recreate_tables:
                     logger.info(f"Force recreating table {table_name}")
                     drop_result = connected_api.execute_ddl(
-                        f"DROP TABLE {self.config.default_target_schema}.{table_name}"
+                        f"DROP TABLE {self.config.default_target_schema}.{table_name}",
                     )
                     if drop_result.is_failure:
                         logger.warning(
-                            f"Failed to drop table for recreation: {drop_result.error}"
+                            f"Failed to drop table for recreation: {drop_result.error}",
                         )
                     table_exists = False
 
@@ -376,7 +376,7 @@ class FlextOracleTargetLoader:
                         )
                         if truncate_result.is_failure:
                             logger.warning(
-                                f"Failed to truncate table: {truncate_result.error}"
+                                f"Failed to truncate table: {truncate_result.error}",
                             )
 
                     # Check if we need to alter table
@@ -389,7 +389,7 @@ class FlextOracleTargetLoader:
                         )
                         if alter_result.is_failure:
                             logger.warning(
-                                f"Failed to alter table: {alter_result.error}"
+                                f"Failed to alter table: {alter_result.error}",
                             )
 
                     # Store schema and key properties for future reference
@@ -450,7 +450,7 @@ class FlextOracleTargetLoader:
                         self.config.json_column_name,
                         CLOB,  # Use CLOB for JSON storage
                         nullable=False,
-                    )
+                    ),
                 )
 
                 # Add key columns if in merge mode
@@ -470,7 +470,7 @@ class FlextOracleTargetLoader:
                                     col_type,
                                     primary_key=True,
                                     nullable=False,
-                                )
+                                ),
                             )
             else:
                 # Flattened or hybrid mode
@@ -490,7 +490,7 @@ class FlextOracleTargetLoader:
                 for prop_name, prop_def in flattened_props.items():
                     col_name = prop_name.upper()
                     col_type = self._map_json_type_to_oracle(
-                        prop_def, stream_name, prop_name
+                        prop_def, stream_name, prop_name,
                     )
 
                     # Check if it's a primary key (only in merge mode)
@@ -511,13 +511,13 @@ class FlextOracleTargetLoader:
             # Add SDC metadata columns with custom names
             sdc_columns = {
                 self.config.sdc_extracted_at_column: TIMESTAMP(
-                    self.config.default_timestamp_precision
+                    self.config.default_timestamp_precision,
                 ),
                 self.config.sdc_loaded_at_column: TIMESTAMP(
-                    self.config.default_timestamp_precision
+                    self.config.default_timestamp_precision,
                 ),
                 self.config.sdc_deleted_at_column: TIMESTAMP(
-                    self.config.default_timestamp_precision
+                    self.config.default_timestamp_precision,
                 ),
                 self.config.sdc_sequence_column: NUMBER,
             }
@@ -540,7 +540,7 @@ class FlextOracleTargetLoader:
                             col_type,
                             primary_key=is_pk,
                             nullable=nullable,
-                        )
+                        ),
                     )
 
             # Order columns according to configuration
@@ -771,7 +771,7 @@ class FlextOracleTargetLoader:
         return VARCHAR2(self.config.default_string_length)
 
     def _order_columns(
-        self, columns: list[Column], key_properties: list[str] | None
+        self, columns: list[Column], key_properties: list[str] | None,
     ) -> list[Column]:
         """Order columns according to configuration rules.
 
@@ -880,7 +880,7 @@ class FlextOracleTargetLoader:
                     logger.warning(f"Failed to create SDC index: {result.error}")
             else:
                 logger.warning(
-                    f"Failed to build SDC index statement: {idx_result.error}"
+                    f"Failed to build SDC index statement: {idx_result.error}",
                 )
 
             # Create composite index on key properties if multiple
@@ -898,11 +898,11 @@ class FlextOracleTargetLoader:
                     result = api.execute_ddl(idx_result.value)
                     if result.is_failure:
                         logger.warning(
-                            f"Failed to create key properties index: {result.error}"
+                            f"Failed to create key properties index: {result.error}",
                         )
                 else:
                     logger.warning(
-                        f"Failed to build key properties index statement: {idx_result.error}"
+                        f"Failed to build key properties index statement: {idx_result.error}",
                     )
 
             # Create custom indexes if defined
@@ -926,11 +926,11 @@ class FlextOracleTargetLoader:
                         result = api.execute_ddl(idx_result.value)
                         if result.is_failure:
                             logger.warning(
-                                f"Failed to create custom index {idx_name}: {result.error}"
+                                f"Failed to create custom index {idx_name}: {result.error}",
                             )
                     else:
                         logger.warning(
-                            f"Failed to build custom index statement: {idx_result.error}"
+                            f"Failed to build custom index statement: {idx_result.error}",
                         )
 
             # Create foreign key indexes if enabled and schema has references
@@ -956,11 +956,11 @@ class FlextOracleTargetLoader:
                             result = api.execute_ddl(idx_result.value)
                             if result.is_failure:
                                 logger.warning(
-                                    f"Failed to create FK index {idx_name}: {result.error}"
+                                    f"Failed to create FK index {idx_name}: {result.error}",
                                 )
                         else:
                             logger.warning(
-                                f"Failed to build FK index statement: {idx_result.error}"
+                                f"Failed to build FK index statement: {idx_result.error}",
                             )
 
         except Exception as e:
@@ -968,7 +968,7 @@ class FlextOracleTargetLoader:
             logger.warning(f"Failed to create indexes for {table_name}: {e}")
 
     def _format_index_name(
-        self, table_name: str, columns: list[str], idx_type: str = ""
+        self, table_name: str, columns: list[str], idx_type: str = "",
     ) -> str:
         """Format index name using configured template.
 
@@ -1026,7 +1026,7 @@ class FlextOracleTargetLoader:
 
             if columns_result.is_failure:
                 return FlextResult.fail(
-                    f"Failed to get table columns: {columns_result.error}"
+                    f"Failed to get table columns: {columns_result.error}",
                 )
 
             existing_columns = {
@@ -1054,7 +1054,7 @@ class FlextOracleTargetLoader:
                     result = api.execute_ddl(alter_sql)
                     if result.is_failure:
                         logger.warning(
-                            f"Failed to add column {col_name}: {result.error}"
+                            f"Failed to add column {col_name}: {result.error}",
                         )
                     else:
                         logger.info(f"Added column {col_name} to table {table_name}")
@@ -1093,7 +1093,7 @@ class FlextOracleTargetLoader:
                         )
                         # Convert SQLAlchemy type to string
                         expected[key_prop.upper()] = str(
-                            col_type.compile(dialect=oracle.dialect())
+                            col_type.compile(dialect=oracle.dialect()),
                         )
         else:
             # Flattened mode
@@ -1107,10 +1107,10 @@ class FlextOracleTargetLoader:
 
             for prop_name, prop_def in flattened_props.items():
                 col_type = self._map_json_type_to_oracle(
-                    prop_def, stream_name, prop_name
+                    prop_def, stream_name, prop_name,
                 )
                 expected[prop_name.upper()] = str(
-                    col_type.compile(dialect=oracle.dialect())
+                    col_type.compile(dialect=oracle.dialect()),
                 )
 
         # Add SDC columns
@@ -1390,7 +1390,7 @@ class FlextOracleTargetLoader:
             # Check if we need merge or append mode
             if self.config.sdc_mode == "merge":
                 return await self._standard_merge(
-                    schema_name, table_name, records, table
+                    schema_name, table_name, records, table,
                 )
 
             # Build INSERT statement using flext-db-oracle
@@ -1471,13 +1471,13 @@ class FlextOracleTargetLoader:
             if not merge_keys:
                 # No merge keys, fall back to insert
                 logger.warning(
-                    f"No merge keys for {stream_name}, using standard insert"
+                    f"No merge keys for {stream_name}, using standard insert",
                 )
                 return await self._standard_insert(schema_name, table_name, records)
 
             # Build merge statement
             merge_sql = self._build_merge_statement(
-                schema_name, table_name, table, merge_keys
+                schema_name, table_name, table, merge_keys,
             )
 
             # Execute merges
@@ -1553,7 +1553,7 @@ class FlextOracleTargetLoader:
                 # Check if we need to do merge or append
                 if self.config.sdc_mode == "merge":
                     return await self._bulk_merge(
-                        schema_name, table_name, records, table
+                        schema_name, table_name, records, table,
                     )
                 return await self._bulk_append(schema_name, table_name, records, table)
 
@@ -1657,7 +1657,7 @@ class FlextOracleTargetLoader:
             if not merge_keys:
                 # No merge keys defined, fall back to append
                 logger.warning(
-                    f"No merge keys defined for {stream_name}, using append mode"
+                    f"No merge keys defined for {stream_name}, using append mode",
                 )
                 return await self._bulk_append(schema_name, table_name, records, table)
 
@@ -1665,7 +1665,7 @@ class FlextOracleTargetLoader:
 
             # Build MERGE statement
             merge_sql = self._build_merge_statement(
-                schema_name, table_name, table, merge_keys
+                schema_name, table_name, table, merge_keys,
             )
 
             # Prepare merge operations
@@ -1954,18 +1954,18 @@ class FlextOracleTargetLoader:
 
                 if ddl_result.is_failure:
                     return FlextResult.fail(
-                        f"Failed to build CREATE TABLE DDL: {ddl_result.error}"
+                        f"Failed to build CREATE TABLE DDL: {ddl_result.error}",
                     )
 
                 # Execute DDL
                 exec_result = connected_api.execute_ddl(ddl_result.value)
                 if exec_result.is_failure:
                     return FlextResult.fail(
-                        f"Failed to execute CREATE TABLE: {exec_result.error}"
+                        f"Failed to execute CREATE TABLE: {exec_result.error}",
                     )
 
                 logger.info(
-                    f"Created simple JSON table: {self.config.default_target_schema}.{table_name}"
+                    f"Created simple JSON table: {self.config.default_target_schema}.{table_name}",
                 )
             return FlextResult.ok(None)
 
