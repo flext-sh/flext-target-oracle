@@ -258,12 +258,16 @@ class TestFlextOracleTargetConfigCoverage:
 
         # Test string representation (current implementation includes password)
         config_str = str(config)
-        assert "secret_password" in config_str  # Current implementation exposes password
+        assert (
+            "secret_password" in config_str
+        )  # Current implementation exposes password
         assert "localhost" in config_str
 
         # Test repr (current implementation excludes password for security)
         config_repr = repr(config)
-        assert "secret_password" not in config_repr  # Password excluded from repr for security
+        assert (
+            "secret_password" not in config_repr
+        )  # Password excluded from repr for security
 
     def test_config_serialization_security(self) -> None:
         """Test that sensitive data is properly handled in serialization."""

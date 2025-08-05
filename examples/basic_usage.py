@@ -60,7 +60,9 @@ def create_configuration() -> FlextOracleTargetConfig:
         connection_timeout=30,
     )
 
-    logger.info(f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service}")
+    logger.info(
+        f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service}"
+    )
     return config
 
 

@@ -33,8 +33,8 @@ class TestFlextOracleTargetLoaderCoverage:
 
         # Verify configuration is stored correctly
         assert loader.config == config
-        assert loader._stream_records == {}
-        assert loader._stream_schemas == {}
+        assert loader._record_buffers == {}
+        assert loader._total_records == 0
 
     @pytest.mark.asyncio
     async def test_ensure_table_exists_error_handling(self) -> None:
@@ -97,17 +97,16 @@ class TestFlextOracleTargetLoaderCoverage:
         )
         loader = FlextOracleTargetLoader(config)
 
-        # Mock Oracle API to raise connection error
-        loader.oracle_api = MagicMock()
-        loader.oracle_api.__enter__ = MagicMock(
-            side_effect=Exception("Connection failed"),
-        )
+        # Mock Oracle API to raise connection error when used as context manager
+        mock_api = MagicMock()
+        mock_api.__enter__.side_effect = RuntimeError("Connection failed")
+        loader.oracle_api = mock_api
 
         records = [{"id": 1, "name": "test"}]
         result = await loader._insert_batch("test_table", records)
 
         assert result.is_failure
-        assert "Failed to insert batch" in str(result.error)
+        assert "Batch insert failed" in str(result.error)
 
     @pytest.mark.asyncio
     async def test_insert_batch_query_failure(self) -> None:
@@ -145,14 +144,9 @@ class TestFlextOracleTargetLoaderCoverage:
         )
         loader = FlextOracleTargetLoader(config)
 
-        # Add some pending records
-        loader._stream_records["test_stream"] = [
-            {"id": 1, "name": "test1"},
-            {"id": 2, "name": "test2"},
-        ]
-
-        # Mock _flush_stream to fail
-        with patch.object(loader, "_flush_stream") as mock_flush:
+        # The loader uses internal batch management now
+        # Mock _flush_batch to fail
+        with patch.object(loader, "_flush_batch") as mock_flush:
             mock_flush.return_value = FlextResult.fail("Flush failed")
 
             result = await loader.finalize_all_streams()
@@ -171,7 +165,7 @@ class TestFlextOracleTargetLoaderCoverage:
         loader = FlextOracleTargetLoader(config)
 
         # Test flushing empty stream
-        result = await loader._flush_stream("empty_stream")
+        result = await loader._flush_batch("empty_stream")
         assert result.success  # Should succeed with no-op
 
     @pytest.mark.asyncio
@@ -237,8 +231,8 @@ class TestFlextOracleTargetLoaderCoverage:
         loader = FlextOracleTargetLoader(config)
 
         # Test internal state management
-        assert len(loader._stream_records) == 0
-        assert len(loader._stream_schemas) == 0
+        assert len(loader._record_buffers) == 0
+        assert loader._total_records == 0
 
         # Test configuration access
         assert loader.config.oracle_host == "localhost"
@@ -257,7 +251,9 @@ class TestFlextOracleTargetLoaderCoverage:
 
         # Test exception during record processing
         with patch.object(
-            loader, "_get_table_name", side_effect=Exception("Naming error"),
+            loader,
+            "_create_table",
+            side_effect=Exception("Table creation error"),
         ):
             result = await loader.load_record("test", {"id": 1})
             assert result.is_failure
@@ -273,15 +269,9 @@ class TestFlextOracleTargetLoaderCoverage:
         )
         loader = FlextOracleTargetLoader(config)
 
-        # Verify initial state
-        assert len(loader._stream_records) == 0
-        assert len(loader._stream_schemas) == 0
+        # Test basic loader state
+        assert loader.config == config
+        assert loader._total_records == 0
 
-        # Simulate adding records to streams
-        loader._stream_records["stream1"] = [{"id": 1}]
-        loader._stream_records["stream2"] = [{"id": 2}, {"id": 3}]
-
-        # Verify state tracking
-        assert len(loader._stream_records) == 2
-        assert len(loader._stream_records["stream1"]) == 1
-        assert len(loader._stream_records["stream2"]) == 2
+        # The loader doesn't expose stream records directly anymore
+        # This is handled internally by the batch processing

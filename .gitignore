@@ -1,3 +1,6 @@
+coverage.json
+CLAUDE.md
+
 # Python artifacts
 __pycache__/
 *.py[cod]
