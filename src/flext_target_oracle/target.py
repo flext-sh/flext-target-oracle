@@ -58,8 +58,19 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import asyncio
+import time
+from datetime import UTC, datetime
+
+# Remove Any import - use specific types
 from flext_core import FlextResult, get_logger
-from flext_meltano import Target
+from flext_meltano import FlextMeltanoTarget
+from flext_meltano.flext_singer import flext_create_singer_bridge
+from flext_meltano.singer_unified import (
+    FlextSingerUnifiedConfig,
+    FlextSingerUnifiedInterface,
+    FlextSingerUnifiedResult,
+)
 
 from flext_target_oracle.config import FlextOracleTargetConfig
 from flext_target_oracle.loader import FlextOracleTargetLoader
@@ -67,7 +78,7 @@ from flext_target_oracle.loader import FlextOracleTargetLoader
 logger = get_logger(__name__)
 
 
-class FlextOracleTarget(Target):
+class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
     """Oracle Singer Target implementation with FLEXT ecosystem integration.
 
     This class provides a production-grade Singer Target for Oracle Database
@@ -189,25 +200,161 @@ class FlextOracleTarget(Target):
             explicit configuration with proper credentials and settings.
 
         """
-        # Initialize base Singer Target with dict config
-        dict_config = config if isinstance(config, dict) else {}
-        super().__init__(config=dict_config)
-
         # Convert config to FlextOracleTargetConfig if needed
         if isinstance(config, FlextOracleTargetConfig):
             self.target_config = config
+            dict_config = config.model_dump()
         elif isinstance(config, dict):
             self.target_config = FlextOracleTargetConfig.model_validate(config)
+            dict_config = config
         else:
-            # Create a minimal config for testing
-            self.target_config = FlextOracleTargetConfig(
-                oracle_host="localhost",
-                oracle_service="xe",
-                oracle_user="test",
-                oracle_password="test",
+            msg = (
+                "Configuration is required. Provide either a FlextOracleTargetConfig instance "
+                "or a dictionary configuration with required Oracle connection parameters."
+            )
+            raise ValueError(
+                msg,
             )
 
+        # Initialize base classes
+        super().__init__(config=dict_config)
+
+        # Initialize components
         self._loader = FlextOracleTargetLoader(self.target_config)
+        self._singer_bridge = flext_create_singer_bridge()
+        self._schemas: dict[str, dict[str, object]] = {}
+        self._state: dict[str, object] = {}
+
+    # FlextSingerUnifiedInterface implementation
+
+    def initialize(self, config: FlextSingerUnifiedConfig) -> FlextResult[None]:
+        """Initialize the Oracle target with unified configuration.
+
+        Args:
+            config: Unified Singer configuration
+
+        Returns:
+            FlextResult indicating initialization success/failure
+
+        """
+        try:
+            # Validate configuration
+            validation_result = self.target_config.validate_domain_rules()
+            if validation_result.is_failure:
+                return validation_result
+
+            # Initialize loader connection
+            connect_result = self._loader.connect()
+            if connect_result.is_failure:
+                return connect_result
+
+            return FlextResult.ok(None)
+        except Exception as e:
+            return FlextResult.fail(f"Failed to initialize Oracle target: {e}")
+
+    def discover_catalog(self) -> FlextResult[dict[str, object]]:
+        """Discover available schemas and generate Singer catalog.
+
+        For targets, this returns the current schema information from loaded streams.
+
+        Returns:
+            FlextResult containing catalog information
+
+        """
+        try:
+            catalog = {
+                "streams": [],
+            }
+
+            for stream_name, schema in self._schemas.items():
+                stream_entry = {
+                    "tap_stream_id": stream_name,
+                    "stream": stream_name,
+                    "schema": schema,
+                    "metadata": [
+                        {
+                            "breadcrumb": [],
+                            "metadata": {
+                                "inclusion": "available",
+                                "table-name": self.target_config.get_table_name(
+                                    stream_name
+                                ),
+                                "schema-name": self.target_config.default_target_schema,
+                                "forced-replication-method": "FULL_TABLE",
+                            },
+                        },
+                    ],
+                }
+                catalog["streams"].append(stream_entry)
+
+            return FlextResult.ok(catalog)
+        except Exception as e:
+            return FlextResult.fail(f"Failed to discover catalog: {e}")
+
+    def execute(
+        self, input_data: object | None = None
+    ) -> FlextResult[FlextSingerUnifiedResult]:
+        """Execute the target operation - process Singer messages.
+
+        Args:
+            input_data: Singer messages to process
+
+        Returns:
+            FlextResult containing execution results
+
+        """
+        start_time = time.time()
+        try:
+            if input_data is None:
+                return FlextResult.fail("No input data provided for target execution")
+
+            # Process messages if they're provided as a list
+            if isinstance(input_data, list):
+                records_processed = 0
+                for message in input_data:
+                    if isinstance(message, dict):
+                        result = self.process_singer_message(message)
+                        if result.is_failure:
+                            return FlextResult.fail(
+                                f"Failed to process message: {result.error}"
+                            )
+                        if message.get("type") == "RECORD":
+                            records_processed += 1
+
+                # Finalize all streams
+                finalize_result = asyncio.run(self._loader.finalize_all_streams())
+                if finalize_result.is_failure:
+                    return FlextResult.fail(
+                        f"Failed to finalize streams: {finalize_result.error}"
+                    )
+
+                # Calculate execution time in milliseconds
+                execution_time_ms = int((time.time() - start_time) * 1000)
+
+                return FlextResult.ok(
+                    FlextSingerUnifiedResult(
+                        success=True,
+                        records_processed=records_processed,
+                        schemas_discovered=list(self._schemas.keys()),
+                        execution_time_ms=execution_time_ms,
+                        state=self._state,
+                    )
+                )
+            return FlextResult.fail("Input data must be a list of Singer messages")
+
+        except Exception as e:
+            return FlextResult.fail(f"Target execution failed: {e}")
+
+    def validate_configuration(self) -> FlextResult[None]:
+        """Validate the current configuration.
+
+        Returns:
+            FlextResult indicating validation success/failure
+
+        """
+        return self.target_config.validate_domain_rules()
+
+    # Singer SDK methods
 
     def _test_connection(self) -> bool:
         """Standard Singer SDK connection test method."""
@@ -367,6 +514,122 @@ class FlextOracleTarget(Target):
             logger.exception("Failed to write records")
             return FlextResult.fail(f"Record writing failed: {e}")
 
+    def _apply_schema_mappings(
+        self, stream_name: str, schema: dict[str, object]
+    ) -> dict[str, object]:
+        """Apply column mappings to schema.
+
+        Args:
+            stream_name: Stream name
+            schema: Original schema
+
+        Returns:
+            Modified schema with mappings applied
+
+        """
+        if "properties" not in schema:
+            return schema
+
+        new_properties = {}
+        for col_name, col_schema in schema["properties"].items():
+            # Skip ignored columns
+            if self.target_config.should_ignore_column(col_name):
+                continue
+
+            # Apply column name mapping
+            mapped_name = self.target_config.map_column_name(stream_name, col_name)
+
+            # Apply column transformations
+            transform = self.target_config.get_column_transform(stream_name, col_name)
+            if transform:
+                # Apply type transformation if specified
+                if "type" in transform:
+                    col_schema = {**col_schema, "type": transform["type"]}
+
+            new_properties[mapped_name] = col_schema
+
+        # Add metadata columns if enabled
+        # Note: We use standard _sdc_ prefix in schema; loader maps to custom names
+        if self.target_config.add_metadata_columns:
+            new_properties["_sdc_extracted_at"] = {
+                "type": "string",
+                "format": "date-time",
+            }
+            new_properties["_sdc_loaded_at"] = {"type": "string", "format": "date-time"}
+            new_properties["_sdc_deleted_at"] = {
+                "type": ["null", "string"],
+                "format": "date-time",
+            }
+            new_properties["_sdc_sequence"] = {"type": "integer"}
+
+        return {**schema, "properties": new_properties}
+
+    def _apply_record_mappings(
+        self, stream_name: str, record: dict[str, object]
+    ) -> dict[str, object]:
+        """Apply column mappings and transformations to a record.
+
+        Args:
+            stream_name: Stream name
+            record: Original record
+
+        Returns:
+            Modified record with mappings applied
+
+        """
+        new_record = {}
+
+        for col_name, value in record.items():
+            # Skip ignored columns
+            if self.target_config.should_ignore_column(col_name):
+                continue
+
+            # Apply column name mapping
+            mapped_name = self.target_config.map_column_name(stream_name, col_name)
+
+            # Apply value transformations
+            transform = self.target_config.get_column_transform(stream_name, col_name)
+            if transform and value is not None:
+                value = self._apply_value_transform(value, transform)
+
+            new_record[mapped_name] = value
+
+        return new_record
+
+    def _apply_value_transform(
+        self, value: object, transform: dict[str, object]
+    ) -> object:
+        """Apply transformation to a value.
+
+        Args:
+            value: Original value
+            transform: Transformation configuration
+
+        Returns:
+            Transformed value
+
+        """
+        if "type" in transform:
+            # Type conversion
+            target_type = transform["type"]
+            if target_type == "string":
+                return str(value)
+            if target_type == "integer":
+                return int(value) if value is not None else None
+            if target_type == "number":
+                return float(value) if value is not None else None
+            if target_type == "boolean":
+                return bool(value) if value is not None else None
+
+        if "format" in transform:
+            # Format transformation (e.g., date formatting)
+            if transform["format"] == "uppercase":
+                return value.upper() if isinstance(value, str) else value
+            if transform["format"] == "lowercase":
+                return value.lower() if isinstance(value, str) else value
+
+        return value
+
     async def process_singer_message(
         self,
         message: dict[str, object],
@@ -498,7 +761,19 @@ class FlextOracleTarget(Target):
             if not isinstance(schema, dict):
                 return FlextResult.fail("Schema message missing valid schema")
 
-            result = await self._loader.ensure_table_exists(stream_name, schema)
+            # Store original schema for catalog discovery
+            self._schemas[stream_name] = schema
+
+            # Apply column mappings if configured
+            if self.target_config.column_mappings:
+                schema = self._apply_schema_mappings(stream_name, schema)
+
+            # Get key properties
+            key_properties = message.get("key_properties", [])
+
+            result = await self._loader.ensure_table_exists(
+                stream_name, schema, key_properties
+            )
             if result.success:
                 logger.info(f"Schema processed for stream: {stream_name}")
 
@@ -558,6 +833,17 @@ class FlextOracleTarget(Target):
 
             if not isinstance(stream_name, str) or not isinstance(record_data, dict):
                 return FlextResult.fail("Record message missing stream or data")
+
+            # Apply column mappings and transformations
+            if self.target_config.column_mappings or self.target_config.ignored_columns:
+                record_data = self._apply_record_mappings(stream_name, record_data)
+
+            # Add metadata columns if enabled
+            if self.target_config.add_metadata_columns:
+                record_data["_sdc_extracted_at"] = message.get("time_extracted", "")
+                record_data["_sdc_loaded_at"] = datetime.now(UTC).isoformat()
+                # _sdc_deleted_at is set to null for non-deleted records
+                record_data["_sdc_deleted_at"] = None
 
             return await self._loader.load_record(stream_name, record_data)
 
@@ -702,7 +988,8 @@ class FlextOracleTarget(Target):
             >>> metrics = target._get_implementation_metrics()
             >>> print(f"Connected to {metrics['oracle_host']}:{metrics['oracle_port']}")
             >>> print(
-            ...     f"Using {metrics['load_method']} with batch size {metrics['batch_size']}"
+            ...     f"Using {metrics['load_method']}"
+                    f" with batch size {metrics['batch_size']}"
             ... )
             >>> print(f"Bulk operations: {metrics['use_bulk_operations']}")
 

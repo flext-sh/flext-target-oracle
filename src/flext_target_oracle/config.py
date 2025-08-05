@@ -179,7 +179,10 @@ class FlextOracleTargetConfig(FlextValueObject):
         max_length=64,
     )
     oracle_user: str = Field(
-        ..., description="Oracle database username", min_length=1, max_length=128,
+        ...,
+        description="Oracle database username",
+        min_length=1,
+        max_length=128,
     )
     oracle_password: str = Field(
         ...,
@@ -194,10 +197,12 @@ class FlextOracleTargetConfig(FlextValueObject):
         max_length=128,
     )
     load_method: LoadMethod = Field(
-        default=LoadMethod.INSERT, description="Oracle data loading strategy",
+        default=LoadMethod.INSERT,
+        description="Oracle data loading strategy",
     )
     use_bulk_operations: bool = Field(
-        default=True, description="Enable Oracle bulk operations for performance",
+        default=True,
+        description="Enable Oracle bulk operations for performance",
     )
     batch_size: int = Field(
         default=OracleTargetConstants.DEFAULT_BATCH_SIZE,
@@ -210,6 +215,243 @@ class FlextOracleTargetConfig(FlextValueObject):
         description="Database connection timeout in seconds",
         gt=0,
         le=3600,  # Maximum 1 hour timeout
+    )
+
+    # SSL/TLS Configuration
+    use_ssl: bool = Field(
+        default=False,
+        description="Enable SSL/TLS for Oracle connection (TCP/TCPS)",
+    )
+    ssl_verify: bool = Field(
+        default=True,
+        description="Verify SSL certificates",
+    )
+    ssl_wallet_location: str | None = Field(
+        default=None,
+        description="Oracle wallet location for SSL connections",
+        max_length=500,
+    )
+    ssl_wallet_password: SecretStr | None = Field(
+        default=None,
+        description="Oracle wallet password",
+    )
+    disable_dn_matching: bool = Field(
+        default=False,
+        description="Disable DN (Distinguished Name) matching for SSL connections",
+    )
+
+    # Connection pool configuration
+    pool_min_size: int = Field(
+        default=1,
+        description="Minimum number of connections in pool",
+        ge=1,
+        le=100,
+    )
+    pool_max_size: int = Field(
+        default=10,
+        description="Maximum number of connections in pool",
+        ge=1,
+        le=100,
+    )
+    pool_increment: int = Field(
+        default=1,
+        description="Number of connections to add when pool is exhausted",
+        ge=1,
+        le=10,
+    )
+
+    # Advanced Oracle features
+    enable_auto_commit: bool = Field(
+        default=True,
+        description="Enable auto-commit for each batch",
+    )
+    use_direct_path: bool = Field(
+        default=False,
+        description="Use Oracle direct path load for bulk operations",
+    )
+    parallel_degree: int | None = Field(
+        default=None,
+        description="Degree of parallelism for Oracle operations",
+        ge=1,
+        le=64,
+    )
+
+    # Column modification support
+    column_mappings: dict[str, dict[str, object]] | None = Field(
+        default=None,
+        description="Column name mappings and transformations",
+    )
+    ignored_columns: list[str] | None = Field(
+        default=None,
+        description="List of columns to ignore during loading",
+    )
+    add_metadata_columns: bool = Field(
+        default=True,
+        description="Add Singer metadata columns (_sdc_*)",
+    )
+
+    # Table naming control
+    table_prefix: str | None = Field(
+        default=None,
+        description="Prefix to add to all table names",
+        max_length=30,
+    )
+    table_suffix: str | None = Field(
+        default=None,
+        description="Suffix to add to all table names",
+        max_length=30,
+    )
+    table_name_mappings: dict[str, str] | None = Field(
+        default=None,
+        description="Custom table name mappings for specific streams",
+    )
+
+    # SDC (Singer Data Capture) mode control
+    sdc_mode: str = Field(
+        default="append",
+        description="SDC mode: 'append' (always insert new rows) or 'merge' (update existing rows)",
+        pattern="^(append|merge)$",
+    )
+    sdc_primary_key_suffix: str = Field(
+        default="_sdc_loaded_at",
+        description="Column suffix for composite primary key in append mode",
+    )
+    sdc_merge_key_properties: dict[str, list[str]] | None = Field(
+        default=None,
+        description="Key properties to use for merge operations per stream",
+    )
+
+    # SDC column name customization
+    sdc_extracted_at_column: str = Field(
+        default="_SDC_EXTRACTED_AT",
+        description="Name for extraction timestamp column",
+    )
+    sdc_loaded_at_column: str = Field(
+        default="_SDC_LOADED_AT",
+        description="Name for load timestamp column",
+    )
+    sdc_deleted_at_column: str = Field(
+        default="_SDC_DELETED_AT",
+        description="Name for deletion timestamp column",
+    )
+    sdc_sequence_column: str = Field(
+        default="_SDC_SEQUENCE",
+        description="Name for sequence number column",
+    )
+
+    # Data storage mode
+    storage_mode: str = Field(
+        default="flattened",
+        description="Storage mode: 'flattened' (flatten nested data), 'json' (store as JSON), 'hybrid' (mix based on depth)",
+        pattern="^(flattened|json|hybrid)$",
+    )
+    max_flattening_depth: int = Field(
+        default=3,
+        description="Maximum depth for flattening nested structures (for hybrid mode)",
+        ge=1,
+        le=10,
+    )
+    json_column_name: str = Field(
+        default="DATA",
+        description="Column name for JSON storage mode",
+    )
+
+    # Type mapping configuration
+    default_string_length: int = Field(
+        default=4000,
+        description="Default length for VARCHAR2 columns",
+        ge=1,
+        le=32767,
+    )
+    default_timestamp_precision: int = Field(
+        default=6,
+        description="Default precision for TIMESTAMP columns",
+        ge=0,
+        le=9,
+    )
+    use_clob_threshold: int = Field(
+        default=4000,
+        description="String length threshold to use CLOB instead of VARCHAR2",
+        ge=1,
+    )
+    type_mappings: dict[str, str] | None = Field(
+        default=None,
+        description="Custom JSON to Oracle type mappings (e.g., {'number': 'NUMBER(38,10)'})",
+    )
+
+    # Column-specific type overrides
+    column_type_overrides: dict[str, dict[str, str]] | None = Field(
+        default=None,
+        description="Per-stream column type overrides (e.g., {'stream_name': {'column_name': 'DATE'}})",
+    )
+
+    # DDL Generation Control
+    column_ordering: str = Field(
+        default="alphabetical",
+        description="Column ordering in CREATE TABLE: 'alphabetical', 'schema_order', 'custom'",
+        pattern="^(alphabetical|schema_order|custom)$",
+    )
+    column_order_rules: dict[str, int] = Field(
+        default_factory=lambda: {
+            "primary_keys": 1,
+            "regular_columns": 2,
+            "audit_columns": 3,
+            "sdc_columns": 4,
+        },
+        description="Priority order for column groups (lower number = higher priority)",
+    )
+    audit_column_patterns: list[str] = Field(
+        default_factory=lambda: [
+            "created_at",
+            "created_by",
+            "created_date",
+            "updated_at",
+            "updated_by",
+            "updated_date",
+            "modified_at",
+            "modified_by",
+            "modified_date",
+            "deleted_at",
+            "deleted_by",
+            "deleted_date",
+        ],
+        description="Patterns to identify audit columns",
+    )
+
+    # Table Management
+    truncate_before_load: bool = Field(
+        default=False,
+        description="Truncate table before loading data",
+    )
+    force_recreate_tables: bool = Field(
+        default=False,
+        description="Drop and recreate tables even if they exist",
+    )
+    allow_alter_table: bool = Field(
+        default=False,
+        description="Allow ALTER TABLE for schema evolution",
+    )
+
+    # Index Management
+    maintain_indexes: bool = Field(
+        default=True,
+        description="Maintain existing indexes when modifying tables",
+    )
+    create_foreign_key_indexes: bool = Field(
+        default=True,
+        description="Create indexes for foreign key relationships from schema",
+    )
+    custom_indexes: dict[str, list[dict[str, object]]] | None = Field(
+        default=None,
+        description="Custom indexes per stream (e.g., {'stream': [{'name': 'idx_custom', 'columns': ['col1', 'col2']}]})",
+    )
+    index_naming_template: str = Field(
+        default="IDX_{table}_{columns}",
+        description="Template for index names ({table}, {columns}, {type} placeholders)",
+    )
+    preserve_existing_indexes: bool = Field(
+        default=True,
+        description="Preserve indexes not defined in schema when updating",
     )
 
     @field_validator("oracle_port")
@@ -337,7 +579,7 @@ class FlextOracleTargetConfig(FlextValueObject):
             >>> api = FlextDbOracleApi(FlextDbOracleConfig(**oracle_config))
 
         """
-        return {
+        oracle_config = {
             "host": self.oracle_host,
             "port": self.oracle_port,
             "service_name": self.oracle_service,
@@ -345,25 +587,43 @@ class FlextOracleTargetConfig(FlextValueObject):
             "password": SecretStr(self.oracle_password),
             "sid": None,  # Use service_name instead of SID
             "timeout": self.connection_timeout,
-            "pool_min": 1,
-            "pool_max": 10,
-            "pool_increment": 1,
+            "pool_min": self.pool_min_size,
+            "pool_max": self.pool_max_size,
+            "pool_increment": self.pool_increment,
             "encoding": "UTF-8",
-            "ssl_enabled": False,
-            "autocommit": False,  # Explicit transaction control
-            "ssl_server_dn_match": True,
+            "ssl_enabled": self.use_ssl,
+            "autocommit": self.enable_auto_commit,
+            "ssl_server_dn_match": not self.disable_dn_matching,
         }
+
+        # Add SSL wallet configuration if provided
+        if self.use_ssl and self.ssl_wallet_location:
+            oracle_config["ssl_wallet_location"] = self.ssl_wallet_location
+            if self.ssl_wallet_password:
+                oracle_config["ssl_wallet_password"] = self.ssl_wallet_password
+
+        # Add advanced Oracle features if enabled
+        if self.use_direct_path:
+            oracle_config["use_direct_path"] = True
+        if self.parallel_degree:
+            oracle_config["parallel_degree"] = self.parallel_degree
+
+        return oracle_config
 
     def get_table_name(self, stream_name: str) -> str:
         """Generate Oracle table name from Singer stream name.
 
         Converts Singer stream names to valid Oracle table names by replacing
-        invalid characters and applying Oracle naming conventions.
+        invalid characters and applying Oracle naming conventions with support
+        for custom mappings, prefixes, and suffixes.
 
         Transformation rules:
-        - Hyphens (-) converted to underscores (_)
-        - Dots (.) converted to underscores (_)
-        - Result converted to uppercase for Oracle convention
+        1. Check for custom mapping first
+        2. Apply standard transformations (replace - and . with _)
+        3. Add prefix if configured
+        4. Add suffix if configured
+        5. Convert to uppercase for Oracle convention
+        6. Ensure length <= 30 characters (Oracle limit)
 
         Args:
             stream_name: Singer stream identifier
@@ -372,20 +632,105 @@ class FlextOracleTargetConfig(FlextValueObject):
             Valid Oracle table name following Oracle naming conventions
 
         Example:
-            >>> config.get_table_name("user-profile.data")
-            'USER_PROFILE_DATA'
-            >>> config.get_table_name("orders")
-            'ORDERS'
-
-        Note:
-            This is a simplified naming strategy. Production deployments may
-            require more sophisticated table naming with prefixes, suffixes,
-            or custom mapping tables.
+            >>> config = FlextOracleTargetConfig(
+            ...     table_prefix="STG_",
+            ...     table_suffix="_RAW",
+            ...     table_name_mappings={"customer-orders": "ORDERS"},
+            ... )
+            >>> config.get_table_name("customer-orders")
+            'ORDERS'  # Custom mapping takes precedence
+            >>> config.get_table_name("user-profile")
+            'STG_USER_PROFILE_RAW'
 
         """
-        # Simple but effective mapping strategy
-        # TODO: Consider adding configurable table prefixes/suffixes for v1.1.0
-        return stream_name.replace("-", "_").replace(".", "_").upper()
+        # Check custom mapping first
+        if self.table_name_mappings and stream_name in self.table_name_mappings:
+            return self.table_name_mappings[stream_name].upper()
+
+        # Standard transformation
+        base_name = stream_name.replace("-", "_").replace(".", "_")
+
+        # Apply prefix and suffix
+        if self.table_prefix:
+            base_name = f"{self.table_prefix}{base_name}"
+        if self.table_suffix:
+            base_name = f"{base_name}{self.table_suffix}"
+
+        # Convert to uppercase
+        table_name = base_name.upper()
+
+        # Ensure Oracle naming limit (30 characters)
+        if len(table_name) > 30:
+            # Truncate intelligently - keep prefix/suffix if possible
+            if self.table_prefix and self.table_suffix:
+                prefix_len = len(self.table_prefix)
+                suffix_len = len(self.table_suffix)
+                remaining = 30 - prefix_len - suffix_len
+                if remaining > 0:
+                    core = table_name[prefix_len:-suffix_len][:remaining]
+                    table_name = f"{self.table_prefix}{core}{self.table_suffix}".upper()
+                else:
+                    table_name = table_name[:30]
+            else:
+                table_name = table_name[:30]
+
+        return table_name
+
+    def map_column_name(self, stream_name: str, column_name: str) -> str:
+        """Map a column name based on configured mappings.
+
+        Args:
+            stream_name: The stream/table name
+            column_name: The original column name
+
+        Returns:
+            The mapped column name or original if no mapping exists
+
+        """
+        if self.column_mappings and stream_name in self.column_mappings:
+            stream_mappings = self.column_mappings[stream_name]
+            if column_name in stream_mappings:
+                mapped = stream_mappings[column_name]
+                if isinstance(mapped, dict) and "name" in mapped:
+                    return mapped["name"]
+                if isinstance(mapped, str):
+                    return mapped
+        return column_name
+
+    def should_ignore_column(self, column_name: str) -> bool:
+        """Check if a column should be ignored during loading.
+
+        Args:
+            column_name: The column name to check
+
+        Returns:
+            True if the column should be ignored
+
+        """
+        if self.ignored_columns:
+            return column_name in self.ignored_columns
+        return False
+
+    def get_column_transform(
+        self, stream_name: str, column_name: str
+    ) -> dict[str, object] | None:
+        """Get transformation configuration for a column.
+
+        Args:
+            stream_name: The stream/table name
+            column_name: The column name
+
+        Returns:
+            Transformation configuration dict or None
+
+        """
+        if self.column_mappings and stream_name in self.column_mappings:
+            stream_mappings = self.column_mappings[stream_name]
+            if column_name in stream_mappings:
+                mapped = stream_mappings[column_name]
+                if isinstance(mapped, dict) and "transform" in mapped:
+                    return mapped["transform"]
+        return None
 
 
 class _ConfigurationValidator:
@@ -400,6 +745,8 @@ class _ConfigurationValidator:
             _UserValidator(),
             _PasswordValidator(),
             _SchemaValidator(),
+            _PoolSizeValidator(),
+            _SSLConfigValidator(),
         ]
 
         # Execute validation chain
@@ -477,6 +824,29 @@ class _SchemaValidator(_BaseValidator):
 
     def _get_error_message(self) -> str:
         return "Target schema is required"
+
+
+class _PoolSizeValidator(_BaseValidator):
+    """Validate connection pool sizes - Single Responsibility."""
+
+    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+        return config.pool_max_size >= config.pool_min_size
+
+    def _get_error_message(self) -> str:
+        return "Pool max size must be greater than or equal to pool min size"
+
+
+class _SSLConfigValidator(_BaseValidator):
+    """Validate SSL configuration consistency - Single Responsibility."""
+
+    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+        # If SSL is enabled with wallet, wallet location must be provided
+        if config.use_ssl and config.ssl_wallet_password:
+            return bool(config.ssl_wallet_location)
+        return True
+
+    def _get_error_message(self) -> str:
+        return "SSL wallet location is required when wallet password is provided"
 
 
 __all__: list[str] = [

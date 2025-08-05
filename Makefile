@@ -1,162 +1,191 @@
-# FLEXT-TARGET-ORACLE Makefile
-PROJECT_NAME := flext-target-oracle
-PYTHON_VERSION := 3.13
-POETRY := poetry
-SRC_DIR := src
-TESTS_DIR := tests
+# FLEXT Target Oracle - Project Makefile
+# =======================================
+# Project-specific commands for flext-target-oracle
+# Extends the standardized build system
 
-# Quality standards
-MIN_COVERAGE := 90
+# Include the standardized build system
+include Makefile.build
 
-# Singer configuration
-TARGET_CONFIG := config.json
-TARGET_STATE := state.json
+.PHONY: help test test-unit test-integration test-e2e test-docker
+.PHONY: oracle-start oracle-stop oracle-logs oracle-shell
+.PHONY: coverage coverage-html dev-setup validate
 
-# Help
-help: ## Show available commands
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\\033[36m%-18s\\033[0m %s\\n", $$1, $$2}'
-
-# Installation
-install: ## Install dependencies
-	$(POETRY) install
-
-install-dev: ## Install dev dependencies
-	$(POETRY) install --with dev,test,docs
-
-setup: install-dev ## Complete project setup
-	$(POETRY) run pre-commit install
-
-# Quality gates
-validate: lint type-check security test ## Run all quality gates
-
-check: lint type-check ## Quick health check
-
-lint: ## Run linting
-	$(POETRY) run ruff check $(SRC_DIR) $(TESTS_DIR)
-
-format: ## Format code
-	$(POETRY) run ruff format $(SRC_DIR) $(TESTS_DIR)
-
-type-check: ## Run type checking
-	$(POETRY) run mypy $(SRC_DIR) --strict
-
-security: ## Run security scanning
-	$(POETRY) run bandit -r $(SRC_DIR)
-	$(POETRY) run pip-audit
-
-fix: ## Auto-fix issues
-	$(POETRY) run ruff check $(SRC_DIR) $(TESTS_DIR) --fix
-	$(POETRY) run ruff format $(SRC_DIR) $(TESTS_DIR)
-
-# Testing
-test: ## Run tests with coverage
-	$(POETRY) run pytest $(TESTS_DIR) --cov=$(SRC_DIR) --cov-report=term-missing --cov-fail-under=$(MIN_COVERAGE)
-
-test-unit: ## Run unit tests
-	$(POETRY) run pytest $(TESTS_DIR) -m "not integration" -v
-
-test-integration: ## Run integration tests
-	$(POETRY) run pytest $(TESTS_DIR) -m integration -v
-
-test-singer: ## Run Singer protocol tests
-	$(POETRY) run pytest $(TESTS_DIR) -m singer -v
-
-test-fast: ## Run tests without coverage
-	$(POETRY) run pytest $(TESTS_DIR) -v
-
-coverage-html: ## Generate HTML coverage report
-	$(POETRY) run pytest $(TESTS_DIR) --cov=$(SRC_DIR) --cov-report=html
-
-# Singer target operations
-load: ## Run target data loading
-	$(POETRY) run target-oracle --config $(TARGET_CONFIG) --state $(TARGET_STATE)
-
-validate-target-config: ## Validate target configuration
-	$(POETRY) run python -c "import json; json.load(open('$(TARGET_CONFIG)'))"
-
-test-target: ## Test target functionality
-	$(POETRY) run target-oracle --about
-	$(POETRY) run target-oracle --version
-
-dry-run: ## Run target in dry-run mode
-	$(POETRY) run target-oracle --config $(TARGET_CONFIG) --dry-run
-
-# Oracle operations
-oracle-connect: ## Test Oracle connection
-	$(POETRY) run python -c "from flext_target_oracle.client import test_connection; test_connection()"
-
-oracle-schema: ## Validate Oracle schema
-	$(POETRY) run python -c "from flext_target_oracle.schema import validate_schema; validate_schema()"
-
-oracle-write-test: ## Test Oracle write operations
-	$(POETRY) run python -c "from flext_target_oracle.operations import test_write; test_write()"
-
-oracle-bulk-load: ## Test Oracle bulk loading
-	$(POETRY) run python -c "from flext_target_oracle.bulk import test_bulk_load; test_bulk_load()"
-
-oracle-performance: ## Run Oracle performance tests
-	$(POETRY) run pytest $(TESTS_DIR)/performance/ -v --benchmark-only
-
-# Build
-build: ## Build package
-	$(POETRY) build
-
-build-clean: clean build ## Clean and build
-
-# Documentation
-docs: ## Build documentation
-	$(POETRY) run mkdocs build
-
-docs-serve: ## Serve documentation
-	$(POETRY) run mkdocs serve
-
-# Dependencies
-deps-update: ## Update dependencies
-	$(POETRY) update
-
-deps-show: ## Show dependency tree
-	$(POETRY) show --tree
-
-deps-audit: ## Audit dependencies
-	$(POETRY) run pip-audit
-
-# Development
-shell: ## Open Python shell
-	$(POETRY) run python
-
-pre-commit: ## Run pre-commit hooks
-	$(POETRY) run pre-commit run --all-files
-
-# Maintenance
-clean: ## Clean build artifacts
-	rm -rf build/ dist/ *.egg-info/ .pytest_cache/ htmlcov/ .coverage .mypy_cache/ .ruff_cache/
-	rm -rf $(TARGET_STATE)
-	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name "*.pyc" -delete 2>/dev/null || true
-
-clean-all: clean ## Deep clean including venv
-	rm -rf .venv/
-
-reset: clean-all setup ## Reset project
-
-# Diagnostics
-diagnose: ## Project diagnostics
-	@echo "Python: $$(python --version)"
-	@echo "Poetry: $$($(POETRY) --version)"
-	@echo "Singer SDK: $$($(POETRY) run python -c 'import singer_sdk; print(singer_sdk.__version__)' 2>/dev/null || echo 'Not available')"
-	@$(POETRY) env info
-
-doctor: diagnose check ## Health check
-
-# Aliases
-t: test
-l: lint
-f: format
-tc: type-check
-c: clean
-i: install
-v: validate
-ld: load
-
+# Default target
 .DEFAULT_GOAL := help
-.PHONY: help install install-dev setup validate check lint format type-check security fix test test-unit test-integration test-singer test-fast coverage-html load validate-target-config test-target dry-run oracle-connect oracle-schema oracle-write-test oracle-bulk-load oracle-performance build build-clean docs docs-serve deps-update deps-show deps-audit shell pre-commit clean clean-all reset diagnose doctor t l f tc c i v ld
+
+# ============================================================================
+# 🎯 PROJECT-SPECIFIC HELP
+# ============================================================================
+
+help: ## Show project-specific help
+	@echo "$(CYAN)🎯 FLEXT Target Oracle - Project Commands$(RESET)"
+	@echo "$(CYAN)========================================$(RESET)"
+	@echo ""
+	@echo "$(YELLOW)Testing Commands:$(RESET)"
+	@grep -E '^(test|coverage)[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "$(CYAN)%-20s$(RESET) %s\n", $$1, $$2}'
+	@echo ""
+	@echo "$(YELLOW)Oracle Docker Commands:$(RESET)"
+	@grep -E '^oracle[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "$(CYAN)%-20s$(RESET) %s\n", $$1, $$2}'
+	@echo ""
+	@echo "$(YELLOW)Development Commands:$(RESET)"
+	@grep -E '^(dev|validate)[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "$(CYAN)%-20s$(RESET) %s\n", $$1, $$2}'
+	@echo ""
+	@echo "$(YELLOW)Standard Commands (std-*):$(RESET)"
+	@echo "Use 'make std-help' to see all standardized commands"
+
+# ============================================================================
+# 🧪 TESTING WITH ORACLE DOCKER
+# ============================================================================
+
+test: ## Run all tests with Oracle Docker
+	@echo "$(BLUE)🧪 Running all tests with Oracle Docker...$(RESET)"
+	@./scripts/run_tests.sh
+
+test-unit: ## Run unit tests only (no Docker required)
+	@echo "$(BLUE)🧪 Running unit tests...$(RESET)"
+	@./scripts/run_tests.sh --unit
+
+test-integration: ## Run integration tests with Oracle Docker
+	@echo "$(BLUE)🧪 Running integration tests...$(RESET)"
+	@./scripts/run_tests.sh --integration
+
+test-e2e: ## Run end-to-end tests with Oracle Docker
+	@echo "$(BLUE)🧪 Running end-to-end tests...$(RESET)"
+	@./scripts/run_tests.sh --e2e
+
+test-docker: oracle-start ## Run all tests keeping Docker container alive
+	@echo "$(BLUE)🧪 Running tests with persistent Oracle container...$(RESET)"
+	@./scripts/run_tests.sh --keep-db
+
+test-parallel: ## Run unit tests in parallel
+	@echo "$(BLUE)⚡ Running unit tests in parallel...$(RESET)"
+	@./scripts/run_tests.sh --unit --parallel 4
+
+coverage: ## Run tests with coverage report
+	@echo "$(BLUE)📊 Running tests with coverage...$(RESET)"
+	@poetry run pytest --cov=flext_target_oracle --cov-report=term-missing --cov-report=html
+
+coverage-html: coverage ## Open coverage HTML report
+	@echo "$(BLUE)🌐 Opening coverage report...$(RESET)"
+	@python -m webbrowser htmlcov/index.html
+
+# ============================================================================
+# 🐳 ORACLE DOCKER MANAGEMENT
+# ============================================================================
+
+ORACLE_COMPOSE := ../flext-db-oracle/docker-compose.oracle.yml
+ORACLE_CONTAINER := flext-oracle-test
+
+oracle-start: ## Start Oracle Docker container
+	@echo "$(BLUE)🐳 Starting Oracle container...$(RESET)"
+	@docker-compose -f $(ORACLE_COMPOSE) up -d oracle-xe
+	@echo "$(GREEN)✅ Oracle container started$(RESET)"
+	@echo "$(YELLOW)Waiting for Oracle to be ready (this may take a minute)...$(RESET)"
+	@until docker exec $(ORACLE_CONTAINER) sqlplus -L system/Oracle123@//localhost:1521/XE @/dev/null >/dev/null 2>&1; do \
+		printf "."; sleep 5; \
+	done
+	@echo ""
+	@echo "$(GREEN)✅ Oracle is ready!$(RESET)"
+
+oracle-stop: ## Stop Oracle Docker container
+	@echo "$(BLUE)🛑 Stopping Oracle container...$(RESET)"
+	@docker-compose -f $(ORACLE_COMPOSE) down
+	@echo "$(GREEN)✅ Oracle container stopped$(RESET)"
+
+oracle-clean: ## Stop and remove Oracle container and volumes
+	@echo "$(RED)🧹 Cleaning Oracle container and data...$(RESET)"
+	@docker-compose -f $(ORACLE_COMPOSE) down -v
+	@echo "$(GREEN)✅ Oracle cleaned$(RESET)"
+
+oracle-logs: ## Show Oracle container logs
+	@echo "$(BLUE)📋 Oracle container logs:$(RESET)"
+	@docker logs -f $(ORACLE_CONTAINER)
+
+oracle-shell: ## Open SQL*Plus shell in Oracle container
+	@echo "$(BLUE)🐚 Opening Oracle SQL*Plus...$(RESET)"
+	@docker exec -it $(ORACLE_CONTAINER) sqlplus system/Oracle123@//localhost:1521/XE
+
+oracle-status: ## Check Oracle container status
+	@echo "$(BLUE)📊 Oracle container status:$(RESET)"
+	@docker ps -a --filter name=$(ORACLE_CONTAINER) --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# ============================================================================
+# 🚀 DEVELOPMENT SETUP
+# ============================================================================
+
+dev-setup: std-install-dev ## Complete development setup with test dependencies
+	@echo "$(BLUE)🚀 Setting up development environment...$(RESET)"
+	@poetry install --all-extras
+	@pip install -r requirements-test.txt
+	@echo "$(GREEN)✅ Development environment ready$(RESET)"
+
+validate: std-validate-setup ## Validate project and dependencies
+	@echo "$(BLUE)🔍 Validating project setup...$(RESET)"
+	@test -f pytest.ini || { echo "$(RED)❌ pytest.ini missing$(RESET)"; exit 1; }
+	@test -f conftest.py || { echo "$(RED)❌ conftest.py missing$(RESET)"; exit 1; }
+	@test -d tests/unit || { echo "$(YELLOW)⚠️  tests/unit/ missing$(RESET)"; }
+	@test -d tests/integration || { echo "$(YELLOW)⚠️  tests/integration/ missing$(RESET)"; }
+	@echo "$(GREEN)✅ Project validation passed$(RESET)"
+
+# ============================================================================
+# 🔄 CONTINUOUS INTEGRATION
+# ============================================================================
+
+ci-test: ## Run tests in CI mode
+	@echo "$(BLUE)🤖 Running tests in CI mode...$(RESET)"
+	@poetry run pytest \
+		--cov=flext_target_oracle \
+		--cov-report=xml \
+		--cov-report=term \
+		--junit-xml=reports/junit.xml \
+		--maxfail=5 \
+		-v
+
+ci-lint: ## Run linting in CI mode
+	@echo "$(BLUE)🤖 Running linting in CI mode...$(RESET)"
+	@poetry run ruff check . --output-format=github
+	@poetry run mypy src/ --junit-xml=reports/mypy.xml
+
+# ============================================================================
+# 🛠️ UTILITIES
+# ============================================================================
+
+test-watch: ## Run tests in watch mode
+	@echo "$(BLUE)👀 Running tests in watch mode...$(RESET)"
+	@poetry run ptw tests/ -- -x --tb=short
+
+test-failed: ## Re-run only failed tests
+	@echo "$(BLUE)🔄 Re-running failed tests...$(RESET)"
+	@poetry run pytest --lf -x
+
+test-debug: ## Run tests with debugging enabled
+	@echo "$(BLUE)🐛 Running tests with debugging...$(RESET)"
+	@poetry run pytest -x --pdb --pdbcls=IPython.terminal.debugger:TerminalPdb
+
+benchmark: ## Run performance benchmarks
+	@echo "$(BLUE)⚡ Running performance benchmarks...$(RESET)"
+	@poetry run pytest tests/performance/ -v --benchmark-only
+
+# ============================================================================
+# 📦 PACKAGE SPECIFIC
+# ============================================================================
+
+example: ## Run example Singer workflow
+	@echo "$(BLUE)📦 Running example Singer workflow...$(RESET)"
+	@cd examples && ./run_example.sh
+
+validate-singer: ## Validate Singer tap compatibility
+	@echo "$(BLUE)🎵 Validating Singer compatibility...$(RESET)"
+	@poetry run singer-tools validate-config config.json.example
+	@echo "$(GREEN)✅ Singer validation passed$(RESET)"
+
+# ============================================================================
+# 🎯 COMMON ALIASES
+# ============================================================================
+
+t: test ## Alias for test
+tu: test-unit ## Alias for test-unit
+ti: test-integration ## Alias for test-integration
+c: coverage ## Alias for coverage
+l: std-lint ## Alias for lint
+f: std-format ## Alias for format

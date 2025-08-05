@@ -32,11 +32,10 @@ classifiers = [
     "Topic :: System :: Archiving",
 ]
 dependencies = [
-
-    # Core dependencies
     "pydantic>=2.11.0",
-
-    # NOTE: Removed singer-sdk direct dependency - use flext-meltano instead
+    "flext-core",
+    "flext-db-oracle", 
+    "flext-meltano",
 ]
 
 [[project.authors]]
@@ -58,27 +57,51 @@ Documentation = "https://github.com/flext-sh/flext/blob/main/README.md"
 # Entry points removed - flext-target-oracle is a library, not a CLI tool
 # CLI functionality is provided by flext-meltano for Singer orchestration
 
-[tool.ruff]
-target-version = "py313"
-line-length = 88
-fix = false
-show-fixes = true
-respect-gitignore = true
-src = ["src", "tests"]
-extend-exclude = [
-    "__pycache__",
-    ".git",
-    ".mypy_cache",
-    ".pytest_cache",
-    ".ruff_cache",
-    ".venv",
-    "venv",
-    "build",
-    "dist",
-    "htmlcov",
-]
-extend = "../.ruff-shared.toml"
 
+[tool.bandit]
+exclude_dirs = ["tests", "build", "dist"]
+skips = ["B101", "B601"]
+
+[tool.poetry]
+[[tool.poetry.packages]]
+include = "flext_target_oracle"
+from = "src"
+
+[tool.poetry.dependencies]
+python = ">=3.13,<3.14"
+
+# Core FLEXT ecosystem dependencies
+flext-core = { path = "../flext-core", develop = true }
+flext-db-oracle = { path = "../flext-db-oracle", develop = true }
+flext-meltano = { path = "../flext-meltano", develop = true }
+
+# Core Python dependencies
+pydantic = ">=2.11.0"
+
+[tool.poetry.group.dev.dependencies]
+# Testing dependencies
+pytest = ">=8.0.0"
+pytest-cov = ">=6.2.1"
+pytest-asyncio = ">=1.1.0"
+pytest-mock = ">=3.14.1"
+pytest-xdist = ">=3.8.0"
+pytest-timeout = ">=2.4.0"
+pytest-sugar = ">=1.0.0"
+pytest-clarity = ">=1.0.1"
+pytest-benchmark = ">=5.1.0"
+
+# Quality and security
+ruff = ">=0.8.0"
+mypy = ">=1.15.0"
+bandit = { extras = ["toml"], version = ">=1.8.0" }
+pip-audit = ">=2.9.0"
+pre-commit = ">=4.2.0"
+detect-secrets = ">=1.5.0"
+
+# Analysis tools
+vulture = ">=2.14"
+radon = ">=6.0.1"
+commitizen = ">=4.8.3"
 
 [tool.mypy]
 # Strict mode - enables all recommended checks
@@ -175,33 +198,10 @@ init_typed = true
 warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
-[tool.bandit]
-exclude_dirs = ["tests", "build", "dist"]
-skips = ["B101", "B601"]
+[tool.ruff]
+extend = "../.ruff-shared.toml"
+lint.isort.known-first-party = ["flext_target_oracle"]
 
-[tool.poetry]
-[[tool.poetry.packages]]
-include = "flext_target_oracle"
-from = "src"
-
-
-[tool.poetry.group.dev.dependencies]
-pre-commit = ">=4.2.0"
-black = ">=25.1.0"
-isort = ">=6.0.1"
-vulture = ">=2.14"
-radon = ">=6.0.1"
-detect-secrets = ">=1.5.0"
-pytest-cov = ">=6.2.1"
-pytest-asyncio = ">=1.1.0"
-pytest-mock = ">=3.14.1"
-pytest-xdist = ">=3.8.0"
-pytest-timeout = ">=2.4.0"
-pytest-sugar = ">=1.0.0"
-pytest-clarity = ">=1.0.1"
-pytest-benchmark = ">=5.1.0"
-pip-audit = ">=2.9.0"
-commitizen = ">=4.8.3"
 
 [tool.deptry]
 known_first_party = ["flext_target_oracle"]
@@ -225,77 +225,6 @@ markers = [
     "e2e: End-to-end tests",
 ]
 filterwarnings = ["error", "ignore::UserWarning", "ignore::DeprecationWarning"]
-
-[tool.ruff.lint]
-select = ["ALL"]
-ignore = [
-    "COM812",
-    "D203",
-    "D213",
-    "ISC001",
-    "ANN401",
-    "ARG001",
-    "ARG002",
-    "BLE001",
-    "C901",
-    "D102",
-    "D103",
-    "D105",
-    "D107",
-    "D401",
-    "DTZ001",
-    "DTZ005",
-    "E401",
-    "E501",
-    "EM101",
-    "EM102",
-    "ERA001",
-    "EXE001",
-    "F401",
-    "F823",
-    "FBT001",
-    "FBT002",
-    "FBT003",
-    "FIX002",
-    "G004",
-    "PLC0415",
-    "PLR0911",
-    "PLR0912",
-    "PLR0913",
-    "PLR0915",
-    "PLR2004",
-    "PLW0603",
-    "PTH118",
-    "PTH123",
-    "RUF001",
-    "S103",
-    "S104",
-    "S105",
-    "S106",
-    "S107",
-    "S603",
-    "S607",
-    "SIM102",
-    "TD002",
-    "TD003",
-    "TRY003",
-    "TRY203",
-    "TRY300",
-    "TRY301",
-    "TRY401",
-]
-
-[tool.ruff.lint.per-file-ignores]
-"tests/*" = [
-    "S101",
-    "SLF001",
-] # Allow assert statements and private member access in tests
-
-[tool.ruff.format]
-quote-style = "double"
-indent-style = "space"
-line-ending = "lf"
-docstring-code-format = true
 
 [tool.coverage.run]
 source = ["src"]

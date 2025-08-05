@@ -128,7 +128,9 @@ class ProductionConfig:
             oracle_port,
             oracle_service,
         )
-        logger.info("Target schema: %s, Batch size: %s", default_target_schema, batch_size)
+        logger.info(
+            "Target schema: %s, Batch size: %s", default_target_schema, batch_size
+        )
         logger.info(
             "Load method: %s, Connection timeout: %ss",
             load_method,
@@ -196,7 +198,8 @@ class ProductionTargetManager:
             return FlextResult.fail(f"Initialization error: {e}")
 
     async def process_singer_stream(
-        self, messages: list[dict[str, Any]],
+        self,
+        messages: list[dict[str, Any]],
     ) -> FlextResult[dict[str, Any]]:
         """Process complete Singer message stream with comprehensive error handling.
 
@@ -257,7 +260,9 @@ class ProductionTargetManager:
 
                 else:
                     stats["errors_encountered"] += 1
-                    logger.error("Message %d processing failed: %s", i + 1, result.error)
+                    logger.error(
+                        "Message %d processing failed: %s", i + 1, result.error
+                    )
 
                     # In production, you might want to decide whether to continue or stop
                     # For this example, we continue processing
@@ -430,7 +435,9 @@ async def demonstrate_production_setup() -> None:
 
             if stats.get("total_records"):
                 logger.info("Total records loaded: %s", stats["total_records"])
-                logger.info("Successful records: %d", stats.get("successful_records", 0))
+                logger.info(
+                    "Successful records: %d", stats.get("successful_records", 0)
+                )
                 logger.info("Failed records: %d", stats.get("failed_records", 0))
         else:
             logger.error("Production processing failed: %s", processing_result.error)
