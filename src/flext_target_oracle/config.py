@@ -562,7 +562,7 @@ class FlextOracleTargetConfig(FlextValueObject):
         except Exception as e:
             return FlextResult.fail(f"Configuration validation failed: {e}")
 
-    def get_oracle_config(self) -> dict[str, str | int | SecretStr | None | bool]:
+    def get_oracle_config(self) -> dict[str, str | int | SecretStr | bool | None]:
         """Convert to flext-db-oracle configuration format.
 
         Transforms this configuration into the format expected by flext-db-oracle
@@ -712,7 +712,7 @@ class FlextOracleTargetConfig(FlextValueObject):
         return False
 
     def get_column_transform(
-        self, stream_name: str, column_name: str
+        self, stream_name: str, column_name: str,
     ) -> dict[str, object] | None:
         """Get transformation configuration for a column.
 

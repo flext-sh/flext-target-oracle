@@ -9,7 +9,6 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 from flext_core import FlextResult
-
 from flext_target_oracle import FlextOracleTargetConfig
 from flext_target_oracle.loader import FlextOracleTargetLoader
 

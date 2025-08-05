@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: S106
 """Basic Usage Example - FLEXT Target Oracle Simple Setup and Processing.
 
 This example demonstrates the fundamental usage patterns for FLEXT Target Oracle,
@@ -26,7 +27,6 @@ import logging
 from typing import Any
 
 from flext_core import get_logger
-
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
 # Configure logging for the example
@@ -247,8 +247,8 @@ async def demonstrate_basic_usage() -> None:
 
         logger.info("Basic usage demonstration completed successfully!")
 
-    except Exception as e:
-        logger.exception(f"Unexpected error during demonstration: {e}")
+    except Exception:
+        logger.exception("Unexpected error during demonstration")
         raise
 
 

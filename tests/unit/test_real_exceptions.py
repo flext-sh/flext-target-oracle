@@ -8,7 +8,6 @@ from datetime import UTC, datetime
 from typing import Never
 
 import pytest
-
 from flext_target_oracle.exceptions import (
     FlextOracleTargetAuthenticationError,
     FlextOracleTargetConnectionError,
@@ -223,8 +222,8 @@ class TestRealOracleExceptions:
                     stream_name="test_stream",
                     record_count=100,
                 )
-            except FlextOracleTargetProcessingError as e:
-                logging.exception(f"Error occurred: {e}")
+            except FlextOracleTargetProcessingError:
+                logging.exception("Error occurred")
 
         assert "Processing failed" in caplog.text
         assert "PROCESSING_ERROR" in caplog.text
@@ -269,9 +268,9 @@ class TestRealOracleExceptions:
                     stream_name="test",
                 ) from e
         except FlextOracleTargetProcessingError as e:
-            assert e.__cause__ is not None
-            assert isinstance(e.__cause__, ValueError)
-            assert str(e.__cause__) == "Invalid value"
+            assert e.__cause__ is not None  # noqa: PT017
+            assert isinstance(e.__cause__, ValueError)  # noqa: PT017
+            assert str(e.__cause__) == "Invalid value"  # noqa: PT017
 
     def test_exception_comparison(self) -> None:
         """Test exception comparison."""
