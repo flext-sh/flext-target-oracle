@@ -3,83 +3,83 @@ default_environment: dev
 project_id: flext-oracle-target-example
 
 environments:
-- name: dev
-- name: staging  
-- name: prod
+  - name: dev
+  - name: staging
+  - name: prod
 
 plugins:
   extractors:
-  - name: tap-csv
-    variant: meltanolabs
-    pip_url: pipelinewise-tap-csv
-    
+    - name: tap-csv
+      variant: meltanolabs
+      pip_url: pipelinewise-tap-csv
+
   targets:
-  - name: target-oracle
-    namespace: flext_target_oracle
-    pip_url: -e ../..  # Local development installation
-    settings:
-    - name: oracle_host
-      label: Oracle Host
-      kind: string
-      description: Oracle database hostname or IP address
-    - name: oracle_port
-      label: Oracle Port
-      kind: integer
-      default: 1521
-      description: Oracle database port number
-    - name: oracle_service
-      label: Oracle Service
-      kind: string
-      description: Oracle service name for connection
-    - name: oracle_user
-      label: Oracle User
-      kind: string
-      description: Oracle database username
-    - name: oracle_password
-      label: Oracle Password
-      kind: password
-      description: Oracle database password
-    - name: default_target_schema
-      label: Target Schema
-      kind: string
-      default: MELTANO_DATA
-      description: Default target schema for table creation
-    - name: load_method
-      label: Load Method
-      kind: options
-      default: INSERT
-      options:
-      - label: INSERT
-        value: INSERT
-      - label: MERGE  
-        value: MERGE
-      - label: BULK_INSERT
-        value: BULK_INSERT
-      - label: BULK_MERGE
-        value: BULK_MERGE
-      description: Oracle data loading strategy
-    - name: batch_size
-      label: Batch Size
-      kind: integer
-      default: 1000
-      description: Number of records per batch for processing
-    - name: use_bulk_operations
-      label: Use Bulk Operations
-      kind: boolean
-      default: true
-      description: Enable Oracle bulk operations for performance
-    - name: connection_timeout
-      label: Connection Timeout
-      kind: integer
-      default: 30
-      description: Database connection timeout in seconds
+    - name: target-oracle
+      namespace: flext_target_oracle
+      pip_url: -e ../.. # Local development installation
+      settings:
+        - name: oracle_host
+          label: Oracle Host
+          kind: string
+          description: Oracle database hostname or IP address
+        - name: oracle_port
+          label: Oracle Port
+          kind: integer
+          default: 1521
+          description: Oracle database port number
+        - name: oracle_service
+          label: Oracle Service
+          kind: string
+          description: Oracle service name for connection
+        - name: oracle_user
+          label: Oracle User
+          kind: string
+          description: Oracle database username
+        - name: oracle_password
+          label: Oracle Password
+          kind: password
+          description: Oracle database password
+        - name: default_target_schema
+          label: Target Schema
+          kind: string
+          default: MELTANO_DATA
+          description: Default target schema for table creation
+        - name: load_method
+          label: Load Method
+          kind: options
+          default: INSERT
+          options:
+            - label: INSERT
+              value: INSERT
+            - label: MERGE
+              value: MERGE
+            - label: BULK_INSERT
+              value: BULK_INSERT
+            - label: BULK_MERGE
+              value: BULK_MERGE
+          description: Oracle data loading strategy
+        - name: batch_size
+          label: Batch Size
+          kind: integer
+          default: 1000
+          description: Number of records per batch for processing
+        - name: use_bulk_operations
+          label: Use Bulk Operations
+          kind: boolean
+          default: true
+          description: Enable Oracle bulk operations for performance
+        - name: connection_timeout
+          label: Connection Timeout
+          kind: integer
+          default: 30
+          description: Database connection timeout in seconds
 
 schedules:
-- name: daily-oracle-sync
-  interval: "@daily"
-  job: csv-to-oracle
-  
+  - name: daily-oracle-sync
+    interval: "@daily"
+    job: csv-to-oracle
+
 jobs:
-- name: csv-to-oracle
-  tasks:
-  - tap-csv target-oracle
+  - name: csv-to-oracle
+    tasks:
+      - tap-csv target-oracle

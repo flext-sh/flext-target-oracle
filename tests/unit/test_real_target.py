@@ -154,7 +154,9 @@ class TestRealOracleTarget:
         result = real_target.execute(json.dumps(activate_msg))
         assert result.is_success
 
-    def test_real_batch_processing(self, real_target, simple_schema, oracle_engine) -> None:
+    def test_real_batch_processing(
+        self, real_target, simple_schema, oracle_engine
+    ) -> None:
         """Test batch processing with real database."""
         real_target.initialize()
 
@@ -191,7 +193,9 @@ class TestRealOracleTarget:
             count = conn.execute(text("SELECT COUNT(*) FROM batch_test")).scalar()
             assert count == 10
 
-    def test_real_column_mapping(self, real_target, simple_schema, oracle_engine) -> None:
+    def test_real_column_mapping(
+        self, real_target, simple_schema, oracle_engine
+    ) -> None:
         """Test column mapping with real database."""
         # Configure column mappings
         real_target.config.column_mappings = {
@@ -302,7 +306,9 @@ class TestRealOracleTarget:
             assert "INTERNAL_ID" not in columns
             assert "USERNAME" in columns
 
-    def test_real_nested_json_handling(self, real_target, nested_schema, oracle_engine) -> None:
+    def test_real_nested_json_handling(
+        self, real_target, nested_schema, oracle_engine
+    ) -> None:
         """Test nested JSON handling with real database."""
         real_target.initialize()
 
@@ -386,7 +392,9 @@ class TestRealOracleTarget:
         assert result.is_failure
         assert isinstance(result.error, FlextOracleTargetSchemaError)
 
-    def test_real_metrics_collection(self, real_target, simple_schema, oracle_engine) -> None:
+    def test_real_metrics_collection(
+        self, real_target, simple_schema, oracle_engine
+    ) -> None:
         """Test metrics collection with real processing."""
         real_target.initialize()
 

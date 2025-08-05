@@ -73,7 +73,9 @@ class TestRealOracleLoader:
         assert exc_info.value.port == 1521
 
     @pytest.mark.asyncio
-    async def test_real_ensure_table_exists_new_table(self, real_loader, simple_schema) -> None:
+    async def test_real_ensure_table_exists_new_table(
+        self, real_loader, simple_schema
+    ) -> None:
         """Test creating a new table in real Oracle."""
         stream_name = "test_users"
         schema = simple_schema["schema"]
@@ -239,9 +241,7 @@ class TestRealOracleLoader:
                 )
             )
             conn.execute(
-                text(
-                    f"INSERT INTO {table_name} (id, name) VALUES (1, 'existing_data')"
-                )
+                text(f"INSERT INTO {table_name} (id, name) VALUES (1, 'existing_data')")
             )
             conn.commit()
 
@@ -376,7 +376,9 @@ class TestRealOracleLoader:
             assert count == 12
 
     @pytest.mark.asyncio
-    async def test_real_merge_mode(self, oracle_engine, simple_schema, clean_database) -> None:
+    async def test_real_merge_mode(
+        self, oracle_engine, simple_schema, clean_database
+    ) -> None:
         """Test merge mode (upsert) with real Oracle."""
         config = FlextOracleTargetConfig(
             oracle_host="localhost",

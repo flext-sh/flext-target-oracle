@@ -19,9 +19,9 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
   "schema": {
     "type": "object",
     "properties": {
-      "id": {"type": "integer"},
-      "name": {"type": "string"},
-      "email": {"type": "string", "format": "email"}
+      "id": { "type": "integer" },
+      "name": { "type": "string" },
+      "email": { "type": "string", "format": "email" }
     }
   },
   "key_properties": ["id"]
@@ -35,12 +35,12 @@ async def _handle_schema(self, message: dict[str, object]) -> FlextResult[None]:
     """Handle SCHEMA message with table creation/evolution."""
     stream_name = message.get("stream")
     schema = message.get("schema", {})
-    
+
     # Ensure target table exists
     result = await self._loader.ensure_table_exists(stream_name, schema)
     if result.success:
         logger.info(f"Schema processed for stream: {stream_name}")
-    
+
     return result
 ```
 
@@ -49,7 +49,7 @@ async def _handle_schema(self, message: dict[str, object]) -> FlextResult[None]:
 ```json
 {
   "type": "RECORD",
-  "stream": "users", 
+  "stream": "users",
   "record": {
     "id": 1,
     "name": "John Doe",
@@ -66,10 +66,10 @@ async def _handle_record(self, message: dict[str, object]) -> FlextResult[None]:
     """Handle RECORD message with batched loading."""
     stream_name = message.get("stream")
     record_data = message.get("record")
-    
+
     if not isinstance(stream_name, str) or not isinstance(record_data, dict):
         return FlextResult.fail("Record message missing stream or data")
-    
+
     return await self._loader.load_record(stream_name, record_data)
 ```
 
@@ -102,27 +102,27 @@ async def _handle_state(self, message: dict[str, object]) -> FlextResult[None]:
 
 ### ✅ Implemented Features
 
-| Feature | Status | Implementation |
-|---------|--------|----------------|
-| SCHEMA message handling | ✅ Complete | `_handle_schema()` |
-| RECORD message handling | ✅ Complete | `_handle_record()` |
-| STATE message handling | ✅ Complete | `_handle_state()` |
-| Batch processing | ✅ Complete | Configurable batch sizes |
-| Error handling | ✅ Complete | FlextResult pattern |
-| JSON storage | ✅ Complete | CLOB-based flexible storage |
-| Configuration validation | ✅ Complete | Pydantic + domain rules |
+| Feature                  | Status      | Implementation              |
+| ------------------------ | ----------- | --------------------------- |
+| SCHEMA message handling  | ✅ Complete | `_handle_schema()`          |
+| RECORD message handling  | ✅ Complete | `_handle_record()`          |
+| STATE message handling   | ✅ Complete | `_handle_state()`           |
+| Batch processing         | ✅ Complete | Configurable batch sizes    |
+| Error handling           | ✅ Complete | FlextResult pattern         |
+| JSON storage             | ✅ Complete | CLOB-based flexible storage |
+| Configuration validation | ✅ Complete | Pydantic + domain rules     |
 
 ### ❌ Missing Singer SDK Compliance
 
 > ⚠️ **Critical Issue**: Missing standard Singer Target methods required for full SDK compliance
 
-| Missing Method | Priority | Singer SDK Requirement |
-|----------------|----------|----------------------|
-| `_test_connection()` | High | Connection testing interface |
-| `_write_record()` | High | Standard record writing method |
-| `_write_records()` | High | Batch record writing method |
-| `.config_class` property | Medium | Configuration class reference |
-| `.name` property | Medium | Target name identifier |
+| Missing Method           | Priority | Singer SDK Requirement         |
+| ------------------------ | -------- | ------------------------------ |
+| `_test_connection()`     | High     | Connection testing interface   |
+| `_write_record()`        | High     | Standard record writing method |
+| `_write_records()`       | High     | Batch record writing method    |
+| `.config_class` property | Medium   | Configuration class reference  |
+| `.name` property         | Medium   | Target name identifier         |
 
 **Current Non-Standard Implementation**:
 
@@ -139,15 +139,15 @@ async def process_singer_message(self, message: dict) -> FlextResult[None]:
 class FlextOracleTarget(Target):
     name = "target-oracle"
     config_class = FlextOracleTargetConfig
-    
+
     def _test_connection(self) -> bool:
         """Test connection - Singer SDK requirement."""
         return self._test_connection_impl()
-    
+
     def _write_record(self, record: Record) -> None:
         """Write single record - Singer SDK requirement."""
         # Convert Record to dict and process
-    
+
     def _write_records(self, records: List[Record]) -> None:
         """Write batch of records - Singer SDK requirement."""
         # Batch processing implementation
@@ -170,7 +170,7 @@ targets:
         kind: string
         description: Oracle database host
       - name: oracle_port
-        label: Oracle Port  
+        label: Oracle Port
         kind: integer
         default: 1521
         description: Oracle database port
@@ -192,7 +192,7 @@ targets:
         kind: string
         default: "MELTANO_DATA"
         description: Target schema for tables
-      
+
       # Performance settings
       - name: batch_size
         label: Batch Size
@@ -292,13 +292,13 @@ sequenceDiagram
     loop For each record
         T->>FTO: RECORD message
         FTO->>B: Add to batch buffer
-        
+
         alt Batch size reached
             B->>O: INSERT batch
             O-->>B: Batch committed
             B->>B: Clear buffer
         end
-        
+
         FTO-->>T: Record accepted
     end
 
@@ -332,11 +332,11 @@ config = FlextOracleTargetConfig(
 
 ### Batch Size Tuning
 
-| Batch Size | Use Case | Performance | Memory Usage |
-|------------|----------|-------------|--------------|
-| 100-500 | Small datasets, low memory | Good | Low |
-| 1000-2000 | Standard workloads | Optimal | Medium |
-| 5000-10000 | Large datasets, bulk loading | Best | High |
+| Batch Size | Use Case                     | Performance | Memory Usage |
+| ---------- | ---------------------------- | ----------- | ------------ |
+| 100-500    | Small datasets, low memory   | Good        | Low          |
+| 1000-2000  | Standard workloads           | Optimal     | Medium       |
+| 5000-10000 | Large datasets, bulk loading | Best        | High         |
 
 ```python
 # Performance testing different batch sizes
@@ -346,19 +346,19 @@ async def benchmark_batch_performance():
     """Benchmark different batch sizes."""
     batch_sizes = [500, 1000, 2000, 5000]
     results = {}
-    
+
     for batch_size in batch_sizes:
         config = FlextOracleTargetConfig(batch_size=batch_size)
         target = FlextOracleTarget(config)
-        
+
         start_time = time.time()
-        
+
         # Process test dataset
         await process_test_data(target)
-        
+
         duration = time.time() - start_time
         results[batch_size] = duration
-    
+
     return results
 ```
 
@@ -369,11 +369,11 @@ async def benchmark_batch_performance():
 config = FlextOracleTargetConfig(
     # Connection optimization
     connection_timeout=60,
-    
-    # Batch optimization  
+
+    # Batch optimization
     batch_size=2000,
     use_bulk_operations=True,
-    
+
     # Load method optimization
     load_method=LoadMethod.BULK_INSERT  # Fastest for append-only
 )
@@ -393,14 +393,14 @@ config = FlextOracleTargetConfig(
 # Consistent error handling with FlextResult
 async def process_with_error_handling():
     """Example of proper error handling in Singer context."""
-    
+
     # Schema processing
     schema_result = await target.process_singer_message(schema_msg)
     if schema_result.is_failure:
         logger.error(f"Schema processing failed: {schema_result.error}")
         # Singer protocol: continue processing or abort based on error type
         return schema_result
-    
+
     # Record processing with retry logic
     for record_msg in record_messages:
         result = await target.process_singer_message(record_msg)
@@ -408,11 +408,11 @@ async def process_with_error_handling():
             # Decide on retry strategy
             if is_transient_error(result.error):
                 result = await retry_with_backoff(target.process_singer_message, record_msg)
-            
+
             if result.is_failure:
                 logger.error(f"Record processing failed: {result.error}")
                 # Singer protocol: may skip record or abort entire stream
-    
+
     # Finalization
     final_result = await target.finalize()
     return final_result
@@ -431,9 +431,9 @@ async def _insert_batch(self, table_name: str, records: list) -> FlextResult[Non
                 result = connected_api.execute_ddl(sql)  # Should be execute_dml
                 if not result.success:
                     return FlextResult.fail(f"Insert failed: {result.error}")
-        
+
         return FlextResult.ok(None)
-    
+
     except Exception as e:
         return FlextResult.fail(f"Batch insert failed: {e}")
 
@@ -448,12 +448,12 @@ async def _insert_batch_improved(self, table_name: str, records: list) -> FlextR
                 if result.is_failure:
                     # Transaction automatically rolled back
                     return FlextResult.fail(f"Batch insert failed: {result.error}")
-                
+
                 # Commit only on success
                 connected_api.commit()
-        
+
         return FlextResult.ok(None)
-    
+
     except Exception as e:
         # Transaction automatically rolled back
         return FlextResult.fail(f"Batch insert failed: {e}")
@@ -469,11 +469,11 @@ from flext_target_oracle import FlextOracleTarget
 
 class TestSingerIntegration:
     """Test Singer protocol compliance."""
-    
+
     @pytest.fixture
     def target(self, sample_config):
         return FlextOracleTarget(sample_config)
-    
+
     async def test_schema_message_processing(self, target):
         """Test SCHEMA message handling."""
         schema_msg = {
@@ -484,10 +484,10 @@ class TestSingerIntegration:
                 "properties": {"id": {"type": "integer"}}
             }
         }
-        
+
         result = await target.process_singer_message(schema_msg)
         assert result.success
-    
+
     async def test_record_message_processing(self, target):
         """Test RECORD message handling."""
         record_msg = {
@@ -495,24 +495,24 @@ class TestSingerIntegration:
             "stream": "test_stream",
             "record": {"id": 1, "name": "Test"}
         }
-        
+
         result = await target.process_singer_message(record_msg)
         assert result.success
-    
+
     async def test_state_message_processing(self, target):
         """Test STATE message handling."""
         state_msg = {
             "type": "STATE",
             "value": {"bookmarks": {"test_stream": {"last_id": 100}}}
         }
-        
+
         result = await target.process_singer_message(state_msg)
         assert result.success
-    
+
     async def test_invalid_message_handling(self, target):
         """Test invalid message handling."""
         invalid_msg = {"type": "INVALID"}
-        
+
         result = await target.process_singer_message(invalid_msg)
         assert result.is_failure
         assert "Unknown message type" in result.error
@@ -527,34 +527,34 @@ import json
 
 async def test_singer_tap_integration():
     """Test integration with actual Singer tap."""
-    
+
     # Run Singer tap to generate messages
     tap_process = subprocess.Popen(
         ["tap-csv", "--config", "tap_config.json"],
         stdout=subprocess.PIPE,
         text=True
     )
-    
+
     target = FlextOracleTarget(config)
-    
+
     # Process each Singer message
     for line in tap_process.stdout:
         try:
             message = json.loads(line.strip())
             result = await target.process_singer_message(message)
-            
+
             if result.is_failure:
                 print(f"Message processing failed: {result.error}")
                 break
-                
+
         except json.JSONDecodeError:
             # Skip non-JSON lines (logs, etc.)
             continue
-    
+
     # Finalize processing
     final_result = await target.finalize()
     assert final_result.success
-    
+
     tap_process.wait()
 ```
 

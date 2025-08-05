@@ -37,7 +37,7 @@ graph TB
 ### Core Dependencies
 
 - **[flext-core](../flext-core)**: Foundational patterns (FlextResult, FlextValueObject, logging)
-- **[flext-meltano](../flext-meltano)**: Singer SDK integration and Target base classes  
+- **[flext-meltano](../flext-meltano)**: Singer SDK integration and Target base classes
 - **[flext-db-oracle](../flext-db-oracle)**: Oracle database operations and connectivity
 - **[Singer SDK](https://sdk.meltano.com/)**: Data integration protocol implementation
 
@@ -71,14 +71,14 @@ sequenceDiagram
     participant T as FLEXT Target Oracle
     participant L as Oracle Loader
     participant O as Oracle Database
-    
+
     S->>T: SCHEMA message
     T->>L: ensure_table_exists()
     L->>O: CREATE TABLE (if needed)
-    
+
     S->>T: RECORD messages
     T->>L: load_record() (batched)
-    
+
     S->>T: STATE message
     T->>L: finalize_all_streams()
     L->>O: COMMIT batch operations
@@ -105,7 +105,7 @@ from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, Load
 config = FlextOracleTargetConfig(
     oracle_host="localhost",
     oracle_port=1521,
-    oracle_service="XE", 
+    oracle_service="XE",
     oracle_user="singer_user",
     oracle_password="password",
     default_target_schema="SINGER_DATA",
@@ -128,7 +128,7 @@ async def process_data():
     # Schema message
     schema_msg = {
         "type": "SCHEMA",
-        "stream": "users", 
+        "stream": "users",
         "schema": {
             "type": "object",
             "properties": {
@@ -176,7 +176,7 @@ targets:
     pip_url: flext-target-oracle
     settings:
       - name: oracle_host
-      - name: oracle_port  
+      - name: oracle_port
       - name: oracle_service
       - name: oracle_user
       - name: oracle_password
@@ -203,14 +203,14 @@ targets:
 
 > ⚠️ **Security Warning**: While documentation is production-ready, the codebase contains critical security vulnerabilities that **block production deployment**. See [docs/TODO.md](docs/TODO.md) for complete technical analysis.
 
-| Issue | Priority | Documentation Status | Implementation Status | Target Release |
-|-------|----------|---------------------|---------------------|----------------|
-| **SQL injection vulnerability** in loader.py | 🚨 **CRITICAL** | ✅ **Documented with security warnings** | ❌ **Still present in code** | v1.0.0 |
-| Exception duplication between files | High | ✅ **Comprehensive exception hierarchy docs** | ❌ **Still duplicated** | v1.0.0 |
-| Missing Singer SDK standard methods | High | ✅ **Singer compliance documented** | ❌ **Methods not implemented** | v1.0.0 |
-| Incorrect use of execute_ddl for DML | High | ✅ **Pattern documented** | ❌ **Still using wrong method** | v1.0.0 |
-| Transaction management improvements | Medium | ✅ **Patterns documented** | ❌ **Not implemented** | v1.1.0 |
-| Schema evolution support | Medium | ✅ **Architecture documented** | ❌ **Not implemented** | v1.1.0 |
+| Issue                                        | Priority        | Documentation Status                          | Implementation Status           | Target Release |
+| -------------------------------------------- | --------------- | --------------------------------------------- | ------------------------------- | -------------- |
+| **SQL injection vulnerability** in loader.py | 🚨 **CRITICAL** | ✅ **Documented with security warnings**      | ❌ **Still present in code**    | v1.0.0         |
+| Exception duplication between files          | High            | ✅ **Comprehensive exception hierarchy docs** | ❌ **Still duplicated**         | v1.0.0         |
+| Missing Singer SDK standard methods          | High            | ✅ **Singer compliance documented**           | ❌ **Methods not implemented**  | v1.0.0         |
+| Incorrect use of execute_ddl for DML         | High            | ✅ **Pattern documented**                     | ❌ **Still using wrong method** | v1.0.0         |
+| Transaction management improvements          | Medium          | ✅ **Patterns documented**                    | ❌ **Not implemented**          | v1.1.0         |
+| Schema evolution support                     | Medium          | ✅ **Architecture documented**                | ❌ **Not implemented**          | v1.1.0         |
 
 ### 🎯 **Production Readiness Assessment**
 
@@ -245,23 +245,23 @@ targets:
 
 ### Core Configuration
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `oracle_host` | str | **Required** | Oracle database host |
-| `oracle_port` | int | `1521` | Oracle database port |
-| `oracle_service` | str | **Required** | Oracle service name |
-| `oracle_user` | str | **Required** | Oracle username |
-| `oracle_password` | str | **Required** | Oracle password |
-| `default_target_schema` | str | `"target"` | Target schema for tables |
+| Option                  | Type | Default      | Description              |
+| ----------------------- | ---- | ------------ | ------------------------ |
+| `oracle_host`           | str  | **Required** | Oracle database host     |
+| `oracle_port`           | int  | `1521`       | Oracle database port     |
+| `oracle_service`        | str  | **Required** | Oracle service name      |
+| `oracle_user`           | str  | **Required** | Oracle username          |
+| `oracle_password`       | str  | **Required** | Oracle password          |
+| `default_target_schema` | str  | `"target"`   | Target schema for tables |
 
 ### Performance & Batch Settings
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `load_method` | LoadMethod | `INSERT` | Data loading strategy |
-| `batch_size` | int | `1000` | Records per batch |
-| `use_bulk_operations` | bool | `True` | Enable Oracle bulk operations |
-| `connection_timeout` | int | `30` | Connection timeout in seconds |
+| Option                | Type       | Default  | Description                   |
+| --------------------- | ---------- | -------- | ----------------------------- |
+| `load_method`         | LoadMethod | `INSERT` | Data loading strategy         |
+| `batch_size`          | int        | `1000`   | Records per batch             |
+| `use_bulk_operations` | bool       | `True`   | Enable Oracle bulk operations |
+| `connection_timeout`  | int        | `30`     | Connection timeout in seconds |
 
 ### Available Load Methods
 
@@ -269,7 +269,7 @@ targets:
 from flext_target_oracle import LoadMethod
 
 LoadMethod.INSERT       # Standard INSERT statements
-LoadMethod.MERGE        # MERGE/UPSERT operations  
+LoadMethod.MERGE        # MERGE/UPSERT operations
 LoadMethod.BULK_INSERT  # Bulk INSERT operations
 LoadMethod.BULK_MERGE   # Bulk MERGE operations
 ```
@@ -318,7 +318,7 @@ make oracle-performance     # Run performance benchmarks
 ### **Enterprise-Grade Documentation (100% Complete)**
 
 - **[Architecture Guide](docs/architecture.md)**: Complete Clean Architecture + DDD implementation patterns
-- **[Development Guide](docs/development.md)**: Comprehensive development workflows and FLEXT ecosystem integration  
+- **[Development Guide](docs/development.md)**: Comprehensive development workflows and FLEXT ecosystem integration
 - **[Singer Integration](docs/singer-integration.md)**: Detailed Singer SDK compliance and protocol implementation
 - **[Python Module Organization](docs/python-module-organization.md)**: Enterprise Python module structure standards
 - **[Documentation Hub](docs/README.md)**: Central navigation for all project documentation

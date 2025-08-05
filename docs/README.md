@@ -6,12 +6,12 @@
 
 ### 📚 **Core Documentation**
 
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| **[Architecture Guide](architecture.md)** | Detailed technical architecture and design patterns | Developers, Architects |
-| **[Development Guide](development.md)** | Development workflows, testing, and contributing | Contributors, Maintainers |
-| **[Singer Integration](singer-integration.md)** | Singer SDK compliance and protocol implementation | Integration Engineers |
-| **[TODO & Issues](TODO.md)** | Known issues, technical debt, and improvement roadmap | All Stakeholders |
+| Document                                        | Purpose                                               | Audience                  |
+| ----------------------------------------------- | ----------------------------------------------------- | ------------------------- |
+| **[Architecture Guide](architecture.md)**       | Detailed technical architecture and design patterns   | Developers, Architects    |
+| **[Development Guide](development.md)**         | Development workflows, testing, and contributing      | Contributors, Maintainers |
+| **[Singer Integration](singer-integration.md)** | Singer SDK compliance and protocol implementation     | Integration Engineers     |
+| **[TODO & Issues](TODO.md)**                    | Known issues, technical debt, and improvement roadmap | All Stakeholders          |
 
 ### 🚀 **Getting Started**
 
@@ -23,6 +23,7 @@
 ## Document Overview
 
 ### [Architecture Guide](architecture.md)
+
 > **Technical architecture, design patterns, and FLEXT ecosystem integration**
 
 - **Clean Architecture Implementation**: Layered architecture with clear separation of concerns
@@ -35,6 +36,7 @@
 - **Integration Architecture**: FLEXT ecosystem and external system integration
 
 ### [Development Guide](development.md)
+
 > **Comprehensive developer documentation for working with the codebase**
 
 - **Quick Start**: Environment setup and verification
@@ -47,6 +49,7 @@
 - **Contributing Guidelines**: Standards and pull request process
 
 ### [Singer Integration](singer-integration.md)
+
 > **Singer SDK compliance, protocol implementation, and integration patterns**
 
 - **Singer Protocol Implementation**: SCHEMA, RECORD, and STATE message handling
@@ -59,6 +62,7 @@
 - **Compliance Roadmap**: Version-based improvement plan
 
 ### [TODO & Issues](TODO.md)
+
 > **Critical issues, technical debt, and improvement roadmap**
 
 - **Critical Architectural Deviations**: Exception duplication, SQL injection risks
@@ -76,7 +80,7 @@
 ### **Production Readiness Checklist**
 
 - ❌ **Singer SDK Compliance**: Missing standard Singer Target methods
-- ❌ **Security**: SQL injection vulnerabilities need addressing  
+- ❌ **Security**: SQL injection vulnerabilities need addressing
 - ✅ **FLEXT Integration**: Properly uses flext-core patterns
 - ✅ **Testing**: 90%+ test coverage maintained
 - ❌ **Documentation**: Architecture docs need completion
@@ -84,12 +88,12 @@
 
 ### **Critical Issues Summary**
 
-| Issue | Priority | Impact | Target Release |
-|-------|----------|--------|----------------|
-| Exception duplication | High | Code maintainability | v1.0.0 |
-| SQL injection risk | High | Security vulnerability | v1.0.0 |
-| Missing Singer SDK methods | High | Ecosystem compatibility | v1.0.0 |
-| Transaction management | Medium | Data reliability | v1.1.0 |
+| Issue                      | Priority | Impact                  | Target Release |
+| -------------------------- | -------- | ----------------------- | -------------- |
+| Exception duplication      | High     | Code maintainability    | v1.0.0         |
+| SQL injection risk         | High     | Security vulnerability  | v1.0.0         |
+| Missing Singer SDK methods | High     | Ecosystem compatibility | v1.0.0         |
+| Transaction management     | Medium   | Data reliability        | v1.1.0         |
 
 ## FLEXT Ecosystem Integration
 
@@ -99,31 +103,31 @@
 graph TB
     subgraph "FLEXT Ecosystem"
         FC[flext-core]
-        FM[flext-meltano] 
+        FM[flext-meltano]
         FDB[flext-db-oracle]
         FO[flext-observability]
     end
-    
+
     subgraph "FLEXT Target Oracle"
         FTO[FlextOracleTarget]
         FTL[FlextOracleTargetLoader]
         FTC[FlextOracleTargetConfig]
     end
-    
+
     subgraph "External Integration"
         SINGER[Singer Ecosystem]
         ORACLE[Oracle Database]
         MELTANO[Meltano Orchestrator]
     end
-    
+
     FC --> FTC
     FM --> FTO
     FDB --> FTL
     FO --> FTO
-    
+
     FTO --> FTL
     FTO --> FTC
-    
+
     SINGER --> FTO
     FTL --> ORACLE
     MELTANO --> FTO
@@ -158,7 +162,7 @@ graph TB
 ### Getting Help
 
 1. **Technical Issues**: Check [Development Guide](development.md#debugging-and-troubleshooting)
-2. **Architecture Questions**: Review [Architecture Guide](architecture.md)  
+2. **Architecture Questions**: Review [Architecture Guide](architecture.md)
 3. **Singer Integration**: See [Singer Integration](singer-integration.md)
 4. **Known Issues**: Consult [TODO & Issues](TODO.md)
 
@@ -173,7 +177,7 @@ graph TB
 
 - **Documentation Issues**: GitHub Issues with `documentation` label
 - **Architecture Feedback**: GitHub Discussions in `architecture` category
-- **Security Issues**: Private report to security@flext.sh
+- **Security Issues**: Private report to <security@flext.sh>
 - **General Questions**: GitHub Discussions in `general` category
 
 ---

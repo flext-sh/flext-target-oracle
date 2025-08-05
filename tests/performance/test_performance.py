@@ -14,6 +14,7 @@ import psutil
 import pytest
 from faker import Faker
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+from sqlalchemy import text
 
 
 @pytest.mark.performance
