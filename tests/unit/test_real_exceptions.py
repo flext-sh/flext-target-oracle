@@ -268,9 +268,9 @@ class TestRealOracleExceptions:
                     stream_name="test",
                 ) from e
         except FlextOracleTargetProcessingError as e:
-            assert e.__cause__ is not None  # noqa: PT017
-            assert isinstance(e.__cause__, ValueError)  # noqa: PT017
-            assert str(e.__cause__) == "Invalid value"  # noqa: PT017
+            assert e.__cause__ is not None
+            assert isinstance(e.__cause__, ValueError)
+            assert str(e.__cause__) == "Invalid value"
 
     def test_exception_comparison(self) -> None:
         """Test exception comparison."""

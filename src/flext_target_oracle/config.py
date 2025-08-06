@@ -660,7 +660,8 @@ class FlextOracleTargetConfig(FlextValueObject):
         table_name = base_name.upper()
 
         # Ensure Oracle naming limit (30 characters)
-        if len(table_name) > 30:
+        oracle_table_name_limit = 30
+        if len(table_name) > oracle_table_name_limit:
             # Truncate intelligently - keep prefix/suffix if possible
             if self.table_prefix and self.table_suffix:
                 prefix_len = len(self.table_prefix)

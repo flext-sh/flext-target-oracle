@@ -23,16 +23,18 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from .batch_processor import OracleBatchProcessor
-from .connection_manager import OracleConnectionManager
-from .record_transformer import OracleRecordTransformer
-from .schema_manager import OracleSchemaManager
-from .sql_generator import OracleSQLGenerator
+# TODO: Implement service modules following SOLID principles
+# from .batch_processor import OracleBatchProcessor
+# from .connection_manager import OracleConnectionManager
+# from .record_transformer import OracleRecordTransformer
+# from .schema_manager import OracleSchemaManager
+# from .sql_generator import OracleSQLGenerator
 
-__all__ = [
-    "OracleBatchProcessor",
-    "OracleConnectionManager",
-    "OracleRecordTransformer",
-    "OracleSQLGenerator",
-    "OracleSchemaManager",
+__all__: list[str] = [
+    # Services to be implemented:
+    # "OracleBatchProcessor",
+    # "OracleConnectionManager",
+    # "OracleRecordTransformer",
+    # "OracleSQLGenerator",
+    # "OracleSchemaManager",
 ]
