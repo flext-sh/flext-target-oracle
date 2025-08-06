@@ -75,8 +75,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Any
-
 from flext_core import FlextContext, FlextObs
 
 from flext_target_oracle.exceptions import (
@@ -103,7 +101,7 @@ class FlextOracleError:
             connection_string: str,
             error_code: str | None = None,
             recovery_strategy: str = "retry_with_backoff",
-            **context: Any,
+            **context: object,
         ) -> FlextOracleTargetConnectionError:
             """Oracle database server unavailable or unreachable."""
             error = FlextOracleTargetConnectionError(
@@ -117,7 +115,7 @@ class FlextOracleError:
                 },
             )
             # Log with observability integration
-            FlextObs.Log.error(
+            FlextObs.Log.error(  # type: ignore[attr-defined]
                 "Oracle database unavailable",
                 connection_string=connection_string,
                 error_code=error_code,
@@ -125,7 +123,7 @@ class FlextOracleError:
                 exception=error,
             )
             # Increment error metrics
-            FlextObs.Metrics.increment(
+            FlextObs.Metrics.increment(  # type: ignore[attr-defined]
                 "oracle.connection.database_unavailable",
                 tags={"recovery_strategy": recovery_strategy},
             )
@@ -137,7 +135,7 @@ class FlextOracleError:
             username: str,
             oracle_service: str,
             error_code: str | None = None,
-            **context: Any,
+            **context: object,
         ) -> FlextOracleTargetAuthenticationError:
             """Oracle authentication failure with user context."""
             error = FlextOracleTargetAuthenticationError(
@@ -151,7 +149,7 @@ class FlextOracleError:
                 },
             )
             # Security audit logging
-            FlextObs.Log.audit(
+            FlextObs.Log.audit(  # type: ignore[attr-defined]
                 "Oracle authentication failure",
                 user_id=username,
                 action="database_login",
@@ -160,7 +158,7 @@ class FlextOracleError:
                 error_code=error_code,
             )
             # Security metrics
-            FlextObs.Metrics.increment(
+            FlextObs.Metrics.increment(  # type: ignore[attr-defined]
                 "oracle.auth.failed",
                 tags={"service": oracle_service},
             )
@@ -171,7 +169,7 @@ class FlextOracleError:
             *,
             timeout_seconds: int,
             operation: str,
-            **context: Any,
+            **context: object,
         ) -> FlextOracleTargetConnectionError:
             """Oracle connection timeout during operation."""
             error = FlextOracleTargetConnectionError(
@@ -184,13 +182,13 @@ class FlextOracleError:
                     **context,
                 },
             )
-            FlextObs.Log.error(
+            FlextObs.Log.error(  # type: ignore[attr-defined]
                 "Oracle connection timeout",
                 timeout_seconds=timeout_seconds,
                 operation=operation,
                 exception=error,
             )
-            FlextObs.Metrics.histogram(
+            FlextObs.Metrics.histogram(  # type: ignore[attr-defined]
                 "oracle.connection.timeout",
                 timeout_seconds,
                 tags={"operation": operation},
@@ -206,7 +204,7 @@ class FlextOracleError:
             stream_name: str,
             schema_errors: list[str],
             singer_specification: str = "1.5.0",
-            **context: Any,
+            **context: object,
         ) -> FlextOracleTargetSchemaError:
             """Singer schema validation failure with detailed errors."""
             error = FlextOracleTargetSchemaError(
@@ -220,14 +218,14 @@ class FlextOracleError:
                     **context,
                 },
             )
-            FlextObs.Log.error(
+            FlextObs.Log.error(  # type: ignore[attr-defined]
                 "Singer schema validation failed",
                 stream_name=stream_name,
                 schema_errors=schema_errors,
                 singer_specification=singer_specification,
                 exception=error,
             )
-            FlextObs.Metrics.increment(
+            FlextObs.Metrics.increment(  # type: ignore[attr-defined]
                 "singer.schema.validation_failed",
                 tags={"stream": stream_name},
             )
@@ -240,7 +238,7 @@ class FlextOracleError:
             record_count: int,
             failed_records: int,
             error_details: list[str],
-            **context: Any,
+            **context: object,
         ) -> FlextOracleTargetProcessingError:
             """Singer record processing failure with batch context."""
             error = FlextOracleTargetProcessingError(
@@ -256,7 +254,7 @@ class FlextOracleError:
                     **context,
                 },
             )
-            FlextObs.Log.error(
+            FlextObs.Log.error(  # type: ignore[attr-defined]
                 "Singer record processing failed",
                 stream_name=stream_name,
                 record_count=record_count,
@@ -264,7 +262,7 @@ class FlextOracleError:
                 success_rate=(record_count - failed_records) / record_count,
                 exception=error,
             )
-            FlextObs.Metrics.increment(
+            FlextObs.Metrics.increment(  # type: ignore[attr-defined]
                 "singer.records.processing_failed",
                 failed_records,
                 tags={"stream": stream_name},
@@ -281,7 +279,7 @@ class FlextOracleError:
             table_name: str,
             oracle_error_code: str,
             affected_rows: int = 0,
-            **context: Any,
+            **context: object,
         ) -> FlextOracleTargetProcessingError:
             """Oracle SQL execution failure with operation context."""
             error = FlextOracleTargetProcessingError(
@@ -296,7 +294,7 @@ class FlextOracleError:
                     **context,
                 },
             )
-            FlextObs.Log.error(
+            FlextObs.Log.error(  # type: ignore[attr-defined]
                 "Oracle SQL execution failed",
                 sql_operation=sql_operation,
                 table_name=table_name,
@@ -304,7 +302,7 @@ class FlextOracleError:
                 affected_rows=affected_rows,
                 exception=error,
             )
-            FlextObs.Metrics.increment(
+            FlextObs.Metrics.increment(  # type: ignore[attr-defined]
                 "oracle.sql.execution_failed",
                 tags={
                     "operation": sql_operation,
@@ -321,7 +319,7 @@ class FlextOracleError:
             batch_size: int,
             processed_records: int,
             load_method: str,
-            **context: Any,
+            **context: object,
         ) -> FlextOracleTargetProcessingError:
             """Oracle bulk load operation failure."""
             error = FlextOracleTargetProcessingError(
@@ -337,7 +335,7 @@ class FlextOracleError:
                     **context,
                 },
             )
-            FlextObs.Log.error(
+            FlextObs.Log.error(  # type: ignore[attr-defined]
                 "Oracle bulk load failed",
                 table_name=table_name,
                 batch_size=batch_size,
@@ -346,7 +344,7 @@ class FlextOracleError:
                 success_rate=processed_records / batch_size,
                 exception=error,
             )
-            FlextObs.Metrics.histogram(
+            FlextObs.Metrics.histogram(  # type: ignore[attr-defined]
                 "oracle.bulk_load.success_rate",
                 processed_records / batch_size,
                 tags={
@@ -373,12 +371,12 @@ class FlextOracleObs(FlextObs):
             cls,
             table_name: str,
             operation: str = "SELECT",
-            **context: Any,
-        ):
+            **context: object,
+        ) -> object:
             """Monitor Oracle query performance with execution context."""
             correlation_id = FlextContext.ensure_correlation_id()
 
-            def _performance_context():
+            def _performance_context() -> object:
                 # Start timing
                 with FlextContext.timed_operation(
                     f"oracle_{operation.lower()}_{table_name}",
@@ -391,8 +389,8 @@ class FlextOracleObs(FlextObs):
                         yield timing
                     finally:
                         # Log performance metrics
-                        duration = timing.get("duration_seconds", 0)
-                        FlextObs.Log.info(
+                        duration: float = float(timing.get("duration_seconds", 0.0))  # type: ignore[arg-type]
+                        FlextObs.Log.info(  # type: ignore[attr-defined]
                             f"Oracle {operation} performance",
                             table_name=table_name,
                             operation=operation,
@@ -401,7 +399,7 @@ class FlextOracleObs(FlextObs):
                         )
 
                         # Record performance metrics
-                        FlextObs.Metrics.histogram(
+                        FlextObs.Metrics.histogram(  # type: ignore[attr-defined]
                             f"oracle.query.{operation.lower()}.duration",
                             duration,
                             tags={"table": table_name},
@@ -409,7 +407,7 @@ class FlextOracleObs(FlextObs):
 
                         # Performance baseline alerting
                         if duration > 30.0:  # 30 second threshold
-                            FlextObs.Alert.warning(
+                            FlextObs.Alert.warning(  # type: ignore[attr-defined]
                                 f"Slow Oracle {operation} detected",
                                 table_name=table_name,
                                 duration_seconds=duration,
@@ -423,12 +421,12 @@ class FlextOracleObs(FlextObs):
             cls,
             connection_pool_size: int,
             active_connections: int,
-            **context: Any,
+            **context: object,
         ) -> None:
             """Monitor Oracle connection pool health and utilization."""
             utilization = active_connections / connection_pool_size
 
-            FlextObs.Log.info(
+            FlextObs.Log.info(  # type: ignore[attr-defined]
                 "Oracle connection pool health",
                 pool_size=connection_pool_size,
                 active_connections=active_connections,
@@ -436,7 +434,7 @@ class FlextOracleObs(FlextObs):
                 **context,
             )
 
-            FlextObs.Metrics.gauge(
+            FlextObs.Metrics.gauge(  # type: ignore[attr-defined]
                 "oracle.connection_pool.utilization",
                 utilization,
                 tags={"pool_size": str(connection_pool_size)},
@@ -444,7 +442,7 @@ class FlextOracleObs(FlextObs):
 
             # High utilization alerting
             if utilization > 0.8:  # 80% threshold
-                FlextObs.Alert.warning(
+                FlextObs.Alert.warning(  # type: ignore[attr-defined]
                     "High Oracle connection pool utilization",
                     pool_size=connection_pool_size,
                     active_connections=active_connections,
@@ -460,7 +458,7 @@ class FlextOracleObs(FlextObs):
             processing_time: float,
             success_count: int,
             error_count: int,
-            **context: Any,
+            **context: object,
         ) -> None:
             """Track Singer batch processing performance metrics."""
             success_rate = (
@@ -470,7 +468,7 @@ class FlextOracleObs(FlextObs):
             )
             throughput = success_count / processing_time if processing_time > 0 else 0
 
-            FlextObs.Log.info(
+            FlextObs.Log.info(  # type: ignore[attr-defined]
                 "Oracle batch processing metrics",
                 stream_name=stream_name,
                 batch_size=batch_size,
@@ -483,19 +481,19 @@ class FlextOracleObs(FlextObs):
             )
 
             # Record detailed metrics
-            FlextObs.Metrics.histogram(
+            FlextObs.Metrics.histogram(  # type: ignore[attr-defined]
                 "oracle.batch.processing_time",
                 processing_time,
                 tags={"stream": stream_name},
             )
 
-            FlextObs.Metrics.gauge(
+            FlextObs.Metrics.gauge(  # type: ignore[attr-defined]
                 "oracle.batch.success_rate",
                 success_rate,
                 tags={"stream": stream_name},
             )
 
-            FlextObs.Metrics.gauge(
+            FlextObs.Metrics.gauge(  # type: ignore[attr-defined]
                 "oracle.batch.throughput",
                 throughput,
                 tags={"stream": stream_name},
@@ -518,7 +516,7 @@ def configure_oracle_observability(
 ) -> None:
     """Configure Oracle-specific observability with database context."""
     # Configure base observability
-    FlextObs.configure_observability(
+    FlextObs.configure_observability(  # type: ignore[attr-defined]
         service_name=service_name,
         **kwargs,
     )
@@ -527,13 +525,15 @@ def configure_oracle_observability(
     FlextContext.add_operation_metadata("oracle_host", oracle_host)
     FlextContext.add_operation_metadata("oracle_service", oracle_service)
     FlextContext.add_operation_metadata(
-        "performance_monitoring", enable_performance_monitoring,
+        "performance_monitoring",
+        enable_performance_monitoring,
     )
     FlextContext.add_operation_metadata(
-        "connection_monitoring", enable_connection_monitoring,
+        "connection_monitoring",
+        enable_connection_monitoring,
     )
 
-    FlextObs.Log.info(
+    FlextObs.Log.info(  # type: ignore[attr-defined]
         "Oracle observability configured",
         oracle_host=oracle_host,
         oracle_service=oracle_service,

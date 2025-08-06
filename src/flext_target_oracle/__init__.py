@@ -48,6 +48,43 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+# === FLEXT-MELTANO COMPLETE INTEGRATION ===
+# Re-export ALL flext-meltano facilities for full ecosystem integration
+from flext_meltano import (
+    # Core Singer SDK classes (centralized from flext-meltano)
+    Stream,
+    Tap,
+    Target,
+    Sink,
+    BatchSink,
+    SQLSink,
+    
+    # Enterprise services from flext-meltano.base
+    FlextMeltanoTargetService,
+    FlextMeltanoBaseService,
+    create_meltano_target_service,
+    
+    # Configuration and validation
+    FlextMeltanoConfig,
+    FlextMeltanoEvent,
+    
+    # Singer typing utilities (centralized)
+    singer_typing,
+    
+    # Bridge integration
+    FlextMeltanoBridge,
+    
+    # Testing utilities
+    get_tap_test_class,
+    
+    # Authentication patterns
+    OAuthAuthenticator,
+    
+    # Typing definitions
+    PropertiesList,
+    Property,
+)
+
 # Import FLEXT core patterns for ecosystem consistency
 from flext_core import FlextResult
 
@@ -71,22 +108,58 @@ __version__ = "0.9.0"
 """Current version - pre-production with known critical issues."""
 
 __all__: list[str] = [
-    # SEMANTIC PATTERN OBSERVABILITY - New namespace classes
-    "FlextOracleError",
-    "FlextOracleObs",
-    # Primary implementation classes
+    # === PRIMARY TARGET CLASSES ===
     "FlextOracleTarget",
-    # Legacy exception hierarchy (TODO: consolidate with exceptions.py)
-    "FlextOracleTargetAuthenticationError",
     "FlextOracleTargetConfig",
+    "LoadMethod",
+    
+    # === FLEXT-MELTANO COMPLETE RE-EXPORTS ===
+    # Singer SDK core classes
+    "Stream",
+    "Tap",
+    "Target", 
+    "Sink",
+    "BatchSink",
+    "SQLSink",
+    
+    # Enterprise services
+    "FlextMeltanoTargetService",
+    "FlextMeltanoBaseService",
+    "create_meltano_target_service",
+    
+    # Configuration patterns
+    "FlextMeltanoConfig",
+    "FlextMeltanoEvent",
+    
+    # Singer typing
+    "singer_typing",
+    "PropertiesList",
+    "Property",
+    
+    # Bridge integration
+    "FlextMeltanoBridge",
+    
+    # Testing
+    "get_tap_test_class",
+    
+    # Authentication
+    "OAuthAuthenticator",
+    
+    # === OBSERVABILITY ===
+    "FlextOracleError",
+    "FlextOracleObs", 
+    "configure_oracle_observability",
+    
+    # === EXCEPTION HIERARCHY ===
+    "FlextOracleTargetAuthenticationError",
     "FlextOracleTargetConnectionError",
     "FlextOracleTargetError",
     "FlextOracleTargetProcessingError",
     "FlextOracleTargetSchemaError",
-    # FLEXT core re-exports for convenience
+    
+    # === FLEXT-CORE RE-EXPORTS ===
     "FlextResult",
-    "LoadMethod",
-    # Version information
+    
+    # === METADATA ===
     "__version__",
-    "configure_oracle_observability",
 ]
