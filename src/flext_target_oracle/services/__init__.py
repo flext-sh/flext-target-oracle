@@ -23,7 +23,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-# TODO: Implement service modules following SOLID principles
+# TODO(@flext-team): Implement service modules following SOLID principles - https://github.com/flext/flext-target-oracle/issues/42
 # from .batch_processor import OracleBatchProcessor
 # from .connection_manager import OracleConnectionManager
 # from .record_transformer import OracleRecordTransformer

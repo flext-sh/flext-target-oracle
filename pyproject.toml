@@ -74,6 +74,7 @@ python = ">=3.13,<3.14"
 flext-core = { path = "../flext-core", develop = true }
 flext-db-oracle = { path = "../flext-db-oracle", develop = true }
 flext-meltano = { path = "../flext-meltano", develop = true }
+flext-observability = { path = "../flext-observability", develop = true }
 
 # Core Python dependencies
 pydantic = ">=2.11.0"

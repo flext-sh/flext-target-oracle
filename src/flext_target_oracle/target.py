@@ -62,11 +62,12 @@ import asyncio
 import time
 from datetime import UTC, datetime
 
-# Remove Any import - use specific types
 from flext_core import FlextResult, get_logger
-from flext_meltano import FlextMeltanoTarget
-from flext_meltano.flext_singer import flext_create_singer_bridge
-from flext_meltano.singer_unified import (
+from flext_meltano import FlextMeltanoTarget  # type: ignore[import-not-found]
+from flext_meltano.flext_singer import (
+    flext_create_singer_bridge,  # type: ignore[import-not-found]
+)
+from flext_meltano.singer_unified import (  # type: ignore[import-not-found]
     FlextSingerUnifiedConfig,
     FlextSingerUnifiedInterface,
     FlextSingerUnifiedResult,
@@ -212,7 +213,7 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                 "Configuration is required. Provide either a FlextOracleTargetConfig instance "
                 "or a dictionary configuration with required Oracle connection parameters."
             )
-            raise ValueError(
+            raise TypeError(
                 msg,
             )
 
@@ -225,9 +226,15 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         self._schemas: dict[str, dict[str, object]] = {}
         self._state: dict[str, object] = {}
 
+    def _handle_record_write_error(self, result: FlextResult[object], stream_name: str) -> None:
+        """Handle record write error."""
+        error_msg = result.error or "Record loading failed"
+        msg = f"Failed to write record to {stream_name}: {error_msg}"
+        raise RuntimeError(msg)
+
     # FlextSingerUnifiedInterface implementation
 
-    def initialize(self, config: FlextSingerUnifiedConfig) -> FlextResult[None]:
+    def initialize(self, _config: FlextSingerUnifiedConfig) -> FlextResult[None]:
         """Initialize the Oracle target with unified configuration.
 
         Args:
@@ -262,7 +269,7 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
         """
         try:
-            catalog = {
+            catalog: dict[str, object] = {
                 "streams": [],
             }
 
@@ -323,7 +330,7 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                             records_processed += 1
 
                 # Finalize all streams
-                finalize_result = asyncio.run(self._loader.finalize_all_streams())
+                finalize_result = self._loader.finalize_all_streams()
                 if finalize_result.is_failure:
                     return FlextResult.fail(
                         f"Failed to finalize streams: {finalize_result.error}",
@@ -380,8 +387,6 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             but internally delegates to async Oracle operations through the loader.
 
         """
-        import asyncio
-
         try:
             # Get or create event loop for async operations
             try:
@@ -396,11 +401,7 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             )
 
             if result.is_failure:
-                error_msg = result.error or "Record loading failed"
-                msg = f"Failed to write record to {stream_name}: {error_msg}"
-                raise RuntimeError(
-                    msg,
-                )
+                self._handle_record_write_error(result, stream_name)
 
         except Exception as e:
             # Re-raise with context for Singer SDK error handling
@@ -507,7 +508,7 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                             f"Failed to load record: {result.error}",
                         )
                 else:
-                    logger.warning(f"Invalid record format: {record}")
+                    logger.warning("Invalid record format: %s", record)
 
             return FlextResult.ok(None)
 
@@ -534,7 +535,7 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             return schema
 
         new_properties = {}
-        for col_name, col_schema in schema["properties"].items():
+        for col_name, original_schema in schema["properties"].items():  # type: ignore[attr-defined]
             # Skip ignored columns
             if self.target_config.should_ignore_column(col_name):
                 continue
@@ -543,13 +544,12 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             mapped_name = self.target_config.map_column_name(stream_name, col_name)
 
             # Apply column transformations
-            transform = self.target_config.get_column_transform(stream_name, col_name)
-            if transform:
-                # Apply type transformation if specified
-                if "type" in transform:
-                    col_schema = {**col_schema, "type": transform["type"]}
+            transform_config = self.target_config.get_column_transform(stream_name, col_name)
+            final_schema = original_schema
+            if transform_config and "type" in transform_config:
+                final_schema = {**original_schema, "type": transform_config["type"]}
 
-            new_properties[mapped_name] = col_schema
+            new_properties[mapped_name] = final_schema
 
         # Add metadata columns if enabled
         # Note: We use standard _sdc_ prefix in schema; loader maps to custom names
@@ -584,7 +584,7 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         """
         new_record = {}
 
-        for col_name, value in record.items():
+        for col_name, original_value in record.items():
             # Skip ignored columns
             if self.target_config.should_ignore_column(col_name):
                 continue
@@ -593,11 +593,12 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             mapped_name = self.target_config.map_column_name(stream_name, col_name)
 
             # Apply value transformations
-            transform = self.target_config.get_column_transform(stream_name, col_name)
-            if transform and value is not None:
-                value = self._apply_value_transform(value, transform)
+            transform_config = self.target_config.get_column_transform(stream_name, col_name)
+            final_value = original_value
+            if transform_config and original_value is not None:
+                final_value = self._apply_value_transform(original_value, transform_config)
 
-            new_record[mapped_name] = value
+            new_record[mapped_name] = final_value
 
         return new_record
 
@@ -784,7 +785,7 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                 key_properties,
             )
             if result.success:
-                logger.info(f"Schema processed for stream: {stream_name}")
+                logger.info("Schema processed for stream: %s", stream_name)
 
             return result
 
@@ -860,7 +861,7 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             logger.exception("Failed to handle record message")
             return FlextResult.fail(f"Record handling failed: {e}")
 
-    async def _handle_state(self, message: dict[str, object]) -> FlextResult[None]:
+    async def _handle_state(self, _message: dict[str, object]) -> FlextResult[None]:
         """Handle Singer STATE messages for incremental processing state management.
 
         Processes Singer STATE messages that contain bookmark information for
@@ -964,7 +965,8 @@ class FlextOracleTarget(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             result = await self._loader.finalize_all_streams()
             if result.success:
                 logger.info("Target finalization completed successfully")
-            return result
+            else:
+                return result
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to finalize target")

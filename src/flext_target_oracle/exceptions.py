@@ -42,7 +42,7 @@ Example:
     ...     # Process Singer record
     ...     await loader.load_record("users", record_data)
     ... except FlextOracleTargetProcessingError as e:
-    ...     logger.error(f"Record processing failed: {e}", extra=e.context)
+    ...     logger.error("Record processing failed: %s", e, extra=e.context)
 
 Note:
     This module resolves the exception duplication issue identified in docs/TODO.md
