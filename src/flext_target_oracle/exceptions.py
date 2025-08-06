@@ -54,7 +54,6 @@ SPDX-License-Identifier: MIT
 
 """
 
-# 🚨 ARCHITECTURAL COMPLIANCE: Use Singer base exceptions to eliminate duplication
 from flext_core import FlextTargetError
 
 

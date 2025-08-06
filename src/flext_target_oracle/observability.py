@@ -77,10 +77,8 @@ from __future__ import annotations
 
 from typing import Any
 
-# Import foundation observability patterns
 from flext_core import FlextContext, FlextObs
 
-# Import Oracle-specific dependencies
 from flext_target_oracle.exceptions import (
     FlextOracleTargetAuthenticationError,
     FlextOracleTargetConnectionError,
