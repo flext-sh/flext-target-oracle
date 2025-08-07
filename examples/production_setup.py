@@ -30,10 +30,13 @@ Usage:
 """
 
 import asyncio
+import datetime
 import logging
 import os
 import signal
 import sys
+import time
+from datetime import UTC
 from typing import Any
 
 from flext_core import FlextResult, get_logger
@@ -157,7 +160,7 @@ class ProductionTargetManager:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
-    def _signal_handler(self, signum: int, frame: Any) -> None:
+    def _signal_handler(self, signum: int, _frame: object) -> None:
         """Handle shutdown signals gracefully."""
         logger.info("Received signal %d, initiating graceful shutdown", signum)
         self.shutdown_requested = True
@@ -223,8 +226,6 @@ class ProductionTargetManager:
             "processing_start_time": None,
             "processing_end_time": None,
         }
-
-        import time
 
         stats["processing_start_time"] = time.time()
 
@@ -316,8 +317,6 @@ class ProductionTargetManager:
             "checks": {},
             "metrics": {},
         }
-
-        import time
 
         health_status["timestamp"] = time.time()
 
@@ -495,9 +494,7 @@ def create_production_sample_stream() -> list[dict[str, Any]]:
     messages.append(schema_message)
 
     # Generate sample records (simulate production volume)
-    import datetime
-
-    base_date = datetime.datetime(2025, 1, 1)
+    base_date = datetime.datetime(2025, 1, 1, tzinfo=UTC)
 
     for i in range(1, 101):  # 100 sample orders
         record_message = {
@@ -569,7 +566,7 @@ def main() -> None:
         # Run production demonstration
         asyncio.run(demonstrate_production_setup())
 
-        logger.info("\n" + "=" * 60)
+        logger.info("\n%s", "=" * 60)
         logger.info("Production setup example completed successfully!")
         logger.info("\nProduction Checklist:")
         logger.info("✓ Environment-based configuration")

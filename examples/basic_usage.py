@@ -298,13 +298,13 @@ def main() -> None:
     # Run the main demonstration
     asyncio.run(demonstrate_basic_usage())
 
-    logger.info("\n" + "=" * 50)
+    logger.info("\n%s", "=" * 50)
     logger.info("Running error handling demonstration")
 
     # Run error handling demonstration
     asyncio.run(demonstrate_error_handling())
 
-    logger.info("\n" + "=" * 50)
+    logger.info("\n%s", "=" * 50)
     logger.info("Example completed successfully!")
     logger.info("Next steps:")
     logger.info("- Check your Oracle database for the created table and data")

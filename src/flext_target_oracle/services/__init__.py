@@ -1,7 +1,7 @@
 """FLEXT Target Oracle Services - SOLID Architecture Implementation.
 
 This module provides specialized services following Single Responsibility Principle
-to replace the monolithic FlextOracleTargetLoader class. Each service has a focused
+to replace the monolithic FlextTargetOracleLoader class. Each service has a focused
 responsibility and uses dependency injection via FlextContainer.
 
 Services:
@@ -23,12 +23,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-# TODO(@flext-team): Implement service modules following SOLID principles - https://github.com/flext/flext-target-oracle/issues/42
-# from .batch_processor import OracleBatchProcessor
-# from .connection_manager import OracleConnectionManager
-# from .record_transformer import OracleRecordTransformer
-# from .schema_manager import OracleSchemaManager
-# from .sql_generator import OracleSQLGenerator
+# NOTE: Service modules currently implemented inline in target.py and loader.py
+# Future expansion could include dedicated service classes following SOLID principles:
+# - OracleBatchProcessor for batch processing operations
+# - OracleConnectionManager for connection lifecycle management
+# - OracleRecordTransformer for data transformation
+# - OracleSchemaManager for schema operations
+# - OracleSQLGenerator for SQL statement generation
 
 __all__: list[str] = [
     # Services to be implemented:
