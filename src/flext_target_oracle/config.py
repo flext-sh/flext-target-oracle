@@ -10,7 +10,7 @@ the Chain of Responsibility pattern. All validation follows railway-oriented
 programming principles using FlextResult for consistent error handling.
 
 Key Classes:
-    FlextOracleTargetConfig: Main configuration class with comprehensive validation
+    FlextTargetOracleConfig: Main configuration class with comprehensive validation
     LoadMethod: Enumeration of supported Oracle data loading strategies
     OracleTargetConstants: System constants to eliminate magic numbers
 
@@ -23,7 +23,7 @@ Architecture Patterns:
 Example:
     Basic configuration with domain validation:
 
-    >>> config = FlextOracleTargetConfig(
+    >>> config = FlextTargetOracleConfig(
     ...     oracle_host="localhost",
     ...     oracle_service="XE",
     ...     oracle_user="target_user",
@@ -99,7 +99,7 @@ class LoadMethod(StrEnum):
     BULK_MERGE = "bulk_merge"
 
 
-class FlextOracleTargetConfig(FlextValueObject):
+class FlextTargetOracleConfig(FlextValueObject):
     """Type-safe Oracle target configuration with comprehensive validation.
 
     Provides immutable configuration object for Oracle Singer target operations
@@ -128,7 +128,7 @@ class FlextOracleTargetConfig(FlextValueObject):
     Example:
         Basic configuration for development:
 
-        >>> config = FlextOracleTargetConfig(
+        >>> config = FlextTargetOracleConfig(
         ...     oracle_host="localhost",
         ...     oracle_service="XE",
         ...     oracle_user="dev_user",
@@ -138,7 +138,7 @@ class FlextOracleTargetConfig(FlextValueObject):
 
         Production configuration with validation:
 
-        >>> config = FlextOracleTargetConfig(
+        >>> config = FlextTargetOracleConfig(
         ...     oracle_host="prod-oracle.company.com",
         ...     oracle_port=1521,
         ...     oracle_service="PRODDB",
@@ -543,7 +543,7 @@ class FlextOracleTargetConfig(FlextValueObject):
             detailed error message if any validation rule fails
 
         Example:
-            >>> config = FlextOracleTargetConfig(...)
+            >>> config = FlextTargetOracleConfig(...)
             >>> result = config.validate_domain_rules()
             >>> if result.is_failure:
             ...     print(f"Configuration issue: {result.error}")
@@ -574,7 +574,7 @@ class FlextOracleTargetConfig(FlextValueObject):
             connection parameters, pooling settings, and security options
 
         Example:
-            >>> config = FlextOracleTargetConfig(...)
+            >>> config = FlextTargetOracleConfig(...)
             >>> oracle_config = config.get_oracle_config()
             >>> api = FlextDbOracleApi(FlextDbOracleConfig(**oracle_config))
 
@@ -632,7 +632,7 @@ class FlextOracleTargetConfig(FlextValueObject):
             Valid Oracle table name following Oracle naming conventions
 
         Example:
-            >>> config = FlextOracleTargetConfig(
+            >>> config = FlextTargetOracleConfig(
             ...     table_prefix="STG_",
             ...     table_suffix="_RAW",
             ...     table_name_mappings={"customer-orders": "ORDERS"},
@@ -739,7 +739,7 @@ class FlextOracleTargetConfig(FlextValueObject):
 class _ConfigurationValidator:
     """Configuration validator using Chain of Responsibility Pattern - Single Responsibility."""
 
-    def validate(self, config: FlextOracleTargetConfig) -> FlextResult[None]:
+    def validate(self, config: FlextTargetOracleConfig) -> FlextResult[None]:
         """Validate configuration using validation chain."""
         # Define validation rules as a list of validators
         validators = [
@@ -764,13 +764,13 @@ class _ConfigurationValidator:
 class _BaseValidator:
     """Base validator using Template Method Pattern."""
 
-    def validate(self, config: FlextOracleTargetConfig) -> FlextResult[None]:
+    def validate(self, config: FlextTargetOracleConfig) -> FlextResult[None]:
         """Template method for validation."""
         if not self._is_valid(config):
             return FlextResult.fail(self._get_error_message())
         return FlextResult.ok(None)
 
-    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
         """Check if configuration is valid - to be implemented by subclasses."""
         raise NotImplementedError
 
@@ -782,7 +782,7 @@ class _BaseValidator:
 class _HostValidator(_BaseValidator):
     """Validate Oracle host - Single Responsibility."""
 
-    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
         return bool(config.oracle_host)
 
     def _get_error_message(self) -> str:
@@ -792,7 +792,7 @@ class _HostValidator(_BaseValidator):
 class _ServiceValidator(_BaseValidator):
     """Validate Oracle service - Single Responsibility."""
 
-    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
         return bool(config.oracle_service)
 
     def _get_error_message(self) -> str:
@@ -802,7 +802,7 @@ class _ServiceValidator(_BaseValidator):
 class _UserValidator(_BaseValidator):
     """Validate Oracle user - Single Responsibility."""
 
-    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
         return bool(config.oracle_user)
 
     def _get_error_message(self) -> str:
@@ -812,7 +812,7 @@ class _UserValidator(_BaseValidator):
 class _PasswordValidator(_BaseValidator):
     """Validate Oracle password - Single Responsibility."""
 
-    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
         return bool(config.oracle_password)
 
     def _get_error_message(self) -> str:
@@ -822,7 +822,7 @@ class _PasswordValidator(_BaseValidator):
 class _SchemaValidator(_BaseValidator):
     """Validate target schema - Single Responsibility."""
 
-    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
         return bool(config.default_target_schema)
 
     def _get_error_message(self) -> str:
@@ -832,7 +832,7 @@ class _SchemaValidator(_BaseValidator):
 class _PoolSizeValidator(_BaseValidator):
     """Validate connection pool sizes - Single Responsibility."""
 
-    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
         return config.pool_max_size >= config.pool_min_size
 
     def _get_error_message(self) -> str:
@@ -842,7 +842,7 @@ class _PoolSizeValidator(_BaseValidator):
 class _SSLConfigValidator(_BaseValidator):
     """Validate SSL configuration consistency - Single Responsibility."""
 
-    def _is_valid(self, config: FlextOracleTargetConfig) -> bool:
+    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
         # If SSL is enabled with wallet, wallet location must be provided
         if config.use_ssl and config.ssl_wallet_password:
             return bool(config.ssl_wallet_location)
@@ -853,6 +853,6 @@ class _SSLConfigValidator(_BaseValidator):
 
 
 __all__: list[str] = [
-    "FlextOracleTargetConfig",
+    "FlextTargetOracleConfig",
     "LoadMethod",
 ]

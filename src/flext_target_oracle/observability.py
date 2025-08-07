@@ -78,11 +78,19 @@ from __future__ import annotations
 from flext_core import FlextContext, FlextObs
 
 from flext_target_oracle.exceptions import (
-    FlextOracleTargetAuthenticationError,
-    FlextOracleTargetConnectionError,
-    FlextOracleTargetProcessingError,
-    FlextOracleTargetSchemaError,
+    FlextTargetOracleAuthenticationError,
+    FlextTargetOracleConnectionError,
+    FlextTargetOracleProcessingError,
+    FlextTargetOracleSchemaError,
 )
+
+# =============================================================================
+# CONSTANTS
+# =============================================================================
+
+# Performance monitoring thresholds
+SLOW_QUERY_THRESHOLD_SECONDS = 30.0  # 30 second threshold for slow queries
+HIGH_UTILIZATION_THRESHOLD = 0.8     # 80% threshold for high resource utilization
 
 # =============================================================================
 # ORACLE-SPECIFIC ERROR NAMESPACE
@@ -102,9 +110,9 @@ class FlextOracleError:
             error_code: str | None = None,
             recovery_strategy: str = "retry_with_backoff",
             **context: object,
-        ) -> FlextOracleTargetConnectionError:
+        ) -> FlextTargetOracleConnectionError:
             """Oracle database server unavailable or unreachable."""
-            error = FlextOracleTargetConnectionError(
+            error = FlextTargetOracleConnectionError(
                 f"Oracle database unavailable: {connection_string}",
                 error_code=error_code or "ORA-CONNECTION-001",
                 context={
@@ -136,9 +144,9 @@ class FlextOracleError:
             oracle_service: str,
             error_code: str | None = None,
             **context: object,
-        ) -> FlextOracleTargetAuthenticationError:
+        ) -> FlextTargetOracleAuthenticationError:
             """Oracle authentication failure with user context."""
-            error = FlextOracleTargetAuthenticationError(
+            error = FlextTargetOracleAuthenticationError(
                 f"Oracle authentication failed for user {username} on service {oracle_service}",
                 error_code=error_code or "ORA-AUTH-001",
                 context={
@@ -170,9 +178,9 @@ class FlextOracleError:
             timeout_seconds: int,
             operation: str,
             **context: object,
-        ) -> FlextOracleTargetConnectionError:
+        ) -> FlextTargetOracleConnectionError:
             """Oracle connection timeout during operation."""
-            error = FlextOracleTargetConnectionError(
+            error = FlextTargetOracleConnectionError(
                 f"Oracle connection timeout after {timeout_seconds}s during {operation}",
                 error_code="ORA-TIMEOUT-001",
                 context={
@@ -205,9 +213,9 @@ class FlextOracleError:
             schema_errors: list[str],
             singer_specification: str = "1.5.0",
             **context: object,
-        ) -> FlextOracleTargetSchemaError:
+        ) -> FlextTargetOracleSchemaError:
             """Singer schema validation failure with detailed errors."""
-            error = FlextOracleTargetSchemaError(
+            error = FlextTargetOracleSchemaError(
                 f"Singer schema validation failed for stream {stream_name}: {'; '.join(schema_errors)}",
                 error_code="SINGER-SCHEMA-001",
                 context={
@@ -239,9 +247,9 @@ class FlextOracleError:
             failed_records: int,
             error_details: list[str],
             **context: object,
-        ) -> FlextOracleTargetProcessingError:
+        ) -> FlextTargetOracleProcessingError:
             """Singer record processing failure with batch context."""
-            error = FlextOracleTargetProcessingError(
+            error = FlextTargetOracleProcessingError(
                 f"Singer record processing failed for stream {stream_name}: {failed_records}/{record_count} records failed",
                 error_code="SINGER-RECORD-001",
                 context={
@@ -280,9 +288,9 @@ class FlextOracleError:
             oracle_error_code: str,
             affected_rows: int = 0,
             **context: object,
-        ) -> FlextOracleTargetProcessingError:
+        ) -> FlextTargetOracleProcessingError:
             """Oracle SQL execution failure with operation context."""
-            error = FlextOracleTargetProcessingError(
+            error = FlextTargetOracleProcessingError(
                 f"Oracle SQL execution failed: {sql_operation} on {table_name} (Oracle: {oracle_error_code})",
                 error_code=f"ORA-SQL-{oracle_error_code}",
                 context={
@@ -320,9 +328,9 @@ class FlextOracleError:
             processed_records: int,
             load_method: str,
             **context: object,
-        ) -> FlextOracleTargetProcessingError:
+        ) -> FlextTargetOracleProcessingError:
             """Oracle bulk load operation failure."""
-            error = FlextOracleTargetProcessingError(
+            error = FlextTargetOracleProcessingError(
                 f"Oracle bulk load failed: {processed_records}/{batch_size} records loaded to {table_name} using {load_method}",
                 error_code="ORA-BULK-001",
                 context={
@@ -371,7 +379,7 @@ class FlextOracleObs(FlextObs):
             cls,
             table_name: str,
             operation: str = "SELECT",
-            **context: object,
+            **_context: object,
         ) -> object:
             """Monitor Oracle query performance with execution context."""
             correlation_id = FlextContext.ensure_correlation_id()
@@ -406,12 +414,12 @@ class FlextOracleObs(FlextObs):
                         )
 
                         # Performance baseline alerting
-                        if duration > 30.0:  # 30 second threshold
+                        if duration > SLOW_QUERY_THRESHOLD_SECONDS:
                             FlextObs.Alert.warning(  # type: ignore[attr-defined]
                                 f"Slow Oracle {operation} detected",
                                 table_name=table_name,
                                 duration_seconds=duration,
-                                threshold_seconds=30.0,
+                                threshold_seconds=SLOW_QUERY_THRESHOLD_SECONDS,
                             )
 
             return _performance_context()
@@ -441,7 +449,7 @@ class FlextOracleObs(FlextObs):
             )
 
             # High utilization alerting
-            if utilization > 0.8:  # 80% threshold
+            if utilization > HIGH_UTILIZATION_THRESHOLD:
                 FlextObs.Alert.warning(  # type: ignore[attr-defined]
                     "High Oracle connection pool utilization",
                     pool_size=connection_pool_size,

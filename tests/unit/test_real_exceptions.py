@@ -20,6 +20,40 @@ from flext_target_oracle.exceptions import (
 class TestRealOracleExceptions:
     """Test Oracle exceptions with real scenarios."""
 
+    def _log_exception(self) -> None:
+        """Helper method for logging exceptions."""
+        from flext_core import get_logger
+        logger = get_logger(__name__)
+        logger.error("Error occurred")
+
+    def _raise_processing_error(self, original_error: ValueError) -> Never:
+        """Helper method to raise processing error."""
+        msg = "Failed to process due to invalid value"
+        raise FlextOracleTargetProcessingError(
+            msg,
+            stream_name="test",
+        ) from original_error
+
+    def _verify_exception_chain(self, exc: FlextOracleTargetProcessingError) -> None:
+        """Helper method to verify exception chain."""
+        assert exc.__cause__ is not None
+        assert isinstance(exc.__cause__, ValueError)
+        assert str(exc.__cause__) == "Invalid value"
+
+    def _raise_processing_error_for_logging(self) -> None:
+        """Helper method to raise processing error for logging test."""
+        msg = "Processing failed"
+        raise FlextOracleTargetProcessingError(
+            msg,
+            stream_name="test_stream",
+            record_count=100,
+        )
+
+    def _raise_value_error_for_chaining(self) -> None:
+        """Helper method to raise ValueError for exception chaining test."""
+        msg = "Invalid value"
+        raise ValueError(msg)
+
     def test_base_exception_creation(self) -> None:
         """Test creating base exception."""
         exc = FlextOracleTargetError("Base error occurred")
@@ -208,22 +242,20 @@ class TestRealOracleExceptions:
                     return False  # Propagate
                 return False
 
-        with pytest.raises(FlextOracleTargetConnectionError), MockResource():
+        def _raise_connection_error():
             msg = "Connection lost"
             raise FlextOracleTargetConnectionError(msg)
+
+        with pytest.raises(FlextOracleTargetConnectionError), MockResource():
+            _raise_connection_error()
 
     def test_exception_logging(self, caplog) -> None:
         """Test exception logging behavior."""
         with caplog.at_level(logging.ERROR):
             try:
-                msg = "Processing failed"
-                raise FlextOracleTargetProcessingError(
-                    msg,
-                    stream_name="test_stream",
-                    record_count=100,
-                )
+                self._raise_processing_error_for_logging()
             except FlextOracleTargetProcessingError:
-                logging.exception("Error occurred")
+                self._log_exception()
 
         assert "Processing failed" in caplog.text
         assert "PROCESSING_ERROR" in caplog.text
@@ -258,19 +290,12 @@ class TestRealOracleExceptions:
         try:
             try:
                 # Original error
-                msg = "Invalid value"
-                raise ValueError(msg)
+                self._raise_value_error_for_chaining()
             except ValueError as e:
                 # Chain with our exception
-                msg = "Failed to process due to invalid value"
-                raise FlextOracleTargetProcessingError(
-                    msg,
-                    stream_name="test",
-                ) from e
+                self._raise_processing_error(e)
         except FlextOracleTargetProcessingError as e:
-            assert e.__cause__ is not None
-            assert isinstance(e.__cause__, ValueError)
-            assert str(e.__cause__) == "Invalid value"
+            self._verify_exception_chain(e)
 
     def test_exception_comparison(self) -> None:
         """Test exception comparison."""

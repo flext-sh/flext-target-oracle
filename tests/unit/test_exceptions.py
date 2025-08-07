@@ -125,9 +125,12 @@ class TestFlextOracleTargetExceptions:
             raise AssertionError(msg)
 
         # Test catching specific exception
-        try:
+        def _raise_auth_error() -> None:
             msg = "Auth error"
             raise FlextOracleTargetAuthenticationError(msg)
+
+        try:
+            _raise_auth_error()
         except FlextOracleTargetAuthenticationError as e:
             if "Auth error" not in str(e):
                 msg: str = f"Expected {'Auth error'} in {e!s}"
@@ -149,7 +152,7 @@ class TestFlextOracleTargetExceptions:
     def test_exception_in_error_handling_pattern(self) -> None:
         """Test exceptions in typical error handling patterns."""
 
-        def function_that_might_fail(should_fail: bool) -> None:
+        def function_that_might_fail(*, should_fail: bool) -> None:
             if should_fail:
                 msg = "Simulated connection failure"
                 raise FlextOracleTargetConnectionError(msg)
@@ -218,10 +221,13 @@ class TestFlextOracleTargetExceptions:
         error2 = FlextOracleTargetError("Same message")
         error3 = FlextOracleTargetError("Different message")
 
+        def _check_error_equality() -> None:
+            if str(error1) != str(error2):
+                msg: str = f"Expected {error2!s}, got {error1!s}"
+                raise AssertionError(msg)
+
         # Test that exceptions with same message are equal
-        if str(error1) != str(error2):
-            msg: str = f"Expected {error2!s}, got {error1!s}"
-            raise AssertionError(msg)
+        _check_error_equality()
         assert str(error1) != str(error3)
 
     def test_exception_in_logging_context(self) -> None:
@@ -229,10 +235,13 @@ class TestFlextOracleTargetExceptions:
         # Create a logger
         logger = logging.getLogger("test_oracle_target")
 
-        # Test that exceptions can be logged
-        try:
+        def _raise_and_log_schema_error() -> None:
             msg = "Schema validation failed"
             raise FlextOracleTargetSchemaError(msg)
+
+        # Test that exceptions can be logged
+        try:
+            _raise_and_log_schema_error()
         except FlextOracleTargetSchemaError as e:
             # This should not raise an exception
             logger.exception("Oracle schema error")

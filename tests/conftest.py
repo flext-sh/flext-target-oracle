@@ -23,6 +23,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 import pytest_asyncio
+from flext_core import get_logger
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from flext_target_oracle import (
     FlextOracleTarget,
@@ -35,6 +36,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.pool import NullPool
 
 # Constants
+logger = get_logger(__name__)
 ORACLE_CONTAINER_NAME = "flext-oracle-test"
 ORACLE_IMAGE = "gvenzl/oracle-xe:21-slim"
 ORACLE_HOST = "localhost"
@@ -93,7 +95,7 @@ def oracle_container():
     try:
         # Stop any existing containers
         subprocess.run(
-            ["docker-compose", "-f", str(DOCKER_COMPOSE_PATH), "down", "-v"],
+            ["/usr/bin/docker-compose", "-f", str(DOCKER_COMPOSE_PATH), "down", "-v"],
             check=False,
             capture_output=True,
             text=True,
@@ -101,7 +103,7 @@ def oracle_container():
 
         # Start new container
         subprocess.run(
-            ["docker-compose", "-f", str(DOCKER_COMPOSE_PATH), "up", "-d", "oracle-xe"],
+            ["/usr/bin/docker-compose", "-f", str(DOCKER_COMPOSE_PATH), "up", "-d", "oracle-xe"],
             check=True,
             capture_output=True,
             text=True,
@@ -118,10 +120,10 @@ def oracle_container():
                 with engine.connect() as conn:
                     conn.execute(text("SELECT 1 FROM DUAL"))
                 break
-            except Exception:
+            except Exception as e:
                 if attempt == max_attempts - 1:
                     msg = "Oracle container failed to start within timeout"
-                    raise RuntimeError(msg)
+                    raise RuntimeError(msg) from e
                 time.sleep(5)
 
         # Create test schema
@@ -133,8 +135,8 @@ def oracle_container():
                 conn.execute(text(f"GRANT ALL PRIVILEGES TO {TEST_SCHEMA}"))
                 conn.commit()
             except Exception:
-                # Schema might already exist
-                pass
+                # Schema might already exist - expected behavior for test setup
+                logger.debug("Schema might already exist - expected behavior")
 
         yield
 
@@ -142,7 +144,7 @@ def oracle_container():
         # Cleanup: stop container
         if os.environ.get("KEEP_TEST_DB") != "true":
             subprocess.run(
-                ["docker-compose", "-f", str(DOCKER_COMPOSE_PATH), "down", "-v"],
+                ["/usr/bin/docker-compose", "-f", str(DOCKER_COMPOSE_PATH), "down", "-v"],
                 check=False,
                 capture_output=True,
                 text=True,
