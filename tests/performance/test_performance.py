@@ -367,7 +367,7 @@ class TestPerformance:
             for stream in streams:
                 # Note: Table names cannot be parameterized in SQLAlchemy, but this is test code
                 # Using f-string for controlled test environment with known table names
-                count = conn.execute(text(f"SELECT COUNT(*) FROM {stream}")).scalar()  # noqa: S608
+                count = conn.execute(text(f"SELECT COUNT(*) FROM {stream}")).scalar()
                 assert count == total_records // len(streams)
 
         # Performance assertion
