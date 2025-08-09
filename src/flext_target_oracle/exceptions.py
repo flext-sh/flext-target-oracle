@@ -31,12 +31,24 @@ _target_oracle_exceptions = create_module_exception_classes("flext_target_oracle
 
 # Extract factory-created exception classes
 FlextTargetOracleError = _target_oracle_exceptions["FlextTargetOracleError"]
-FlextTargetOracleValidationError = _target_oracle_exceptions["FlextTargetOracleValidationError"]
-FlextTargetOracleConfigurationError = _target_oracle_exceptions["FlextTargetOracleConfigurationError"]
-FlextTargetOracleConnectionError = _target_oracle_exceptions["FlextTargetOracleConnectionError"]
-FlextTargetOracleProcessingError = _target_oracle_exceptions["FlextTargetOracleProcessingError"]
-FlextTargetOracleAuthenticationError = _target_oracle_exceptions["FlextTargetOracleAuthenticationError"]
-FlextTargetOracleTimeoutError = _target_oracle_exceptions["FlextTargetOracleTimeoutError"]
+FlextTargetOracleValidationError = _target_oracle_exceptions[
+    "FlextTargetOracleValidationError"
+]
+FlextTargetOracleConfigurationError = _target_oracle_exceptions[
+    "FlextTargetOracleConfigurationError"
+]
+FlextTargetOracleConnectionError = _target_oracle_exceptions[
+    "FlextTargetOracleConnectionError"
+]
+FlextTargetOracleProcessingError = _target_oracle_exceptions[
+    "FlextTargetOracleProcessingError"
+]
+FlextTargetOracleAuthenticationError = _target_oracle_exceptions[
+    "FlextTargetOracleAuthenticationError"
+]
+FlextTargetOracleTimeoutError = _target_oracle_exceptions[
+    "FlextTargetOracleTimeoutError"
+]
 
 
 # Domain-specific exceptions for Oracle Target business logic
@@ -45,7 +57,7 @@ FlextTargetOracleTimeoutError = _target_oracle_exceptions["FlextTargetOracleTime
 # ==========================================================
 
 
-class FlextTargetOracleSchemaError(FlextTargetOracleValidationError):  # type: ignore[valid-type,misc]
+class FlextTargetOracleSchemaError(FlextTargetOracleValidationError):
     """Oracle Target schema-specific errors using DRY foundation."""
 
     def __init__(
@@ -69,7 +81,7 @@ class FlextTargetOracleSchemaError(FlextTargetOracleValidationError):  # type: i
         super().__init__(f"Schema Error: {message}", **context)
 
 
-class FlextTargetOracleLoadError(FlextTargetOracleProcessingError):  # type: ignore[valid-type,misc]
+class FlextTargetOracleLoadError(FlextTargetOracleProcessingError):
     """Oracle Target loading errors using DRY foundation."""
 
     def __init__(
@@ -93,7 +105,7 @@ class FlextTargetOracleLoadError(FlextTargetOracleProcessingError):  # type: ign
         super().__init__(f"Load Error: {message}", **context)
 
 
-class FlextTargetOracleSQLError(FlextTargetOracleProcessingError):  # type: ignore[valid-type,misc]
+class FlextTargetOracleSQLError(FlextTargetOracleProcessingError):
     """Oracle Target SQL errors using DRY foundation."""
 
     def __init__(
@@ -114,7 +126,7 @@ class FlextTargetOracleSQLError(FlextTargetOracleProcessingError):  # type: igno
         super().__init__(f"SQL Error: {message}", **context)
 
 
-class FlextTargetOracleRecordError(FlextTargetOracleProcessingError):  # type: ignore[valid-type,misc]
+class FlextTargetOracleRecordError(FlextTargetOracleProcessingError):
     """Oracle Target record processing errors using DRY foundation."""
 
     def __init__(

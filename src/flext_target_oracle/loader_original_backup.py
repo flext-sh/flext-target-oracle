@@ -129,7 +129,9 @@ class OracleConnectionManager:
     """Oracle connection lifecycle management following Single Responsibility."""
 
     def __init__(
-        self, oracle_api: FlextDbOracleApi, config: FlextTargetOracleConfig,
+        self,
+        oracle_api: FlextDbOracleApi,
+        config: FlextTargetOracleConfig,
     ) -> None:
         """Initialize connection manager."""
         self.oracle_api = oracle_api
@@ -200,7 +202,9 @@ class OracleSchemaManager:
         self._tables: dict[str, Table] = {}
 
     def map_json_type_to_oracle(
-        self, json_type: str, format_type: str | None = None,
+        self,
+        json_type: str,
+        format_type: str | None = None,
     ) -> str:
         """Map JSON schema type to Oracle column type string.
 
@@ -339,8 +343,21 @@ class OracleSQLGenerator:
         # Check for SQL injection patterns
         # Note: This validation prevents SQL injection in dynamic SQL construction
         dangerous_patterns = [
-            ";", "--", "/*", "*/", "xp_", "sp_", "exec", "execute",
-            "union", "select", "insert", "update", "delete", "drop", "create",
+            ";",
+            "--",
+            "/*",
+            "*/",
+            "xp_",
+            "sp_",
+            "exec",
+            "execute",
+            "union",
+            "select",
+            "insert",
+            "update",
+            "delete",
+            "drop",
+            "create",
         ]
 
         identifier_lower = identifier.lower()
@@ -358,8 +375,12 @@ class OracleSQLGenerator:
         # Oracle identifier limit is 128 characters in 12.2+, 30 in earlier versions
         if len(base_name) > MAX_ORACLE_IDENTIFIER_LENGTH:
             # Truncate and add hash for uniqueness
-            hash_suffix = hashlib.sha256(base_name.encode()).hexdigest()[:HASH_SUFFIX_LENGTH]
-            truncated = base_name[: MAX_ORACLE_IDENTIFIER_LENGTH - HASH_SUFFIX_LENGTH - UNDERSCORE_LENGTH]
+            hash_suffix = hashlib.sha256(base_name.encode()).hexdigest()[
+                :HASH_SUFFIX_LENGTH
+            ]
+            truncated = base_name[
+                : MAX_ORACLE_IDENTIFIER_LENGTH - HASH_SUFFIX_LENGTH - UNDERSCORE_LENGTH
+            ]
             return f"{truncated}_{hash_suffix}"
         return base_name
 
@@ -372,7 +393,9 @@ class OracleRecordTransformer:
         self.config = config
 
     def flatten_record(
-        self, record: dict[str, object], prefix: str = "",
+        self,
+        record: dict[str, object],
+        prefix: str = "",
     ) -> dict[str, object]:
         """Flatten nested record for Oracle table structure."""
         flattened = {}
@@ -611,7 +634,9 @@ class FlextTargetOracleLoader:
             table_name=table_name,
         )
 
-    def _handle_sql_build_error(self, sql_result: FlextResult[object], table_name: str) -> None:
+    def _handle_sql_build_error(
+        self, sql_result: FlextResult[object], table_name: str
+    ) -> None:
         """Handle SQL build error."""
         msg = f"Failed to build INSERT statement: {sql_result.error}"
         raise FlextTargetOracleProcessingError(
@@ -620,7 +645,9 @@ class FlextTargetOracleLoader:
             table_name=table_name,
         )
 
-    def _handle_insert_error(self, result: FlextResult[object], table_name: str, sequence: int) -> None:
+    def _handle_insert_error(
+        self, result: FlextResult[object], table_name: str, sequence: int
+    ) -> None:
         """Handle insert execution error."""
         msg = f"Insert failed: {result.error}"
         raise FlextTargetOracleProcessingError(
@@ -630,7 +657,9 @@ class FlextTargetOracleLoader:
             record_id=sequence,
         )
 
-    def _handle_merge_error(self, result: FlextResult[object], table_name: str, sequence: int) -> None:
+    def _handle_merge_error(
+        self, result: FlextResult[object], table_name: str, sequence: int
+    ) -> None:
         """Handle merge execution error."""
         msg = f"Merge failed: {result.error}"
         raise FlextTargetOracleProcessingError(
@@ -640,7 +669,9 @@ class FlextTargetOracleLoader:
             record_id=sequence,
         )
 
-    def _handle_bulk_operation_error(self, result: FlextResult[object], operation: str, table_name: str) -> None:
+    def _handle_bulk_operation_error(
+        self, result: FlextResult[object], operation: str, table_name: str
+    ) -> None:
         """Handle bulk operation error."""
         msg = f"{operation} failed: {result.error}"
         raise FlextTargetOracleProcessingError(
@@ -658,7 +689,9 @@ class FlextTargetOracleLoader:
             table_name=table_name,
         )
 
-    def _handle_ddl_error(self, ddl_result: FlextResult[object], table_name: str) -> None:
+    def _handle_ddl_error(
+        self, ddl_result: FlextResult[object], table_name: str
+    ) -> None:
         """Handle DDL execution error."""
         msg = f"Failed to create table: {ddl_result.error}"
         raise FlextTargetOracleSchemaError(
@@ -859,7 +892,9 @@ class FlextTargetOracleLoader:
                     # Type guard to ensure properties is a dict
                     if isinstance(properties, dict):
                         for key_prop in key_properties:
-                            if key_prop in properties and isinstance(properties[key_prop], dict):
+                            if key_prop in properties and isinstance(
+                                properties[key_prop], dict
+                            ):
                                 key_prop_def = properties[key_prop]
                                 col_type = self._schema_manager.map_json_type_to_oracle(
                                     key_prop_def.get("type", "string"),
@@ -1163,7 +1198,7 @@ class FlextTargetOracleLoader:
     def _order_columns(
         self,
         columns: list[Column[object]],
-        key_properties: list[str] | None,  # noqa: ARG002
+        key_properties: list[str] | None,
     ) -> list[Column[object]]:
         """Order columns according to configuration rules.
 
@@ -1528,7 +1563,7 @@ class FlextTargetOracleLoader:
         self,
         tables_result: FlextResult[list[str]],
         table_name: str,
-        stream_name: str,  # noqa: ARG002
+        stream_name: str,
     ) -> FlextResult[None]:
         """Process table existence result using Railway Pattern - Single Responsibility."""
         if not tables_result.success:
@@ -1723,7 +1758,9 @@ class FlextTargetOracleLoader:
             return FlextResult.fail(f"Batch flush failed: {e}")
 
     async def _flush_batch_records(
-        self, stream_name: str, records: list[dict[str, object]],
+        self,
+        stream_name: str,
+        records: list[dict[str, object]],
     ) -> FlextResult[None]:
         """Helper method to flush specific records."""
         try:

@@ -771,9 +771,9 @@ class OracleTargetResult[T]:  # Creates ecosystem fragmentation
 
 ```python
 # ✅ CORRECT - Hierarchical configuration following ecosystem patterns
-from flext_core import FlextBaseSettings
+from flext_core import FlextSettings
 
-class OracleConnectionSettings(FlextBaseSettings):
+class OracleConnectionSettings(FlextSettings):
     """Oracle connection configuration."""
     host: str = "localhost"
     port: int = 1521
@@ -782,7 +782,7 @@ class OracleConnectionSettings(FlextBaseSettings):
     class Config:
         env_prefix = "ORACLE_"
 
-class ObservabilitySettings(FlextBaseSettings):
+class ObservabilitySettings(FlextSettings):
     """Observability configuration."""
     enable_metrics: bool = True
     enable_tracing: bool = False
@@ -790,7 +790,7 @@ class ObservabilitySettings(FlextBaseSettings):
     class Config:
         env_prefix = "OBSERVABILITY_"
 
-class FlextOracleTargetConfig(FlextBaseSettings):
+class FlextOracleTargetConfig(FlextSettings):
     """Complete target configuration composing ecosystem settings."""
 
     # Oracle-specific settings

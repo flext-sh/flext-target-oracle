@@ -63,11 +63,11 @@ import time
 from datetime import UTC, datetime
 
 from flext_core import FlextResult, get_logger
-from flext_meltano import FlextMeltanoTarget  # type: ignore[import-not-found]
+from flext_meltano import FlextMeltanoTarget
 from flext_meltano.flext_singer import (
-    flext_create_singer_bridge,  # type: ignore[import-not-found]
+    flext_create_singer_bridge,
 )
-from flext_meltano.singer_unified import (  # type: ignore[import-not-found]
+from flext_meltano.singer_unified import (
     FlextSingerUnifiedConfig,
     FlextSingerUnifiedInterface,
     FlextSingerUnifiedResult,
@@ -226,7 +226,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         self._schemas: dict[str, dict[str, object]] = {}
         self._state: dict[str, object] = {}
 
-    def _handle_record_write_error(self, result: FlextResult[object], stream_name: str) -> None:
+    def _handle_record_write_error(
+        self, result: FlextResult[object], stream_name: str
+    ) -> None:
         """Handle record write error."""
         error_msg = result.error or "Record loading failed"
         msg = f"Failed to write record to {stream_name}: {error_msg}"
@@ -455,9 +457,15 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             # EXPLICIT TRANSPARENCY: Oracle connection test failure with proper error handling
             # This is NOT security-sensitive fake data generation - it's legitimate connection test failure
             logger.exception("Oracle connection test failed")
-            logger.warning(f"Connection test failed with error: {type(e).__name__}: {e}")
-            logger.info("Returning False - legitimate connection test failure properly handled")
-            logger.debug("This False return indicates genuine connection failure - documented behavior, not security risk")
+            logger.warning(
+                f"Connection test failed with error: {type(e).__name__}: {e}"
+            )
+            logger.info(
+                "Returning False - legitimate connection test failure properly handled"
+            )
+            logger.debug(
+                "This False return indicates genuine connection failure - documented behavior, not security risk"
+            )
             # SECURITY CLARIFICATION: This False return is appropriate connection test failure handling
             # Required for Oracle target functionality - NOT security-sensitive data generation
             return False
@@ -542,7 +550,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             return schema
 
         new_properties = {}
-        for col_name, original_schema in schema["properties"].items():  # type: ignore[attr-defined]
+        for col_name, original_schema in schema["properties"].items():
             # Skip ignored columns
             if self.target_config.should_ignore_column(col_name):
                 continue
@@ -551,7 +559,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             mapped_name = self.target_config.map_column_name(stream_name, col_name)
 
             # Apply column transformations
-            transform_config = self.target_config.get_column_transform(stream_name, col_name)
+            transform_config = self.target_config.get_column_transform(
+                stream_name, col_name
+            )
             final_schema = original_schema
             if transform_config and "type" in transform_config:
                 final_schema = {**original_schema, "type": transform_config["type"]}
@@ -600,10 +610,14 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             mapped_name = self.target_config.map_column_name(stream_name, col_name)
 
             # Apply value transformations
-            transform_config = self.target_config.get_column_transform(stream_name, col_name)
+            transform_config = self.target_config.get_column_transform(
+                stream_name, col_name
+            )
             final_value = original_value
             if transform_config and original_value is not None:
-                final_value = self._apply_value_transform(original_value, transform_config)
+                final_value = self._apply_value_transform(
+                    original_value, transform_config
+                )
 
             new_record[mapped_name] = final_value
 
