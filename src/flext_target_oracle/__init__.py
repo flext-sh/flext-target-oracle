@@ -81,26 +81,53 @@ from flext_meltano import (
     singer_typing,
 )
 
-# Import local implementations
-from flext_target_oracle.config import FlextTargetOracleConfig, LoadMethod
-from flext_target_oracle.exceptions import (
+# Import local implementations - CONSOLIDATED PEP8 STRUCTURE
+from flext_target_oracle.target_config import FlextTargetOracleConfig, LoadMethod
+from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,
     FlextTargetOracleError,
     FlextTargetOracleProcessingError,
     FlextTargetOracleSchemaError,
 )
-from flext_target_oracle.observability import (
+from flext_target_oracle.target_observability import (
     FlextOracleError,
     FlextOracleObs,
     configure_oracle_observability,
 )
-from flext_target_oracle.target import FlextTargetOracle
+from flext_target_oracle.target_client import (
+    FlextTargetOracle,
+    FlextTargetOracleLoader,
+    FlextTargetOraclePlugin,
+    create_target_oracle_plugin,
+    TargetOracle,
+)
+from flext_target_oracle.target_models import (
+    LoadMethodModel,
+    StorageModeModel,
+    OracleConnectionModel,
+    SingerStreamModel,
+    BatchProcessingModel,
+    LoadStatisticsModel,
+    OracleTableMetadataModel,
+)
+from flext_target_oracle.target_services import (
+    ConnectionServiceProtocol,
+    SchemaServiceProtocol,
+    BatchServiceProtocol,
+    RecordServiceProtocol,
+    OracleConnectionService,
+    OracleSchemaService,
+    OracleBatchService,
+    OracleRecordService,
+    OracleTargetServiceFactory,
+)
 
 __version__ = "0.9.0"
 """Current version - pre-production with known critical issues."""
 
 __all__: list[str] = [
+    # === FLEXT-MELTANO COMPLETE RE-EXPORTS ===
     "BatchSink",
     "FlextMeltanoBaseService",
     # Bridge integration
@@ -110,38 +137,68 @@ __all__: list[str] = [
     "FlextMeltanoEvent",
     # Enterprise services
     "FlextMeltanoTargetService",
-    # === OBSERVABILITY ===
-    "FlextOracleError",
-    "FlextOracleObs",
-    # === FLEXT-CORE RE-EXPORTS ===
-    "FlextResult",
-    # === PRIMARY TARGET CLASSES ===
-    "FlextTargetOracle",
-    # === EXCEPTION HIERARCHY ===
-    "FlextTargetOracleAuthenticationError",
-    "FlextTargetOracleConfig",
-    "FlextTargetOracleConnectionError",
-    "FlextTargetOracleError",
-    "FlextTargetOracleProcessingError",
-    "FlextTargetOracleSchemaError",
-    "LoadMethod",
     # Authentication
     "OAuthAuthenticator",
     "PropertiesList",
     "Property",
     "SQLSink",
     "Sink",
-    # === FLEXT-MELTANO COMPLETE RE-EXPORTS ===
     # Singer SDK core classes
     "Stream",
     "Tap",
     "Target",
-    # === METADATA ===
-    "__version__",
-    "configure_oracle_observability",
     "create_meltano_target_service",
     # Testing
     "get_tap_test_class",
     # Singer typing
     "singer_typing",
+    
+    # === FLEXT-CORE RE-EXPORTS ===
+    "FlextResult",
+    
+    # === PRIMARY TARGET CLASSES ===
+    "FlextTargetOracle",
+    "FlextTargetOracleLoader",
+    "FlextTargetOraclePlugin",
+    "create_target_oracle_plugin",
+    "TargetOracle",  # Compatibility alias
+    
+    # === CONFIGURATION ===
+    "FlextTargetOracleConfig",
+    "LoadMethod",
+    
+    # === EXCEPTION HIERARCHY ===
+    "FlextTargetOracleAuthenticationError",
+    "FlextTargetOracleConnectionError",
+    "FlextTargetOracleError",
+    "FlextTargetOracleProcessingError",
+    "FlextTargetOracleSchemaError",
+    
+    # === OBSERVABILITY ===
+    "FlextOracleError",
+    "FlextOracleObs",
+    "configure_oracle_observability",
+    
+    # === DATA MODELS ===
+    "LoadMethodModel",
+    "StorageModeModel", 
+    "OracleConnectionModel",
+    "SingerStreamModel",
+    "BatchProcessingModel",
+    "LoadStatisticsModel",
+    "OracleTableMetadataModel",
+    
+    # === SERVICES ===
+    "ConnectionServiceProtocol",
+    "SchemaServiceProtocol",
+    "BatchServiceProtocol",
+    "RecordServiceProtocol",
+    "OracleConnectionService",
+    "OracleSchemaService",
+    "OracleBatchService", 
+    "OracleRecordService",
+    "OracleTargetServiceFactory",
+    
+    # === METADATA ===
+    "__version__",
 ]
