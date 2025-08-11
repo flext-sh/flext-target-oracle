@@ -75,9 +75,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextContext, FlextObs
+from flext_core import FlextObs
 
-from flext_target_oracle.exceptions import (
+from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,
     FlextTargetOracleProcessingError,
@@ -382,45 +382,49 @@ class FlextOracleObs(FlextObs):
             **_context: object,
         ) -> object:
             """Monitor Oracle query performance with execution context."""
-            correlation_id = FlextContext.ensure_correlation_id()
+            import uuid
+            import time
+            correlation_id = str(uuid.uuid4())
 
             def _performance_context() -> object:
                 # Start timing
-                with FlextContext.timed_operation(
-                    f"oracle_{operation.lower()}_{table_name}",
-                ) as timing:
-                    timing["table_name"] = table_name
-                    timing["operation"] = operation
-                    timing["correlation_id"] = correlation_id
+                start_time = time.time()
+                timing = {
+                    "table_name": table_name,
+                    "operation": operation, 
+                    "correlation_id": correlation_id,
+                }
+                
+                try:
+                    yield timing
+                finally:
+                    # Calculate duration
+                    duration = time.time() - start_time
+                    
+                    # Log performance metrics
+                    FlextObs.Log.info(
+                        f"Oracle {operation} performance",
+                        table_name=table_name,
+                        operation=operation,
+                        duration_seconds=duration,
+                        correlation_id=correlation_id,
+                    )
 
-                    try:
-                        yield timing
-                    finally:
-                        # Log performance metrics
-                        duration: float = float(timing.get("duration_seconds", 0.0))
-                        FlextObs.Log.info(
-                            f"Oracle {operation} performance",
+                    # Record performance metrics
+                    FlextObs.Metrics.histogram(
+                        f"oracle.query.{operation.lower()}.duration",
+                        duration,
+                        tags={"table": table_name},
+                    )
+
+                    # Performance baseline alerting
+                    if duration > SLOW_QUERY_THRESHOLD_SECONDS:
+                        FlextObs.Alert.warning(
+                            f"Slow Oracle {operation} detected",
                             table_name=table_name,
-                            operation=operation,
                             duration_seconds=duration,
-                            correlation_id=correlation_id,
+                            threshold_seconds=SLOW_QUERY_THRESHOLD_SECONDS,
                         )
-
-                        # Record performance metrics
-                        FlextObs.Metrics.histogram(
-                            f"oracle.query.{operation.lower()}.duration",
-                            duration,
-                            tags={"table": table_name},
-                        )
-
-                        # Performance baseline alerting
-                        if duration > SLOW_QUERY_THRESHOLD_SECONDS:
-                            FlextObs.Alert.warning(
-                                f"Slow Oracle {operation} detected",
-                                table_name=table_name,
-                                duration_seconds=duration,
-                                threshold_seconds=SLOW_QUERY_THRESHOLD_SECONDS,
-                            )
 
             return _performance_context()
 
@@ -529,17 +533,8 @@ def configure_oracle_observability(
         **kwargs,
     )
 
-    # Set Oracle-specific context
-    FlextContext.add_operation_metadata("oracle_host", oracle_host)
-    FlextContext.add_operation_metadata("oracle_service", oracle_service)
-    FlextContext.add_operation_metadata(
-        "performance_monitoring",
-        enable_performance_monitoring,
-    )
-    FlextContext.add_operation_metadata(
-        "connection_monitoring",
-        enable_connection_monitoring,
-    )
+    # Set Oracle-specific context in FlextObs
+    # Note: Without FlextContext, we log the configuration directly
 
     FlextObs.Log.info(
         "Oracle observability configured",

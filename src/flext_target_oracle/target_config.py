@@ -1,4 +1,4 @@
-"""Configuration Management for FLEXT Target Oracle.
+"""Target Configuration Management for FLEXT Target Oracle.
 
 This module provides type-safe configuration management for Oracle Singer target
 operations, implementing FLEXT ecosystem patterns with comprehensive validation

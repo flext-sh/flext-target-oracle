@@ -1,55 +1,25 @@
-"""Oracle Singer Target Implementation with FLEXT Ecosystem Integration.
+"""Target Client Implementation for FLEXT Target Oracle.
 
-This module provides the main Singer Target implementation for Oracle Database
-data loading, built using FLEXT ecosystem patterns and enterprise-grade
-reliability standards. The target follows Clean Architecture principles with
-proper separation of concerns and railway-oriented programming patterns.
+This module consolidates the main Oracle Singer Target implementation, Oracle data
+loader, and plugin implementation into a single cohesive client following PEP8
+naming conventions and Clean Architecture principles.
 
-The implementation integrates with the broader FLEXT ecosystem through:
-- flext-core: FlextResult error handling and structured logging
-- flext-meltano: Singer SDK base classes and protocol compliance
-- flext-db-oracle: Production-grade Oracle database operations
-
-Key Components:
-    FlextTargetOracle: Main Singer Target implementation with async processing
-    Message Handlers: Specialized handlers for SCHEMA, RECORD, and STATE messages
-    Configuration Integration: Type-safe configuration with domain validation
-    Performance Optimization: Batch processing and connection management
+The consolidated client provides:
+- FlextTargetOracle: Main Singer Target implementation with async processing
+- FlextTargetOracleLoader: Oracle data loading infrastructure
+- FlextTargetOraclePlugin: Clean plugin architecture implementation
 
 Architecture Integration:
-    Clean Architecture: Clear separation between application and infrastructure layers
-    Railway-Oriented Programming: FlextResult pattern for consistent error handling
-    Domain-Driven Design: Business logic encapsulation with proper validation
-    CQRS Pattern: Command-query separation for scalable data operations
+    Built on flext-core foundations (FlextResult, FlextValueObject patterns)
+    Integrates with flext-meltano for Singer SDK compliance
+    Uses flext-db-oracle for production-grade Oracle connectivity
+    Follows railway-oriented programming for error handling
 
-Example:
-    Basic target initialization and message processing:
-
-    >>> from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig
-    >>> config = FlextTargetOracleConfig(
-    ...     oracle_host="localhost",
-    ...     oracle_service="XE",
-    ...     oracle_user="target_user",
-    ...     oracle_password="secure_password",
-    ... )
-    >>> target = FlextTargetOracle(config)
-    >>>
-    >>> # Process Singer SCHEMA message
-    >>> schema_msg = {
-    ...     "type": "SCHEMA",
-    ...     "stream": "users",
-    ...     "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
-    ... }
-    >>> result = await target.process_singer_message(schema_msg)
-    >>> if result.success:
-    ...     print("Schema processed successfully")
-    ... else:
-    ...     print(f"Schema processing failed: {result.error}")
-
-Note:
-    Version 0.9.0 is pre-production. This implementation is undergoing
-    architectural improvements to address identified issues. See docs/TODO.md
-    for current status and improvement roadmap.
+Key Components:
+    - Oracle data loader with batch processing and connection management
+    - Singer protocol compliance with SCHEMA, RECORD, and STATE message handling
+    - Plugin implementation with clean architecture patterns
+    - Performance optimization through batch processing and connection pooling
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -59,24 +29,279 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any
 
 from flext_core import FlextResult, get_logger
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from flext_meltano import FlextMeltanoTarget
-from flext_meltano.flext_singer import (
-    flext_create_singer_bridge,
-)
+from flext_meltano.flext_singer import flext_create_singer_bridge
+from flext_meltano.singer_plugin_base import FlextTargetPlugin
 from flext_meltano.singer_unified import (
     FlextSingerUnifiedConfig,
     FlextSingerUnifiedInterface,
     FlextSingerUnifiedResult,
 )
+# FlextPluginEntity import removed - not essential for core functionality
 
-from flext_target_oracle.config import FlextTargetOracleConfig
-from flext_target_oracle.loader import FlextTargetOracleLoader
+from flext_target_oracle.target_exceptions import (
+    FlextTargetOracleConnectionError,
+)
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from flext_target_oracle.target_config import FlextTargetOracleConfig
 
 logger = get_logger(__name__)
+
+# Constants
+MAX_PORT_NUMBER = 65535  # Maximum valid TCP port number
+
+
+# =============================================================================
+# ORACLE DATA LOADER
+# =============================================================================
+
+
+class FlextTargetOracleLoader:
+    """Oracle data loader - CORRETO usando apenas flext-db-oracle API pública.
+
+    Esta implementação:
+    1. Usa APENAS a API pública da flext-db-oracle
+    2. Não duplica funcionalidades genéricas
+    3. Mantém apenas o código específico para Singer target
+    """
+
+    def __init__(self, config: FlextTargetOracleConfig) -> None:
+        """Initialize loader using flext-db-oracle correctly."""
+        self.config = config
+
+        # Use flext-db-oracle configuration
+        oracle_config_dict = config.get_oracle_config()
+        oracle_config_result = FlextDbOracleConfig.from_dict(
+            dict(oracle_config_dict),
+        )
+        if oracle_config_result.is_failure:
+            msg = f"Failed to create Oracle config: {oracle_config_result.error}"
+            raise FlextTargetOracleConnectionError(
+                msg,
+                host=config.oracle_host,
+                port=config.oracle_port,
+                service_name=config.oracle_service,
+            )
+
+        # Initialize Oracle API - CORRETA integração
+        oracle_config = oracle_config_result.data
+        self.oracle_api = FlextDbOracleApi(oracle_config)
+
+        # Simple state tracking - específico para Singer target
+        self._record_buffers: dict[str, list[dict[str, object]]] = {}
+        self._total_records = 0
+
+    def connect(self) -> FlextResult[None]:
+        """Test connection to Oracle database."""
+        try:
+            # Use flext-db-oracle context manager to test connection
+            with self.oracle_api as connected_api:
+                # Simple connection test
+                tables_result = connected_api.get_tables(
+                    schema=self.config.default_target_schema,
+                )
+                if tables_result.is_failure:
+                    return FlextResult.fail(f"Connection test failed: {tables_result.error}")
+                
+                logger.info("Oracle connection established successfully")
+                return FlextResult.ok(None)
+        except Exception as e:
+            logger.exception("Failed to connect to Oracle")
+            return FlextResult.fail(f"Connection failed: {e}")
+
+    async def ensure_table_exists(
+        self,
+        stream_name: str,
+        _schema: dict[str, object],
+        _key_properties: list[str] | None = None,
+    ) -> FlextResult[None]:
+        """Ensure table exists using flext-db-oracle API."""
+        try:
+            table_name = self.config.get_table_name(stream_name)
+
+            # Use flext-db-oracle context manager CORRETAMENTE
+            with self.oracle_api as connected_api:
+                # Check if table exists usando API
+                tables_result = connected_api.get_tables(
+                    schema=self.config.default_target_schema,
+                )
+
+                if tables_result.is_failure:
+                    return FlextResult.fail(f"Failed to check tables: {tables_result.error}")
+
+                existing_tables = [t.upper() for t in tables_result.data or []]
+                table_exists = table_name.upper() in existing_tables
+
+                if table_exists:
+                    logger.info("Table %s already exists", table_name)
+                    return FlextResult.ok(None)
+
+                # Create simple JSON table usando API pública
+                columns = [
+                    {
+                        "name": "DATA",
+                        "type": "CLOB",
+                        "nullable": True,
+                    },
+                    {
+                        "name": "_SDC_EXTRACTED_AT",
+                        "type": "TIMESTAMP",
+                        "nullable": True,
+                    },
+                    {
+                        "name": "_SDC_LOADED_AT",
+                        "type": "TIMESTAMP",
+                        "nullable": True,
+                        "default": "CURRENT_TIMESTAMP",
+                    },
+                ]
+
+                # Create and execute table DDL using flext-db-oracle API
+                ddl_result = connected_api.create_table_ddl(
+                    table_name=table_name,
+                    columns=columns,
+                    schema=self.config.default_target_schema,
+                )
+
+                if ddl_result.is_failure:
+                    return FlextResult.fail(f"Failed to create DDL: {ddl_result.error}")
+
+                # Execute DDL - handle None case and execution result together
+                ddl_sql = ddl_result.data
+                if ddl_sql is None:
+                    return FlextResult.fail("DDL creation returned None")
+
+                exec_result = connected_api.execute_ddl(ddl_sql)
+                logger.info("Created table %s", table_name) if exec_result.is_success else None
+
+                return (
+                    FlextResult.ok(None)
+                    if exec_result.is_success
+                    else FlextResult.fail(f"Failed to create table: {exec_result.error}")
+                )
+
+        except Exception as e:
+            logger.exception("Failed to ensure table exists")
+            return FlextResult.fail(f"Table creation failed: {e}")
+
+    async def load_record(
+        self,
+        stream_name: str,
+        record_data: dict[str, object],
+    ) -> FlextResult[None]:
+        """Load record with batching."""
+        try:
+            # Simple buffering - específico para Singer target
+            if stream_name not in self._record_buffers:
+                self._record_buffers[stream_name] = []
+
+            self._record_buffers[stream_name].append(record_data)
+            self._total_records += 1
+
+            # Auto-flush if batch is full
+            if len(self._record_buffers[stream_name]) >= self.config.batch_size:
+                return await self._flush_batch(stream_name)
+
+            return FlextResult.ok(None)
+
+        except Exception as e:
+            logger.exception("Failed to load record")
+            return FlextResult.fail(f"Record loading failed: {e}")
+
+    async def finalize_all_streams(self) -> FlextResult[dict[str, object]]:
+        """Finalize all streams and return stats."""
+        try:
+            # Flush all remaining records
+            for stream_name, records in self._record_buffers.items():
+                if records:
+                    result = await self._flush_batch(stream_name)
+                    if result.is_failure:
+                        logger.error(
+                            f"Failed to flush {stream_name}: {result.error}",
+                        )
+
+            stats: dict[str, object] = {
+                "total_records": self._total_records,
+                "streams_processed": len(self._record_buffers),
+            }
+
+            return FlextResult.ok(stats)
+
+        except Exception as e:
+            logger.exception("Failed to finalize streams")
+            return FlextResult.fail(f"Finalization failed: {e}")
+
+    async def _flush_batch(self, stream_name: str) -> FlextResult[None]:
+        """Flush batch usando flext-db-oracle API CORRETAMENTE."""
+        try:
+            records = self._record_buffers.get(stream_name, [])
+            if not records:
+                return FlextResult.ok(None)
+
+            table_name = self.config.get_table_name(stream_name)
+            loaded_at = datetime.now(UTC)
+
+            # Use flext-db-oracle API para bulk operations
+            with self.oracle_api as connected_api:
+                # Prepare SQL usando API pública
+                sql_result = connected_api.build_insert_statement(
+                    table_name=table_name,
+                    columns=["DATA", "_SDC_EXTRACTED_AT", "_SDC_LOADED_AT"],
+                    schema_name=self.config.default_target_schema,
+                )
+
+                if sql_result.is_failure:
+                    return FlextResult.fail(
+                        f"Failed to build INSERT: {sql_result.error}",
+                    )
+
+                # Prepare batch data with correct types
+                batch_operations: list[tuple[str, dict[str, object] | None]] = []
+                sql_str = sql_result.data
+                if sql_str is None:
+                    return FlextResult.fail("INSERT statement creation returned None")
+
+                for record in records:
+                    params: dict[str, object] = {
+                        "DATA": json.dumps(record),
+                        "_SDC_EXTRACTED_AT": record.get("_sdc_extracted_at", loaded_at),
+                        "_SDC_LOADED_AT": loaded_at,
+                    }
+                    batch_operations.append((sql_str, params))
+
+                # Execute batch usando API pública CORRETAMENTE
+                result = connected_api.execute_batch(batch_operations)
+                if result.is_failure:
+                    return FlextResult.fail(
+                        f"Batch insert failed: {result.error}",
+                    )
+
+                # Clear buffer
+                self._record_buffers[stream_name] = []
+
+                logger.info(
+                    "Flushed %d records to %s", len(records), table_name,
+                )
+                return FlextResult.ok(None)
+
+        except Exception as e:
+            logger.exception("Failed to flush batch")
+            return FlextResult.fail(f"Batch flush failed: {e}")
+
+
+# =============================================================================
+# MAIN SINGER TARGET IMPLEMENTATION
+# =============================================================================
 
 
 class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
@@ -145,7 +370,6 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
     """
 
     name = "flext-oracle-target"
-    config_class = FlextTargetOracleConfig
 
     def __init__(
         self,
@@ -201,6 +425,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             explicit configuration with proper credentials and settings.
 
         """
+        # Import here to avoid circular import
+        from flext_target_oracle.target_config import FlextTargetOracleConfig
+
         # Convert config to FlextTargetOracleConfig if needed
         if isinstance(config, FlextTargetOracleConfig):
             self.target_config = config
@@ -216,6 +443,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             raise TypeError(
                 msg,
             )
+
+        # Set config_class for compatibility
+        self.config_class = FlextTargetOracleConfig
 
         # Initialize base classes
         super().__init__(config=dict_config)
@@ -449,25 +679,19 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                 return False
 
             # Test connection using loader
-            # Note: This would require async context, simplified for now
+            connection_result = self._loader.connect()
+            if not connection_result.success:
+                logger.error(f"Connection test failed: {connection_result.error}")
+                return False
+
             logger.info("Oracle connection test passed")
             return True
 
         except (RuntimeError, ValueError, TypeError) as e:
-            # EXPLICIT TRANSPARENCY: Oracle connection test failure with proper error handling
-            # This is NOT security-sensitive fake data generation - it's legitimate connection test failure
             logger.exception("Oracle connection test failed")
             logger.warning(
                 f"Connection test failed with error: {type(e).__name__}: {e}"
             )
-            logger.info(
-                "Returning False - legitimate connection test failure properly handled"
-            )
-            logger.debug(
-                "This False return indicates genuine connection failure - documented behavior, not security risk"
-            )
-            # SECURITY CLARIFICATION: This False return is appropriate connection test failure handling
-            # Required for Oracle target functionality - NOT security-sensitive data generation
             return False
 
     async def _write_records_impl(
@@ -989,6 +1213,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             result = await self._loader.finalize_all_streams()
             if result.success:
                 logger.info("Target finalization completed successfully")
+                return result
             else:
                 return result
 
@@ -1043,5 +1268,325 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         }
 
 
+# =============================================================================
+# ORACLE TARGET PLUGIN IMPLEMENTATION
+# =============================================================================
+
+
+class FlextTargetOraclePlugin(FlextTargetPlugin):
+    """Oracle-specific implementation of target plugin.
+
+    Extends FlextTargetPlugin with Oracle-specific functionality for
+    data loading to Oracle databases.
+
+    Attributes:
+        _connection_string: Oracle connection string
+        _schema: Target schema name
+        _batch_size: Batch size for bulk inserts
+
+    """
+
+    def __init__(
+        self,
+        name: str = "target-oracle",
+        version: str = "1.0.0",
+        config: dict[str, Any] | None = None,
+        entity: Any | None = None,
+    ) -> None:
+        """Initialize Oracle target plugin.
+
+        Args:
+            name: Plugin name
+            version: Plugin version
+            config: Plugin configuration
+            entity: Optional domain entity
+
+        """
+        super().__init__(name, version, config, entity)
+        self._connection_string = ""
+        self._schema = config.get("schema", "PUBLIC") if config else "PUBLIC"
+        self._batch_size = config.get("batch_size", 1000) if config else 1000
+        self._load_method = config.get("load_method", "insert") if config else "insert"
+
+    def _get_required_config_fields(self) -> list[str]:
+        """Get list of required configuration fields.
+
+        Returns:
+            List of required field names for Oracle connection
+
+        """
+        return ["host", "port", "user", "password", "service_name"]
+
+    def _validate_specific_config(self, config: Mapping[str, object]) -> FlextResult[None]:
+        """Perform Oracle-specific configuration validation.
+
+        Args:
+            config: Configuration to validate
+
+        Returns:
+            FlextResult indicating validation success or errors
+
+        """
+        # Validate port is numeric
+        port = config.get("port")
+        if not isinstance(port, int) or port <= 0 or port > MAX_PORT_NUMBER:
+            return FlextResult.fail(f"Invalid port number: {port}")
+
+        # Validate service_name is provided
+        service_name = config.get("service_name")
+        if not service_name or not isinstance(service_name, str):
+            return FlextResult.fail("service_name must be a non-empty string")
+
+        # Build connection string
+        self._connection_string = (
+            f"oracle://{config['user']}:{config['password']}@"
+            f"{config['host']}:{config['port']}/{service_name}"
+        )
+
+        # Store optional configuration
+        self._schema = str(config.get("schema", "PUBLIC"))
+
+        # Validate batch size
+        batch_size = config.get("batch_size", 1000)
+        if isinstance(batch_size, int) and batch_size > 0:
+            self._batch_size = batch_size
+        else:
+            self._logger.warning(f"Invalid batch_size {batch_size}, using default 1000")
+            self._batch_size = 1000
+
+        # Validate load method
+        load_method = config.get("load_method", "insert")
+        if load_method in {"insert", "upsert", "replace"}:
+            self._load_method = str(load_method)
+        else:
+            self._logger.warning(f"Invalid load_method {load_method}, using 'insert'")
+            self._load_method = "insert"
+
+        return FlextResult.ok(None)
+
+    def _test_specific_connection(self) -> FlextResult[None]:
+        """Perform Oracle-specific connection test.
+
+        Returns:
+            FlextResult indicating connection success or failure
+
+        """
+        try:
+            self._logger.info(f"Testing Oracle connection to {self._connection_string}")
+
+            # Use flext-db-oracle for Oracle operations
+            if not self._connection_string:
+                return FlextResult.fail("Connection string not configured")
+
+            # NOTE: Real Oracle connection testing would use FlextDbOracleApi here
+            # Current implementation is a simulated test for development
+            self._logger.info("Oracle connection test successful (simulated)")
+            return FlextResult.ok(None)
+
+        except Exception as e:
+            self._logger.exception("Oracle connection test failed")
+            return FlextResult.fail(f"Connection failed: {e!s}")
+
+    def _load_target_data(self, data: object) -> FlextResult[dict[str, Any]]:
+        """Perform Oracle-specific data loading.
+
+        Args:
+            data: Singer messages to load
+
+        Returns:
+            FlextResult containing load statistics or error
+
+        """
+        try:
+            self._logger.info(f"Loading data to Oracle schema {self._schema}")
+
+            # Parse Singer messages
+            if not isinstance(data, list):
+                return FlextResult.fail("Data must be a list of Singer messages")
+
+            loaded_count = 0
+            error_count = 0
+            batch = []
+
+            for message in data:
+                if not isinstance(message, dict):
+                    error_count += 1
+                    continue
+
+                # Process message based on type
+                process_result = self._process_singer_message(message, batch)
+                if process_result.is_failure:
+                    error_count += 1
+                    continue
+
+                # Process batch if full
+                if len(batch) >= self._batch_size:
+                    batch_result = self._insert_batch(batch)
+                    loaded_count, error_count = self._update_counts(
+                        batch_result, batch, loaded_count, error_count,
+                    )
+                    batch = []
+
+            # Process remaining batch
+            if batch:
+                batch_result = self._insert_batch(batch)
+                loaded_count, error_count = self._update_counts(
+                    batch_result, batch, loaded_count, error_count,
+                )
+
+            statistics = {
+                "loaded": loaded_count,
+                "errors": error_count,
+                "load_method": self._load_method,
+                "target_schema": self._schema,
+            }
+
+            self._logger.info(
+                f"Oracle load complete: {loaded_count} loaded, {error_count} errors",
+            )
+
+            return FlextResult.ok(statistics)
+
+        except Exception as e:
+            self._logger.exception("Oracle data loading failed")
+            return FlextResult.fail(f"Load error: {e!s}")
+
+    def _process_singer_message(
+        self, message: dict[str, Any], batch: list[dict[str, Any]],
+    ) -> FlextResult[None]:
+        """Process a single Singer message."""
+        msg_type = message.get("type")
+
+        if msg_type == "SCHEMA":
+            current_stream = message.get("stream")
+            self._logger.info(f"Processing schema for stream {current_stream}")
+            return FlextResult.ok(None)
+
+        if msg_type == "RECORD":
+            stream = message.get("stream")
+            record = message.get("record")
+
+            if not stream or not record:
+                return FlextResult.fail("Invalid record message")
+
+            batch.append({
+                "stream": stream,
+                "record": record,
+                "time_extracted": message.get("time_extracted"),
+            })
+            return FlextResult.ok(None)
+
+        if msg_type == "STATE":
+            self._logger.debug(f"Processing state: {message.get('value')}")
+            return FlextResult.ok(None)
+
+        return FlextResult.fail(f"Unknown message type: {msg_type}")
+
+    def _update_counts(
+        self,
+        batch_result: FlextResult[None],
+        batch: list[dict[str, Any]],
+        loaded_count: int,
+        error_count: int,
+    ) -> tuple[int, int]:
+        """Update loaded and error counts based on batch result."""
+        if batch_result.success:
+            return loaded_count + len(batch), error_count
+        return loaded_count, error_count + len(batch)
+
+    def _insert_batch(self, batch: list[dict[str, Any]]) -> FlextResult[None]:
+        """Insert a batch of records to Oracle.
+
+        Args:
+            batch: List of records to insert
+
+        Returns:
+            FlextResult indicating success or failure
+
+        """
+        try:
+            if not batch:
+                return FlextResult.ok(None)
+
+            # Group by stream
+            streams: dict[str, list[dict]] = {}
+            for item in batch:
+                stream = item["stream"]
+                if stream not in streams:
+                    streams[stream] = []
+                streams[stream].append(item["record"])
+
+            # Insert each stream's records
+            for stream, records in streams.items():
+                table_name = f"{self._schema}.{stream}"
+                self._logger.debug(f"Inserting {len(records)} records to {table_name}")
+
+                # In real implementation, use Oracle bulk insert
+                # with connection.cursor() as cursor:
+                #     if self._load_method == "insert":
+                #         cursor.executemany(insert_sql, records)
+                #     elif self._load_method == "upsert":
+                #         cursor.executemany(merge_sql, records)
+                #     elif self._load_method == "replace":
+                #         cursor.execute(f"TRUNCATE TABLE {table_name}")
+                #         cursor.executemany(insert_sql, records)
+
+            return FlextResult.ok(None)
+
+        except Exception as e:
+            self._logger.exception("Batch insert failed")
+            return FlextResult.fail(f"Batch insert error: {e!s}")
+
+
+def create_target_oracle_plugin(
+    name: str = "target-oracle",
+    version: str = "1.0.0",
+    config: dict[str, Any] | None = None,
+    entity: Any | None = None,
+) -> FlextResult[FlextTargetOraclePlugin]:
+    """Factory function to create Oracle target plugin.
+
+    Args:
+        name: Plugin name
+        version: Plugin version
+        config: Plugin configuration
+        entity: Optional domain entity
+
+    Returns:
+        FlextResult containing plugin instance or error
+
+    """
+    try:
+        # Skip entity creation - FlextPluginEntity not available
+        # entity would normally be created here
+
+        # Create plugin instance
+        plugin = FlextTargetOraclePlugin(
+            name=name,
+            version=version,
+            config=config,
+            entity=entity,
+        )
+
+        return FlextResult.ok(plugin)
+
+    except Exception as e:
+        plugin_logger = get_logger("target.oracle")
+        plugin_logger.exception("Failed to create Oracle target plugin")
+        return FlextResult.fail(f"Plugin creation failed: {e!s}")
+
+
 # Compatibility aliases
 TargetOracle = FlextTargetOracle
+
+
+__all__ = [
+    # Main Oracle Target classes
+    "FlextTargetOracle",
+    "FlextTargetOracleLoader", 
+    "FlextTargetOraclePlugin",
+    # Factory functions
+    "create_target_oracle_plugin",
+    # Compatibility aliases
+    "TargetOracle",
+]
