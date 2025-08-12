@@ -29,19 +29,18 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
 
-from flext_core import FlextValueObject
-from pydantic import Field, validator
+from flext_core import FlextResult, FlextValueObject
+from pydantic import Field, field_validator
 
 
 class LoadMethodModel(StrEnum):
     """Data loading methods for Oracle target operations.
-    
+
     Defines the available strategies for loading Singer data into Oracle
     tables, each optimized for different use cases and performance requirements.
     """
-    
+
     INSERT = "insert"
     MERGE = "merge"
     BULK_INSERT = "bulk_insert"
@@ -50,11 +49,11 @@ class LoadMethodModel(StrEnum):
 
 class StorageModeModel(StrEnum):
     """Data storage modes for Oracle target operations.
-    
+
     Defines how Singer data should be stored in Oracle tables,
     with different approaches for handling nested JSON data.
     """
-    
+
     FLATTENED = "flattened"
     JSON = "json"
     HYBRID = "hybrid"
@@ -62,10 +61,10 @@ class StorageModeModel(StrEnum):
 
 class OracleConnectionModel(FlextValueObject):
     """Oracle database connection parameters model.
-    
+
     Immutable value object representing Oracle database connection
     configuration with comprehensive validation for production use.
-    
+
     Attributes:
         host: Oracle database hostname or IP address
         port: Oracle listener port number (default: 1521)
@@ -74,8 +73,9 @@ class OracleConnectionModel(FlextValueObject):
         schema: Target schema for table operations (default: "PUBLIC")
         use_ssl: Enable SSL/TLS connection (default: False)
         connection_timeout: Connection timeout in seconds (default: 30)
+
     """
-    
+
     host: str = Field(
         ...,
         description="Oracle database hostname or IP address",
@@ -100,7 +100,7 @@ class OracleConnectionModel(FlextValueObject):
         min_length=1,
         max_length=128,
     )
-    schema: str = Field(
+    schema: str = Field(  # type: ignore[assignment]
         default="PUBLIC",
         description="Target schema for table operations",
         min_length=1,
@@ -116,29 +116,46 @@ class OracleConnectionModel(FlextValueObject):
         gt=0,
         le=3600,
     )
-    
-    def get_connection_string(self, include_credentials: bool = False) -> str:
+
+    def get_connection_string(self, *, include_credentials: bool = False) -> str:
         """Generate Oracle connection string.
-        
+
         Args:
             include_credentials: Whether to include username in connection string
-            
+
         Returns:
             Oracle connection string for logging and diagnostics
+
         """
         protocol = "tcps" if self.use_ssl else "tcp"
-        
+
         if include_credentials:
             return f"{protocol}://{self.username}@{self.host}:{self.port}/{self.service_name}"
         return f"{protocol}://{self.host}:{self.port}/{self.service_name}"
 
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate Oracle connection business rules."""
+        # Validate host is reachable format
+        if not self.host or self.host.isspace():
+            return FlextResult.fail("Host cannot be empty or whitespace")
+
+        # Validate service name format
+        if not self.service_name or self.service_name.isspace():
+            return FlextResult.fail("Service name cannot be empty or whitespace")
+
+        # Validate username
+        if not self.username or self.username.isspace():
+            return FlextResult.fail("Username cannot be empty or whitespace")
+
+        return FlextResult.ok(None)
+
 
 class SingerStreamModel(FlextValueObject):
     """Singer stream definition with Oracle mappings.
-    
+
     Immutable value object representing a Singer stream configuration
     with Oracle-specific table mappings and transformation rules.
-    
+
     Attributes:
         stream_name: Singer stream identifier
         table_name: Oracle table name (derived or mapped)
@@ -148,8 +165,9 @@ class SingerStreamModel(FlextValueObject):
         ignored_columns: List of columns to ignore during loading
         storage_mode: How to store the data (flattened, json, hybrid)
         load_method: Loading strategy for this stream
+
     """
-    
+
     stream_name: str = Field(
         ...,
         description="Singer stream identifier",
@@ -188,23 +206,23 @@ class SingerStreamModel(FlextValueObject):
         default=LoadMethodModel.INSERT,
         description="Loading strategy for this stream",
     )
-    
-    @validator("table_name")
+
+    @field_validator("table_name")
     @classmethod
     def validate_table_name(cls, v: str) -> str:
         """Validate Oracle table name conventions."""
         # Convert to uppercase and ensure Oracle naming conventions
         table_name = v.upper()
-        
+
         # Replace invalid characters
         table_name = table_name.replace("-", "_").replace(".", "_")
-        
+
         # Ensure it starts with letter or underscore
         if table_name and not (table_name[0].isalpha() or table_name[0] == "_"):
             table_name = f"T_{table_name}"
-        
+
         return table_name
-    
+
     def get_qualified_table_name(self) -> str:
         """Get fully qualified Oracle table name."""
         return f"{self.schema_name}.{self.table_name}"
@@ -212,10 +230,10 @@ class SingerStreamModel(FlextValueObject):
 
 class BatchProcessingModel(FlextValueObject):
     """Batch processing configuration and state.
-    
+
     Immutable value object representing batch processing configuration
     and current state for Oracle data loading operations.
-    
+
     Attributes:
         stream_name: Singer stream being processed
         batch_size: Number of records per batch
@@ -224,8 +242,9 @@ class BatchProcessingModel(FlextValueObject):
         batch_count: Number of batches processed
         last_processed_at: Timestamp of last record processing
         has_pending_records: Whether there are records waiting to be flushed
+
     """
-    
+
     stream_name: str = Field(
         ...,
         description="Singer stream being processed",
@@ -237,7 +256,7 @@ class BatchProcessingModel(FlextValueObject):
         gt=0,
         le=50000,
     )
-    current_batch: list[dict[str, Any]] = Field(
+    current_batch: list[dict[str, object]] = Field(
         default_factory=list,
         description="Current batch of records",
     )
@@ -255,33 +274,33 @@ class BatchProcessingModel(FlextValueObject):
         default_factory=lambda: datetime.now(UTC),
         description="Timestamp of last record processing",
     )
-    
+
     @property
     def has_pending_records(self) -> bool:
         """Whether there are records waiting to be flushed."""
         return len(self.current_batch) > 0
-    
+
     @property
     def is_batch_full(self) -> bool:
         """Whether the current batch is full and ready for processing."""
         return len(self.current_batch) >= self.batch_size
-    
+
     @property
     def current_batch_size(self) -> int:
         """Current number of records in the batch."""
         return len(self.current_batch)
-    
-    def add_record(self, record: dict[str, Any]) -> BatchProcessingModel:
+
+    def add_record(self, record: dict[str, object]) -> BatchProcessingModel:
         """Add a record to the current batch (immutable operation)."""
         new_batch = self.current_batch.copy()
         new_batch.append(record)
-        
+
         return self.model_copy(update={
             "current_batch": new_batch,
             "total_records": self.total_records + 1,
             "last_processed_at": datetime.now(UTC),
         })
-    
+
     def clear_batch(self) -> BatchProcessingModel:
         """Clear the current batch after processing (immutable operation)."""
         return self.model_copy(update={
@@ -290,13 +309,21 @@ class BatchProcessingModel(FlextValueObject):
             "last_processed_at": datetime.now(UTC),
         })
 
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate business rules for batch processing."""
+        if not self.stream_name or self.stream_name.isspace():
+            return FlextResult.fail("Stream name cannot be empty or whitespace")
+        if self.batch_size <= 0:
+            return FlextResult.fail("Batch size must be positive")
+        return FlextResult.ok(None)
+
 
 class LoadStatisticsModel(FlextValueObject):
     """Data loading statistics and metrics.
-    
+
     Immutable value object representing comprehensive statistics
     about Oracle data loading operations for monitoring and reporting.
-    
+
     Attributes:
         stream_name: Singer stream name
         total_records_processed: Total number of records processed
@@ -309,8 +336,9 @@ class LoadStatisticsModel(FlextValueObject):
         average_batch_size: Average number of records per batch
         throughput_records_per_second: Processing throughput
         error_details: List of error messages encountered
+
     """
-    
+
     stream_name: str = Field(
         ...,
         description="Singer stream name",
@@ -352,32 +380,32 @@ class LoadStatisticsModel(FlextValueObject):
         default_factory=list,
         description="List of error messages encountered",
     )
-    
+
     @property
     def is_completed(self) -> bool:
         """Whether processing has completed."""
         return self.processing_end_time is not None
-    
+
     @property
     def success_rate(self) -> float:
         """Calculate success rate as percentage."""
         if self.total_records_processed == 0:
             return 0.0
         return (self.successful_records / self.total_records_processed) * 100.0
-    
+
     @property
     def processing_duration_seconds(self) -> float:
         """Calculate processing duration in seconds."""
         end_time = self.processing_end_time or datetime.now(UTC)
         return (end_time - self.processing_start_time).total_seconds()
-    
+
     @property
     def average_batch_size(self) -> float:
         """Calculate average batch size."""
         if self.batches_processed == 0:
             return 0.0
         return self.total_records_processed / self.batches_processed
-    
+
     @property
     def throughput_records_per_second(self) -> float:
         """Calculate processing throughput in records per second."""
@@ -385,30 +413,42 @@ class LoadStatisticsModel(FlextValueObject):
         if duration == 0:
             return 0.0
         return self.successful_records / duration
-    
+
     def finalize(self) -> LoadStatisticsModel:
         """Mark statistics as completed (immutable operation)."""
         return self.model_copy(update={
             "processing_end_time": datetime.now(UTC),
         })
-    
+
     def add_error(self, error_message: str) -> LoadStatisticsModel:
         """Add an error message (immutable operation)."""
         new_errors = self.error_details.copy()
         new_errors.append(error_message)
-        
+
         return self.model_copy(update={
             "error_details": new_errors,
             "failed_records": self.failed_records + 1,
         })
 
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate business rules for load statistics."""
+        if not self.stream_name or self.stream_name.isspace():
+            return FlextResult.fail("Stream name cannot be empty or whitespace")
+        if self.successful_records < 0:
+            return FlextResult.fail("Successful records count cannot be negative")
+        if self.failed_records < 0:
+            return FlextResult.fail("Failed records count cannot be negative")
+        if self.total_records_processed != self.successful_records + self.failed_records:
+            return FlextResult.fail("Total records must equal successful + failed records")
+        return FlextResult.ok(None)
+
 
 class OracleTableMetadataModel(FlextValueObject):
     """Oracle table metadata and schema information.
-    
+
     Immutable value object representing Oracle table structure
     and metadata for Singer stream processing.
-    
+
     Attributes:
         table_name: Oracle table name
         schema_name: Oracle schema name
@@ -419,8 +459,9 @@ class OracleTableMetadataModel(FlextValueObject):
         created_at: When the table was created
         last_modified: When the table was last modified
         singer_stream_name: Associated Singer stream name
+
     """
-    
+
     table_name: str = Field(
         ...,
         description="Oracle table name",
@@ -433,7 +474,7 @@ class OracleTableMetadataModel(FlextValueObject):
         min_length=1,
         max_length=128,
     )
-    columns: list[dict[str, Any]] = Field(
+    columns: list[dict[str, object]] = Field(
         default_factory=list,
         description="List of column definitions",
     )
@@ -441,7 +482,7 @@ class OracleTableMetadataModel(FlextValueObject):
         default_factory=list,
         description="List of primary key column names",
     )
-    indexes: list[dict[str, Any]] = Field(
+    indexes: list[dict[str, object]] = Field(
         default_factory=list,
         description="List of index definitions",
     )
@@ -461,29 +502,29 @@ class OracleTableMetadataModel(FlextValueObject):
         default=None,
         description="Associated Singer stream name",
     )
-    
+
     def get_qualified_name(self) -> str:
         """Get fully qualified table name."""
         return f"{self.schema_name}.{self.table_name}"
-    
+
     def has_column(self, column_name: str) -> bool:
         """Check if table has a specific column."""
-        column_names = [col.get("name", "").upper() for col in self.columns]
+        column_names = [str(col.get("name", "")).upper() for col in self.columns]
         return column_name.upper() in column_names
-    
+
     def get_column_names(self) -> list[str]:
         """Get list of all column names."""
-        return [col.get("name", "") for col in self.columns if col.get("name")]
+        return [str(col.get("name", "")) for col in self.columns if col.get("name")]
 
 
 __all__ = [
+    "BatchProcessingModel",
     # Enums
     "LoadMethodModel",
-    "StorageModeModel",
+    "LoadStatisticsModel",
     # Value Objects
     "OracleConnectionModel",
-    "SingerStreamModel", 
-    "BatchProcessingModel",
-    "LoadStatisticsModel",
     "OracleTableMetadataModel",
+    "SingerStreamModel",
+    "StorageModeModel",
 ]

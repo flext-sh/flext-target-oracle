@@ -24,31 +24,36 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core.exceptions import create_module_exception_classes
+from flext_core.exceptions import FlextError
 
-# 🚨 DRY PATTERN: Use create_module_exception_classes to eliminate exception duplication
-_target_oracle_exceptions = create_module_exception_classes("flext_target_oracle")
 
-# Extract factory-created exception classes
-FlextTargetOracleError = _target_oracle_exceptions["FlextTargetOracleError"]
-FlextTargetOracleValidationError = _target_oracle_exceptions[
-    "FlextTargetOracleValidationError"
-]
-FlextTargetOracleConfigurationError = _target_oracle_exceptions[
-    "FlextTargetOracleConfigurationError"
-]
-FlextTargetOracleConnectionError = _target_oracle_exceptions[
-    "FlextTargetOracleConnectionError"
-]
-FlextTargetOracleProcessingError = _target_oracle_exceptions[
-    "FlextTargetOracleProcessingError"
-]
-FlextTargetOracleAuthenticationError = _target_oracle_exceptions[
-    "FlextTargetOracleAuthenticationError"
-]
-FlextTargetOracleTimeoutError = _target_oracle_exceptions[
-    "FlextTargetOracleTimeoutError"
-]
+# Oracle Target Exception Hierarchy - Built on FLEXT patterns
+class FlextTargetOracleError(FlextError):
+    """Base exception for all Oracle Target operations."""
+
+
+class FlextTargetOracleValidationError(FlextTargetOracleError):
+    """Oracle Target validation errors."""
+
+
+class FlextTargetOracleConfigurationError(FlextTargetOracleError):
+    """Oracle Target configuration errors."""
+
+
+class FlextTargetOracleConnectionError(FlextTargetOracleError):
+    """Oracle Target connection errors."""
+
+
+class FlextTargetOracleProcessingError(FlextTargetOracleError):
+    """Oracle Target data processing errors."""
+
+
+class FlextTargetOracleAuthenticationError(FlextTargetOracleConnectionError):
+    """Oracle Target authentication errors."""
+
+
+class FlextTargetOracleTimeoutError(FlextTargetOracleConnectionError):
+    """Oracle Target timeout errors."""
 
 
 # Domain-specific exceptions for Oracle Target business logic
@@ -78,7 +83,7 @@ class FlextTargetOracleSchemaError(FlextTargetOracleValidationError):
         if schema_name is not None:
             context["schema_name"] = schema_name
 
-        super().__init__(f"Schema Error: {message}", **context)
+        super().__init__(f"Schema Error: {message}")
 
 
 class FlextTargetOracleLoadError(FlextTargetOracleProcessingError):
@@ -102,7 +107,7 @@ class FlextTargetOracleLoadError(FlextTargetOracleProcessingError):
         if batch_size is not None:
             context["batch_size"] = batch_size
 
-        super().__init__(f"Load Error: {message}", **context)
+        super().__init__(f"Load Error: {message}")
 
 
 class FlextTargetOracleSQLError(FlextTargetOracleProcessingError):
@@ -123,7 +128,7 @@ class FlextTargetOracleSQLError(FlextTargetOracleProcessingError):
         if oracle_error_code is not None:
             context["oracle_error_code"] = oracle_error_code
 
-        super().__init__(f"SQL Error: {message}", **context)
+        super().__init__(f"SQL Error: {message}")
 
 
 class FlextTargetOracleRecordError(FlextTargetOracleProcessingError):
@@ -144,7 +149,7 @@ class FlextTargetOracleRecordError(FlextTargetOracleProcessingError):
         if record_data is not None:
             context["record_sample"] = str(record_data)[:100]  # Truncate for safety
 
-        super().__init__(f"Record Error: {message}", **context)
+        super().__init__(f"Record Error: {message}")
 
 
 __all__: list[str] = [

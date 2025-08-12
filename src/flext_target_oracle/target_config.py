@@ -608,7 +608,7 @@ class FlextTargetOracleConfig(FlextValueObject):
         if self.parallel_degree:
             oracle_config["parallel_degree"] = self.parallel_degree
 
-        return oracle_config
+        return oracle_config  # type: ignore[return-value]
 
     def get_table_name(self, stream_name: str) -> str:
         """Generate Oracle table name from Singer stream name.
@@ -693,7 +693,7 @@ class FlextTargetOracleConfig(FlextValueObject):
             if column_name in stream_mappings:
                 mapped = stream_mappings[column_name]
                 if isinstance(mapped, dict) and "name" in mapped:
-                    return mapped["name"]
+                    return str(mapped["name"])
                 if isinstance(mapped, str):
                     return mapped
         return column_name
@@ -732,7 +732,10 @@ class FlextTargetOracleConfig(FlextValueObject):
             if column_name in stream_mappings:
                 mapped = stream_mappings[column_name]
                 if isinstance(mapped, dict) and "transform" in mapped:
-                    return mapped["transform"]
+                    transform_value = mapped["transform"]
+                    if isinstance(transform_value, dict):
+                        return dict(transform_value)
+                    return None
         return None
 
 

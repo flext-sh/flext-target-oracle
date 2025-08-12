@@ -8,7 +8,6 @@ Note: S608 warnings about SQL injection are suppressed for this test file as:
 3. Oracle DDL statements cannot use parameterized queries
 4. These are test scenarios with known-safe hardcoded values
 """
-# ruff: noqa: S608
 
 from datetime import UTC, datetime
 from decimal import Decimal

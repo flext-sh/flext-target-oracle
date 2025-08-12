@@ -36,6 +36,9 @@ dependencies = [
     "flext-core",
     "flext-db-oracle", 
     "flext-meltano",
+    "flext-cli",
+    "click>=8.0.0",
+    "rich>=13.0.0",
 ]
 
 [[project.authors]]
@@ -54,8 +57,9 @@ Homepage = "https://github.com/flext-sh/flext"
 Repository = "https://github.com/flext-sh/flext"
 Documentation = "https://github.com/flext-sh/flext/blob/main/README.md"
 
-# Entry points removed - flext-target-oracle is a library, not a CLI tool
-# CLI functionality is provided by flext-meltano for Singer orchestration
+[project.scripts]
+target-oracle = "flext_target_oracle.target:cli"
+flext-target-oracle = "flext_target_oracle.target:cli"
 
 
 [tool.bandit]
@@ -75,9 +79,12 @@ flext-core = { path = "../flext-core", develop = true }
 flext-db-oracle = { path = "../flext-db-oracle", develop = true }
 flext-meltano = { path = "../flext-meltano", develop = true }
 flext-observability = { path = "../flext-observability", develop = true }
+flext-cli = { path = "../flext-cli", develop = true }
 
 # Core Python dependencies
 pydantic = ">=2.11.0"
+click = ">=8.0.0"
+rich = ">=13.0.0"
 
 [tool.poetry.group.dev.dependencies]
 # Testing dependencies

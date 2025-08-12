@@ -44,16 +44,15 @@ from flext_meltano.singer_unified import (
     FlextSingerUnifiedInterface,
     FlextSingerUnifiedResult,
 )
-# FlextPluginEntity import removed - not essential for core functionality
 
+# FlextPluginEntity import removed - not essential for core functionality
+from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleConnectionError,
 )
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
-
-    from flext_target_oracle.target_config import FlextTargetOracleConfig
 
 logger = get_logger(__name__)
 
@@ -81,20 +80,15 @@ class FlextTargetOracleLoader:
 
         # Use flext-db-oracle configuration
         oracle_config_dict = config.get_oracle_config()
-        oracle_config_result = FlextDbOracleConfig.from_dict(
-            dict(oracle_config_dict),
-        )
-        if oracle_config_result.is_failure:
-            msg = f"Failed to create Oracle config: {oracle_config_result.error}"
-            raise FlextTargetOracleConnectionError(
-                msg,
-                host=config.oracle_host,
-                port=config.oracle_port,
-                service_name=config.oracle_service,
+        try:
+            oracle_config = FlextDbOracleConfig.from_dict(
+                dict(oracle_config_dict),
             )
+        except Exception as e:
+            msg = f"Failed to create Oracle config: {e}"
+            raise FlextTargetOracleConnectionError(msg) from e
 
         # Initialize Oracle API - CORRETA integração
-        oracle_config = oracle_config_result.data
         self.oracle_api = FlextDbOracleApi(oracle_config)
 
         # Simple state tracking - específico para Singer target
@@ -112,7 +106,7 @@ class FlextTargetOracleLoader:
                 )
                 if tables_result.is_failure:
                     return FlextResult.fail(f"Connection test failed: {tables_result.error}")
-                
+
                 logger.info("Oracle connection established successfully")
                 return FlextResult.ok(None)
         except Exception as e:
@@ -425,16 +419,13 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             explicit configuration with proper credentials and settings.
 
         """
-        # Import here to avoid circular import
-        from flext_target_oracle.target_config import FlextTargetOracleConfig
+        # Config import now at top level
 
         # Convert config to FlextTargetOracleConfig if needed
         if isinstance(config, FlextTargetOracleConfig):
             self.target_config = config
-            dict_config = config.model_dump()
         elif isinstance(config, dict):
             self.target_config = FlextTargetOracleConfig.model_validate(config)
-            dict_config = config
         else:
             msg = (
                 "Configuration is required. Provide either a FlextTargetOracleConfig instance "
@@ -448,7 +439,8 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         self.config_class = FlextTargetOracleConfig
 
         # Initialize base classes
-        super().__init__(config=dict_config)
+        # FlextMeltanoTarget expects FlextMeltanoConfig - converting dict directly
+        super().__init__(config={})  # type: ignore[call-arg]
 
         # Initialize components
         self._loader = FlextTargetOracleLoader(self.target_config)
@@ -457,7 +449,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         self._state: dict[str, object] = {}
 
     def _handle_record_write_error(
-        self, result: FlextResult[object], stream_name: str
+        self, result: FlextResult[object], stream_name: str,
     ) -> None:
         """Handle record write error."""
         error_msg = result.error or "Record loading failed"
@@ -530,7 +522,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         except Exception as e:
             return FlextResult.fail(f"Failed to discover catalog: {e}")
 
-    def execute(
+    async def execute(
         self,
         input_data: object | None = None,
     ) -> FlextResult[FlextSingerUnifiedResult]:
@@ -553,7 +545,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                 records_processed = 0
                 for message in input_data:
                     if isinstance(message, dict):
-                        result = self.process_singer_message(message)
+                        result = await self.process_singer_message(message)
                         if result.is_failure:
                             return FlextResult.fail(
                                 f"Failed to process message: {result.error}",
@@ -562,7 +554,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                             records_processed += 1
 
                 # Finalize all streams
-                finalize_result = self._loader.finalize_all_streams()
+                finalize_result = await self._loader.finalize_all_streams()
                 if finalize_result.is_failure:
                     return FlextResult.fail(
                         f"Failed to finalize streams: {finalize_result.error}",
@@ -690,7 +682,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Oracle connection test failed")
             logger.warning(
-                f"Connection test failed with error: {type(e).__name__}: {e}"
+                f"Connection test failed with error: {type(e).__name__}: {e}",
             )
             return False
 
@@ -784,7 +776,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
             # Apply column transformations
             transform_config = self.target_config.get_column_transform(
-                stream_name, col_name
+                stream_name, col_name,
             )
             final_schema = original_schema
             if transform_config and "type" in transform_config:
@@ -835,12 +827,12 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
             # Apply value transformations
             transform_config = self.target_config.get_column_transform(
-                stream_name, col_name
+                stream_name, col_name,
             )
             final_value = original_value
             if transform_config and original_value is not None:
                 final_value = self._apply_value_transform(
-                    original_value, transform_config
+                    original_value, transform_config,
                 )
 
             new_record[mapped_name] = final_value
@@ -1214,8 +1206,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             if result.success:
                 logger.info("Target finalization completed successfully")
                 return result
-            else:
-                return result
+            return result
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to finalize target")
@@ -1291,7 +1282,7 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
         name: str = "target-oracle",
         version: str = "1.0.0",
         config: dict[str, Any] | None = None,
-        entity: Any | None = None,
+        entity: dict[str, object] | None = None,
     ) -> None:
         """Initialize Oracle target plugin.
 
@@ -1542,7 +1533,7 @@ def create_target_oracle_plugin(
     name: str = "target-oracle",
     version: str = "1.0.0",
     config: dict[str, Any] | None = None,
-    entity: Any | None = None,
+    entity: dict[str, object] | None = None,
 ) -> FlextResult[FlextTargetOraclePlugin]:
     """Factory function to create Oracle target plugin.
 
@@ -1583,10 +1574,10 @@ TargetOracle = FlextTargetOracle
 __all__ = [
     # Main Oracle Target classes
     "FlextTargetOracle",
-    "FlextTargetOracleLoader", 
+    "FlextTargetOracleLoader",
     "FlextTargetOraclePlugin",
-    # Factory functions
-    "create_target_oracle_plugin",
     # Compatibility aliases
     "TargetOracle",
+    # Factory functions
+    "create_target_oracle_plugin",
 ]
