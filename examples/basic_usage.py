@@ -52,7 +52,7 @@ def create_configuration() -> FlextOracleTargetConfig:
         oracle_port=1521,
         oracle_service="XE",
         oracle_user="system",
-        oracle_password="oracle",
+        oracle_password="oracle"  # noqa: S105,
         default_target_schema="FLEXT_EXAMPLES",
         load_method=LoadMethod.INSERT,
         batch_size=100,  # Small batch size for demo
@@ -266,7 +266,7 @@ async def demonstrate_error_handling() -> None:
             oracle_host="",  # Invalid empty host
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password="test"  # noqa: S105,
         )
 
         validation_result = invalid_config.validate_domain_rules()

@@ -83,7 +83,7 @@ class ProductionConfig:
         oracle_host = os.getenv("ORACLE_HOST")
         oracle_service = os.getenv("ORACLE_SERVICE")
         oracle_user = os.getenv("ORACLE_USER")
-        oracle_password = os.getenv("ORACLE_PASSWORD")
+        oracle_password = os.getenv("ORACLE_PASSWORD"  # noqa: S105)
 
         if not all([oracle_host, oracle_service, oracle_user, oracle_password]):
             missing = [
