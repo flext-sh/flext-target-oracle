@@ -1,3 +1,9 @@
+"""Constants for FLEXT Target Oracle module.
+
+This module defines centralized constants following the FlextConstants pattern
+from flext-core, extending it with Oracle target-specific constants.
+"""
+
 from __future__ import annotations
 
 from typing import Final

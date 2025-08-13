@@ -84,7 +84,7 @@ class OracleTargetAboutParams:
         )
 
 
-class OracleTargetValidateCommand(CLICommand, CLICompleteMixin):
+class OracleTargetValidateCommand(CLICommand):
     """Oracle target validation command using modern flext-cli patterns.
 
     CLICompleteMixin includes:
@@ -172,7 +172,7 @@ class OracleTargetValidateCommand(CLICommand, CLICompleteMixin):
             return FlextResult.fail(f"Validation error: {e}")
 
 
-class OracleTargetLoadCommand(CLICommand, CLICompleteMixin):
+class OracleTargetLoadCommand(CLICommand):
     """Oracle target load command using modern flext-cli patterns."""
 
     def __init__(
@@ -305,7 +305,7 @@ class OracleTargetLoadCommand(CLICommand, CLICompleteMixin):
             return FlextResult.fail(f"Load error: {e}")
 
 
-class OracleTargetAboutCommand(CLICommand, CLICompleteMixin):
+class OracleTargetAboutCommand(CLICommand):
     """Oracle target about command using modern flext-cli patterns."""
 
     def __init__(
