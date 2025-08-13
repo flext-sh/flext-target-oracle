@@ -47,10 +47,10 @@ class OracleTargetValidateParams:
     config_file: str | None = None
 
     @classmethod
-    def from_click_args(cls, **kwargs) -> OracleTargetValidateParams:
+    def from_click_args(cls, **kwargs: object) -> OracleTargetValidateParams:
         """Create from Click arguments using flext-cli patterns."""
         return cls(
-            config_file=kwargs.get("config_file"),
+            config_file=str(kwargs.get("config_file")) if kwargs.get("config_file") is not None else None,
         )
 
 
@@ -62,11 +62,11 @@ class OracleTargetLoadParams:
     state_file: str | None = None
 
     @classmethod
-    def from_click_args(cls, **kwargs) -> OracleTargetLoadParams:
+    def from_click_args(cls, **kwargs: object) -> OracleTargetLoadParams:
         """Create from Click arguments using flext-cli patterns."""
         return cls(
-            config_file=kwargs.get("config_file"),
-            state_file=kwargs.get("state_file"),
+            config_file=str(kwargs.get("config_file")) if kwargs.get("config_file") is not None else None,
+            state_file=str(kwargs.get("state_file")) if kwargs.get("state_file") is not None else None,
         )
 
 
@@ -77,10 +77,10 @@ class OracleTargetAboutParams:
     format: str = "json"
 
     @classmethod
-    def from_click_args(cls, **kwargs) -> OracleTargetAboutParams:
+    def from_click_args(cls, **kwargs: object) -> OracleTargetAboutParams:
         """Create from Click arguments using flext-cli patterns."""
         return cls(
-            format=kwargs.get("format", "json"),
+            format=str(kwargs.get("format", "json")),
         )
 
 
@@ -203,7 +203,7 @@ class OracleTargetLoadCommand(CLICommand, CLICompleteMixin):
             )
         return FlextResult.ok(None)
 
-    def execute(self) -> FlextResult[object]:
+    def execute(self) -> FlextResult[object]:  # noqa: PLR0912, PLR0915
         """Execute Oracle target load using modern patterns."""
         self.cli_helper.print_info("Starting Oracle target data loading")
 
@@ -246,9 +246,9 @@ class OracleTargetLoadCommand(CLICommand, CLICompleteMixin):
             try:
                 import json
                 for line in sys.stdin:
-                    line = line.strip()
-                    if line:
-                        message = json.loads(line)
+                    stripped_line = line.strip()
+                    if stripped_line:
+                        message = json.loads(stripped_line)
                         messages.append(message)
             except json.JSONDecodeError as e:
                 self.cli_helper.print_error(f"Invalid JSON input: {e}")
@@ -265,7 +265,11 @@ class OracleTargetLoadCommand(CLICommand, CLICompleteMixin):
             for message in messages:
                 if isinstance(message, dict):
                     result = target.process_singer_message(message)
-                    result_value = await result if hasattr(result, "__await__") else result
+                    if hasattr(result, "__await__"):
+                        import asyncio
+                        result_value = asyncio.run(result)
+                    else:
+                        result_value = result
                     if result_value.is_failure:
                         self.cli_helper.print_error(f"Failed to process message: {result_value.error}")
                         return FlextResult.fail(f"Message processing failed: {result_value.error}")
@@ -278,7 +282,11 @@ class OracleTargetLoadCommand(CLICommand, CLICompleteMixin):
             # Finalize loading
             self.cli_helper.print_info("Finalizing data loading...")
             finalize_result = target.finalize()
-            final_result_value = await finalize_result if hasattr(finalize_result, "__await__") else finalize_result
+            if hasattr(finalize_result, "__await__"):
+                import asyncio
+                final_result_value = asyncio.run(finalize_result)
+            else:
+                final_result_value = finalize_result
 
             if final_result_value.is_success:
                 stats = final_result_value.data
@@ -509,7 +517,7 @@ def about(**kwargs: object) -> None:
 
 
 def main() -> None:
-    """Main CLI entry point using flext-cli patterns."""
+    """Provide CLI entry point using flext-cli patterns."""
     try:
         cli()
     except KeyboardInterrupt:

@@ -45,34 +45,11 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Final
 
 from flext_core import FlextResult, FlextValueObject
 from pydantic import Field, SecretStr, field_validator
 
-
-class OracleTargetConstants:
-    """Oracle Target system constants following DRY principles.
-
-    Centralizes magic numbers and system defaults to eliminate duplication
-    and provide single source of truth for Oracle target configuration limits.
-
-    Attributes:
-        DEFAULT_PORT: Standard Oracle listener port (1521)
-        DEFAULT_BATCH_SIZE: Optimal batch size for most workloads (1000)
-        DEFAULT_CONNECTION_TIMEOUT: Conservative connection timeout (30s)
-        DEFAULT_MAX_PARALLEL_STREAMS: Safe parallel processing limit (4)
-        MIN_PORT: Minimum valid port number (1)
-        MAX_PORT: Maximum valid port number (65535)
-
-    """
-
-    DEFAULT_PORT: Final = 1521
-    DEFAULT_BATCH_SIZE: Final = 1000
-    DEFAULT_CONNECTION_TIMEOUT: Final = 30
-    DEFAULT_MAX_PARALLEL_STREAMS: Final = 4
-    MIN_PORT: Final = 1
-    MAX_PORT: Final = 65535
+from .constants import OracleTargetConstants
 
 
 class LoadMethod(StrEnum):
@@ -522,6 +499,18 @@ class FlextTargetOracleConfig(FlextValueObject):
             msg = "Connection timeout must be positive"
             raise ValueError(msg)
         return v
+
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate business rules implementation required by FlextValueObject.
+
+        Implements abstract method from FlextValueObject by delegating to
+        validate_domain_rules for backwards compatibility and consistency.
+
+        Returns:
+            FlextResult[None]: Success if all business rules pass
+
+        """
+        return self.validate_domain_rules()
 
     def validate_domain_rules(self) -> FlextResult[None]:
         """Validate business rules using Chain of Responsibility pattern.

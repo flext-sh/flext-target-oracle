@@ -171,20 +171,6 @@ from flext_target_oracle.target_services import (
 __version__ = "0.9.0"
 
 __all__: list[str] = [
-    "annotations", "FlextResult", "BatchSink", "FlextMeltanoBaseService", "FlextMeltanoBridge",
-    "FlextMeltanoConfig", "FlextMeltanoEvent", "FlextMeltanoTargetService", "OAuthAuthenticator",
-    "PropertiesList", "Property", "Sink", "SQLSink", "Stream", "Tap", "Target",
-    "create_meltano_target_service", "get_tap_test_class", "singer_typing", "FlextTargetOracleConfig",
-    "LoadMethod", "FlextTargetOracleAuthenticationError", "FlextTargetOracleConnectionError",
-    "FlextTargetOracleError", "FlextTargetOracleProcessingError", "FlextTargetOracleSchemaError",
-    "FlextOracleError", "FlextOracleObs", "configure_oracle_observability", "FlextTargetOracle",
-    "FlextTargetOracleLoader", "FlextTargetOraclePlugin", "create_target_oracle_plugin", "TargetOracle",
-    "LoadMethodModel", "StorageModeModel", "OracleConnectionModel", "SingerStreamModel",
-    "BatchProcessingModel", "LoadStatisticsModel", "OracleTableMetadataModel",
-    "ConnectionServiceProtocol", "SchemaServiceProtocol", "BatchServiceProtocol",
-    "RecordServiceProtocol", "OracleConnectionService", "OracleSchemaService", "OracleBatchService",
-    "OracleRecordService", "OracleTargetServiceFactory", "__version__",
-] = [
     # === FLEXT-MELTANO COMPLETE RE-EXPORTS ===
     "BatchSink",
     "FlextMeltanoBaseService",

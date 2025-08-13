@@ -1,0 +1,45 @@
+from __future__ import annotations
+
+from typing import Final
+
+from flext_core.constants import FlextConstants
+
+
+class FlextTargetOracleConstants(FlextConstants):
+    """Target Oracle constants extending flext-core.
+
+    Provides a single source of truth for Target Oracle defaults while
+    reusing platform-wide values from flext-core where applicable.
+    """
+
+    class Connection:
+        DEFAULT_PORT = FlextConstants.Infrastructure.DEFAULT_ORACLE_PORT
+        MIN_PORT = FlextConstants.Platform.MIN_PORT_NUMBER
+        MAX_PORT = FlextConstants.Platform.MAX_PORT_NUMBER
+        DEFAULT_CONNECTION_TIMEOUT = FlextConstants.Defaults.TIMEOUT
+
+    class Processing:
+        DEFAULT_BATCH_SIZE = FlextConstants.Performance.DEFAULT_BATCH_SIZE
+        DEFAULT_MAX_PARALLEL_STREAMS = 4
+
+
+# Backward-compatibility: keep the original name/shape used by target_config
+class OracleTargetConstants:
+    DEFAULT_PORT: Final[int] = FlextTargetOracleConstants.Connection.DEFAULT_PORT
+    DEFAULT_BATCH_SIZE: Final[int] = (
+        FlextTargetOracleConstants.Processing.DEFAULT_BATCH_SIZE
+    )
+    DEFAULT_CONNECTION_TIMEOUT: Final[int] = (
+        FlextTargetOracleConstants.Connection.DEFAULT_CONNECTION_TIMEOUT
+    )
+    DEFAULT_MAX_PARALLEL_STREAMS: Final[int] = (
+        FlextTargetOracleConstants.Processing.DEFAULT_MAX_PARALLEL_STREAMS
+    )
+    MIN_PORT: Final[int] = FlextTargetOracleConstants.Connection.MIN_PORT
+    MAX_PORT: Final[int] = FlextTargetOracleConstants.Connection.MAX_PORT
+
+
+__all__ = [
+    "FlextTargetOracleConstants",
+    "OracleTargetConstants",
+]

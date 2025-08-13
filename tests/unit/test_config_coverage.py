@@ -6,8 +6,9 @@ validation scenarios, and domain rule testing.
 """
 
 import pytest
-from flext_target_oracle import FlextOracleTargetConfig, LoadMethod
 from pydantic import ValidationError
+
+from flext_target_oracle import FlextOracleTargetConfig, LoadMethod
 
 
 class TestFlextOracleTargetConfigCoverage:

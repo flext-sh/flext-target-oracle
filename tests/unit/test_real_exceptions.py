@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from typing import Never
 
 import pytest
+
 from flext_target_oracle.exceptions import (
     FlextOracleTargetAuthenticationError,
     FlextOracleTargetConnectionError,
