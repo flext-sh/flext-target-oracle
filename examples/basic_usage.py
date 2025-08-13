@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# ruff: noqa: S106
 """Basic Usage Example - FLEXT Target Oracle Simple Setup and Processing.
 
 This example demonstrates the fundamental usage patterns for FLEXT Target Oracle,
@@ -48,12 +47,13 @@ def create_configuration() -> FlextOracleTargetConfig:
     """
     logger.info("Creating Oracle target configuration")
 
+    import os
     config = FlextOracleTargetConfig(
         oracle_host="localhost",
         oracle_port=1521,
         oracle_service="XE",
-        oracle_user="system",
-        oracle_password="oracle",
+        oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "system"),
+        oracle_password=os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
         default_target_schema="FLEXT_EXAMPLES",
         load_method=LoadMethod.INSERT,
         batch_size=100,  # Small batch size for demo
@@ -263,11 +263,12 @@ async def demonstrate_error_handling() -> None:
 
     # Create invalid configuration to show validation errors
     try:
+        import os
         invalid_config = FlextOracleTargetConfig(
             oracle_host="",  # Invalid empty host
             oracle_service="XE",
-            oracle_user="test",
-            oracle_password="test",
+            oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
+            oracle_password=os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
         )
 
         validation_result = invalid_config.validate_domain_rules()
