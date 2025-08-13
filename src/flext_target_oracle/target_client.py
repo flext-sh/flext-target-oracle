@@ -37,6 +37,7 @@ from typing import TYPE_CHECKING
 from flext_core import FlextResult, get_logger
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from flext_meltano import FlextMeltanoTarget
+from flext_meltano.config import FlextMeltanoConfig
 from flext_meltano.flext_singer import flext_create_singer_bridge
 from flext_meltano.singer_plugin_base import FlextTargetPlugin
 from flext_meltano.singer_unified import (
@@ -181,7 +182,8 @@ class FlextTargetOracleLoader:
 
                 exec_result = connected_api.execute_ddl(ddl_sql)
                 logger.info(
-                    "Created table %s", table_name,
+                    "Created table %s",
+                    table_name,
                 ) if exec_result.is_success else None
 
                 return (
@@ -450,8 +452,6 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
         # Initialize base classes with proper config
         # Create a minimal FlextMeltanoConfig from our Oracle config
-        from flext_meltano.config import FlextMeltanoConfig
-
         meltano_config = FlextMeltanoConfig(
             project_root=str(getattr(self.target_config, "project_root", ".")),
             environment=getattr(self.target_config, "environment", "dev"),
@@ -572,8 +572,6 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                     if isinstance(message, dict):
                         message_result = self.process_singer_message(message)
                         if hasattr(message_result, "__await__"):
-                            import asyncio
-
                             result = asyncio.run(message_result)
                         else:
                             result = message_result  # type: ignore[assignment]
@@ -587,8 +585,6 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                 # Finalize all streams
                 finalize_operation = self._loader.finalize_all_streams()
                 if hasattr(finalize_operation, "__await__"):
-                    import asyncio
-
                     finalize_result = asyncio.run(finalize_operation)
                 else:
                     finalize_result = finalize_operation  # type: ignore[assignment]
@@ -1341,7 +1337,10 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
 
         """
         super().__init__(
-            name, version, config, None,
+            name,
+            version,
+            config,
+            None,
         )  # Convert entity to FlextPluginEntity if needed
         self._connection_string = ""
         self._schema = config.get("schema", "PUBLIC") if config else "PUBLIC"
@@ -1361,7 +1360,8 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
         return ["host", "port", "user", "password", "service_name"]
 
     def _validate_specific_config(
-        self, config: Mapping[str, object],
+        self,
+        config: Mapping[str, object],
     ) -> FlextResult[None]:
         """Perform Oracle-specific configuration validation.
 

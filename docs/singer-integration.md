@@ -521,41 +521,41 @@ class TestSingerIntegration:
 ### Integration Testing with Singer Ecosystem
 
 ```python
-# Test with actual Singer tap output
-import subprocess
+# Test with actual Singer tap output (async)
+import asyncio
 import json
 
 async def test_singer_tap_integration():
     """Test integration with actual Singer tap."""
 
     # Run Singer tap to generate messages
-    tap_process = subprocess.Popen(
-        ["tap-csv", "--config", "tap_config.json"],
-        stdout=subprocess.PIPE,
-        text=True
+    process = await asyncio.create_subprocess_exec(
+        "tap-csv", "--config", "tap_config.json",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
     )
 
     target = FlextOracleTarget(config)
 
-    # Process each Singer message
-    for line in tap_process.stdout:
+    assert process.stdout is not None
+    async for raw_line in process.stdout:
         try:
-            message = json.loads(line.strip())
+            line = raw_line.decode().strip()
+            if not line:
+                continue
+            message = json.loads(line)
             result = await target.process_singer_message(message)
-
             if result.is_failure:
                 print(f"Message processing failed: {result.error}")
                 break
-
         except json.JSONDecodeError:
-            # Skip non-JSON lines (logs, etc.)
             continue
 
     # Finalize processing
     final_result = await target.finalize()
     assert final_result.success
 
-    tap_process.wait()
+    await process.wait()
 ```
 
 ## Compliance Roadmap

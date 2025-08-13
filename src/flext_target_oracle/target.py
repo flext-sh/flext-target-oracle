@@ -12,6 +12,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import asyncio
+import json
+import os
 import sys
 import uuid
 from dataclasses import dataclass
@@ -142,8 +145,6 @@ class OracleTargetValidateCommand(CLICommand):
                 config = FlextTargetOracleConfig.model_validate_json(config_data)
             else:
                 # Use environment variables - provide minimal required args
-                import os
-
                 config = FlextTargetOracleConfig(
                     oracle_host=os.getenv("ORACLE_HOST", "localhost"),
                     oracle_service=os.getenv("ORACLE_SERVICE", "XE"),
@@ -231,8 +232,6 @@ class OracleTargetLoadCommand(CLICommand):
                 config = FlextTargetOracleConfig.model_validate_json(config_data)
             else:
                 # Use environment variables - provide minimal required args
-                import os
-
                 config = FlextTargetOracleConfig(
                     oracle_host=os.getenv("ORACLE_HOST", "localhost"),
                     oracle_service=os.getenv("ORACLE_SERVICE", "XE"),
@@ -256,8 +255,6 @@ class OracleTargetLoadCommand(CLICommand):
             messages = []
 
             try:
-                import json
-
                 for line in sys.stdin:
                     stripped_line = line.strip()
                     if stripped_line:
@@ -279,8 +276,6 @@ class OracleTargetLoadCommand(CLICommand):
                 if isinstance(message, dict):
                     result = target.process_singer_message(message)
                     if hasattr(result, "__await__"):
-                        import asyncio
-
                         result_value = asyncio.run(result)
                     else:
                         result_value = result  # type: ignore[assignment]
@@ -301,8 +296,6 @@ class OracleTargetLoadCommand(CLICommand):
             self.cli_helper.print_info("Finalizing data loading...")
             finalize_result = target.finalize()
             if hasattr(finalize_result, "__await__"):
-                import asyncio
-
                 final_result_value = asyncio.run(finalize_result)
             else:
                 final_result_value = finalize_result  # type: ignore[assignment]
@@ -472,7 +465,10 @@ def cli() -> None:
 
 @cli.command()
 @click.option(
-    "--config", "-c", "config_file", help="Path to target configuration JSON file",
+    "--config",
+    "-c",
+    "config_file",
+    help="Path to target configuration JSON file",
 )
 def validate(**kwargs: object) -> None:
     """Validate Oracle target configuration and test connection.
@@ -498,7 +494,10 @@ def validate(**kwargs: object) -> None:
 
 @cli.command()
 @click.option(
-    "--config", "-c", "config_file", help="Path to target configuration JSON file",
+    "--config",
+    "-c",
+    "config_file",
+    help="Path to target configuration JSON file",
 )
 @click.option("--state", "state_file", help="Path to Singer state file")
 def load(**kwargs: object) -> None:

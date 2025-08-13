@@ -147,7 +147,7 @@ from flext_target_oracle.target_client import (
     create_target_oracle_plugin,
     TargetOracle,
 )
-from flext_target_oracle.target_models import (
+from flext_target_oracle.models import (
     LoadMethodModel,
     StorageModeModel,
     OracleConnectionModel,

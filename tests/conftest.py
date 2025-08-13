@@ -14,7 +14,6 @@ Key Features:
 import asyncio
 import json
 import os
-import subprocess
 import time
 from contextlib import contextmanager
 from pathlib import Path
@@ -83,39 +82,44 @@ def oracle_container():
         "{{.Status}}",
     ]
     try:
-        result = subprocess.run(check_cmd, capture_output=True, text=True, check=True)
-        container_status = result.stdout.strip()
+        async def _run(cmd: list[str]) -> tuple[int, str, str]:
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await process.communicate()
+            return process.returncode, stdout.decode(), stderr.decode()
+
+        rc, out, _err = asyncio.run(_run(check_cmd))
+        container_status = out.strip() if rc == 0 else ""
 
         if "Up" in container_status:
             yield
             return
-    except subprocess.CalledProcessError:
+    except Exception:
         pass
 
     # Start Oracle container using docker-compose
     try:
         # Stop any existing containers
-        subprocess.run(
-            ["/usr/bin/docker-compose", "-f", str(DOCKER_COMPOSE_PATH), "down", "-v"],
-            check=False,
-            capture_output=True,
-            text=True,
+        asyncio.run(
+            _run(["/usr/bin/docker-compose", "-f", str(DOCKER_COMPOSE_PATH), "down", "-v"]),
         )
 
         # Start new container
-        subprocess.run(
-            [
+        rc, _out, err = asyncio.run(
+            _run([
                 "/usr/bin/docker-compose",
                 "-f",
                 str(DOCKER_COMPOSE_PATH),
                 "up",
                 "-d",
                 "oracle-xe",
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
+            ]),
         )
+        if rc != 0:
+            raise RuntimeError(f"Failed to start docker-compose: {err}")
 
         # Wait for Oracle to be ready
         max_attempts = 60  # 5 minutes max
@@ -151,17 +155,14 @@ def oracle_container():
     finally:
         # Cleanup: stop container
         if os.environ.get("KEEP_TEST_DB") != "true":
-            subprocess.run(
-                [
+            asyncio.run(
+                _run([
                     "/usr/bin/docker-compose",
                     "-f",
                     str(DOCKER_COMPOSE_PATH),
                     "down",
                     "-v",
-                ],
-                check=False,
-                capture_output=True,
-                text=True,
+                ]),
             )
 
 

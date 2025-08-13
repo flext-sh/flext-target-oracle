@@ -10,8 +10,8 @@ ZERO TOLERANCE: NO SKIPS - All tests must run with real Oracle infrastructure.
 
 from __future__ import annotations
 
+import asyncio
 import os
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -33,21 +33,32 @@ def oracle_e2e_environment() -> dict[str, str]:
     """
     # Check if Oracle E2E is already running
     try:
-        result = subprocess.run(
-            [
+        async def _run(cmd: list[str], cwd: str | None = None, timeout: int | None = None) -> tuple[int, str, str]:
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                cwd=cwd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            try:
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=timeout)
+            except asyncio.TimeoutError:
+                process.kill()
+                await process.communicate()
+                raise
+            return process.returncode, stdout.decode(), stderr.decode()
+
+        rc, out, _err = asyncio.run(
+            _run([
                 "docker",
                 "ps",
                 "--filter",
                 "name=flext-oracle-db-e2e",
                 "--format",
                 "{{.Names}}",
-            ],
-            capture_output=True,
-            text=True,
-            check=True,
+            ]),
         )
-        if "flext-oracle-db-e2e" in result.stdout:
-            # Oracle already running - use it
+        if rc == 0 and "flext-oracle-db-e2e" in out:
             return {
                 "ORACLE_HOST": "localhost",
                 "ORACLE_PORT": "1521",
@@ -56,7 +67,7 @@ def oracle_e2e_environment() -> dict[str, str]:
                 "ORACLE_PASSWORD": "FlextTest123!",
                 "ORACLE_SCHEMA": "FLEXT_TEST",
             }
-    except subprocess.CalledProcessError:
+    except Exception:
         pass
 
     # Start Oracle E2E infrastructure
@@ -68,8 +79,8 @@ def oracle_e2e_environment() -> dict[str, str]:
 
     try:
         # Start Oracle database
-        subprocess.run(
-            [
+        rc_up, _o1, err1 = asyncio.run(
+            _run([
                 "docker",
                 "compose",
                 "-f",
@@ -77,14 +88,14 @@ def oracle_e2e_environment() -> dict[str, str]:
                 "up",
                 "-d",
                 "oracle-db",
-            ],
-            check=True,
-            cwd=docker_dir,
+            ], cwd=str(docker_dir)),
         )
+        if rc_up != 0:
+            pytest.fail(f"docker compose up failed: {err1}")
 
         # Wait for Oracle to be healthy
-        subprocess.run(
-            [
+        rc_wait, _o2, err2 = asyncio.run(
+            _run([
                 "docker",
                 "compose",
                 "-f",
@@ -95,11 +106,10 @@ def oracle_e2e_environment() -> dict[str, str]:
                 "bash",
                 "-c",
                 "until sqlplus -s sys/Oracle123!@localhost:1521/FLEXT_PDB as sysdba <<< 'SELECT 1 FROM DUAL;' | grep -q '1'; do sleep 5; done",
-            ],
-            check=True,
-            cwd=docker_dir,
-            timeout=300,
+            ], cwd=str(docker_dir), timeout=300),
         )
+        if rc_wait != 0:
+            pytest.fail(f"oracle health check failed: {err2}")
 
         return {
             "ORACLE_HOST": "localhost",
@@ -110,7 +120,7 @@ def oracle_e2e_environment() -> dict[str, str]:
             "ORACLE_SCHEMA": "FLEXT_TEST",
         }
 
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as e:
+    except Exception as e:
         pytest.fail(f"Failed to start Oracle E2E infrastructure: {e}")
 
 
