@@ -13,13 +13,14 @@ from datetime import UTC, datetime
 from decimal import Decimal
 
 import pytest
+from sqlalchemy import text
+
 from flext_target_oracle import FlextOracleTargetConfig, LoadMethod
 from flext_target_oracle.exceptions import (
     FlextOracleTargetConnectionError,
     FlextOracleTargetSchemaError,
 )
 from flext_target_oracle.loader import FlextOracleTargetLoader
-from sqlalchemy import text
 
 
 def safe_table_name(name: str) -> str:

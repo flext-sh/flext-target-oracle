@@ -13,8 +13,9 @@ from datetime import UTC, datetime
 import psutil
 import pytest
 from faker import Faker
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 from sqlalchemy import text
+
+from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
 
 @pytest.mark.performance

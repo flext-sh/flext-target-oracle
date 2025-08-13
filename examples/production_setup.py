@@ -40,6 +40,7 @@ from datetime import UTC
 from typing import Any
 
 from flext_core import FlextResult, get_logger
+
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
 # Configure production-grade logging
@@ -83,7 +84,7 @@ class ProductionConfig:
         oracle_host = os.getenv("ORACLE_HOST")
         oracle_service = os.getenv("ORACLE_SERVICE")
         oracle_user = os.getenv("ORACLE_USER")
-        oracle_password = os.getenv("ORACLE_PASSWORD"  # noqa: S105)
+        oracle_password = os.getenv("ORACLE_PASSWORD")  # noqa: S105
 
         if not all([oracle_host, oracle_service, oracle_user, oracle_password]):
             missing = [

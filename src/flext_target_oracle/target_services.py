@@ -51,6 +51,8 @@ from flext_target_oracle.target_models import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable as _Callable
+
     from flext_db_oracle import FlextDbOracleApi
 
     from flext_target_oracle.target_config import FlextTargetOracleConfig
@@ -302,9 +304,10 @@ class OracleSchemaService:
         try:
             with self._oracle_api as connected_api:
                 # Get column information using Oracle API
+                # API signature is get_columns(table_name: str, schema: str | None)
                 columns_result = connected_api.get_columns(
                     table_name=table_name,
-                    schema_name=schema_name,
+                    schema=schema_name,
                 )
 
                 if columns_result.is_failure:
@@ -321,8 +324,8 @@ class OracleSchemaService:
     async def _create_table(
         self,
         stream: SingerStreamModel,
-        schema: dict[str, object],
-        key_properties: list[str] | None = None,
+        _schema: dict[str, object],
+        _key_properties: list[str] | None = None,
     ) -> FlextResult[None]:
         """Create Oracle table based on stream configuration."""
         try:
@@ -700,7 +703,7 @@ class OracleRecordService:
         properties: dict[str, object],
     ) -> FlextResult[None]:
         """Validate field types match schema."""
-        type_validators = {
+        type_validators: dict[str, _Callable[[object], bool]] = {
             "string": lambda v: isinstance(v, str),
             "integer": lambda v: isinstance(v, int),
             "number": lambda v: isinstance(v, (int, float)),

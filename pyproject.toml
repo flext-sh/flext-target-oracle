@@ -61,6 +61,9 @@ Documentation = "https://github.com/flext-sh/flext/blob/main/README.md"
 target-oracle = "flext_target_oracle.target:cli"
 flext-target-oracle = "flext_target_oracle.target:cli"
 
+[tool.ruff]
+extend = "../.ruff-shared.toml"
+lint.isort.known-first-party = ["flext_target_oracle"]
 
 [tool.bandit]
 exclude_dirs = ["tests", "build", "dist"]

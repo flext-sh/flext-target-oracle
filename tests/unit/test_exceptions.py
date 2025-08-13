@@ -19,6 +19,7 @@ Note:
 import logging
 
 import pytest
+
 from flext_target_oracle.exceptions import (
     FlextOracleTargetAuthenticationError,
     FlextOracleTargetConnectionError,

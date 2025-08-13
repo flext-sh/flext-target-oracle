@@ -25,15 +25,16 @@ import pytest
 import pytest_asyncio
 from flext_core import get_logger
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine
+from sqlalchemy.pool import NullPool
+
 from flext_target_oracle import (
     FlextOracleTarget,
     FlextOracleTargetConfig,
     LoadMethod,
 )
 from flext_target_oracle.loader import FlextOracleTargetLoader
-from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
-from sqlalchemy.pool import NullPool
 
 # Constants
 logger = get_logger(__name__)

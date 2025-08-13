@@ -7,8 +7,9 @@ import os
 
 import pytest
 from flext_core import FlextResult
-from flext_target_oracle import FlextOracleTargetConfig, LoadMethod
 from pydantic import ValidationError
+
+from flext_target_oracle import FlextOracleTargetConfig, LoadMethod
 
 
 class TestRealOracleConfig:
