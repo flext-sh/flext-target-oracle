@@ -19,18 +19,24 @@ class FlextTargetOracleConstants(FlextConstants):
     """
 
     class Connection:
+        """Connection-related constants for Oracle target."""
+
         DEFAULT_PORT = FlextConstants.Infrastructure.DEFAULT_ORACLE_PORT
         MIN_PORT = FlextConstants.Platform.MIN_PORT_NUMBER
         MAX_PORT = FlextConstants.Platform.MAX_PORT_NUMBER
         DEFAULT_CONNECTION_TIMEOUT = FlextConstants.Defaults.TIMEOUT
 
     class Processing:
+        """Processing-related constants for Oracle target."""
+
         DEFAULT_BATCH_SIZE = FlextConstants.Performance.DEFAULT_BATCH_SIZE
         DEFAULT_MAX_PARALLEL_STREAMS = 4
 
 
 # Backward-compatibility: keep the original name/shape used by target_config
 class OracleTargetConstants:
+    """Backward-compatibility constants for Oracle target configuration."""
+
     DEFAULT_PORT: Final[int] = FlextTargetOracleConstants.Connection.DEFAULT_PORT
     DEFAULT_BATCH_SIZE: Final[int] = (
         FlextTargetOracleConstants.Processing.DEFAULT_BATCH_SIZE

@@ -39,6 +39,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Protocol
+from flext_target_oracle.typings import FlextTypes
 
 from flext_core import FlextResult, get_logger
 
