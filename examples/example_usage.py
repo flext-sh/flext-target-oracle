@@ -39,7 +39,7 @@ async def main() -> None:
 
     config = FlextOracleTargetConfig(**config_dict)
     print(
-        f"✅ Configuration loaded: {config.oracle_host}:{config.oracle_port}/{config.oracle_service}"
+        f"✅ Configuration loaded: {config.oracle_host}:{config.oracle_port}/{config.oracle_service}",
     )
 
     # Create target instance

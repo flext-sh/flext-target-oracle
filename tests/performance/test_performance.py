@@ -13,7 +13,7 @@ from datetime import UTC, datetime
 import psutil
 import pytest
 from faker import Faker
-from sqlalchemy import text
+from sqlalchemy import MetaData, Table, func, select, text
 
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
@@ -31,7 +31,7 @@ class TestPerformance:
 
     @pytest.fixture
     def performance_config(
-        self, oracle_config: FlextOracleTargetConfig
+        self, oracle_config: FlextOracleTargetConfig,
     ) -> FlextOracleTargetConfig:
         """Configure for optimal performance."""
         oracle_config.batch_size = 10000
@@ -101,7 +101,7 @@ class TestPerformance:
                         "email": fake.email(),
                         "age": fake.random_int(18, 80),
                         "balance": fake.pyfloat(
-                            left_digits=5, right_digits=2, positive=True
+                            left_digits=5, right_digits=2, positive=True,
                         ),
                         "is_active": fake.boolean(),
                         "created_at": datetime.now(UTC).isoformat(),
@@ -135,13 +135,13 @@ class TestPerformance:
                     "records_per_second": records_per_second,
                     "memory_used_mb": memory_used,
                     "avg_latency_ms": latency_ms,
-                }
+                },
             )
 
         # Verify all records inserted
         with oracle_engine.connect() as conn:
             count = conn.execute(
-                text("SELECT COUNT(*) FROM benchmark_inserts")
+                text("SELECT COUNT(*) FROM benchmark_inserts"),
             ).scalar()
             assert count == sum(batch_sizes)
 
@@ -287,7 +287,7 @@ class TestPerformance:
                                 "values": {
                                     str(j): fake.random_int() for j in range(20)
                                 },
-                            }
+                            },
                         },
                     },
                 }
@@ -366,9 +366,8 @@ class TestPerformance:
         # Verify data distribution
         with oracle_engine.connect() as conn:
             for stream in streams:
-                # Note: Table names cannot be parameterized in SQLAlchemy, but this is test code
-                # Using f-string for controlled test environment with known table names
-                count = conn.execute(text(f"SELECT COUNT(*) FROM {stream}")).scalar()
+                table = Table(stream.upper(), MetaData(), autoload_with=conn)
+                count = conn.execute(select(func.count()).select_from(table)).scalar()
                 assert count == total_records // len(streams)
 
         # Performance assertion
@@ -427,7 +426,7 @@ class TestPerformance:
                     "size": size,
                     "elapsed": elapsed,
                     "throughput": throughput,
-                }
+                },
             )
 
         # Check if performance scales linearly

@@ -39,7 +39,6 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Protocol
-from flext_target_oracle.typings import FlextTypes
 
 from flext_core import FlextResult, get_logger
 
@@ -669,14 +668,16 @@ class OracleRecordService:
 
             # Validate required fields
             required_validation = self._validate_required_fields(
-                record, required_fields if isinstance(required_fields, list) else [],
+                record,
+                required_fields if isinstance(required_fields, list) else [],
             )
             if required_validation.is_failure:
                 return required_validation
 
             # Validate field types
             type_validation = self._validate_field_types(
-                record, properties if isinstance(properties, dict) else {},
+                record,
+                properties if isinstance(properties, dict) else {},
             )
             if type_validation.is_failure:
                 return type_validation

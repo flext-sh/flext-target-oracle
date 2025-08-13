@@ -197,7 +197,7 @@ class TestSingerWorkflowE2E:
                     "name": f"Product {i}",
                     "category": categories[i % len(categories)],
                     "price": float(
-                        Decimal(str(10 + i * 5.99)).quantize(Decimal("0.01"))
+                        Decimal(str(10 + i * 5.99)).quantize(Decimal("0.01")),
                     ),
                     "cost": float(Decimal(str(5 + i * 2.99)).quantize(Decimal("0.01"))),
                     "created_at": now,
@@ -287,7 +287,7 @@ class TestSingerWorkflowE2E:
                         "replication_key_value": now,
                         "version": 1,
                     },
-                }
+                },
             },
         }
         result = await target.execute(json.dumps(state))
@@ -303,14 +303,14 @@ class TestSingerWorkflowE2E:
                     FROM user_tables
                     WHERE table_name IN ('CUSTOMERS', 'PRODUCTS', 'ORDERS', 'ORDER_ITEMS')
                     ORDER BY table_name
-                    """
-                )
+                    """,
+                ),
             ).fetchall()
             assert len(tables) == 4
 
             # Verify customer data with flattened address
             customer_count = conn.execute(
-                text("SELECT COUNT(*) FROM customers")
+                text("SELECT COUNT(*) FROM customers"),
             ).scalar()
             assert customer_count == 100
 
@@ -323,8 +323,8 @@ class TestSingerWorkflowE2E:
                     WHERE table_name = 'CUSTOMERS'
                     AND column_name LIKE 'ADDRESS__%'
                     ORDER BY column_name
-                    """
-                )
+                    """,
+                ),
             ).fetchall()
             assert len(columns) == 4  # street, city, state, zip
 
@@ -336,8 +336,8 @@ class TestSingerWorkflowE2E:
                     FROM user_indexes
                     WHERE table_name IN ('ORDERS', 'ORDER_ITEMS')
                     AND index_name LIKE '%FK%'
-                    """
-                )
+                    """,
+                ),
             ).fetchall()
             assert (
                 len(indexes) >= 2
@@ -358,8 +358,8 @@ class TestSingerWorkflowE2E:
                     HAVING COUNT(DISTINCT o.order_id) > 0
                     ORDER BY total_spent DESC
                     FETCH FIRST 10 ROWS ONLY
-                    """
-                )
+                    """,
+                ),
             ).fetchall()
             assert len(result) > 0
 
@@ -491,8 +491,8 @@ class TestSingerWorkflowE2E:
                     FROM user_tab_columns
                     WHERE table_name = 'EVOLVING_TABLE'
                     ORDER BY column_id
-                    """
-                )
+                    """,
+                ),
             ).fetchall()
 
             column_names = [col[0] for col in columns]
@@ -510,8 +510,8 @@ class TestSingerWorkflowE2E:
                     SELECT id, name, email, age, is_active
                     FROM evolving_table
                     ORDER BY id
-                    """
-                )
+                    """,
+                ),
             ).fetchall()
 
             assert len(records) == 2
@@ -623,8 +623,8 @@ class TestSingerWorkflowE2E:
                     FROM events
                     GROUP BY event_type
                     ORDER BY event_type
-                    """
-                )
+                    """,
+                ),
             ).fetchall()
 
             assert len(distribution) == len(event_types)

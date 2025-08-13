@@ -104,7 +104,14 @@ def oracle_container():
 
         # Start new container
         subprocess.run(
-            ["/usr/bin/docker-compose", "-f", str(DOCKER_COMPOSE_PATH), "up", "-d", "oracle-xe"],
+            [
+                "/usr/bin/docker-compose",
+                "-f",
+                str(DOCKER_COMPOSE_PATH),
+                "up",
+                "-d",
+                "oracle-xe",
+            ],
             check=True,
             capture_output=True,
             text=True,
@@ -131,7 +138,7 @@ def oracle_container():
         with engine.connect() as conn:
             try:
                 conn.execute(
-                    text(f"CREATE USER {TEST_SCHEMA} IDENTIFIED BY test_password")
+                    text(f"CREATE USER {TEST_SCHEMA} IDENTIFIED BY test_password"),
                 )
                 conn.execute(text(f"GRANT ALL PRIVILEGES TO {TEST_SCHEMA}"))
                 conn.commit()
@@ -145,7 +152,13 @@ def oracle_container():
         # Cleanup: stop container
         if os.environ.get("KEEP_TEST_DB") != "true":
             subprocess.run(
-                ["/usr/bin/docker-compose", "-f", str(DOCKER_COMPOSE_PATH), "down", "-v"],
+                [
+                    "/usr/bin/docker-compose",
+                    "-f",
+                    str(DOCKER_COMPOSE_PATH),
+                    "down",
+                    "-v",
+                ],
                 check=False,
                 capture_output=True,
                 text=True,
@@ -172,7 +185,7 @@ def clean_database(oracle_engine) -> None:
                 SELECT table_name
                 FROM all_tables
                 WHERE owner = :schema
-                """
+                """,
             ),
             {"schema": TEST_SCHEMA},
         )
@@ -273,34 +286,34 @@ def mock_oracle_api() -> Mock:
 
     # Setup common return values
     mock_api.connect.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None
+        is_success=True, is_failure=False, value=None,
     )
     mock_api.disconnect.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None
+        is_success=True, is_failure=False, value=None,
     )
     mock_api.get_tables.return_value = MagicMock(
-        is_success=True, is_failure=False, value=[]
+        is_success=True, is_failure=False, value=[],
     )
     mock_api.create_table_ddl.return_value = MagicMock(
-        is_success=True, is_failure=False, value="CREATE TABLE..."
+        is_success=True, is_failure=False, value="CREATE TABLE...",
     )
     mock_api.execute_ddl.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None
+        is_success=True, is_failure=False, value=None,
     )
     mock_api.build_insert_statement.return_value = MagicMock(
-        is_success=True, is_failure=False, value="INSERT INTO..."
+        is_success=True, is_failure=False, value="INSERT INTO...",
     )
     mock_api.build_merge_statement.return_value = MagicMock(
-        is_success=True, is_failure=False, value="MERGE INTO..."
+        is_success=True, is_failure=False, value="MERGE INTO...",
     )
     mock_api.query.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None
+        is_success=True, is_failure=False, value=None,
     )
     mock_api.execute_batch.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None
+        is_success=True, is_failure=False, value=None,
     )
     mock_api.get_columns.return_value = MagicMock(
-        is_success=True, is_failure=False, value=[]
+        is_success=True, is_failure=False, value=[],
     )
 
     # Mock connection property
@@ -472,15 +485,15 @@ def state_message() -> dict[str, Any]:
                     "replication_key": "created_at",
                     "replication_key_value": "2025-01-20T12:00:00Z",
                     "version": 1,
-                }
-            }
+                },
+            },
         },
     }
 
 
 @pytest.fixture
 def singer_messages(
-    simple_schema, sample_record, state_message
+    simple_schema, sample_record, state_message,
 ) -> list[dict[str, Any]]:
     """Complete Singer message stream for testing."""
     return [

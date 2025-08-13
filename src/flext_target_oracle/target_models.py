@@ -295,19 +295,23 @@ class BatchProcessingModel(FlextValueObject):
         new_batch = self.current_batch.copy()
         new_batch.append(record)
 
-        return self.model_copy(update={
-            "current_batch": new_batch,
-            "total_records": self.total_records + 1,
-            "last_processed_at": datetime.now(UTC),
-        })
+        return self.model_copy(
+            update={
+                "current_batch": new_batch,
+                "total_records": self.total_records + 1,
+                "last_processed_at": datetime.now(UTC),
+            },
+        )
 
     def clear_batch(self) -> BatchProcessingModel:
         """Clear the current batch after processing (immutable operation)."""
-        return self.model_copy(update={
-            "current_batch": [],
-            "batch_count": self.batch_count + 1,
-            "last_processed_at": datetime.now(UTC),
-        })
+        return self.model_copy(
+            update={
+                "current_batch": [],
+                "batch_count": self.batch_count + 1,
+                "last_processed_at": datetime.now(UTC),
+            },
+        )
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for batch processing."""
@@ -416,19 +420,23 @@ class LoadStatisticsModel(FlextValueObject):
 
     def finalize(self) -> LoadStatisticsModel:
         """Mark statistics as completed (immutable operation)."""
-        return self.model_copy(update={
-            "processing_end_time": datetime.now(UTC),
-        })
+        return self.model_copy(
+            update={
+                "processing_end_time": datetime.now(UTC),
+            },
+        )
 
     def add_error(self, error_message: str) -> LoadStatisticsModel:
         """Add an error message (immutable operation)."""
         new_errors = self.error_details.copy()
         new_errors.append(error_message)
 
-        return self.model_copy(update={
-            "error_details": new_errors,
-            "failed_records": self.failed_records + 1,
-        })
+        return self.model_copy(
+            update={
+                "error_details": new_errors,
+                "failed_records": self.failed_records + 1,
+            },
+        )
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for load statistics."""
@@ -438,8 +446,13 @@ class LoadStatisticsModel(FlextValueObject):
             return FlextResult.fail("Successful records count cannot be negative")
         if self.failed_records < 0:
             return FlextResult.fail("Failed records count cannot be negative")
-        if self.total_records_processed != self.successful_records + self.failed_records:
-            return FlextResult.fail("Total records must equal successful + failed records")
+        if (
+            self.total_records_processed
+            != self.successful_records + self.failed_records
+        ):
+            return FlextResult.fail(
+                "Total records must equal successful + failed records",
+            )
         return FlextResult.ok(None)
 
 

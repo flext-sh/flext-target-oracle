@@ -59,7 +59,7 @@ Example:
     ...     oracle_user="target_user",
     ...     oracle_password="secure_password",
     ...     batch_size=10000,
-    ...     load_method="BULK_INSERT"
+    ...     load_method="BULK_INSERT",
     ... )
     >>>
     >>> # Initialize and process data
@@ -196,33 +196,27 @@ __all__: list[str] = [
     "get_tap_test_class",
     # Singer typing
     "singer_typing",
-
     # === FLEXT-CORE RE-EXPORTS ===
     "FlextResult",
-
     # === PRIMARY TARGET CLASSES ===
     "FlextTargetOracle",
     "FlextTargetOracleLoader",
     "FlextTargetOraclePlugin",
     "create_target_oracle_plugin",
     "TargetOracle",  # Compatibility alias
-
     # === CONFIGURATION ===
     "FlextTargetOracleConfig",
     "LoadMethod",
-
     # === EXCEPTION HIERARCHY ===
     "FlextTargetOracleAuthenticationError",
     "FlextTargetOracleConnectionError",
     "FlextTargetOracleError",
     "FlextTargetOracleProcessingError",
     "FlextTargetOracleSchemaError",
-
     # === OBSERVABILITY ===
     "FlextOracleError",
     "FlextOracleObs",
     "configure_oracle_observability",
-
     # === DATA MODELS ===
     "LoadMethodModel",
     "StorageModeModel",
@@ -231,7 +225,6 @@ __all__: list[str] = [
     "BatchProcessingModel",
     "LoadStatisticsModel",
     "OracleTableMetadataModel",
-
     # === SERVICES ===
     "ConnectionServiceProtocol",
     "SchemaServiceProtocol",
@@ -242,7 +235,6 @@ __all__: list[str] = [
     "OracleBatchService",
     "OracleRecordService",
     "OracleTargetServiceFactory",
-
     # === METADATA ===
     "__version__",
 ]

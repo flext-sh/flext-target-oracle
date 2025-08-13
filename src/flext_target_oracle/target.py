@@ -50,7 +50,9 @@ class OracleTargetValidateParams:
     def from_click_args(cls, **kwargs: object) -> OracleTargetValidateParams:
         """Create from Click arguments using flext-cli patterns."""
         return cls(
-            config_file=str(kwargs.get("config_file")) if kwargs.get("config_file") is not None else None,
+            config_file=str(kwargs.get("config_file"))
+            if kwargs.get("config_file") is not None
+            else None,
         )
 
 
@@ -65,8 +67,12 @@ class OracleTargetLoadParams:
     def from_click_args(cls, **kwargs: object) -> OracleTargetLoadParams:
         """Create from Click arguments using flext-cli patterns."""
         return cls(
-            config_file=str(kwargs.get("config_file")) if kwargs.get("config_file") is not None else None,
-            state_file=str(kwargs.get("state_file")) if kwargs.get("state_file") is not None else None,
+            config_file=str(kwargs.get("config_file"))
+            if kwargs.get("config_file") is not None
+            else None,
+            state_file=str(kwargs.get("state_file"))
+            if kwargs.get("state_file") is not None
+            else None,
         )
 
 
@@ -137,6 +143,7 @@ class OracleTargetValidateCommand(CLICommand):
             else:
                 # Use environment variables - provide minimal required args
                 import os
+
                 config = FlextTargetOracleConfig(
                     oracle_host=os.getenv("ORACLE_HOST", "localhost"),
                     oracle_service=os.getenv("ORACLE_SERVICE", "XE"),
@@ -153,8 +160,12 @@ class OracleTargetValidateCommand(CLICommand):
             # Validate configuration
             validation_result = config.validate_domain_rules()
             if validation_result.is_failure:
-                self.cli_helper.print_error(f"Configuration validation failed: {validation_result.error}")
-                return FlextResult.fail(validation_result.error or "Configuration validation failed")
+                self.cli_helper.print_error(
+                    f"Configuration validation failed: {validation_result.error}",
+                )
+                return FlextResult.fail(
+                    validation_result.error or "Configuration validation failed",
+                )
 
             # Test connection
             self.cli_helper.print_info("Testing Oracle database connection...")
@@ -221,6 +232,7 @@ class OracleTargetLoadCommand(CLICommand):
             else:
                 # Use environment variables - provide minimal required args
                 import os
+
                 config = FlextTargetOracleConfig(
                     oracle_host=os.getenv("ORACLE_HOST", "localhost"),
                     oracle_service=os.getenv("ORACLE_SERVICE", "XE"),
@@ -235,7 +247,9 @@ class OracleTargetLoadCommand(CLICommand):
             if self.params.state_file:
                 Path(self.params.state_file).read_text(encoding="utf-8")
                 # Note: State parsing would need proper Singer SDK integration
-                self.cli_helper.print_info(f"Loaded state from {self.params.state_file}")
+                self.cli_helper.print_info(
+                    f"Loaded state from {self.params.state_file}",
+                )
 
             # Read Singer messages from stdin (Singer protocol)
             self.cli_helper.print_info("Reading Singer messages from stdin...")
@@ -243,6 +257,7 @@ class OracleTargetLoadCommand(CLICommand):
 
             try:
                 import json
+
                 for line in sys.stdin:
                     stripped_line = line.strip()
                     if stripped_line:
@@ -265,12 +280,17 @@ class OracleTargetLoadCommand(CLICommand):
                     result = target.process_singer_message(message)
                     if hasattr(result, "__await__"):
                         import asyncio
+
                         result_value = asyncio.run(result)
                     else:
                         result_value = result  # type: ignore[assignment]
                     if result_value.is_failure:
-                        self.cli_helper.print_error(f"Failed to process message: {result_value.error}")
-                        return FlextResult.fail(f"Message processing failed: {result_value.error}")
+                        self.cli_helper.print_error(
+                            f"Failed to process message: {result_value.error}",
+                        )
+                        return FlextResult.fail(
+                            f"Message processing failed: {result_value.error}",
+                        )
                     messages_processed += 1
 
                     # Output state messages to stdout (Singer protocol)
@@ -282,6 +302,7 @@ class OracleTargetLoadCommand(CLICommand):
             finalize_result = target.finalize()
             if hasattr(finalize_result, "__await__"):
                 import asyncio
+
                 final_result_value = asyncio.run(finalize_result)
             else:
                 final_result_value = finalize_result  # type: ignore[assignment]
@@ -289,12 +310,18 @@ class OracleTargetLoadCommand(CLICommand):
             if final_result_value.is_success:
                 stats = final_result_value.data
                 self.cli_helper.print_success("Data loading completed successfully")
-                self.cli_helper.print_success(f"Processed {messages_processed} messages")
+                self.cli_helper.print_success(
+                    f"Processed {messages_processed} messages",
+                )
                 if isinstance(stats, dict):
                     total_records = stats.get("total_records", 0)
                     self.cli_helper.print_success(f"Loaded {total_records} records")
-                return FlextResult.ok({"messages_processed": messages_processed, "stats": stats})
-            self.cli_helper.print_error(f"Finalization failed: {final_result_value.error}")
+                return FlextResult.ok(
+                    {"messages_processed": messages_processed, "stats": stats},
+                )
+            self.cli_helper.print_error(
+                f"Finalization failed: {final_result_value.error}",
+            )
             return FlextResult.fail(final_result_value.error or "Finalization failed")
 
         except Exception as e:
@@ -394,10 +421,16 @@ class OracleTargetAboutCommand(CLICommand):
                 pass
             else:
                 # Text format
-                self.cli_helper.print_info(f"Target: {about_info['name']} v{about_info['version']}")
+                self.cli_helper.print_info(
+                    f"Target: {about_info['name']} v{about_info['version']}",
+                )
                 self.cli_helper.print_info(f"Description: {about_info['description']}")
-                self.cli_helper.print_info(f"Capabilities: {', '.join(about_info['capabilities'])}")
-                self.cli_helper.print_info(f"Python versions: {', '.join(about_info['supported_python_versions'])}")
+                self.cli_helper.print_info(
+                    f"Capabilities: {', '.join(about_info['capabilities'])}",
+                )
+                self.cli_helper.print_info(
+                    f"Python versions: {', '.join(about_info['supported_python_versions'])}",
+                )
 
             return FlextResult.ok(about_info)
 
@@ -410,6 +443,7 @@ class OracleTargetAboutCommand(CLICommand):
 # =============================================================================
 # MODERN CLICK CLI WITH FLEXT-CLI INTEGRATION
 # =============================================================================
+
 
 @click.group(name="target-oracle")
 @click.version_option(version="0.9.0", prog_name="FLEXT Target Oracle")
@@ -437,7 +471,9 @@ def cli() -> None:
 
 
 @cli.command()
-@click.option("--config", "-c", "config_file", help="Path to target configuration JSON file")
+@click.option(
+    "--config", "-c", "config_file", help="Path to target configuration JSON file",
+)
 def validate(**kwargs: object) -> None:
     """Validate Oracle target configuration and test connection.
 
@@ -461,7 +497,9 @@ def validate(**kwargs: object) -> None:
 
 
 @cli.command()
-@click.option("--config", "-c", "config_file", help="Path to target configuration JSON file")
+@click.option(
+    "--config", "-c", "config_file", help="Path to target configuration JSON file",
+)
 @click.option("--state", "state_file", help="Path to Singer state file")
 def load(**kwargs: object) -> None:
     """Load data into Oracle database using Singer protocol.
@@ -488,7 +526,12 @@ def load(**kwargs: object) -> None:
 
 
 @cli.command()
-@click.option("--format", type=click.Choice(["json", "text"]), default="json", help="Output format")
+@click.option(
+    "--format",
+    type=click.Choice(["json", "text"]),
+    default="json",
+    help="Output format",
+)
 def about(**kwargs: object) -> None:
     """Display information about the Oracle target.
 

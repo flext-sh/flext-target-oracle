@@ -24,7 +24,7 @@ class TestFlextOracleTargetLoaderConnection:
     def test_connect_success(self, oracle_config, mock_oracle_api) -> None:
         """Test successful connection to Oracle."""
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             result = loader.connect()
@@ -36,11 +36,11 @@ class TestFlextOracleTargetLoaderConnection:
     def test_connect_failure(self, oracle_config, mock_oracle_api) -> None:
         """Test connection failure handling."""
         mock_oracle_api.connect.return_value = MagicMock(
-            is_failure=True, is_success=False, error="Connection refused"
+            is_failure=True, is_success=False, error="Connection refused",
         )
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             result = loader.connect()
@@ -55,12 +55,12 @@ class TestTableManagement:
 
     @pytest.mark.asyncio
     async def test_ensure_table_exists_new_table(
-        self, oracle_config, mock_oracle_api, simple_schema
+        self, oracle_config, mock_oracle_api, simple_schema,
     ) -> None:
         """Test creating a new table from schema."""
         # Fix mock to have both is_success and is_failure
         mock_oracle_api.get_tables.return_value = MagicMock(
-            is_success=True, is_failure=False, value=[]
+            is_success=True, is_failure=False, value=[],
         )
         mock_oracle_api.__enter__.return_value = mock_oracle_api
 
@@ -70,7 +70,7 @@ class TestTableManagement:
                 return_value=mock_oracle_api,
             ),
             patch(
-                "flext_target_oracle.loader.FlextDbOracleMetadataManager"
+                "flext_target_oracle.loader.FlextDbOracleMetadataManager",
             ) as mock_metadata,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
@@ -102,16 +102,16 @@ class TestTableManagement:
 
     @pytest.mark.asyncio
     async def test_ensure_table_exists_existing_table(
-        self, oracle_config, mock_oracle_api, simple_schema
+        self, oracle_config, mock_oracle_api, simple_schema,
     ) -> None:
         """Test handling existing table."""
         mock_oracle_api.get_tables.return_value = MagicMock(
-            is_success=True, is_failure=False, value=["USERS"]
+            is_success=True, is_failure=False, value=["USERS"],
         )
         mock_oracle_api.__enter__.return_value = mock_oracle_api
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             loader.oracle_api = mock_oracle_api
@@ -140,12 +140,12 @@ class TestTableManagement:
         )
 
         mock_oracle_api.get_tables.return_value = MagicMock(
-            is_success=True, is_failure=False, value=["USERS"]
+            is_success=True, is_failure=False, value=["USERS"],
         )
         mock_oracle_api.__enter__.return_value = mock_oracle_api
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(config)
             loader.oracle_api = mock_oracle_api
@@ -158,7 +158,7 @@ class TestTableManagement:
             assert result.is_success
             # Should drop and recreate
             mock_oracle_api.execute_ddl.assert_any_call(
-                f"DROP TABLE {config.default_target_schema}.USERS"
+                f"DROP TABLE {config.default_target_schema}.USERS",
             )
             # Verify execute_ddl was called multiple times (DROP + CREATE)
             assert mock_oracle_api.execute_ddl.call_count >= 2
@@ -179,11 +179,11 @@ class TestTableManagement:
         )
 
         mock_oracle_api.get_tables.return_value = MagicMock(
-            is_success=True, is_failure=False, value=["USERS"]
+            is_success=True, is_failure=False, value=["USERS"],
         )
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(config)
             loader.oracle_api = mock_oracle_api
@@ -195,7 +195,7 @@ class TestTableManagement:
 
             assert result.is_success
             mock_oracle_api.execute_ddl.assert_called_with(
-                f"TRUNCATE TABLE {config.default_target_schema}.USERS"
+                f"TRUNCATE TABLE {config.default_target_schema}.USERS",
             )
 
 
@@ -204,11 +204,11 @@ class TestDataInsertion:
 
     @pytest.mark.asyncio
     async def test_insert_single_record(
-        self, oracle_config, mock_oracle_api, sample_record
+        self, oracle_config, mock_oracle_api, sample_record,
     ) -> None:
         """Test inserting a single record."""
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             loader.oracle_api = mock_oracle_api
@@ -223,13 +223,13 @@ class TestDataInsertion:
 
     @pytest.mark.asyncio
     async def test_insert_batch_records(
-        self, oracle_config, mock_oracle_api, batch_records
+        self, oracle_config, mock_oracle_api, batch_records,
     ) -> None:
         """Test batch insertion."""
         oracle_config.batch_size = 50
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             loader.oracle_api = mock_oracle_api
@@ -244,7 +244,7 @@ class TestDataInsertion:
 
     @pytest.mark.asyncio
     async def test_bulk_insert_append_mode(
-        self, oracle_config, mock_oracle_api, batch_records
+        self, oracle_config, mock_oracle_api, batch_records,
     ) -> None:
         """Test bulk insertion with APPEND hint."""
         oracle_config.load_method = LoadMethod.BULK_INSERT
@@ -252,7 +252,7 @@ class TestDataInsertion:
         oracle_config.parallel_degree = 4
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             loader.oracle_api = mock_oracle_api
@@ -276,14 +276,14 @@ class TestMergeOperations:
 
     @pytest.mark.asyncio
     async def test_merge_mode_insert_or_update(
-        self, oracle_config, mock_oracle_api, sample_record
+        self, oracle_config, mock_oracle_api, sample_record,
     ) -> None:
         """Test merge mode for insert or update."""
         oracle_config.sdc_mode = "merge"
         oracle_config.load_method = LoadMethod.INSERT
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             loader.oracle_api = mock_oracle_api
@@ -300,14 +300,14 @@ class TestMergeOperations:
 
     @pytest.mark.asyncio
     async def test_bulk_merge(
-        self, oracle_config, mock_oracle_api, batch_records
+        self, oracle_config, mock_oracle_api, batch_records,
     ) -> None:
         """Test bulk merge operations."""
         oracle_config.sdc_mode = "merge"
         oracle_config.load_method = LoadMethod.BULK_INSERT
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             loader.oracle_api = mock_oracle_api
@@ -327,14 +327,14 @@ class TestStorageModes:
 
     @pytest.mark.asyncio
     async def test_json_storage_mode(
-        self, oracle_config, mock_oracle_api, nested_schema
+        self, oracle_config, mock_oracle_api, nested_schema,
     ) -> None:
         """Test JSON storage mode."""
         oracle_config.storage_mode = "json"
         oracle_config.json_column_name = "DATA"
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             loader.oracle_api = mock_oracle_api
@@ -344,7 +344,7 @@ class TestStorageModes:
 
             # Mock table creation
             mock_oracle_api.create_table_ddl.return_value = MagicMock(
-                is_success=True, value="CREATE TABLE orders (id NUMBER, data CLOB)"
+                is_success=True, value="CREATE TABLE orders (id NUMBER, data CLOB)",
             )
 
             result = await loader.ensure_table_exists("orders", schema, key_properties)
@@ -359,13 +359,13 @@ class TestStorageModes:
 
     @pytest.mark.asyncio
     async def test_flattened_storage_mode(
-        self, oracle_config, mock_oracle_api, nested_schema
+        self, oracle_config, mock_oracle_api, nested_schema,
     ) -> None:
         """Test flattened storage mode."""
         oracle_config.storage_mode = "flattened"
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             loader.oracle_api = mock_oracle_api
@@ -462,11 +462,11 @@ class TestErrorHandling:
     async def test_schema_error_handling(self, oracle_config, mock_oracle_api) -> None:
         """Test handling of schema creation errors."""
         mock_oracle_api.create_table_ddl.return_value = MagicMock(
-            is_failure=True, is_success=False, error="Invalid column type"
+            is_failure=True, is_success=False, error="Invalid column type",
         )
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             loader.oracle_api = mock_oracle_api
@@ -478,7 +478,7 @@ class TestErrorHandling:
 
     @pytest.mark.asyncio
     async def test_processing_error_handling(
-        self, oracle_config, mock_oracle_api
+        self, oracle_config, mock_oracle_api,
     ) -> None:
         """Test handling of data processing errors."""
         mock_oracle_api.query.return_value = MagicMock(
@@ -488,7 +488,7 @@ class TestErrorHandling:
         )
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
             loader.oracle_api = mock_oracle_api
@@ -510,11 +510,11 @@ class TestIndexManagement:
             "users": [
                 {"name": "IDX_USERS_EMAIL", "columns": ["EMAIL"], "unique": True},
                 {"columns": ["CREATED_AT", "STATUS"]},  # No name, should generate
-            ]
+            ],
         }
 
         with patch(
-            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api
+            "flext_target_oracle.loader.FlextDbOracleApi", return_value=mock_oracle_api,
         ):
             loader = FlextOracleTargetLoader(oracle_config)
 

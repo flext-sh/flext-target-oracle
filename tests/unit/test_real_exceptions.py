@@ -24,6 +24,7 @@ class TestRealOracleExceptions:
     def _log_exception(self) -> None:
         """Helper method for logging exceptions."""
         from flext_core import get_logger
+
         logger = get_logger(__name__)
         logger.error("Error occurred")
 
