@@ -462,7 +462,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
     # FlextSingerUnifiedInterface implementation
 
-    def initialize(self) -> FlextResult[bool]:
+    def initialize(self, config: FlextSingerUnifiedConfig) -> FlextResult[None]:  # type: ignore[override]
         """Initialize the Oracle target.
 
         Args:
@@ -483,7 +483,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             if connect_result.is_failure:
                 return FlextResult.fail(connect_result.error or "Connection failed")
 
-            return FlextResult.ok(data=True)
+            return FlextResult.ok(None)
         except Exception as e:
             return FlextResult.fail(f"Failed to initialize Oracle target: {e}")
 
@@ -554,9 +554,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                         message_result = self.process_singer_message(message)
                         if hasattr(message_result, "__await__"):
                             import asyncio
-                            result = asyncio.run(message_result)
+                            result = asyncio.run(message_result)  # type: ignore[arg-type]
                         else:
-                            result = message_result
+                            result = message_result  # type: ignore[assignment]
                         if result.is_failure:
                             return FlextResult.fail(
                                 f"Failed to process message: {result.error}",
@@ -568,9 +568,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                 finalize_operation = self._loader.finalize_all_streams()
                 if hasattr(finalize_operation, "__await__"):
                     import asyncio
-                    finalize_result = asyncio.run(finalize_operation)
+                    finalize_result = asyncio.run(finalize_operation)  # type: ignore[arg-type]
                 else:
-                    finalize_result = finalize_operation
+                    finalize_result = finalize_operation  # type: ignore[assignment]
                 if finalize_result.is_failure:
                     return FlextResult.fail(
                         f"Failed to finalize streams: {finalize_result.error}",
@@ -877,13 +877,13 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             target_type = transform["type"]
             type_converters: dict[str, _Callable[[object], object] | type[str]] = {
                 "string": str,
-                "integer": lambda x: int(x) if x is not None else None,
-                "number": lambda x: float(x) if x is not None else None,
+                "integer": lambda x: int(str(x)) if x is not None else None,
+                "number": lambda x: float(str(x)) if x is not None else None,
                 "boolean": lambda x: bool(x) if x is not None else None,
             }
             if isinstance(target_type, str) and target_type in type_converters:
                 converter = type_converters[target_type]
-                return converter(value)  # type: ignore[operator]
+                return converter(value)
 
         # Format transformations
         if "format" in transform and isinstance(value, str):
@@ -894,7 +894,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             }
             if isinstance(format_type, str) and format_type in format_converters:
                 converter = format_converters[format_type]
-                return converter(value)  # type: ignore[no-untyped-call]
+                return converter(value)
 
         return value
 
@@ -1600,7 +1600,7 @@ def create_target_oracle_plugin(
             name=name,
             version=version,
             config=config,
-            entity=entity,
+            _entity=entity,
         )
 
         return FlextResult.ok(plugin)
