@@ -40,6 +40,7 @@ from flext_meltano import FlextMeltanoTarget
 from flext_meltano.flext_singer import flext_create_singer_bridge
 from flext_meltano.singer_plugin_base import FlextTargetPlugin
 from flext_meltano.singer_unified import (
+    FlextSingerUnifiedConfig,
     FlextSingerUnifiedInterface,
     FlextSingerUnifiedResult,
 )
@@ -104,7 +105,9 @@ class FlextTargetOracleLoader:
                     schema=self.config.default_target_schema,
                 )
                 if tables_result.is_failure:
-                    return FlextResult.fail(f"Connection test failed: {tables_result.error}")
+                    return FlextResult.fail(
+                        f"Connection test failed: {tables_result.error}"
+                    )
 
                 logger.info("Oracle connection established successfully")
                 return FlextResult.ok(None)
@@ -130,7 +133,9 @@ class FlextTargetOracleLoader:
                 )
 
                 if tables_result.is_failure:
-                    return FlextResult.fail(f"Failed to check tables: {tables_result.error}")
+                    return FlextResult.fail(
+                        f"Failed to check tables: {tables_result.error}"
+                    )
 
                 existing_tables = [t.upper() for t in tables_result.data or []]
                 table_exists = table_name.upper() in existing_tables
@@ -175,12 +180,16 @@ class FlextTargetOracleLoader:
                     return FlextResult.fail("DDL creation returned None")
 
                 exec_result = connected_api.execute_ddl(ddl_sql)
-                logger.info("Created table %s", table_name) if exec_result.is_success else None
+                logger.info(
+                    "Created table %s", table_name
+                ) if exec_result.is_success else None
 
                 return (
                     FlextResult.ok(None)
                     if exec_result.is_success
-                    else FlextResult.fail(f"Failed to create table: {exec_result.error}")
+                    else FlextResult.fail(
+                        f"Failed to create table: {exec_result.error}"
+                    )
                 )
 
         except Exception as e:
@@ -283,7 +292,9 @@ class FlextTargetOracleLoader:
                 self._record_buffers[stream_name] = []
 
                 logger.info(
-                    "Flushed %d records to %s", len(records), table_name,
+                    "Flushed %d records to %s",
+                    len(records),
+                    table_name,
                 )
                 return FlextResult.ok(None)
 
@@ -440,6 +451,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         # Initialize base classes with proper config
         # Create a minimal FlextMeltanoConfig from our Oracle config
         from flext_meltano.config import FlextMeltanoConfig
+
         meltano_config = FlextMeltanoConfig(
             project_root=str(getattr(self.target_config, "project_root", ".")),
             environment=getattr(self.target_config, "environment", "dev"),
@@ -453,7 +465,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         self._state: dict[str, object] = {}
 
     def _handle_record_write_error(
-        self, result: FlextResult[None], stream_name: str,
+        self,
+        result: FlextResult[None],
+        stream_name: str,
     ) -> None:
         """Handle record write error."""
         error_msg = result.error or "Record loading failed"
@@ -473,10 +487,15 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
         """
         try:
+            # Use config parameter for validation if needed
+            _ = config  # noqa: ARG001
+
             # Validate configuration
             validation_result = self.target_config.validate_domain_rules()
             if validation_result.is_failure:
-                return FlextResult.fail(validation_result.error or "Configuration validation failed")
+                return FlextResult.fail(
+                    validation_result.error or "Configuration validation failed"
+                )
 
             # Initialize loader connection
             connect_result = self._loader.connect()
@@ -554,7 +573,8 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                         message_result = self.process_singer_message(message)
                         if hasattr(message_result, "__await__"):
                             import asyncio
-                            result = asyncio.run(message_result)  # type: ignore[arg-type]
+
+                            result = asyncio.run(message_result)
                         else:
                             result = message_result  # type: ignore[assignment]
                         if result.is_failure:
@@ -568,7 +588,8 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                 finalize_operation = self._loader.finalize_all_streams()
                 if hasattr(finalize_operation, "__await__"):
                     import asyncio
-                    finalize_result = asyncio.run(finalize_operation)  # type: ignore[arg-type]
+
+                    finalize_result = asyncio.run(finalize_operation)
                 else:
                     finalize_result = finalize_operation  # type: ignore[assignment]
                 if finalize_result.is_failure:
@@ -794,7 +815,8 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
                 # Apply column transformations
                 transform_config = self.target_config.get_column_transform(
-                    stream_name, col_name,
+                    stream_name,
+                    col_name,
                 )
                 final_schema = original_schema
                 if transform_config and "type" in transform_config:
@@ -845,12 +867,14 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
             # Apply value transformations
             transform_config = self.target_config.get_column_transform(
-                stream_name, col_name,
+                stream_name,
+                col_name,
             )
             final_value = original_value
             if transform_config and original_value is not None:
                 final_value = self._apply_value_transform(
-                    original_value, transform_config,
+                    original_value,
+                    transform_config,
                 )
 
             new_record[mapped_name] = final_value
@@ -893,8 +917,8 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                 "lowercase": lambda x: x.lower(),
             }
             if isinstance(format_type, str) and format_type in format_converters:
-                converter = format_converters[format_type]
-                return converter(value)
+                format_converter = format_converters[format_type]
+                return format_converter(value)
 
         return value
 
@@ -1038,7 +1062,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
             # Get key properties
             key_properties = message.get("key_properties", [])
-            key_props_list = key_properties if isinstance(key_properties, list) else None
+            key_props_list = (
+                key_properties if isinstance(key_properties, list) else None
+            )
 
             result = await self._loader.ensure_table_exists(
                 stream_name,
@@ -1314,11 +1340,15 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
             entity: Optional domain entity
 
         """
-        super().__init__(name, version, config, None)  # Convert entity to FlextPluginEntity if needed
+        super().__init__(
+            name, version, config, None
+        )  # Convert entity to FlextPluginEntity if needed
         self._connection_string = ""
         self._schema = config.get("schema", "PUBLIC") if config else "PUBLIC"
         batch_size_value = config.get("batch_size", 1000) if config else 1000
-        self._batch_size = int(batch_size_value) if isinstance(batch_size_value, (int, str)) else 1000
+        self._batch_size = (
+            int(batch_size_value) if isinstance(batch_size_value, (int, str)) else 1000
+        )
         self._load_method = config.get("load_method", "insert") if config else "insert"
 
     def _get_required_config_fields(self) -> list[str]:
@@ -1330,7 +1360,9 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
         """
         return ["host", "port", "user", "password", "service_name"]
 
-    def _validate_specific_config(self, config: Mapping[str, object]) -> FlextResult[None]:
+    def _validate_specific_config(
+        self, config: Mapping[str, object]
+    ) -> FlextResult[None]:
         """Perform Oracle-specific configuration validation.
 
         Args:
@@ -1436,7 +1468,10 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
                 if len(batch) >= self._batch_size:
                     batch_result = self._insert_batch(batch)
                     loaded_count, error_count = self._update_counts(
-                        batch_result, batch, loaded_count, error_count,
+                        batch_result,
+                        batch,
+                        loaded_count,
+                        error_count,
                     )
                     batch = []
 
@@ -1444,7 +1479,10 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
             if batch:
                 batch_result = self._insert_batch(batch)
                 loaded_count, error_count = self._update_counts(
-                    batch_result, batch, loaded_count, error_count,
+                    batch_result,
+                    batch,
+                    loaded_count,
+                    error_count,
                 )
 
             statistics = {
@@ -1465,7 +1503,9 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
             return FlextResult.fail(f"Load error: {e!s}")
 
     def _process_singer_message(
-        self, message: dict[str, object], batch: list[dict[str, object]],
+        self,
+        message: dict[str, object],
+        batch: list[dict[str, object]],
     ) -> FlextResult[None]:
         """Process a single Singer message."""
         msg_type = message.get("type")
@@ -1482,11 +1522,13 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
             if not stream or not record:
                 return FlextResult.fail("Invalid record message")
 
-            batch.append({
-                "stream": stream,
-                "record": record,
-                "time_extracted": message.get("time_extracted"),
-            })
+            batch.append(
+                {
+                    "stream": stream,
+                    "record": record,
+                    "time_extracted": message.get("time_extracted"),
+                }
+            )
             return FlextResult.ok(None)
 
         if msg_type == "STATE":

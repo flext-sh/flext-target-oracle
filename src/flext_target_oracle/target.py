@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import click
-from flext_cli import CLICommand, CLICompleteMixin
+from flext_cli import CLICommand
 from flext_cli.core.helpers import FlextCliHelper
 from flext_cli.foundation import (
     create_cli_config as create_flext_cli_config,
@@ -109,7 +109,6 @@ class OracleTargetValidateCommand(CLICommand):
         )
         self.params = params
         self.cli_helper = FlextCliHelper()
-        CLICompleteMixin.__init__(self)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for Oracle target validation."""
@@ -189,7 +188,6 @@ class OracleTargetLoadCommand(CLICommand):
         )
         self.params = params
         self.cli_helper = FlextCliHelper()
-        CLICompleteMixin.__init__(self)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for Oracle target load."""
@@ -269,7 +267,7 @@ class OracleTargetLoadCommand(CLICommand):
                         import asyncio
                         result_value = asyncio.run(result)
                     else:
-                        result_value = result
+                        result_value = result  # type: ignore[assignment]
                     if result_value.is_failure:
                         self.cli_helper.print_error(f"Failed to process message: {result_value.error}")
                         return FlextResult.fail(f"Message processing failed: {result_value.error}")
@@ -286,7 +284,7 @@ class OracleTargetLoadCommand(CLICommand):
                 import asyncio
                 final_result_value = asyncio.run(finalize_result)
             else:
-                final_result_value = finalize_result
+                final_result_value = finalize_result  # type: ignore[assignment]
 
             if final_result_value.is_success:
                 stats = final_result_value.data
@@ -322,7 +320,6 @@ class OracleTargetAboutCommand(CLICommand):
         )
         self.params = params
         self.cli_helper = FlextCliHelper()
-        CLICompleteMixin.__init__(self)
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for Oracle target about."""
