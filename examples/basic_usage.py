@@ -48,6 +48,7 @@ def create_configuration() -> FlextOracleTargetConfig:
     logger.info("Creating Oracle target configuration")
 
     import os
+
     config = FlextOracleTargetConfig(
         oracle_host="localhost",
         oracle_port=1521,
@@ -264,6 +265,7 @@ async def demonstrate_error_handling() -> None:
     # Create invalid configuration to show validation errors
     try:
         import os
+
         invalid_config = FlextOracleTargetConfig(
             oracle_host="",  # Invalid empty host
             oracle_service="XE",

@@ -81,7 +81,10 @@ class TestRealOracleTarget:
 
     @pytest.mark.asyncio
     async def test_real_process_record_message(
-        self, real_target, simple_schema, oracle_engine,
+        self,
+        real_target,
+        simple_schema,
+        oracle_engine,
     ) -> None:
         """Test processing record message with real database."""
         real_target.initialize()
@@ -156,7 +159,10 @@ class TestRealOracleTarget:
         assert result.is_success
 
     def test_real_batch_processing(
-        self, real_target, simple_schema, oracle_engine,
+        self,
+        real_target,
+        simple_schema,
+        oracle_engine,
     ) -> None:
         """Test batch processing with real database."""
         real_target.initialize()
@@ -195,7 +201,10 @@ class TestRealOracleTarget:
             assert count == 10
 
     def test_real_column_mapping(
-        self, real_target, simple_schema, oracle_engine,
+        self,
+        real_target,
+        simple_schema,
+        oracle_engine,
     ) -> None:
         """Test column mapping with real database."""
         # Configure column mappings
@@ -308,7 +317,10 @@ class TestRealOracleTarget:
             assert "USERNAME" in columns
 
     def test_real_nested_json_handling(
-        self, real_target, nested_schema, oracle_engine,
+        self,
+        real_target,
+        nested_schema,
+        oracle_engine,
     ) -> None:
         """Test nested JSON handling with real database."""
         real_target.initialize()
@@ -394,7 +406,10 @@ class TestRealOracleTarget:
         assert isinstance(result.error, FlextOracleTargetSchemaError)
 
     def test_real_metrics_collection(
-        self, real_target, simple_schema, oracle_engine,
+        self,
+        real_target,
+        simple_schema,
+        oracle_engine,
     ) -> None:
         """Test metrics collection with real processing."""
         real_target.initialize()
@@ -549,7 +564,10 @@ class TestRealOracleTarget:
         assert result.is_success
 
     def test_real_large_batch_processing(
-        self, real_target, simple_schema, oracle_engine,
+        self,
+        real_target,
+        simple_schema,
+        oracle_engine,
     ) -> None:
         """Test processing large batches with real database."""
         # Configure for large batches

@@ -82,6 +82,7 @@ def oracle_container():
         "{{.Status}}",
     ]
     try:
+
         async def _run(cmd: list[str]) -> tuple[int, str, str]:
             process = await asyncio.create_subprocess_exec(
                 *cmd,
@@ -104,19 +105,29 @@ def oracle_container():
     try:
         # Stop any existing containers
         asyncio.run(
-            _run(["/usr/bin/docker-compose", "-f", str(DOCKER_COMPOSE_PATH), "down", "-v"]),
+            _run(
+                [
+                    "/usr/bin/docker-compose",
+                    "-f",
+                    str(DOCKER_COMPOSE_PATH),
+                    "down",
+                    "-v",
+                ],
+            ),
         )
 
         # Start new container
         rc, _out, err = asyncio.run(
-            _run([
-                "/usr/bin/docker-compose",
-                "-f",
-                str(DOCKER_COMPOSE_PATH),
-                "up",
-                "-d",
-                "oracle-xe",
-            ]),
+            _run(
+                [
+                    "/usr/bin/docker-compose",
+                    "-f",
+                    str(DOCKER_COMPOSE_PATH),
+                    "up",
+                    "-d",
+                    "oracle-xe",
+                ],
+            ),
         )
         if rc != 0:
             raise RuntimeError(f"Failed to start docker-compose: {err}")
@@ -156,13 +167,15 @@ def oracle_container():
         # Cleanup: stop container
         if os.environ.get("KEEP_TEST_DB") != "true":
             asyncio.run(
-                _run([
-                    "/usr/bin/docker-compose",
-                    "-f",
-                    str(DOCKER_COMPOSE_PATH),
-                    "down",
-                    "-v",
-                ]),
+                _run(
+                    [
+                        "/usr/bin/docker-compose",
+                        "-f",
+                        str(DOCKER_COMPOSE_PATH),
+                        "down",
+                        "-v",
+                    ],
+                ),
             )
 
 
@@ -287,34 +300,54 @@ def mock_oracle_api() -> Mock:
 
     # Setup common return values
     mock_api.connect.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None,
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.disconnect.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None,
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.get_tables.return_value = MagicMock(
-        is_success=True, is_failure=False, value=[],
+        is_success=True,
+        is_failure=False,
+        value=[],
     )
     mock_api.create_table_ddl.return_value = MagicMock(
-        is_success=True, is_failure=False, value="CREATE TABLE...",
+        is_success=True,
+        is_failure=False,
+        value="CREATE TABLE...",
     )
     mock_api.execute_ddl.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None,
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.build_insert_statement.return_value = MagicMock(
-        is_success=True, is_failure=False, value="INSERT INTO...",
+        is_success=True,
+        is_failure=False,
+        value="INSERT INTO...",
     )
     mock_api.build_merge_statement.return_value = MagicMock(
-        is_success=True, is_failure=False, value="MERGE INTO...",
+        is_success=True,
+        is_failure=False,
+        value="MERGE INTO...",
     )
     mock_api.query.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None,
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.execute_batch.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None,
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.get_columns.return_value = MagicMock(
-        is_success=True, is_failure=False, value=[],
+        is_success=True,
+        is_failure=False,
+        value=[],
     )
 
     # Mock connection property
@@ -494,7 +527,9 @@ def state_message() -> dict[str, Any]:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema, sample_record, state_message,
+    simple_schema,
+    sample_record,
+    state_message,
 ) -> list[dict[str, Any]]:
     """Complete Singer message stream for testing."""
     return [

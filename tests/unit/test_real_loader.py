@@ -74,7 +74,9 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_ensure_table_exists_new_table(
-        self, real_loader, simple_schema,
+        self,
+        real_loader,
+        simple_schema,
     ) -> None:
         """Test creating a new table in real Oracle."""
         stream_name = "test_users"
@@ -82,7 +84,9 @@ class TestRealOracleLoader:
         key_properties = simple_schema["key_properties"]
 
         result = await real_loader.ensure_table_exists(
-            stream_name, schema, key_properties,
+            stream_name,
+            schema,
+            key_properties,
         )
         assert result.is_success
 
@@ -123,7 +127,10 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_ensure_table_exists_existing_table(
-        self, real_loader, simple_schema, oracle_engine,
+        self,
+        real_loader,
+        simple_schema,
+        oracle_engine,
     ) -> None:
         """Test handling existing table in real Oracle."""
         stream_name = "existing_table"
@@ -131,7 +138,11 @@ class TestRealOracleLoader:
         # Create table first
         with oracle_engine.connect() as conn:
             table_name = safe_table_name(stream_name)
-            conn.execute(text(f"CREATE TABLE {table_name} (id NUMBER PRIMARY KEY, name VARCHAR2(100))"))
+            conn.execute(
+                text(
+                    f"CREATE TABLE {table_name} (id NUMBER PRIMARY KEY, name VARCHAR2(100))",
+                ),
+            )
             conn.commit()
 
         schema = simple_schema["schema"]
@@ -139,13 +150,18 @@ class TestRealOracleLoader:
 
         # Should handle existing table
         result = await real_loader.ensure_table_exists(
-            stream_name, schema, key_properties,
+            stream_name,
+            schema,
+            key_properties,
         )
         assert result.is_success
 
     @pytest.mark.asyncio
     async def test_real_force_recreate_table(
-        self, oracle_engine, simple_schema, clean_database,
+        self,
+        oracle_engine,
+        simple_schema,
+        clean_database,
     ) -> None:
         """Test force recreating table in real Oracle."""
         config = FlextOracleTargetConfig(
@@ -173,7 +189,11 @@ class TestRealOracleLoader:
                 ),
             )
             # Controlled test insert with static values (table name is quoted identifier)
-            conn.execute(text("INSERT INTO \"RECREATE_TABLE\" (id, old_column) VALUES (1, 'old_data')"))
+            conn.execute(
+                text(
+                    "INSERT INTO \"RECREATE_TABLE\" (id, old_column) VALUES (1, 'old_data')",
+                ),
+            )
             conn.commit()
 
         schema = simple_schema["schema"]
@@ -207,7 +227,10 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_truncate_before_load(
-        self, oracle_engine, simple_schema, clean_database,
+        self,
+        oracle_engine,
+        simple_schema,
+        clean_database,
     ) -> None:
         """Test truncating table before load in real Oracle."""
         config = FlextOracleTargetConfig(
@@ -228,9 +251,17 @@ class TestRealOracleLoader:
         # Create table with data first
         with oracle_engine.connect() as conn:
             table_name = safe_table_name(stream_name)
-            conn.execute(text(f"CREATE TABLE {table_name} (id NUMBER PRIMARY KEY, name VARCHAR2(100))"))
+            conn.execute(
+                text(
+                    f"CREATE TABLE {table_name} (id NUMBER PRIMARY KEY, name VARCHAR2(100))",
+                ),
+            )
             # Controlled test insert with static values (safe table name computed above)
-            conn.execute(text("INSERT INTO \"TRUNCATE_TABLE\" (id, name) VALUES (1, 'existing_data')"))
+            conn.execute(
+                text(
+                    "INSERT INTO \"TRUNCATE_TABLE\" (id, name) VALUES (1, 'existing_data')",
+                ),
+            )
             conn.commit()
 
             # Verify data exists
@@ -253,7 +284,10 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_load_record_single(
-        self, real_loader, simple_schema, oracle_engine,
+        self,
+        real_loader,
+        simple_schema,
+        oracle_engine,
     ) -> None:
         """Test loading a single record into real Oracle."""
         stream_name = "load_single"
@@ -279,7 +313,9 @@ class TestRealOracleLoader:
         # Verify in database
         with oracle_engine.connect() as conn:
             table = Table(stream_name.upper(), MetaData(), autoload_with=conn)
-            result = conn.execute(select(table.c.ID, table.c.NAME, table.c.EMAIL).where(table.c.ID == 1))
+            result = conn.execute(
+                select(table.c.ID, table.c.NAME, table.c.EMAIL).where(table.c.ID == 1),
+            )
             row = result.fetchone()
             assert row is not None
             assert row[0] == 1
@@ -288,7 +324,10 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_load_record_batch(
-        self, real_loader, simple_schema, oracle_engine,
+        self,
+        real_loader,
+        simple_schema,
+        oracle_engine,
     ) -> None:
         """Test loading batch of records into real Oracle."""
         stream_name = "load_batch"
@@ -319,7 +358,10 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_bulk_insert_mode(
-        self, oracle_engine, simple_schema, clean_database,
+        self,
+        oracle_engine,
+        simple_schema,
+        clean_database,
     ) -> None:
         """Test bulk insert mode with real Oracle."""
         config = FlextOracleTargetConfig(
@@ -364,7 +406,10 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_merge_mode(
-        self, oracle_engine, simple_schema, clean_database,
+        self,
+        oracle_engine,
+        simple_schema,
+        clean_database,
     ) -> None:
         """Test merge mode (upsert) with real Oracle."""
         config = FlextOracleTargetConfig(
@@ -409,7 +454,9 @@ class TestRealOracleLoader:
         # Verify update
         with oracle_engine.connect() as conn:
             table = Table(stream_name.upper(), MetaData(), autoload_with=conn)
-            result = conn.execute(select(table.c.NAME, table.c.EMAIL).where(table.c.ID == 1))
+            result = conn.execute(
+                select(table.c.NAME, table.c.EMAIL).where(table.c.ID == 1),
+            )
             row = result.fetchone()
             assert row[0] == "Updated Name"
             assert row[1] == "updated@example.com"
@@ -421,7 +468,10 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_nested_json_flattening(
-        self, real_loader, nested_schema, oracle_engine,
+        self,
+        real_loader,
+        nested_schema,
+        oracle_engine,
     ) -> None:
         """Test flattening nested JSON structures in real Oracle."""
         stream_name = "nested_json"
@@ -555,7 +605,10 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_column_ordering(
-        self, oracle_engine, simple_schema, clean_database,
+        self,
+        oracle_engine,
+        simple_schema,
+        clean_database,
     ) -> None:
         """Test column ordering in real Oracle."""
         config = FlextOracleTargetConfig(
@@ -635,7 +688,10 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_custom_indexes(
-        self, oracle_engine, simple_schema, clean_database,
+        self,
+        oracle_engine,
+        simple_schema,
+        clean_database,
     ) -> None:
         """Test custom index creation in real Oracle."""
         config = FlextOracleTargetConfig(
@@ -685,7 +741,10 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_finalize_streams_metrics(
-        self, real_loader, simple_schema, oracle_engine,
+        self,
+        real_loader,
+        simple_schema,
+        oracle_engine,
     ) -> None:
         """Test finalize streams with metrics in real Oracle."""
         stream_name = "metrics_test"
@@ -731,7 +790,10 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_parallel_and_direct_path(
-        self, oracle_engine, simple_schema, clean_database,
+        self,
+        oracle_engine,
+        simple_schema,
+        clean_database,
     ) -> None:
         """Test parallel and direct path options in real Oracle."""
         config = FlextOracleTargetConfig(
