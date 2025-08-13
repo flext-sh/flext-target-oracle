@@ -42,7 +42,7 @@ from typing import TYPE_CHECKING, Protocol
 
 from flext_core import FlextResult, get_logger
 
-from flext_target_oracle.target_models import (
+from flext_target_oracle.models import (
     BatchProcessingModel,
     LoadMethodModel,
     LoadStatisticsModel,
