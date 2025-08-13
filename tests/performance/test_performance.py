@@ -31,7 +31,8 @@ class TestPerformance:
 
     @pytest.fixture
     def performance_config(
-        self, oracle_config: FlextOracleTargetConfig,
+        self,
+        oracle_config: FlextOracleTargetConfig,
     ) -> FlextOracleTargetConfig:
         """Configure for optimal performance."""
         oracle_config.batch_size = 10000
@@ -101,7 +102,9 @@ class TestPerformance:
                         "email": fake.email(),
                         "age": fake.random_int(18, 80),
                         "balance": fake.pyfloat(
-                            left_digits=5, right_digits=2, positive=True,
+                            left_digits=5,
+                            right_digits=2,
+                            positive=True,
                         ),
                         "is_active": fake.boolean(),
                         "created_at": datetime.now(UTC).isoformat(),
