@@ -84,7 +84,7 @@ class ProductionConfig:
         oracle_host = os.getenv("ORACLE_HOST")
         oracle_service = os.getenv("ORACLE_SERVICE")
         oracle_user = os.getenv("ORACLE_USER")
-        oracle_password = os.getenv("ORACLE_PASSWORD")  # noqa: S105
+        oracle_password = os.getenv("ORACLE_PASSWORD")
 
         if not all([oracle_host, oracle_service, oracle_user, oracle_password]):
             missing = [
@@ -132,7 +132,7 @@ class ProductionConfig:
             oracle_service,
         )
         logger.info(
-            "Target schema: %s, Batch size: %s", default_target_schema, batch_size
+            "Target schema: %s, Batch size: %s", default_target_schema, batch_size,
         )
         logger.info(
             "Load method: %s, Connection timeout: %ss",
@@ -262,7 +262,7 @@ class ProductionTargetManager:
                 else:
                     stats["errors_encountered"] += 1
                     logger.error(
-                        "Message %d processing failed: %s", i + 1, result.error
+                        "Message %d processing failed: %s", i + 1, result.error,
                     )
 
                     # In production, you might want to decide whether to continue or stop
@@ -435,7 +435,7 @@ async def demonstrate_production_setup() -> None:
             if stats.get("total_records"):
                 logger.info("Total records loaded: %s", stats["total_records"])
                 logger.info(
-                    "Successful records: %d", stats.get("successful_records", 0)
+                    "Successful records: %d", stats.get("successful_records", 0),
                 )
                 logger.info("Failed records: %d", stats.get("failed_records", 0))
         else:

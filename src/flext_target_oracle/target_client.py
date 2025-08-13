@@ -106,7 +106,7 @@ class FlextTargetOracleLoader:
                 )
                 if tables_result.is_failure:
                     return FlextResult.fail(
-                        f"Connection test failed: {tables_result.error}"
+                        f"Connection test failed: {tables_result.error}",
                     )
 
                 logger.info("Oracle connection established successfully")
@@ -134,7 +134,7 @@ class FlextTargetOracleLoader:
 
                 if tables_result.is_failure:
                     return FlextResult.fail(
-                        f"Failed to check tables: {tables_result.error}"
+                        f"Failed to check tables: {tables_result.error}",
                     )
 
                 existing_tables = [t.upper() for t in tables_result.data or []]
@@ -181,14 +181,14 @@ class FlextTargetOracleLoader:
 
                 exec_result = connected_api.execute_ddl(ddl_sql)
                 logger.info(
-                    "Created table %s", table_name
+                    "Created table %s", table_name,
                 ) if exec_result.is_success else None
 
                 return (
                     FlextResult.ok(None)
                     if exec_result.is_success
                     else FlextResult.fail(
-                        f"Failed to create table: {exec_result.error}"
+                        f"Failed to create table: {exec_result.error}",
                     )
                 )
 
@@ -488,13 +488,13 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         """
         try:
             # Use config parameter for validation if needed
-            _ = config  # noqa: ARG001
+            _ = config
 
             # Validate configuration
             validation_result = self.target_config.validate_domain_rules()
             if validation_result.is_failure:
                 return FlextResult.fail(
-                    validation_result.error or "Configuration validation failed"
+                    validation_result.error or "Configuration validation failed",
                 )
 
             # Initialize loader connection
@@ -1341,7 +1341,7 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
 
         """
         super().__init__(
-            name, version, config, None
+            name, version, config, None,
         )  # Convert entity to FlextPluginEntity if needed
         self._connection_string = ""
         self._schema = config.get("schema", "PUBLIC") if config else "PUBLIC"
@@ -1361,7 +1361,7 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
         return ["host", "port", "user", "password", "service_name"]
 
     def _validate_specific_config(
-        self, config: Mapping[str, object]
+        self, config: Mapping[str, object],
     ) -> FlextResult[None]:
         """Perform Oracle-specific configuration validation.
 
@@ -1527,7 +1527,7 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
                     "stream": stream,
                     "record": record,
                     "time_extracted": message.get("time_extracted"),
-                }
+                },
             )
             return FlextResult.ok(None)
 

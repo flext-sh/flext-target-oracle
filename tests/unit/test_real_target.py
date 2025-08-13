@@ -81,7 +81,7 @@ class TestRealOracleTarget:
 
     @pytest.mark.asyncio
     async def test_real_process_record_message(
-        self, real_target, simple_schema, oracle_engine
+        self, real_target, simple_schema, oracle_engine,
     ) -> None:
         """Test processing record message with real database."""
         real_target.initialize()
@@ -133,7 +133,7 @@ class TestRealOracleTarget:
                 "bookmarks": {
                     "stream1": {"replication_key_value": "2023-01-01", "version": 1},
                     "stream2": {"version": 2},
-                }
+                },
             },
         }
 
@@ -156,7 +156,7 @@ class TestRealOracleTarget:
         assert result.is_success
 
     def test_real_batch_processing(
-        self, real_target, simple_schema, oracle_engine
+        self, real_target, simple_schema, oracle_engine,
     ) -> None:
         """Test batch processing with real database."""
         real_target.initialize()
@@ -195,7 +195,7 @@ class TestRealOracleTarget:
             assert count == 10
 
     def test_real_column_mapping(
-        self, real_target, simple_schema, oracle_engine
+        self, real_target, simple_schema, oracle_engine,
     ) -> None:
         """Test column mapping with real database."""
         # Configure column mappings
@@ -203,7 +203,7 @@ class TestRealOracleTarget:
             "mapping_test": {
                 "name": "full_name",
                 "email": "email_address",
-            }
+            },
         }
 
         real_target.initialize()
@@ -240,8 +240,8 @@ class TestRealOracleTarget:
                     SELECT column_name
                     FROM user_tab_columns
                     WHERE table_name = 'MAPPING_TEST'
-                    """
-                )
+                    """,
+                ),
             )
             columns = [row[0] for row in result]
 
@@ -298,8 +298,8 @@ class TestRealOracleTarget:
                     SELECT column_name
                     FROM user_tab_columns
                     WHERE table_name = 'IGNORE_TEST'
-                    """
-                )
+                    """,
+                ),
             )
             columns = [row[0] for row in result]
 
@@ -308,7 +308,7 @@ class TestRealOracleTarget:
             assert "USERNAME" in columns
 
     def test_real_nested_json_handling(
-        self, real_target, nested_schema, oracle_engine
+        self, real_target, nested_schema, oracle_engine,
     ) -> None:
         """Test nested JSON handling with real database."""
         real_target.initialize()
@@ -350,7 +350,7 @@ class TestRealOracleTarget:
         # Verify flattened structure
         with oracle_engine.connect() as conn:
             result = conn.execute(
-                text("SELECT * FROM nested_test WHERE order_id = 'ORD-001'")
+                text("SELECT * FROM nested_test WHERE order_id = 'ORD-001'"),
             )
             row = result.fetchone()
             assert row is not None
@@ -363,8 +363,8 @@ class TestRealOracleTarget:
                     FROM user_tab_columns
                     WHERE table_name = 'NESTED_TEST'
                     AND column_name LIKE 'CUSTOMER__%'
-                    """
-                )
+                    """,
+                ),
             )
             customer_cols = [row[0] for row in result]
             assert len(customer_cols) > 0
@@ -394,7 +394,7 @@ class TestRealOracleTarget:
         assert isinstance(result.error, FlextOracleTargetSchemaError)
 
     def test_real_metrics_collection(
-        self, real_target, simple_schema, oracle_engine
+        self, real_target, simple_schema, oracle_engine,
     ) -> None:
         """Test metrics collection with real processing."""
         real_target.initialize()
@@ -502,8 +502,8 @@ class TestRealOracleTarget:
                     SELECT column_name, data_type, data_length, data_precision, data_scale
                     FROM user_tab_columns
                     WHERE table_name = 'TYPE_MAPPING_TEST'
-                    """
-                )
+                    """,
+                ),
             )
             columns = {row[0]: row for row in result}
 
@@ -549,7 +549,7 @@ class TestRealOracleTarget:
         assert result.is_success
 
     def test_real_large_batch_processing(
-        self, real_target, simple_schema, oracle_engine
+        self, real_target, simple_schema, oracle_engine,
     ) -> None:
         """Test processing large batches with real database."""
         # Configure for large batches
@@ -654,8 +654,8 @@ class TestRealOracleTarget:
                     FROM user_tab_columns
                     WHERE table_name = 'EVOLVING_TABLE'
                     AND column_name = 'EMAIL'
-                    """
-                )
+                    """,
+                ),
             )
             assert result.scalar() == 1
 

@@ -62,7 +62,7 @@ def create_configuration() -> FlextOracleTargetConfig:
     )
 
     logger.info(
-        f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service}"
+        f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service}",
     )
     return config
 
@@ -267,7 +267,7 @@ async def demonstrate_error_handling() -> None:
             oracle_host="",  # Invalid empty host
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test"
+            oracle_password="test",
         )
 
         validation_result = invalid_config.validate_domain_rules()

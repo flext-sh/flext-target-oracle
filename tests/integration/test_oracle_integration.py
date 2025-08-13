@@ -20,7 +20,7 @@ class TestOracleIntegration:
 
     @pytest.mark.asyncio
     async def test_create_simple_table(
-        self, connected_loader, oracle_engine, simple_schema
+        self, connected_loader, oracle_engine, simple_schema,
     ) -> None:
         """Test creating a simple table with basic data types."""
         stream_name = "test_users"
@@ -29,7 +29,7 @@ class TestOracleIntegration:
 
         # Ensure table is created
         result = await connected_loader.ensure_table_exists(
-            stream_name, schema, key_properties
+            stream_name, schema, key_properties,
         )
         assert result.is_success
 
@@ -41,7 +41,7 @@ class TestOracleIntegration:
                     SELECT COUNT(*)
                     FROM user_tables
                     WHERE table_name = :table_name
-                    """
+                    """,
                 ),
                 {"table_name": "TEST_USERS"},
             )
@@ -55,7 +55,7 @@ class TestOracleIntegration:
                     FROM user_tab_columns
                     WHERE table_name = :table_name
                     ORDER BY column_id
-                    """
+                    """,
                 ),
                 {"table_name": "TEST_USERS"},
             )
@@ -70,7 +70,7 @@ class TestOracleIntegration:
 
     @pytest.mark.asyncio
     async def test_insert_and_retrieve_data(
-        self, connected_loader, oracle_engine, simple_schema
+        self, connected_loader, oracle_engine, simple_schema,
     ) -> None:
         """Test inserting data and retrieving it."""
         stream_name = "test_insert"
@@ -92,7 +92,7 @@ class TestOracleIntegration:
         # Verify data in database
         with oracle_engine.connect() as conn:
             result = conn.execute(
-                text("SELECT id, name, email FROM test_insert ORDER BY id")
+                text("SELECT id, name, email FROM test_insert ORDER BY id"),
             )
             rows = list(result)
 
@@ -102,7 +102,7 @@ class TestOracleIntegration:
 
     @pytest.mark.asyncio
     async def test_merge_mode_updates(
-        self, oracle_config, oracle_engine, simple_schema, clean_database
+        self, oracle_config, oracle_engine, simple_schema, clean_database,
     ) -> None:
         """Test merge mode for updating existing records."""
         oracle_config.sdc_mode = "merge"
@@ -131,7 +131,7 @@ class TestOracleIntegration:
         # Verify update
         with oracle_engine.connect() as conn:
             result = conn.execute(
-                text("SELECT name, email FROM test_merge WHERE id = 1")
+                text("SELECT name, email FROM test_merge WHERE id = 1"),
             )
             row = result.fetchone()
             assert row[0] == "Updated Name"
@@ -141,7 +141,7 @@ class TestOracleIntegration:
 
     @pytest.mark.asyncio
     async def test_bulk_insert_performance(
-        self, oracle_config, oracle_engine, clean_database
+        self, oracle_config, oracle_engine, clean_database,
     ) -> None:
         """Test bulk insert with large dataset."""
         oracle_config.load_method = LoadMethod.BULK_INSERT
@@ -194,7 +194,7 @@ class TestOracleIntegration:
 
     @pytest.mark.asyncio
     async def test_json_storage_mode(
-        self, oracle_config, oracle_engine, nested_schema, clean_database
+        self, oracle_config, oracle_engine, nested_schema, clean_database,
     ) -> None:
         """Test JSON storage mode with nested data."""
         oracle_config.storage_mode = "json"
@@ -241,7 +241,7 @@ class TestOracleIntegration:
 
     @pytest.mark.asyncio
     async def test_column_ordering(
-        self, oracle_config, oracle_engine, clean_database
+        self, oracle_config, oracle_engine, clean_database,
     ) -> None:
         """Test column ordering in created tables."""
         oracle_config.column_ordering = "alphabetical"
@@ -279,7 +279,7 @@ class TestOracleIntegration:
                     FROM user_tab_columns
                     WHERE table_name = :table_name
                     ORDER BY column_id
-                    """
+                    """,
                 ),
                 {"table_name": "TEST_ORDERING"},
             )
@@ -308,7 +308,7 @@ class TestOracleIntegration:
 
     @pytest.mark.asyncio
     async def test_truncate_before_load(
-        self, oracle_config, oracle_engine, simple_schema, clean_database
+        self, oracle_config, oracle_engine, simple_schema, clean_database,
     ) -> None:
         """Test truncate table before loading data."""
         oracle_config.truncate_before_load = True
@@ -340,14 +340,14 @@ class TestOracleIntegration:
 
     @pytest.mark.asyncio
     async def test_custom_indexes(
-        self, oracle_config, oracle_engine, simple_schema, clean_database
+        self, oracle_config, oracle_engine, simple_schema, clean_database,
     ) -> None:
         """Test creation of custom indexes."""
         oracle_config.custom_indexes = {
             "test_indexes": [
                 {"name": "IDX_EMAIL_UNIQUE", "columns": ["EMAIL"], "unique": True},
                 {"columns": ["NAME", "CREATED_AT"]},
-            ]
+            ],
         }
 
         loader = FlextOracleTargetLoader(oracle_config)
@@ -367,7 +367,7 @@ class TestOracleIntegration:
                     SELECT index_name, uniqueness
                     FROM user_indexes
                     WHERE table_name = :table_name
-                    """
+                    """,
                 ),
                 {"table_name": "TEST_INDEXES"},
             )
@@ -392,7 +392,7 @@ class TestOracleTargetE2E:
 
     @pytest.mark.asyncio
     async def test_full_singer_workflow(
-        self, oracle_config, oracle_engine, singer_messages, clean_database
+        self, oracle_config, oracle_engine, singer_messages, clean_database,
     ) -> None:
         """Test complete Singer workflow: schema -> records -> state."""
         target = FlextOracleTarget(config=oracle_config)
@@ -415,8 +415,8 @@ class TestOracleTargetE2E:
                     SELECT COUNT(*)
                     FROM user_tables
                     WHERE table_name = 'USERS'
-                    """
-                )
+                    """,
+                ),
             ).scalar()
             assert table_count == 1
 
@@ -426,11 +426,11 @@ class TestOracleTargetE2E:
 
     @pytest.mark.asyncio
     async def test_column_mapping_and_filtering(
-        self, oracle_config, oracle_engine, clean_database
+        self, oracle_config, oracle_engine, clean_database,
     ) -> None:
         """Test column mapping and filtering features."""
         oracle_config.column_mappings = {
-            "users": {"name": "full_name", "email": "email_address"}
+            "users": {"name": "full_name", "email": "email_address"},
         }
         oracle_config.ignored_columns = ["password", "internal_id"]
 
@@ -480,8 +480,8 @@ class TestOracleTargetE2E:
                     SELECT column_name
                     FROM user_tab_columns
                     WHERE table_name = 'USERS'
-                    """
-                )
+                    """,
+                ),
             )
             columns = [row[0] for row in result]
 
@@ -495,7 +495,7 @@ class TestOracleTargetE2E:
 
             # Check data with mapped names
             result = conn.execute(
-                text("SELECT full_name, email_address FROM users WHERE id = 1")
+                text("SELECT full_name, email_address FROM users WHERE id = 1"),
             )
             row = result.fetchone()
             assert row[0] == "John Doe"
