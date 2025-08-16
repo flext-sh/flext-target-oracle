@@ -5,6 +5,7 @@ Tests target functionality against a real Oracle container for maximum coverage.
 
 import json
 from datetime import UTC, datetime
+from typing import Any
 
 import pytest
 from sqlalchemy import text
@@ -21,11 +22,11 @@ class TestRealOracleTarget:
     """Test Oracle target with real database connection."""
 
     @pytest.fixture
-    def real_target(self, oracle_config, oracle_engine, clean_database):
+    def real_target(self, oracle_config: object) -> object:
         """Create real target instance."""
         return FlextOracleTarget(config=oracle_config)
 
-    def test_real_initialize(self, real_target) -> None:
+    def test_real_initialize(self, real_target: object) -> None:
         """Test real target initialization."""
         result = real_target.initialize()
         assert result.is_success
@@ -533,7 +534,7 @@ class TestRealOracleTarget:
             assert columns["IS_ACTIVE"][1] == "CHAR"
             assert columns["IS_ACTIVE"][2] == 1
 
-    def test_real_write_state_messages(self, real_target, capfd) -> None:
+    def test_real_write_state_messages(self, real_target: Any, capfd: Any) -> None:
         """Test write_state behavior."""
         real_target.initialize()
 

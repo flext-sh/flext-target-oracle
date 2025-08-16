@@ -11,6 +11,7 @@ import pytest
 from flext_core import FlextResult
 
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig
+from flext_target_oracle.target import FlextTargetOracle, TargetOracle
 
 
 class TestFlextOracleTargetCoverage:
@@ -231,9 +232,7 @@ class TestFlextOracleTargetCoverage:
             assert "State handling failed" in str(result.error)
 
     def test_target_compatibility_aliases(self) -> None:
-        """Test compatibility aliases work correctly."""
-        from flext_target_oracle.target import FlextTargetOracle, TargetOracle
-
+        # Test compatibility aliases work correctly
         config = FlextOracleTargetConfig(
             oracle_host="localhost",
             oracle_service="xe",
