@@ -244,7 +244,7 @@ class TestRealOracleExceptions:
                     return False  # Propagate
                 return False
 
-        def _raise_connection_error():
+        def _raise_connection_error() -> Never:
             msg = "Connection lost"
             raise FlextOracleTargetConnectionError(msg)
 
