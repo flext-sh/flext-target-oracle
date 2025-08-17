@@ -171,7 +171,7 @@ files = ["src", "tests"]
 plugins = ["pydantic.mypy"]
 
 # Cache
-sqlite_cache = true
+# sqlite_cache = true
 cache_dir = ".mypy_cache"
 
 # Advanced checks

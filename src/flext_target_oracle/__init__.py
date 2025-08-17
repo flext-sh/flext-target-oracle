@@ -37,6 +37,8 @@ from flext_meltano import (
 
 # Import local implementations - CONSOLIDATED PEP8 STRUCTURE
 from flext_target_oracle.target_config import FlextTargetOracleConfig, LoadMethod
+
+FlextOracleTargetConfig = FlextTargetOracleConfig  # Alias for backward compatibility
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,
@@ -44,6 +46,13 @@ from flext_target_oracle.target_exceptions import (
     FlextTargetOracleProcessingError,
     FlextTargetOracleSchemaError,
 )
+
+# Backward compatibility aliases for tests
+FlextOracleTargetError = FlextTargetOracleError
+FlextOracleTargetAuthenticationError = FlextTargetOracleAuthenticationError
+FlextOracleTargetConnectionError = FlextTargetOracleConnectionError
+FlextOracleTargetProcessingError = FlextTargetOracleProcessingError
+FlextOracleTargetSchemaError = FlextTargetOracleSchemaError
 from flext_target_oracle.target_observability import (
     FlextOracleError,
     FlextOracleObs,
@@ -56,6 +65,8 @@ from flext_target_oracle.target_client import (
     create_target_oracle_plugin,
     TargetOracle,
 )
+
+FlextOracleTargetLoader = FlextTargetOracleLoader  # Alias for backward compatibility
 from flext_target_oracle.models import (
     LoadMethodModel,
     StorageModeModel,
@@ -111,11 +122,13 @@ __all__: list[str] = [
     # === PRIMARY TARGET CLASSES ===
     "FlextTargetOracle",
     "FlextTargetOracleLoader",
+    "FlextOracleTargetLoader",  # Alias for backward compatibility
     "FlextTargetOraclePlugin",
     "create_target_oracle_plugin",
     "TargetOracle",  # Compatibility alias
     # === CONFIGURATION ===
     "FlextTargetOracleConfig",
+    "FlextOracleTargetConfig",  # Alias for backward compatibility
     "LoadMethod",
     # === EXCEPTION HIERARCHY ===
     "FlextTargetOracleAuthenticationError",
@@ -123,6 +136,12 @@ __all__: list[str] = [
     "FlextTargetOracleError",
     "FlextTargetOracleProcessingError",
     "FlextTargetOracleSchemaError",
+    # Backward compatibility aliases
+    "FlextOracleTargetError",
+    "FlextOracleTargetAuthenticationError",
+    "FlextOracleTargetConnectionError",
+    "FlextOracleTargetProcessingError",
+    "FlextOracleTargetSchemaError",
     # === OBSERVABILITY ===
     "FlextOracleError",
     "FlextOracleObs",
