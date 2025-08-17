@@ -73,118 +73,118 @@ def oracle_container():
     """Manage Oracle Docker container lifecycle for tests."""
     # Check if container is already running
     check_cmd = [
-      "docker",
-      "ps",
-      "-a",
-      "--filter",
-      f"name={ORACLE_CONTAINER_NAME}",
-      "--format",
-      "{{.Status}}",
+        "docker",
+        "ps",
+        "-a",
+        "--filter",
+        f"name={ORACLE_CONTAINER_NAME}",
+        "--format",
+        "{{.Status}}",
     ]
     try:
 
-      async def _run(cmd: list[str]) -> tuple[int, str, str]:
-          process = await asyncio.create_subprocess_exec(
-              *cmd,
-              stdout=asyncio.subprocess.PIPE,
-              stderr=asyncio.subprocess.PIPE,
-          )
-          stdout, stderr = await process.communicate()
-          return process.returncode, stdout.decode(), stderr.decode()
+        async def _run(cmd: list[str]) -> tuple[int, str, str]:
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await process.communicate()
+            return process.returncode, stdout.decode(), stderr.decode()
 
-      rc, out, _err = asyncio.run(_run(check_cmd))
-      container_status = out.strip() if rc == 0 else ""
+        rc, out, _err = asyncio.run(_run(check_cmd))
+        container_status = out.strip() if rc == 0 else ""
 
-      if "Up" in container_status:
-          yield
-          return
+        if "Up" in container_status:
+            yield
+            return
     except Exception:
-      pass
+        pass
 
     # Start Oracle container using docker-compose
     try:
-      # Stop any existing containers
-      asyncio.run(
-          _run(
-              [
-                  "/usr/bin/docker-compose",
-                  "-f",
-                  str(DOCKER_COMPOSE_PATH),
-                  "down",
-                  "-v",
-              ],
-          ),
-      )
+        # Stop any existing containers
+        asyncio.run(
+            _run(
+                [
+                    "/usr/bin/docker-compose",
+                    "-f",
+                    str(DOCKER_COMPOSE_PATH),
+                    "down",
+                    "-v",
+                ],
+            ),
+        )
 
-      # Start new container
-      rc, _out, err = asyncio.run(
-          _run(
-              [
-                  "/usr/bin/docker-compose",
-                  "-f",
-                  str(DOCKER_COMPOSE_PATH),
-                  "up",
-                  "-d",
-                  "oracle-xe",
-              ],
-          ),
-      )
-      if rc != 0:
-          raise RuntimeError(f"Failed to start docker-compose: {err}")
+        # Start new container
+        rc, _out, err = asyncio.run(
+            _run(
+                [
+                    "/usr/bin/docker-compose",
+                    "-f",
+                    str(DOCKER_COMPOSE_PATH),
+                    "up",
+                    "-d",
+                    "oracle-xe",
+                ],
+            ),
+        )
+        if rc != 0:
+            raise RuntimeError(f"Failed to start docker-compose: {err}")
 
-      # Wait for Oracle to be ready
-      max_attempts = 60  # 5 minutes max
-      for attempt in range(max_attempts):
-          try:
-              engine = create_engine(
-                  f"oracle+oracledb://{ORACLE_USER}:{ORACLE_PASSWORD}@{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SERVICE}",
-                  poolclass=NullPool,
-              )
-              with engine.connect() as conn:
-                  conn.execute(text("SELECT 1 FROM DUAL"))
-              break
-          except Exception as e:
-              if attempt == max_attempts - 1:
-                  msg = "Oracle container failed to start within timeout"
-                  raise RuntimeError(msg) from e
-              time.sleep(5)
+        # Wait for Oracle to be ready
+        max_attempts = 60  # 5 minutes max
+        for attempt in range(max_attempts):
+            try:
+                engine = create_engine(
+                    f"oracle+oracledb://{ORACLE_USER}:{ORACLE_PASSWORD}@{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SERVICE}",
+                    poolclass=NullPool,
+                )
+                with engine.connect() as conn:
+                    conn.execute(text("SELECT 1 FROM DUAL"))
+                break
+            except Exception as e:
+                if attempt == max_attempts - 1:
+                    msg = "Oracle container failed to start within timeout"
+                    raise RuntimeError(msg) from e
+                time.sleep(5)
 
-      # Create test schema
-      with engine.connect() as conn:
-          try:
-              conn.execute(
-                  text(f"CREATE USER {TEST_SCHEMA} IDENTIFIED BY test_password"),
-              )
-              conn.execute(text(f"GRANT ALL PRIVILEGES TO {TEST_SCHEMA}"))
-              conn.commit()
-          except Exception:
-              # Schema might already exist - expected behavior for test setup
-              logger.debug("Schema might already exist - expected behavior")
+        # Create test schema
+        with engine.connect() as conn:
+            try:
+                conn.execute(
+                    text(f"CREATE USER {TEST_SCHEMA} IDENTIFIED BY test_password"),
+                )
+                conn.execute(text(f"GRANT ALL PRIVILEGES TO {TEST_SCHEMA}"))
+                conn.commit()
+            except Exception:
+                # Schema might already exist - expected behavior for test setup
+                logger.debug("Schema might already exist - expected behavior")
 
-      yield
+        yield
 
     finally:
-      # Cleanup: stop container
-      if os.environ.get("KEEP_TEST_DB") != "true":
-          asyncio.run(
-              _run(
-                  [
-                      "/usr/bin/docker-compose",
-                      "-f",
-                      str(DOCKER_COMPOSE_PATH),
-                      "down",
-                      "-v",
-                  ],
-              ),
-          )
+        # Cleanup: stop container
+        if os.environ.get("KEEP_TEST_DB") != "true":
+            asyncio.run(
+                _run(
+                    [
+                        "/usr/bin/docker-compose",
+                        "-f",
+                        str(DOCKER_COMPOSE_PATH),
+                        "down",
+                        "-v",
+                    ],
+                ),
+            )
 
 
 @pytest.fixture(scope="session")
-def oracle_engine(oracle_container) -> Engine:
+def oracle_engine(_oracle_container) -> Engine:
     """Create SQLAlchemy engine for direct database access."""
     return create_engine(
-      f"oracle+oracledb://{TEST_SCHEMA}:test_password@{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SERVICE}",
-      poolclass=NullPool,
+        f"oracle+oracledb://{TEST_SCHEMA}:test_password@{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SERVICE}",
+        poolclass=NullPool,
     )
 
 
@@ -192,45 +192,45 @@ def oracle_engine(oracle_container) -> Engine:
 def clean_database(oracle_engine) -> None:
     """Clean database before each test."""
     with oracle_engine.connect() as conn:
-      # Drop all tables in test schema
-      result = conn.execute(
-          text(
-              """
+        # Drop all tables in test schema
+        result = conn.execute(
+            text(
+                """
               SELECT table_name
               FROM all_tables
               WHERE owner = :schema
               """,
-          ),
-          {"schema": TEST_SCHEMA},
-      )
-      tables = [row[0] for row in result]
+            ),
+            {"schema": TEST_SCHEMA},
+        )
+        tables = [row[0] for row in result]
 
-      for table in tables:
-          conn.execute(text(f"DROP TABLE {TEST_SCHEMA}.{table} CASCADE CONSTRAINTS"))
-      conn.commit()
+        for table in tables:
+            conn.execute(text(f"DROP TABLE {TEST_SCHEMA}.{table} CASCADE CONSTRAINTS"))
+        conn.commit()
 
     # Cleanup after test (optional)
 
 
 @pytest.fixture
-def oracle_config(oracle_container) -> FlextOracleTargetConfig:
+def oracle_config(_oracle_container) -> FlextOracleTargetConfig:
     """Create Oracle target configuration for tests."""
     return FlextOracleTargetConfig(
-      oracle_host=ORACLE_HOST,
-      oracle_port=ORACLE_PORT,
-      oracle_service=ORACLE_SERVICE,
-      oracle_user=TEST_SCHEMA,
-      oracle_password="test_password",
-      default_target_schema=TEST_SCHEMA,
-      batch_size=1000,
-      load_method=LoadMethod.INSERT,
-      # Enable all features for testing
-      sdc_mode="merge",
-      storage_mode="flattened",
-      column_ordering="alphabetical",
-      allow_alter_table=True,
-      maintain_indexes=True,
-      create_foreign_key_indexes=True,
+        oracle_host=ORACLE_HOST,
+        oracle_port=ORACLE_PORT,
+        oracle_service=ORACLE_SERVICE,
+        oracle_user=TEST_SCHEMA,
+        oracle_password="test_password",
+        default_target_schema=TEST_SCHEMA,
+        batch_size=1000,
+        load_method=LoadMethod.INSERT,
+        # Enable all features for testing
+        sdc_mode="merge",
+        storage_mode="flattened",
+        column_ordering="alphabetical",
+        allow_alter_table=True,
+        maintain_indexes=True,
+        create_foreign_key_indexes=True,
     )
 
 
@@ -238,24 +238,24 @@ def oracle_config(oracle_container) -> FlextOracleTargetConfig:
 def oracle_api(oracle_config) -> FlextDbOracleApi:
     """Create FlextDbOracleApi instance."""
     db_config = FlextDbOracleConfig(
-      host=oracle_config.oracle_host,
-      port=oracle_config.oracle_port,
-      service_name=oracle_config.oracle_service,
-      username=oracle_config.oracle_user,
-      password=oracle_config.oracle_password,
-      schema=oracle_config.default_target_schema,
+        host=oracle_config.oracle_host,
+        port=oracle_config.oracle_port,
+        service_name=oracle_config.oracle_service,
+        username=oracle_config.oracle_user,
+        password=oracle_config.oracle_password,
+        schema=oracle_config.default_target_schema,
     )
     return FlextDbOracleApi(db_config)
 
 
 @pytest_asyncio.fixture
-async def oracle_loader(oracle_config, oracle_api) -> FlextOracleTargetLoader:
+async def oracle_loader(oracle_config, _oracle_api) -> FlextOracleTargetLoader:
     """Create FlextOracleTargetLoader instance."""
     loader = FlextOracleTargetLoader(oracle_config)
     # Connect to database
     connect_result = await loader.connect()
     if connect_result.is_failure:
-      pytest.fail(f"Failed to connect to Oracle: {connect_result.error}")
+        pytest.fail(f"Failed to connect to Oracle: {connect_result.error}")
 
     yield loader
 
@@ -273,15 +273,15 @@ def oracle_target(oracle_config) -> FlextOracleTarget:
 def sample_config() -> FlextOracleTargetConfig:
     """Sample configuration for unit testing (no Oracle connection required)."""
     return FlextOracleTargetConfig(
-      oracle_host="localhost",
-      oracle_port=1521,
-      oracle_service="XE",
-      oracle_user="test_user",
-      oracle_password="test_password",
-      default_target_schema="TEST_SCHEMA",
-      batch_size=1000,
-      load_method=LoadMethod.INSERT,
-      use_bulk_operations=True,
+        oracle_host="localhost",
+        oracle_port=1521,
+        oracle_service="XE",
+        oracle_user="test_user",
+        oracle_password="test_password",
+        default_target_schema="TEST_SCHEMA",
+        batch_size=1000,
+        load_method=LoadMethod.INSERT,
+        use_bulk_operations=True,
     )
 
 
@@ -300,54 +300,54 @@ def mock_oracle_api() -> Mock:
 
     # Setup common return values
     mock_api.connect.return_value = MagicMock(
-      is_success=True,
-      is_failure=False,
-      value=None,
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.disconnect.return_value = MagicMock(
-      is_success=True,
-      is_failure=False,
-      value=None,
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.get_tables.return_value = MagicMock(
-      is_success=True,
-      is_failure=False,
-      value=[],
+        is_success=True,
+        is_failure=False,
+        value=[],
     )
     mock_api.create_table_ddl.return_value = MagicMock(
-      is_success=True,
-      is_failure=False,
-      value="CREATE TABLE...",
+        is_success=True,
+        is_failure=False,
+        value="CREATE TABLE...",
     )
     mock_api.execute_ddl.return_value = MagicMock(
-      is_success=True,
-      is_failure=False,
-      value=None,
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.build_insert_statement.return_value = MagicMock(
-      is_success=True,
-      is_failure=False,
-      value="INSERT INTO...",
+        is_success=True,
+        is_failure=False,
+        value="INSERT INTO...",
     )
     mock_api.build_merge_statement.return_value = MagicMock(
-      is_success=True,
-      is_failure=False,
-      value="MERGE INTO...",
+        is_success=True,
+        is_failure=False,
+        value="MERGE INTO...",
     )
     mock_api.query.return_value = MagicMock(
-      is_success=True,
-      is_failure=False,
-      value=None,
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.execute_batch.return_value = MagicMock(
-      is_success=True,
-      is_failure=False,
-      value=None,
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.get_columns.return_value = MagicMock(
-      is_success=True,
-      is_failure=False,
-      value=[],
+        is_success=True,
+        is_failure=False,
+        value=[],
     )
 
     # Mock connection property
@@ -372,17 +372,17 @@ def mock_loader() -> AsyncMock:
 def schema() -> dict[str, object]:
     """Simple Singer schema message for unit testing."""
     return {
-      "type": "SCHEMA",
-      "stream": "users",
-      "schema": {
-          "type": "object",
-          "properties": {
-              "id": {"type": "integer"},
-              "name": {"type": "string"},
-              "email": {"type": "string"},
-          },
-      },
-      "key_properties": ["id"],
+        "type": "SCHEMA",
+        "stream": "users",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+                "email": {"type": "string"},
+            },
+        },
+        "key_properties": ["id"],
     }
 
 
@@ -390,13 +390,13 @@ def schema() -> dict[str, object]:
 def record() -> dict[str, object]:
     """Simple Singer record message for unit testing."""
     return {
-      "type": "RECORD",
-      "stream": "users",
-      "record": {
-          "id": 1,
-          "name": "John Doe",
-          "email": "john@example.com",
-      },
+        "type": "RECORD",
+        "stream": "users",
+        "record": {
+            "id": 1,
+            "name": "John Doe",
+            "email": "john@example.com",
+        },
     }
 
 
@@ -404,8 +404,8 @@ def record() -> dict[str, object]:
 def state() -> dict[str, object]:
     """Simple Singer state message for unit testing."""
     return {
-      "type": "STATE",
-      "value": {"bookmarks": {"users": {"last_updated": "2025-01-01T00:00:00Z"}}},
+        "type": "STATE",
+        "value": {"bookmarks": {"users": {"last_updated": "2025-01-01T00:00:00Z"}}},
     }
 
 
@@ -413,18 +413,18 @@ def state() -> dict[str, object]:
 def simple_schema() -> dict[str, Any]:
     """Simple Singer schema for testing."""
     return {
-      "type": "SCHEMA",
-      "stream": "users",
-      "schema": {
-          "type": "object",
-          "properties": {
-              "id": {"type": "integer"},
-              "name": {"type": "string"},
-              "email": {"type": "string"},
-              "created_at": {"type": "string", "format": "date-time"},
-          },
-      },
-      "key_properties": ["id"],
+        "type": "SCHEMA",
+        "stream": "users",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+                "email": {"type": "string"},
+                "created_at": {"type": "string", "format": "date-time"},
+            },
+        },
+        "key_properties": ["id"],
     }
 
 
@@ -432,43 +432,43 @@ def simple_schema() -> dict[str, Any]:
 def nested_schema() -> dict[str, Any]:
     """Nested Singer schema for testing flattening."""
     return {
-      "type": "SCHEMA",
-      "stream": "orders",
-      "schema": {
-          "type": "object",
-          "properties": {
-              "id": {"type": "integer"},
-              "customer": {
-                  "type": "object",
-                  "properties": {
-                      "id": {"type": "integer"},
-                      "name": {"type": "string"},
-                      "address": {
-                          "type": "object",
-                          "properties": {
-                              "street": {"type": "string"},
-                              "city": {"type": "string"},
-                              "zip": {"type": "string"},
-                          },
-                      },
-                  },
-              },
-              "items": {
-                  "type": "array",
-                  "items": {
-                      "type": "object",
-                      "properties": {
-                          "product_id": {"type": "integer"},
-                          "quantity": {"type": "integer"},
-                          "price": {"type": "number"},
-                      },
-                  },
-              },
-              "total": {"type": "number"},
-              "created_at": {"type": "string", "format": "date-time"},
-          },
-      },
-      "key_properties": ["id"],
+        "type": "SCHEMA",
+        "stream": "orders",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "customer": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "integer"},
+                        "name": {"type": "string"},
+                        "address": {
+                            "type": "object",
+                            "properties": {
+                                "street": {"type": "string"},
+                                "city": {"type": "string"},
+                                "zip": {"type": "string"},
+                            },
+                        },
+                    },
+                },
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "product_id": {"type": "integer"},
+                            "quantity": {"type": "integer"},
+                            "price": {"type": "number"},
+                        },
+                    },
+                },
+                "total": {"type": "number"},
+                "created_at": {"type": "string", "format": "date-time"},
+            },
+        },
+        "key_properties": ["id"],
     }
 
 
@@ -476,16 +476,16 @@ def nested_schema() -> dict[str, Any]:
 def sample_record() -> dict[str, Any]:
     """Sample Singer record message."""
     return {
-      "type": "RECORD",
-      "stream": "users",
-      "record": {
-          "id": 1,
-          "name": "John Doe",
-          "email": "john@example.com",
-          "created_at": "2025-01-20T12:00:00Z",
-      },
-      "time_extracted": "2025-01-20T12:00:00Z",
-      "version": 1,
+        "type": "RECORD",
+        "stream": "users",
+        "record": {
+            "id": 1,
+            "name": "John Doe",
+            "email": "john@example.com",
+            "created_at": "2025-01-20T12:00:00Z",
+        },
+        "time_extracted": "2025-01-20T12:00:00Z",
+        "version": 1,
     }
 
 
@@ -493,18 +493,18 @@ def sample_record() -> dict[str, Any]:
 def batch_records() -> list[dict[str, Any]]:
     """Batch of records for testing bulk operations."""
     return [
-      {
-          "type": "RECORD",
-          "stream": "users",
-          "record": {
-              "id": i,
-              "name": f"User {i}",
-              "email": f"user{i}@example.com",
-              "created_at": f"2025-01-20T12:00:{i:02d}Z",
-          },
-          "time_extracted": "2025-01-20T12:00:00Z",
-      }
-      for i in range(1, 101)  # 100 records
+        {
+            "type": "RECORD",
+            "stream": "users",
+            "record": {
+                "id": i,
+                "name": f"User {i}",
+                "email": f"user{i}@example.com",
+                "created_at": f"2025-01-20T12:00:{i:02d}Z",
+            },
+            "time_extracted": "2025-01-20T12:00:00Z",
+        }
+        for i in range(1, 101)  # 100 records
     ]
 
 
@@ -512,16 +512,16 @@ def batch_records() -> list[dict[str, Any]]:
 def state_message() -> dict[str, Any]:
     """Sample Singer state message."""
     return {
-      "type": "STATE",
-      "value": {
-          "bookmarks": {
-              "users": {
-                  "replication_key": "created_at",
-                  "replication_key_value": "2025-01-20T12:00:00Z",
-                  "version": 1,
-              },
-          },
-      },
+        "type": "STATE",
+        "value": {
+            "bookmarks": {
+                "users": {
+                    "replication_key": "created_at",
+                    "replication_key_value": "2025-01-20T12:00:00Z",
+                    "version": 1,
+                },
+            },
+        },
     }
 
 
@@ -533,10 +533,10 @@ def singer_messages(
 ) -> list[dict[str, Any]]:
     """Complete Singer message stream for testing."""
     return [
-      simple_schema,
-      sample_record,
-      sample_record,  # Duplicate for testing updates
-      state_message,
+        simple_schema,
+        sample_record,
+        sample_record,  # Duplicate for testing updates
+        state_message,
     ]
 
 
@@ -546,34 +546,34 @@ def temporary_env_vars(**kwargs):
     """Temporarily set environment variables."""
     old_values = {}
     for key, value in kwargs.items():
-      old_values[key] = os.environ.get(key)
-      if value is None:
-          os.environ.pop(key, None)
-      else:
-          os.environ[key] = str(value)
+        old_values[key] = os.environ.get(key)
+        if value is None:
+            os.environ.pop(key, None)
+        else:
+            os.environ[key] = str(value)
 
     try:
-      yield
+        yield
     finally:
-      for key, value in old_values.items():
-          if value is None:
-              os.environ.pop(key, None)
-          else:
-              os.environ[key] = value
+        for key, value in old_values.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
 
 
 @pytest.fixture
 def temp_config_file(tmp_path) -> Path:
     """Create temporary configuration file."""
     config_data = {
-      "oracle_host": ORACLE_HOST,
-      "oracle_port": ORACLE_PORT,
-      "oracle_service": ORACLE_SERVICE,
-      "oracle_user": TEST_SCHEMA,
-      "oracle_password": "test_password",
-      "default_target_schema": TEST_SCHEMA,
-      "batch_size": 1000,
-      "load_method": "insert",
+        "oracle_host": ORACLE_HOST,
+        "oracle_port": ORACLE_PORT,
+        "oracle_service": ORACLE_SERVICE,
+        "oracle_user": TEST_SCHEMA,
+        "oracle_password": "test_password",
+        "default_target_schema": TEST_SCHEMA,
+        "batch_size": 1000,
+        "load_method": "insert",
     }
 
     config_file = tmp_path / "config.json"
@@ -593,52 +593,52 @@ async def connected_loader(oracle_loader):
 def large_dataset() -> list[dict[str, Any]]:
     """Generate large dataset for performance testing."""
     schema = {
-      "type": "SCHEMA",
-      "stream": "performance_test",
-      "schema": {
-          "type": "object",
-          "properties": {
-              "id": {"type": "integer"},
-              "data": {"type": "string"},
-              "value": {"type": "number"},
-              "timestamp": {"type": "string", "format": "date-time"},
-          },
-      },
-      "key_properties": ["id"],
+        "type": "SCHEMA",
+        "stream": "performance_test",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "data": {"type": "string"},
+                "value": {"type": "number"},
+                "timestamp": {"type": "string", "format": "date-time"},
+            },
+        },
+        "key_properties": ["id"],
     }
 
     records = [
-      {
-          "type": "RECORD",
-          "stream": "performance_test",
-          "record": {
-              "id": i,
-              "data": f"Performance test data {i}" * 10,  # Make it larger
-              "value": i * 1.5,
-              "timestamp": f"2025-01-20T12:{i % 60:02d}:00Z",
-          },
-      }
-      for i in range(10000)  # 10k records
+        {
+            "type": "RECORD",
+            "stream": "performance_test",
+            "record": {
+                "id": i,
+                "data": f"Performance test data {i}" * 10,  # Make it larger
+                "value": i * 1.5,
+                "timestamp": f"2025-01-20T12:{i % 60:02d}:00Z",
+            },
+        }
+        for i in range(10000)  # 10k records
     ]
 
     return [schema, *records]
 
 
 # Markers for different test categories
-def pytest_collection_modifyitems(config, items) -> None:
+def pytest_collection_modifyitems(_config, items) -> None:
     """Add markers to test items based on their location."""
     for item in items:
-      # Add markers based on test file location
-      if "unit" in str(item.fspath):
-          item.add_marker(pytest.mark.unit)
-      elif "integration" in str(item.fspath):
-          item.add_marker(pytest.mark.integration)
-          item.add_marker(pytest.mark.oracle)
-      elif "e2e" in str(item.fspath):
-          item.add_marker(pytest.mark.e2e)
-          item.add_marker(pytest.mark.oracle)
-          item.add_marker(pytest.mark.slow)
-      elif "performance" in str(item.fspath):
-          item.add_marker(pytest.mark.performance)
-          item.add_marker(pytest.mark.oracle)
-          item.add_marker(pytest.mark.slow)
+        # Add markers based on test file location
+        if "unit" in str(item.fspath):
+            item.add_marker(pytest.mark.unit)
+        elif "integration" in str(item.fspath):
+            item.add_marker(pytest.mark.integration)
+            item.add_marker(pytest.mark.oracle)
+        elif "e2e" in str(item.fspath):
+            item.add_marker(pytest.mark.e2e)
+            item.add_marker(pytest.mark.oracle)
+            item.add_marker(pytest.mark.slow)
+        elif "performance" in str(item.fspath):
+            item.add_marker(pytest.mark.performance)
+            item.add_marker(pytest.mark.oracle)
+            item.add_marker(pytest.mark.slow)
