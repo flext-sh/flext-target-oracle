@@ -16,513 +16,513 @@ class TestRealOracleConfig:
     """Test Oracle configuration with real scenarios."""
 
     def test_minimal_config_creation(self) -> None:
-      """Test creating config with minimal required fields."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test_user",
-          oracle_password="test_pass",
-      )
+        """Test creating config with minimal required fields."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test_user",
+            oracle_password="test_pass",
+        )
 
-      # Verify defaults
-      assert config.oracle_port == 1521
-      assert config.default_target_schema == "target"
-      assert config.load_method == LoadMethod.INSERT
-      assert config.batch_size == 1000
-      assert config.connection_timeout == 30
-      assert config.use_bulk_operations is True
-      assert config.sdc_mode == "append"
-      assert config.storage_mode == "flattened"
+        # Verify defaults
+        assert config.oracle_port == 1521
+        assert config.default_target_schema == "target"
+        assert config.load_method == LoadMethod.INSERT
+        assert config.batch_size == 1000
+        assert config.connection_timeout == 30
+        assert config.use_bulk_operations is True
+        assert config.sdc_mode == "append"
+        assert config.storage_mode == "flattened"
 
     def test_full_config_creation(self) -> None:
-      """Test creating config with all fields."""
-      config = FlextOracleTargetConfig(
-          # Basic connection
-          oracle_host="prod-oracle.company.com",
-          oracle_port=1522,
-          oracle_service="PRODDB",
-          oracle_user="prod_user",
-          oracle_password="prod_pass",
-          oracle_dsn="(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=prod-oracle.company.com)(PORT=1522))(CONNECT_DATA=(SERVICE_NAME=PRODDB)))",
-          oracle_wallet_location="/opt/oracle/wallet",
-          oracle_wallet_password="wallet_pass",
-          # Schema settings
-          default_target_schema="PROD_SCHEMA",
-          # Loading settings
-          load_method=LoadMethod.BULK_INSERT,
-          use_bulk_operations=True,
-          batch_size=5000,
-          connection_timeout=60,
-          # SSL/TLS
-          use_ssl=True,
-          ssl_cert_path="/etc/ssl/certs/oracle.pem",
-          ssl_key_path="/etc/ssl/private/oracle.key",
-          ssl_ca_path="/etc/ssl/certs/ca.pem",
-          ssl_verify_cert=True,
-          ssl_cipher_suites="TLS_AES_256_GCM_SHA384",
-          # Connection pooling
-          enable_connection_pool=True,
-          pool_size=10,
-          pool_max_overflow=20,
-          pool_timeout=30,
-          pool_recycle=3600,
-          pool_pre_ping=True,
-          # Advanced Oracle features
-          enable_auto_commit=False,
-          use_direct_path=True,
-          parallel_degree=8,
-          # Column modification
-          column_mappings={
-              "users": {"old_name": "new_name"},
-              "orders": {"customer_id": "cust_id"},
-          },
-          ignored_columns=["password", "secret", "internal_id"],
-          value_transforms={
-              "email": "lower",
-              "name": "title",
-          },
-          # Table naming
-          table_name_prefix="stg_",
-          table_name_suffix="_tbl",
-          table_name_mapping={
-              "raw_users": "clean_users",
-              "raw_orders": "clean_orders",
-          },
-          # SDC control
-          sdc_mode="merge",
-          sdc_extracted_at_column="_sdc_extracted_at",
-          sdc_loaded_at_column="_sdc_loaded_at",
-          sdc_deleted_at_column="_sdc_deleted_at",
-          sdc_table_version_column="_sdc_table_version",
-          sdc_sequence_column="_sdc_sequence",
-          sdc_primary_key_column="_sdc_primary_key",
-          sdc_batched_at_column="_sdc_batched_at",
-          sdc_merge_key_properties={"users": ["id", "email"]},
-          sdc_default_replication_method="INCREMENTAL",
-          sdc_hard_delete=True,
-          # Storage mode
-          storage_mode="hybrid",
-          json_column_name="raw_json",
-          flatten_max_depth=3,
-          # Type mapping
-          type_mapping={
-              "string": "VARCHAR2(4000)",
-              "number": "NUMBER(38,10)",
-              "boolean": "CHAR(1)",
-              "date-time": "TIMESTAMP(6) WITH TIME ZONE",
-          },
-          default_varchar_length=1000,
-          use_clob_for_large_strings=True,
-          clob_threshold=4000,
-          # Column ordering
-          column_ordering="custom",
-          column_order_rules={
-              "primary_keys": 1,
-              "regular_columns": 2,
-              "audit_columns": 3,
-              "sdc_columns": 4,
-          },
-          audit_column_patterns=["created_at", "updated_at", "modified_by"],
-          # DDL options
-          truncate_before_load=True,
-          force_recreate_tables=False,
-          allow_alter_table=True,
-          # Index management
-          maintain_indexes=True,
-          create_foreign_key_indexes=True,
-          custom_indexes={
-              "users": [
-                  {"name": "idx_users_email", "columns": ["email"], "unique": True},
-                  {"name": "idx_users_name", "columns": ["name"]},
-              ],
-          },
-          index_naming_template="IX_{table}_{columns}",
-          preserve_existing_indexes=False,
-      )
+        """Test creating config with all fields."""
+        config = FlextOracleTargetConfig(
+            # Basic connection
+            oracle_host="prod-oracle.company.com",
+            oracle_port=1522,
+            oracle_service="PRODDB",
+            oracle_user="prod_user",
+            oracle_password="prod_pass",
+            oracle_dsn="(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=prod-oracle.company.com)(PORT=1522))(CONNECT_DATA=(SERVICE_NAME=PRODDB)))",
+            oracle_wallet_location="/opt/oracle/wallet",
+            oracle_wallet_password="wallet_pass",
+            # Schema settings
+            default_target_schema="PROD_SCHEMA",
+            # Loading settings
+            load_method=LoadMethod.BULK_INSERT,
+            use_bulk_operations=True,
+            batch_size=5000,
+            connection_timeout=60,
+            # SSL/TLS
+            use_ssl=True,
+            ssl_cert_path="/etc/ssl/certs/oracle.pem",
+            ssl_key_path="/etc/ssl/private/oracle.key",
+            ssl_ca_path="/etc/ssl/certs/ca.pem",
+            ssl_verify_cert=True,
+            ssl_cipher_suites="TLS_AES_256_GCM_SHA384",
+            # Connection pooling
+            enable_connection_pool=True,
+            pool_size=10,
+            pool_max_overflow=20,
+            pool_timeout=30,
+            pool_recycle=3600,
+            pool_pre_ping=True,
+            # Advanced Oracle features
+            enable_auto_commit=False,
+            use_direct_path=True,
+            parallel_degree=8,
+            # Column modification
+            column_mappings={
+                "users": {"old_name": "new_name"},
+                "orders": {"customer_id": "cust_id"},
+            },
+            ignored_columns=["password", "secret", "internal_id"],
+            value_transforms={
+                "email": "lower",
+                "name": "title",
+            },
+            # Table naming
+            table_name_prefix="stg_",
+            table_name_suffix="_tbl",
+            table_name_mapping={
+                "raw_users": "clean_users",
+                "raw_orders": "clean_orders",
+            },
+            # SDC control
+            sdc_mode="merge",
+            sdc_extracted_at_column="_sdc_extracted_at",
+            sdc_loaded_at_column="_sdc_loaded_at",
+            sdc_deleted_at_column="_sdc_deleted_at",
+            sdc_table_version_column="_sdc_table_version",
+            sdc_sequence_column="_sdc_sequence",
+            sdc_primary_key_column="_sdc_primary_key",
+            sdc_batched_at_column="_sdc_batched_at",
+            sdc_merge_key_properties={"users": ["id", "email"]},
+            sdc_default_replication_method="INCREMENTAL",
+            sdc_hard_delete=True,
+            # Storage mode
+            storage_mode="hybrid",
+            json_column_name="raw_json",
+            flatten_max_depth=3,
+            # Type mapping
+            type_mapping={
+                "string": "VARCHAR2(4000)",
+                "number": "NUMBER(38,10)",
+                "boolean": "CHAR(1)",
+                "date-time": "TIMESTAMP(6) WITH TIME ZONE",
+            },
+            default_varchar_length=1000,
+            use_clob_for_large_strings=True,
+            clob_threshold=4000,
+            # Column ordering
+            column_ordering="custom",
+            column_order_rules={
+                "primary_keys": 1,
+                "regular_columns": 2,
+                "audit_columns": 3,
+                "sdc_columns": 4,
+            },
+            audit_column_patterns=["created_at", "updated_at", "modified_by"],
+            # DDL options
+            truncate_before_load=True,
+            force_recreate_tables=False,
+            allow_alter_table=True,
+            # Index management
+            maintain_indexes=True,
+            create_foreign_key_indexes=True,
+            custom_indexes={
+                "users": [
+                    {"name": "idx_users_email", "columns": ["email"], "unique": True},
+                    {"name": "idx_users_name", "columns": ["name"]},
+                ],
+            },
+            index_naming_template="IX_{table}_{columns}",
+            preserve_existing_indexes=False,
+        )
 
-      # Verify all settings
-      assert config.oracle_host == "prod-oracle.company.com"
-      assert config.oracle_port == 1522
-      assert config.use_ssl is True
-      assert config.enable_connection_pool is True
-      assert config.parallel_degree == 8
-      assert len(config.column_mappings) == 2
-      assert len(config.ignored_columns) == 3
-      assert config.table_name_prefix == "stg_"
-      assert config.sdc_mode == "merge"
-      assert config.storage_mode == "hybrid"
-      assert config.column_ordering == "custom"
-      assert config.truncate_before_load is True
+        # Verify all settings
+        assert config.oracle_host == "prod-oracle.company.com"
+        assert config.oracle_port == 1522
+        assert config.use_ssl is True
+        assert config.enable_connection_pool is True
+        assert config.parallel_degree == 8
+        assert len(config.column_mappings) == 2
+        assert len(config.ignored_columns) == 3
+        assert config.table_name_prefix == "stg_"
+        assert config.sdc_mode == "merge"
+        assert config.storage_mode == "hybrid"
+        assert config.column_ordering == "custom"
+        assert config.truncate_before_load is True
 
     def test_config_validation_errors(self) -> None:
-      """Test config validation with invalid values."""
-      # Invalid port
-      with pytest.raises(ValidationError) as exc_info:
-          FlextOracleTargetConfig(
-              oracle_host="localhost",
-              oracle_port=0,  # Invalid
-              oracle_service="XE",
-              oracle_user="test",
-              oracle_password="test",
-          )
-      assert "greater than 0" in str(exc_info.value)
+        """Test config validation with invalid values."""
+        # Invalid port
+        with pytest.raises(ValidationError) as exc_info:
+            FlextOracleTargetConfig(
+                oracle_host="localhost",
+                oracle_port=0,  # Invalid
+                oracle_service="XE",
+                oracle_user="test",
+                oracle_password="test",
+            )
+        assert "greater than 0" in str(exc_info.value)
 
-      # Invalid batch size
-      with pytest.raises(ValidationError) as exc_info:
-          FlextOracleTargetConfig(
-              oracle_host="localhost",
-              oracle_service="XE",
-              oracle_user="test",
-              oracle_password="test",
-              batch_size=-1,  # Invalid
-          )
-      assert "greater than 0" in str(exc_info.value)
+        # Invalid batch size
+        with pytest.raises(ValidationError) as exc_info:
+            FlextOracleTargetConfig(
+                oracle_host="localhost",
+                oracle_service="XE",
+                oracle_user="test",
+                oracle_password="test",
+                batch_size=-1,  # Invalid
+            )
+        assert "greater than 0" in str(exc_info.value)
 
-      # Invalid timeout
-      with pytest.raises(ValidationError) as exc_info:
-          FlextOracleTargetConfig(
-              oracle_host="localhost",
-              oracle_service="XE",
-              oracle_user="test",
-              oracle_password="test",
-              connection_timeout=0,  # Invalid
-          )
-      assert "greater than 0" in str(exc_info.value)
+        # Invalid timeout
+        with pytest.raises(ValidationError) as exc_info:
+            FlextOracleTargetConfig(
+                oracle_host="localhost",
+                oracle_service="XE",
+                oracle_user="test",
+                oracle_password="test",
+                connection_timeout=0,  # Invalid
+            )
+        assert "greater than 0" in str(exc_info.value)
 
     def test_load_method_enum(self) -> None:
-      """Test LoadMethod enum values."""
-      assert LoadMethod.INSERT == "INSERT"
-      assert LoadMethod.BULK_INSERT == "BULK_INSERT"
-      assert LoadMethod.MERGE == "MERGE"
-      assert LoadMethod.BULK_MERGE == "BULK_MERGE"
+        """Test LoadMethod enum values."""
+        assert LoadMethod.INSERT == "INSERT"
+        assert LoadMethod.BULK_INSERT == "BULK_INSERT"
+        assert LoadMethod.MERGE == "MERGE"
+        assert LoadMethod.BULK_MERGE == "BULK_MERGE"
 
-      # Test creating config with each method
-      for method in LoadMethod:
-          config = FlextOracleTargetConfig(
-              oracle_host="localhost",
-              oracle_service="XE",
-              oracle_user="test",
-              oracle_password="test",
-              load_method=method,
-          )
-          assert config.load_method == method
+        # Test creating config with each method
+        for method in LoadMethod:
+            config = FlextOracleTargetConfig(
+                oracle_host="localhost",
+                oracle_service="XE",
+                oracle_user="test",
+                oracle_password="test",
+                load_method=method,
+            )
+            assert config.load_method == method
 
     def test_get_oracle_config(self) -> None:
-      """Test get_oracle_config method."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_port=1521,
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-          default_target_schema="TEST_SCHEMA",
-          use_ssl=True,
-          enable_connection_pool=True,
-          pool_size=5,
-      )
+        """Test get_oracle_config method."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_port=1521,
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+            default_target_schema="TEST_SCHEMA",
+            use_ssl=True,
+            enable_connection_pool=True,
+            pool_size=5,
+        )
 
-      oracle_config = config.get_oracle_config()
+        oracle_config = config.get_oracle_config()
 
-      # Should create FlextDbOracleConfig
-      assert oracle_config.host == "localhost"
-      assert oracle_config.port == 1521
-      assert oracle_config.service_name == "XE"
-      assert oracle_config.username == "test"
-      assert str(oracle_config.password) == "test"
-      assert oracle_config.schema == "TEST_SCHEMA"
-      assert oracle_config.use_ssl is True
-      assert oracle_config.pool_enabled is True
-      assert oracle_config.pool_min_size == 5
+        # Should create FlextDbOracleConfig
+        assert oracle_config.host == "localhost"
+        assert oracle_config.port == 1521
+        assert oracle_config.service_name == "XE"
+        assert oracle_config.username == "test"
+        assert str(oracle_config.password) == "test"
+        assert oracle_config.schema == "TEST_SCHEMA"
+        assert oracle_config.use_ssl is True
+        assert oracle_config.pool_enabled is True
+        assert oracle_config.pool_min_size == 5
 
     def test_get_table_name_variations(self) -> None:
-      """Test get_table_name with various configurations."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-      )
+        """Test get_table_name with various configurations."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+        )
 
-      # Default behavior - uppercase
-      assert config.get_table_name("my_stream") == "MY_STREAM"
-      assert config.get_table_name("CamelCase") == "CAMELCASE"
+        # Default behavior - uppercase
+        assert config.get_table_name("my_stream") == "MY_STREAM"
+        assert config.get_table_name("CamelCase") == "CAMELCASE"
 
-      # With prefix
-      config.table_name_prefix = "stg_"
-      assert config.get_table_name("my_stream") == "STG_MY_STREAM"
+        # With prefix
+        config.table_name_prefix = "stg_"
+        assert config.get_table_name("my_stream") == "STG_MY_STREAM"
 
-      # With suffix
-      config.table_name_suffix = "_tbl"
-      assert config.get_table_name("my_stream") == "STG_MY_STREAM_TBL"
+        # With suffix
+        config.table_name_suffix = "_tbl"
+        assert config.get_table_name("my_stream") == "STG_MY_STREAM_TBL"
 
-      # With mapping (overrides prefix/suffix)
-      config.table_name_mapping = {"my_stream": "custom_table"}
-      assert config.get_table_name("my_stream") == "CUSTOM_TABLE"
+        # With mapping (overrides prefix/suffix)
+        config.table_name_mapping = {"my_stream": "custom_table"}
+        assert config.get_table_name("my_stream") == "CUSTOM_TABLE"
 
-      # Stream not in mapping uses prefix/suffix
-      assert config.get_table_name("other_stream") == "STG_OTHER_STREAM_TBL"
+        # Stream not in mapping uses prefix/suffix
+        assert config.get_table_name("other_stream") == "STG_OTHER_STREAM_TBL"
 
     def test_config_environment_variables(self) -> None:
-      """Test config can be created from environment variables."""
-      # Set environment variables
-      os.environ["ORACLE_HOST"] = "env-host"
-      os.environ["ORACLE_PORT"] = "1522"
-      os.environ["ORACLE_SERVICE"] = "ENV_SERVICE"
-      os.environ["ORACLE_USER"] = "env_user"
-      os.environ["ORACLE_PASSWORD"] = "env_pass"
+        """Test config can be created from environment variables."""
+        # Set environment variables
+        os.environ["ORACLE_HOST"] = "env-host"
+        os.environ["ORACLE_PORT"] = "1522"
+        os.environ["ORACLE_SERVICE"] = "ENV_SERVICE"
+        os.environ["ORACLE_USER"] = "env_user"
+        os.environ["ORACLE_PASSWORD"] = "env_pass"
 
-      try:
-          # Would work with proper env var handling in config
-          config = FlextOracleTargetConfig(
-              oracle_host=os.environ.get("ORACLE_HOST", "localhost"),
-              oracle_port=int(os.environ.get("ORACLE_PORT", "1521")),
-              oracle_service=os.environ.get("ORACLE_SERVICE", "XE"),
-              oracle_user=os.environ.get("ORACLE_USER", "test"),
-              oracle_password=os.environ.get("ORACLE_PASSWORD", "test"),
-          )
+        try:
+            # Would work with proper env var handling in config
+            config = FlextOracleTargetConfig(
+                oracle_host=os.environ.get("ORACLE_HOST", "localhost"),
+                oracle_port=int(os.environ.get("ORACLE_PORT", "1521")),
+                oracle_service=os.environ.get("ORACLE_SERVICE", "XE"),
+                oracle_user=os.environ.get("ORACLE_USER", "test"),
+                oracle_password=os.environ.get("ORACLE_PASSWORD", "test"),
+            )
 
-          assert config.oracle_host == "env-host"
-          assert config.oracle_port == 1522
-          assert config.oracle_service == "ENV_SERVICE"
+            assert config.oracle_host == "env-host"
+            assert config.oracle_port == 1522
+            assert config.oracle_service == "ENV_SERVICE"
 
-      finally:
-          # Cleanup
-          for key in [
-              "ORACLE_HOST",
-              "ORACLE_PORT",
-              "ORACLE_SERVICE",
-              "ORACLE_USER",
-              "ORACLE_PASSWORD",
-          ]:
-              os.environ.pop(key, None)
+        finally:
+            # Cleanup
+            for key in [
+                "ORACLE_HOST",
+                "ORACLE_PORT",
+                "ORACLE_SERVICE",
+                "ORACLE_USER",
+                "ORACLE_PASSWORD",
+            ]:
+                os.environ.pop(key, None)
 
     def test_config_password_hiding(self) -> None:
-      """Test password is hidden in string representation."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="super_secret_password",
-      )
+        """Test password is hidden in string representation."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="super_secret_password",
+        )
 
-      # Password should not appear in string repr
-      config_str = str(config)
-      assert "super_secret_password" not in config_str
-      assert "**********" in config_str or "SecretStr" in config_str
+        # Password should not appear in string repr
+        config_str = str(config)
+        assert "super_secret_password" not in config_str
+        assert "**********" in config_str or "SecretStr" in config_str
 
     def test_config_immutability(self) -> None:
-      """Test config is immutable after creation."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-      )
+        """Test config is immutable after creation."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+        )
 
-      # Should not be able to modify
-      with pytest.raises(ValidationError):
-          config.oracle_host = "new-host"
+        # Should not be able to modify
+        with pytest.raises(ValidationError):
+            config.oracle_host = "new-host"
 
     def test_sdc_column_customization(self) -> None:
-      """Test SDC column name customization."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-          sdc_extracted_at_column="extracted_timestamp",
-          sdc_loaded_at_column="loaded_timestamp",
-          sdc_deleted_at_column="deleted_timestamp",
-          sdc_sequence_column="sequence_num",
-      )
+        """Test SDC column name customization."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+            sdc_extracted_at_column="extracted_timestamp",
+            sdc_loaded_at_column="loaded_timestamp",
+            sdc_deleted_at_column="deleted_timestamp",
+            sdc_sequence_column="sequence_num",
+        )
 
-      assert config.sdc_extracted_at_column == "extracted_timestamp"
-      assert config.sdc_loaded_at_column == "loaded_timestamp"
-      assert config.sdc_deleted_at_column == "deleted_timestamp"
-      assert config.sdc_sequence_column == "sequence_num"
+        assert config.sdc_extracted_at_column == "extracted_timestamp"
+        assert config.sdc_loaded_at_column == "loaded_timestamp"
+        assert config.sdc_deleted_at_column == "deleted_timestamp"
+        assert config.sdc_sequence_column == "sequence_num"
 
     def test_type_mapping_configuration(self) -> None:
-      """Test type mapping configuration."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-          type_mapping={
-              "string": "NVARCHAR2(2000)",
-              "integer": "NUMBER(19)",
-              "number": "BINARY_DOUBLE",
-              "boolean": "VARCHAR2(5)",
-              "date-time": "DATE",
-          },
-          default_varchar_length=2000,
-          use_clob_for_large_strings=True,
-          clob_threshold=2000,
-      )
+        """Test type mapping configuration."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+            type_mapping={
+                "string": "NVARCHAR2(2000)",
+                "integer": "NUMBER(19)",
+                "number": "BINARY_DOUBLE",
+                "boolean": "VARCHAR2(5)",
+                "date-time": "DATE",
+            },
+            default_varchar_length=2000,
+            use_clob_for_large_strings=True,
+            clob_threshold=2000,
+        )
 
-      assert config.type_mapping["string"] == "NVARCHAR2(2000)"
-      assert config.type_mapping["number"] == "BINARY_DOUBLE"
-      assert config.default_varchar_length == 2000
-      assert config.use_clob_for_large_strings is True
-      assert config.clob_threshold == 2000
+        assert config.type_mapping["string"] == "NVARCHAR2(2000)"
+        assert config.type_mapping["number"] == "BINARY_DOUBLE"
+        assert config.default_varchar_length == 2000
+        assert config.use_clob_for_large_strings is True
+        assert config.clob_threshold == 2000
 
     def test_column_ordering_rules(self) -> None:
-      """Test column ordering rules configuration."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-          column_ordering="custom",
-          column_order_rules={
-              "sdc_columns": 1,  # SDC first
-              "primary_keys": 2,
-              "audit_columns": 3,
-              "regular_columns": 4,
-          },
-          audit_column_patterns=["created_", "updated_", "_at$"],
-      )
+        """Test column ordering rules configuration."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+            column_ordering="custom",
+            column_order_rules={
+                "sdc_columns": 1,  # SDC first
+                "primary_keys": 2,
+                "audit_columns": 3,
+                "regular_columns": 4,
+            },
+            audit_column_patterns=["created_", "updated_", "_at$"],
+        )
 
-      assert config.column_ordering == "custom"
-      assert config.column_order_rules["sdc_columns"] == 1
-      assert len(config.audit_column_patterns) == 3
+        assert config.column_ordering == "custom"
+        assert config.column_order_rules["sdc_columns"] == 1
+        assert len(config.audit_column_patterns) == 3
 
     def test_index_configuration(self) -> None:
-      """Test index management configuration."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-          maintain_indexes=True,
-          create_foreign_key_indexes=True,
-          custom_indexes={
-              "users": [
-                  {
-                      "name": "idx_users_email_unique",
-                      "columns": ["email"],
-                      "unique": True,
-                      "tablespace": "USERS_IDX",
-                  },
-                  {
-                      "name": "idx_users_composite",
-                      "columns": ["last_name", "first_name"],
-                      "unique": False,
-                  },
-              ],
-              "orders": [
-                  {
-                      "name": "idx_orders_date",
-                      "columns": ["order_date"],
-                      "unique": False,
-                      "compress": True,
-                  },
-              ],
-          },
-          index_naming_template="IX_{table}_{columns}_{unique}",
-          preserve_existing_indexes=True,
-      )
+        """Test index management configuration."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+            maintain_indexes=True,
+            create_foreign_key_indexes=True,
+            custom_indexes={
+                "users": [
+                    {
+                        "name": "idx_users_email_unique",
+                        "columns": ["email"],
+                        "unique": True,
+                        "tablespace": "USERS_IDX",
+                    },
+                    {
+                        "name": "idx_users_composite",
+                        "columns": ["last_name", "first_name"],
+                        "unique": False,
+                    },
+                ],
+                "orders": [
+                    {
+                        "name": "idx_orders_date",
+                        "columns": ["order_date"],
+                        "unique": False,
+                        "compress": True,
+                    },
+                ],
+            },
+            index_naming_template="IX_{table}_{columns}_{unique}",
+            preserve_existing_indexes=True,
+        )
 
-      assert config.maintain_indexes is True
-      assert config.create_foreign_key_indexes is True
-      assert len(config.custom_indexes["users"]) == 2
-      assert config.custom_indexes["users"][0]["unique"] is True
-      assert config.index_naming_template == "IX_{table}_{columns}_{unique}"
+        assert config.maintain_indexes is True
+        assert config.create_foreign_key_indexes is True
+        assert len(config.custom_indexes["users"]) == 2
+        assert config.custom_indexes["users"][0]["unique"] is True
+        assert config.index_naming_template == "IX_{table}_{columns}_{unique}"
 
     def test_storage_mode_options(self) -> None:
-      """Test different storage mode configurations."""
-      # Flattened mode (default)
-      config1 = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-          storage_mode="flattened",
-      )
-      assert config1.storage_mode == "flattened"
+        """Test different storage mode configurations."""
+        # Flattened mode (default)
+        config1 = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+            storage_mode="flattened",
+        )
+        assert config1.storage_mode == "flattened"
 
-      # JSON mode
-      config2 = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-          storage_mode="json",
-          json_column_name="json_data",
-      )
-      assert config2.storage_mode == "json"
-      assert config2.json_column_name == "json_data"
+        # JSON mode
+        config2 = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+            storage_mode="json",
+            json_column_name="json_data",
+        )
+        assert config2.storage_mode == "json"
+        assert config2.json_column_name == "json_data"
 
-      # Hybrid mode
-      config3 = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-          storage_mode="hybrid",
-          flatten_max_depth=2,
-      )
-      assert config3.storage_mode == "hybrid"
-      assert config3.flatten_max_depth == 2
+        # Hybrid mode
+        config3 = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+            storage_mode="hybrid",
+            flatten_max_depth=2,
+        )
+        assert config3.storage_mode == "hybrid"
+        assert config3.flatten_max_depth == 2
 
     def test_validation_methods(self) -> None:
-      """Test config validation methods."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-      )
+        """Test config validation methods."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+        )
 
-      # Test validate_oracle_config
-      result = config.validate_oracle_config()
-      assert isinstance(result, FlextResult)
-      assert result.is_success
+        # Test validate_oracle_config
+        result = config.validate_oracle_config()
+        assert isinstance(result, FlextResult)
+        assert result.is_success
 
-      # Config with missing required fields would fail
-      # (Can't test directly due to Pydantic validation)
+        # Config with missing required fields would fail
+        # (Can't test directly due to Pydantic validation)
 
     def test_oracle_specific_features(self) -> None:
-      """Test Oracle-specific feature configurations."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-          # Oracle-specific
-          enable_auto_commit=False,
-          use_direct_path=True,
-          parallel_degree=16,
-          oracle_wallet_location="/opt/oracle/wallet",
-          oracle_wallet_password="wallet_secret",
-      )
+        """Test Oracle-specific feature configurations."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+            # Oracle-specific
+            enable_auto_commit=False,
+            use_direct_path=True,
+            parallel_degree=16,
+            oracle_wallet_location="/opt/oracle/wallet",
+            oracle_wallet_password="wallet_secret",
+        )
 
-      assert config.enable_auto_commit is False
-      assert config.use_direct_path is True
-      assert config.parallel_degree == 16
-      assert config.oracle_wallet_location == "/opt/oracle/wallet"
+        assert config.enable_auto_commit is False
+        assert config.use_direct_path is True
+        assert config.parallel_degree == 16
+        assert config.oracle_wallet_location == "/opt/oracle/wallet"
 
     def test_config_serialization(self) -> None:
-      """Test config can be serialized and deserialized."""
-      config = FlextOracleTargetConfig(
-          oracle_host="localhost",
-          oracle_service="XE",
-          oracle_user="test",
-          oracle_password="test",
-          batch_size=2000,
-          column_mappings={"users": {"old": "new"}},
-      )
+        """Test config can be serialized and deserialized."""
+        config = FlextOracleTargetConfig(
+            oracle_host="localhost",
+            oracle_service="XE",
+            oracle_user="test",
+            oracle_password="test",
+            batch_size=2000,
+            column_mappings={"users": {"old": "new"}},
+        )
 
-      # Convert to dict
-      config_dict = config.model_dump()
-      assert config_dict["oracle_host"] == "localhost"
-      assert config_dict["batch_size"] == 2000
+        # Convert to dict
+        config_dict = config.model_dump()
+        assert config_dict["oracle_host"] == "localhost"
+        assert config_dict["batch_size"] == 2000
 
-      # Password should be masked
-      assert config_dict["oracle_password"] != "test"
+        # Password should be masked
+        assert config_dict["oracle_password"] != "test"
 
-      # Can recreate from dict (with password)
-      config_dict["oracle_password"] = "test"
-      new_config = FlextOracleTargetConfig(**config_dict)
-      assert new_config.oracle_host == config.oracle_host
-      assert new_config.batch_size == config.batch_size
+        # Can recreate from dict (with password)
+        config_dict["oracle_password"] = "test"
+        new_config = FlextOracleTargetConfig(**config_dict)
+        assert new_config.oracle_host == config.oracle_host
+        assert new_config.batch_size == config.batch_size
