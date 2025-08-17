@@ -6,11 +6,7 @@ Singer-formatted data into an Oracle database.
 
 import asyncio
 import json
-import sys
 from pathlib import Path
-
-# Add parent directory to path to import the module
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig
 
@@ -19,14 +15,14 @@ def load_config() -> dict:
     """Load configuration from file."""
     config_path = Path("config.json")
     with config_path.open(encoding="utf-8") as f:
-        return json.load(f)
+      return json.load(f)
 
 
 def load_singer_messages() -> list[dict]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
     with data_path.open(encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+      return [json.loads(line) for line in f if line.strip()]
 
 
 async def main() -> None:
@@ -39,7 +35,7 @@ async def main() -> None:
 
     config = FlextOracleTargetConfig(**config_dict)
     print(
-        f"✅ Configuration loaded: {config.oracle_host}:{config.oracle_port}/{config.oracle_service}",
+      f"✅ Configuration loaded: {config.oracle_host}:{config.oracle_port}/{config.oracle_service}",
     )
 
     # Create target instance
@@ -49,8 +45,8 @@ async def main() -> None:
     print("\n📦 Initializing target...")
     init_result = await target.initialize()
     if init_result.is_failure:
-        print(f"❌ Initialization failed: {init_result.error}")
-        return
+      print(f"❌ Initialization failed: {init_result.error}")
+      return
     print("✅ Target initialized successfully")
 
     # Process Singer messages
@@ -58,23 +54,23 @@ async def main() -> None:
     messages = load_singer_messages()
 
     for line_num, message in enumerate(messages, 1):
-        msg_type = message.get("type", "UNKNOWN")
+      msg_type = message.get("type", "UNKNOWN")
 
-        if msg_type == "SCHEMA":
-            stream = message.get("stream", "unknown")
-            print(f"  📋 Processing schema for stream: {stream}")
-        elif msg_type == "RECORD":
-            stream = message.get("stream", "unknown")
-            record_id = message.get("record", {}).get("id", "?")
-            print(f"  📝 Processing record {record_id} for stream: {stream}")
-        elif msg_type == "STATE":
-            print("  💾 Processing state message")
+      if msg_type == "SCHEMA":
+          stream = message.get("stream", "unknown")
+          print(f"  📋 Processing schema for stream: {stream}")
+      elif msg_type == "RECORD":
+          stream = message.get("stream", "unknown")
+          record_id = message.get("record", {}).get("id", "?")
+          print(f"  📝 Processing record {record_id} for stream: {stream}")
+      elif msg_type == "STATE":
+          print("  💾 Processing state message")
 
-        # Execute the message
-        result = await target.execute(json.dumps(message))
-        if result.is_failure:
-            print(f"❌ Error processing line {line_num}: {result.error}")
-            return
+      # Execute the message
+      result = await target.execute(json.dumps(message))
+      if result.is_failure:
+          print(f"❌ Error processing line {line_num}: {result.error}")
+          return
 
     print("\n✅ All messages processed successfully!")
 

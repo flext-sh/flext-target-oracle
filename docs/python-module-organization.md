@@ -493,7 +493,7 @@ from pydantic import Field, field_validator  # Third-party validation
 import json
 import asyncio
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import  Any, Dict, List
 
 # ❌ INCORRECT - Direct Singer SDK import when flext-meltano available
 from singer_sdk import Target  # Should use flext-meltano instead
