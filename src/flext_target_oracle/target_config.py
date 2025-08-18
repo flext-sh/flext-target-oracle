@@ -597,7 +597,7 @@ class FlextTargetOracleConfig(FlextBaseConfigModel):
         if self.parallel_degree:
             oracle_config["parallel_degree"] = self.parallel_degree
 
-        return oracle_config  # type: ignore[return-value]
+        return oracle_config
 
     def get_table_name(self, stream_name: str) -> str:
         """Generate Oracle table name from Singer stream name.

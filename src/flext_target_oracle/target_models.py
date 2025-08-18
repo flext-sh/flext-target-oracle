@@ -100,7 +100,7 @@ class OracleConnectionModel(FlextValueObject):
         min_length=1,
         max_length=128,
     )
-    schema: str = Field(  # type: ignore[assignment]
+    schema: str = Field(
         default="PUBLIC",
         description="Target schema for table operations",
         min_length=1,

@@ -52,6 +52,7 @@ from flext_target_oracle.target_exceptions import (
 )
 
 logger = get_logger(__name__)
+
 # Constants
 MAX_PORT_NUMBER = 65535  # Maximum valid TCP port number
 
@@ -471,7 +472,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
     # FlextSingerUnifiedInterface implementation
 
-    def initialize(self, config: FlextSingerUnifiedConfig) -> FlextResult[None]:  # type: ignore[override]
+    def initialize(self, config: FlextSingerUnifiedConfig) -> FlextResult[None]:
         """Initialize the Oracle target.
 
         Args:
@@ -569,7 +570,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                         if hasattr(message_result, "__await__"):
                             result = asyncio.run(message_result)
                         else:
-                            result = message_result  # type: ignore[assignment]
+                            result = message_result
                         if result.is_failure:
                             return FlextResult.fail(
                                 f"Failed to process message: {result.error}",
@@ -582,7 +583,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                 if hasattr(finalize_operation, "__await__"):
                     finalize_result = asyncio.run(finalize_operation)
                 else:
-                    finalize_result = finalize_operation  # type: ignore[assignment]
+                    finalize_result = finalize_operation
                 if finalize_result.is_failure:
                     return FlextResult.fail(
                         f"Failed to finalize streams: {finalize_result.error}",
