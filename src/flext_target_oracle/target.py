@@ -278,7 +278,7 @@ class OracleTargetLoadCommand(CLICommand):
                     if hasattr(result, "__await__"):
                         result_value = asyncio.run(result)
                     else:
-                        result_value = result  # type: ignore[assignment]
+                        result_value = result
                     if result_value.is_failure:
                         self.cli_helper.print_error(
                             f"Failed to process message: {result_value.error}",
@@ -298,7 +298,7 @@ class OracleTargetLoadCommand(CLICommand):
             if hasattr(finalize_result, "__await__"):
                 final_result_value = asyncio.run(finalize_result)
             else:
-                final_result_value = finalize_result  # type: ignore[assignment]
+                final_result_value = finalize_result
 
             if final_result_value.is_success:
                 stats = final_result_value.data

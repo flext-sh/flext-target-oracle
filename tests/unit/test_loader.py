@@ -12,10 +12,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from flext_core import get_logger
-from sqlalchemy import (  # type: ignore [reportMissingModuleSource]
+from sqlalchemy import (
     Column,
 )
-from sqlalchemy.types import (  # type: ignore [reportMissingModuleSource]
+from sqlalchemy.types import (
     CLOB,
     NUMBER,
     TIMESTAMP,
@@ -30,14 +30,13 @@ from flext_target_oracle import (
     LoadMethod,
 )
 
-# Configure logging for tests
 logger = get_logger(__name__)
 
 # Dynamic import for SQLAlchemy Engine and MetaData
 # This is done to avoid circular imports and enable mocking in specific tests
 
 with contextlib.suppress(ImportError):
-    pass  # type: ignore [reportMissingModuleSource]
+    pass
 
 # Constants for testing
 TEST_SCHEMA = "TEST_SCHEMA"
