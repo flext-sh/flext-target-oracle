@@ -143,10 +143,10 @@ def operation() -> FlextResult[Data]:
     """Clear docstring with FlextResult return type."""
     try:
         # Business logic here
-        return FlextResult.ok(data)
+        return FlextResult[None].ok(data)
     except Exception as e:
         logger.exception("Operation failed")
-        return FlextResult.fail(f"Operation failed: {e}")
+        return FlextResult[None].fail(f"Operation failed: {e}")
 
 # ✅ GOOD: Configuration with validation
 class Config(FlextValueObject):
@@ -180,18 +180,18 @@ async def process_record(record: dict) -> FlextResult[None]:
     try:
         # Validate input
         if not record:
-            return FlextResult.fail("Record cannot be empty")
+            return FlextResult[None].fail("Record cannot be empty")
 
         # Process record
         result = await some_operation(record)
         if result.is_failure:
             return result  # Propagate failure
 
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     except Exception as e:
         logger.exception("Record processing failed")
-        return FlextResult.fail(f"Processing failed: {e}")
+        return FlextResult[None].fail(f"Processing failed: {e}")
 
 # ✅ Chain FlextResult operations
 async def process_batch(records: list[dict]) -> FlextResult[Stats]:
@@ -201,11 +201,11 @@ async def process_batch(records: list[dict]) -> FlextResult[Stats]:
     for record in records:
         result = await process_record(record)
         if result.is_failure:
-            return FlextResult.fail(f"Batch failed on record: {result.error}")
+            return FlextResult[None].fail(f"Batch failed on record: {result.error}")
 
         stats.increment()
 
-    return FlextResult.ok(stats)
+    return FlextResult[None].ok(stats)
 ```
 
 ### Configuration Patterns

@@ -68,7 +68,7 @@ async def _handle_record(self, message: dict[str, object]) -> FlextResult[None]:
     record_data = message.get("record")
 
     if not isinstance(stream_name, str) or not isinstance(record_data, dict):
-        return FlextResult.fail("Record message missing stream or data")
+        return FlextResult[None].fail("Record message missing stream or data")
 
     return await self._loader.load_record(stream_name, record_data)
 ```
@@ -95,7 +95,7 @@ async def _handle_state(self, message: dict[str, object]) -> FlextResult[None]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
     logger.debug("State message received - forwarding to Meltano")
-    return FlextResult.ok(None)
+    return FlextResult[None].ok(None)
 ```
 
 ## Current Implementation Status
@@ -430,12 +430,12 @@ async def _insert_batch(self, table_name: str, records: list) -> FlextResult[Non
             for record in records:
                 result = connected_api.execute_ddl(sql)  # Should be execute_dml
                 if not result.success:
-                    return FlextResult.fail(f"Insert failed: {result.error}")
+                    return FlextResult[None].fail(f"Insert failed: {result.error}")
 
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     except Exception as e:
-        return FlextResult.fail(f"Batch insert failed: {e}")
+        return FlextResult[None].fail(f"Batch insert failed: {e}")
 
 # Improved implementation (needed)
 async def _insert_batch_improved(self, table_name: str, records: list) -> FlextResult[None]:
@@ -447,16 +447,16 @@ async def _insert_batch_improved(self, table_name: str, records: list) -> FlextR
                 result = connected_api.execute_batch_dml(sql, parameters)
                 if result.is_failure:
                     # Transaction automatically rolled back
-                    return FlextResult.fail(f"Batch insert failed: {result.error}")
+                    return FlextResult[None].fail(f"Batch insert failed: {result.error}")
 
                 # Commit only on success
                 connected_api.commit()
 
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
     except Exception as e:
         # Transaction automatically rolled back
-        return FlextResult.fail(f"Batch insert failed: {e}")
+        return FlextResult[None].fail(f"Batch insert failed: {e}")
 ```
 
 ## Testing Singer Integration

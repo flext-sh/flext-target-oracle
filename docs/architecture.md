@@ -229,7 +229,7 @@ flowchart TD
     A[Operation Start] --> B{FlextResult Pattern}
     B -->|Success| C[Continue Pipeline]
     B -->|Failure| D[Log Error with Context]
-    D --> E[Return FlextResult.fail()]
+    D --> E[Return FlextResult[None].fail()]
     E --> F[Caller Handles Error]
     F --> G{Recoverable?}
     G -->|Yes| H[Retry with Backoff]
@@ -260,7 +260,7 @@ class BatchProcessor:
         if len(buffer) >= self._batch_size:
             return await self._flush_batch(stream)
 
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 ```
 
 ### Connection Management
