@@ -32,7 +32,7 @@ class TestFlextOracleTargetCoverage:
         target = FlextOracleTarget(config)
 
         # Mock the loader to return success
-        mock_result = FlextResult.ok(None)
+        mock_result = FlextResult[None].ok(None)
         target._loader.load_record = AsyncMock(return_value=mock_result)
 
         # Test successful record write
@@ -52,7 +52,7 @@ class TestFlextOracleTargetCoverage:
         target = FlextOracleTarget(config)
 
         # Mock the loader to return failure
-        mock_result = FlextResult.fail("Database connection failed")
+        mock_result = FlextResult[None].fail("Database connection failed")
         target._loader.load_record = AsyncMock(return_value=mock_result)
 
         # Test record write failure
@@ -93,7 +93,7 @@ class TestFlextOracleTargetCoverage:
             target.target_config,
             "validate_domain_rules",
         ) as mock_validate:
-            mock_validate.return_value = FlextResult.ok(None)
+            mock_validate.return_value = FlextResult[None].ok(None)
 
             # Test successful connection
             result = target._test_connection_impl()
@@ -187,7 +187,7 @@ class TestFlextOracleTargetCoverage:
         ]
 
         # Mock loader to return success for valid records
-        target._loader.load_record = AsyncMock(return_value=FlextResult.ok(None))
+        target._loader.load_record = AsyncMock(return_value=FlextResult[None].ok(None))
 
         result = await target._write_records_impl(invalid_records)
         assert result.success

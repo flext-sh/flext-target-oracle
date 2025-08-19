@@ -53,7 +53,7 @@ class TestFlextOracleTarget:
         # Mock the domain validation to return success
         with patch(
             "flext_target_oracle.config.FlextOracleTargetConfig.validate_domain_rules",
-            return_value=FlextResult.ok(None),
+            return_value=FlextResult[None].ok(None),
         ):
             result = sample_target._test_connection_impl()
             if not (result):
@@ -69,7 +69,7 @@ class TestFlextOracleTarget:
         # Mock the domain validation to return failure
         with patch(
             "flext_target_oracle.config.FlextOracleTargetConfig.validate_domain_rules",
-            return_value=FlextResult.fail("Validation failed"),
+            return_value=FlextResult[None].fail("Validation failed"),
         ):
             result = sample_target._test_connection_impl()
             if result:
@@ -87,7 +87,7 @@ class TestFlextOracleTarget:
         with patch.object(
             sample_target._loader,
             "load_record",
-            return_value=FlextResult.ok(None),
+            return_value=FlextResult[None].ok(None),
         ):
             result = await sample_target._write_records_impl(batch_records)
             assert result.success
@@ -103,7 +103,7 @@ class TestFlextOracleTarget:
         with patch.object(
             sample_target._loader,
             "load_record",
-            return_value=FlextResult.fail("Load failed"),
+            return_value=FlextResult[None].fail("Load failed"),
         ):
             result = await sample_target._write_records_impl(batch_records)
             assert not result.success
@@ -138,7 +138,7 @@ class TestFlextOracleTarget:
         with patch.object(
             sample_target._loader,
             "ensure_table_exists",
-            return_value=FlextResult.ok(None),
+            return_value=FlextResult[None].ok(None),
         ):
             result = await sample_target.process_singer_message(schema)
             assert result.success
@@ -154,7 +154,7 @@ class TestFlextOracleTarget:
         with patch.object(
             sample_target._loader,
             "load_record",
-            return_value=FlextResult.ok(None),
+            return_value=FlextResult[None].ok(None),
         ):
             result = await sample_target.process_singer_message(record)
             assert result.success
@@ -199,7 +199,7 @@ class TestFlextOracleTarget:
         with patch.object(
             sample_target._loader,
             "ensure_table_exists",
-            return_value=FlextResult.ok(None),
+            return_value=FlextResult[None].ok(None),
         ):
             result = await sample_target._handle_schema(schema_message)
             assert result.success
@@ -239,7 +239,7 @@ class TestFlextOracleTarget:
         with patch.object(
             sample_target._loader,
             "load_record",
-            return_value=FlextResult.ok(None),
+            return_value=FlextResult[None].ok(None),
         ):
             result = await sample_target._handle_record(record_message)
             assert result.success
@@ -288,7 +288,7 @@ class TestFlextOracleTarget:
         with patch.object(
             sample_target._loader,
             "finalize_all_streams",
-            return_value=FlextResult.ok(mock_stats),
+            return_value=FlextResult[None].ok(mock_stats),
         ):
             result = await sample_target.finalize()
             assert result.success
@@ -304,7 +304,7 @@ class TestFlextOracleTarget:
         with patch.object(
             sample_target._loader,
             "finalize_all_streams",
-            return_value=FlextResult.fail("Finalization failed"),
+            return_value=FlextResult[None].fail("Finalization failed"),
         ):
             result = await sample_target.finalize()
             assert not result.success

@@ -182,7 +182,7 @@ class ProductionTargetManager:
             logger.info("Validating configuration domain rules")
             validation_result = self.config.validate_domain_rules()
             if validation_result.is_failure:
-                return FlextResult.fail(
+                return FlextResult[None].fail(
                     f"Configuration validation failed: {validation_result.error}",
                 )
 
@@ -193,14 +193,14 @@ class ProductionTargetManager:
             # Step 3: Test connectivity
             logger.info("Testing Oracle database connectivity")
             if not self.target._test_connection_impl():
-                return FlextResult.fail("Oracle connectivity test failed")
+                return FlextResult[None].fail("Oracle connectivity test failed")
 
             logger.info("Production target initialized successfully")
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
 
         except Exception as e:
             logger.exception("Failed to initialize production target")
-            return FlextResult.fail(f"Initialization error: {e}")
+            return FlextResult[None].fail(f"Initialization error: {e}")
 
     async def process_singer_stream(
         self,
@@ -216,7 +216,7 @@ class ProductionTargetManager:
 
         """
         if not self.target:
-            return FlextResult.fail("Target not initialized")
+            return FlextResult[None].fail("Target not initialized")
 
         logger.info("Processing Singer stream with %d messages", len(messages))
 
@@ -299,13 +299,13 @@ class ProductionTargetManager:
                 "Stream processing completed in %.2f seconds",
                 processing_duration,
             )
-            return FlextResult.ok(stats)
+            return FlextResult[None].ok(stats)
 
         except Exception as e:
             logger.exception("Unexpected error during stream processing")
             stats["processing_end_time"] = time.time()
             stats["errors_encountered"] += 1
-            return FlextResult.fail(f"Stream processing error: {e}")
+            return FlextResult[None].fail(f"Stream processing error: {e}")
 
     async def health_check(self) -> FlextResult[dict[str, Any]]:
         """Perform comprehensive health check for monitoring systems.
@@ -351,13 +351,13 @@ class ProductionTargetManager:
             )
 
             logger.debug("Health check completed: %s", health_status["status"])
-            return FlextResult.ok(health_status)
+            return FlextResult[None].ok(health_status)
 
         except Exception as e:
             logger.exception("Health check failed")
             health_status["status"] = "unhealthy"
             health_status["error"] = str(e)
-            return FlextResult.fail(f"Health check error: {e}")
+            return FlextResult[None].fail(f"Health check error: {e}")
 
     async def shutdown(self) -> FlextResult[None]:
         """Graceful shutdown with resource cleanup.
@@ -379,11 +379,11 @@ class ProductionTargetManager:
                 self.target = None
 
             logger.info("Graceful shutdown completed")
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
 
         except Exception as e:
             logger.exception("Error during shutdown")
-            return FlextResult.fail(f"Shutdown error: {e}")
+            return FlextResult[None].fail(f"Shutdown error: {e}")
 
 
 async def demonstrate_production_setup() -> None:

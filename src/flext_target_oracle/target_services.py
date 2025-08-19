@@ -185,16 +185,16 @@ class OracleConnectionService:
                 )
 
                 if tables_result.is_failure:
-                    return FlextResult.fail(
+                    return FlextResult[None].fail(
                         f"Connection test failed: {tables_result.error}",
                     )
 
                 logger.info("Oracle connection test successful")
-                return FlextResult.ok(None)
+                return FlextResult[None].ok(None)
 
         except Exception as e:
             logger.exception("Oracle connection test failed")
-            return FlextResult.fail(f"Connection test failed: {e}")
+            return FlextResult[None].fail(f"Connection test failed: {e}")
 
     def get_connection_info(self) -> FlextResult[OracleConnectionModel]:
         """Get connection information.
@@ -204,9 +204,9 @@ class OracleConnectionService:
 
         """
         if self._connection_model is None:
-            return FlextResult.fail("Connection model not initialized")
+            return FlextResult[None].fail("Connection model not initialized")
 
-        return FlextResult.ok(self._connection_model)
+        return FlextResult[None].ok(self._connection_model)
 
 
 # =============================================================================
@@ -261,7 +261,7 @@ class OracleSchemaService:
                 )
 
                 if tables_result.is_failure:
-                    return FlextResult.fail(
+                    return FlextResult[None].fail(
                         f"Failed to check tables: {tables_result.error}",
                     )
 
@@ -270,14 +270,14 @@ class OracleSchemaService:
 
                 if table_exists:
                     logger.info(f"Table {stream.table_name} already exists")
-                    return FlextResult.ok(None)
+                    return FlextResult[None].ok(None)
 
                 # Create table based on storage mode
                 return await self._create_table(stream, schema, key_properties)
 
         except Exception as e:
             logger.exception("Failed to ensure table exists")
-            return FlextResult.fail(f"Table creation failed: {e}")
+            return FlextResult[None].fail(f"Table creation failed: {e}")
 
     async def get_table_columns(
         self,
@@ -304,15 +304,15 @@ class OracleSchemaService:
                 )
 
                 if columns_result.is_failure:
-                    return FlextResult.fail(
+                    return FlextResult[None].fail(
                         f"Failed to get columns: {columns_result.error}",
                     )
 
-                return FlextResult.ok(columns_result.data or [])
+                return FlextResult[None].ok(columns_result.data or [])
 
         except Exception as e:
             logger.exception("Failed to get table columns")
-            return FlextResult.fail(f"Column retrieval failed: {e}")
+            return FlextResult[None].fail(f"Column retrieval failed: {e}")
 
     async def _create_table(
         self,
@@ -362,25 +362,25 @@ class OracleSchemaService:
                 )
 
                 if ddl_result.is_failure:
-                    return FlextResult.fail(f"Failed to create DDL: {ddl_result.error}")
+                    return FlextResult[None].fail(f"Failed to create DDL: {ddl_result.error}")
 
                 # Execute DDL
                 ddl_sql = ddl_result.data
                 if ddl_sql is None:
-                    return FlextResult.fail("DDL creation returned None")
+                    return FlextResult[None].fail("DDL creation returned None")
 
                 exec_result = connected_api.execute_ddl(ddl_sql)
                 if exec_result.is_failure:
-                    return FlextResult.fail(
+                    return FlextResult[None].fail(
                         f"Failed to create table: {exec_result.error}",
                     )
 
                 logger.info(f"Created table {stream.table_name}")
-                return FlextResult.ok(None)
+                return FlextResult[None].ok(None)
 
         except Exception as e:
             logger.exception("Failed to create table")
-            return FlextResult.fail(f"Table creation failed: {e}")
+            return FlextResult[None].fail(f"Table creation failed: {e}")
 
 
 # =============================================================================
@@ -448,11 +448,11 @@ class OracleBatchService:
             if new_batch.is_batch_full:
                 return await self.flush_batch(stream_name)
 
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
 
         except Exception as e:
             logger.exception("Failed to add record to batch")
-            return FlextResult.fail(f"Batch add failed: {e}")
+            return FlextResult[None].fail(f"Batch add failed: {e}")
 
     async def flush_batch(self, stream_name: str) -> FlextResult[None]:
         """Flush pending batch for stream.
@@ -467,7 +467,7 @@ class OracleBatchService:
         try:
             batch = self._batches.get(stream_name)
             if not batch or not batch.has_pending_records:
-                return FlextResult.ok(None)
+                return FlextResult[None].ok(None)
 
             table_name = self._config.get_table_name(stream_name)
             loaded_at = datetime.now(UTC)
@@ -482,13 +482,13 @@ class OracleBatchService:
                 )
 
                 if sql_result.is_failure:
-                    return FlextResult.fail(
+                    return FlextResult[None].fail(
                         f"Failed to build INSERT: {sql_result.error}",
                     )
 
                 sql_str = sql_result.data
                 if sql_str is None:
-                    return FlextResult.fail("INSERT statement creation returned None")
+                    return FlextResult[None].fail("INSERT statement creation returned None")
 
                 # Prepare batch operations
                 batch_operations: list[tuple[str, dict[str, object] | None]] = []
@@ -508,7 +508,7 @@ class OracleBatchService:
                     self._statistics[stream_name] = stats.add_error(
                         f"Batch insert failed: {result.error}",
                     )
-                    return FlextResult.fail(f"Batch insert failed: {result.error}")
+                    return FlextResult[None].fail(f"Batch insert failed: {result.error}")
 
                 # Update batch and statistics
                 records_processed = len(batch.current_batch)
@@ -527,11 +527,11 @@ class OracleBatchService:
                 )
 
                 logger.info(f"Flushed {records_processed} records to {table_name}")
-                return FlextResult.ok(None)
+                return FlextResult[None].ok(None)
 
         except Exception as e:
             logger.exception("Failed to flush batch")
-            return FlextResult.fail(f"Batch flush failed: {e}")
+            return FlextResult[None].fail(f"Batch flush failed: {e}")
 
     async def flush_all_batches(self) -> FlextResult[LoadStatisticsModel]:
         """Flush all pending batches.
@@ -574,11 +574,11 @@ class OracleBatchService:
                 error_details=all_errors,
             ).finalize()
 
-            return FlextResult.ok(aggregated_stats)
+            return FlextResult[None].ok(aggregated_stats)
 
         except Exception as e:
             logger.exception("Failed to flush all batches")
-            return FlextResult.fail(f"Batch flush all failed: {e}")
+            return FlextResult[None].fail(f"Batch flush all failed: {e}")
 
 
 # =============================================================================
@@ -643,11 +643,11 @@ class OracleRecordService:
                 if "_sdc_extracted_at" not in transformed_record:
                     transformed_record["_sdc_extracted_at"] = now
 
-            return FlextResult.ok(transformed_record)
+            return FlextResult[None].ok(transformed_record)
 
         except Exception as e:
             logger.exception("Failed to transform record")
-            return FlextResult.fail(f"Record transformation failed: {e}")
+            return FlextResult[None].fail(f"Record transformation failed: {e}")
 
     def validate_record(
         self,
@@ -675,11 +675,11 @@ class OracleRecordService:
             if type_validation.is_failure:
                 return type_validation
 
-            return FlextResult.ok(None)
+            return FlextResult[None].ok(None)
 
         except Exception as e:
             logger.exception("Failed to validate record")
-            return FlextResult.fail(f"Record validation failed: {e}")
+            return FlextResult[None].fail(f"Record validation failed: {e}")
 
     def _validate_required_fields(
         self,
@@ -689,8 +689,8 @@ class OracleRecordService:
         """Validate required fields are present."""
         for field in required_fields:
             if field not in record:
-                return FlextResult.fail(f"Missing required field: {field}")
-        return FlextResult.ok(None)
+                return FlextResult[None].fail(f"Missing required field: {field}")
+        return FlextResult[None].ok(None)
 
     def _validate_field_types(
         self,
@@ -714,11 +714,11 @@ class OracleRecordService:
                     if expected_type in type_validators:
                         validator_func = type_validators[expected_type]
                         if not validator_func(field_value):
-                            return FlextResult.fail(
+                            return FlextResult[None].fail(
                                 f"Field {field_name} should be {expected_type}, got {type(field_value)}",
                             )
 
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
 
 # =============================================================================

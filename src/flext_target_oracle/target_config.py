@@ -549,7 +549,7 @@ class FlextTargetOracleConfig(FlextBaseConfigModel):
             validator = _ConfigurationValidator()
             return validator.validate(self)
         except Exception as e:
-            return FlextResult.fail(f"Configuration validation failed: {e}")
+            return FlextResult[None].fail(f"Configuration validation failed: {e}")
 
     def get_oracle_config(self) -> dict[str, str | int | SecretStr | bool | None]:
         """Convert to flext-db-oracle configuration format.
@@ -750,7 +750,7 @@ class _ConfigurationValidator:
             if result.is_failure:
                 return result
 
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
 
 class _BaseValidator:
@@ -759,8 +759,8 @@ class _BaseValidator:
     def validate(self, config: FlextTargetOracleConfig) -> FlextResult[None]:
         """Template method for validation."""
         if not self._is_valid(config):
-            return FlextResult.fail(self._get_error_message())
-        return FlextResult.ok(None)
+            return FlextResult[None].fail(self._get_error_message())
+        return FlextResult[None].ok(None)
 
     def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
         """Check if configuration is valid - to be implemented by subclasses."""

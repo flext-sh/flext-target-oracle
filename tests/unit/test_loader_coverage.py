@@ -120,7 +120,7 @@ class TestFlextOracleTargetLoaderCoverage:
 
         # Mock Oracle API connection success but query failure
         mock_api = MagicMock()
-        mock_api.query = Mock(return_value=FlextResult.fail("SQL execution failed"))
+        mock_api.query = Mock(return_value=FlextResult[None].fail("SQL execution failed"))
 
         loader.oracle_api = MagicMock()
         loader.oracle_api.__enter__ = MagicMock(return_value=mock_api)
@@ -146,7 +146,7 @@ class TestFlextOracleTargetLoaderCoverage:
         # The loader uses internal batch management now
         # Mock _flush_batch to fail
         with patch.object(loader, "_flush_batch") as mock_flush:
-            mock_flush.return_value = FlextResult.fail("Flush failed")
+            mock_flush.return_value = FlextResult[None].fail("Flush failed")
 
             result = await loader.finalize_all_streams()
             assert result.is_failure
@@ -180,10 +180,10 @@ class TestFlextOracleTargetLoaderCoverage:
         loader = FlextOracleTargetLoader(config)
 
         # Mock table existence check
-        loader.ensure_table_exists = AsyncMock(return_value=FlextResult.ok(None))
+        loader.ensure_table_exists = AsyncMock(return_value=FlextResult[None].ok(None))
 
         # Mock batch flush
-        loader._flush_stream = AsyncMock(return_value=FlextResult.ok(None))
+        loader._flush_stream = AsyncMock(return_value=FlextResult[None].ok(None))
 
         # Load records - should trigger batch flush
         await loader.load_record("test_stream", {"id": 1, "name": "test1"})

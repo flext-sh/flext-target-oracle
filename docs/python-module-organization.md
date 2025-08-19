@@ -369,7 +369,7 @@ class FlextOracleTargetConfig(FlextValueObject):
             if result.is_failure:
                 return result
 
-        return FlextResult.ok(None)
+        return FlextResult[None].ok(None)
 
 # ❌ INCORRECT - Plain dataclass without validation
 @dataclass
@@ -433,7 +433,7 @@ async def process_batch(self, stream_name: str, records: list) -> FlextResult[No
                 "batch_size": len(records)
             }
         )
-        return FlextResult.fail(f"Unexpected error: {e}")
+        return FlextResult[None].fail(f"Unexpected error: {e}")
 
 # ❌ INCORRECT - Unstructured logging
 def process_batch_bad(self, stream_name: str, records: list):
@@ -682,8 +682,8 @@ def map_result(
 ) -> FlextResult[U]:
     """Generic result mapping with type safety."""
     if result.success:
-        return FlextResult.ok(func(result.data))
-    return FlextResult.fail(result.error)
+        return FlextResult[None].ok(func(result.data))
+    return FlextResult[None].fail(result.error)
 
 # ❌ MISSING type annotations (forbidden)
 async def process_message(self, message):  # Missing types
