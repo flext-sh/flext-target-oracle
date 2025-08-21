@@ -384,7 +384,7 @@ def malicious_data():
 
 ### **FLEXT Patterns**
 
-- `flext-core`: FlextResult, FlextValueObject
+- `flext-core`: FlextResult, FlextValue
 - `flext-meltano`: Target base class
 - `flext-db-oracle`: Oracle operations
 

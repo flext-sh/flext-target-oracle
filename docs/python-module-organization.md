@@ -11,7 +11,7 @@ FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for
 ### **Core Design Principles**
 
 1. **Singer Protocol Compliance**: Primary focus on Singer specification implementation
-2. **FLEXT Pattern Integration**: Uses flext-core foundations (FlextResult, FlextValueObject)
+2. **FLEXT Pattern Integration**: Uses flext-core foundations (FlextResult, FlextValue)
 3. **Clean Architecture Simplified**: Streamlined layers for target-specific needs
 4. **Type-Safe Everything**: Comprehensive type hints and strict MyPy compliance
 5. **Railway-Oriented Programming**: FlextResult[T] threading through all operations
@@ -26,7 +26,7 @@ FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for
 ```python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Public API gateway & exports
-├── config.py                # ⚙️ FlextValueObject configuration patterns
+├── config.py                # ⚙️ FlextValue configuration patterns
 ├── target.py                # 🎯 Singer Target implementation
 ├── loader.py                # 🔧 Oracle data loading operations
 └── exceptions.py            # 🚨 Domain-specific error hierarchy
@@ -107,7 +107,7 @@ __version__ = "0.9.0"
 ```python
 """Oracle target configuration using FLEXT ValueObject patterns."""
 
-from flext_core import FlextResult, FlextValueObject
+from flext_core import FlextResult, FlextValue
 from pydantic import Field, field_validator
 from enum import StrEnum
 
@@ -118,7 +118,7 @@ class LoadMethod(StrEnum):
     BULK_INSERT = "bulk_insert"
     BULK_MERGE = "bulk_merge"
 
-class FlextOracleTargetConfig(FlextValueObject):
+class FlextOracleTargetConfig(FlextValue):
     """Type-safe Oracle configuration with business rule validation."""
 
     # Required Oracle connection parameters
@@ -142,7 +142,7 @@ class FlextOracleTargetConfig(FlextValueObject):
 
 **Strengths**:
 
-- ✅ **FlextValueObject Integration**: Proper use of FLEXT core patterns
+- ✅ **FlextValue Integration**: Proper use of FLEXT core patterns
 - ✅ **Domain Validation**: Chain of Responsibility validation pattern
 - ✅ **Type Safety**: Comprehensive Pydantic validation
 
@@ -339,11 +339,11 @@ async def process_record_bad(self, stream_name: str, record_data: dict) -> None:
     self._flush_if_needed(stream_name)
 ```
 
-### **FlextValueObject Configuration Pattern**
+### **FlextValue Configuration Pattern**
 
 ```python
 # ✅ CORRECT - Comprehensive validation with domain rules
-class FlextOracleTargetConfig(FlextValueObject):
+class FlextOracleTargetConfig(FlextValue):
     """Type-safe configuration with business validation."""
 
     oracle_host: str = Field(..., description="Oracle host")
@@ -484,7 +484,7 @@ from flext_db_oracle import FlextDbOracleApi
 
 ```python
 # ✅ CORRECT - FLEXT ecosystem integration
-from flext_core import FlextResult, FlextValueObject, get_logger
+from flext_core import FlextResult, FlextValue, get_logger
 from flext_meltano import Target  # Singer SDK integration layer
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from pydantic import Field, field_validator  # Third-party validation
@@ -746,7 +746,7 @@ def ensure_table_exists(
 
 ```python
 # ✅ STANDARD - Ecosystem imports following established patterns
-from flext_core import FlextResult, FlextValueObject, get_logger
+from flext_core import FlextResult, FlextValue, get_logger
 from flext_meltano import Target, Record  # Singer SDK integration layer
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from flext_observability import metrics, tracing  # Future integration
@@ -886,7 +886,7 @@ def _write_record(self, record: Record) -> None:
 ### **Pre-Development Checklist**
 
 - [ ] **Architecture Review**: Module fits within Clean Architecture layers
-- [ ] **FLEXT Pattern Compliance**: Uses FlextResult, FlextValueObject patterns
+- [ ] **FLEXT Pattern Compliance**: Uses FlextResult, FlextValue patterns
 - [ ] **Dependency Analysis**: Dependencies flow inward (no circular references)
 - [ ] **Singer Compliance**: Follows Singer specification requirements
 - [ ] **Security Review**: No SQL injection or credential exposure risks

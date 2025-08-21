@@ -137,7 +137,7 @@ make test                   # Must maintain 90%+ coverage
 
 ```python
 # ✅ GOOD: FLEXT patterns
-from flext_core import FlextResult, FlextValueObject, get_logger
+from flext_core import FlextResult, FlextValue, get_logger
 
 def operation() -> FlextResult[Data]:
     """Clear docstring with FlextResult return type."""
@@ -149,7 +149,7 @@ def operation() -> FlextResult[Data]:
         return FlextResult[None].fail(f"Operation failed: {e}")
 
 # ✅ GOOD: Configuration with validation
-class Config(FlextValueObject):
+class Config(FlextValue):
     field: str = Field(..., description="Required field")
 
     @field_validator("field")
@@ -211,8 +211,8 @@ async def process_batch(records: list[dict]) -> FlextResult[Stats]:
 ### Configuration Patterns
 
 ```python
-# ✅ FlextValueObject with domain validation
-class FlextOracleTargetConfig(FlextValueObject):
+# ✅ FlextValue with domain validation
+class FlextOracleTargetConfig(FlextValue):
     """Type-safe configuration with business rule validation."""
 
     # Required fields with clear validation

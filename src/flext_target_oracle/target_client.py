@@ -10,7 +10,7 @@ The consolidated client provides:
 - FlextTargetOraclePlugin: Clean plugin architecture implementation
 
 Architecture Integration:
-    Built on flext-core foundations (FlextResult, FlextValueObject patterns)
+    Built on flext-core foundations (FlextResult, FlextValue patterns)
     Integrates with flext-meltano for Singer SDK compliance
     Uses flext-db-oracle for production-grade Oracle connectivity
     Follows railway-oriented programming for error handling

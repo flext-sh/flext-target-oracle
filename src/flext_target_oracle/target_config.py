@@ -4,7 +4,7 @@ This module provides type-safe configuration management for Oracle Singer target
 operations, implementing FLEXT ecosystem patterns with comprehensive validation
 and enterprise-grade reliability standards.
 
-The configuration system uses FlextValueObject as the foundation, providing
+The configuration system uses FlextValue as the foundation, providing
 immutable, validated configuration objects with domain rule validation through
 the Chain of Responsibility pattern. All validation follows railway-oriented
 programming principles using FlextResult for consistent error handling.
@@ -15,7 +15,7 @@ Key Classes:
     OracleTargetConstants: System constants to eliminate magic numbers
 
 Architecture Patterns:
-    FlextValueObject: Immutable configuration with built-in validation
+    FlextValue: Immutable configuration with built-in validation
     Chain of Responsibility: Modular validation rule composition
     Railway-Oriented Programming: FlextResult for error handling
     Domain-Driven Design: Business rule validation with domain context
@@ -501,9 +501,9 @@ class FlextTargetOracleConfig(FlextBaseConfigModel):
         return v
 
     def validate_business_rules(self) -> FlextResult[None]:
-        """Validate business rules implementation required by FlextValueObject.
+        """Validate business rules implementation required by FlextValue.
 
-        Implements abstract method from FlextValueObject by delegating to
+        Implements abstract method from FlextValue by delegating to
         validate_domain_rules for backwards compatibility and consistency.
 
         Returns:

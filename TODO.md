@@ -43,7 +43,7 @@
 ### Architecture Achievements
 
 - [x] **Documentation**: Enterprise-grade docstrings across all modules
-- [x] **Configuration**: FlextValueObject pattern with comprehensive validation
+- [x] **Configuration**: FlextValue pattern with comprehensive validation
 - [x] **Integration**: Clean integration with flext-core, flext-db-oracle patterns
 - [x] **Error Handling**: FlextResult pattern implementation
 
