@@ -36,6 +36,7 @@ from datetime import UTC, datetime
 
 from flext_core import FlextResult, get_logger
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
+
 from flext_meltano import (
     FlextMeltanoConfig,
     FlextMeltanoTarget,
@@ -43,7 +44,6 @@ from flext_meltano import (
     FlextSingerUnifiedInterface,
     FlextSingerUnifiedResult,
 )
-
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleConnectionError,
