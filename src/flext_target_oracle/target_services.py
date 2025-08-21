@@ -362,7 +362,9 @@ class OracleSchemaService:
                 )
 
                 if ddl_result.is_failure:
-                    return FlextResult[None].fail(f"Failed to create DDL: {ddl_result.error}")
+                    return FlextResult[None].fail(
+                        f"Failed to create DDL: {ddl_result.error}"
+                    )
 
                 # Execute DDL
                 ddl_sql = ddl_result.data
@@ -488,7 +490,9 @@ class OracleBatchService:
 
                 sql_str = sql_result.data
                 if sql_str is None:
-                    return FlextResult[None].fail("INSERT statement creation returned None")
+                    return FlextResult[None].fail(
+                        "INSERT statement creation returned None"
+                    )
 
                 # Prepare batch operations
                 batch_operations: list[tuple[str, dict[str, object] | None]] = []
@@ -508,7 +512,9 @@ class OracleBatchService:
                     self._statistics[stream_name] = stats.add_error(
                         f"Batch insert failed: {result.error}",
                     )
-                    return FlextResult[None].fail(f"Batch insert failed: {result.error}")
+                    return FlextResult[None].fail(
+                        f"Batch insert failed: {result.error}"
+                    )
 
                 # Update batch and statistics
                 records_processed = len(batch.current_batch)

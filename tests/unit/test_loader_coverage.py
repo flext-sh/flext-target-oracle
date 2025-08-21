@@ -120,7 +120,9 @@ class TestFlextOracleTargetLoaderCoverage:
 
         # Mock Oracle API connection success but query failure
         mock_api = MagicMock()
-        mock_api.query = Mock(return_value=FlextResult[None].fail("SQL execution failed"))
+        mock_api.query = Mock(
+            return_value=FlextResult[None].fail("SQL execution failed")
+        )
 
         loader.oracle_api = MagicMock()
         loader.oracle_api.__enter__ = MagicMock(return_value=mock_api)
