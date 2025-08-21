@@ -130,7 +130,7 @@ pytest examples/tests/ -m integration
 
 ## Contributing Examples
 
-1. **Follow FLEXT Patterns**: Use FlextResult, FlextValueObject, and structured logging
+1. **Follow FLEXT Patterns**: Use FlextResult, FlextValue, and structured logging
 2. **Document Thoroughly**: Include comprehensive docstrings and comments
 3. **Test Coverage**: Add corresponding tests in examples/tests/
 4. **Security Awareness**: Highlight security considerations and best practices

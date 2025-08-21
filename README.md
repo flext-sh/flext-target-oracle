@@ -32,7 +32,7 @@ graph TB
 
 ### Core Dependencies
 
-- **[flext-core](../flext-core)**: Foundational patterns (FlextResult, FlextValueObject, logging)
+- **[flext-core](../flext-core)**: Foundational patterns (FlextResult, FlextValue, logging)
 - **[flext-meltano](../flext-meltano)**: Singer SDK integration and Target base classes
 - **[flext-db-oracle](../flext-db-oracle)**: Oracle database operations and connectivity
 - **[Singer SDK](https://sdk.meltano.com/)**: Data integration protocol implementation
@@ -44,7 +44,7 @@ graph TB
 ```
 src/flext_target_oracle/
 ├── __init__.py          # Public API and exports
-├── config.py            # Configuration (FlextValueObject patterns)
+├── config.py            # Configuration (FlextValue patterns)
 ├── target.py            # Singer Target implementation
 ├── loader.py            # Oracle data loading operations
 └── exceptions.py        # Domain-specific error handling
@@ -53,7 +53,7 @@ src/flext_target_oracle/
 ### FLEXT Integration Patterns
 
 - ✅ **FlextResult Railway Pattern**: Consistent error handling throughout
-- ✅ **FlextValueObject Configuration**: Type-safe, validated configuration
+- ✅ **FlextValue Configuration**: Type-safe, validated configuration
 - ✅ **flext-core Logging**: Structured logging with correlation IDs
 - ✅ **flext-db-oracle Integration**: Production-grade Oracle connectivity
 - ✅ **flext-meltano Base Classes**: Singer SDK integration layer
@@ -410,7 +410,7 @@ MIT License - Copyright (c) 2025 FLEXT Team
 
 ### Development Standards
 
-1. **Follow FLEXT Patterns**: Use flext-core patterns (FlextResult, FlextValueObject)
+1. **Follow FLEXT Patterns**: Use flext-core patterns (FlextResult, FlextValue)
 2. **Singer SDK Compliance**: Ensure full Singer specification compliance
 3. **Zero Tolerance Quality**: Maintain 90%+ test coverage, zero lint issues
 4. **Security First**: Address all security vulnerabilities before PR
