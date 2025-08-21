@@ -36,11 +36,9 @@ from datetime import UTC, datetime
 
 from flext_core import FlextResult, get_logger
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
-from flext_meltano import FlextMeltanoTarget
-from flext_meltano.config import FlextMeltanoConfig
-from flext_meltano.flext_singer import flext_create_singer_bridge
-from flext_meltano.singer_plugin_base import FlextTargetPlugin
-from flext_meltano.singer_unified import (
+from flext_meltano import (
+    FlextMeltanoConfig,
+    FlextMeltanoTarget,
     FlextSingerUnifiedConfig,
     FlextSingerUnifiedInterface,
     FlextSingerUnifiedResult,
@@ -169,7 +167,9 @@ class FlextTargetOracleLoader:
                 )
 
                 if ddl_result.is_failure:
-                    return FlextResult[None].fail(f"Failed to create DDL: {ddl_result.error}")
+                    return FlextResult[None].fail(
+                        f"Failed to create DDL: {ddl_result.error}"
+                    )
 
                 # Execute DDL - handle None case and execution result together
                 ddl_sql = ddl_result.data
@@ -269,7 +269,9 @@ class FlextTargetOracleLoader:
                 batch_operations: list[tuple[str, dict[str, object] | None]] = []
                 sql_str = sql_result.data
                 if sql_str is None:
-                    return FlextResult[None].fail("INSERT statement creation returned None")
+                    return FlextResult[None].fail(
+                        "INSERT statement creation returned None"
+                    )
 
                 for record in records:
                     params: dict[str, object] = {
@@ -496,7 +498,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
             # Initialize loader connection
             connect_result = self._loader.connect()
             if connect_result.is_failure:
-                return FlextResult[None].fail(connect_result.error or "Connection failed")
+                return FlextResult[None].fail(
+                    connect_result.error or "Connection failed"
+                )
 
             return FlextResult[None].ok(None)
         except Exception as e:
@@ -559,7 +563,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         start_time = time.time()
         try:
             if input_data is None:
-                return FlextResult[None].fail("No input data provided for target execution")
+                return FlextResult[None].fail(
+                    "No input data provided for target execution"
+                )
 
             # Process messages if they're provided as a list
             if isinstance(input_data, list):
@@ -601,7 +607,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                         state_updates=self._state,
                     ),
                 )
-            return FlextResult[None].fail("Input data must be a list of Singer messages")
+            return FlextResult[None].fail(
+                "Input data must be a list of Singer messages"
+            )
 
         except Exception as e:
             return FlextResult[None].fail(f"Target execution failed: {e}")
@@ -982,7 +990,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                 return await self._handle_record(message)
             if message_type == "STATE":
                 return await self._handle_state(message)
-            return FlextResult[None].fail(f"Unknown message type: {message.get('type')}")
+            return FlextResult[None].fail(
+                f"Unknown message type: {message.get('type')}"
+            )
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to process Singer message")

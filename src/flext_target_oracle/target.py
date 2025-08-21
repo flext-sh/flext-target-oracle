@@ -21,9 +21,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import click
-from flext_cli import CLICommand
-from flext_cli.core.helpers import FlextCliHelper
-from flext_cli.foundation import (
+from flext_cli import (
+    CLICommand,
+    FlextCliHelper,
     create_cli_config as create_flext_cli_config,
     setup_cli as setup_flext_cli,
 )
@@ -173,7 +173,9 @@ class OracleTargetValidateCommand(CLICommand):
             if target._test_connection():
                 self.cli_helper.print_success("Oracle target configuration is valid")
                 self.cli_helper.print_success("Oracle database connection successful")
-                return FlextResult[None].ok({"status": "valid", "connection": "successful"})
+                return FlextResult[None].ok(
+                    {"status": "valid", "connection": "successful"}
+                )
             self.cli_helper.print_error("Oracle database connection failed")
             return FlextResult[None].fail("Connection test failed")
 
@@ -315,7 +317,9 @@ class OracleTargetLoadCommand(CLICommand):
             self.cli_helper.print_error(
                 f"Finalization failed: {final_result_value.error}",
             )
-            return FlextResult[None].fail(final_result_value.error or "Finalization failed")
+            return FlextResult[None].fail(
+                final_result_value.error or "Finalization failed"
+            )
 
         except Exception as e:
             logger.exception("Oracle target load failed")
