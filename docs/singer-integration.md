@@ -560,7 +560,7 @@ async def test_singer_tap_integration():
 
 ## Compliance Roadmap
 
-### Version 1.0.0 Requirements
+### Version 0.9.0 Requirements
 
 - [ ] **Implement missing Singer SDK methods**
   - [ ] `_test_connection()`
@@ -595,7 +595,7 @@ async def test_singer_tap_integration():
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2025-08-04  
-**Singer Specification**: [hub.meltano.com/singer/spec](https://hub.meltano.com/singer/spec)  
+**Document Version**: 1.0
+**Last Updated**: 2025-08-04
+**Singer Specification**: [hub.meltano.com/singer/spec](https://hub.meltano.com/singer/spec)
 **Next Review**: 2025-08-11
