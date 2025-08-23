@@ -815,9 +815,9 @@ class FlextOracleTargetConfig(FlextSettings):
 ### **Version Migration Strategy**
 
 ```python
-# Version 0.9.0 → 1.0.0 Migration Plan
+# Version 0.9.0 → 0.9.0 Migration Plan
 class TargetMigration_0_9_to_1_0:
-    """Migration from current structure to production-ready 1.0.0."""
+    """Migration from current structure to production-ready 0.9.0."""
 
     def migrate_exception_handling(self) -> FlextResult[None]:
         """Consolidate duplicated exceptions into single hierarchy."""
@@ -920,7 +920,7 @@ def _write_record(self, record: Record) -> None:
 
 ## 🚀 **Future Evolution Roadmap**
 
-### **Version 1.0.0 (Production Ready)**
+### **Version 0.9.0 (Production Ready)**
 
 **Module Structure Improvements**:
 
@@ -963,7 +963,7 @@ src/flext_target_oracle/
     └── parallel.py         # Parallel processing optimization
 ```
 
-### **Version 2.0.0 (Next Generation)**
+### **Version 0.9.0 (Next Generation)**
 
 **Module Architecture Evolution**:
 
@@ -974,8 +974,8 @@ src/flext_target_oracle/
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2025-08-04  
-**Target Audience**: FLEXT ecosystem developers working on Singer targets  
-**Scope**: Python module organization for Oracle target implementation  
+**Document Version**: 1.0
+**Last Updated**: 2025-08-04
+**Target Audience**: FLEXT ecosystem developers working on Singer targets
+**Scope**: Python module organization for Oracle target implementation
 **Compliance**: FLEXT ecosystem standards and Singer specification requirements
