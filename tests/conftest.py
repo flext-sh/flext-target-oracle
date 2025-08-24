@@ -130,7 +130,8 @@ def oracle_container():
             ),
         )
         if rc != 0:
-            raise RuntimeError(f"Failed to start docker-compose: {err}")
+            msg = f"Failed to start docker-compose: {err}"
+            raise RuntimeError(msg)
 
         # Wait for Oracle to be ready
         max_attempts = 60  # 5 minutes max

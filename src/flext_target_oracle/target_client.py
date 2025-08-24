@@ -42,6 +42,7 @@ from flext_meltano import (
     FlextSingerUnifiedConfig,
     FlextSingerUnifiedInterface,
     FlextSingerUnifiedResult,
+    FlextTargetPlugin,
 )
 
 from flext_target_oracle.target_config import FlextTargetOracleConfig
@@ -239,7 +240,7 @@ class FlextTargetOracleLoader:
 
         except Exception as e:
             logger.exception("Failed to finalize streams")
-            return FlextResult[None].fail(f"Finalization failed: {e}")
+            return FlextResult[dict[str, object]].fail(f"Finalization failed: {e}")
 
     async def _flush_batch(self, stream_name: str) -> FlextResult[None]:
         """Flush batch usando flext-db-oracle API CORRETAMENTE."""
@@ -458,7 +459,6 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
         # Initialize components
         self._loader = FlextTargetOracleLoader(self.target_config)
-        self._singer_bridge = flext_create_singer_bridge()
         self._schemas: dict[str, dict[str, object]] = {}
         self._state: dict[str, object] = {}
 
@@ -545,7 +545,9 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
             return FlextResult[dict[str, object]].ok(catalog)
         except Exception as e:
-            return FlextResult[None].fail(f"Failed to discover catalog: {e}")
+            return FlextResult[dict[str, object]].fail(
+                f"Failed to discover catalog: {e}"
+            )
 
     def execute(
         self,
@@ -1259,7 +1261,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to finalize target")
-            return FlextResult[None].fail(f"Finalization failed: {e}")
+            return FlextResult[dict[str, object]].fail(f"Finalization failed: {e}")
 
     def _get_implementation_metrics(self) -> dict[str, object]:
         """Get Oracle-specific implementation metrics and configuration details.
@@ -1453,7 +1455,9 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
 
             # Parse Singer messages
             if not isinstance(data, list):
-                return FlextResult[None].fail("Data must be a list of Singer messages")
+                return FlextResult[dict[str, object]].fail(
+                    "Data must be a list of Singer messages"
+                )
 
             loaded_count = 0
             error_count = 0
@@ -1506,7 +1510,7 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
 
         except Exception as e:
             self._logger.exception("Oracle data loading failed")
-            return FlextResult[None].fail(f"Load error: {e!s}")
+            return FlextResult[dict[str, object]].fail(f"Load error: {e!s}")
 
     def _process_singer_message(
         self,
@@ -1656,7 +1660,9 @@ def create_target_oracle_plugin(
     except Exception as e:
         plugin_logger = get_logger("target.oracle")
         plugin_logger.exception("Failed to create Oracle target plugin")
-        return FlextResult[None].fail(f"Plugin creation failed: {e!s}")
+        return FlextResult[FlextTargetOraclePlugin].fail(
+            f"Plugin creation failed: {e!s}"
+        )
 
 
 # Compatibility aliases
