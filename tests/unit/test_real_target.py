@@ -268,7 +268,7 @@ class TestRealOracleTarget:
     def test_real_ignored_columns(
         self,
         real_target: object,
-        oracle_engine: object,  # noqa: ARG002
+        oracle_engine: object,
     ) -> None:
         """Test ignored columns with real database."""
         # Configure ignored columns
@@ -409,7 +409,7 @@ class TestRealOracleTarget:
         self,
         real_target: object,
         simple_schema: object,
-        oracle_engine: object,  # noqa: ARG002
+        oracle_engine: object,
     ) -> None:
         """Test metrics collection with real processing."""
         real_target.initialize()
@@ -446,7 +446,7 @@ class TestRealOracleTarget:
         assert "elapsed_time" in metrics
         assert metrics["status"] == "running"
 
-    def test_real_connection_pooling(self, oracle_engine: object) -> None:  # noqa: ARG002
+    def test_real_connection_pooling(self, oracle_engine: object) -> None:
         """Test connection pooling configuration."""
         config = FlextOracleTargetConfig(
             host="localhost",
@@ -478,7 +478,7 @@ class TestRealOracleTarget:
     def test_real_type_mapping_customization(
         self,
         real_target: object,
-        oracle_engine: object,  # noqa: ARG002
+        oracle_engine: object,
     ) -> None:
         """Test custom type mapping with real database."""
         # Configure custom type mappings

@@ -42,9 +42,10 @@ from datetime import UTC, datetime
 from typing import Protocol
 
 from flext_core import FlextResult, get_logger
+from flext_db_oracle import FlextDbOracleApi
 
-from flext_target_oracle.config import FlextTargetOracleConfig
-from flext_target_oracle.models import (
+from flext_target_oracle.target_config import FlextTargetOracleConfig
+from flext_target_oracle.target_models import (
     BatchProcessingModel,
     LoadMethodModel,
     LoadStatisticsModel,
@@ -204,9 +205,11 @@ class OracleConnectionService:
 
         """
         if self._connection_model is None:
-            return FlextResult[None].fail("Connection model not initialized")
+            return FlextResult[OracleConnectionModel].fail(
+                "Connection model not initialized"
+            )
 
-        return FlextResult[None].ok(self._connection_model)
+        return FlextResult[OracleConnectionModel].ok(self._connection_model)
 
 
 # =============================================================================
@@ -304,15 +307,19 @@ class OracleSchemaService:
                 )
 
                 if columns_result.is_failure:
-                    return FlextResult[None].fail(
+                    return FlextResult[list[dict[str, object]]].fail(
                         f"Failed to get columns: {columns_result.error}",
                     )
 
-                return FlextResult[None].ok(columns_result.data or [])
+                return FlextResult[list[dict[str, object]]].ok(
+                    columns_result.data or []
+                )
 
         except Exception as e:
             logger.exception("Failed to get table columns")
-            return FlextResult[None].fail(f"Column retrieval failed: {e}")
+            return FlextResult[list[dict[str, object]]].fail(
+                f"Column retrieval failed: {e}"
+            )
 
     async def _create_table(
         self,
@@ -580,11 +587,11 @@ class OracleBatchService:
                 error_details=all_errors,
             ).finalize()
 
-            return FlextResult[None].ok(aggregated_stats)
+            return FlextResult[LoadStatisticsModel].ok(aggregated_stats)
 
         except Exception as e:
             logger.exception("Failed to flush all batches")
-            return FlextResult[None].fail(f"Batch flush all failed: {e}")
+            return FlextResult[LoadStatisticsModel].fail(f"Batch flush all failed: {e}")
 
 
 # =============================================================================
@@ -649,11 +656,13 @@ class OracleRecordService:
                 if "_sdc_extracted_at" not in transformed_record:
                     transformed_record["_sdc_extracted_at"] = now
 
-            return FlextResult[None].ok(transformed_record)
+            return FlextResult[dict[str, object]].ok(transformed_record)
 
         except Exception as e:
             logger.exception("Failed to transform record")
-            return FlextResult[None].fail(f"Record transformation failed: {e}")
+            return FlextResult[dict[str, object]].fail(
+                f"Record transformation failed: {e}"
+            )
 
     def validate_record(
         self,

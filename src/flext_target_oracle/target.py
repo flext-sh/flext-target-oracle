@@ -164,7 +164,7 @@ class OracleTargetValidateCommand(CLICommand):
                 self.cli_helper.print_error(
                     f"Configuration validation failed: {validation_result.error}",
                 )
-                return FlextResult[None].fail(
+                return FlextResult[object].fail(
                     validation_result.error or "Configuration validation failed",
                 )
 
@@ -173,16 +173,17 @@ class OracleTargetValidateCommand(CLICommand):
             if target._test_connection():
                 self.cli_helper.print_success("Oracle target configuration is valid")
                 self.cli_helper.print_success("Oracle database connection successful")
-                return FlextResult[None].ok(
-                    {"status": "valid", "connection": "successful"}
-                )
+                return FlextResult[object].ok({
+                    "status": "valid",
+                    "connection": "successful",
+                })
             self.cli_helper.print_error("Oracle database connection failed")
-            return FlextResult[None].fail("Connection test failed")
+            return FlextResult[object].fail("Connection test failed")
 
         except Exception as e:
             logger.exception("Oracle target validation failed")
             self.cli_helper.print_error(f"Validation error: {e}")
-            return FlextResult[None].fail(f"Validation error: {e}")
+            return FlextResult[object].fail(f"Validation error: {e}")
 
 
 class OracleTargetLoadCommand(CLICommand):
@@ -215,7 +216,7 @@ class OracleTargetLoadCommand(CLICommand):
             )
         return FlextResult[None].ok(None)
 
-    def execute(self) -> FlextResult[object]:  # noqa: PLR0912, PLR0915
+    def execute(self) -> FlextResult[object]:
         """Execute Oracle target load using modern patterns."""
         self.cli_helper.print_info("Starting Oracle target data loading")
 
@@ -264,11 +265,11 @@ class OracleTargetLoadCommand(CLICommand):
                         messages.append(message)
             except json.JSONDecodeError as e:
                 self.cli_helper.print_error(f"Invalid JSON input: {e}")
-                return FlextResult[None].fail(f"JSON parsing error: {e}")
+                return FlextResult[object].fail(f"JSON parsing error: {e}")
 
             if not messages:
                 self.cli_helper.print_warning("No Singer messages received from stdin")
-                return FlextResult[None].ok({"messages_processed": 0})
+                return FlextResult[object].ok({"messages_processed": 0})
 
             # Process messages
             self.cli_helper.print_info(f"Processing {len(messages)} Singer messages...")
@@ -285,7 +286,7 @@ class OracleTargetLoadCommand(CLICommand):
                         self.cli_helper.print_error(
                             f"Failed to process message: {result_value.error}",
                         )
-                        return FlextResult[None].fail(
+                        return FlextResult[object].fail(
                             f"Message processing failed: {result_value.error}",
                         )
                     messages_processed += 1
@@ -311,20 +312,20 @@ class OracleTargetLoadCommand(CLICommand):
                 if isinstance(stats, dict):
                     total_records = stats.get("total_records", 0)
                     self.cli_helper.print_success(f"Loaded {total_records} records")
-                return FlextResult[None].ok(
+                return FlextResult[object].ok(
                     {"messages_processed": messages_processed, "stats": stats},
                 )
             self.cli_helper.print_error(
                 f"Finalization failed: {final_result_value.error}",
             )
-            return FlextResult[None].fail(
+            return FlextResult[object].fail(
                 final_result_value.error or "Finalization failed"
             )
 
         except Exception as e:
             logger.exception("Oracle target load failed")
             self.cli_helper.print_error(f"Load error: {e}")
-            return FlextResult[None].fail(f"Load error: {e}")
+            return FlextResult[object].fail(f"Load error: {e}")
 
 
 class OracleTargetAboutCommand(CLICommand):
@@ -429,12 +430,12 @@ class OracleTargetAboutCommand(CLICommand):
                     f"Python versions: {', '.join(about_info['supported_python_versions'])}",
                 )
 
-            return FlextResult[None].ok(about_info)
+            return FlextResult[object].ok(about_info)
 
         except Exception as e:
             logger.exception("Oracle target about failed")
             self.cli_helper.print_error(f"About error: {e}")
-            return FlextResult[None].fail(f"About error: {e}")
+            return FlextResult[object].fail(f"About error: {e}")
 
 
 # =============================================================================

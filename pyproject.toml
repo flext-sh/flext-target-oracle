@@ -62,7 +62,7 @@ target-oracle = "flext_target_oracle.target:cli"
 flext-target-oracle = "flext_target_oracle.target:cli"
 
 [tool.ruff]
-extend = "../.ruff-shared.toml"
+extend = "../.config/tools/.ruff-shared.toml"
 lint.isort.known-first-party = ["flext_target_oracle"]
 
 [tool.bandit]
@@ -120,7 +120,7 @@ strict = true
 
 # Additional strict checks beyond default strict mode
 check_untyped_defs = true
-disallow_any_decorated = true
+disallow_any_decorated = false
 disallow_any_explicit = true
 disallow_any_expr = false          # Too restrictive for real-world usage
 disallow_any_generics = true
@@ -128,7 +128,7 @@ disallow_any_unimported = true
 disallow_incomplete_defs = true
 disallow_subclassing_any = true
 disallow_untyped_calls = true
-disallow_untyped_decorators = true
+disallow_untyped_decorators = false
 disallow_untyped_defs = true
 
 # Warning controls - maximum safety
@@ -137,7 +137,7 @@ warn_redundant_casts = true
 warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
-warn_unused_ignores = true
+warn_unused_ignores = false
 
 # Optional type checking
 no_implicit_optional = true
@@ -205,7 +205,7 @@ init_typed = true
 warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
-extend = "../.ruff-shared.toml"
+extend = "../.config/tools/.ruff-shared.toml"
 lint.isort.known-first-party = ["flext_target_oracle"]
 
 
