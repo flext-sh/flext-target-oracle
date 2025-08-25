@@ -62,7 +62,7 @@ target-oracle = "flext_target_oracle.target:cli"
 flext-target-oracle = "flext_target_oracle.target:cli"
 
 [tool.ruff]
-extend = "../.config/tools/.ruff-shared.toml"
+extend = "../ruff-shared.toml"
 lint.isort.known-first-party = ["flext_target_oracle"]
 
 [tool.bandit]
@@ -205,7 +205,7 @@ init_typed = true
 warn_required_dynamic_aliases = true
 warn_untyped_fields = true
 
-extend = "../.config/tools/.ruff-shared.toml"
+extend = "../ruff-shared.toml"
 lint.isort.known-first-party = ["flext_target_oracle"]
 
 
