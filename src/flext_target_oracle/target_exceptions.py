@@ -28,7 +28,7 @@ from flext_core import FlextExceptions
 
 
 # Oracle Target Exception Hierarchy - Built on FLEXT patterns
-class FlextTargetOracleError(FlextExceptions.Error):
+class FlextTargetOracleError(FlextExceptions):
     """Base exception for all Oracle Target operations."""
 
 
