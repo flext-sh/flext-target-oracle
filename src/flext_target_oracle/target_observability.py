@@ -21,7 +21,7 @@ Semantic Architecture Patterns:
     Database Monitoring: Connection pooling and query performance tracking
 
 Integration Points:
-    - FlextError foundation: Extends base error hierarchy with Oracle semantics
+    - FlextExceptions.Error foundation: Extends base error hierarchy with Oracle semantics
     - FlextObs integration: Oracle-specific logging and metrics collection
     - Singer target errors: Protocol-specific error handling and recovery
     - Database operations: Query timing, connection health, and performance metrics

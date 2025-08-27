@@ -42,14 +42,14 @@ src/flext_target_oracle/
 """FLEXT Target Oracle - Public API exports following ecosystem standards."""
 
 # FLEXT Core pattern re-exports for convenience
-from flext_core import FlextError, FlextResult
+from flext_core import FlextExceptions.Error, FlextResult
 
 # Local implementation exports
 from flext_target_oracle.config import FlextOracleTargetConfig, LoadMethod
 from flext_target_oracle.target import FlextOracleTarget
 
 # Exception hierarchy (consolidated from duplicated sources)
-class FlextOracleTargetError(FlextError):
+class FlextOracleTargetError(FlextExceptions.Error):
     """Base exception for Oracle target operations."""
 
 # Alias exports for backward compatibility
