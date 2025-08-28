@@ -493,7 +493,8 @@ from pydantic import Field, field_validator  # Third-party validation
 import json
 import asyncio
 from datetime import UTC, datetime
-from typing import  Any, Dict, List
+from typing import  Dict, List
+
 
 # ❌ INCORRECT - Direct Singer SDK import when flext-meltano available
 from singer_sdk import Target  # Should use flext-meltano instead
@@ -654,19 +655,20 @@ class TestSingerCompliance:
 
 ```python
 # ✅ COMPLETE type annotations for all public methods
-from typing import Any, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
+
 from flext_core import FlextResult
 
 async def process_singer_message(
     self,
-    message: Dict[str, Any]
+    message: Dict[str, object]
 ) -> FlextResult[None]:
     """Process Singer message with complete type safety."""
 
 async def load_records(
     self,
     stream_name: str,
-    records: List[Dict[str, Any]]
+    records: List[Dict[str, object]]
 ) -> FlextResult[Dict[str, Union[int, str]]]:
     """Load records with specific return type."""
 
@@ -696,7 +698,7 @@ async def process_message(self, message):  # Missing types
 def ensure_table_exists(
     self,
     stream_name: str,
-    schema: Dict[str, Any]
+    schema: Dict[str, object]
 ) -> FlextResult[None]:
     """
     Ensure Oracle table exists for Singer stream with proper schema.
@@ -843,11 +845,12 @@ class TargetMigration_0_9_to_1_0:
 ```python
 # Maintain backward compatibility during migration
 from warnings import warn
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
+
 
 def process_singer_message(
     self,
-    message: Dict[str, Any]
+    message: Dict[str, object]
 ) -> FlextResult[None]:
     """
     DEPRECATED: Custom message processing method.

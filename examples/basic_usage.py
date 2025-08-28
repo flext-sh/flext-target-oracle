@@ -23,7 +23,8 @@ Usage:
 
 import asyncio
 import logging
-from typing import Any
+
+object
 
 from flext_core import get_logger
 
@@ -68,11 +69,11 @@ def create_configuration() -> FlextOracleTargetConfig:
     return config
 
 
-def create_sample_schema_message() -> dict[str, Any]:
+def create_sample_schema_message() -> dict[str, object]:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
-      Dict[str, Any]: Singer SCHEMA message for users table
+      Dict[str, object]: Singer SCHEMA message for users table
 
     """
     return {
@@ -93,11 +94,11 @@ def create_sample_schema_message() -> dict[str, Any]:
     }
 
 
-def create_sample_record_messages() -> list[dict[str, Any]]:
+def create_sample_record_messages() -> list[dict[str, object]]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
-      List[Dict[str, Any]]: List of Singer RECORD messages
+      List[Dict[str, object]]: List of Singer RECORD messages
 
     """
     return [
@@ -137,11 +138,11 @@ def create_sample_record_messages() -> list[dict[str, Any]]:
     ]
 
 
-def create_sample_state_message() -> dict[str, Any]:
+def create_sample_state_message() -> dict[str, object]:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
-      Dict[str, Any]: Singer STATE message with bookmark information
+      Dict[str, object]: Singer STATE message with bookmark information
 
     """
     return {

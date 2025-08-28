@@ -17,7 +17,8 @@ import os
 import time
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any
+
+object
 from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
@@ -411,7 +412,7 @@ def state() -> dict[str, object]:
 
 
 @pytest.fixture
-def simple_schema() -> dict[str, Any]:
+def simple_schema() -> dict[str, object]:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
@@ -430,7 +431,7 @@ def simple_schema() -> dict[str, Any]:
 
 
 @pytest.fixture
-def nested_schema() -> dict[str, Any]:
+def nested_schema() -> dict[str, object]:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
@@ -474,7 +475,7 @@ def nested_schema() -> dict[str, Any]:
 
 
 @pytest.fixture
-def sample_record() -> dict[str, Any]:
+def sample_record() -> dict[str, object]:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -491,7 +492,7 @@ def sample_record() -> dict[str, Any]:
 
 
 @pytest.fixture
-def batch_records() -> list[dict[str, Any]]:
+def batch_records() -> list[dict[str, object]]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -510,7 +511,7 @@ def batch_records() -> list[dict[str, Any]]:
 
 
 @pytest.fixture
-def state_message() -> dict[str, Any]:
+def state_message() -> dict[str, object]:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -531,7 +532,7 @@ def singer_messages(
     simple_schema,
     sample_record,
     state_message,
-) -> list[dict[str, Any]]:
+) -> list[dict[str, object]]:
     """Complete Singer message stream for testing."""
     return [
         simple_schema,
@@ -591,7 +592,7 @@ async def connected_loader(oracle_loader):
 
 # Performance Testing Fixtures
 @pytest.fixture
-def large_dataset() -> list[dict[str, Any]]:
+def large_dataset() -> list[dict[str, object]]:
     """Generate large dataset for performance testing."""
     schema = {
         "type": "SCHEMA",
