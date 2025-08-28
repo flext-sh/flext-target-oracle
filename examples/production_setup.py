@@ -37,7 +37,8 @@ import signal
 import sys
 import time
 from datetime import UTC
-from typing import Any
+
+object
 
 from flext_core import FlextResult, get_logger
 
@@ -204,8 +205,8 @@ class ProductionTargetManager:
 
     async def process_singer_stream(
         self,
-        messages: list[dict[str, Any]],
-    ) -> FlextResult[dict[str, Any]]:
+        messages: list[dict[str, object]],
+    ) -> FlextResult[dict[str, object]]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:
@@ -307,7 +308,7 @@ class ProductionTargetManager:
             stats["errors_encountered"] += 1
             return FlextResult[None].fail(f"Stream processing error: {e}")
 
-    async def health_check(self) -> FlextResult[dict[str, Any]]:
+    async def health_check(self) -> FlextResult[dict[str, object]]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
@@ -465,7 +466,7 @@ async def demonstrate_production_setup() -> None:
         raise
 
 
-def create_production_sample_stream() -> list[dict[str, Any]]:
+def create_production_sample_stream() -> list[dict[str, object]]:
     """Create a realistic production data stream for demonstration.
 
     Returns:

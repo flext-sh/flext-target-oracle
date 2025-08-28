@@ -7,7 +7,8 @@ data insertion, and bulk operations using mocked dependencies.
 from __future__ import annotations
 
 import contextlib
-from typing import Any
+
+object
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -95,7 +96,7 @@ class TestTableManagement:
         self,
         oracle_config: FlextOracleTargetConfig,
         mock_oracle_api: MagicMock,
-        simple_schema: dict[str, Any],
+        simple_schema: dict[str, object],
     ) -> None:
         """Test creating a new table from schema."""
         # Fix mock to have both is_success and is_failure
@@ -147,7 +148,7 @@ class TestTableManagement:
         self,
         oracle_config: FlextOracleTargetConfig,
         mock_oracle_api: MagicMock,
-        simple_schema: dict[str, Any],
+        simple_schema: dict[str, object],
     ) -> None:
         """Test handling existing table."""
         mock_oracle_api.get_tables.return_value = MagicMock(
@@ -176,7 +177,7 @@ class TestTableManagement:
     async def test_force_recreate_table(
         self,
         mock_oracle_api: MagicMock,
-        simple_schema: dict[str, Any],
+        simple_schema: dict[str, object],
     ) -> None:
         """Test force recreating existing table."""
         config = FlextOracleTargetConfig(
@@ -220,7 +221,7 @@ class TestTableManagement:
     async def test_truncate_before_load(
         self,
         mock_oracle_api: MagicMock,
-        simple_schema: dict[str, Any],
+        simple_schema: dict[str, object],
     ) -> None:
         """Test truncating table before load."""
         config = FlextOracleTargetConfig(
@@ -265,7 +266,7 @@ class TestDataInsertion:
         self,
         oracle_config: FlextOracleTargetConfig,
         mock_oracle_api: MagicMock,
-        sample_record: dict[str, Any],
+        sample_record: dict[str, object],
     ) -> None:
         """Test inserting a single record."""
         with patch(
@@ -288,7 +289,7 @@ class TestDataInsertion:
         self,
         oracle_config: FlextOracleTargetConfig,
         mock_oracle_api: MagicMock,
-        batch_records: list[dict[str, Any]],
+        batch_records: list[dict[str, object]],
     ) -> None:
         """Test batch insertion."""
         oracle_config.batch_size = 50
@@ -313,7 +314,7 @@ class TestDataInsertion:
         self,
         oracle_config: FlextOracleTargetConfig,
         mock_oracle_api: MagicMock,
-        batch_records: list[dict[str, Any]],
+        batch_records: list[dict[str, object]],
     ) -> None:
         """Test bulk insertion with APPEND hint."""
         oracle_config.load_method = LoadMethod.BULK_INSERT
@@ -349,7 +350,7 @@ class TestMergeOperations:
         self,
         oracle_config: FlextOracleTargetConfig,
         mock_oracle_api: MagicMock,
-        sample_record: dict[str, Any],
+        sample_record: dict[str, object],
     ) -> None:
         """Test merge mode for insert or update."""
         oracle_config.sdc_mode = "merge"
@@ -377,7 +378,7 @@ class TestMergeOperations:
         self,
         oracle_config: FlextOracleTargetConfig,
         mock_oracle_api: MagicMock,
-        batch_records: list[dict[str, Any]],
+        batch_records: list[dict[str, object]],
     ) -> None:
         """Test bulk merge operations."""
         oracle_config.sdc_mode = "merge"
@@ -408,7 +409,7 @@ class TestStorageModes:
         self,
         oracle_config: FlextOracleTargetConfig,
         mock_oracle_api: MagicMock,
-        nested_schema: dict[str, Any],
+        nested_schema: dict[str, object],
     ) -> None:
         """Test JSON storage mode."""
         oracle_config.storage_mode = "json"
@@ -445,7 +446,7 @@ class TestStorageModes:
         self,
         oracle_config: FlextOracleTargetConfig,
         mock_oracle_api: MagicMock,
-        nested_schema: dict[str, Any],
+        nested_schema: dict[str, object],
     ) -> None:
         """Test flattened storage mode."""
         oracle_config.storage_mode = "flattened"
