@@ -4,7 +4,7 @@ This module provides data models and value objects for Oracle Singer target
 operations, implementing FLEXT ecosystem patterns with comprehensive validation
 and enterprise-grade reliability standards.
 
-The models use FlextValue as the foundation, providing immutable,
+The models use FlextModels.Value as the foundation, providing immutable,
 validated data objects with domain rule validation following Clean Architecture
 and Domain-Driven Design principles.
 
@@ -15,7 +15,7 @@ Key Models:
     LoadStatisticsModel: Data loading statistics and metrics
 
 Architecture Patterns:
-    FlextValue: Immutable data models with built-in validation
+    FlextModels.Value: Immutable data models with built-in validation
     Domain-Driven Design: Business rule validation with domain context
     Railway-Oriented Programming: FlextResult for error handling
     Type Safety: Comprehensive type hints and runtime validation
@@ -30,7 +30,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from flext_core import FlextResult, FlextValue
+from flext_core import FlextResult, FlextModels.Value
 from pydantic import Field, field_validator
 
 
@@ -59,7 +59,7 @@ class StorageModeModel(StrEnum):
     HYBRID = "hybrid"
 
 
-class OracleConnectionModel(FlextValue):
+class OracleConnectionModel(FlextModels.Value):
     """Oracle database connection parameters model.
 
     Immutable value object representing Oracle database connection
@@ -150,7 +150,7 @@ class OracleConnectionModel(FlextValue):
         return FlextResult[None].ok(None)
 
 
-class SingerStreamModel(FlextValue):
+class SingerStreamModel(FlextModels.Value):
     """Singer stream definition with Oracle mappings.
 
     Immutable value object representing a Singer stream configuration
@@ -228,7 +228,7 @@ class SingerStreamModel(FlextValue):
         return f"{self.schema_name}.{self.table_name}"
 
 
-class BatchProcessingModel(FlextValue):
+class BatchProcessingModel(FlextModels.Value):
     """Batch processing configuration and state.
 
     Immutable value object representing batch processing configuration
@@ -322,7 +322,7 @@ class BatchProcessingModel(FlextValue):
         return FlextResult[None].ok(None)
 
 
-class LoadStatisticsModel(FlextValue):
+class LoadStatisticsModel(FlextModels.Value):
     """Data loading statistics and metrics.
 
     Immutable value object representing comprehensive statistics
@@ -456,7 +456,7 @@ class LoadStatisticsModel(FlextValue):
         return FlextResult[None].ok(None)
 
 
-class OracleTableMetadataModel(FlextValue):
+class OracleTableMetadataModel(FlextModels.Value):
     """Oracle table metadata and schema information.
 
     Immutable value object representing Oracle table structure

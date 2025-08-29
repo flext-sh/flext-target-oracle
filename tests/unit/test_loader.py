@@ -12,7 +12,7 @@ object
 from unittest.mock import MagicMock, patch
 
 import pytest
-from flext_core import get_logger
+from flext_core import FlextLogger
 from sqlalchemy import (
     Column,
 )
@@ -31,7 +31,7 @@ from flext_target_oracle import (
     LoadMethod,
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 # Dynamic import for SQLAlchemy Engine and MetaData
 # This is done to avoid circular imports and enable mocking in specific tests

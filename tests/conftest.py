@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 import pytest_asyncio
-from flext_core import get_logger
+from flext_core import FlextLogger
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
@@ -37,7 +37,7 @@ from flext_target_oracle import (
 )
 
 # Constants
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 ORACLE_CONTAINER_NAME = "flext-oracle-test"
 ORACLE_IMAGE = "gvenzl/oracle-xe:21-slim"
 ORACLE_HOST = "localhost"
