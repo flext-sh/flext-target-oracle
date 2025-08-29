@@ -112,10 +112,10 @@ if validation_result.is_failure:
 Integration with FLEXT core patterns and flext-db-oracle:
 
 ```python
-from flext_core import FlextResult, get_logger
+from flext_core import FlextResult, FlextLogger
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 ```
 
 ## Testing Examples
@@ -130,7 +130,7 @@ pytest examples/tests/ -m integration
 
 ## Contributing Examples
 
-1. **Follow FLEXT Patterns**: Use FlextResult, FlextValue, and structured logging
+1. **Follow FLEXT Patterns**: Use FlextResult, FlextModels.Value, and structured logging
 2. **Document Thoroughly**: Include comprehensive docstrings and comments
 3. **Test Coverage**: Add corresponding tests in examples/tests/
 4. **Security Awareness**: Highlight security considerations and best practices

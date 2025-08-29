@@ -137,7 +137,7 @@ make test                   # Must maintain 90%+ coverage
 
 ```python
 # ✅ GOOD: FLEXT patterns
-from flext_core import FlextResult, FlextValue, get_logger
+from flext_core import FlextResult, FlextModels.Value, FlextLogger
 
 def operation() -> FlextResult[Data]:
     """Clear docstring with FlextResult return type."""
@@ -149,7 +149,7 @@ def operation() -> FlextResult[Data]:
         return FlextResult[None].fail(f"Operation failed: {e}")
 
 # ✅ GOOD: Configuration with validation
-class Config(FlextValue):
+class Config(FlextModels.Value):
     field: str = Field(..., description="Required field")
 
     @field_validator("field")
@@ -211,8 +211,8 @@ async def process_batch(records: list[dict]) -> FlextResult[Stats]:
 ### Configuration Patterns
 
 ```python
-# ✅ FlextValue with domain validation
-class FlextOracleTargetConfig(FlextValue):
+# ✅ FlextModels.Value with domain validation
+class FlextOracleTargetConfig(FlextModels.Value):
     """Type-safe configuration with business rule validation."""
 
     # Required fields with clear validation
@@ -243,9 +243,9 @@ class FlextOracleTargetConfig(FlextValue):
 
 ```python
 # ✅ Structured logging with context
-from flext_core import get_logger
+from flext_core import FlextLogger
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 def process_with_logging(stream_name: str, batch_size: int):
     """Example of proper logging with context."""

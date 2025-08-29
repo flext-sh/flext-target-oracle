@@ -26,13 +26,13 @@ import logging
 
 object
 
-from flext_core import get_logger
+from flext_core import FlextLogger
 
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
 # Configure logging for the example
 logging.basicConfig(level=logging.INFO)
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 def create_configuration() -> FlextOracleTargetConfig:

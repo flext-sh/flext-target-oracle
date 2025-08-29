@@ -78,7 +78,7 @@ from __future__ import annotations
 import time
 import uuid
 
-from flext_core import get_logger
+from flext_core import FlextLogger
 
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
@@ -87,7 +87,7 @@ from flext_target_oracle.target_exceptions import (
     FlextTargetOracleSchemaError,
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 # =============================================================================
 # CONSTANTS

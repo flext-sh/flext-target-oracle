@@ -40,7 +40,7 @@ from datetime import UTC
 
 object
 
-from flext_core import FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
@@ -51,7 +51,7 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(), logging.FileHandler("flext_target_oracle.log")],
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 
 class ProductionConfig:

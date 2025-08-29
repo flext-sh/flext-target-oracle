@@ -10,7 +10,7 @@ The consolidated client provides:
 - FlextTargetOraclePlugin: Clean plugin architecture implementation
 
 Architecture Integration:
-    Built on flext-core foundations (FlextResult, FlextValue patterns)
+    Built on flext-core foundations (FlextResult, FlextModels.Value patterns)
     Integrates with flext-meltano for Singer SDK compliance
     Uses flext-db-oracle for production-grade Oracle connectivity
     Follows railway-oriented programming for error handling
@@ -34,7 +34,7 @@ import time
 from collections.abc import Callable as _Callable, Mapping
 from datetime import UTC, datetime
 
-from flext_core import FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from flext_meltano import (
     FlextMeltanoConfig,
@@ -50,7 +50,7 @@ from flext_target_oracle.target_exceptions import (
     FlextTargetOracleConnectionError,
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 
 # Constants
 MAX_PORT_NUMBER = 65535  # Maximum valid TCP port number
@@ -1658,7 +1658,7 @@ def create_target_oracle_plugin(
         return FlextResult[object].ok(plugin)
 
     except Exception as e:
-        plugin_logger = get_logger("target.oracle")
+        plugin_logger = FlextLogger("target.oracle")
         plugin_logger.exception("Failed to create Oracle target plugin")
         return FlextResult[FlextTargetOraclePlugin].fail(
             f"Plugin creation failed: {e!s}"

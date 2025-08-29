@@ -27,7 +27,7 @@ from flext_cli import (
     create_cli_config as create_flext_cli_config,
     setup_cli as setup_flext_cli,
 )
-from flext_core import FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 from rich.console import Console
 
 from flext_target_oracle.target_client import (
@@ -35,7 +35,7 @@ from flext_target_oracle.target_client import (
 )
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 console = Console()
 
 # =============================================================================

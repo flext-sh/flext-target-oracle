@@ -4,7 +4,7 @@ This module provides type-safe configuration management for Oracle Singer target
 operations, implementing FLEXT ecosystem patterns with comprehensive validation
 and enterprise-grade reliability standards.
 
-The configuration system uses FlextValue as the foundation, providing
+The configuration system uses FlextModels.Value as the foundation, providing
 immutable, validated configuration objects with domain rule validation through
 the Chain of Responsibility pattern. All validation follows railway-oriented
 programming principles using FlextResult for consistent error handling.
@@ -15,7 +15,7 @@ Key Classes:
     OracleTargetConstants: System constants to eliminate magic numbers
 
 Architecture Patterns:
-    FlextValue: Immutable configuration with built-in validation
+    FlextModels.Value: Immutable configuration with built-in validation
     Chain of Responsibility: Modular validation rule composition
     Railway-Oriented Programming: FlextResult for error handling
     Domain-Driven Design: Business rule validation with domain context
@@ -46,7 +46,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-from flext_core import FlextBaseConfigModel, FlextResult
+from flext_core import FlextConfig.BaseConfigModel, FlextResult
 from pydantic import Field, SecretStr, field_validator
 
 from .constants import OracleTargetConstants
@@ -76,14 +76,14 @@ class LoadMethod(StrEnum):
     BULK_MERGE = "bulk_merge"
 
 
-class FlextTargetOracleConfig(FlextBaseConfigModel):
+class FlextTargetOracleConfig(FlextConfig.BaseConfigModel):
     """Type-safe Oracle target configuration with comprehensive validation.
 
     Provides immutable configuration object for Oracle Singer target operations
     with built-in validation, domain rule checking, and integration with the
     FLEXT ecosystem's configuration management patterns.
 
-    This configuration class extends FlextBaseConfigModel to provide:
+    This configuration class extends FlextConfig.BaseConfigModel to provide:
     - Modern configuration with Pydantic validation
     - Comprehensive field validation using Pydantic
     - Business rule validation through validate_business_rules() method
@@ -501,9 +501,9 @@ class FlextTargetOracleConfig(FlextBaseConfigModel):
         return v
 
     def validate_business_rules(self) -> FlextResult[None]:
-        """Validate business rules implementation required by FlextValue.
+        """Validate business rules implementation required by FlextModels.Value.
 
-        Implements abstract method from FlextValue by delegating to
+        Implements abstract method from FlextModels.Value by delegating to
         validate_domain_rules for backwards compatibility and consistency.
 
         Returns:

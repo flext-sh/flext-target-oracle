@@ -18,7 +18,7 @@ Key Services:
 
 Architecture Patterns:
     - FlextResult for all operations (railway-oriented programming)
-    - FlextEntity/FlextValue where appropriate
+    - FlextModels.Entity/FlextModels.Value where appropriate
     - Constructor injection via dependencies
     - Interface segregation with protocols
     - Single Responsibility Principle
@@ -41,7 +41,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Protocol
 
-from flext_core import FlextResult, get_logger
+from flext_core import FlextLogger, FlextResult
 from flext_db_oracle import FlextDbOracleApi
 
 from flext_target_oracle.target_config import FlextTargetOracleConfig
@@ -53,7 +53,7 @@ from flext_target_oracle.target_models import (
     SingerStreamModel,
 )
 
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 # =============================================================================
 # SERVICE PROTOCOLS (INTERFACES)
 # =============================================================================

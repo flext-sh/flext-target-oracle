@@ -14,10 +14,10 @@ The target is built on foundational FLEXT patterns:
 
 ```python
 # FlextResult Railway Pattern - Consistent error handling
-from flext_core import FlextResult, FlextValue, get_logger
+from flext_core import FlextResult, FlextModels.Value, FlextLogger
 
 # Configuration with domain validation
-class FlextOracleTargetConfig(FlextValue):
+class FlextOracleTargetConfig(FlextModels.Value):
     def validate_domain_rules(self) -> FlextResult[None]:
         # Chain of Responsibility validation pattern
 ```
@@ -105,7 +105,7 @@ class FlextOracleTarget(Target):
 **Responsibility**: Configuration management with domain validation
 
 ```python
-class FlextOracleTargetConfig(FlextValue):
+class FlextOracleTargetConfig(FlextModels.Value):
     """Type-safe configuration with business rule validation."""
 
     # Required Oracle connection parameters
@@ -429,7 +429,7 @@ networks:
 
 ```python
 # Structured logging with correlation IDs
-logger = get_logger(__name__)
+logger = FlextLogger(__name__)
 logger.info("Batch processing started", extra={
     "stream_name": stream_name,
     "batch_size": len(records),
