@@ -46,7 +46,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-from flext_core import FlextConfig.BaseConfigModel, FlextResult
+from flext_core import FlextConfig, FlextResult
 from pydantic import Field, SecretStr, field_validator
 
 from .constants import OracleTargetConstants
@@ -76,14 +76,14 @@ class LoadMethod(StrEnum):
     BULK_MERGE = "bulk_merge"
 
 
-class FlextTargetOracleConfig(FlextConfig.BaseConfigModel):
+class FlextTargetOracleConfig(FlextConfig.BaseModel):
     """Type-safe Oracle target configuration with comprehensive validation.
 
     Provides immutable configuration object for Oracle Singer target operations
     with built-in validation, domain rule checking, and integration with the
     FLEXT ecosystem's configuration management patterns.
 
-    This configuration class extends FlextConfig.BaseConfigModel to provide:
+    This configuration class extends FlextConfig.BaseModel to provide:
     - Modern configuration with Pydantic validation
     - Comprehensive field validation using Pydantic
     - Business rule validation through validate_business_rules() method
