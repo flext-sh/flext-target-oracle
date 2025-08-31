@@ -173,10 +173,12 @@ class OracleTargetValidateCommand(CLICommand):
             if target._test_connection():
                 self.cli_helper.print_success("Oracle target configuration is valid")
                 self.cli_helper.print_success("Oracle database connection successful")
-                return FlextResult[object].ok({
-                    "status": "valid",
-                    "connection": "successful",
-                })
+                return FlextResult[object].ok(
+                    {
+                        "status": "valid",
+                        "connection": "successful",
+                    }
+                )
             self.cli_helper.print_error("Oracle database connection failed")
             return FlextResult[object].fail("Connection test failed")
 

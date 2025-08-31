@@ -30,7 +30,9 @@ class FlextTargetOracleConstants(FlextConstants):
         """Processing-related constants for Oracle target."""
 
         DEFAULT_BATCH_SIZE = FlextConstants.Singer.DEFAULT_BATCH_SIZE
-        DEFAULT_MAX_PARALLEL_STREAMS = FlextConstants.Singer.DEFAULT_MAX_PARALLEL_STREAMS
+        DEFAULT_MAX_PARALLEL_STREAMS = (
+            FlextConstants.Singer.DEFAULT_MAX_PARALLEL_STREAMS
+        )
 
 
 # Backward-compatibility: keep the original name/shape used by target_config

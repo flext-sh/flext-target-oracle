@@ -30,7 +30,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from flext_core import FlextResult, FlextModels.Value
+from flext_core import FlextModels, FlextResult
 from pydantic import Field, field_validator
 
 
