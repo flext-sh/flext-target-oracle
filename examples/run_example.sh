@@ -60,7 +60,7 @@ EOF
 
 # Run the target
 echo -e "${BLUE}Running flext-target-oracle...${NC}"
-python example_usage.py
+python 02_usage.py
 
 # Show results
 echo -e "${GREEN}✅ Example completed successfully!${NC}"
