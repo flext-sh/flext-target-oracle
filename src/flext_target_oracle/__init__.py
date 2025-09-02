@@ -8,31 +8,12 @@ from flext_core import FlextResult
 # === FLEXT-MELTANO COMPLETE INTEGRATION ===
 # Re-export ALL flext-meltano facilities for full ecosystem integration
 from flext_meltano import (
-    BatchSink,
-    FlextMeltanoBaseService,
     # Bridge integration
     FlextMeltanoBridge,
     # Configuration and validation
     FlextMeltanoConfig,
-    FlextMeltanoEvent,
-    # Enterprise services from flext-meltano.base
-    FlextMeltanoTargetService,
-    # Authentication patterns
-    OAuthAuthenticator,
-    # Typing definitions
-    PropertiesList,
-    Property,
-    Sink,
-    SQLSink,
-    # Core Singer SDK classes (centralized from flext-meltano)
-    Stream,
-    Tap,
-    Target,
-    create_meltano_target_service,
-    # Testing utilities
-    get_tap_test_class,
-    # Singer typing utilities (centralized)
-    singer_typing,
+    # Core Singer SDK classes (available from flext-meltano)
+    FlextTarget as Target,
 )
 
 # Import local implementations - CONSOLIDATED PEP8 STRUCTURE
@@ -67,7 +48,7 @@ from flext_target_oracle.target_client import (
 )
 
 FlextOracleTargetLoader = FlextTargetOracleLoader  # Alias for backward compatibility
-from flext_target_oracle.models import (
+from flext_target_oracle.target_models import (
     LoadMethodModel,
     StorageModeModel,
     OracleConnectionModel,
