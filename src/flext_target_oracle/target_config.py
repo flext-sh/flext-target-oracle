@@ -46,7 +46,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-from flext_core import FlextResult
+from flext_core import FlextModels, FlextResult
 from pydantic import Field, SecretStr, field_validator
 
 from .constants import OracleTargetConstants
