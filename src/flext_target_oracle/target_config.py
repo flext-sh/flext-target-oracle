@@ -4,7 +4,7 @@ This module provides type-safe configuration management for Oracle Singer target
 operations, implementing FLEXT ecosystem patterns with comprehensive validation
 and enterprise-grade reliability standards.
 
-The configuration system uses FlextModels.Value as the foundation, providing
+The configuration system uses FlextModels as the foundation, providing
 immutable, validated configuration objects with domain rule validation through
 the Chain of Responsibility pattern. All validation follows railway-oriented
 programming principles using FlextResult for consistent error handling.
@@ -15,7 +15,7 @@ Key Classes:
     OracleTargetConstants: System constants to eliminate magic numbers
 
 Architecture Patterns:
-    FlextModels.Value: Immutable configuration with built-in validation
+    FlextModels: Immutable configuration with built-in validation
     Chain of Responsibility: Modular validation rule composition
     Railway-Oriented Programming: FlextResult for error handling
     Domain-Driven Design: Business rule validation with domain context
@@ -46,7 +46,7 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-from flext_core import FlextConfig, FlextResult
+from flext_core import FlextResult
 from pydantic import Field, SecretStr, field_validator
 
 from .constants import OracleTargetConstants
@@ -76,7 +76,7 @@ class LoadMethod(StrEnum):
     BULK_MERGE = "bulk_merge"
 
 
-class FlextTargetOracleConfig(FlextConfig.BaseModel):
+class FlextTargetOracleConfig(FlextModels.BaseConfig):
     """Type-safe Oracle target configuration with comprehensive validation.
 
     Provides immutable configuration object for Oracle Singer target operations
@@ -501,9 +501,9 @@ class FlextTargetOracleConfig(FlextConfig.BaseModel):
         return v
 
     def validate_business_rules(self) -> FlextResult[None]:
-        """Validate business rules implementation required by FlextModels.Value.
+        """Validate business rules implementation required by FlextModels.
 
-        Implements abstract method from FlextModels.Value by delegating to
+        Implements abstract method from FlextModels by delegating to
         validate_domain_rules for backwards compatibility and consistency.
 
         Returns:

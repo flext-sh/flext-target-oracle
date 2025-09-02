@@ -4,7 +4,7 @@ This module provides data models and value objects for Oracle Singer target
 operations, implementing FLEXT ecosystem patterns with comprehensive validation
 and enterprise-grade reliability standards.
 
-The models use FlextModels.Value as the foundation, providing immutable,
+The models use FlextModels as the foundation, providing immutable,
 validated data objects with domain rule validation following Clean Architecture
 and Domain-Driven Design principles.
 
@@ -15,7 +15,7 @@ Key Models:
     LoadStatisticsModel: Data loading statistics and metrics
 
 Architecture Patterns:
-    FlextModels.Value: Immutable data models with built-in validation
+    FlextModels: Immutable data models with built-in validation
     Domain-Driven Design: Business rule validation with domain context
     Railway-Oriented Programming: FlextResult for error handling
     Type Safety: Comprehensive type hints and runtime validation
@@ -59,7 +59,7 @@ class StorageModeModel(StrEnum):
     HYBRID = "hybrid"
 
 
-class OracleConnectionModel(FlextModels.Value):
+class OracleConnectionModel(FlextModels):
     """Oracle database connection parameters model.
 
     Immutable value object representing Oracle database connection
@@ -150,7 +150,7 @@ class OracleConnectionModel(FlextModels.Value):
         return FlextResult[None].ok(None)
 
 
-class SingerStreamModel(FlextModels.Value):
+class SingerStreamModel(FlextModels):
     """Singer stream definition with Oracle mappings.
 
     Immutable value object representing a Singer stream configuration
@@ -228,7 +228,7 @@ class SingerStreamModel(FlextModels.Value):
         return f"{self.schema_name}.{self.table_name}"
 
 
-class BatchProcessingModel(FlextModels.Value):
+class BatchProcessingModel(FlextModels):
     """Batch processing configuration and state.
 
     Immutable value object representing batch processing configuration
@@ -322,7 +322,7 @@ class BatchProcessingModel(FlextModels.Value):
         return FlextResult[None].ok(None)
 
 
-class LoadStatisticsModel(FlextModels.Value):
+class LoadStatisticsModel(FlextModels):
     """Data loading statistics and metrics.
 
     Immutable value object representing comprehensive statistics
@@ -456,7 +456,7 @@ class LoadStatisticsModel(FlextModels.Value):
         return FlextResult[None].ok(None)
 
 
-class OracleTableMetadataModel(FlextModels.Value):
+class OracleTableMetadataModel(FlextModels):
     """Oracle table metadata and schema information.
 
     Immutable value object representing Oracle table structure
