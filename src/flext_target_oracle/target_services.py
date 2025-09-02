@@ -18,7 +18,7 @@ Key Services:
 
 Architecture Patterns:
     - FlextResult for all operations (railway-oriented programming)
-    - FlextModels.Entity/FlextModels.Value where appropriate
+    - FlextModels/FlextModels where appropriate
     - Constructor injection via dependencies
     - Interface segregation with protocols
     - Single Responsibility Principle
