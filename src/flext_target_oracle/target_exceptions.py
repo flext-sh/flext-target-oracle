@@ -24,12 +24,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextExceptions
-
 
 # Oracle Target Exception Hierarchy - Built on FLEXT patterns
-class FlextTargetOracleError(FlextExceptions):
+class FlextTargetOracleError(Exception):
     """Base exception for all Oracle Target operations."""
+
+    def __init__(self, message: str = "", *args) -> None:
+        super().__init__(message, *args)
+        self.message = message
 
 
 class FlextTargetOracleValidationError(FlextTargetOracleError):

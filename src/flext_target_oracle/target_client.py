@@ -37,12 +37,7 @@ from datetime import UTC, datetime
 from flext_core import FlextLogger, FlextResult
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from flext_meltano import (
-    FlextMeltanoConfig,
-    FlextMeltanoTarget,
-    FlextSingerUnifiedConfig,
-    FlextSingerUnifiedInterface,
-    FlextSingerUnifiedResult,
-    FlextTargetPlugin,
+    FlextTarget as FlextMeltanoTarget,
 )
 
 from flext_target_oracle.target_config import FlextTargetOracleConfig
@@ -74,18 +69,21 @@ class FlextTargetOracleLoader:
         """Initialize loader using flext-db-oracle correctly."""
         self.config = config
 
-        # Use flext-db-oracle configuration
-        oracle_config_dict = config.get_oracle_config()
+        # Real Oracle API integration - environment cleaned
         try:
-            oracle_config = FlextDbOracleConfig.from_dict(
-                dict(oracle_config_dict),
+            oracle_config = FlextDbOracleConfig(
+                host=config.oracle_host,
+                port=config.oracle_port,
+                service_name=config.oracle_service,
+                username=config.oracle_user,
+                password=config.oracle_password,
             )
-        except Exception as e:
-            msg = f"Failed to create Oracle config: {e}"
-            raise FlextTargetOracleConnectionError(msg) from e
 
-        # Initialize Oracle API - CORRETA integração
-        self.oracle_api = FlextDbOracleApi(oracle_config)
+            # Initialize real Oracle API
+            self.oracle_api = FlextDbOracleApi(oracle_config)
+        except Exception as e:
+            msg = f"Failed to create Oracle API: {e}"
+            raise FlextTargetOracleConnectionError(msg) from e
 
         # Simple state tracking - específico para Singer target
         self._record_buffers: dict[str, list[dict[str, object]]] = {}
@@ -309,7 +307,7 @@ class FlextTargetOracleLoader:
 # =============================================================================
 
 
-class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
+class FlextTargetOracle(FlextMeltanoTarget):
     """Oracle Singer Target implementation with FLEXT ecosystem integration.
 
     This class provides a production-grade Singer Target for Oracle Database
@@ -451,11 +449,18 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 
         # Initialize base classes with proper config
         # Create a minimal FlextMeltanoConfig from our Oracle config
-        meltano_config = FlextMeltanoConfig(
-            project_root=str(getattr(self.target_config, "project_root", ".")),
-            environment=getattr(self.target_config, "environment", "dev"),
-        )
-        super().__init__(config=meltano_config)
+        # FlextTarget requires native_target and adapter, not config
+        # Create a minimal native target for compatibility
+        from flext_meltano import FlextMeltanoTypeAdapters
+
+        class MinimalNativeTarget:
+            def __init__(self, config) -> None:
+                self.config = config
+                self.name = "target-oracle"
+
+        native_target = MinimalNativeTarget(self.target_config)
+        adapter = FlextMeltanoTypeAdapters()
+        super().__init__(native_target=native_target, adapter=adapter)
 
         # Initialize components
         self._loader = FlextTargetOracleLoader(self.target_config)
@@ -472,9 +477,6 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
         msg = f"Failed to write record to {stream_name}: {error_msg}"
         raise RuntimeError(msg)
 
-    # FlextSingerUnifiedInterface implementation
-
-    def initialize(self, config: FlextSingerUnifiedConfig) -> FlextResult[None]:
         """Initialize the Oracle target.
 
         Args:
@@ -552,7 +554,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
     def execute(
         self,
         input_data: object | None = None,
-    ) -> FlextResult[FlextSingerUnifiedResult]:
+    ) -> FlextResult[dict[str, object]]:
         """Execute the target operation - process Singer messages.
 
         Args:
@@ -600,21 +602,20 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
                 # Calculate execution time in milliseconds
                 execution_time_ms = int((time.time() - start_time) * 1000)
 
-                return FlextResult[None].ok(
-                    FlextSingerUnifiedResult(
-                        success=True,
-                        records_processed=records_processed,
-                        schemas_discovered=list(self._schemas.keys()),
-                        execution_time_ms=execution_time_ms,
-                        state_updates=self._state,
-                    ),
-                )
-            return FlextResult[None].fail(
+                result_data = {
+                    "success": True,
+                    "records_processed": records_processed,
+                    "schemas_discovered": list(self._schemas.keys()),
+                    "execution_time_ms": execution_time_ms,
+                    "state_updates": self._state,
+                }
+                return FlextResult[dict[str, object]].ok(result_data)
+            return FlextResult[dict[str, object]].fail(
                 "Input data must be a list of Singer messages"
             )
 
         except Exception as e:
-            return FlextResult[None].fail(f"Target execution failed: {e}")
+            return FlextResult[dict[str, object]].fail(f"Target execution failed: {e}")
 
     def validate_configuration(self) -> FlextResult[None]:
         """Validate the current configuration.
@@ -1315,7 +1316,7 @@ class FlextTargetOracle(FlextMeltanoTarget, FlextSingerUnifiedInterface):
 # =============================================================================
 
 
-class FlextTargetOraclePlugin(FlextTargetPlugin):
+class FlextTargetOraclePlugin:
     """Oracle-specific implementation of target plugin.
 
     Extends FlextTargetPlugin with Oracle-specific functionality for
@@ -1344,12 +1345,10 @@ class FlextTargetOraclePlugin(FlextTargetPlugin):
             entity: Optional domain entity
 
         """
-        super().__init__(
-            name,
-            version,
-            config,
-            None,
-        )  # Convert entity to FlextPluginEntity if needed
+        # Initialize plugin attributes
+        self.name = name
+        self.version = version
+        self._logger = FlextLogger(f"plugin.{name}")
         self._connection_string = ""
         self._schema = config.get("schema", "PUBLIC") if config else "PUBLIC"
         batch_size_value = config.get("batch_size", 1000) if config else 1000
