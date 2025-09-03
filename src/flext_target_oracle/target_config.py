@@ -76,7 +76,7 @@ class LoadMethod(StrEnum):
     BULK_MERGE = "bulk_merge"
 
 
-class FlextTargetOracleConfig(FlextModels.BaseConfig):
+class FlextTargetOracleConfig(FlextModels.Config):
     """Type-safe Oracle target configuration with comprehensive validation.
 
     Provides immutable configuration object for Oracle Singer target operations
