@@ -266,7 +266,9 @@ def oracle_api(oracle_config: FlextTargetOracleConfig) -> FlextDbOracleApi:
 
 
 @pytest_asyncio.fixture
-async def oracle_loader(oracle_config: FlextTargetOracleConfig) -> AsyncGenerator[FlextTargetOracleLoader]:
+async def oracle_loader(
+    oracle_config: FlextTargetOracleConfig,
+) -> AsyncGenerator[FlextTargetOracleLoader]:
     """Create FlextTargetOracleLoader instance with mocked connection."""
     from unittest.mock import MagicMock, patch
 
@@ -611,7 +613,9 @@ def temp_config_file(tmp_path: Path) -> Path:
 
 # Async Fixtures
 @pytest_asyncio.fixture
-async def connected_loader(oracle_loader: FlextTargetOracleLoader) -> AsyncGenerator[FlextTargetOracleLoader]:
+async def connected_loader(
+    oracle_loader: FlextTargetOracleLoader,
+) -> AsyncGenerator[FlextTargetOracleLoader]:
     """Provide a connected FlextTargetOracleLoader instance."""
     yield oracle_loader
 
@@ -655,7 +659,9 @@ def large_dataset() -> list[dict[str, object]]:
 
 
 # Markers for different test categories
-def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+def pytest_collection_modifyitems(
+    config: pytest.Config, items: list[pytest.Item]
+) -> None:
     """Add markers to test items based on their location."""
     for item in items:
         # Add markers based on test file location
