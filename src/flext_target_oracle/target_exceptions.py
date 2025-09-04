@@ -29,7 +29,7 @@ from __future__ import annotations
 class FlextTargetOracleError(Exception):
     """Base exception for all Oracle Target operations."""
 
-    def __init__(self, message: str = "", *args) -> None:
+    def __init__(self, message: str = "", *args: object) -> None:
         super().__init__(message, *args)
         self.message = message
 

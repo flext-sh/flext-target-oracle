@@ -37,6 +37,7 @@ from datetime import UTC, datetime
 from flext_core import FlextLogger, FlextResult
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from flext_meltano import (
+    FlextMeltanoTypeAdapters,
     FlextTarget as FlextMeltanoTarget,
 )
 
@@ -451,10 +452,9 @@ class FlextTargetOracle(FlextMeltanoTarget):
         # Create a minimal FlextMeltanoConfig from our Oracle config
         # FlextTarget requires native_target and adapter, not config
         # Create a minimal native target for compatibility
-        from flext_meltano import FlextMeltanoTypeAdapters
 
         class MinimalNativeTarget:
-            def __init__(self, config) -> None:
+            def __init__(self, config: FlextTargetOracleConfig) -> None:
                 self.config = config
                 self.name = "target-oracle"
 
@@ -476,37 +476,6 @@ class FlextTargetOracle(FlextMeltanoTarget):
         error_msg = result.error or "Record loading failed"
         msg = f"Failed to write record to {stream_name}: {error_msg}"
         raise RuntimeError(msg)
-
-        """Initialize the Oracle target.
-
-        Args:
-            config: Singer unified configuration object
-
-        Returns:
-            FlextResult indicating initialization success/failure
-
-        """
-        try:
-            # Use config parameter for validation if needed
-            _ = config
-
-            # Validate configuration
-            validation_result = self.target_config.validate_domain_rules()
-            if validation_result.is_failure:
-                return FlextResult[None].fail(
-                    validation_result.error or "Configuration validation failed",
-                )
-
-            # Initialize loader connection
-            connect_result = self._loader.connect()
-            if connect_result.is_failure:
-                return FlextResult[None].fail(
-                    connect_result.error or "Connection failed"
-                )
-
-            return FlextResult[None].ok(None)
-        except Exception as e:
-            return FlextResult[None].fail(f"Failed to initialize Oracle target: {e}")
 
     def discover_catalog(self) -> FlextResult[dict[str, object]]:
         """Discover available schemas and generate Singer catalog.
