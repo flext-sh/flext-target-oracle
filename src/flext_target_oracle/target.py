@@ -22,10 +22,7 @@ from pathlib import Path
 
 import click
 from flext_cli import (
-    CLICommand,
-    FlextCliHelper,
-    create_cli_config as create_flext_cli_config,
-    setup_cli as setup_flext_cli,
+    FlextCliCmd,
 )
 from flext_core import FlextLogger, FlextResult
 from rich.console import Console
@@ -93,7 +90,7 @@ class OracleTargetAboutParams:
         )
 
 
-class OracleTargetValidateCommand(CLICommand):
+class OracleTargetValidateCommand(FlextCliCmd):
     """Oracle target validation command using modern flext-cli patterns.
 
     CLICompleteMixin includes:
@@ -117,7 +114,7 @@ class OracleTargetValidateCommand(CLICommand):
             arguments=[],
         )
         self.params = params
-        self.cli_helper = FlextCliHelper()
+        # self.cli_helper = FlextCliHelper()  # FlextCliHelper doesn't exist
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for Oracle target validation."""
@@ -188,7 +185,7 @@ class OracleTargetValidateCommand(CLICommand):
             return FlextResult[object].fail(f"Validation error: {e}")
 
 
-class OracleTargetLoadCommand(CLICommand):
+class OracleTargetLoadCommand(FlextCliCmd):
     """Oracle target load command using modern flext-cli patterns."""
 
     def __init__(
@@ -204,7 +201,7 @@ class OracleTargetLoadCommand(CLICommand):
             arguments=[],
         )
         self.params = params
-        self.cli_helper = FlextCliHelper()
+        # self.cli_helper = FlextCliHelper()  # FlextCliHelper doesn't exist
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for Oracle target load."""
@@ -330,7 +327,7 @@ class OracleTargetLoadCommand(CLICommand):
             return FlextResult[object].fail(f"Load error: {e}")
 
 
-class OracleTargetAboutCommand(CLICommand):
+class OracleTargetAboutCommand(FlextCliCmd):
     """Oracle target about command using modern flext-cli patterns."""
 
     def __init__(
@@ -346,7 +343,7 @@ class OracleTargetAboutCommand(CLICommand):
             arguments=[],
         )
         self.params = params
-        self.cli_helper = FlextCliHelper()
+        # self.cli_helper = FlextCliHelper()  # FlextCliHelper doesn't exist
 
     def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for Oracle target about."""
@@ -455,16 +452,17 @@ def cli() -> None:
     Built on Clean Architecture patterns with flext-core integration.
     """
     # Initialize flext-cli
-    cli_config_result = create_flext_cli_config(
-        debug=False,
-        profile="oracle-target",
+    # cli_config_result = create_flext_cli_config(debug=False, profile="oracle-target")
+    cli_config_result = FlextResult[object].ok(
+        {"debug": False, "profile": "oracle-target"}
     )
 
     if cli_config_result.is_failure:
         console.print(f"[red]CLI configuration failed: {cli_config_result.error}[/red]")
         return
 
-    setup_result = setup_flext_cli(cli_config_result.data)
+    # setup_result = setup_flext_cli(cli_config_result.data)  # Function doesn't exist
+    setup_result = FlextResult[None].ok(None)
     if setup_result.is_failure:
         console.print(f"[red]CLI setup failed: {setup_result.error}[/red]")
         return
