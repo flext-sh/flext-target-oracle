@@ -59,7 +59,7 @@ class StorageModeModel(StrEnum):
     HYBRID = "hybrid"
 
 
-class OracleConnectionModel(FlextModels):
+class OracleConnectionModel(FlextModels.Config):
     """Oracle database connection parameters model.
 
     Immutable value object representing Oracle database connection
@@ -100,11 +100,12 @@ class OracleConnectionModel(FlextModels):
         min_length=1,
         max_length=128,
     )
-    schema: str = Field(
+    schema_name: str = Field(
         default="PUBLIC",
         description="Target schema for table operations",
         min_length=1,
         max_length=128,
+        alias="schema",
     )
     use_ssl: bool = Field(
         default=False,
@@ -150,7 +151,7 @@ class OracleConnectionModel(FlextModels):
         return FlextResult[None].ok(None)
 
 
-class SingerStreamModel(FlextModels):
+class SingerStreamModel(FlextModels.Config):
     """Singer stream definition with Oracle mappings.
 
     Immutable value object representing a Singer stream configuration
@@ -228,7 +229,7 @@ class SingerStreamModel(FlextModels):
         return f"{self.schema_name}.{self.table_name}"
 
 
-class BatchProcessingModel(FlextModels):
+class BatchProcessingModel(FlextModels.Config):
     """Batch processing configuration and state.
 
     Immutable value object representing batch processing configuration
@@ -322,7 +323,7 @@ class BatchProcessingModel(FlextModels):
         return FlextResult[None].ok(None)
 
 
-class LoadStatisticsModel(FlextModels):
+class LoadStatisticsModel(FlextModels.Config):
     """Data loading statistics and metrics.
 
     Immutable value object representing comprehensive statistics
@@ -456,7 +457,7 @@ class LoadStatisticsModel(FlextModels):
         return FlextResult[None].ok(None)
 
 
-class OracleTableMetadataModel(FlextModels):
+class OracleTableMetadataModel(FlextModels.Config):
     """Oracle table metadata and schema information.
 
     Immutable value object representing Oracle table structure
