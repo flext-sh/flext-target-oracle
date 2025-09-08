@@ -1,6 +1,17 @@
-"""Production-Grade Singer Target for Oracle Database data loading."""
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
 
 from __future__ import annotations
+from flext_core import FlextTypes
+
+
+"""Production-Grade Singer Target for Oracle Database data loading."""
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
+
 
 # Import FLEXT core patterns for ecosystem consistency
 from flext_core import FlextResult
@@ -72,7 +83,7 @@ from flext_target_oracle.target_services import (
 __version__ = "0.9.0"
 __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     # === FLEXT-MELTANO COMPLETE RE-EXPORTS ===
     "BatchSink",
     "FlextMeltanoBaseService",

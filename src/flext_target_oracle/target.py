@@ -1,4 +1,10 @@
-#!/usr/bin/env python3
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+# !/usr/bin/env python3
 """FLEXT Target Oracle - Modern CLI using flext-cli foundation patterns.
 
 Singer Target interface with modern Click CLI integration using flext-cli patterns
@@ -10,7 +16,6 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-from __future__ import annotations
 
 import asyncio
 import json
@@ -450,6 +455,10 @@ def cli() -> None:
 
     Modern CLI using flext-cli foundation with zero boilerplate.
     Built on Clean Architecture patterns with flext-core integration.
+
+    Returns:
+            object: Description of return value.
+
     """
     # Initialize flext-cli
     # cli_config_result = create_flext_cli_config(debug=False, profile="oracle-target")
@@ -481,6 +490,9 @@ def validate(**kwargs: object) -> None:
     Example:
       target-oracle validate --config config.json
       target-oracle validate  # Uses environment variables
+
+    Returns:
+            object: Description of return value.
 
     """
     params = OracleTargetValidateParams.from_click_args(**kwargs)
@@ -514,6 +526,9 @@ def load(**kwargs: object) -> None:
       cat messages.jsonl | target-oracle load --config config.json
       meltano elt tap-source target-oracle --state state.json
 
+    Returns:
+            object: Description of return value.
+
     """
     params = OracleTargetLoadParams.from_click_args(**kwargs)
 
@@ -544,6 +559,9 @@ def about(**kwargs: object) -> None:
     Example:
       target-oracle about
       target-oracle about --format text
+
+    Returns:
+            object: Description of return value.
 
     """
     params = OracleTargetAboutParams.from_click_args(**kwargs)

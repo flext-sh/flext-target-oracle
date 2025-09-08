@@ -9,6 +9,10 @@ Key Features:
     - Session-scoped database setup with proper cleanup
     - Comprehensive test fixtures for all test scenarios
     - Integration with flext-db-oracle test infrastructure
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 import asyncio
@@ -83,7 +87,7 @@ def oracle_container() -> Generator[None]:
     ]
     try:
 
-        async def _run(cmd: list[str]) -> tuple[int, str, str]:
+        async def _run(cmd: FlextTypes.Core.StringList) -> tuple[int, str, str]:
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
@@ -399,7 +403,7 @@ def mock_loader() -> AsyncMock:
 
 # Test Data Fixtures
 @pytest.fixture
-def schema() -> dict[str, object]:
+def schema() -> FlextTypes.Core.Dict:
     """Simple Singer schema message for unit testing."""
     return {
         "type": "SCHEMA",
@@ -417,7 +421,7 @@ def schema() -> dict[str, object]:
 
 
 @pytest.fixture
-def record() -> dict[str, object]:
+def record() -> FlextTypes.Core.Dict:
     """Simple Singer record message for unit testing."""
     return {
         "type": "RECORD",
@@ -431,7 +435,7 @@ def record() -> dict[str, object]:
 
 
 @pytest.fixture
-def state() -> dict[str, object]:
+def state() -> FlextTypes.Core.Dict:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -440,7 +444,7 @@ def state() -> dict[str, object]:
 
 
 @pytest.fixture
-def simple_schema() -> dict[str, object]:
+def simple_schema() -> FlextTypes.Core.Dict:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
@@ -459,7 +463,7 @@ def simple_schema() -> dict[str, object]:
 
 
 @pytest.fixture
-def nested_schema() -> dict[str, object]:
+def nested_schema() -> FlextTypes.Core.Dict:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
@@ -503,7 +507,7 @@ def nested_schema() -> dict[str, object]:
 
 
 @pytest.fixture
-def sample_record() -> dict[str, object]:
+def sample_record() -> FlextTypes.Core.Dict:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -520,7 +524,7 @@ def sample_record() -> dict[str, object]:
 
 
 @pytest.fixture
-def batch_records() -> list[dict[str, object]]:
+def batch_records() -> list[FlextTypes.Core.Dict]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -539,7 +543,7 @@ def batch_records() -> list[dict[str, object]]:
 
 
 @pytest.fixture
-def state_message() -> dict[str, object]:
+def state_message() -> FlextTypes.Core.Dict:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -557,10 +561,10 @@ def state_message() -> dict[str, object]:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema: dict[str, object],
-    sample_record: dict[str, object],
-    state_message: dict[str, object],
-) -> list[dict[str, object]]:
+    simple_schema: FlextTypes.Core.Dict,
+    sample_record: FlextTypes.Core.Dict,
+    state_message: FlextTypes.Core.Dict,
+) -> list[FlextTypes.Core.Dict]:
     """Complete Singer message stream for testing."""
     return [
         simple_schema,
@@ -622,7 +626,7 @@ async def connected_loader(
 
 # Performance Testing Fixtures
 @pytest.fixture
-def large_dataset() -> list[dict[str, object]]:
+def large_dataset() -> list[FlextTypes.Core.Dict]:
     """Generate large dataset for performance testing."""
     schema = {
         "type": "SCHEMA",
@@ -653,7 +657,7 @@ def large_dataset() -> list[dict[str, object]]:
         for i in range(10000)  # 10k records
     ]
 
-    result: list[dict[str, object]] = [schema]
+    result: list[FlextTypes.Core.Dict] = [schema]
     result.extend(records)
     return result
 

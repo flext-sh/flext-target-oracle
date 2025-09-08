@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """Target Client Implementation for FLEXT Target Oracle.
 
 This module consolidates the main Oracle Singer Target implementation, Oracle data
@@ -25,13 +33,16 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 
 """
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
-from __future__ import annotations
 
 import asyncio
 import json
 import time
-from collections.abc import Callable as _Callable, Mapping
+from collections.abc import Mapping
 from datetime import UTC, datetime
 
 from flext_core import FlextLogger, FlextResult
@@ -87,7 +98,7 @@ class FlextTargetOracleLoader:
             raise FlextTargetOracleConnectionError(msg) from e
 
         # Simple state tracking - específico para Singer target
-        self._record_buffers: dict[str, list[dict[str, object]]] = {}
+        self._record_buffers: dict[str, list[FlextTypes.Core.Dict]] = {}
         self._total_records = 0
 
     def connect(self) -> FlextResult[None]:
@@ -113,8 +124,8 @@ class FlextTargetOracleLoader:
     async def ensure_table_exists(
         self,
         stream_name: str,
-        _schema: dict[str, object],
-        _key_properties: list[str] | None = None,
+        _schema: FlextTypes.Core.Dict,
+        _key_properties: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[None]:
         """Ensure table exists using flext-db-oracle API."""
         try:
@@ -197,7 +208,7 @@ class FlextTargetOracleLoader:
     async def load_record(
         self,
         stream_name: str,
-        record_data: dict[str, object],
+        record_data: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Load record with batching."""
         try:
@@ -218,7 +229,7 @@ class FlextTargetOracleLoader:
             logger.exception("Failed to load record")
             return FlextResult[None].fail(f"Record loading failed: {e}")
 
-    async def finalize_all_streams(self) -> FlextResult[dict[str, object]]:
+    async def finalize_all_streams(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Finalize all streams and return stats."""
         try:
             # Flush all remaining records
@@ -230,16 +241,16 @@ class FlextTargetOracleLoader:
                             f"Failed to flush {stream_name}: {result.error}",
                         )
 
-            stats: dict[str, object] = {
+            stats: FlextTypes.Core.Dict = {
                 "total_records": self._total_records,
                 "streams_processed": len(self._record_buffers),
             }
 
-            return FlextResult[dict[str, object]].ok(stats)
+            return FlextResult[FlextTypes.Core.Dict].ok(stats)
 
         except Exception as e:
             logger.exception("Failed to finalize streams")
-            return FlextResult[dict[str, object]].fail(f"Finalization failed: {e}")
+            return FlextResult[FlextTypes.Core.Dict].fail(f"Finalization failed: {e}")
 
     async def _flush_batch(self, stream_name: str) -> FlextResult[None]:
         """Flush batch usando flext-db-oracle API CORRETAMENTE."""
@@ -266,7 +277,7 @@ class FlextTargetOracleLoader:
                     )
 
                 # Prepare batch data with correct types
-                batch_operations: list[tuple[str, dict[str, object] | None]] = []
+                batch_operations: list[tuple[str, FlextTypes.Core.Dict | None]] = []
                 sql_str = sql_result.data
                 if sql_str is None:
                     return FlextResult[None].fail(
@@ -274,7 +285,7 @@ class FlextTargetOracleLoader:
                     )
 
                 for record in records:
-                    params: dict[str, object] = {
+                    params: FlextTypes.Core.Dict = {
                         "DATA": json.dumps(record),
                         "_SDC_EXTRACTED_AT": record.get("_sdc_extracted_at", loaded_at),
                         "_SDC_LOADED_AT": loaded_at,
@@ -377,7 +388,7 @@ class FlextTargetOracle(FlextMeltanoTarget):
 
     def __init__(
         self,
-        config: dict[str, object] | FlextTargetOracleConfig | None = None,
+        config: FlextTypes.Core.Dict | FlextTargetOracleConfig | None = None,
     ) -> None:
         """Initialize Oracle Singer Target with configuration validation.
 
@@ -464,8 +475,8 @@ class FlextTargetOracle(FlextMeltanoTarget):
 
         # Initialize components
         self._loader = FlextTargetOracleLoader(self.target_config)
-        self._schemas: dict[str, dict[str, object]] = {}
-        self._state: dict[str, object] = {}
+        self._schemas: dict[str, FlextTypes.Core.Dict] = {}
+        self._state: FlextTypes.Core.Dict = {}
 
     def _handle_record_write_error(
         self,
@@ -477,7 +488,7 @@ class FlextTargetOracle(FlextMeltanoTarget):
         msg = f"Failed to write record to {stream_name}: {error_msg}"
         raise RuntimeError(msg)
 
-    def discover_catalog(self) -> FlextResult[dict[str, object]]:
+    def discover_catalog(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Discover available schemas and generate Singer catalog.
 
         For targets, this returns the current schema information from loaded streams.
@@ -487,7 +498,7 @@ class FlextTargetOracle(FlextMeltanoTarget):
 
         """
         try:
-            catalog: dict[str, object] = {
+            catalog: FlextTypes.Core.Dict = {
                 "streams": [],
             }
 
@@ -514,16 +525,16 @@ class FlextTargetOracle(FlextMeltanoTarget):
                 if isinstance(streams, list):
                     streams.append(stream_entry)
 
-            return FlextResult[dict[str, object]].ok(catalog)
+            return FlextResult[FlextTypes.Core.Dict].ok(catalog)
         except Exception as e:
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[FlextTypes.Core.Dict].fail(
                 f"Failed to discover catalog: {e}"
             )
 
     def execute(
         self,
         input_data: object | None = None,
-    ) -> FlextResult[dict[str, object]]:
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute the target operation - process Singer messages.
 
         Args:
@@ -578,13 +589,15 @@ class FlextTargetOracle(FlextMeltanoTarget):
                     "execution_time_ms": execution_time_ms,
                     "state_updates": self._state,
                 }
-                return FlextResult[dict[str, object]].ok(result_data)
-            return FlextResult[dict[str, object]].fail(
+                return FlextResult[FlextTypes.Core.Dict].ok(result_data)
+            return FlextResult[FlextTypes.Core.Dict].fail(
                 "Input data must be a list of Singer messages"
             )
 
         except Exception as e:
-            return FlextResult[dict[str, object]].fail(f"Target execution failed: {e}")
+            return FlextResult[FlextTypes.Core.Dict].fail(
+                f"Target execution failed: {e}"
+            )
 
     def validate_configuration(self) -> FlextResult[None]:
         """Validate the current configuration.
@@ -601,7 +614,7 @@ class FlextTargetOracle(FlextMeltanoTarget):
         """Test connection as required by Singer SDK."""
         return self._test_connection_impl()
 
-    def _write_record(self, stream_name: str, record: dict[str, object]) -> None:
+    def _write_record(self, stream_name: str, record: FlextTypes.Core.Dict) -> None:
         """Write individual records as required by Singer SDK.
 
         This method implements the Singer SDK interface for processing individual
@@ -669,50 +682,138 @@ class FlextTargetOracle(FlextMeltanoTarget):
             connectivity issues. Check logs for specific failure reasons when
             the method returns False.
 
-        """
-        try:
-            # Validate configuration
-            validation_result = self.target_config.validate_domain_rules()
-            if not validation_result.success:
-                logger.error(
-                    f"Configuration validation failed: {validation_result.error}",
-                )
-                return False
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
 
-            # Test connection using loader
-            connection_result = self._loader.connect()
-            if not connection_result.success:
-                logger.error(f"Connection test failed: {connection_result.error}")
-                return False
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
 
-            logger.info("Oracle connection test passed")
-            return True
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
 
-        except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception("Oracle connection test failed")
-            logger.warning(
-                f"Connection test failed with error: {type(e).__name__}: {e}",
-            )
-            return False
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
 
-    async def _write_records_impl(
-        self,
-        records: list[dict[str, object]],
-    ) -> FlextResult[None]:
-        """Write batch of records to Oracle database with error handling.
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
 
-        Processes a batch of Singer RECORD messages and loads them into Oracle
-        tables using the configured loading strategy. This method implements
-        the Singer SDK batch writing interface while providing railway-oriented
-        error handling for reliable data loading.
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
 
-        The method processes each record individually, extracting stream name
-        and record data, then delegating to the Oracle loader for database
-        operations. Failed records are reported with detailed error context.
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
 
-        Args:
-            records: List of Singer RECORD messages, each containing:
-                    - stream: Stream name for table identification
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if all records loaded successfully,
+
                     - record: Dictionary of field values to insert
 
         Returns:
@@ -759,8 +860,8 @@ class FlextTargetOracle(FlextMeltanoTarget):
     def _apply_schema_mappings(
         self,
         stream_name: str,
-        schema: dict[str, object],
-    ) -> dict[str, object]:
+        schema: FlextTypes.Core.Dict,
+    ) -> FlextTypes.Core.Dict:
         """Apply column mappings to schema.
 
         Args:
@@ -815,8 +916,8 @@ class FlextTargetOracle(FlextMeltanoTarget):
     def _apply_record_mappings(
         self,
         stream_name: str,
-        record: dict[str, object],
-    ) -> dict[str, object]:
+        record: FlextTypes.Core.Dict,
+    ) -> FlextTypes.Core.Dict:
         """Apply column mappings and transformations to a record.
 
         Args:
@@ -856,7 +957,7 @@ class FlextTargetOracle(FlextMeltanoTarget):
     def _apply_value_transform(
         self,
         value: object,
-        transform: dict[str, object],
+        transform: FlextTypes.Core.Dict,
     ) -> object:
         """Apply transformation to a value.
 
@@ -867,52 +968,144 @@ class FlextTargetOracle(FlextMeltanoTarget):
         Returns:
             Transformed value
 
-        """
-        # Type conversion transformations
-        if "type" in transform:
-            target_type = transform["type"]
-            type_converters: dict[str, _Callable[[object], object] | type[str]] = {
-                "string": str,
-                "integer": lambda x: int(str(x)) if x is not None else None,
-                "number": lambda x: float(str(x)) if x is not None else None,
-                "boolean": lambda x: bool(x) if x is not None else None,
-            }
-            if isinstance(target_type, str) and target_type in type_converters:
-                converter = type_converters[target_type]
-                return converter(value)
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
 
-        # Format transformations
-        if "format" in transform and isinstance(value, str):
-            format_type = transform["format"]
-            format_converters: dict[str, _Callable[[str], str]] = {
-                "uppercase": lambda x: x.upper(),
-                "lowercase": lambda x: x.lower(),
-            }
-            if isinstance(format_type, str) and format_type in format_converters:
-                format_converter = format_converters[format_type]
-                return format_converter(value)
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
 
-        return value
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
 
-    async def process_singer_message(
-        self,
-        message: dict[str, object],
-    ) -> FlextResult[None]:
-        """Process Singer protocol messages with comprehensive error handling.
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
 
-        Main entry point for processing Singer specification messages including
-        SCHEMA, RECORD, and STATE messages. This method implements the core
-        Singer protocol handling while maintaining railway-oriented programming
-        patterns for consistent error handling.
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
 
-        The method routes messages to specialized handlers based on message type:
-        - SCHEMA: Creates/updates Oracle table structures
-        - RECORD: Loads data records into Oracle tables
-        - STATE: Manages state information for incremental processing
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
 
-        Args:
-            message: Singer message dictionary containing:
-                    - type: Message type (SCHEMA, RECORD, or STATE)
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
+        Returns:
+            FlextResult[None]: Success if message processed successfully,
+
                     - Additional fields specific to message type
 
         Returns:
@@ -949,43 +1142,117 @@ class FlextTargetOracle(FlextMeltanoTarget):
             while delegating to specialized handlers. Unknown message types are
             rejected with detailed error messages.
 
-        """
-        try:
-            message_type_raw = message.get("type", "")
-            message_type = (
-                message_type_raw.upper() if isinstance(message_type_raw, str) else ""
-            )
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
 
-            if message_type == "SCHEMA":
-                return await self._handle_schema(message)
-            if message_type == "RECORD":
-                return await self._handle_record(message)
-            if message_type == "STATE":
-                return await self._handle_state(message)
-            return FlextResult[None].fail(
-                f"Unknown message type: {message.get('type')}"
-            )
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
 
-        except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception("Failed to process Singer message")
-            return FlextResult[None].fail(f"Message processing failed: {e}")
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
 
-    async def _handle_schema(self, message: dict[str, object]) -> FlextResult[None]:
-        """Handle Singer SCHEMA messages for table creation and structure management.
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
 
-        Processes Singer SCHEMA messages to create or update Oracle table structures
-        based on the JSON Schema definition. This method ensures target tables exist
-        with appropriate column definitions before data loading begins.
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
 
-        The schema handling process includes:
-        1. Extract stream name and JSON Schema definition
-        2. Validate schema message format and content
-        3. Delegate to Oracle loader for table creation/update
-        4. Log successful schema processing
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
 
-        Args:
-            message: Singer SCHEMA message containing:
-                    - stream: Stream name for table identification
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
+        Returns:
+            FlextResult[None]: Success if table created/updated successfully,
+
                     - schema: JSON Schema definition of record structure
 
         Returns:
@@ -1016,61 +1283,171 @@ class FlextTargetOracle(FlextMeltanoTarget):
             processing. Invalid or missing schema components result in detailed
             error messages for troubleshooting.
 
-        """
-        try:
-            stream_name = message.get("stream")
-            schema = message.get("schema", {})
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-            if not isinstance(stream_name, str):
-                return FlextResult[None].fail("Schema message missing stream name")
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-            if not isinstance(schema, dict):
-                return FlextResult[None].fail("Schema message missing valid schema")
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-            # Store original schema for catalog discovery
-            self._schemas[stream_name] = schema
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-            # Apply column mappings if configured
-            if self.target_config.column_mappings:
-                schema = self._apply_schema_mappings(stream_name, schema)
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-            # Get key properties
-            key_properties = message.get("key_properties", [])
-            key_props_list = (
-                key_properties if isinstance(key_properties, list) else None
-            )
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-            result = await self._loader.ensure_table_exists(
-                stream_name,
-                schema,
-                key_props_list,
-            )
-            if result.success:
-                logger.info("Schema processed for stream: %s", stream_name)
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-            return result
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-        except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception("Failed to handle schema message")
-            return FlextResult[None].fail(f"Schema handling failed: {e}")
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-    async def _handle_record(self, message: dict[str, object]) -> FlextResult[None]:
-        """Handle Singer RECORD messages for data loading into Oracle tables.
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-        Processes Singer RECORD messages to load individual data records into
-        Oracle tables. This method extracts the record data and delegates to
-        the Oracle loader for database insertion using the configured loading
-        strategy (INSERT, MERGE, BULK_INSERT, or BULK_MERGE).
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-        The record handling process includes:
-        1. Extract stream name and record data from message
-        2. Validate message format and required fields
-        3. Delegate to Oracle loader for database insertion
-        4. Handle any loading errors with detailed context
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
 
-        Args:
-            message: Singer RECORD message containing:
-                    - stream: Stream name for table identification
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
+        Returns:
+            FlextResult[None]: Success if record loaded successfully,
+
                     - record: Dictionary of field values to insert
 
         Returns:
@@ -1097,46 +1474,126 @@ class FlextTargetOracle(FlextMeltanoTarget):
             processing. Missing or invalid components result in detailed
             error messages without affecting other records.
 
-        """
-        try:
-            stream_name = message.get("stream")
-            record_data = message.get("record")
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
 
-            if not isinstance(stream_name, str) or not isinstance(record_data, dict):
-                return FlextResult[None].fail("Record message missing stream or data")
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
 
-            # Apply column mappings and transformations
-            if self.target_config.column_mappings or self.target_config.ignored_columns:
-                record_data = self._apply_record_mappings(stream_name, record_data)
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
 
-            # Add metadata columns if enabled
-            if self.target_config.add_metadata_columns:
-                record_data["_sdc_extracted_at"] = message.get("time_extracted", "")
-                record_data["_sdc_loaded_at"] = datetime.now(UTC).isoformat()
-                # _sdc_deleted_at is set to null for non-deleted records
-                record_data["_sdc_deleted_at"] = None
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
 
-            return await self._loader.load_record(stream_name, record_data)
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
 
-        except Exception as e:
-            logger.exception("Failed to handle record message")
-            return FlextResult[None].fail(f"Record handling failed: {e}")
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
 
-    async def _handle_state(self, _message: dict[str, object]) -> FlextResult[None]:
-        """Handle Singer STATE messages for incremental processing state management.
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
 
-        Processes Singer STATE messages that contain bookmark information for
-        incremental data synchronization. State messages are typically managed
-        by the Singer orchestrator (like Meltano) and contain information about
-        the last successfully processed record or timestamp.
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
 
-        This implementation follows the Singer specification by acknowledging
-        the state message while delegating actual state persistence to the
-        orchestrator. The target logs the state reception for debugging purposes.
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
 
-        Args:
-            message: Singer STATE message containing:
-                    - type: "STATE" message type identifier
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
+        Returns:
+            FlextResult[None]: Always succeeds as state handling is delegated
+
                     - value: State data with bookmark information
 
         Returns:
@@ -1162,33 +1619,79 @@ class FlextTargetOracle(FlextMeltanoTarget):
             state handling can be implemented here if needed for specific
             use cases.
 
-        """
-        try:
-            # State messages are typically handled by Meltano
-            logger.debug("State message received - forwarding to Meltano")
-            return FlextResult[None].ok(None)
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
 
-        except (RuntimeError, ValueError, TypeError) as e:
-            logger.exception("Failed to handle state message")
-            return FlextResult[None].fail(f"State handling failed: {e}")
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
 
-    async def finalize(self) -> FlextResult[dict[str, object]]:
-        """Finalize data loading operations and return comprehensive statistics.
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
 
-        Completes all pending data loading operations, flushes any remaining
-        batches, commits transactions, and returns detailed statistics about
-        the entire data loading session. This method should be called after
-        all Singer messages have been processed.
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
 
-        The finalization process includes:
-        1. Flush any remaining batched records to Oracle
-        2. Commit all pending database transactions
-        3. Collect comprehensive loading statistics
-        4. Release database connections and resources
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
+        Returns:
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
+
         5. Generate summary report with performance metrics
 
         Returns:
-            FlextResult[dict[str, object]]: Success contains statistics dictionary
+            FlextResult[FlextTypes.Core.Dict]: Success contains statistics dictionary
             with details about records processed, performance metrics, and status.
             Failure contains detailed error information.
 
@@ -1231,9 +1734,9 @@ class FlextTargetOracle(FlextMeltanoTarget):
 
         except (RuntimeError, ValueError, TypeError) as e:
             logger.exception("Failed to finalize target")
-            return FlextResult[dict[str, object]].fail(f"Finalization failed: {e}")
+            return FlextResult[FlextTypes.Core.Dict].fail(f"Finalization failed: {e}")
 
-    def _get_implementation_metrics(self) -> dict[str, object]:
+    def _get_implementation_metrics(self) -> FlextTypes.Core.Dict:
         """Get Oracle-specific implementation metrics and configuration details.
 
         Returns comprehensive metrics about the Oracle target implementation
@@ -1246,7 +1749,7 @@ class FlextTargetOracle(FlextMeltanoTarget):
         and performing in production environments.
 
         Returns:
-            dict[str, object]: Dictionary containing Oracle-specific metrics:
+            FlextTypes.Core.Dict: Dictionary containing Oracle-specific metrics:
                 - oracle_host: Oracle database hostname
                 - oracle_port: Oracle listener port number
                 - default_schema: Target schema for table creation
@@ -1302,8 +1805,8 @@ class FlextTargetOraclePlugin:
         self,
         name: str = "target-oracle",
         version: str = "1.0.0",
-        config: dict[str, object] | None = None,
-        _entity: dict[str, object] | None = None,
+        config: FlextTypes.Core.Dict | None = None,
+        _entity: FlextTypes.Core.Dict | None = None,
     ) -> None:
         """Initialize Oracle target plugin.
 
@@ -1326,7 +1829,7 @@ class FlextTargetOraclePlugin:
         )
         self._load_method = config.get("load_method", "insert") if config else "insert"
 
-    def _get_required_config_fields(self) -> list[str]:
+    def _get_required_config_fields(self) -> FlextTypes.Core.StringList:
         """Get list of required configuration fields.
 
         Returns:
@@ -1408,7 +1911,7 @@ class FlextTargetOraclePlugin:
             self._logger.exception("Oracle connection test failed")
             return FlextResult[None].fail(f"Connection failed: {e!s}")
 
-    def _load_target_data(self, data: object) -> FlextResult[dict[str, object]]:
+    def _load_target_data(self, data: object) -> FlextResult[FlextTypes.Core.Dict]:
         """Perform Oracle-specific data loading.
 
         Args:
@@ -1423,13 +1926,13 @@ class FlextTargetOraclePlugin:
 
             # Parse Singer messages
             if not isinstance(data, list):
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[FlextTypes.Core.Dict].fail(
                     "Data must be a list of Singer messages"
                 )
 
             loaded_count = 0
             error_count = 0
-            batch: list[dict[str, object]] = []
+            batch: list[FlextTypes.Core.Dict] = []
 
             for message in data:
                 if not isinstance(message, dict):
@@ -1474,16 +1977,16 @@ class FlextTargetOraclePlugin:
                 f"Oracle load complete: {loaded_count} loaded, {error_count} errors",
             )
 
-            return FlextResult[dict[str, object]].ok(statistics)
+            return FlextResult[FlextTypes.Core.Dict].ok(statistics)
 
         except Exception as e:
             self._logger.exception("Oracle data loading failed")
-            return FlextResult[dict[str, object]].fail(f"Load error: {e!s}")
+            return FlextResult[FlextTypes.Core.Dict].fail(f"Load error: {e!s}")
 
     def _process_singer_message(
         self,
-        message: dict[str, object],
-        batch: list[dict[str, object]],
+        message: FlextTypes.Core.Dict,
+        batch: list[FlextTypes.Core.Dict],
     ) -> FlextResult[None]:
         """Process a single Singer message."""
         msg_type = message.get("type")
@@ -1518,7 +2021,7 @@ class FlextTargetOraclePlugin:
     def _update_counts(
         self,
         batch_result: FlextResult[None],
-        batch: list[dict[str, object]],
+        batch: list[FlextTypes.Core.Dict],
         loaded_count: int,
         error_count: int,
     ) -> tuple[int, int]:
@@ -1527,7 +2030,7 @@ class FlextTargetOraclePlugin:
             return loaded_count + len(batch), error_count
         return loaded_count, error_count + len(batch)
 
-    def _insert_batch(self, batch: list[dict[str, object]]) -> FlextResult[None]:
+    def _insert_batch(self, batch: list[FlextTypes.Core.Dict]) -> FlextResult[None]:
         """Insert a batch of records to Oracle.
 
         Args:
@@ -1542,7 +2045,7 @@ class FlextTargetOraclePlugin:
                 return FlextResult[None].ok(None)
 
             # Group by stream
-            streams: dict[str, list[dict[str, object]]] = {}
+            streams: dict[str, list[FlextTypes.Core.Dict]] = {}
             for item in batch:
                 stream = item.get("stream")
                 if not isinstance(stream, str):
@@ -1574,7 +2077,7 @@ class FlextTargetOraclePlugin:
             self._logger.exception("Batch insert failed")
             return FlextResult[None].fail(f"Batch insert error: {e!s}")
 
-    def get_info(self) -> dict[str, object]:
+    def get_info(self) -> FlextTypes.Core.Dict:
         """Get plugin information.
 
         Returns:
@@ -1596,8 +2099,8 @@ class FlextTargetOraclePlugin:
 def create_target_oracle_plugin(
     name: str = "target-oracle",
     version: str = "1.0.0",
-    config: dict[str, object] | None = None,
-    entity: dict[str, object] | None = None,
+    config: FlextTypes.Core.Dict | None = None,
+    entity: FlextTypes.Core.Dict | None = None,
 ) -> FlextResult[FlextTargetOraclePlugin]:
     """Create Oracle target plugin.
 

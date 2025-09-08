@@ -5,28 +5,6 @@ This example demonstrates production-ready configuration and deployment patterns
 for FLEXT Target Oracle, including comprehensive error handling, monitoring,
 security considerations, and performance optimization.
 
-Key Production Concepts:
-    - Environment-based configuration management
-    - Comprehensive validation and error handling
-    - Connection pooling and performance tuning
-    - Structured logging with correlation IDs
-    - Security best practices and credential management
-    - Health checks and monitoring integration
-    - Graceful shutdown and resource cleanup
-
-Prerequisites:
-    - Production Oracle database with proper security
-    - Environment variables configured
-    - Monitoring/observability infrastructure
-    - Proper network security and access controls
-
-Usage:
-    export ORACLE_HOST=prod-oracle.company.com
-    export ORACLE_SERVICE=PRODDB
-    export ORACLE_USER=flext_prod_user
-    export ORACLE_PASSWORD=<secure-password>
-
-    python examples/production_setup.py
 """
 
 import asyncio
@@ -37,12 +15,10 @@ import signal
 import sys
 import time
 from datetime import UTC
-
-object
-
+from flext_core import FlextTypes
 from flext_core import FlextLogger, FlextResult
 
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+from ..flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
 # Configure production-grade logging
 logging.basicConfig(
@@ -205,8 +181,8 @@ class ProductionTargetManager:
 
     async def process_singer_stream(
         self,
-        messages: list[dict[str, object]],
-    ) -> FlextResult[dict[str, object]]:
+        messages: list[FlextTypes.Core.Dict],
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:
@@ -308,7 +284,7 @@ class ProductionTargetManager:
             stats["errors_encountered"] += 1
             return FlextResult[None].fail(f"Stream processing error: {e}")
 
-    async def health_check(self) -> FlextResult[dict[str, object]]:
+    async def health_check(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
@@ -466,7 +442,7 @@ async def demonstrate_production_setup() -> None:
         raise
 
 
-def create_production_sample_stream() -> list[dict[str, object]]:
+def create_production_sample_stream() -> list[FlextTypes.Core.Dict]:
     """Create a realistic production data stream for demonstration.
 
     Returns:

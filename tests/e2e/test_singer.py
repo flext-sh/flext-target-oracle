@@ -3,6 +3,10 @@
 These tests validate the full data pipeline from Singer tap through
 the Oracle target, including schema evolution, state management, and
 complex data transformations.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 import asyncio

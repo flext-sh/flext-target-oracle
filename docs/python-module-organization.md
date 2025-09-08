@@ -57,7 +57,7 @@ FlextTargetOracle = FlextOracleTarget
 TargetOracle = FlextOracleTarget
 
 __version__ = "0.9.0"
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     # Primary implementation
     "FlextOracleTarget",
     "FlextOracleTargetConfig",
@@ -176,7 +176,7 @@ class FlextOracleTarget(Target):
     async def _handle_record(self, message: dict) -> FlextResult[None]:
         """Handle RECORD messages with batched loading."""
 
-    async def finalize(self) -> FlextResult[dict[str, object]]:
+    async def finalize(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Finalize streams and return statistics."""
 ```
 
@@ -224,7 +224,7 @@ class FlextOracleTargetLoader:
     async def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]:
         """Load record with batching and error handling."""
 
-    async def finalize_all_streams(self) -> FlextResult[dict[str, object]]:
+    async def finalize_all_streams(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Finalize all streams and return statistics."""
 ```
 

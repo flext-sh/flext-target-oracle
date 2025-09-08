@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """Target Models for FLEXT Target Oracle.
 
 This module provides data models and value objects for Oracle Singer target
@@ -24,8 +32,11 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 
 """
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
-from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -187,15 +198,15 @@ class SingerStreamModel(FlextModels.Config):
         min_length=1,
         max_length=128,
     )
-    key_properties: list[str] = Field(
+    key_properties: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="List of primary key column names",
     )
-    column_mappings: dict[str, str] = Field(
+    column_mappings: FlextTypes.Core.Headers = Field(
         default_factory=dict,
         description="Column name mappings (singer_name -> oracle_name)",
     )
-    ignored_columns: list[str] = Field(
+    ignored_columns: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="List of columns to ignore during loading",
     )
@@ -257,7 +268,7 @@ class BatchProcessingModel(FlextModels.Config):
         gt=0,
         le=50000,
     )
-    current_batch: list[dict[str, object]] = Field(
+    current_batch: list[FlextTypes.Core.Dict] = Field(
         default_factory=list,
         description="Current batch of records",
     )
@@ -291,7 +302,7 @@ class BatchProcessingModel(FlextModels.Config):
         """Current number of records in the batch."""
         return len(self.current_batch)
 
-    def add_record(self, record: dict[str, object]) -> BatchProcessingModel:
+    def add_record(self, record: FlextTypes.Core.Dict) -> BatchProcessingModel:
         """Add a record to the current batch (immutable operation)."""
         new_batch = self.current_batch.copy()
         new_batch.append(record)
@@ -381,7 +392,7 @@ class LoadStatisticsModel(FlextModels.Config):
         default=LoadMethodModel.INSERT,
         description="Loading method that was used",
     )
-    error_details: list[str] = Field(
+    error_details: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="List of error messages encountered",
     )
@@ -488,15 +499,15 @@ class OracleTableMetadataModel(FlextModels.Config):
         min_length=1,
         max_length=128,
     )
-    columns: list[dict[str, object]] = Field(
+    columns: list[FlextTypes.Core.Dict] = Field(
         default_factory=list,
         description="List of column definitions",
     )
-    primary_key_columns: list[str] = Field(
+    primary_key_columns: FlextTypes.Core.StringList = Field(
         default_factory=list,
         description="List of primary key column names",
     )
-    indexes: list[dict[str, object]] = Field(
+    indexes: list[FlextTypes.Core.Dict] = Field(
         default_factory=list,
         description="List of index definitions",
     )
@@ -526,7 +537,7 @@ class OracleTableMetadataModel(FlextModels.Config):
         column_names = [str(col.get("name", "")).upper() for col in self.columns]
         return column_name.upper() in column_names
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> FlextTypes.Core.StringList:
         """Get list of all column names."""
         return [str(col.get("name", "")) for col in self.columns if col.get("name")]
 

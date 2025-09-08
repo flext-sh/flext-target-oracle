@@ -28,7 +28,7 @@ object
 
 from flext_core import FlextLogger
 
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+from ..flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
 # Configure logging for the example
 logging.basicConfig(level=logging.INFO)
@@ -69,7 +69,7 @@ def create_configuration() -> FlextOracleTargetConfig:
     return config
 
 
-def create_sample_schema_message() -> dict[str, object]:
+def create_sample_schema_message() -> FlextTypes.Core.Dict:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
@@ -94,7 +94,7 @@ def create_sample_schema_message() -> dict[str, object]:
     }
 
 
-def create_sample_record_messages() -> list[dict[str, object]]:
+def create_sample_record_messages() -> list[FlextTypes.Core.Dict]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
@@ -138,7 +138,7 @@ def create_sample_record_messages() -> list[dict[str, object]]:
     ]
 
 
-def create_sample_state_message() -> dict[str, object]:
+def create_sample_state_message() -> FlextTypes.Core.Dict:
     """Create sample Singer STATE message for demonstration.
 
     Returns:

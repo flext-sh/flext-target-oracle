@@ -91,7 +91,7 @@ class FlextOracleTarget(Target):
     async def _handle_state(self, message: dict) -> FlextResult[None]
 
     # Lifecycle management
-    async def finalize(self) -> FlextResult[dict[str, object]]
+    async def finalize(self) -> FlextResult[FlextTypes.Core.Dict]
 ```
 
 **Key Patterns**:
@@ -150,7 +150,7 @@ class FlextOracleTargetLoader:
 
     # Data loading with batching
     async def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]
-    async def finalize_all_streams(self) -> FlextResult[dict[str, object]]
+    async def finalize_all_streams(self) -> FlextResult[FlextTypes.Core.Dict]
 ```
 
 **Key Patterns**:

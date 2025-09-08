@@ -1,28 +1,16 @@
-"""🚨 ARCHITECTURAL COMPLIANCE: ELIMINATED MASSIVE EXCEPTION DUPLICATION using DRY.
-
-REFATORADO COMPLETO usando create_module_exception_classes:
-- ZERO code duplication através do DRY exception factory pattern de flext-core
-- USA create_module_exception_classes() para eliminar exception boilerplate massivo
-- Elimina 300+ linhas duplicadas de código boilerplate por exception class
-- SOLID: Single source of truth para module exception patterns
-- Redução de 326+ linhas para <100 linhas (70%+ reduction)
-
-Oracle Target Exception Hierarchy - Enterprise Error Handling.
+"""Oracle Target Exception Hierarchy - Enterprise Error Handling.
 
 This module provides a comprehensive exception hierarchy for Oracle Singer target
 operations using factory pattern to eliminate code duplication, built on FLEXT
 ecosystem error handling patterns.
 
-The exception hierarchy follows Domain-Driven Design principles with specific
-exception types for different failure categories: connection issues, authentication
-problems, schema errors, and data processing failures.
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
-
 """
 
 from __future__ import annotations
+
+from flext_core import FlextTypes
 
 
 # Oracle Target Exception Hierarchy - Built on FLEXT patterns
@@ -141,7 +129,7 @@ class FlextTargetOracleRecordError(FlextTargetOracleProcessingError):
         message: str = "Oracle Target record error",
         *,
         stream_name: str | None = None,
-        record_data: dict[str, object] | None = None,
+        record_data: FlextTypes.Core.Dict | None = None,
         **kwargs: object,
     ) -> None:
         """Initialize record error with Singer context."""
@@ -154,7 +142,7 @@ class FlextTargetOracleRecordError(FlextTargetOracleProcessingError):
         super().__init__(f"Record Error: {message}")
 
 
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     # Factory-created base exceptions (from flext-core)
     "FlextTargetOracleAuthenticationError",
     "FlextTargetOracleConfigurationError",

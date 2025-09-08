@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """Target Configuration Management for FLEXT Target Oracle.
 
 This module provides type-safe configuration management for Oracle Singer target
@@ -41,8 +49,11 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 
 """
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
-from __future__ import annotations
 
 from enum import StrEnum
 
@@ -254,11 +265,11 @@ class FlextTargetOracleConfig(FlextModels.Config):
     )
 
     # Column modification support
-    column_mappings: dict[str, dict[str, object]] | None = Field(
+    column_mappings: dict[str, FlextTypes.Core.Dict] | None = Field(
         default=None,
         description="Column name mappings and transformations",
     )
-    ignored_columns: list[str] | None = Field(
+    ignored_columns: FlextTypes.Core.StringList | None = Field(
         default=None,
         description="List of columns to ignore during loading",
     )
@@ -278,7 +289,7 @@ class FlextTargetOracleConfig(FlextModels.Config):
         description="Suffix to add to all table names",
         max_length=30,
     )
-    table_name_mappings: dict[str, str] | None = Field(
+    table_name_mappings: FlextTypes.Core.Headers | None = Field(
         default=None,
         description="Custom table name mappings for specific streams",
     )
@@ -293,7 +304,7 @@ class FlextTargetOracleConfig(FlextModels.Config):
         default="_sdc_loaded_at",
         description="Column suffix for composite primary key in append mode",
     )
-    sdc_merge_key_properties: dict[str, list[str]] | None = Field(
+    sdc_merge_key_properties: dict[str, FlextTypes.Core.StringList] | None = Field(
         default=None,
         description="Key properties to use for merge operations per stream",
     )
@@ -351,13 +362,13 @@ class FlextTargetOracleConfig(FlextModels.Config):
         description="String length threshold to use CLOB instead of VARCHAR2",
         ge=1,
     )
-    type_mappings: dict[str, str] | None = Field(
+    type_mappings: FlextTypes.Core.Headers | None = Field(
         default=None,
         description="Custom JSON to Oracle type mappings (e.g., {'number': 'NUMBER(38,10)'})",
     )
 
     # Column-specific type overrides
-    column_type_overrides: dict[str, dict[str, str]] | None = Field(
+    column_type_overrides: dict[str, FlextTypes.Core.Headers] | None = Field(
         default=None,
         description="Per-stream column type overrides (e.g., {'stream_name': {'column_name': 'DATE'}})",
     )
@@ -377,7 +388,7 @@ class FlextTargetOracleConfig(FlextModels.Config):
         },
         description="Priority order for column groups (lower number = higher priority)",
     )
-    audit_column_patterns: list[str] = Field(
+    audit_column_patterns: FlextTypes.Core.StringList = Field(
         default_factory=lambda: [
             "created_at",
             "created_by",
@@ -418,7 +429,7 @@ class FlextTargetOracleConfig(FlextModels.Config):
         default=True,
         description="Create indexes for foreign key relationships from schema",
     )
-    custom_indexes: dict[str, list[dict[str, object]]] | None = Field(
+    custom_indexes: dict[str, list[FlextTypes.Core.Dict]] | None = Field(
         default=None,
         description="Custom indexes per stream (e.g., {'stream': [{'name': 'idx_custom', 'columns': ['col1', 'col2']}]})",
     )
@@ -705,7 +716,7 @@ class FlextTargetOracleConfig(FlextModels.Config):
         self,
         stream_name: str,
         column_name: str,
-    ) -> dict[str, object] | None:
+    ) -> FlextTypes.Core.Dict | None:
         """Get transformation configuration for a column.
 
         Args:
@@ -844,7 +855,7 @@ class _SSLConfigValidator(_BaseValidator):
         return "SSL wallet location is required when wallet password is provided"
 
 
-__all__: list[str] = [
+__all__: FlextTypes.Core.StringList = [
     "FlextTargetOracleConfig",
     "LoadMethod",
 ]

@@ -4,49 +4,18 @@ This module provides specialized services following Single Responsibility Princi
 to support Oracle Singer target operations. Each service has a focused responsibility
 and uses dependency injection via FlextContainer following SOLID principles.
 
-The services implement Clean Architecture patterns with proper separation of concerns:
-- Application Services: High-level business logic coordination
-- Domain Services: Core business rule implementations
-- Infrastructure Services: External system integrations
-
-Key Services:
-    OracleConnectionService: Connection lifecycle management
-    OracleSchemaService: Table creation and schema operations
-    OracleBatchService: Batch processing logic
-    OracleSQLService: SQL generation for different operations
-    OracleRecordService: Record transformation and validation
-
-Architecture Patterns:
-    - FlextResult for all operations (railway-oriented programming)
-    - FlextModels/FlextModels where appropriate
-    - Constructor injection via dependencies
-    - Interface segregation with protocols
-    - Single Responsibility Principle
-
-Following docs/patterns/foundation.md:
-    - Consistent error handling with FlextResult
-    - Immutable value objects for data transfer
-    - Domain-driven design with clear boundaries
-    - Testable services with dependency injection
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
-
 """
 
-from __future__ import annotations
-
-import json
-from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Protocol
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_db_oracle import FlextDbOracleApi
 
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_models import (
-    BatchProcessingModel,
     LoadMethodModel,
     LoadStatisticsModel,
     OracleConnectionModel,
@@ -77,8 +46,8 @@ class SchemaServiceProtocol(Protocol):
     async def ensure_table_exists(
         self,
         stream: SingerStreamModel,
-        schema: dict[str, object],
-        key_properties: list[str] | None = None,
+        schema: FlextTypes.Core.Dict,
+        key_properties: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[None]:
         """Ensure table exists for Singer stream."""
         ...
@@ -87,7 +56,7 @@ class SchemaServiceProtocol(Protocol):
         self,
         table_name: str,
         schema_name: str,
-    ) -> FlextResult[list[dict[str, object]]]:
+    ) -> FlextResult[list[FlextTypes.Core.Dict]]:
         """Get table column definitions."""
         ...
 
@@ -98,7 +67,7 @@ class BatchServiceProtocol(Protocol):
     async def add_record(
         self,
         stream_name: str,
-        record: dict[str, object],
+        record: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Add record to batch processing queue."""
         ...
@@ -117,16 +86,16 @@ class RecordServiceProtocol(Protocol):
 
     def transform_record(
         self,
-        record: dict[str, object],
+        record: FlextTypes.Core.Dict,
         stream: SingerStreamModel,
-    ) -> FlextResult[dict[str, object]]:
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Transform Singer record for Oracle storage."""
         ...
 
     def validate_record(
         self,
-        record: dict[str, object],
-        schema: dict[str, object],
+        record: FlextTypes.Core.Dict,
+        schema: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Validate record against schema."""
         ...
@@ -235,62 +204,164 @@ class OracleSchemaService:
             config: Oracle target configuration
             oracle_api: Oracle database API instance
 
-        """
-        self._config = config
-        self._oracle_api = oracle_api
+        Returns:
+            FlextResult indicating success/failure
 
-    async def ensure_table_exists(
-        self,
-        stream: SingerStreamModel,
-        schema: dict[str, object],
-        key_properties: list[str] | None = None,
-    ) -> FlextResult[None]:
-        """Ensure table exists for Singer stream.
+        Returns:
+            FlextResult indicating success/failure
 
-        Args:
-            stream: Singer stream model
-            schema: JSON schema definition
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
+        Returns:
+            FlextResult indicating success/failure
+
             key_properties: Primary key columns
 
         Returns:
             FlextResult indicating success/failure
 
-        """
-        try:
-            with self._oracle_api as connected_api:
-                # Check if table exists
-                tables_result = connected_api.get_tables(
-                    schema=stream.schema_name,
-                )
+        Returns:
+            FlextResult containing column definitions
 
-                if tables_result.is_failure:
-                    return FlextResult[None].fail(
-                        f"Failed to check tables: {tables_result.error}",
-                    )
+        Returns:
+            FlextResult containing column definitions
 
-                existing_tables = [t.upper() for t in tables_result.data or []]
-                table_exists = stream.table_name.upper() in existing_tables
+        Returns:
+            FlextResult containing column definitions
 
-                if table_exists:
-                    logger.info(f"Table {stream.table_name} already exists")
-                    return FlextResult[None].ok(None)
+        Returns:
+            FlextResult containing column definitions
 
-                # Create table based on storage mode
-                return await self._create_table(stream, schema, key_properties)
+        Returns:
+            FlextResult containing column definitions
 
-        except Exception as e:
-            logger.exception("Failed to ensure table exists")
-            return FlextResult[None].fail(f"Table creation failed: {e}")
+        Returns:
+            FlextResult containing column definitions
 
-    async def get_table_columns(
-        self,
-        table_name: str,
-        schema_name: str,
-    ) -> FlextResult[list[dict[str, object]]]:
-        """Get table column definitions.
+        Returns:
+            FlextResult containing column definitions
 
-        Args:
-            table_name: Oracle table name
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
+        Returns:
+            FlextResult containing column definitions
+
             schema_name: Oracle schema name
 
         Returns:
@@ -307,25 +378,25 @@ class OracleSchemaService:
                 )
 
                 if columns_result.is_failure:
-                    return FlextResult[list[dict[str, object]]].fail(
+                    return FlextResult[list[FlextTypes.Core.Dict]].fail(
                         f"Failed to get columns: {columns_result.error}",
                     )
 
-                return FlextResult[list[dict[str, object]]].ok(
+                return FlextResult[list[FlextTypes.Core.Dict]].ok(
                     columns_result.data or []
                 )
 
         except Exception as e:
             logger.exception("Failed to get table columns")
-            return FlextResult[list[dict[str, object]]].fail(
+            return FlextResult[list[FlextTypes.Core.Dict]].fail(
                 f"Column retrieval failed: {e}"
             )
 
     async def _create_table(
         self,
         stream: SingerStreamModel,
-        _schema: dict[str, object],
-        _key_properties: list[str] | None = None,
+        _schema: FlextTypes.Core.Dict,
+        _key_properties: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[None]:
         """Create Oracle table based on stream configuration."""
         try:
@@ -416,143 +487,6 @@ class OracleBatchService:
             oracle_api: Oracle database API instance
 
         """
-        self._config = config
-        self._oracle_api = oracle_api
-        self._batches: dict[str, BatchProcessingModel] = {}
-        self._statistics: dict[str, LoadStatisticsModel] = {}
-
-    async def add_record(
-        self,
-        stream_name: str,
-        record: dict[str, object],
-    ) -> FlextResult[None]:
-        """Add record to batch processing queue.
-
-        Args:
-            stream_name: Singer stream name
-            record: Record data to add
-
-        Returns:
-            FlextResult indicating success/failure
-
-        """
-        try:
-            # Initialize batch if not exists
-            if stream_name not in self._batches:
-                self._batches[stream_name] = BatchProcessingModel(
-                    stream_name=stream_name,
-                    batch_size=self._config.batch_size,
-                )
-                self._statistics[stream_name] = LoadStatisticsModel(
-                    stream_name=stream_name,
-                    load_method_used=LoadMethodModel(self._config.load_method.value),
-                )
-
-            # Add record to batch
-            current_batch = self._batches[stream_name]
-            new_batch = current_batch.add_record(record)
-            self._batches[stream_name] = new_batch
-
-            # Auto-flush if batch is full
-            if new_batch.is_batch_full:
-                return await self.flush_batch(stream_name)
-
-            return FlextResult[None].ok(None)
-
-        except Exception as e:
-            logger.exception("Failed to add record to batch")
-            return FlextResult[None].fail(f"Batch add failed: {e}")
-
-    async def flush_batch(self, stream_name: str) -> FlextResult[None]:
-        """Flush pending batch for stream.
-
-        Args:
-            stream_name: Singer stream name
-
-        Returns:
-            FlextResult indicating success/failure
-
-        """
-        try:
-            batch = self._batches.get(stream_name)
-            if not batch or not batch.has_pending_records:
-                return FlextResult[None].ok(None)
-
-            table_name = self._config.get_table_name(stream_name)
-            loaded_at = datetime.now(UTC)
-
-            # Execute batch insert
-            with self._oracle_api as connected_api:
-                # Build INSERT statement
-                sql_result = connected_api.build_insert_statement(
-                    table_name=table_name,
-                    columns=["DATA", "_SDC_EXTRACTED_AT", "_SDC_LOADED_AT"],
-                    schema_name=self._config.default_target_schema,
-                )
-
-                if sql_result.is_failure:
-                    return FlextResult[None].fail(
-                        f"Failed to build INSERT: {sql_result.error}",
-                    )
-
-                sql_str = sql_result.data
-                if sql_str is None:
-                    return FlextResult[None].fail(
-                        "INSERT statement creation returned None"
-                    )
-
-                # Prepare batch operations
-                batch_operations: list[tuple[str, dict[str, object] | None]] = []
-                for record in batch.current_batch:
-                    params: dict[str, object] = {
-                        "DATA": json.dumps(record),
-                        "_SDC_EXTRACTED_AT": record.get("_sdc_extracted_at", loaded_at),
-                        "_SDC_LOADED_AT": loaded_at,
-                    }
-                    batch_operations.append((sql_str, params))
-
-                # Execute batch
-                result = connected_api.execute_batch(batch_operations)
-                if result.is_failure:
-                    # Update statistics with error
-                    stats = self._statistics[stream_name]
-                    self._statistics[stream_name] = stats.add_error(
-                        f"Batch insert failed: {result.error}",
-                    )
-                    return FlextResult[None].fail(
-                        f"Batch insert failed: {result.error}"
-                    )
-
-                # Update batch and statistics
-                records_processed = len(batch.current_batch)
-                self._batches[stream_name] = batch.clear_batch()
-
-                # Update statistics
-                stats = self._statistics[stream_name]
-                self._statistics[stream_name] = stats.model_copy(
-                    update={
-                        "successful_records": stats.successful_records
-                        + records_processed,
-                        "total_records_processed": stats.total_records_processed
-                        + records_processed,
-                        "batches_processed": stats.batches_processed + 1,
-                    },
-                )
-
-                logger.info(f"Flushed {records_processed} records to {table_name}")
-                return FlextResult[None].ok(None)
-
-        except Exception as e:
-            logger.exception("Failed to flush batch")
-            return FlextResult[None].fail(f"Batch flush failed: {e}")
-
-    async def flush_all_batches(self) -> FlextResult[LoadStatisticsModel]:
-        """Flush all pending batches.
-
-        Returns:
-            FlextResult containing aggregated load statistics
-
-        """
         try:
             # Flush all pending batches
             for stream_name in list(self._batches.keys()):
@@ -566,7 +500,7 @@ class OracleBatchService:
             total_successful = 0
             total_failed = 0
             total_batches = 0
-            all_errors: list[str] = []
+            all_errors: FlextTypes.Core.StringList = []
 
             for stats in self._statistics.values():
                 final_stats = stats.finalize()
@@ -612,14 +546,17 @@ class OracleRecordService:
         Args:
             config: Oracle target configuration
 
+        Returns:
+            object: Description of return value.
+
         """
         self._config = config
 
     def transform_record(
         self,
-        record: dict[str, object],
+        record: FlextTypes.Core.Dict,
         stream: SingerStreamModel,
-    ) -> FlextResult[dict[str, object]]:
+    ) -> FlextResult[FlextTypes.Core.Dict]:
         """Transform Singer record for Oracle storage.
 
         Args:
@@ -656,18 +593,18 @@ class OracleRecordService:
                 if "_sdc_extracted_at" not in transformed_record:
                     transformed_record["_sdc_extracted_at"] = now
 
-            return FlextResult[dict[str, object]].ok(transformed_record)
+            return FlextResult[FlextTypes.Core.Dict].ok(transformed_record)
 
         except Exception as e:
             logger.exception("Failed to transform record")
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[FlextTypes.Core.Dict].fail(
                 f"Record transformation failed: {e}"
             )
 
     def validate_record(
         self,
-        record: dict[str, object],
-        schema: dict[str, object],
+        record: FlextTypes.Core.Dict,
+        schema: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Validate record against schema."""
         try:
@@ -698,8 +635,8 @@ class OracleRecordService:
 
     def _validate_required_fields(
         self,
-        record: dict[str, object],
-        required_fields: list[str],
+        record: FlextTypes.Core.Dict,
+        required_fields: FlextTypes.Core.StringList,
     ) -> FlextResult[None]:
         """Validate required fields are present."""
         for field in required_fields:
@@ -709,11 +646,11 @@ class OracleRecordService:
 
     def _validate_field_types(
         self,
-        record: dict[str, object],
-        properties: dict[str, object],
+        record: FlextTypes.Core.Dict,
+        properties: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Validate field types match schema."""
-        type_validators: dict[str, Callable[[object], bool]] = {
+        type_validators: dict[str, FlextTypes.Validation.Validator] = {
             "string": lambda v: isinstance(v, str),
             "integer": lambda v: isinstance(v, int),
             "number": lambda v: isinstance(v, (int, float)),

@@ -7,10 +7,16 @@ Note: S608 warnings about SQL injection are suppressed for this test file as:
 2. We use safe_table_name() function for proper Oracle identifier quoting
 3. Oracle DDL statements cannot use parameterized queries
 4. These are test scenarios with known-safe hardcoded values
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
+from collections.abc import Callable
 from datetime import UTC, datetime
 from decimal import Decimal
+from typing import Protocol
 
 import pytest
 from sqlalchemy import Engine, MetaData, Table, func, select, text
@@ -22,6 +28,19 @@ from flext_target_oracle import (
     FlextOracleTargetSchemaError,
     LoadMethod,
 )
+
+
+class TestLoader(Protocol):
+    """Protocol for test loader objects."""
+
+    def load_record(self, stream_name: str, record: FlextTypes.Core.Dict) -> None: ...
+    def load_batch(
+        self, stream_name: str, records: list[FlextTypes.Core.Dict]
+    ) -> None: ...
+    def ensure_table_exists(
+        self, stream_name: str, schema: FlextTypes.Core.Dict
+    ) -> None: ...
+    def finalize_streams(self, stream_name: str) -> FlextTypes.Core.Dict: ...
 
 
 def safe_table_name(name: str) -> str:
@@ -84,8 +103,8 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_ensure_table_exists_new_table(
         self,
-        real_loader,
-        simple_schema,
+        real_loader: TestLoader,
+        simple_schema: FlextTypes.Core.Dict,
     ) -> None:
         """Test creating a new table in real Oracle."""
         stream_name = "test_users"
@@ -137,9 +156,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_ensure_table_exists_existing_table(
         self,
-        real_loader,
-        simple_schema,
-        oracle_engine,
+        real_loader: TestLoader,
+        simple_schema: FlextTypes.Core.Dict,
+        oracle_engine: Engine,
     ) -> None:
         """Test handling existing table in real Oracle."""
         stream_name = "existing_table"
@@ -168,9 +187,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_force_recreate_table(
         self,
-        oracle_engine,
-        simple_schema,
-        clean_database,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
+        clean_database: Callable[[], None],
     ) -> None:
         """Test force recreating table in real Oracle."""
         config = FlextOracleTargetConfig(
@@ -237,9 +256,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_truncate_before_load(
         self,
-        oracle_engine,
-        simple_schema,
-        clean_database,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
+        clean_database: Callable[[], None],
     ) -> None:
         """Test truncating table before load in real Oracle."""
         config = FlextOracleTargetConfig(
@@ -294,9 +313,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_load_record_single(
         self,
-        real_loader,
-        simple_schema,
-        oracle_engine,
+        real_loader: TestLoader,
+        simple_schema: FlextTypes.Core.Dict,
+        oracle_engine: Engine,
     ) -> None:
         """Test loading a single record into real Oracle."""
         stream_name = "load_single"
@@ -334,9 +353,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_load_record_batch(
         self,
-        real_loader,
-        simple_schema,
-        oracle_engine,
+        real_loader: TestLoader,
+        simple_schema: FlextTypes.Core.Dict,
+        oracle_engine: Engine,
     ) -> None:
         """Test loading batch of records into real Oracle."""
         stream_name = "load_batch"
@@ -368,9 +387,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_bulk_insert_mode(
         self,
-        oracle_engine,
-        simple_schema,
-        clean_database,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
+        clean_database: Callable[[], None],
     ) -> None:
         """Test bulk insert mode with real Oracle."""
         config = FlextOracleTargetConfig(
@@ -416,9 +435,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_merge_mode(
         self,
-        oracle_engine,
-        simple_schema,
-        clean_database,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
+        clean_database: Callable[[], None],
     ) -> None:
         """Test merge mode (upsert) with real Oracle."""
         config = FlextOracleTargetConfig(
@@ -478,9 +497,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_nested_json_flattening(
         self,
-        real_loader,
-        nested_schema,
-        oracle_engine,
+        real_loader: TestLoader,
+        nested_schema: FlextTypes.Core.Dict,
+        oracle_engine: Engine,
     ) -> None:
         """Test flattening nested JSON structures in real Oracle."""
         stream_name = "nested_json"
@@ -541,7 +560,9 @@ class TestRealOracleLoader:
             assert "CUSTOMER__ADDRESS__CITY" in customer_cols
 
     @pytest.mark.asyncio
-    async def test_real_type_conversions(self, real_loader, oracle_engine) -> None:
+    async def test_real_type_conversions(
+        self, real_loader: object, oracle_engine: Engine
+    ) -> None:
         """Test various data type conversions in real Oracle."""
         stream_name = "type_test"
 
@@ -598,7 +619,9 @@ class TestRealOracleLoader:
             assert row[4] is not None  # DATETIME -> TIMESTAMP
 
     @pytest.mark.asyncio
-    async def test_real_error_handling_invalid_schema(self, real_loader) -> None:
+    async def test_real_error_handling_invalid_schema(
+        self, real_loader: object
+    ) -> None:
         """Test error handling with invalid schema."""
         stream_name = "invalid_schema"
 
@@ -615,9 +638,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_column_ordering(
         self,
-        oracle_engine,
-        simple_schema,
-        clean_database,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
+        clean_database: Callable[[], None],
     ) -> None:
         """Test column ordering in real Oracle."""
         config = FlextOracleTargetConfig(
@@ -698,9 +721,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_custom_indexes(
         self,
-        oracle_engine,
-        simple_schema,
-        clean_database,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
+        clean_database: Callable[[], None],
     ) -> None:
         """Test custom index creation in real Oracle."""
         config = FlextOracleTargetConfig(
@@ -751,9 +774,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_finalize_streams_metrics(
         self,
-        real_loader,
-        simple_schema,
-        oracle_engine,
+        real_loader: TestLoader,
+        simple_schema: FlextTypes.Core.Dict,
+        oracle_engine: Engine,
     ) -> None:
         """Test finalize streams with metrics in real Oracle."""
         stream_name = "metrics_test"
@@ -784,7 +807,7 @@ class TestRealOracleLoader:
         assert stream_name in metrics["streams"]
         assert metrics["streams"][stream_name]["count"] == 5
 
-    def test_real_get_table_name_variants(self, real_loader) -> None:
+    def test_real_get_table_name_variants(self, real_loader: object) -> None:
         """Test table name generation with various options."""
         # Test default behavior
         assert real_loader._get_table_name("my_stream") == "MY_STREAM"
@@ -800,9 +823,9 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_parallel_and_direct_path(
         self,
-        oracle_engine,
-        simple_schema,
-        clean_database,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
+        clean_database: Callable[[], None],
     ) -> None:
         """Test parallel and direct path options in real Oracle."""
         config = FlextOracleTargetConfig(
