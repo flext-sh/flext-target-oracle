@@ -2,6 +2,10 @@
 
 These tests measure and validate performance characteristics including
 throughput, latency, memory usage, and scalability.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 import gc

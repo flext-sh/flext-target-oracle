@@ -8,7 +8,7 @@ import asyncio
 import json
 from pathlib import Path
 
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig
+from ..flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig
 
 
 def load_config() -> dict:

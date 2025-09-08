@@ -2,6 +2,10 @@
 
 These tests require a running Oracle database container and test
 actual database operations including DDL, DML, and bulk operations.
+
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
 """
 
 import json

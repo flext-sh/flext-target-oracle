@@ -1,3 +1,11 @@
+"""Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT.
+"""
+
+from __future__ import annotations
+
+from flext_core import FlextTypes
+
 """FLEXT Target Oracle Observability - Semantic Error Handling Extensions.
 
 Oracle-specific extensions to the FLEXT observability foundation, providing
@@ -72,8 +80,11 @@ Copyright (c) 2025 FLEXT Contributors
 SPDX-License-Identifier: MIT
 
 """
+"""
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
-from __future__ import annotations
 
 import time
 import uuid
@@ -178,7 +189,7 @@ class FlextOracleError:
         def schema_validation_failed(
             *,
             stream_name: str,
-            schema_errors: list[str],
+            schema_errors: FlextTypes.Core.StringList,
             singer_specification: str = "1.5.0",
         ) -> FlextTargetOracleSchemaError:
             """Singer schema validation failure with detailed errors."""
