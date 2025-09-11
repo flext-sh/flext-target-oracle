@@ -4,8 +4,8 @@ SPDX-License-Identifier: MIT.
 """
 
 from __future__ import annotations
-from flext_core import FlextTypes
 
+from flext_core import FlextTypes
 
 """Production-Grade Singer Target for Oracle Database data loading.
 
@@ -46,11 +46,6 @@ FlextOracleTargetAuthenticationError = FlextTargetOracleAuthenticationError
 FlextOracleTargetConnectionError = FlextTargetOracleConnectionError
 FlextOracleTargetProcessingError = FlextTargetOracleProcessingError
 FlextOracleTargetSchemaError = FlextTargetOracleSchemaError
-from flext_target_oracle.target_observability import (
-    FlextOracleError,
-    FlextOracleObs,
-    configure_oracle_observability,
-)
 from flext_target_oracle.target_client import (
     FlextTargetOracle,
     TargetOracle,
@@ -58,38 +53,47 @@ from flext_target_oracle.target_client import (
 from flext_target_oracle.target_loader import (
     FlextTargetOracleLoader,
 )
+from flext_target_oracle.target_observability import (
+    FlextOracleError,
+    FlextOracleObs,
+    configure_oracle_observability,
+)
 
 # Compatibility aliases
 FlextOracleTargetLoader = FlextTargetOracleLoader
 FlextTargetOraclePlugin = None  # Removed in SOLID refactoring
 create_target_oracle_plugin = None  # Removed in SOLID refactoring
 from flext_target_oracle.target_models import (
-    LoadMethodModel,
-    StorageModeModel,
-    OracleConnectionModel,
-    SingerStreamModel,
     BatchProcessingModel,
+    LoadMethodModel,
     LoadStatisticsModel,
+    OracleConnectionModel,
     OracleTableMetadataModel,
+    SingerStreamModel,
+    StorageModeModel,
 )
 from flext_target_oracle.target_services import (
-    ConnectionServiceProtocol,
-    SchemaServiceProtocol,
     BatchServiceProtocol,
-    RecordServiceProtocol,
-    OracleConnectionService,
-    OracleSchemaService,
+    ConnectionServiceProtocol,
     OracleBatchService,
+    OracleConnectionService,
     OracleRecordService,
+    OracleSchemaService,
     OracleTargetServiceFactory,
+    RecordServiceProtocol,
+    SchemaServiceProtocol,
 )
 
 __version__ = "0.9.0"
 __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
 __all__: FlextTypes.Core.StringList = [
+    "BatchProcessingModel",
+    "BatchServiceProtocol",
     # === FLEXT-MELTANO COMPLETE RE-EXPORTS ===
     "BatchSink",
+    # === SERVICES ===
+    "ConnectionServiceProtocol",
     "FlextMeltanoBaseService",
     # Bridge integration
     "FlextMeltanoBridge",
@@ -98,69 +102,65 @@ __all__: FlextTypes.Core.StringList = [
     "FlextMeltanoEvent",
     # Enterprise services
     "FlextMeltanoTargetService",
-    # Authentication
-    "OAuthAuthenticator",
-    "PropertiesList",
-    "Property",
-    "SQLSink",
-    "Sink",
-    # Singer SDK core classes
-    "Stream",
-    "Tap",
-    "Target",
-    "create_meltano_target_service",
-    # Testing
-    "get_tap_test_class",
-    # Singer typing
-    "singer_typing",
+    # === OBSERVABILITY ===
+    "FlextOracleError",
+    "FlextOracleObs",
+    "FlextOracleTargetAuthenticationError",
+    "FlextOracleTargetConfig",
+    "FlextOracleTargetConnectionError",
+    # Backward compatibility aliases
+    "FlextOracleTargetError",
+    "FlextOracleTargetLoader",
+    "FlextOracleTargetProcessingError",
+    "FlextOracleTargetSchemaError",
     # === FLEXT-CORE RE-EXPORTS ===
     "FlextResult",
     # === PRIMARY TARGET CLASSES ===
     "FlextTargetOracle",
-    "FlextTargetOracleLoader",
-    "FlextOracleTargetLoader",
-    "FlextTargetOraclePlugin",
-    "create_target_oracle_plugin",
-    "TargetOracle",  # Compatibility alias
-    # === CONFIGURATION ===
-    "FlextTargetOracleConfig",
-    "FlextOracleTargetConfig",
-    "LoadMethod",
     # === EXCEPTION HIERARCHY ===
     "FlextTargetOracleAuthenticationError",
+    # === CONFIGURATION ===
+    "FlextTargetOracleConfig",
     "FlextTargetOracleConnectionError",
     "FlextTargetOracleError",
+    "FlextTargetOracleLoader",
+    "FlextTargetOraclePlugin",
     "FlextTargetOracleProcessingError",
     "FlextTargetOracleSchemaError",
-    # Backward compatibility aliases
-    "FlextOracleTargetError",
-    "FlextOracleTargetAuthenticationError",
-    "FlextOracleTargetConnectionError",
-    "FlextOracleTargetProcessingError",
-    "FlextOracleTargetSchemaError",
-    # === OBSERVABILITY ===
-    "FlextOracleError",
-    "FlextOracleObs",
-    "configure_oracle_observability",
+    "LoadMethod",
     # === DATA MODELS ===
     "LoadMethodModel",
-    "StorageModeModel",
-    "OracleConnectionModel",
-    "SingerStreamModel",
-    "BatchProcessingModel",
     "LoadStatisticsModel",
-    "OracleTableMetadataModel",
-    # === SERVICES ===
-    "ConnectionServiceProtocol",
-    "SchemaServiceProtocol",
-    "BatchServiceProtocol",
-    "RecordServiceProtocol",
-    "OracleConnectionService",
-    "OracleSchemaService",
+    # Authentication
+    "OAuthAuthenticator",
     "OracleBatchService",
+    "OracleConnectionModel",
+    "OracleConnectionService",
     "OracleRecordService",
+    "OracleSchemaService",
+    "OracleTableMetadataModel",
     "OracleTargetServiceFactory",
+    "PropertiesList",
+    "Property",
+    "RecordServiceProtocol",
+    "SQLSink",
+    "SchemaServiceProtocol",
+    "SingerStreamModel",
+    "Sink",
+    "StorageModeModel",
+    # Singer SDK core classes
+    "Stream",
+    "Tap",
+    "Target",
+    "TargetOracle",  # Compatibility alias
     # === METADATA ===
     "__version__",
     "__version_info__",
+    "configure_oracle_observability",
+    "create_meltano_target_service",
+    "create_target_oracle_plugin",
+    # Testing
+    "get_tap_test_class",
+    # Singer typing
+    "singer_typing",
 ]

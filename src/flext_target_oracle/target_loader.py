@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 
-from flext_core import FlextDomainService, FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextDomainService, FlextResult, FlextTypes
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from pydantic import Field, SecretStr
 
@@ -69,9 +69,8 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             )
 
         except Exception as e:
-            raise FlextTargetOracleConnectionError(
-                f"Failed to create Oracle API: {e}"
-            ) from e
+            msg = f"Failed to create Oracle API: {e}"
+            raise FlextTargetOracleConnectionError(msg) from e
 
     def execute(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute domain service - returns connection test result."""
@@ -242,7 +241,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             with self.oracle_api as connected_api:
                 # Build INSERT SQL manually
                 insert_sql = f"""
-                INSERT INTO {full_table_name} 
+                INSERT INTO {full_table_name}
                 (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT)
                 VALUES (:data, :extracted_at, :loaded_at)
                 """

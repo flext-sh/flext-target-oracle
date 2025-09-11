@@ -68,7 +68,7 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
         if args is None:
             args = sys.argv[1:]
 
-        if not args or args[0] in ["-h", "--help", "help"]:
+        if not args or args[0] in {"-h", "--help", "help"}:
             help_text = self._get_help_text()
             self.log_info(help_text)
             return FlextResult[str].ok("Help displayed")
@@ -95,7 +95,7 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
 
         i = 0
         while i < len(args):
-            if args[i] in ["--config", "-c"] and i + 1 < len(args):
+            if args[i] in {"--config", "-c"} and i + 1 < len(args):
                 config_file = args[i + 1]
                 i += 2
             else:
@@ -120,10 +120,10 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
 
         i = 0
         while i < len(args):
-            if args[i] in ["--config", "-c"] and i + 1 < len(args):
+            if args[i] in {"--config", "-c"} and i + 1 < len(args):
                 config_file = args[i + 1]
                 i += 2
-            elif args[i] in ["--state", "-s"] and i + 1 < len(args):
+            elif args[i] in {"--state", "-s"} and i + 1 < len(args):
                 state_file = args[i + 1]
                 i += 2
             else:
@@ -149,7 +149,7 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
 
         i = 0
         while i < len(args):
-            if args[i] in ["--format", "-f"] and i + 1 < len(args):
+            if args[i] in {"--format", "-f"} and i + 1 < len(args):
                 format_type = args[i + 1]
                 i += 2
             else:
