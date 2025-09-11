@@ -2,7 +2,7 @@
 
 This module provides specialized services following Single Responsibility Principle
 to support Oracle Singer target operations. Each service has a focused responsibility
-and uses dependency injection via FlextContainer following SOLID principles.
+and uses dependency injection via FlextContainer
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT

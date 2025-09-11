@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """FLEXT Target Oracle - Main entry point using SOURCE OF TRUTH patterns.
 
-This module provides the main entry point for the Oracle Singer Target with 
+This module provides the main entry point for the Oracle Singer Target with
 clean architecture and SOLID compliance.
 
 ZERO DUPLICATION - Uses FlextTargetOracle from target_client exclusively.
@@ -15,11 +15,12 @@ from __future__ import annotations
 
 from flext_target_oracle.target_client import FlextTargetOracle
 
+
 # Main entry point - minimal wrapper for compatibility
 def main() -> None:
     """Main entry point for Oracle Singer Target."""
     import sys
-    
+
     # For Singer targets, the main entry typically reads from stdin
     # This is a basic stub - full Singer CLI would be handled by Meltano
     print("FLEXT Target Oracle - Use with Meltano or Singer CLI")

@@ -14,82 +14,82 @@ src/flext_target_oracle/target_exceptions.py:29:34: error: Invalid base class
     class FlextTargetOracleBaseError(_FlextTargetOracleBaseError):
                                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "host" of class "FlextTargetOracleConnectionError":
-src/flext_target_oracle/target_exceptions.py:85:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:85:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("host")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "port" of class "FlextTargetOracleConnectionError":
-src/flext_target_oracle/target_exceptions.py:92:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:92:13: error: Returning object from
 function declared to return "int | None"  [no-any-return]
                 return self.context.get("port")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "service_name" of class "FlextTargetOracleConnectionError":
-src/flext_target_oracle/target_exceptions.py:99:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:99:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("service_name")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "user" of class "FlextTargetOracleConnectionError":
-src/flext_target_oracle/target_exceptions.py:106:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:106:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("user")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "dsn" of class "FlextTargetOracleConnectionError":
-src/flext_target_oracle/target_exceptions.py:113:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:113:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("dsn")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "user" of class "FlextTargetOracleAuthenticationError":
-src/flext_target_oracle/target_exceptions.py:158:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:158:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("user")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "auth_method" of class "FlextTargetOracleAuthenticationError":
-src/flext_target_oracle/target_exceptions.py:165:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:165:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("auth_method")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "wallet_location" of class "FlextTargetOracleAuthenticationError":
-src/flext_target_oracle/target_exceptions.py:172:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:172:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("wallet_location")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "stream_name" of class "FlextTargetOracleProcessingError":
-src/flext_target_oracle/target_exceptions.py:216:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:216:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("stream_name")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "record_count" of class "FlextTargetOracleProcessingError":
-src/flext_target_oracle/target_exceptions.py:223:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:223:13: error: Returning object from
 function declared to return "int | None"  [no-any-return]
                 return self.context.get("record_count")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "error_records" of class "FlextTargetOracleProcessingError":
-src/flext_target_oracle/target_exceptions.py:230:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:230:13: error: Returning object from
 function declared to return "list[dict[str, object]] | None"  [no-any-return]
                 return self.context.get("error_records")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "operation" of class "FlextTargetOracleProcessingError":
-src/flext_target_oracle/target_exceptions.py:237:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:237:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("operation")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "stream_name" of class "FlextTargetOracleSchemaError":
-src/flext_target_oracle/target_exceptions.py:302:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:302:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("stream_name")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "table_name" of class "FlextTargetOracleSchemaError":
-src/flext_target_oracle/target_exceptions.py:309:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:309:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("table_name")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "schema_hash" of class "FlextTargetOracleSchemaError":
-src/flext_target_oracle/target_exceptions.py:316:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:316:13: error: Returning object from
 function declared to return "str | None"  [no-any-return]
                 return self.context.get("schema_hash")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_exceptions.py: note: In member "validation_errors" of class "FlextTargetOracleSchemaError":
-src/flext_target_oracle/target_exceptions.py:323:13: error: Returning Any from
+src/flext_target_oracle/target_exceptions.py:323:13: error: Returning object from
 function declared to return "list[str] | None"  [no-any-return]
                 return self.context.get("validation_errors")
                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -136,7 +136,7 @@ incompatible with supertype "flext_core.domain_services.FlextDomainService"
         def execute(self, operation: str, **kwargs: object) -> FlextResult...
         ^
 src/flext_target_oracle/target_services.py:172:5: note:      Superclass:
-src/flext_target_oracle/target_services.py:172:5: note:          def execute(self) -> FlextResult[Any]
+src/flext_target_oracle/target_services.py:172:5: note:          def execute(self) -> FlextResult[object]
 src/flext_target_oracle/target_services.py:172:5: note:      Subclass:
 src/flext_target_oracle/target_services.py:172:5: note:          def execute(self, operation: str, **kwargs: object) -> FlextResult[object]
 src/flext_target_oracle/target_services.py:184:20: error: Incompatible return
@@ -187,12 +187,12 @@ incompatible with supertype "flext_core.domain_services.FlextDomainService"
         def execute(self, operation: str, **kwargs: object) -> FlextResult...
         ^
 src/flext_target_oracle/target_services.py:233:5: note:      Superclass:
-src/flext_target_oracle/target_services.py:233:5: note:          def execute(self) -> FlextResult[Any]
+src/flext_target_oracle/target_services.py:233:5: note:          def execute(self) -> FlextResult[object]
 src/flext_target_oracle/target_services.py:233:5: note:      Subclass:
 src/flext_target_oracle/target_services.py:233:5: note:          def execute(self, operation: str, **kwargs: object) -> FlextResult[object]
 src/flext_target_oracle/target_services.py:251:32: error: Argument 1 to "run"
-has incompatible type "Coroutine[Any, Any, FlextResult[None]]"; expected
-"Coroutine[Any, Any, FlextResult[object]]"  [arg-type]
+has incompatible type "Coroutine[object, object, FlextResult[None]]"; expected
+"Coroutine[object, object, FlextResult[object]]"  [arg-type]
                 return asyncio.run(self.ensure_table_exists(stream, schema...
                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~...
 src/flext_target_oracle/target_services.py:251:57: error: Argument 1 to
@@ -212,8 +212,8 @@ expected "list[str] | None"  [arg-type]
                                                              ^~~~~~~~~~~~~~
 src/flext_target_oracle/target_services.py:257:32: error: Argument 1 to "run"
 has incompatible type
-"Coroutine[Any, Any, FlextResult[list[dict[str, object]]]]"; expected
-"Coroutine[Any, Any, FlextResult[object]]"  [arg-type]
+"Coroutine[object, object, FlextResult[list[dict[str, object]]]]"; expected
+"Coroutine[object, object, FlextResult[object]]"  [arg-type]
                 return asyncio.run(self.get_table_columns(table_name, sche...
                                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~...
 src/flext_target_oracle/target_services.py:257:55: error: Argument 1 to
@@ -291,12 +291,12 @@ incompatible with supertype "flext_core.domain_services.FlextDomainService"
         def execute(self, operation: str, **kwargs: object) -> FlextResult...
         ^
 src/flext_target_oracle/target_services.py:447:5: note:      Superclass:
-src/flext_target_oracle/target_services.py:447:5: note:          def execute(self) -> FlextResult[Any]
+src/flext_target_oracle/target_services.py:447:5: note:          def execute(self) -> FlextResult[object]
 src/flext_target_oracle/target_services.py:447:5: note:      Subclass:
 src/flext_target_oracle/target_services.py:447:5: note:          def execute(self, operation: str, **kwargs: object) -> FlextResult[object]
 src/flext_target_oracle/target_services.py:459:32: error: Argument 1 to "run"
-has incompatible type "Coroutine[Any, Any, FlextResult[LoadStatisticsModel]]";
-expected "Coroutine[Any, Any, FlextResult[object]]"  [arg-type]
+has incompatible type "Coroutine[object, object, FlextResult[LoadStatisticsModel]]";
+expected "Coroutine[object, object, FlextResult[object]]"  [arg-type]
                 return asyncio.run(self.finalize_all())
                                    ^~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target_services.py:465:32: error: "OracleBatchService"
@@ -345,7 +345,7 @@ incompatible with supertype "flext_core.domain_services.FlextDomainService"
         def execute(self, operation: str, **kwargs: object) -> FlextResult...
         ^
 src/flext_target_oracle/target_services.py:548:5: note:      Superclass:
-src/flext_target_oracle/target_services.py:548:5: note:          def execute(self) -> FlextResult[Any]
+src/flext_target_oracle/target_services.py:548:5: note:          def execute(self) -> FlextResult[object]
 src/flext_target_oracle/target_services.py:548:5: note:      Subclass:
 src/flext_target_oracle/target_services.py:548:5: note:          def execute(self, operation: str, **kwargs: object) -> FlextResult[object]
 src/flext_target_oracle/target_services.py:564:20: error: Incompatible return
@@ -431,7 +431,7 @@ value type (got "FlextResult[None]", expected "FlextResult[dict[str, object]]")
                                        ^
 src/flext_target_oracle/target_client.py:573:39: error: Incompatible types in
 assignment (expression has type
-"Coroutine[Any, Any, FlextResult[dict[str, object]]]", variable has type
+"Coroutine[object, object, FlextResult[dict[str, object]]]", variable has type
 "FlextResult[dict[str, object]]")  [assignment]
                         finalize_result = finalize_operation
                                           ^~~~~~~~~~~~~~~~~~
@@ -458,7 +458,7 @@ defined  [name-defined]
                                       ^~~~~~~~~~~
 src/flext_target_oracle/target.py: note: In class "OracleTargetValidateCommand":
 src/flext_target_oracle/target.py:92:35: error: Class cannot subclass
-"FlextCliCmd" (has type "Any")  [misc]
+"FlextCliCmd" (has type "object")  [misc]
     class OracleTargetValidateCommand(FlextCliCmd):
                                       ^~~~~~~~~~~
 src/flext_target_oracle/target.py: note: In member "execute" of class "OracleTargetValidateCommand":
@@ -478,7 +478,7 @@ defined  [name-defined]
                                   ^~~~~~~~~~~
 src/flext_target_oracle/target.py: note: In class "OracleTargetLoadCommand":
 src/flext_target_oracle/target.py:187:31: error: Class cannot subclass
-"FlextCliCmd" (has type "Any")  [misc]
+"FlextCliCmd" (has type "object")  [misc]
     class OracleTargetLoadCommand(FlextCliCmd):
                                   ^~~~~~~~~~~
 src/flext_target_oracle/target.py: note: In member "execute" of class "OracleTargetLoadCommand":
@@ -497,7 +497,7 @@ attribute "process_singer_message"  [attr-defined]
                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 src/flext_target_oracle/target.py:302:38: error: Incompatible types in
 assignment (expression has type
-"Coroutine[Any, Any, FlextResult[dict[str, object]]]", variable has type
+"Coroutine[object, object, FlextResult[dict[str, object]]]", variable has type
 "FlextResult[dict[str, object]]")  [assignment]
                     final_result_value = finalize_result
                                          ^~~~~~~~~~~~~~~
@@ -509,7 +509,7 @@ defined  [name-defined]
                                    ^~~~~~~~~~~
 src/flext_target_oracle/target.py: note: In class "OracleTargetAboutCommand":
 src/flext_target_oracle/target.py:329:32: error: Class cannot subclass
-"FlextCliCmd" (has type "Any")  [misc]
+"FlextCliCmd" (has type "object")  [misc]
     class OracleTargetAboutCommand(FlextCliCmd):
                                    ^~~~~~~~~~~
 src/flext_target_oracle/target.py: note: At top level:
