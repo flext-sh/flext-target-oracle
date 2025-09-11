@@ -23,8 +23,6 @@ def main() -> None:
 
     # For Singer targets, the main entry typically reads from stdin
     # This is a basic stub - full Singer CLI would be handled by Meltano
-    print("FLEXT Target Oracle - Use with Meltano or Singer CLI")
-    print("Direct Python usage: from flext_target_oracle import FlextTargetOracle")
     sys.exit(0)
 
 

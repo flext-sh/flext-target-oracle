@@ -59,10 +59,11 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
         elif isinstance(config, FlextTargetOracleConfig):
             validated_config = config
         else:
-            raise TypeError(
+            msg = (
                 "Configuration is required. Provide FlextTargetOracleConfig instance "
                 "or dictionary with Oracle connection parameters."
             )
+            raise TypeError(msg)
 
         # Create loader with validated config
         loader = FlextTargetOracleLoader(validated_config)
@@ -306,7 +307,8 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
         """Singer SDK record writing compatibility."""
         result = self.loader.load_record(stream_name, record)
         if result.is_failure:
-            raise RuntimeError(f"Failed to write record: {result.error}")
+            msg = f"Failed to write record: {result.error}"
+            raise RuntimeError(msg)
 
     # === Metrics and Information ===
 

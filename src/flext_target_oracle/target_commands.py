@@ -43,7 +43,7 @@ class OracleTargetValidateCommand(FlextCommands.Models.Command):
                         f"Configuration file not found: {self.config_file}"
                     )
 
-                config_data = json.loads(config_path.read_text())
+                config_data = json.loads(config_path.read_text(encoding="utf-8"))
                 config = FlextTargetOracleConfig(**config_data)
             else:
                 # Load from environment variables
@@ -131,7 +131,7 @@ class OracleTargetLoadCommand(FlextCommands.Models.Command):
                         f"Configuration file not found: {self.config_file}"
                     )
 
-                config_data = json.loads(config_path.read_text())
+                config_data = json.loads(config_path.read_text(encoding="utf-8"))
                 config = FlextTargetOracleConfig(**config_data)
             else:
                 # Load from environment variables
