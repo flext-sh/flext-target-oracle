@@ -3,20 +3,11 @@
 This module defines centralized constants following the FlextConstants pattern
 from flext-core, extending it with Oracle target-specific constants.
 
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
-from typing import Final
 
 from flext_core import FlextConstants
 
@@ -45,25 +36,6 @@ class FlextTargetOracleConstants(FlextConstants):
         )
 
 
-# Backward-compatibility: keep the original name/shape used by target_config
-class OracleTargetConstants:
-    """Backward-compatibility constants for Oracle target configuration."""
-
-    DEFAULT_PORT: Final[int] = FlextTargetOracleConstants.Connection.DEFAULT_PORT
-    DEFAULT_BATCH_SIZE: Final[int] = (
-        FlextTargetOracleConstants.Processing.DEFAULT_BATCH_SIZE
-    )
-    DEFAULT_CONNECTION_TIMEOUT: Final[int] = (
-        FlextTargetOracleConstants.Connection.DEFAULT_CONNECTION_TIMEOUT
-    )
-    DEFAULT_MAX_PARALLEL_STREAMS: Final[int] = (
-        FlextTargetOracleConstants.Processing.DEFAULT_MAX_PARALLEL_STREAMS
-    )
-    MIN_PORT: Final[int] = FlextTargetOracleConstants.Connection.MIN_PORT
-    MAX_PORT: Final[int] = FlextTargetOracleConstants.Connection.MAX_PORT
-
-
 __all__ = [
     "FlextTargetOracleConstants",
-    "OracleTargetConstants",
 ]

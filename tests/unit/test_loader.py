@@ -19,19 +19,20 @@ from decimal import Decimal
 from typing import Protocol
 
 import pytest
+from flext_core import FlextTypes
 from sqlalchemy import Engine, MetaData, Table, func, select, text
 
 from flext_target_oracle import (
-    FlextOracleTargetConfig,
-    FlextOracleTargetConnectionError,
-    FlextOracleTargetLoader,
-    FlextOracleTargetSchemaError,
+    FlextTargetOracleConfig,
+    FlextTargetOracleConnectionError,
+    FlextTargetOracleLoader,
+    FlextTargetOracleSchemaError,
     LoadMethod,
 )
 
 
-class TestLoader(Protocol):
-    """Protocol for test loader objects."""
+class LoaderProtocol(Protocol):
+    """Protocol for loader objects in tests."""
 
     def load_record(self, stream_name: str, record: FlextTypes.Core.Dict) -> None: ...
     def load_batch(
@@ -55,12 +56,12 @@ class TestRealOracleLoader:
     @pytest.fixture
     def real_loader(
         self,
-        oracle_config: FlextOracleTargetConfig,
+        oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
         clean_database: None,
-    ) -> FlextOracleTargetLoader:
+    ) -> FlextTargetOracleLoader:
         """Create real loader instance connected to Oracle."""
-        loader = FlextOracleTargetLoader(oracle_config)
+        loader = FlextTargetOracleLoader(oracle_config)
         result = loader.connect()
         assert result.is_success
         return loader
@@ -68,10 +69,10 @@ class TestRealOracleLoader:
 
     def test_real_connect_disconnect(
         self,
-        oracle_config: FlextOracleTargetConfig,
+        oracle_config: FlextTargetOracleConfig,
     ) -> None:
         """Test real connection and disconnection."""
-        loader = FlextOracleTargetLoader(oracle_config)
+        loader = FlextTargetOracleLoader(oracle_config)
 
         # Test connect
         result = loader.connect()
@@ -83,7 +84,7 @@ class TestRealOracleLoader:
 
     def test_real_connect_with_invalid_credentials(self) -> None:
         """Test connection with invalid credentials."""
-        config = FlextOracleTargetConfig(
+        config = FlextTargetOracleConfig(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -92,8 +93,8 @@ class TestRealOracleLoader:
             default_target_schema="TEST",
         )
 
-        loader = FlextOracleTargetLoader(config)
-        with pytest.raises(FlextOracleTargetConnectionError) as exc_info:
+        loader = FlextTargetOracleLoader(config)
+        with pytest.raises(FlextTargetOracleConnectionError) as exc_info:
             loader.connect()
 
         assert "Failed to establish Oracle connection" in str(exc_info.value)
@@ -103,7 +104,7 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_ensure_table_exists_new_table(
         self,
-        real_loader: TestLoader,
+        real_loader: LoaderProtocol,
         simple_schema: FlextTypes.Core.Dict,
     ) -> None:
         """Test creating a new table in real Oracle."""
@@ -156,7 +157,7 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_ensure_table_exists_existing_table(
         self,
-        real_loader: TestLoader,
+        real_loader: LoaderProtocol,
         simple_schema: FlextTypes.Core.Dict,
         oracle_engine: Engine,
     ) -> None:
@@ -192,7 +193,7 @@ class TestRealOracleLoader:
         clean_database: Callable[[], None],
     ) -> None:
         """Test force recreating table in real Oracle."""
-        config = FlextOracleTargetConfig(
+        config = FlextTargetOracleConfig(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -202,7 +203,7 @@ class TestRealOracleLoader:
             force_recreate_tables=True,
         )
 
-        loader = FlextOracleTargetLoader(config)
+        loader = FlextTargetOracleLoader(config)
         loader.connect()
 
         stream_name = "recreate_table"
@@ -261,7 +262,7 @@ class TestRealOracleLoader:
         clean_database: Callable[[], None],
     ) -> None:
         """Test truncating table before load in real Oracle."""
-        config = FlextOracleTargetConfig(
+        config = FlextTargetOracleConfig(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -271,7 +272,7 @@ class TestRealOracleLoader:
             truncate_before_load=True,
         )
 
-        loader = FlextOracleTargetLoader(config)
+        loader = FlextTargetOracleLoader(config)
         loader.connect()
 
         stream_name = "truncate_table"
@@ -313,7 +314,7 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_load_record_single(
         self,
-        real_loader: TestLoader,
+        real_loader: LoaderProtocol,
         simple_schema: FlextTypes.Core.Dict,
         oracle_engine: Engine,
     ) -> None:
@@ -353,7 +354,7 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_load_record_batch(
         self,
-        real_loader: TestLoader,
+        real_loader: LoaderProtocol,
         simple_schema: FlextTypes.Core.Dict,
         oracle_engine: Engine,
     ) -> None:
@@ -392,7 +393,7 @@ class TestRealOracleLoader:
         clean_database: Callable[[], None],
     ) -> None:
         """Test bulk insert mode with real Oracle."""
-        config = FlextOracleTargetConfig(
+        config = FlextTargetOracleConfig(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -403,7 +404,7 @@ class TestRealOracleLoader:
             batch_size=5,
         )
 
-        loader = FlextOracleTargetLoader(config)
+        loader = FlextTargetOracleLoader(config)
         loader.connect()
 
         stream_name = "bulk_insert"
@@ -440,7 +441,7 @@ class TestRealOracleLoader:
         clean_database: Callable[[], None],
     ) -> None:
         """Test merge mode (upsert) with real Oracle."""
-        config = FlextOracleTargetConfig(
+        config = FlextTargetOracleConfig(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -451,7 +452,7 @@ class TestRealOracleLoader:
             load_method=LoadMethod.MERGE,
         )
 
-        loader = FlextOracleTargetLoader(config)
+        loader = FlextTargetOracleLoader(config)
         loader.connect()
 
         stream_name = "merge_test"
@@ -497,7 +498,7 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_nested_json_flattening(
         self,
-        real_loader: TestLoader,
+        real_loader: LoaderProtocol,
         nested_schema: FlextTypes.Core.Dict,
         oracle_engine: Engine,
     ) -> None:
@@ -632,7 +633,7 @@ class TestRealOracleLoader:
             },
         }
 
-        with pytest.raises(FlextOracleTargetSchemaError):
+        with pytest.raises(FlextTargetOracleSchemaError):
             await real_loader.ensure_table_exists(stream_name, invalid_schema, ["id"])
 
     @pytest.mark.asyncio
@@ -643,7 +644,7 @@ class TestRealOracleLoader:
         clean_database: Callable[[], None],
     ) -> None:
         """Test column ordering in real Oracle."""
-        config = FlextOracleTargetConfig(
+        config = FlextTargetOracleConfig(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -660,7 +661,7 @@ class TestRealOracleLoader:
             audit_column_patterns=["created_at", "updated_at"],
         )
 
-        loader = FlextOracleTargetLoader(config)
+        loader = FlextTargetOracleLoader(config)
         loader.connect()
 
         stream_name = "ordered_columns"
@@ -726,7 +727,7 @@ class TestRealOracleLoader:
         clean_database: Callable[[], None],
     ) -> None:
         """Test custom index creation in real Oracle."""
-        config = FlextOracleTargetConfig(
+        config = FlextTargetOracleConfig(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -741,7 +742,7 @@ class TestRealOracleLoader:
             },
         )
 
-        loader = FlextOracleTargetLoader(config)
+        loader = FlextTargetOracleLoader(config)
         loader.connect()
 
         stream_name = "indexed_table"
@@ -774,7 +775,7 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     async def test_real_finalize_streams_metrics(
         self,
-        real_loader: TestLoader,
+        real_loader: LoaderProtocol,
         simple_schema: FlextTypes.Core.Dict,
         oracle_engine: Engine,
     ) -> None:
@@ -828,7 +829,7 @@ class TestRealOracleLoader:
         clean_database: Callable[[], None],
     ) -> None:
         """Test parallel and direct path options in real Oracle."""
-        config = FlextOracleTargetConfig(
+        config = FlextTargetOracleConfig(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -841,7 +842,7 @@ class TestRealOracleLoader:
             batch_size=100,
         )
 
-        loader = FlextOracleTargetLoader(config)
+        loader = FlextTargetOracleLoader(config)
         loader.connect()
 
         stream_name = "parallel_test"

@@ -1,11 +1,3 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """Target Configuration Management for FLEXT Target Oracle.
 
 This module provides type-safe configuration management for Oracle Singer target
@@ -20,7 +12,7 @@ programming principles using FlextResult for consistent error handling.
 Key Classes:
     FlextTargetOracleConfig: Main configuration class with comprehensive validation
     LoadMethod: Enumeration of supported Oracle data loading strategies
-    OracleTargetConstants: System constants to eliminate magic numbers
+    FlextTargetOracleConstants: System constants to eliminate magic numbers
 
 Architecture Patterns:
     FlextModels: Immutable configuration with built-in validation
@@ -49,18 +41,15 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 
 """
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
 
+from __future__ import annotations
 
 from enum import StrEnum
 
-from flext_core import FlextModels, FlextResult
+from flext_core import FlextModels, FlextResult, FlextTypes, FlextValidations
 from pydantic import Field, SecretStr, field_validator
 
-from .constants import OracleTargetConstants
+from .constants import FlextTargetOracleConstants
 
 
 class LoadMethod(StrEnum):
@@ -81,13 +70,13 @@ class LoadMethod(StrEnum):
 
     """
 
-    INSERT = "insert"
-    MERGE = "merge"
-    BULK_INSERT = "bulk_insert"
-    BULK_MERGE = "bulk_merge"
+    INSERT = "INSERT"
+    MERGE = "MERGE"
+    BULK_INSERT = "BULK_INSERT"
+    BULK_MERGE = "BULK_MERGE"
 
 
-class FlextTargetOracleConfig(FlextModels.Config):
+class FlextTargetOracleConfig(FlextModels.Value):
     """Type-safe Oracle target configuration with comprehensive validation.
 
     Provides immutable configuration object for Oracle Singer target operations
@@ -155,10 +144,10 @@ class FlextTargetOracleConfig(FlextModels.Config):
         max_length=255,
     )
     oracle_port: int = Field(
-        default=OracleTargetConstants.DEFAULT_PORT,
+        default=FlextTargetOracleConstants.Connection.DEFAULT_PORT,
         description="Oracle listener port number",
-        ge=OracleTargetConstants.MIN_PORT,
-        le=OracleTargetConstants.MAX_PORT,
+        ge=FlextTargetOracleConstants.Connection.MIN_PORT,
+        le=FlextTargetOracleConstants.Connection.MAX_PORT,
     )
     oracle_service: str = Field(
         ...,
@@ -172,11 +161,9 @@ class FlextTargetOracleConfig(FlextModels.Config):
         min_length=1,
         max_length=128,
     )
-    oracle_password: str = Field(
+    oracle_password: SecretStr = Field(
         ...,
         description="Oracle database password",
-        min_length=1,
-        repr=False,  # Hide password in string representations
     )
     default_target_schema: str = Field(
         default="target",
@@ -193,13 +180,13 @@ class FlextTargetOracleConfig(FlextModels.Config):
         description="Enable Oracle bulk operations for performance",
     )
     batch_size: int = Field(
-        default=OracleTargetConstants.DEFAULT_BATCH_SIZE,
+        default=FlextTargetOracleConstants.Processing.DEFAULT_BATCH_SIZE,
         description="Number of records per batch for processing",
         gt=0,
         le=50000,  # Reasonable upper limit for Oracle batch operations
     )
     connection_timeout: int = Field(
-        default=OracleTargetConstants.DEFAULT_CONNECTION_TIMEOUT,
+        default=FlextTargetOracleConstants.Connection.DEFAULT_CONNECTION_TIMEOUT,
         description="Database connection timeout in seconds",
         gt=0,
         le=3600,  # Maximum 1 hour timeout
@@ -344,7 +331,6 @@ class FlextTargetOracleConfig(FlextModels.Config):
         description="Column name for JSON storage mode",
     )
 
-    # Type mapping configuration
     default_string_length: int = Field(
         default=4000,
         description="Default length for VARCHAR2 columns",
@@ -460,8 +446,12 @@ class FlextTargetOracleConfig(FlextModels.Config):
             ValueError: If port is outside valid range (1-65535)
 
         """
-        if not (OracleTargetConstants.MIN_PORT <= v <= OracleTargetConstants.MAX_PORT):
-            msg: str = f"Oracle port must be between {OracleTargetConstants.MIN_PORT} and {OracleTargetConstants.MAX_PORT}"
+        if not (
+            FlextTargetOracleConstants.Connection.MIN_PORT
+            <= v
+            <= FlextTargetOracleConstants.Connection.MAX_PORT
+        ):
+            msg: str = f"Oracle port must be between {FlextTargetOracleConstants.Connection.MIN_PORT} and {FlextTargetOracleConstants.Connection.MAX_PORT}"
             raise ValueError(msg)
         return v
 
@@ -556,13 +546,16 @@ class FlextTargetOracleConfig(FlextModels.Config):
 
         """
         try:
-            # Use validation chain to eliminate multiple returns and compose rules
-            validator = _ConfigurationValidator()
-            return validator.validate(self)
+            # Use flext-core validation function - ZERO DUPLICATION
+            return validate_oracle_configuration(self)
         except Exception as e:
             return FlextResult[None].fail(f"Configuration validation failed: {e}")
 
-    def get_oracle_config(self) -> dict[str, str | int | SecretStr | bool | None]:
+    def validate_oracle_config(self) -> FlextResult[None]:
+        """Validate Oracle configuration - alias for validate_domain_rules for test compatibility."""
+        return self.validate_domain_rules()
+
+    def get_oracle_config(self) -> dict[str, object]:
         """Convert to flext-db-oracle configuration format.
 
         Transforms this configuration into the format expected by flext-db-oracle
@@ -584,7 +577,7 @@ class FlextTargetOracleConfig(FlextModels.Config):
             "port": self.oracle_port,
             "service_name": self.oracle_service,
             "username": self.oracle_user,
-            "password": SecretStr(self.oracle_password),
+            "password": self.oracle_password.get_secret_value(),
             "sid": None,  # Use service_name instead of SID
             "timeout": self.connection_timeout,
             "pool_min": self.pool_min_size,
@@ -739,123 +732,55 @@ class FlextTargetOracleConfig(FlextModels.Config):
         return None
 
 
-class _ConfigurationValidator:
-    """Configuration validator using Chain of Responsibility Pattern - Single Responsibility."""
+def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResult[None]:
+    """Validate Oracle configuration using flext-core FlextValidations - ZERO DUPLICATION."""
+    # Required string fields validation using flext-core
+    required_fields = [
+        (config.oracle_host, "Oracle host is required"),
+        (config.oracle_service, "Oracle service is required"),
+        (config.oracle_user, "Oracle username is required"),
+        (
+            config.oracle_password.get_secret_value()
+            if config.oracle_password
+            else None,
+            "Oracle password is required",
+        ),
+        (config.default_target_schema, "Target schema is required"),
+    ]
 
-    def validate(self, config: FlextTargetOracleConfig) -> FlextResult[None]:
-        """Validate configuration using validation chain."""
-        # Define validation rules as a list of validators
-        validators = [
-            _HostValidator(),
-            _ServiceValidator(),
-            _UserValidator(),
-            _PasswordValidator(),
-            _SchemaValidator(),
-            _PoolSizeValidator(),
-            _SSLConfigValidator(),
-        ]
+    # Validate required string fields using FlextValidations
+    for field_value, error_message in required_fields:
+        if not FlextValidations.validate_non_empty_string_func(field_value):
+            return FlextResult[None].fail(error_message)
 
-        # Execute validation chain
-        for validator in validators:
-            result = validator.validate(config)
-            if result.is_failure:
-                return result
+    # Validate pool size constraints using FlextValidations number validation
+    if not FlextValidations.validate_number(config.pool_min_size, min_value=0):
+        return FlextResult[None].fail("Pool min size must be non-negative")
 
-        return FlextResult[None].ok(None)
+    if not FlextValidations.validate_number(
+        config.pool_max_size, min_value=config.pool_min_size
+    ):
+        return FlextResult[None].fail(
+            "Pool max size must be greater than or equal to pool min size"
+        )
 
+    # SSL configuration consistency validation
+    if (
+        config.use_ssl
+        and config.ssl_wallet_password
+        and not FlextValidations.validate_non_empty_string_func(
+            config.ssl_wallet_location
+        )
+    ):
+        return FlextResult[None].fail(
+            "SSL wallet location is required when wallet password is provided"
+        )
 
-class _BaseValidator:
-    """Base validator using Template Method Pattern."""
-
-    def validate(self, config: FlextTargetOracleConfig) -> FlextResult[None]:
-        """Template method for validation."""
-        if not self._is_valid(config):
-            return FlextResult[None].fail(self._get_error_message())
-        return FlextResult[None].ok(None)
-
-    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
-        """Check if configuration is valid - to be implemented by subclasses."""
-        raise NotImplementedError
-
-    def _get_error_message(self) -> str:
-        """Get error message - to be implemented by subclasses."""
-        raise NotImplementedError
-
-
-class _HostValidator(_BaseValidator):
-    """Validate Oracle host - Single Responsibility."""
-
-    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
-        return bool(config.oracle_host)
-
-    def _get_error_message(self) -> str:
-        return "Oracle host is required"
-
-
-class _ServiceValidator(_BaseValidator):
-    """Validate Oracle service - Single Responsibility."""
-
-    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
-        return bool(config.oracle_service)
-
-    def _get_error_message(self) -> str:
-        return "Oracle service is required"
-
-
-class _UserValidator(_BaseValidator):
-    """Validate Oracle user - Single Responsibility."""
-
-    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
-        return bool(config.oracle_user)
-
-    def _get_error_message(self) -> str:
-        return "Oracle username is required"
-
-
-class _PasswordValidator(_BaseValidator):
-    """Validate Oracle password - Single Responsibility."""
-
-    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
-        return bool(config.oracle_password)
-
-    def _get_error_message(self) -> str:
-        return "Oracle password is required"
-
-
-class _SchemaValidator(_BaseValidator):
-    """Validate target schema - Single Responsibility."""
-
-    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
-        return bool(config.default_target_schema)
-
-    def _get_error_message(self) -> str:
-        return "Target schema is required"
-
-
-class _PoolSizeValidator(_BaseValidator):
-    """Validate connection pool sizes - Single Responsibility."""
-
-    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
-        return config.pool_max_size >= config.pool_min_size
-
-    def _get_error_message(self) -> str:
-        return "Pool max size must be greater than or equal to pool min size"
-
-
-class _SSLConfigValidator(_BaseValidator):
-    """Validate SSL configuration consistency - Single Responsibility."""
-
-    def _is_valid(self, config: FlextTargetOracleConfig) -> bool:
-        # If SSL is enabled with wallet, wallet location must be provided
-        if config.use_ssl and config.ssl_wallet_password:
-            return bool(config.ssl_wallet_location)
-        return True
-
-    def _get_error_message(self) -> str:
-        return "SSL wallet location is required when wallet password is provided"
+    return FlextResult[None].ok(None)
 
 
 __all__: FlextTypes.Core.StringList = [
     "FlextTargetOracleConfig",
     "LoadMethod",
+    "validate_oracle_configuration",
 ]

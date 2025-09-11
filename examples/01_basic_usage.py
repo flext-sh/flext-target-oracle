@@ -28,7 +28,7 @@ object
 
 from flext_core import FlextLogger
 
-from ..flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
 # Configure logging for the example
 logging.basicConfig(level=logging.INFO)

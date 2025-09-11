@@ -26,7 +26,7 @@ from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 import pytest_asyncio
-from flext_core import FlextLogger
+from flext_core import FlextLogger, FlextTypes
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
@@ -186,7 +186,7 @@ def oracle_container() -> Generator[None]:
 
 
 @pytest.fixture(scope="session")
-def oracle_engine(_oracle_container: None) -> Engine:
+def oracle_engine(oracle_container: None) -> Engine:
     """Create SQLAlchemy engine for direct database access."""
     return create_engine(
         f"oracle+oracledb://{TEST_SCHEMA}:test_password@{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SERVICE}",
@@ -219,7 +219,7 @@ def clean_database(oracle_engine: Engine) -> None:
 
 
 @pytest.fixture
-def oracle_config(_oracle_container: None) -> FlextTargetOracleConfig:
+def oracle_config(oracle_container: None) -> FlextTargetOracleConfig:
     """Create Oracle target configuration for tests."""
     return FlextTargetOracleConfig(
         oracle_host=ORACLE_HOST,
