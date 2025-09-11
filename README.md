@@ -294,7 +294,7 @@ make test                    # Run tests with 90% coverage minimum
 
 # Development Workflow
 make format                  # Format code with ruff
-make lint                    # Ruff linting (ALL rules enabled)
+make lint
 make type-check             # MyPy strict mode type checking
 
 # Oracle Testing

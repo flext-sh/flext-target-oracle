@@ -1,8 +1,7 @@
 """Centralized typings facade for flext-target-oracle.
 
-- Extends flext-core types
-- Add Target Oracle-specific type aliases and Protocols here
-
+Re-exports flext-core types without duplication - SOURCE OF TRUTH pattern.
+Oracle Target-specific type extensions can be added here if needed.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -10,20 +9,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextTypes
-
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
-
-
-from flext_core import E, F, FlextTypes as CoreFlextTypes, P, R, T, U, V
-
-
-class FlextTypes(CoreFlextTypes):
-    """Target Oracle domain-specific types can extend here."""
-
+# SOURCE OF TRUTH: Use flext-core types directly, no duplication
+from flext_core import E, F, FlextTypes, P, R, T, U, V
 
 __all__ = [
     "E",

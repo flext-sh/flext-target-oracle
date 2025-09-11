@@ -1,8 +1,7 @@
-"""Oracle Target Exception Hierarchy - Enterprise Error Handling.
+"""Oracle Target Exception Hierarchy - Using flext-core SOURCE OF TRUTH.
 
-This module provides a comprehensive exception hierarchy for Oracle Singer target
-operations using factory pattern to eliminate code duplication, built on FLEXT
-ecosystem error handling patterns.
+Direct usage of flext-core exception classes without duplication or factories.
+Oracle-specific exceptions inherit directly from flext-core bases.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -10,145 +9,349 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import cast
+
 from flext_core import FlextTypes
+from flext_core.exceptions import FlextExceptions
+
+# Direct access to the internal exception classes for proper inheritance
+BaseError = FlextExceptions.BaseError
+ConfigurationError = FlextExceptions._ConfigurationError
+FlextConnectionError = (
+    FlextExceptions._ConnectionError
+)  # Avoid Python builtin shadowing
+ValidationError = FlextExceptions._ValidationError
+AuthenticationError = FlextExceptions._AuthenticationError
+ProcessingError = FlextExceptions._ProcessingError
+FlextTimeoutError = FlextExceptions._TimeoutError  # Avoid Python builtin shadowing
 
 
-# Oracle Target Exception Hierarchy - Built on FLEXT patterns
-class FlextTargetOracleError(Exception):
-    """Base exception for all Oracle Target operations."""
-
-    def __init__(self, message: str = "", *args: object) -> None:
-        super().__init__(message, *args)
-        self.message = message
+# Oracle-specific exception classes using flext-core SOURCE OF TRUTH
+class FlextTargetOracleBaseError(BaseError):
+    """Oracle Target base error using flext-core foundation."""
 
 
-class FlextTargetOracleValidationError(FlextTargetOracleError):
-    """Oracle Target validation errors."""
+# Main Oracle error - inherits from base error
+class FlextTargetOracleError(FlextTargetOracleBaseError):
+    """Oracle Target main error - inherits from base error."""
 
 
-class FlextTargetOracleConfigurationError(FlextTargetOracleError):
-    """Oracle Target configuration errors."""
+class FlextTargetOracleConfigurationError(ConfigurationError):
+    """Oracle configuration error using flext-core foundation."""
 
 
-class FlextTargetOracleConnectionError(FlextTargetOracleError):
-    """Oracle Target connection errors."""
-
-
-class FlextTargetOracleProcessingError(FlextTargetOracleError):
-    """Oracle Target data processing errors."""
-
-
-class FlextTargetOracleAuthenticationError(FlextTargetOracleConnectionError):
-    """Oracle Target authentication errors."""
-
-
-class FlextTargetOracleTimeoutError(FlextTargetOracleConnectionError):
-    """Oracle Target timeout errors."""
-
-
-# Domain-specific exceptions for Oracle Target business logic
-# ==========================================================
-# REFACTORING: Template Method Pattern - eliminates massive duplication
-# ==========================================================
-
-
-class FlextTargetOracleSchemaError(FlextTargetOracleValidationError):
-    """Oracle Target schema-specific errors using DRY foundation."""
+class FlextTargetOracleConnectionError(FlextConnectionError):
+    """Oracle connection error with Oracle-specific context."""
 
     def __init__(
         self,
-        message: str = "Oracle Target schema error",
+        message: str,
         *,
-        stream_name: str | None = None,
-        table_name: str | None = None,
-        schema_name: str | None = None,
+        host: str | None = None,
+        port: int | None = None,
+        service_name: str | None = None,
+        user: str | None = None,
+        dsn: str | None = None,
+        code: str | None = None,
+        context: dict[str, object] | None = None,
+        correlation_id: str | None = None,
         **kwargs: object,
     ) -> None:
-        """Initialize schema error with Oracle context."""
-        context = dict(kwargs)
-        if stream_name is not None:
-            context["stream_name"] = stream_name
-        if table_name is not None:
-            context["table_name"] = table_name
-        if schema_name is not None:
-            context["schema_name"] = schema_name
+        """Initialize connection error with Oracle-specific context."""
+        oracle_context = context or {}
+        if host is not None:
+            oracle_context["host"] = host
+        if port is not None:
+            oracle_context["port"] = port
+        if service_name is not None:
+            oracle_context["service_name"] = service_name
+        if user is not None:
+            oracle_context["user"] = user
+        if dsn is not None:
+            oracle_context["dsn"] = dsn
 
-        super().__init__(f"Schema Error: {message}")
+        oracle_context.update(kwargs)
+
+        super().__init__(
+            message=message,
+            code=code or "CONNECTION_ERROR",
+            context=oracle_context,
+            correlation_id=correlation_id,
+        )
+
+    @property
+    def host(self) -> str | None:
+        """Get connection host."""
+        if hasattr(self, "context") and self.context:
+            return cast("str | None", self.context.get("host"))
+        return None
+
+    @property
+    def port(self) -> int | None:
+        """Get connection port."""
+        if hasattr(self, "context") and self.context:
+            return cast("int | None", self.context.get("port"))
+        return None
+
+    @property
+    def service_name(self) -> str | None:
+        """Get Oracle service name."""
+        if hasattr(self, "context") and self.context:
+            return cast("str | None", self.context.get("service_name"))
+        return None
+
+    @property
+    def user(self) -> str | None:
+        """Get connection user."""
+        if hasattr(self, "context") and self.context:
+            return cast("str | None", self.context.get("user"))
+        return None
+
+    @property
+    def dsn(self) -> str | None:
+        """Get Oracle DSN."""
+        if hasattr(self, "context") and self.context:
+            return cast("str | None", self.context.get("dsn"))
+        return None
 
 
-class FlextTargetOracleLoadError(FlextTargetOracleProcessingError):
-    """Oracle Target loading errors using DRY foundation."""
+class FlextTargetOracleValidationError(ValidationError):
+    """Oracle validation error using flext-core foundation."""
+
+
+class FlextTargetOracleAuthenticationError(AuthenticationError):
+    """Oracle authentication error with Oracle-specific context."""
 
     def __init__(
         self,
-        message: str = "Oracle Target load error",
+        message: str,
+        *,
+        user: str | None = None,
+        auth_method: str | None = None,
+        wallet_location: str | None = None,
+        code: str | None = None,
+        context: dict[str, object] | None = None,
+        correlation_id: str | None = None,
+        **kwargs: object,
+    ) -> None:
+        """Initialize authentication error with Oracle-specific context."""
+        oracle_context = context or {}
+        if user is not None:
+            oracle_context["user"] = user
+        if auth_method is not None:
+            oracle_context["auth_method"] = auth_method
+        if wallet_location is not None:
+            oracle_context["wallet_location"] = wallet_location
+
+        oracle_context.update(kwargs)
+
+        super().__init__(
+            message=message,
+            code=code or "AUTHENTICATION_ERROR",
+            context=oracle_context,
+            correlation_id=correlation_id,
+        )
+
+    @property
+    def user(self) -> str | None:
+        """Get authentication user."""
+        if hasattr(self, "context") and self.context:
+            return cast("str | None", self.context.get("user"))
+        return None
+
+    @property
+    def wallet_location(self) -> str | None:
+        """Get wallet location."""
+        if hasattr(self, "context") and self.context:
+            return cast("str | None", self.context.get("wallet_location"))
+        return None
+
+
+class FlextTargetOracleProcessingError(ProcessingError):
+    """Oracle processing error with Oracle-specific context."""
+
+    def __init__(
+        self,
+        message: str,
         *,
         stream_name: str | None = None,
         record_count: int | None = None,
-        batch_size: int | None = None,
+        error_records: list[dict[str, object]] | None = None,
+        operation: str | None = None,
+        code: str | None = None,
+        context: dict[str, object] | None = None,
+        correlation_id: str | None = None,
         **kwargs: object,
     ) -> None:
-        """Initialize load error with Singer context."""
-        context = dict(kwargs)
+        """Initialize processing error with Oracle-specific context."""
+        oracle_context = context or {}
         if stream_name is not None:
-            context["stream_name"] = stream_name
+            oracle_context["stream_name"] = stream_name
         if record_count is not None:
-            context["record_count"] = record_count
-        if batch_size is not None:
-            context["batch_size"] = batch_size
+            oracle_context["record_count"] = record_count
+        if error_records is not None:
+            oracle_context["error_records"] = error_records
+        if operation is not None:
+            oracle_context["operation"] = operation
 
-        super().__init__(f"Load Error: {message}")
+        oracle_context.update(kwargs)
+
+        super().__init__(
+            message=message,
+            code=code or "PROCESSING_ERROR",
+            context=oracle_context,
+            correlation_id=correlation_id,
+        )
+
+    @property
+    def stream_name(self) -> str | None:
+        """Get stream name."""
+        if hasattr(self, "context") and self.context:
+            return cast("str | None", self.context.get("stream_name"))
+        return None
+
+    @property
+    def record_count(self) -> int | None:
+        """Get record count."""
+        if hasattr(self, "context") and self.context:
+            return cast("int | None", self.context.get("record_count"))
+        return None
+
+    @property
+    def error_records(self) -> list[dict[str, object]] | None:
+        """Get error records."""
+        if hasattr(self, "context") and self.context:
+            return cast(
+                "list[dict[str, object]] | None", self.context.get("error_records")
+            )
+        return None
+
+
+class FlextTargetOracleTimeoutError(FlextTimeoutError):
+    """Oracle timeout error using flext-core foundation."""
+
+
+# Domain-specific Oracle exceptions extending flext-core patterns
+class FlextTargetOracleSchemaError(FlextTargetOracleValidationError):
+    """Oracle schema-specific validation errors."""
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        stream_name: str | None = None,
+        table_name: str | None = None,
+        schema_hash: str | None = None,
+        validation_errors: list[str] | None = None,
+        code: str | None = None,
+        context: dict[str, object] | None = None,
+        correlation_id: str | None = None,
+        **kwargs: object,
+    ) -> None:
+        """Initialize schema error with Oracle-specific context."""
+        oracle_context = context or {}
+        if stream_name is not None:
+            oracle_context["stream_name"] = stream_name
+        if table_name is not None:
+            oracle_context["table_name"] = table_name
+        if schema_hash is not None:
+            oracle_context["schema_hash"] = schema_hash
+        if validation_errors is not None:
+            oracle_context["validation_errors"] = validation_errors
+
+        oracle_context.update(kwargs)
+
+        super().__init__(
+            message=message,
+            code=code or "SCHEMA_ERROR",
+            context=oracle_context,
+            correlation_id=correlation_id,
+        )
+
+    @property
+    def stream_name(self) -> str | None:
+        """Get stream name."""
+        if hasattr(self, "context") and self.context:
+            return cast("str | None", self.context.get("stream_name"))
+        return None
+
+    @property
+    def table_name(self) -> str | None:
+        """Get table name."""
+        if hasattr(self, "context") and self.context:
+            return cast("str | None", self.context.get("table_name"))
+        return None
+
+    @property
+    def schema_hash(self) -> str | None:
+        """Get schema hash."""
+        if hasattr(self, "context") and self.context:
+            return cast("str | None", self.context.get("schema_hash"))
+        return None
+
+    @property
+    def validation_errors(self) -> list[str] | None:
+        """Get validation errors."""
+        if hasattr(self, "context") and self.context:
+            return cast("list[str] | None", self.context.get("validation_errors"))
+        return None
+
+
+class FlextTargetOracleLoadError(FlextTargetOracleProcessingError):
+    """Oracle data loading errors."""
 
 
 class FlextTargetOracleSQLError(FlextTargetOracleProcessingError):
-    """Oracle Target SQL errors using DRY foundation."""
+    """Oracle SQL execution errors."""
 
     def __init__(
         self,
-        message: str = "Oracle Target SQL error",
+        message: str,
         *,
         sql_statement: str | None = None,
-        oracle_error_code: str | None = None,
+        table_name: str | None = None,
+        operation: str | None = None,
+        code: str | None = None,
+        context: dict[str, object] | None = None,
+        correlation_id: str | None = None,
         **kwargs: object,
     ) -> None:
-        """Initialize SQL error with Oracle context."""
-        context = dict(kwargs)
+        """Initialize SQL error with Oracle-specific context."""
+        oracle_context = context or {}
         if sql_statement is not None:
-            context["sql_statement"] = sql_statement[:200]  # Truncate for safety
-        if oracle_error_code is not None:
-            context["oracle_error_code"] = oracle_error_code
+            oracle_context["sql_statement"] = sql_statement
+        if table_name is not None:
+            oracle_context["table_name"] = table_name
+        if operation is not None:
+            oracle_context["operation"] = operation
 
-        super().__init__(f"SQL Error: {message}")
+        oracle_context.update(kwargs)
+
+        super().__init__(
+            message=message,
+            code=code or "SQL_ERROR",
+            context=oracle_context,
+            correlation_id=correlation_id,
+        )
+
+    @property
+    def sql_statement(self) -> str | None:
+        """Get SQL statement."""
+        if hasattr(self, "context") and self.context:
+            return cast("str | None", self.context.get("sql_statement"))
+        return None
 
 
 class FlextTargetOracleRecordError(FlextTargetOracleProcessingError):
-    """Oracle Target record processing errors using DRY foundation."""
-
-    def __init__(
-        self,
-        message: str = "Oracle Target record error",
-        *,
-        stream_name: str | None = None,
-        record_data: FlextTypes.Core.Dict | None = None,
-        **kwargs: object,
-    ) -> None:
-        """Initialize record error with Singer context."""
-        context = dict(kwargs)
-        if stream_name is not None:
-            context["stream_name"] = stream_name
-        if record_data is not None:
-            context["record_sample"] = str(record_data)[:100]  # Truncate for safety
-
-        super().__init__(f"Record Error: {message}")
+    """Oracle record processing errors."""
 
 
 __all__: FlextTypes.Core.StringList = [
-    # Factory-created base exceptions (from flext-core)
     "FlextTargetOracleAuthenticationError",
+    "FlextTargetOracleBaseError",
     "FlextTargetOracleConfigurationError",
     "FlextTargetOracleConnectionError",
     "FlextTargetOracleError",
-    # Domain-specific Oracle Target business logic exceptions
     "FlextTargetOracleLoadError",
     "FlextTargetOracleProcessingError",
     "FlextTargetOracleRecordError",

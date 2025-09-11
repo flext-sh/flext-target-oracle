@@ -1,11 +1,3 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """Target Models for FLEXT Target Oracle.
 
 This module provides data models and value objects for Oracle Singer target
@@ -30,18 +22,14 @@ Architecture Patterns:
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
-
-"""
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from flext_core import FlextModels, FlextResult
+from flext_core import FlextModels, FlextResult, FlextTypes
 from pydantic import Field, field_validator
 
 
@@ -52,10 +40,10 @@ class LoadMethodModel(StrEnum):
     tables, each optimized for different use cases and performance requirements.
     """
 
-    INSERT = "insert"
-    MERGE = "merge"
-    BULK_INSERT = "bulk_insert"
-    BULK_MERGE = "bulk_merge"
+    INSERT = "INSERT"
+    MERGE = "MERGE"
+    BULK_INSERT = "BULK_INSERT"
+    BULK_MERGE = "BULK_MERGE"
 
 
 class StorageModeModel(StrEnum):

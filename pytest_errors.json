@@ -1,0 +1,29 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0
+benchmark: 5.1.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+Using --randomly-seed=3220845082
+rootdir: /home/marlonsc/flext/flext-target-oracle
+configfile: pytest.ini
+plugins: anyio-4.10.0, Faker-37.5.3, hypothesis-6.138.2, benchmark-5.1.0, clarity-1.0.1, cov-6.2.1, deadfixtures-2.2.1, env-1.1.5, httpx-0.35.0, mock-3.14.1, randomly-3.16.0, timeout-2.4.0, xdist-3.8.0, singer-sdk-0.48.0, asyncio-1.1.0, sugar-1.1.0, devtools-0.12.2
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 96 items
+
+tests/integration/test_oracle.py EEEEE
+
+============================= slowest 10 durations =============================
+2.36s setup    tests/integration/test_oracle.py::TestOracleIntegration::test_column_ordering
+1.06s setup    tests/integration/test_oracle.py::TestOracleIntegration::test_truncate_before_load
+1.04s setup    tests/integration/test_oracle.py::TestOracleIntegration::test_merge_mode_updates
+0.02s setup    tests/integration/test_oracle.py::TestOracleIntegration::test_insert_and_retrieve_data
+0.01s teardown tests/integration/test_oracle.py::TestOracleIntegration::test_merge_mode_updates
+0.01s setup    tests/integration/test_oracle.py::TestOracleIntegration::test_create_simple_table
+
+(4 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+ERROR tests/integration/test_oracle.py::TestOracleIntegration::test_column_ordering
+ERROR tests/integration/test_oracle.py::TestOracleIntegration::test_truncate_before_load
+ERROR tests/integration/test_oracle.py::TestOracleIntegration::test_create_simple_table
+ERROR tests/integration/test_oracle.py::TestOracleIntegration::test_insert_and_retrieve_data
+ERROR tests/integration/test_oracle.py::TestOracleIntegration::test_merge_mode_updates
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+============================== 5 errors in 5.72s ===============================

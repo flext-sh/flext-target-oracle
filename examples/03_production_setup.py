@@ -18,7 +18,7 @@ from datetime import UTC
 from flext_core import FlextTypes
 from flext_core import FlextLogger, FlextResult
 
-from ..flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
 # Configure production-grade logging
 logging.basicConfig(

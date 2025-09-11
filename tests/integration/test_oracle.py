@@ -13,7 +13,7 @@ import json
 import pytest
 from sqlalchemy import text
 
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetLoader, LoadMethod
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleLoader, LoadMethod
 
 
 @pytest.mark.integration
@@ -121,7 +121,7 @@ class TestOracleIntegration:
     ) -> None:
         """Test merge mode for updating existing records."""
         oracle_config.sdc_mode = "merge"
-        loader = FlextOracleTargetLoader(oracle_config)
+        loader = FlextTargetOracleLoader(oracle_config)
         await loader.connect()
 
         stream_name = "test_merge"
@@ -164,7 +164,7 @@ class TestOracleIntegration:
         """Test bulk insert with large dataset."""
         oracle_config.load_method = LoadMethod.BULK_INSERT
         oracle_config.batch_size = 1000
-        loader = FlextOracleTargetLoader(oracle_config)
+        loader = FlextTargetOracleLoader(oracle_config)
         await loader.connect()
 
         stream_name = "test_bulk"
@@ -221,7 +221,7 @@ class TestOracleIntegration:
         """Test JSON storage mode with nested data."""
         oracle_config.storage_mode = "json"
         oracle_config.json_column_name = "json_data"
-        loader = FlextOracleTargetLoader(oracle_config)
+        loader = FlextTargetOracleLoader(oracle_config)
         await loader.connect()
 
         stream_name = "test_json"
@@ -277,7 +277,7 @@ class TestOracleIntegration:
             "sdc_columns": 4,
         }
 
-        loader = FlextOracleTargetLoader(oracle_config)
+        loader = FlextTargetOracleLoader(oracle_config)
         await loader.connect()
 
         stream_name = "test_ordering"
@@ -341,7 +341,7 @@ class TestOracleIntegration:
     ) -> None:
         """Test truncate table before loading data."""
         oracle_config.truncate_before_load = True
-        loader = FlextOracleTargetLoader(oracle_config)
+        loader = FlextTargetOracleLoader(oracle_config)
         await loader.connect()
 
         stream_name = "test_truncate"
@@ -383,7 +383,7 @@ class TestOracleIntegration:
             ],
         }
 
-        loader = FlextOracleTargetLoader(oracle_config)
+        loader = FlextTargetOracleLoader(oracle_config)
         await loader.connect()
 
         stream_name = "test_indexes"
@@ -421,7 +421,7 @@ class TestOracleIntegration:
 @pytest.mark.integration
 @pytest.mark.oracle
 class TestOracleTargetE2E:
-    """End-to-end tests using the full FlextOracleTarget."""
+    """End-to-end tests using the full FlextTargetOracle."""
 
     @pytest.mark.asyncio
     async def test_full_singer_workflow(
@@ -432,7 +432,7 @@ class TestOracleTargetE2E:
         clean_database,
     ) -> None:
         """Test complete Singer workflow: schema -> records -> state."""
-        target = FlextOracleTarget(config=oracle_config)
+        target = FlextTargetOracle(config=oracle_config)
 
         # Initialize target
         init_result = await target.initialize()
@@ -474,7 +474,7 @@ class TestOracleTargetE2E:
         }
         oracle_config.ignored_columns = ["password", "internal_id"]
 
-        target = FlextOracleTarget(config=oracle_config)
+        target = FlextTargetOracle(config=oracle_config)
         await target.initialize()
 
         # Process schema with extra columns

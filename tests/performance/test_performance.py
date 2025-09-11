@@ -19,7 +19,7 @@ import pytest
 from faker import Faker
 from sqlalchemy import MetaData, Table, func, select, text
 
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
 
 
 @pytest.mark.performance
@@ -36,8 +36,8 @@ class TestPerformance:
     @pytest.fixture
     def performance_config(
         self,
-        oracle_config: FlextOracleTargetConfig,
-    ) -> FlextOracleTargetConfig:
+        oracle_config: FlextTargetOracleConfig,
+    ) -> FlextTargetOracleConfig:
         """Configure for optimal performance."""
         oracle_config.batch_size = 10000
         oracle_config.load_method = LoadMethod.BULK_INSERT
@@ -56,13 +56,13 @@ class TestPerformance:
     @pytest.mark.benchmark
     async def test_insert_throughput(
         self,
-        performance_config: FlextOracleTargetConfig,
+        performance_config: FlextTargetOracleConfig,
         oracle_engine,
         clean_database,
         fake: Faker,
     ) -> None:
         """Benchmark INSERT throughput with different batch sizes."""
-        target = FlextOracleTarget(config=performance_config)
+        target = FlextTargetOracle(config=performance_config)
         await target.initialize()
 
         # Test schema
@@ -159,7 +159,7 @@ class TestPerformance:
     @pytest.mark.asyncio
     async def test_bulk_vs_standard_performance(
         self,
-        oracle_config: FlextOracleTargetConfig,
+        oracle_config: FlextTargetOracleConfig,
         oracle_engine,
         clean_database,
         fake: Faker,
@@ -185,7 +185,7 @@ class TestPerformance:
         # Test 1: Standard INSERT
         oracle_config.load_method = LoadMethod.INSERT
         oracle_config.batch_size = 100
-        target_standard = FlextOracleTarget(config=oracle_config)
+        target_standard = FlextTargetOracle(config=oracle_config)
         await target_standard.initialize()
 
         result = await target_standard.execute(json.dumps(schema))
@@ -216,7 +216,7 @@ class TestPerformance:
         oracle_config.load_method = LoadMethod.BULK_INSERT
         oracle_config.batch_size = 1000
         oracle_config.use_direct_path = True
-        target_bulk = FlextOracleTarget(config=oracle_config)
+        target_bulk = FlextTargetOracle(config=oracle_config)
         await target_bulk.initialize()
 
         start_time = time.time()
@@ -241,13 +241,13 @@ class TestPerformance:
     @pytest.mark.asyncio
     async def test_memory_efficiency(
         self,
-        performance_config: FlextOracleTargetConfig,
+        performance_config: FlextTargetOracleConfig,
         oracle_engine,
         clean_database,
         fake: Faker,
     ) -> None:
         """Test memory efficiency with large batches."""
-        target = FlextOracleTarget(config=performance_config)
+        target = FlextTargetOracle(config=performance_config)
         await target.initialize()
 
         # Schema with large text fields
@@ -318,13 +318,13 @@ class TestPerformance:
     @pytest.mark.asyncio
     async def test_concurrent_streams(
         self,
-        performance_config: FlextOracleTargetConfig,
+        performance_config: FlextTargetOracleConfig,
         oracle_engine,
         clean_database,
         fake: Faker,
     ) -> None:
         """Test performance with multiple concurrent streams."""
-        target = FlextOracleTarget(config=performance_config)
+        target = FlextTargetOracle(config=performance_config)
         await target.initialize()
 
         # Define multiple streams
@@ -383,12 +383,12 @@ class TestPerformance:
     @pytest.mark.asyncio
     async def test_scalability(
         self,
-        performance_config: FlextOracleTargetConfig,
+        performance_config: FlextTargetOracleConfig,
         oracle_engine,
         clean_database,
     ) -> None:
         """Test scalability with increasing data volume."""
-        target = FlextOracleTarget(config=performance_config)
+        target = FlextTargetOracle(config=performance_config)
         await target.initialize()
 
         schema = {

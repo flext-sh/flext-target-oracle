@@ -1,11 +1,3 @@
-"""Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT.
-"""
-
-from __future__ import annotations
-
-from flext_core import FlextTypes
-
 """FLEXT Target Oracle Observability - Semantic Error Handling Extensions.
 
 Oracle-specific extensions to the FLEXT observability foundation, providing
@@ -80,16 +72,13 @@ Copyright (c) 2025 FLEXT Contributors
 SPDX-License-Identifier: MIT
 
 """
-"""
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
 
+from __future__ import annotations
 
 import time
 import uuid
 
-from flext_core import FlextLogger
+from flext_core import FlextLogger, FlextTypes
 
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
@@ -100,17 +89,10 @@ from flext_target_oracle.target_exceptions import (
 
 logger = FlextLogger(__name__)
 
-# =============================================================================
-# CONSTANTS
-# =============================================================================
 
 # Performance monitoring thresholds
 SLOW_QUERY_THRESHOLD_SECONDS = 30.0  # 30 second threshold for slow queries
 HIGH_UTILIZATION_THRESHOLD = 0.8  # 80% threshold for high resource utilization
-
-# =============================================================================
-# ORACLE-SPECIFIC ERROR NAMESPACE
-# =============================================================================
 
 
 class FlextOracleError:
@@ -279,11 +261,6 @@ class FlextOracleError:
             return error
 
 
-# =============================================================================
-# ORACLE-SPECIFIC OBSERVABILITY EXTENSIONS
-# =============================================================================
-
-
 class FlextOracleObs:
     """Oracle-specific observability extensions with database monitoring."""
 
@@ -397,11 +374,6 @@ class FlextOracleObs:
             # Metrics placeholder - removed FlextObs dependency
 
 
-# =============================================================================
-# CONVENIENCE FUNCTIONS
-# =============================================================================
-
-
 def configure_oracle_observability(
     *,
     oracle_host: str,
@@ -424,10 +396,6 @@ def configure_oracle_observability(
         connection_monitoring=enable_connection_monitoring,
     )
 
-
-# =============================================================================
-# EXPORTS
-# =============================================================================
 
 __all__ = [
     "FlextOracleError",

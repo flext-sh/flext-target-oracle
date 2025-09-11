@@ -18,7 +18,7 @@ from decimal import Decimal
 import pytest
 from sqlalchemy import text
 
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
 
 
 @pytest.mark.e2e
@@ -30,7 +30,7 @@ class TestSingerWorkflowE2E:
     @pytest.mark.asyncio
     async def test_complete_ecommerce_workflow(
         self,
-        oracle_config: FlextOracleTargetConfig,
+        oracle_config: FlextTargetOracleConfig,
         oracle_engine,
         clean_database,
     ) -> None:
@@ -43,7 +43,7 @@ class TestSingerWorkflowE2E:
         oracle_config.column_ordering = "alphabetical"
         oracle_config.create_foreign_key_indexes = True
 
-        target = FlextOracleTarget(config=oracle_config)
+        target = FlextTargetOracle(config=oracle_config)
         await target.initialize()
 
         # Stream 1: Customers
@@ -370,7 +370,7 @@ class TestSingerWorkflowE2E:
     @pytest.mark.asyncio
     async def test_schema_evolution_workflow(
         self,
-        oracle_config: FlextOracleTargetConfig,
+        oracle_config: FlextTargetOracleConfig,
         oracle_engine,
         clean_database,
     ) -> None:
@@ -378,7 +378,7 @@ class TestSingerWorkflowE2E:
         oracle_config.allow_alter_table = True
         oracle_config.sdc_mode = "merge"
 
-        target = FlextOracleTarget(config=oracle_config)
+        target = FlextTargetOracle(config=oracle_config)
         await target.initialize()
 
         # Initial schema
@@ -525,7 +525,7 @@ class TestSingerWorkflowE2E:
     @pytest.mark.asyncio
     async def test_high_volume_streaming(
         self,
-        oracle_config: FlextOracleTargetConfig,
+        oracle_config: FlextTargetOracleConfig,
         oracle_engine,
         clean_database,
     ) -> None:
@@ -537,7 +537,7 @@ class TestSingerWorkflowE2E:
         oracle_config.parallel_degree = 4
         oracle_config.sdc_mode = "append"  # Faster for bulk loads
 
-        target = FlextOracleTarget(config=oracle_config)
+        target = FlextTargetOracle(config=oracle_config)
         await target.initialize()
 
         # Schema for high-volume events

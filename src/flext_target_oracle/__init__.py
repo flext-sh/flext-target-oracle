@@ -1,4 +1,5 @@
 """Copyright (c) 2025 FLEXT Team. All rights reserved.
+
 SPDX-License-Identifier: MIT.
 """
 
@@ -6,8 +7,8 @@ from __future__ import annotations
 from flext_core import FlextTypes
 
 
-"""Production-Grade Singer Target for Oracle Database data loading."""
-"""
+"""Production-Grade Singer Target for Oracle Database data loading.
+
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
@@ -30,7 +31,7 @@ from flext_meltano import (
 # Import local implementations - CONSOLIDATED PEP8 STRUCTURE
 from flext_target_oracle.target_config import FlextTargetOracleConfig, LoadMethod
 
-FlextOracleTargetConfig = FlextTargetOracleConfig  # Alias for backward compatibility
+FlextOracleTargetConfig = FlextTargetOracleConfig
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,
@@ -52,13 +53,16 @@ from flext_target_oracle.target_observability import (
 )
 from flext_target_oracle.target_client import (
     FlextTargetOracle,
-    FlextTargetOracleLoader,
-    FlextTargetOraclePlugin,
-    create_target_oracle_plugin,
     TargetOracle,
 )
+from flext_target_oracle.target_loader import (
+    FlextTargetOracleLoader,
+)
 
-FlextOracleTargetLoader = FlextTargetOracleLoader  # Alias for backward compatibility
+# Compatibility aliases
+FlextOracleTargetLoader = FlextTargetOracleLoader
+FlextTargetOraclePlugin = None  # Removed in SOLID refactoring
+create_target_oracle_plugin = None  # Removed in SOLID refactoring
 from flext_target_oracle.target_models import (
     LoadMethodModel,
     StorageModeModel,
@@ -114,13 +118,13 @@ __all__: FlextTypes.Core.StringList = [
     # === PRIMARY TARGET CLASSES ===
     "FlextTargetOracle",
     "FlextTargetOracleLoader",
-    "FlextOracleTargetLoader",  # Alias for backward compatibility
+    "FlextOracleTargetLoader",
     "FlextTargetOraclePlugin",
     "create_target_oracle_plugin",
     "TargetOracle",  # Compatibility alias
     # === CONFIGURATION ===
     "FlextTargetOracleConfig",
-    "FlextOracleTargetConfig",  # Alias for backward compatibility
+    "FlextOracleTargetConfig",
     "LoadMethod",
     # === EXCEPTION HIERARCHY ===
     "FlextTargetOracleAuthenticationError",

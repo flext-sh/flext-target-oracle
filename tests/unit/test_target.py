@@ -14,10 +14,10 @@ import pytest
 from sqlalchemy import text
 
 from flext_target_oracle import (
-    FlextOracleTarget,
-    FlextOracleTargetConfig,
-    FlextOracleTargetProcessingError,
-    FlextOracleTargetSchemaError,
+    FlextTargetOracle,
+    FlextTargetOracleConfig,
+    FlextTargetOracleProcessingError,
+    FlextTargetOracleSchemaError,
     LoadMethod,
 )
 
@@ -29,7 +29,7 @@ class TestRealOracleTarget:
     @pytest.fixture
     def real_target(self, oracle_config: object) -> object:
         """Create real target instance."""
-        return FlextOracleTarget(config=oracle_config)
+        return FlextTargetOracle(config=oracle_config)
 
     def test_real_initialize(self, real_target: object) -> None:
         """Test real target initialization."""
@@ -392,7 +392,7 @@ class TestRealOracleTarget:
         # Send invalid JSON
         result = real_target.execute("{ invalid json }")
         assert result.is_failure
-        assert isinstance(result.error, FlextOracleTargetProcessingError)
+        assert isinstance(result.error, FlextTargetOracleProcessingError)
 
     def test_real_error_handling_missing_stream(self, real_target: object) -> None:
         """Test error handling with missing stream in record."""
@@ -407,7 +407,7 @@ class TestRealOracleTarget:
 
         result = real_target.execute(json.dumps(record_msg))
         assert result.is_failure
-        assert isinstance(result.error, FlextOracleTargetSchemaError)
+        assert isinstance(result.error, FlextTargetOracleSchemaError)
 
     def test_real_metrics_collection(
         self,
@@ -452,7 +452,7 @@ class TestRealOracleTarget:
 
     def test_real_connection_pooling(self, oracle_engine: object) -> None:
         """Test connection pooling configuration."""
-        config = FlextOracleTargetConfig(
+        config = FlextTargetOracleConfig(
             host="localhost",
             port=1521,
             service_name="test",
@@ -462,12 +462,12 @@ class TestRealOracleTarget:
             connection_pool_max_overflow=20,
         )
 
-        target = FlextOracleTarget(config)
+        target = FlextTargetOracle(config)
         assert target.config.connection_pool_size == 10
         assert target.config.connection_pool_max_overflow == 20
 
         # Test SSL configuration
-        ssl_config = FlextOracleTargetConfig(
+        ssl_config = FlextTargetOracleConfig(
             host="localhost",
             port=1521,
             service_name="test",
@@ -476,7 +476,7 @@ class TestRealOracleTarget:
             use_ssl=True,
         )
 
-        target = FlextOracleTarget(ssl_config)
+        target = FlextTargetOracle(ssl_config)
         assert target.config.use_ssl is True
 
     def test_real_type_mapping_customization(
