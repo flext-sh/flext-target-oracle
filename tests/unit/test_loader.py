@@ -1,14 +1,5 @@
 """Real Oracle Loader Tests - Using Docker Oracle Container.
 
-Tests loader functionality against a real Oracle container for maximum coverage.
-
-Note: S608 warnings about SQL injection are suppressed for this test file as:
-1. All table names come from controlled test variables, not user input
-2. We use safe_table_name() function for proper Oracle identifier quoting
-3. Oracle DDL statements cannot use parameterized queries
-4. These are test scenarios with known-safe hardcoded values
-
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
@@ -124,6 +115,7 @@ class TestRealOracleLoader:
             result = conn.execute(
                 text(
                     """
+
                   SELECT COUNT(*)
                   FROM user_tables
                   WHERE table_name = :table_name
@@ -137,6 +129,7 @@ class TestRealOracleLoader:
             result = conn.execute(
                 text(
                     """
+
                   SELECT column_name, data_type
                   FROM user_tab_columns
                   WHERE table_name = :table_name
@@ -243,6 +236,7 @@ class TestRealOracleLoader:
             result = conn.execute(
                 text(
                     """
+
                   SELECT column_name
                   FROM user_tab_columns
                   WHERE table_name = :table_name
@@ -545,6 +539,7 @@ class TestRealOracleLoader:
             result = conn.execute(
                 text(
                     """
+
                   SELECT column_name
                   FROM user_tab_columns
                   WHERE table_name = :table_name
@@ -687,6 +682,7 @@ class TestRealOracleLoader:
             result = conn.execute(
                 text(
                     """
+
                   SELECT column_name, column_id
                   FROM user_tab_columns
                   WHERE table_name = :table_name
@@ -756,6 +752,7 @@ class TestRealOracleLoader:
             result = conn.execute(
                 text(
                     """
+
                   SELECT index_name, uniqueness
                   FROM user_indexes
                   WHERE table_name = :table_name

@@ -1,11 +1,4 @@
-#!/usr/bin/env python3
 """FLEXT Target Oracle - Main entry point using SOURCE OF TRUTH patterns.
-
-This module provides the main entry point for the Oracle Singer Target with
-clean architecture and SOLID compliance.
-
-ZERO DUPLICATION - Uses FlextTargetOracle from target_client exclusively.
-SOLID COMPLIANCE - Single responsibility: Main entry point only.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT

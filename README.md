@@ -295,7 +295,7 @@ make test                    # Run tests with 90% coverage minimum
 # Development Workflow
 make format                  # Format code with ruff
 make lint
-make type-check           
+make type-check
 
 # Oracle Testing
 make oracle-connect         # Test Oracle connection

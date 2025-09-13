@@ -265,8 +265,6 @@ async def demonstrate_error_handling() -> None:
 
     # Create invalid configuration to show validation errors
     try:
-        import os
-
         invalid_config = FlextOracleTargetConfig(
             oracle_host="",  # Invalid empty host
             oracle_service="XE",

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import uuid
 
+import yaml
 from flext_core import FlextCommands, FlextResult, FlextTypes
 from pydantic import Field
 
@@ -122,8 +123,6 @@ class OracleTargetLoadCommand(FlextCommands.Models.Command):
             # Load configuration using direct instantiation - SOURCE OF TRUTH pattern
             if self.config_file:
                 # Load configuration from file
-                import json
-                from pathlib import Path
 
                 config_path = Path(self.config_file)
                 if not config_path.exists():
@@ -135,9 +134,6 @@ class OracleTargetLoadCommand(FlextCommands.Models.Command):
                 config = FlextTargetOracleConfig(**config_data)
             else:
                 # Load from environment variables
-                import os
-
-                from pydantic import SecretStr
 
                 config = FlextTargetOracleConfig(
                     oracle_host=os.getenv("ORACLE_HOST", "localhost"),
@@ -219,13 +215,9 @@ class OracleTargetAboutCommand(FlextCommands.Models.Command):
             }
 
             if self.format == "json":
-                import json
-
                 formatted_output = json.dumps(about_info, indent=2)
             elif self.format == "yaml":
                 try:
-                    import yaml
-
                     formatted_output = yaml.dump(about_info, default_flow_style=False)
                 except ImportError:
                     return FlextResult[str].fail(
@@ -250,6 +242,7 @@ class OracleTargetAboutCommand(FlextCommands.Models.Command):
                 )
 
                 formatted_output = f"""
+
 FLEXT Target Oracle v{about_info["version"]}
 {about_info["description"]}
 
