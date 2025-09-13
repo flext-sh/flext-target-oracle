@@ -131,19 +131,16 @@ pre-commit install
 ### Key Components
 
 1. **Target Class** (`src/flext_target_oracle/target.py`):
-
    - Main Singer target implementation
    - Implements `FlextSingerUnifiedInterface`
    - Handles message routing and state management
 
 2. **Loader Class** (`src/flext_target_oracle/loader.py`):
-
    - Core data loading logic
    - DDL/DML operations via `flext-db-oracle`
    - Schema flattening and type mapping
 
 3. **Configuration** (`src/flext_target_oracle/config.py`):
-
    - Pydantic models for configuration
    - Validation and defaults
    - Feature flags and customization

@@ -1,25 +1,5 @@
 """Target Models for FLEXT Target Oracle.
 
-This module provides data models and value objects for Oracle Singer target
-operations, implementing FLEXT ecosystem patterns with comprehensive validation
-and enterprise-grade reliability standards.
-
-The models use FlextModels as the foundation, providing immutable,
-validated data objects with domain rule validation following Clean Architecture
-and Domain-Driven Design principles.
-
-Key Models:
-    OracleConnectionModel: Oracle database connection parameters
-    SingerStreamModel: Singer stream definition with Oracle mappings
-    BatchProcessingModel: Batch processing configuration and state
-    LoadStatisticsModel: Data loading statistics and metrics
-
-Architecture Patterns:
-    FlextModels: Immutable data models with built-in validation
-    Domain-Driven Design: Business rule validation with domain context
-    Railway-Oriented Programming: FlextResult for error handling
-    Type Safety: Comprehensive type hints and runtime validation
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """

@@ -1,16 +1,5 @@
 """Pytest Configuration and Test Fixtures - FLEXT Target Oracle.
 
-This module provides pytest configuration, fixtures, and test utilities for
-the Oracle target test suite. Includes automatic Docker container management,
-configuration fixtures, and comprehensive test data generators.
-
-Key Features:
-    - Automatic Oracle Docker container lifecycle management
-    - Session-scoped database setup with proper cleanup
-    - Comprehensive test fixtures for all test scenarios
-    - Integration with flext-db-oracle test infrastructure
-
-
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
@@ -22,12 +11,13 @@ import time
 from collections.abc import AsyncGenerator, Generator
 from contextlib import contextmanager
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
-from flext_core import FlextLogger, FlextTypes
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
+from pydantic import SecretStr
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.pool import NullPool
@@ -202,6 +192,7 @@ def clean_database(oracle_engine: Engine) -> None:
         result = conn.execute(
             text(
                 """
+
               SELECT table_name
               FROM all_tables
               WHERE owner = :schema
@@ -246,7 +237,6 @@ def oracle_api(oracle_config: FlextTargetOracleConfig) -> FlextDbOracleApi:
     from unittest.mock import MagicMock
 
     from flext_core import FlextResult
-    from pydantic import SecretStr
 
     # Create real config for reference
     db_config = FlextDbOracleConfig(
@@ -274,10 +264,6 @@ async def oracle_loader(
     oracle_config: FlextTargetOracleConfig,
 ) -> AsyncGenerator[FlextTargetOracleLoader]:
     """Create FlextTargetOracleLoader instance with mocked connection."""
-    from unittest.mock import MagicMock, patch
-
-    from flext_core import FlextResult
-
     with patch("flext_target_oracle.target_client.FlextDbOracleApi") as mock_api_class:
         # Mock the API instance
         mock_api = MagicMock()

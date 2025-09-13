@@ -1,76 +1,7 @@
 """FLEXT Target Oracle Observability - Semantic Error Handling Extensions.
 
-Oracle-specific extensions to the FLEXT observability foundation, providing
-domain-specific error handling, logging, and monitoring for Oracle database
-operations in Singer target implementations.
-
-Module Role in Architecture:
-    Domain Extension Layer → Oracle Observability → Singer Target Monitoring
-
-    This module extends flext-core observability patterns with Oracle-specific
-    semantic error handling and monitoring:
-    - Oracle connection error classification and recovery strategies
-    - Singer protocol error categorization for Oracle operations
-    - Database performance monitoring with Oracle-specific metrics
-    - SQL error analysis and structured logging
-
-Semantic Architecture Patterns:
-    FlextOracleError: Domain-specific error namespace for Oracle operations
-    FlextOracleObs: Oracle-specific observability extensions
-    Singer Integration: Error context preservation for Singer protocol violations
-    Database Monitoring: Connection pooling and query performance tracking
-
-Integration Points:
-    - FlextExceptions foundation: Extends base error hierarchy with Oracle semantics
-    - FlextObs integration: Oracle-specific logging and metrics collection
-    - Singer target errors: Protocol-specific error handling and recovery
-    - Database operations: Query timing, connection health, and performance metrics
-
-Usage Patterns:
-    # Oracle connection error handling
-    try:
-      result = oracle_api.connect()
-    except OracleConnectionError as e:
-      FlextOracleError.Connection.database_unavailable(
-          connection_string=config.connection_string,
-          error_code=e.code,
-          recovery_strategy="retry_with_backoff"
-      )
-
-    # Singer protocol error handling
-    if not schema_valid:
-      FlextOracleError.Singer.schema_validation_failed(
-          stream_name=stream,
-          schema_errors=validation_errors,
-          singer_specification="1.5.0"
-      )
-
-    # Performance monitoring
-    with FlextOracleObs.Monitor.query_performance(table_name, operation="INSERT"):
-      result = loader.bulk_insert(records)
-
-Domain-Specific Features:
-    - Oracle error code mapping to business-meaningful categories
-    - Singer protocol compliance monitoring and alerting
-    - Database performance baselines and anomaly detection
-    - Connection pooling health and resource utilization tracking
-    - SQL query analysis with execution plan correlation
-
-Quality Standards:
-    - All Oracle errors must include database context (SID, schema, operation)
-    - Singer errors must preserve protocol compliance information
-    - Performance metrics must include baseline comparisons
-    - Error recovery strategies must be deterministic and documented
-
-See Also:
-    flext_core.observability: Foundation observability patterns
-    flext_core.exceptions: Base error hierarchy
-    flext_db_oracle: Database connectivity and operations
-    flext_meltano: Singer protocol implementation
-
 Copyright (c) 2025 FLEXT Contributors
 SPDX-License-Identifier: MIT
-
 """
 
 from __future__ import annotations
