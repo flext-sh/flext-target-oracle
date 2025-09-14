@@ -113,12 +113,12 @@ class TestOracleIntegration:
             assert rows[1] == (2, "Jane Smith", "jane@example.com")
 
     @pytest.mark.asyncio
+    @pytest.mark.usefixtures("_clean_database")
     async def test_merge_mode_updates(
         self,
         oracle_config: object,
         oracle_engine: object,
         simple_schema: object,
-        _clean_database: object,
     ) -> None:
         """Test merge mode for updating existing records."""
         oracle_config.sdc_mode = "merge"

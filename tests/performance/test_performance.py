@@ -17,7 +17,7 @@ from datetime import UTC, datetime
 import psutil
 import pytest
 from faker import Faker
-from sqlalchemy import text
+from sqlalchemy import Engine, text
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
 
@@ -55,11 +55,12 @@ class TestPerformance:
 
     @pytest.mark.asyncio
     @pytest.mark.benchmark
-    @pytest.mark.usefixtures("_oracle_engine", "_clean_database")
+    @pytest.mark.usefixtures("oracle_engine", "clean_database")
     async def test_insert_throughput(
         self,
         performance_config: FlextTargetOracleConfig,
         fake: Faker,
+        _oracle_engine: Engine,  # noqa: ARG002
     ) -> None:
         """Benchmark INSERT throughput with different batch sizes."""
         target = FlextTargetOracle(config=performance_config)
@@ -147,7 +148,7 @@ class TestPerformance:
 
         # Verify all records inserted
         # Database verification disabled for performance test
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             count = conn.execute(
                 text("SELECT COUNT(*) FROM benchmark_inserts"),
             ).scalar()
@@ -158,11 +159,12 @@ class TestPerformance:
         assert best_throughput > 1000  # Should handle > 1k records/sec
 
     @pytest.mark.asyncio
-    @pytest.mark.usefixtures("_oracle_engine", "_clean_database")
+    @pytest.mark.usefixtures("oracle_engine", "clean_database")
     async def test_bulk_vs_standard_performance(
         self,
         oracle_config: FlextTargetOracleConfig,
         fake: Faker,
+        _oracle_engine: Engine,  # noqa: ARG002
     ) -> None:
         """Compare BULK INSERT vs standard INSERT performance."""
         record_count = 10000
@@ -237,11 +239,12 @@ class TestPerformance:
         assert bulk_rate > standard_rate * 5  # At least 5x faster
 
     @pytest.mark.asyncio
-    @pytest.mark.usefixtures("_oracle_engine", "_clean_database")
+    @pytest.mark.usefixtures("oracle_engine", "clean_database")
     async def test_memory_efficiency(
         self,
         performance_config: FlextTargetOracleConfig,
         fake: Faker,
+        _oracle_engine: Engine,  # noqa: ARG002
     ) -> None:
         """Test memory efficiency with large batches."""
         target = FlextTargetOracle(config=performance_config)
@@ -313,11 +316,12 @@ class TestPerformance:
         assert total_memory < 500  # Total should stay under 500MB
 
     @pytest.mark.asyncio
-    @pytest.mark.usefixtures("_oracle_engine", "_clean_database")
+    @pytest.mark.usefixtures("oracle_engine", "clean_database")
     async def test_concurrent_streams(
         self,
         performance_config: FlextTargetOracleConfig,
         fake: Faker,
+        _oracle_engine: Engine,  # noqa: ARG002
     ) -> None:
         """Test performance with multiple concurrent streams."""
         target = FlextTargetOracle(config=performance_config)
@@ -373,10 +377,11 @@ class TestPerformance:
         assert throughput > 500  # Should handle > 500 records/sec with multiple streams
 
     @pytest.mark.asyncio
-    @pytest.mark.usefixtures("_oracle_engine", "_clean_database")
+    @pytest.mark.usefixtures("oracle_engine", "clean_database")
     async def test_scalability(
         self,
         performance_config: FlextTargetOracleConfig,
+        _oracle_engine: Engine,  # noqa: ARG002
     ) -> None:
         """Test scalability with increasing data volume."""
         target = FlextTargetOracle(config=performance_config)

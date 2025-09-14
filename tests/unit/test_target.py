@@ -11,7 +11,7 @@ import json
 from datetime import UTC, datetime
 
 import pytest
-from sqlalchemy import text
+from sqlalchemy import Engine, text
 
 from flext_target_oracle import (
     FlextTargetOracle,
@@ -90,11 +90,11 @@ class TestRealOracleTarget:
         )
 
     @pytest.mark.asyncio
-    @pytest.mark.usefixtures("_oracle_engine")
     async def test_real_process_record_message(
         self,
         real_target: object,
         simple_schema: object,
+        oracle_engine: Engine,
     ) -> None:
         """Test processing record message with real database."""
         real_target.initialize()
@@ -132,7 +132,7 @@ class TestRealOracleTarget:
         assert result.is_success
 
         # Verify in database
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             count = conn.execute(text("SELECT COUNT(*) FROM users")).scalar()
             assert count == 1
 
@@ -168,11 +168,11 @@ class TestRealOracleTarget:
         result = real_target.execute(json.dumps(activate_msg))
         assert result.is_success
 
-    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_batch_processing(
         self,
         real_target: object,
         simple_schema: object,
+        oracle_engine: Engine,
     ) -> None:
         """Test batch processing with real database."""
         real_target.initialize()
@@ -206,15 +206,15 @@ class TestRealOracleTarget:
         real_target.execute(json.dumps(state_msg))
 
         # Verify all records
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             count = conn.execute(text("SELECT COUNT(*) FROM batch_test")).scalar()
             assert count == 10
 
-    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_column_mapping(
         self,
         real_target: object,
         simple_schema: object,
+        oracle_engine: Engine,
     ) -> None:
         """Test column mapping with real database."""
         # Configure column mappings
@@ -252,7 +252,7 @@ class TestRealOracleTarget:
         real_target.execute(json.dumps({"type": "STATE", "value": {}}))
 
         # Verify mapped columns
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             result = conn.execute(
                 text(
                     """
@@ -269,7 +269,6 @@ class TestRealOracleTarget:
             assert "NAME" not in columns  # Original name not present
             assert "EMAIL" not in columns  # Original email not present
 
-    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_ignored_columns(
         self,
         real_target: object,
@@ -320,11 +319,11 @@ class TestRealOracleTarget:
         # This would require database verification in real test
         assert real_target._ignored_columns == ["email", "phone"]
 
-    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_nested_json_handling(
         self,
         real_target: object,
         nested_schema: object,
+        oracle_engine: object,
     ) -> None:
         """Test nested JSON handling with real database."""
         real_target.initialize()
@@ -364,7 +363,7 @@ class TestRealOracleTarget:
         real_target.execute(json.dumps({"type": "STATE", "value": {}}))
 
         # Verify flattened structure
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             result = conn.execute(
                 text("SELECT * FROM nested_test WHERE order_id = 'ORD-001'"),
             )
@@ -409,7 +408,6 @@ class TestRealOracleTarget:
         assert result.is_failure
         assert isinstance(result.error, FlextTargetOracleSchemaError)
 
-    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_metrics_collection(
         self,
         real_target: object,
@@ -450,7 +448,6 @@ class TestRealOracleTarget:
         assert "elapsed_time" in metrics
         assert metrics["status"] == "running"
 
-    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_connection_pooling(self) -> None:
         """Test connection pooling configuration."""
         config = FlextTargetOracleConfig(
@@ -480,7 +477,6 @@ class TestRealOracleTarget:
         target = FlextTargetOracle(ssl_config)
         assert target.config.use_ssl is True
 
-    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_type_mapping_customization(
         self,
         real_target: object,
@@ -575,11 +571,11 @@ class TestRealOracleTarget:
         result = real_target.test_connection()
         assert result.is_success
 
-    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_large_batch_processing(
         self,
         real_target: object,
         simple_schema: object,
+        oracle_engine: object,
     ) -> None:
         """Test processing large batches with real database."""
         # Configure for large batches
@@ -614,14 +610,14 @@ class TestRealOracleTarget:
         real_target.execute(json.dumps({"type": "STATE", "value": {}}))
 
         # Verify all records
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             count = conn.execute(text("SELECT COUNT(*) FROM large_batch")).scalar()
             assert count == 2500
 
-    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_schema_evolution(
         self,
         real_target: object,
+        oracle_engine: object,
     ) -> None:
         """Test schema evolution with real database."""
         # Enable schema evolution
@@ -679,7 +675,7 @@ class TestRealOracleTarget:
         real_target.execute(json.dumps({"type": "STATE", "value": {}}))
 
         # Verify schema evolution
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             # Check new column exists
             result = conn.execute(
                 text(
