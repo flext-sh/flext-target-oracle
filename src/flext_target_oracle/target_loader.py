@@ -11,10 +11,11 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
+from typing import ClassVar
 
 from flext_core import FlextDomainService, FlextResult, FlextTypes
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
-from pydantic import Field, SecretStr
+from pydantic import Field
 
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_exceptions import (
@@ -29,6 +30,8 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
     SOLID COMPLIANCE - Single responsibility: Oracle data loading operations.
     """
 
+    model_config: ClassVar = {"frozen": False}  # Allow field mutations
+
     # Pydantic fields for configuration and state
     config: FlextTargetOracleConfig = Field(description="Oracle target configuration")
     oracle_api: FlextDbOracleApi = Field(description="Oracle API instance")
@@ -39,34 +42,31 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
     )
     total_records: int = Field(default=0, description="Total records processed")
 
-    def __init__(self, config: FlextTargetOracleConfig, **data: object) -> None:
+    def __init__(self, config: FlextTargetOracleConfig, **_data: object) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
             # Create Oracle API configuration from target config
             oracle_config = FlextDbOracleConfig(
                 host=config.oracle_host,
                 port=config.oracle_port,
-                service_name=config.oracle_service,
-                database=config.oracle_service,  # Required field - same as service_name
-                username=config.oracle_user,
-                password=SecretStr(
-                    config.oracle_password.get_secret_value()
-                    if hasattr(config.oracle_password, "get_secret_value")
-                    else str(config.oracle_password)
-                ),
+                name=config.oracle_service,  # Use 'name' instead of 'service_name'
+                user=config.oracle_user,  # Use 'user' instead of 'username'
+                password=config.oracle_password.get_secret_value()
+                if hasattr(config.oracle_password, "get_secret_value")
+                else str(config.oracle_password),
             )
 
             # Initialize Oracle API
             oracle_api = FlextDbOracleApi(oracle_config)
 
-            # Initialize FlextDomainService with Pydantic fields
-            super().__init__(
-                config=config,
-                oracle_api=oracle_api,
-                record_buffers={},
-                total_records=0,
-                **data,
-            )
+            # Initialize FlextDomainService
+            super().__init__()
+
+            # Set Pydantic fields as instance attributes
+            self.config = config
+            self.oracle_api = oracle_api
+            self.record_buffers = {}
+            self.total_records = 0
 
         except Exception as e:
             msg = f"Failed to create Oracle API: {e}"
@@ -132,7 +132,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
                     )
 
                 # Handle case where tables_result.data might be None
-                existing_tables_raw = tables_result.data
+                existing_tables_raw: object | None = tables_result.data
                 if existing_tables_raw is None:
                     existing_tables = []
                 elif isinstance(existing_tables_raw, list):
@@ -241,12 +241,12 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             with self.oracle_api as connected_api:
                 # Use parameterized query with table name validation
                 # Validate table name contains only safe characters
-                if not all(c.isalnum() or c in '._' for c in full_table_name):
+                if not all(c.isalnum() or c in "._" for c in full_table_name):
                     return FlextResult[None].fail("Invalid table name characters")
-                
+
                 # Build INSERT SQL with validated table name
                 insert_sql = (
-                    f"INSERT INTO {full_table_name} "
+                    f"INSERT INTO {full_table_name} "  # noqa: S608 - Table name validated above
                     "(DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) "
                     "VALUES (:data, :extracted_at, :loaded_at)"
                 )

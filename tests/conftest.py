@@ -234,7 +234,6 @@ def oracle_config() -> FlextTargetOracleConfig:
 @pytest.fixture
 def oracle_api(oracle_config: FlextTargetOracleConfig) -> FlextDbOracleApi:
     """Create mocked FlextDbOracleApi instance."""
-
     # Create real config for reference
     db_config = FlextDbOracleConfig(
         host=oracle_config.oracle_host,
@@ -646,9 +645,7 @@ def large_dataset() -> list[FlextTypes.Core.Dict]:
 
 
 # Markers for different test categories
-def pytest_collection_modifyitems(
-    items: list[pytest.Item]
-) -> None:
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     """Add markers to test items based on their location."""
     for item in items:
         # Add markers based on test file location

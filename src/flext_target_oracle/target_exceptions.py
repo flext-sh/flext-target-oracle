@@ -241,7 +241,8 @@ class FlextTargetOracleProcessingError(ProcessingError):
             if isinstance(value, list) and all(isinstance(i, dict) for i in value):
                 # Rebuild to ensure precise element typing
                 normalized: list[dict[str, object]] = [
-                    {**item} for item in value  # shallow copy as dict[str, object]
+                    {**item}
+                    for item in value  # shallow copy as dict[str, object]
                 ]
                 return normalized
         return None

@@ -90,11 +90,11 @@ class TestRealOracleTarget:
         )
 
     @pytest.mark.asyncio
+    @pytest.mark.usefixtures("_oracle_engine")
     async def test_real_process_record_message(
         self,
         real_target: object,
         simple_schema: object,
-        _oracle_engine: object,
     ) -> None:
         """Test processing record message with real database."""
         real_target.initialize()
@@ -168,11 +168,11 @@ class TestRealOracleTarget:
         result = real_target.execute(json.dumps(activate_msg))
         assert result.is_success
 
+    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_batch_processing(
         self,
         real_target: object,
         simple_schema: object,
-        _oracle_engine: object,
     ) -> None:
         """Test batch processing with real database."""
         real_target.initialize()
@@ -210,11 +210,11 @@ class TestRealOracleTarget:
             count = conn.execute(text("SELECT COUNT(*) FROM batch_test")).scalar()
             assert count == 10
 
+    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_column_mapping(
         self,
         real_target: object,
         simple_schema: object,
-        _oracle_engine: object,
     ) -> None:
         """Test column mapping with real database."""
         # Configure column mappings
@@ -269,10 +269,10 @@ class TestRealOracleTarget:
             assert "NAME" not in columns  # Original name not present
             assert "EMAIL" not in columns  # Original email not present
 
+    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_ignored_columns(
         self,
         real_target: object,
-        _oracle_engine: object,
     ) -> None:
         """Test ignored columns with real database."""
         # Configure ignored columns
@@ -320,11 +320,11 @@ class TestRealOracleTarget:
         # This would require database verification in real test
         assert real_target._ignored_columns == ["email", "phone"]
 
+    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_nested_json_handling(
         self,
         real_target: object,
         nested_schema: object,
-        _oracle_engine: object,
     ) -> None:
         """Test nested JSON handling with real database."""
         real_target.initialize()
@@ -409,11 +409,11 @@ class TestRealOracleTarget:
         assert result.is_failure
         assert isinstance(result.error, FlextTargetOracleSchemaError)
 
+    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_metrics_collection(
         self,
         real_target: object,
         simple_schema: object,
-        _oracle_engine: object,
     ) -> None:
         """Test metrics collection with real processing."""
         real_target.initialize()
@@ -450,7 +450,8 @@ class TestRealOracleTarget:
         assert "elapsed_time" in metrics
         assert metrics["status"] == "running"
 
-    def test_real_connection_pooling(self, _oracle_engine: object) -> None:
+    @pytest.mark.usefixtures("_oracle_engine")
+    def test_real_connection_pooling(self) -> None:
         """Test connection pooling configuration."""
         config = FlextTargetOracleConfig(
             host="localhost",
@@ -479,10 +480,10 @@ class TestRealOracleTarget:
         target = FlextTargetOracle(ssl_config)
         assert target.config.use_ssl is True
 
+    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_type_mapping_customization(
         self,
         real_target: object,
-        _oracle_engine: object,
     ) -> None:
         """Test custom type mapping with real database."""
         # Configure custom type mappings
@@ -574,11 +575,11 @@ class TestRealOracleTarget:
         result = real_target.test_connection()
         assert result.is_success
 
+    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_large_batch_processing(
         self,
         real_target: object,
         simple_schema: object,
-        _oracle_engine: object,
     ) -> None:
         """Test processing large batches with real database."""
         # Configure for large batches
@@ -617,10 +618,10 @@ class TestRealOracleTarget:
             count = conn.execute(text("SELECT COUNT(*) FROM large_batch")).scalar()
             assert count == 2500
 
+    @pytest.mark.usefixtures("_oracle_engine")
     def test_real_schema_evolution(
         self,
         real_target: object,
-        _oracle_engine: object,
     ) -> None:
         """Test schema evolution with real database."""
         # Enable schema evolution

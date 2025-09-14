@@ -9,6 +9,7 @@ SPDX-License-Identifier: MIT
 """
 
 import json
+import time
 
 import pytest
 from sqlalchemy import text

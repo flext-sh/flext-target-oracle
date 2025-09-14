@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import time
+from typing import ClassVar
 
 from flext_core import FlextDomainService, FlextResult, FlextTypes
 from pydantic import Field
@@ -25,6 +26,8 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
     SOLID COMPLIANCE - Single responsibility: Singer protocol operations.
     """
 
+    model_config: ClassVar = {"frozen": False}  # Allow field mutations
+
     # Pydantic fields for service configuration
     name: str = Field(default="flext-oracle-target", description="Target name")
     config: FlextTargetOracleConfig = Field(description="Oracle target configuration")
@@ -38,20 +41,20 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
         default_factory=dict, description="Singer state"
     )
 
-    def __init__(self, config: FlextTargetOracleConfig, **data: object) -> None:
+    def __init__(self, config: FlextTargetOracleConfig, **_data: object) -> None:
         """Initialize Oracle Target service with configuration validation."""
         # Create loader instance
         loader = FlextTargetOracleLoader(config)
 
         # Initialize FlextDomainService
-        super().__init__(
-            name="flext-oracle-target",
-            config=config,
-            loader=loader,
-            _schemas={},
-            _state={},
-            **data,
-        )
+        super().__init__()
+
+        # Set Pydantic fields as instance attributes
+        self.name = "flext-oracle-target"
+        self.config = config
+        self.loader = loader
+        self._schemas = {}
+        self._state = {}
 
     def execute(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute domain service - test connection and return status."""
@@ -84,9 +87,10 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
             catalog: FlextTypes.Core.Dict = {
                 "streams": [],
             }
+            streams_list: list[dict[str, object]] = catalog["streams"]  # type: ignore[assignment]
 
             for stream_name, schema in self._schemas.items():
-                stream_entry = {
+                stream_entry: dict[str, object] = {
                     "tap_stream_id": stream_name,
                     "stream": stream_name,
                     "schema": schema,
@@ -102,7 +106,7 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
                         },
                     ],
                 }
-                catalog["streams"].append(stream_entry)
+                streams_list.append(stream_entry)
 
             return FlextResult[FlextTypes.Core.Dict].ok(catalog)
 
@@ -120,9 +124,6 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
             start_time = time.time()
 
             for message in messages:
-                if not isinstance(message, dict):
-                    continue
-
                 result = self._process_single_message(message)
                 if result.is_failure:
                     return FlextResult[FlextTypes.Core.Dict].fail(
@@ -186,8 +187,12 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
             self._schemas[stream_name] = schema
 
             # Ensure table exists
+            key_properties = message.get("key_properties")
+            key_properties_list: FlextTypes.Core.StringList | None = (
+                key_properties if isinstance(key_properties, list) else None
+            )
             table_result = self.loader.ensure_table_exists(
-                stream_name, schema, message.get("key_properties")
+                stream_name, schema, key_properties_list
             )
             if table_result.is_failure:
                 return FlextResult[None].fail(
