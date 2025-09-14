@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import time
+from typing import ClassVar
 
 from flext_core import FlextDomainService, FlextResult, FlextTypes
 from pydantic import Field
@@ -34,6 +35,8 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
         - Dependency Inversion: Depends on abstractions (flext-core patterns)
     """
 
+    model_config: ClassVar = {"frozen": False}  # Allow field mutations
+
     # Pydantic fields - flext-core SOURCE OF TRUTH patterns
     name: str = Field(default="flext-oracle-target", description="Singer target name")
     config: FlextTargetOracleConfig = Field(description="Oracle target configuration")
@@ -50,7 +53,7 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
     def __init__(
         self,
         config: FlextTargetOracleConfig | FlextTypes.Core.Dict | None = None,
-        **data: object,
+        **_data: object,
     ) -> None:
         """Initialize Oracle Singer Target with configuration validation."""
         # Convert config if needed
@@ -68,15 +71,15 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
         # Create loader with validated config
         loader = FlextTargetOracleLoader(validated_config)
 
-        # Initialize FlextDomainService with Pydantic fields
-        super().__init__(
-            name="flext-oracle-target",
-            config=validated_config,
-            loader=loader,
-            schemas={},
-            state={},
-            **data,
-        )
+        # Initialize FlextDomainService
+        super().__init__()
+
+        # Set Pydantic fields as instance attributes
+        self.name = "flext-oracle-target"
+        self.config = validated_config
+        self.loader = loader
+        self.schemas = {}
+        self.state = {}
 
     def execute(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute Oracle Target - implements FlextDomainService abstract method."""
@@ -152,9 +155,6 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
             start_time = time.time()
 
             for message in messages:
-                if not isinstance(message, dict):
-                    continue
-
                 result = self._process_single_message(message)
                 if result.is_failure:
                     return FlextResult[FlextTypes.Core.Dict].fail(

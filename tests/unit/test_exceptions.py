@@ -60,6 +60,7 @@ class TestRealOracleExceptions:
         raise ValueError(msg)
 
     def test_base_exception_creation(self) -> None:
+        """Test method."""
         """Test creating base exception."""
         exc = FlextTargetOracleError("Base error occurred")
 
@@ -67,6 +68,7 @@ class TestRealOracleExceptions:
         assert exc.message == "Base error occurred"
 
     def test_base_exception_with_context(self) -> None:
+        """Test method."""
         """Test specific exception with context."""
         # Use a specific exception class that supports context parameters
         exc = FlextTargetOracleSchemaError(
@@ -77,6 +79,7 @@ class TestRealOracleExceptions:
         assert "[SCHEMA_ERROR] Error with context" in str(exc)
 
     def test_connection_error_full(self) -> None:
+        """Test method."""
         """Test connection error with all parameters."""
         exc = FlextTargetOracleConnectionError(
             "Failed to connect to Oracle",
@@ -99,6 +102,7 @@ class TestRealOracleExceptions:
         assert "prod-oracle.company.com:1522" in full_message
 
     def test_connection_error_minimal(self) -> None:
+        """Test method."""
         """Test connection error with minimal parameters."""
         exc = FlextTargetOracleConnectionError("Connection refused")
 
@@ -108,6 +112,7 @@ class TestRealOracleExceptions:
         assert exc.service_name is None
 
     def test_authentication_error(self) -> None:
+        """Test method."""
         """Test authentication error."""
         exc = FlextTargetOracleAuthenticationError(
             "Invalid credentials",
@@ -121,6 +126,7 @@ class TestRealOracleExceptions:
         assert exc.error_code == "AUTHENTICATION_ERROR"
 
     def test_authentication_error_wallet(self) -> None:
+        """Test method."""
         """Test authentication error with wallet."""
         exc = FlextTargetOracleAuthenticationError(
             "Wallet authentication failed",
@@ -133,6 +139,7 @@ class TestRealOracleExceptions:
         assert exc.wallet_location == "/opt/oracle/wallet"
 
     def test_schema_error_with_details(self) -> None:
+        """Test method."""
         """Test schema error with full details."""
         exc = FlextTargetOracleSchemaError(
             "Invalid schema structure",
@@ -151,6 +158,7 @@ class TestRealOracleExceptions:
         assert exc.error_code == "SCHEMA_ERROR"
 
     def test_schema_error_minimal(self) -> None:
+        """Test method."""
         """Test schema error with minimal info."""
         exc = FlextTargetOracleSchemaError("Schema not found")
 
@@ -159,6 +167,7 @@ class TestRealOracleExceptions:
         assert exc.validation_errors is None
 
     def test_processing_error_comprehensive(self) -> None:
+        """Test method."""
         """Test processing error with all details."""
         exc = FlextTargetOracleProcessingError(
             "Failed to process record",
@@ -179,6 +188,7 @@ class TestRealOracleExceptions:
         assert exc.error_code == "PROCESSING_ERROR"
 
     def test_processing_error_single_record(self) -> None:
+        """Test method."""
         """Test processing error for single record."""
         exc = FlextTargetOracleProcessingError(
             "Record validation failed",
@@ -191,6 +201,7 @@ class TestRealOracleExceptions:
         assert exc.error_records is None
 
     def test_exception_inheritance(self) -> None:
+        """Test method."""
         """Test exception inheritance hierarchy."""
         # All should inherit from base
         conn_err = FlextTargetOracleConnectionError("test")
@@ -210,6 +221,7 @@ class TestRealOracleExceptions:
         assert isinstance(proc_err, Exception)
 
     def test_exception_catching(self) -> None:
+        """Test method."""
         """Test catching exceptions in hierarchy."""
 
         def raise_connection_error() -> Never:
@@ -232,10 +244,12 @@ class TestRealOracleExceptions:
         """Test using exceptions in context managers."""
 
         class MockResource:
-            def __enter__(self):
+            def __enter__(self) -> "MockResource":
                 return self
 
-            def __exit__(self, exc_type: object, exc_val: object, exc_tb: object):
+            def __exit__(
+                self, exc_type: object, exc_val: object, exc_tb: object
+            ) -> bool:
                 if exc_type is FlextTargetOracleConnectionError:
                     # Handle connection errors
                     return False  # Propagate
@@ -249,6 +263,7 @@ class TestRealOracleExceptions:
             _raise_connection_error()
 
     def test_exception_logging(self, caplog: object) -> None:
+        """Test method."""
         """Test exception logging behavior."""
         with caplog.at_level(logging.ERROR):
             try:
@@ -260,6 +275,7 @@ class TestRealOracleExceptions:
         assert "PROCESSING_ERROR" in caplog.text
 
     def test_exception_serialization(self) -> None:
+        """Test method."""
         """Test exception can be serialized."""
         exc = FlextTargetOracleSchemaError(
             "Schema validation failed",
@@ -277,6 +293,7 @@ class TestRealOracleExceptions:
         assert "Schema Error: Schema validation failed" in exc_dict["message"]
 
     def test_exception_chaining(self) -> None:
+        """Test method."""
         """Test exception chaining."""
         try:
             try:
@@ -289,6 +306,7 @@ class TestRealOracleExceptions:
             self._verify_exception_chain(e)
 
     def test_exception_comparison(self) -> None:
+        """Test method."""
         """Test exception comparison."""
         exc1 = FlextTargetOracleError("Error 1")
         exc2 = FlextTargetOracleError("Error 1")
@@ -300,6 +318,7 @@ class TestRealOracleExceptions:
         assert str(exc1) != str(exc3)  # Different messages
 
     def test_exception_timestamp(self) -> None:
+        """Test method."""
         """Test exception timestamp is set."""
         before = datetime.now(UTC)
         exc = FlextTargetOracleError("Test error")
@@ -309,6 +328,7 @@ class TestRealOracleExceptions:
         assert before <= exc.timestamp <= after
 
     def test_complex_error_scenario(self) -> None:
+        """Test method."""
         """Test complex error scenario with nested context."""
         # Simulate a complex processing error
         error_context = {
@@ -342,6 +362,7 @@ class TestRealOracleExceptions:
         assert exc.context["error_summary"]["validation_errors"] == 10
 
     def test_authentication_error_methods(self) -> None:
+        """Test method."""
         """Test different authentication methods in errors."""
         # Password auth
         exc1 = FlextTargetOracleAuthenticationError(
@@ -370,6 +391,7 @@ class TestRealOracleExceptions:
         assert exc3.auth_method == "kerberos"
 
     def test_connection_error_retry_info(self) -> None:
+        """Test method."""
         """Test connection error with retry information."""
         exc = FlextTargetOracleConnectionError(
             "Connection failed after retries",
@@ -388,6 +410,7 @@ class TestRealOracleExceptions:
         assert exc.context["last_error"] == "ORA-12541: TNS:no listener"
 
     def test_schema_error_diff(self) -> None:
+        """Test method."""
         """Test schema error with schema differences."""
         exc = FlextTargetOracleSchemaError(
             "Schema mismatch detected",
@@ -409,6 +432,7 @@ class TestRealOracleExceptions:
         assert exc.context["breaking_changes"] is True
 
     def test_processing_error_bulk_details(self) -> None:
+        """Test method."""
         """Test processing error with bulk operation details."""
         exc = FlextTargetOracleProcessingError(
             "Bulk insert partially failed",

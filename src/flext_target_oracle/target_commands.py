@@ -73,13 +73,11 @@ class OracleTargetValidateCommand(FlextCommands.Models.Command):
             oracle_api_config = FlextDbOracleConfig(
                 host=config.oracle_host,
                 port=config.oracle_port,
-                database=config.oracle_service,
-                username=config.oracle_user,
-                password=SecretStr(
-                    config.oracle_password.get_secret_value()
-                    if hasattr(config.oracle_password, "get_secret_value")
-                    else str(config.oracle_password)
-                ),
+                name=config.oracle_service,  # Use 'name' instead of 'database'
+                user=config.oracle_user,  # Use 'user' instead of 'username'
+                password=config.oracle_password.get_secret_value()
+                if hasattr(config.oracle_password, "get_secret_value")
+                else str(config.oracle_password),
             )
             oracle_api = FlextDbOracleApi(oracle_api_config)
 
@@ -146,7 +144,7 @@ class OracleTargetLoadCommand(FlextCommands.Models.Command):
 
             # Singer targets are typically executed by reading stdin
             # For CLI purposes, we'll validate the target is ready for operation
-            loader_result = target._loader.connect()
+            loader_result = target.loader.test_connection()
             if loader_result.is_failure:
                 return FlextResult[str].fail(
                     f"Target initialization failed: {loader_result.error}"
