@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from typing import Never
 
 import pytest
+from flext_core import FlextLogger
 
 from flext_target_oracle import (
     FlextTargetOracleAuthenticationError,
@@ -27,8 +28,6 @@ class TestRealOracleExceptions:
 
     def _log_exception(self) -> None:
         """Helper method for logging exceptions."""
-        from flext_core import FlextLogger
-
         logger = FlextLogger(__name__)
         logger.error("Error occurred")
 
@@ -236,7 +235,7 @@ class TestRealOracleExceptions:
             def __enter__(self):
                 return self
 
-            def __exit__(self, exc_type, exc_val, exc_tb):
+            def __exit__(self, exc_type: object, exc_val: object, exc_tb: object):
                 if exc_type is FlextTargetOracleConnectionError:
                     # Handle connection errors
                     return False  # Propagate
@@ -249,7 +248,7 @@ class TestRealOracleExceptions:
         with pytest.raises(FlextTargetOracleConnectionError), MockResource():
             _raise_connection_error()
 
-    def test_exception_logging(self, caplog) -> None:
+    def test_exception_logging(self, caplog: object) -> None:
         """Test exception logging behavior."""
         with caplog.at_level(logging.ERROR):
             try:

@@ -64,7 +64,7 @@ class BatchServiceProtocol(Protocol):
     async def add_record(
         self,
         stream_name: str,
-        record: FlextTypes.Core.Dict,
+        _record: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Add record to batch processing queue."""
         ...
@@ -451,7 +451,7 @@ class OracleBatchService(FlextDomainService[LoadStatisticsModel]):
     async def add_record(
         self,
         stream_name: str,
-        record: FlextTypes.Core.Dict,
+        _record: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Add record to batch processing queue.
 

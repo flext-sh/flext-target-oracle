@@ -39,7 +39,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
     )
     total_records: int = Field(default=0, description="Total records processed")
 
-    def __init__(self, config: FlextTargetOracleConfig, **data) -> None:
+    def __init__(self, config: FlextTargetOracleConfig, **data: object) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
             # Create Oracle API configuration from target config
@@ -114,7 +114,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
         self,
         stream_name: str,
         schema: FlextTypes.Core.Dict,
-        key_properties: FlextTypes.Core.StringList | None = None,
+        _key_properties: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[None]:
         """Ensure table exists using flext-db-oracle API with correct table creation."""
         try:
@@ -209,7 +209,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             return FlextResult[FlextTypes.Core.Dict].fail(f"Finalization failed: {e}")
 
     def _build_create_table_sql(
-        self, table_name: str, schema: FlextTypes.Core.Dict
+        self, table_name: str, _schema: FlextTypes.Core.Dict
     ) -> str:
         """Build CREATE TABLE SQL statement."""
         schema_name = self.config.default_target_schema
@@ -239,12 +239,17 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             loaded_at = datetime.now(UTC)
 
             with self.oracle_api as connected_api:
-                # Build INSERT SQL manually
-                insert_sql = f"""
-                INSERT INTO {full_table_name}
-                (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT)
-                VALUES (:data, :extracted_at, :loaded_at)
-                """
+                # Use parameterized query with table name validation
+                # Validate table name contains only safe characters
+                if not all(c.isalnum() or c in '._' for c in full_table_name):
+                    return FlextResult[None].fail("Invalid table name characters")
+                
+                # Build INSERT SQL with validated table name
+                insert_sql = (
+                    f"INSERT INTO {full_table_name} "
+                    "(DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) "
+                    "VALUES (:data, :extracted_at, :loaded_at)"
+                )
 
                 # Execute batch using multiple execute calls
                 for record in records:

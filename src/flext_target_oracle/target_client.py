@@ -50,7 +50,7 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
     def __init__(
         self,
         config: FlextTargetOracleConfig | FlextTypes.Core.Dict | None = None,
-        **data,
+        **data: object,
     ) -> None:
         """Initialize Oracle Singer Target with configuration validation."""
         # Convert config if needed

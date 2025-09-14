@@ -10,16 +10,9 @@ from flext_core import FlextResult, FlextTypes
 from flext_meltano import (
     FlextMeltanoBridge,
     FlextMeltanoConfig,
-    FlextTarget as Target,
-    OAuthAuthenticator,
-    PropertiesList,
-    Property,
-    Sink,
-    SQLSink,
-    Stream,
-    Tap,
-    get_tap_test_class,
-    singer_typing,
+    FlextMeltanoTypes,
+    FlextSingerTypes,
+    FlextTargetAbstractions,
 )
 
 from flext_target_oracle.target_client import (
@@ -81,6 +74,9 @@ __all__: FlextTypes.Core.StringList = [
     # Core Integration
     "FlextMeltanoBridge",
     "FlextMeltanoConfig",
+    "FlextMeltanoTypes",
+    "FlextSingerTypes",
+    "FlextTargetAbstractions",
     # Observability
     "FlextOracleError",
     "FlextOracleObs",
@@ -104,8 +100,7 @@ __all__: FlextTypes.Core.StringList = [
     "LoadMethod",
     "LoadMethodModel",
     "LoadStatisticsModel",
-    # Authentication
-    "OAuthAuthenticator",
+    # Services
     "OracleBatchService",
     "OracleConnectionModel",
     "OracleConnectionService",
@@ -113,24 +108,66 @@ __all__: FlextTypes.Core.StringList = [
     "OracleSchemaService",
     "OracleTableMetadataModel",
     "OracleTargetServiceFactory",
-    "PropertiesList",
-    "Property",
     "RecordServiceProtocol",
-    "SQLSink",
     "SchemaServiceProtocol",
     "SingerStreamModel",
-    "Sink",
     "StorageModeModel",
-    # Singer SDK
-    "Stream",
-    "Tap",
-    "Target",
+    # Core Classes
     "TargetOracle",
     # Metadata
     "__version__",
     "__version_info__",
     "configure_oracle_observability",
-    # Testing
-    "get_tap_test_class",
-    "singer_typing",
+]: FlextTypes.Core.StringList = [
+    # Data Models
+    "BatchProcessingModel",
+    "BatchServiceProtocol",
+    "ConnectionServiceProtocol",
+    # Core Integration
+    "FlextMeltanoBridge",
+    "FlextMeltanoConfig",
+    "FlextTargetAbstractions",
+    "FlextSingerTypes",
+    "FlextMeltanoTypes",
+    # Observability
+    "FlextOracleError",
+    "FlextOracleObs",
+    "FlextOracleTargetAuthenticationError",
+    "FlextOracleTargetConfig",
+    "FlextOracleTargetConnectionError",
+    "FlextOracleTargetError",
+    "FlextOracleTargetLoader",
+    "FlextOracleTargetProcessingError",
+    "FlextOracleTargetSchemaError",
+    # Core Classes
+    "FlextResult",
+    "FlextTargetOracle",
+    "FlextTargetOracleAuthenticationError",
+    "FlextTargetOracleConfig",
+    "FlextTargetOracleConnectionError",
+    "FlextTargetOracleError",
+    "FlextTargetOracleLoader",
+    "FlextTargetOracleProcessingError",
+    "FlextTargetOracleSchemaError",
+    "LoadMethod",
+    "LoadMethodModel",
+    "LoadStatisticsModel",
+    # Services
+    "OracleBatchService",
+    "OracleConnectionModel",
+    "OracleConnectionService",
+    "OracleRecordService",
+    "OracleSchemaService",
+    "OracleTableMetadataModel",
+    "OracleTargetServiceFactory",
+    "RecordServiceProtocol",
+    "SchemaServiceProtocol",
+    "SingerStreamModel",
+    "StorageModeModel",
+    # Core Classes
+    "TargetOracle",
+    # Metadata
+    "__version__",
+    "__version_info__",
+    "configure_oracle_observability",
 ]

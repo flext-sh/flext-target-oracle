@@ -9,10 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import cast
-
-from flext_core import FlextTypes
-from flext_core.exceptions import FlextExceptions
+from flext_core import FlextConstants, FlextExceptions, FlextTypes
 
 # Direct access to the internal exception classes for proper inheritance
 BaseError = FlextExceptions.BaseError
@@ -74,7 +71,7 @@ class FlextTargetOracleConnectionError(FlextConnectionError):
 
         super().__init__(
             message=message,
-            code=code or "CONNECTION_ERROR",
+            code=code or FlextConstants.Errors.CONNECTION_ERROR,
             context=oracle_context,
             correlation_id=correlation_id,
         )
@@ -82,36 +79,46 @@ class FlextTargetOracleConnectionError(FlextConnectionError):
     @property
     def host(self) -> str | None:
         """Get connection host."""
-        if hasattr(self, "context") and self.context:
-            return cast("str | None", self.context.get("host"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("host")
+            return value if isinstance(value, str) else None
         return None
 
     @property
     def port(self) -> int | None:
         """Get connection port."""
-        if hasattr(self, "context") and self.context:
-            return cast("int | None", self.context.get("port"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("port")
+            return value if isinstance(value, int) else None
         return None
 
     @property
     def service_name(self) -> str | None:
         """Get Oracle service name."""
-        if hasattr(self, "context") and self.context:
-            return cast("str | None", self.context.get("service_name"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("service_name")
+            return value if isinstance(value, str) else None
         return None
 
     @property
     def user(self) -> str | None:
         """Get connection user."""
-        if hasattr(self, "context") and self.context:
-            return cast("str | None", self.context.get("user"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("user")
+            return value if isinstance(value, str) else None
         return None
 
     @property
     def dsn(self) -> str | None:
         """Get Oracle DSN."""
-        if hasattr(self, "context") and self.context:
-            return cast("str | None", self.context.get("dsn"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("dsn")
+            return value if isinstance(value, str) else None
         return None
 
 
@@ -147,7 +154,7 @@ class FlextTargetOracleAuthenticationError(AuthenticationError):
 
         super().__init__(
             message=message,
-            code=code or "AUTHENTICATION_ERROR",
+            code=code or FlextConstants.Errors.AUTHENTICATION_ERROR,
             context=oracle_context,
             correlation_id=correlation_id,
         )
@@ -155,15 +162,19 @@ class FlextTargetOracleAuthenticationError(AuthenticationError):
     @property
     def user(self) -> str | None:
         """Get authentication user."""
-        if hasattr(self, "context") and self.context:
-            return cast("str | None", self.context.get("user"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("user")
+            return value if isinstance(value, str) else None
         return None
 
     @property
     def wallet_location(self) -> str | None:
         """Get wallet location."""
-        if hasattr(self, "context") and self.context:
-            return cast("str | None", self.context.get("wallet_location"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("wallet_location")
+            return value if isinstance(value, str) else None
         return None
 
 
@@ -198,7 +209,7 @@ class FlextTargetOracleProcessingError(ProcessingError):
 
         super().__init__(
             message=message,
-            code=code or "PROCESSING_ERROR",
+            code=code or FlextConstants.Errors.PROCESSING_ERROR,
             context=oracle_context,
             correlation_id=correlation_id,
         )
@@ -206,24 +217,33 @@ class FlextTargetOracleProcessingError(ProcessingError):
     @property
     def stream_name(self) -> str | None:
         """Get stream name."""
-        if hasattr(self, "context") and self.context:
-            return cast("str | None", self.context.get("stream_name"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("stream_name")
+            return value if isinstance(value, str) else None
         return None
 
     @property
     def record_count(self) -> int | None:
         """Get record count."""
-        if hasattr(self, "context") and self.context:
-            return cast("int | None", self.context.get("record_count"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("record_count")
+            return value if isinstance(value, int) else None
         return None
 
     @property
     def error_records(self) -> list[dict[str, object]] | None:
         """Get error records."""
-        if hasattr(self, "context") and self.context:
-            return cast(
-                "list[dict[str, object]] | None", self.context.get("error_records")
-            )
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("error_records")
+            if isinstance(value, list) and all(isinstance(i, dict) for i in value):
+                # Rebuild to ensure precise element typing
+                normalized: list[dict[str, object]] = [
+                    {**item} for item in value  # shallow copy as dict[str, object]
+                ]
+                return normalized
         return None
 
 
@@ -263,7 +283,7 @@ class FlextTargetOracleSchemaError(FlextTargetOracleValidationError):
 
         super().__init__(
             message=message,
-            code=code or "SCHEMA_ERROR",
+            code=code or FlextConstants.Errors.VALIDATION_ERROR,
             context=oracle_context,
             correlation_id=correlation_id,
         )
@@ -271,29 +291,38 @@ class FlextTargetOracleSchemaError(FlextTargetOracleValidationError):
     @property
     def stream_name(self) -> str | None:
         """Get stream name."""
-        if hasattr(self, "context") and self.context:
-            return cast("str | None", self.context.get("stream_name"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("stream_name")
+            return value if isinstance(value, str) else None
         return None
 
     @property
     def table_name(self) -> str | None:
         """Get table name."""
-        if hasattr(self, "context") and self.context:
-            return cast("str | None", self.context.get("table_name"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("table_name")
+            return value if isinstance(value, str) else None
         return None
 
     @property
     def schema_hash(self) -> str | None:
         """Get schema hash."""
-        if hasattr(self, "context") and self.context:
-            return cast("str | None", self.context.get("schema_hash"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("schema_hash")
+            return value if isinstance(value, str) else None
         return None
 
     @property
     def validation_errors(self) -> list[str] | None:
         """Get validation errors."""
-        if hasattr(self, "context") and self.context:
-            return cast("list[str] | None", self.context.get("validation_errors"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("validation_errors")
+            if isinstance(value, list) and all(isinstance(s, str) for s in value):
+                return value
         return None
 
 
@@ -329,7 +358,7 @@ class FlextTargetOracleSQLError(FlextTargetOracleProcessingError):
 
         super().__init__(
             message=message,
-            code=code or "SQL_ERROR",
+            code=code or FlextConstants.Errors.OPERATION_ERROR,
             context=oracle_context,
             correlation_id=correlation_id,
         )
@@ -337,8 +366,10 @@ class FlextTargetOracleSQLError(FlextTargetOracleProcessingError):
     @property
     def sql_statement(self) -> str | None:
         """Get SQL statement."""
-        if hasattr(self, "context") and self.context:
-            return cast("str | None", self.context.get("sql_statement"))
+        ctx = getattr(self, "context", None)
+        if isinstance(ctx, dict):
+            value = ctx.get("sql_statement")
+            return value if isinstance(value, str) else None
         return None
 
 
