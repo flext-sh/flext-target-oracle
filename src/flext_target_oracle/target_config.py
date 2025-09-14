@@ -567,12 +567,16 @@ def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResul
             return FlextResult[None].fail(error_message)
 
     # Validate pool size constraints using FlextValidations number validation
-    if not FlextValidations.validate_number(config.pool_min_size, min_value=0):
+    min_size_result = FlextValidations.validate_number(config.pool_min_size)
+    if min_size_result.is_failure:
+        return FlextResult[None].fail("Pool min size must be a valid number")
+    if min_size_result.unwrap() < 0:
         return FlextResult[None].fail("Pool min size must be non-negative")
 
-    if not FlextValidations.validate_number(
-        config.pool_max_size, min_value=config.pool_min_size
-    ):
+    max_size_result = FlextValidations.validate_number(config.pool_max_size)
+    if max_size_result.is_failure:
+        return FlextResult[None].fail("Pool max size must be a valid number")
+    if max_size_result.unwrap() < min_size_result.unwrap():
         return FlextResult[None].fail(
             "Pool max size must be greater than or equal to pool min size"
         )

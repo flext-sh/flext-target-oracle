@@ -23,10 +23,9 @@ Usage:
 
 import asyncio
 import logging
+import os
 
-object
-
-from flext_core import FlextLogger
+from flext_core import FlextLogger, FlextTypes
 
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
@@ -47,8 +46,6 @@ def create_configuration() -> FlextOracleTargetConfig:
 
     """
     logger.info("Creating Oracle target configuration")
-
-    import os
 
     config = FlextOracleTargetConfig(
         oracle_host="localhost",

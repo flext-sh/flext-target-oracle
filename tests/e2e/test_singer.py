@@ -31,8 +31,8 @@ class TestSingerWorkflowE2E:
     async def test_complete_ecommerce_workflow(
         self,
         oracle_config: FlextTargetOracleConfig,
-        oracle_engine,
-        clean_database,
+        oracle_engine: object,
+        _clean_database: object,
     ) -> None:
         """Test complete e-commerce data workflow with multiple streams."""
         # Configure for realistic scenario
@@ -371,8 +371,8 @@ class TestSingerWorkflowE2E:
     async def test_schema_evolution_workflow(
         self,
         oracle_config: FlextTargetOracleConfig,
-        oracle_engine,
-        clean_database,
+        oracle_engine: object,
+        _clean_database: object,
     ) -> None:
         """Test schema evolution with ALTER TABLE support."""
         oracle_config.allow_alter_table = True
@@ -526,8 +526,8 @@ class TestSingerWorkflowE2E:
     async def test_high_volume_streaming(
         self,
         oracle_config: FlextTargetOracleConfig,
-        oracle_engine,
-        clean_database,
+        oracle_engine: object,
+        _clean_database: object,
     ) -> None:
         """Test high-volume data streaming with performance metrics."""
         # Configure for performance

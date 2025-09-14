@@ -176,7 +176,7 @@ def oracle_container() -> Generator[None]:
 
 
 @pytest.fixture(scope="session")
-def oracle_engine(oracle_container: None) -> Engine:
+def oracle_engine() -> Engine:
     """Create SQLAlchemy engine for direct database access."""
     return create_engine(
         f"oracle+oracledb://{TEST_SCHEMA}:test_password@{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SERVICE}",
@@ -210,7 +210,7 @@ def clean_database(oracle_engine: Engine) -> None:
 
 
 @pytest.fixture
-def oracle_config(oracle_container: None) -> FlextTargetOracleConfig:
+def oracle_config() -> FlextTargetOracleConfig:
     """Create Oracle target configuration for tests."""
     return FlextTargetOracleConfig(
         oracle_host=ORACLE_HOST,
@@ -234,9 +234,6 @@ def oracle_config(oracle_container: None) -> FlextTargetOracleConfig:
 @pytest.fixture
 def oracle_api(oracle_config: FlextTargetOracleConfig) -> FlextDbOracleApi:
     """Create mocked FlextDbOracleApi instance."""
-    from unittest.mock import MagicMock
-
-    from flext_core import FlextResult
 
     # Create real config for reference
     db_config = FlextDbOracleConfig(
@@ -650,7 +647,7 @@ def large_dataset() -> list[FlextTypes.Core.Dict]:
 
 # Markers for different test categories
 def pytest_collection_modifyitems(
-    config: pytest.Config, items: list[pytest.Item]
+    items: list[pytest.Item]
 ) -> None:
     """Add markers to test items based on their location."""
     for item in items:

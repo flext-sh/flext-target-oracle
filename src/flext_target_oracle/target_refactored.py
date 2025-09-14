@@ -52,7 +52,7 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
         description="Oracle target command handler",
     )
 
-    def model_post_init(self, __context: object = None) -> None:
+    def model_post_init(self, __context: object = None, /) -> None:
         """Initialize CLI service using Pydantic post-init pattern."""
         # Register command handler using FlextCommands bus
         self.command_bus.register_handler(self.command_handler)
@@ -217,9 +217,9 @@ def main() -> None:
             logger.error(result.error or "CLI execution failed")
             sys.exit(1)
 
-    except Exception as e:
+    except Exception:
         logger = FlextLogger(__name__)
-        logger.exception(f"Fatal CLI error: {e}")
+        logger.exception("Fatal CLI error")
         sys.exit(1)
 
 

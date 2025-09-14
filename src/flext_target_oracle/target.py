@@ -6,14 +6,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import sys
+
 from flext_target_oracle.target_client import FlextTargetOracle
 
 
 # Main entry point - minimal wrapper for compatibility
 def main() -> None:
     """Main entry point for Oracle Singer Target."""
-    import sys
-
     # For Singer targets, the main entry typically reads from stdin
     # This is a basic stub - full Singer CLI would be handled by Meltano
     sys.exit(0)

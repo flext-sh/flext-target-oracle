@@ -22,10 +22,10 @@ class FlextTargetOracleConstants(FlextConstants):
     class Connection:
         """Connection-related constants for Oracle target."""
 
-        DEFAULT_PORT = FlextConstants.Infrastructure.DEFAULT_ORACLE_PORT
-        MIN_PORT = FlextConstants.Platform.MIN_PORT_NUMBER
-        MAX_PORT = FlextConstants.Platform.MAX_PORT_NUMBER
-        DEFAULT_CONNECTION_TIMEOUT = FlextConstants.Defaults.TIMEOUT
+        DEFAULT_PORT = FlextConstants.Meltano.DEFAULT_ORACLE_PORT
+        MIN_PORT = FlextConstants.Network.MIN_PORT
+        MAX_PORT = FlextConstants.Network.MAX_PORT
+        DEFAULT_CONNECTION_TIMEOUT = FlextConstants.Network.DEFAULT_TIMEOUT
 
     class Processing:
         """Processing-related constants for Oracle target."""

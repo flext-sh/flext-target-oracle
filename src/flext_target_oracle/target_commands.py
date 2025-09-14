@@ -9,13 +9,20 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import json
+import os
 import uuid
+from pathlib import Path
 
 import yaml
 from flext_core import FlextCommands, FlextResult, FlextTypes
-from pydantic import Field
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
+from pydantic import Field, SecretStr
 
+from flext_target_oracle import __version__
+from flext_target_oracle.target_client import FlextTargetOracle
 from flext_target_oracle.target_config import FlextTargetOracleConfig
+from flext_target_oracle.target_services import OracleConnectionService
 
 
 class OracleTargetValidateCommand(FlextCommands.Models.Command):
@@ -35,9 +42,6 @@ class OracleTargetValidateCommand(FlextCommands.Models.Command):
             # Load configuration using direct instantiation - SOURCE OF TRUTH pattern
             if self.config_file:
                 # Load configuration from file
-                import json
-                from pathlib import Path
-
                 config_path = Path(self.config_file)
                 if not config_path.exists():
                     return FlextResult[str].fail(
@@ -48,10 +52,6 @@ class OracleTargetValidateCommand(FlextCommands.Models.Command):
                 config = FlextTargetOracleConfig(**config_data)
             else:
                 # Load from environment variables
-                import os
-
-                from pydantic import SecretStr
-
                 config = FlextTargetOracleConfig(
                     oracle_host=os.getenv("ORACLE_HOST", "localhost"),
                     oracle_service=os.getenv("ORACLE_SERVICE", "XE"),
@@ -69,10 +69,6 @@ class OracleTargetValidateCommand(FlextCommands.Models.Command):
                 )
 
             # Test Oracle connection using domain services
-            from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
-
-            from flext_target_oracle.target_services import OracleConnectionService
-
             # Create Oracle API configuration from our config
             oracle_api_config = FlextDbOracleConfig(
                 host=config.oracle_host,
@@ -145,8 +141,6 @@ class OracleTargetLoadCommand(FlextCommands.Models.Command):
                 )
 
             # Create target instance using SOURCE OF TRUTH factory pattern
-            from flext_target_oracle.target_client import FlextTargetOracle
-
             # Create FlextTargetOracle instance directly - it accepts config in constructor
             target = FlextTargetOracle(config)
 
@@ -182,8 +176,6 @@ class OracleTargetAboutCommand(FlextCommands.Models.Command):
         """Execute about using pure flext-core patterns."""
         try:
             # Get about information using domain methods
-            from flext_target_oracle import __version__
-
             about_info: dict[str, object] = {
                 "name": "flext-target-oracle",
                 "version": __version__,
@@ -313,12 +305,12 @@ class OracleTargetCommandFactory:
         )
 
     @staticmethod
-    def create_about_command(format: str = "json") -> OracleTargetAboutCommand:
+    def create_about_command(output_format: str = "json") -> OracleTargetAboutCommand:
         """Create about command using FlextCommands SOURCE OF TRUTH."""
         return OracleTargetAboutCommand(
             command_id=str(uuid.uuid4()),
             command_type="oracle_target_about",
-            format=format,
+            format=output_format,
         )
 
 

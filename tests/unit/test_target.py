@@ -94,7 +94,7 @@ class TestRealOracleTarget:
         self,
         real_target: object,
         simple_schema: object,
-        oracle_engine: object,
+        _oracle_engine: object,
     ) -> None:
         """Test processing record message with real database."""
         real_target.initialize()
@@ -132,7 +132,7 @@ class TestRealOracleTarget:
         assert result.is_success
 
         # Verify in database
-        with oracle_engine.connect() as conn:
+        with _oracle_engine.connect() as conn:
             count = conn.execute(text("SELECT COUNT(*) FROM users")).scalar()
             assert count == 1
 
@@ -172,7 +172,7 @@ class TestRealOracleTarget:
         self,
         real_target: object,
         simple_schema: object,
-        oracle_engine: object,
+        _oracle_engine: object,
     ) -> None:
         """Test batch processing with real database."""
         real_target.initialize()
@@ -206,7 +206,7 @@ class TestRealOracleTarget:
         real_target.execute(json.dumps(state_msg))
 
         # Verify all records
-        with oracle_engine.connect() as conn:
+        with _oracle_engine.connect() as conn:
             count = conn.execute(text("SELECT COUNT(*) FROM batch_test")).scalar()
             assert count == 10
 
@@ -214,7 +214,7 @@ class TestRealOracleTarget:
         self,
         real_target: object,
         simple_schema: object,
-        oracle_engine: object,
+        _oracle_engine: object,
     ) -> None:
         """Test column mapping with real database."""
         # Configure column mappings
@@ -252,7 +252,7 @@ class TestRealOracleTarget:
         real_target.execute(json.dumps({"type": "STATE", "value": {}}))
 
         # Verify mapped columns
-        with oracle_engine.connect() as conn:
+        with _oracle_engine.connect() as conn:
             result = conn.execute(
                 text(
                     """
@@ -272,7 +272,7 @@ class TestRealOracleTarget:
     def test_real_ignored_columns(
         self,
         real_target: object,
-        oracle_engine: object,
+        _oracle_engine: object,
     ) -> None:
         """Test ignored columns with real database."""
         # Configure ignored columns
@@ -324,7 +324,7 @@ class TestRealOracleTarget:
         self,
         real_target: object,
         nested_schema: object,
-        oracle_engine: object,
+        _oracle_engine: object,
     ) -> None:
         """Test nested JSON handling with real database."""
         real_target.initialize()
@@ -364,7 +364,7 @@ class TestRealOracleTarget:
         real_target.execute(json.dumps({"type": "STATE", "value": {}}))
 
         # Verify flattened structure
-        with oracle_engine.connect() as conn:
+        with _oracle_engine.connect() as conn:
             result = conn.execute(
                 text("SELECT * FROM nested_test WHERE order_id = 'ORD-001'"),
             )
@@ -413,7 +413,7 @@ class TestRealOracleTarget:
         self,
         real_target: object,
         simple_schema: object,
-        oracle_engine: object,
+        _oracle_engine: object,
     ) -> None:
         """Test metrics collection with real processing."""
         real_target.initialize()
@@ -450,7 +450,7 @@ class TestRealOracleTarget:
         assert "elapsed_time" in metrics
         assert metrics["status"] == "running"
 
-    def test_real_connection_pooling(self, oracle_engine: object) -> None:
+    def test_real_connection_pooling(self, _oracle_engine: object) -> None:
         """Test connection pooling configuration."""
         config = FlextTargetOracleConfig(
             host="localhost",
@@ -482,7 +482,7 @@ class TestRealOracleTarget:
     def test_real_type_mapping_customization(
         self,
         real_target: object,
-        oracle_engine: object,
+        _oracle_engine: object,
     ) -> None:
         """Test custom type mapping with real database."""
         # Configure custom type mappings
@@ -578,7 +578,7 @@ class TestRealOracleTarget:
         self,
         real_target: object,
         simple_schema: object,
-        oracle_engine: object,
+        _oracle_engine: object,
     ) -> None:
         """Test processing large batches with real database."""
         # Configure for large batches
@@ -613,14 +613,14 @@ class TestRealOracleTarget:
         real_target.execute(json.dumps({"type": "STATE", "value": {}}))
 
         # Verify all records
-        with oracle_engine.connect() as conn:
+        with _oracle_engine.connect() as conn:
             count = conn.execute(text("SELECT COUNT(*) FROM large_batch")).scalar()
             assert count == 2500
 
     def test_real_schema_evolution(
         self,
         real_target: object,
-        oracle_engine: object,
+        _oracle_engine: object,
     ) -> None:
         """Test schema evolution with real database."""
         # Enable schema evolution
@@ -678,7 +678,7 @@ class TestRealOracleTarget:
         real_target.execute(json.dumps({"type": "STATE", "value": {}}))
 
         # Verify schema evolution
-        with oracle_engine.connect() as conn:
+        with _oracle_engine.connect() as conn:
             # Check new column exists
             result = conn.execute(
                 text(

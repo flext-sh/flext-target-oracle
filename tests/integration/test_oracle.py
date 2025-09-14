@@ -24,9 +24,9 @@ class TestOracleIntegration:
     @pytest.mark.asyncio
     async def test_create_simple_table(
         self,
-        connected_loader,
-        oracle_engine,
-        simple_schema,
+        connected_loader: object,
+        oracle_engine: object,
+        simple_schema: object,
     ) -> None:
         """Test creating a simple table with basic data types."""
         stream_name = "test_users"
@@ -79,9 +79,9 @@ class TestOracleIntegration:
     @pytest.mark.asyncio
     async def test_insert_and_retrieve_data(
         self,
-        connected_loader,
-        oracle_engine,
-        simple_schema,
+        connected_loader: object,
+        oracle_engine: object,
+        simple_schema: object,
     ) -> None:
         """Test inserting data and retrieving it."""
         stream_name = "test_insert"
@@ -114,10 +114,10 @@ class TestOracleIntegration:
     @pytest.mark.asyncio
     async def test_merge_mode_updates(
         self,
-        oracle_config,
-        oracle_engine,
-        simple_schema,
-        clean_database,
+        oracle_config: object,
+        oracle_engine: object,
+        simple_schema: object,
+        _clean_database: object,
     ) -> None:
         """Test merge mode for updating existing records."""
         oracle_config.sdc_mode = "merge"
@@ -157,9 +157,9 @@ class TestOracleIntegration:
     @pytest.mark.asyncio
     async def test_bulk_insert_performance(
         self,
-        oracle_config,
-        oracle_engine,
-        clean_database,
+        oracle_config: object,
+        oracle_engine: object,
+        _clean_database: object,
     ) -> None:
         """Test bulk insert with large dataset."""
         oracle_config.load_method = LoadMethod.BULK_INSERT
@@ -192,8 +192,6 @@ class TestOracleIntegration:
         ]
 
         # Measure bulk insert performance
-        import time
-
         start_time = time.time()
         result = await loader.insert_records(stream_name, records)
         elapsed = time.time() - start_time
@@ -213,10 +211,10 @@ class TestOracleIntegration:
     @pytest.mark.asyncio
     async def test_json_storage_mode(
         self,
-        oracle_config,
-        oracle_engine,
-        nested_schema,
-        clean_database,
+        oracle_config: object,
+        oracle_engine: object,
+        nested_schema: object,
+        _clean_database: object,
     ) -> None:
         """Test JSON storage mode with nested data."""
         oracle_config.storage_mode = "json"
@@ -264,9 +262,9 @@ class TestOracleIntegration:
     @pytest.mark.asyncio
     async def test_column_ordering(
         self,
-        oracle_config,
-        oracle_engine,
-        clean_database,
+        oracle_config: object,
+        oracle_engine: object,
+        _clean_database: object,
     ) -> None:
         """Test column ordering in created tables."""
         oracle_config.column_ordering = "alphabetical"
@@ -334,10 +332,10 @@ class TestOracleIntegration:
     @pytest.mark.asyncio
     async def test_truncate_before_load(
         self,
-        oracle_config,
-        oracle_engine,
-        simple_schema,
-        clean_database,
+        oracle_config: object,
+        oracle_engine: object,
+        simple_schema: object,
+        _clean_database: object,
     ) -> None:
         """Test truncate table before loading data."""
         oracle_config.truncate_before_load = True
@@ -370,10 +368,10 @@ class TestOracleIntegration:
     @pytest.mark.asyncio
     async def test_custom_indexes(
         self,
-        oracle_config,
-        oracle_engine,
-        simple_schema,
-        clean_database,
+        oracle_config: object,
+        oracle_engine: object,
+        simple_schema: object,
+        _clean_database: object,
     ) -> None:
         """Test creation of custom indexes."""
         oracle_config.custom_indexes = {
@@ -426,10 +424,10 @@ class TestOracleTargetE2E:
     @pytest.mark.asyncio
     async def test_full_singer_workflow(
         self,
-        oracle_config,
-        oracle_engine,
-        singer_messages,
-        clean_database,
+        oracle_config: object,
+        oracle_engine: object,
+        singer_messages: object,
+        _clean_database: object,
     ) -> None:
         """Test complete Singer workflow: schema -> records -> state."""
         target = FlextTargetOracle(config=oracle_config)
@@ -464,9 +462,9 @@ class TestOracleTargetE2E:
     @pytest.mark.asyncio
     async def test_column_mapping_and_filtering(
         self,
-        oracle_config,
-        oracle_engine,
-        clean_database,
+        oracle_config: object,
+        oracle_engine: object,
+        _clean_database: object,
     ) -> None:
         """Test column mapping and filtering features."""
         oracle_config.column_mappings = {

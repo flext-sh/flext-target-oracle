@@ -38,7 +38,7 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
         default_factory=dict, description="Singer state"
     )
 
-    def __init__(self, config: FlextTargetOracleConfig, **data) -> None:
+    def __init__(self, config: FlextTargetOracleConfig, **data: object) -> None:
         """Initialize Oracle Target service with configuration validation."""
         # Create loader instance
         loader = FlextTargetOracleLoader(config)
