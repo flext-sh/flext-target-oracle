@@ -60,7 +60,7 @@ class TestPerformance:
         self,
         performance_config: FlextTargetOracleConfig,
         fake: Faker,
-        _oracle_engine: Engine,  # noqa: ARG002
+        _oracle_engine: Engine,
     ) -> None:
         """Benchmark INSERT throughput with different batch sizes."""
         target = FlextTargetOracle(config=performance_config)
@@ -164,7 +164,7 @@ class TestPerformance:
         self,
         oracle_config: FlextTargetOracleConfig,
         fake: Faker,
-        _oracle_engine: Engine,  # noqa: ARG002
+        _oracle_engine: Engine,
     ) -> None:
         """Compare BULK INSERT vs standard INSERT performance."""
         record_count = 10000
@@ -244,7 +244,7 @@ class TestPerformance:
         self,
         performance_config: FlextTargetOracleConfig,
         fake: Faker,
-        _oracle_engine: Engine,  # noqa: ARG002
+        _oracle_engine: Engine,
     ) -> None:
         """Test memory efficiency with large batches."""
         target = FlextTargetOracle(config=performance_config)
@@ -321,7 +321,7 @@ class TestPerformance:
         self,
         performance_config: FlextTargetOracleConfig,
         fake: Faker,
-        _oracle_engine: Engine,  # noqa: ARG002
+        _oracle_engine: Engine,
     ) -> None:
         """Test performance with multiple concurrent streams."""
         target = FlextTargetOracle(config=performance_config)
@@ -381,7 +381,7 @@ class TestPerformance:
     async def test_scalability(
         self,
         performance_config: FlextTargetOracleConfig,
-        _oracle_engine: Engine,  # noqa: ARG002
+        _oracle_engine: Engine,
     ) -> None:
         """Test scalability with increasing data volume."""
         target = FlextTargetOracle(config=performance_config)

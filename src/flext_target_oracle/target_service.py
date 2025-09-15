@@ -87,7 +87,7 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
             catalog: FlextTypes.Core.Dict = {
                 "streams": [],
             }
-            streams_list: list[dict[str, object]] = catalog["streams"]  # type: ignore[assignment]
+            streams_list: list[dict[str, object]] = catalog["streams"]
 
             for stream_name, schema in self._schemas.items():
                 stream_entry: dict[str, object] = {

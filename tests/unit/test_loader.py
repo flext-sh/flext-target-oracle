@@ -57,8 +57,8 @@ class TestRealOracleLoader:
     def real_loader(
         self,
         oracle_config: FlextTargetOracleConfig,
-        _oracle_engine: Engine,  # noqa: ARG002
-        _clean_database: None,  # noqa: ARG002
+        _oracle_engine: Engine,
+        _clean_database: None,
     ) -> FlextTargetOracleLoader:
         """Create real loader instance connected to Oracle."""
         loader = FlextTargetOracleLoader(oracle_config)
@@ -108,7 +108,7 @@ class TestRealOracleLoader:
         self,
         real_loader: LoaderProtocol,
         simple_schema: FlextTypes.Core.Dict,
-        _oracle_engine: Engine,  # noqa: ARG002
+        _oracle_engine: Engine,
     ) -> None:
         """Test creating a new table in real Oracle."""
         stream_name = "test_users"
