@@ -256,7 +256,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
                     insert_stmt: Insert = insert(table).values(
                         DATA=json.dumps(record),
                         _SDC_EXTRACTED_AT=record.get("_sdc_extracted_at", loaded_at),
-                        _SDC_LOADED_AT=loaded_at
+                        _SDC_LOADED_AT=loaded_at,
                     )
 
                     result = connected_api.execute_statement(insert_stmt)
