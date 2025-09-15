@@ -16,6 +16,8 @@ from typing import ClassVar
 from flext_core import FlextDomainService, FlextResult, FlextTypes
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from pydantic import Field
+from sqlalchemy import MetaData, Table, insert
+from sqlalchemy.sql import Insert
 
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_exceptions import (
@@ -239,27 +241,25 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             loaded_at = datetime.now(UTC)
 
             with self.oracle_api as connected_api:
-                # Use parameterized query with table name validation
+                # Use SQLAlchemy 2.0 Core API - NO STRING CONCATENATION
                 # Validate table name contains only safe characters
                 if not all(c.isalnum() or c in "._" for c in full_table_name):
                     return FlextResult[None].fail("Invalid table name characters")
 
-                # Build INSERT SQL with validated table name
-                insert_sql = (
-                    f"INSERT INTO {full_table_name} "  # noqa: S608
-                    "(DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) "
-                    "VALUES (:data, :extracted_at, :loaded_at)"
-                )
+                # Build INSERT SQL using SQLAlchemy 2.0 Core API - NO STRING CONCATENATION
+                metadata = MetaData()
+                table = Table(full_table_name, metadata)
 
-                # Execute batch using multiple execute calls
+                # Execute batch using SQLAlchemy 2.0 Core API - NO STRING CONCATENATION
                 for record in records:
-                    params = {
-                        "data": json.dumps(record),
-                        "extracted_at": record.get("_sdc_extracted_at", loaded_at),
-                        "loaded_at": loaded_at,
-                    }
+                    # Build proper SQLAlchemy INSERT statement for each record - NO STRING CONCATENATION
+                    insert_stmt: Insert = insert(table).values(
+                        DATA=json.dumps(record),
+                        _SDC_EXTRACTED_AT=record.get("_sdc_extracted_at", loaded_at),
+                        _SDC_LOADED_AT=loaded_at
+                    )
 
-                    result = connected_api.execute(insert_sql, params)
+                    result = connected_api.execute_statement(insert_stmt)
                     if result.is_failure:
                         return FlextResult[None].fail(
                             f"Batch insert failed: {result.error}"
