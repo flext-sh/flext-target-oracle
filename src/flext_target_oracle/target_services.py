@@ -12,10 +12,10 @@ import asyncio
 from datetime import UTC, datetime
 from typing import Protocol
 
-from flext_core import FlextDomainService, FlextResult, FlextTypes
-from flext_db_oracle import FlextDbOracleApi
 from pydantic import Field
 
+from flext_core import FlextDomainService, FlextResult, FlextTypes
+from flext_db_oracle import FlextDbOracleApi
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_models import (
     LoadMethodModel,

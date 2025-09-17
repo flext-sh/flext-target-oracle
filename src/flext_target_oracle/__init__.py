@@ -14,7 +14,6 @@ from flext_meltano import (
     FlextSingerTypes,
     FlextTargetAbstractions,
 )
-
 from flext_target_oracle.target_client import (
     FlextTargetOracle,
     TargetOracle,

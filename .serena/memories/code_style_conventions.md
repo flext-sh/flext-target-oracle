@@ -23,7 +23,7 @@
 - **Clean Architecture**: Foundation → Domain → Application → Infrastructure layers
 - **Import Strategy**: Root-level imports only (from flext_core import X)
 - **No Wrappers**: Use flext-core directly, no compatibility layers
-- **No Any Types**: Explicit type annotations required, no type: ignore
+- **No object Types**: Explicit type annotations required, no type: ignore
 
 ## Naming Conventions
 

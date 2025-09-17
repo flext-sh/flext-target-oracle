@@ -26,7 +26,6 @@ import logging
 import os
 
 from flext_core import FlextLogger, FlextTypes
-
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
 
 # Configure logging for the example

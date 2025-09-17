@@ -8,8 +8,9 @@ from __future__ import annotations
 
 from enum import StrEnum
 
-from flext_core import FlextModels, FlextResult, FlextTypes, FlextValidations
 from pydantic import Field, SecretStr, field_validator
+
+from flext_core import FlextModels, FlextResult, FlextTypes
 
 from .constants import FlextTargetOracleConstants
 
@@ -561,22 +562,19 @@ def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResul
         (config.default_target_schema, "Target schema is required"),
     ]
 
-    # Validate required string fields using FlextValidations
+    # Validate required string fields using direct validation
     for field_value, error_message in required_fields:
-        if not FlextValidations.validate_non_empty_string_func(field_value):
+        if not (field_value and str(field_value).strip()):
             return FlextResult[None].fail(error_message)
 
-    # Validate pool size constraints using FlextValidations number validation
-    min_size_result = FlextValidations.validate_number(config.pool_min_size)
-    if min_size_result.is_failure:
-        return FlextResult[None].fail("Pool min size must be a valid number")
-    if min_size_result.unwrap() < 0:
-        return FlextResult[None].fail("Pool min size must be non-negative")
+    # Validate pool size constraints using direct number validation
+    if not isinstance(config.pool_min_size, (int, float)) or config.pool_min_size < 0:
+        return FlextResult[None].fail("Pool min size must be a non-negative number")
 
-    max_size_result = FlextValidations.validate_number(config.pool_max_size)
-    if max_size_result.is_failure:
+    if not isinstance(config.pool_max_size, (int, float)):
         return FlextResult[None].fail("Pool max size must be a valid number")
-    if max_size_result.unwrap() < min_size_result.unwrap():
+
+    if config.pool_max_size < config.pool_min_size:
         return FlextResult[None].fail(
             "Pool max size must be greater than or equal to pool min size"
         )
@@ -585,9 +583,7 @@ def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResul
     if (
         config.use_ssl
         and config.ssl_wallet_password
-        and not FlextValidations.validate_non_empty_string_func(
-            config.ssl_wallet_location
-        )
+        and not (config.ssl_wallet_location and str(config.ssl_wallet_location).strip())
     ):
         return FlextResult[None].fail(
             "SSL wallet location is required when wallet password is provided"

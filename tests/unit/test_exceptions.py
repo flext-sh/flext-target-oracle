@@ -12,8 +12,8 @@ from datetime import UTC, datetime
 from typing import Never
 
 import pytest
-from flext_core import FlextLogger
 
+from flext_core import FlextLogger
 from flext_target_oracle import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,

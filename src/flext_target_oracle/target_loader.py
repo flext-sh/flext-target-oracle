@@ -13,12 +13,12 @@ import json
 from datetime import UTC, datetime
 from typing import ClassVar
 
-from flext_core import FlextDomainService, FlextResult, FlextTypes
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from pydantic import Field
 from sqlalchemy import MetaData, Table, insert
 from sqlalchemy.sql import Insert
 
+from flext_core import FlextDomainService, FlextResult, FlextTypes
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleConnectionError,
@@ -48,11 +48,11 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
             # Create Oracle API configuration from target config
-            oracle_config = FlextDbOracleConfig(
+            oracle_config = FlextDbOracleModels.OracleConfig(
                 host=config.oracle_host,
                 port=config.oracle_port,
                 name=config.oracle_service,  # Use 'name' instead of 'service_name'
-                user=config.oracle_user,  # Use 'user' instead of 'username'
+                username=config.oracle_user,  # Use 'username' instead of 'user'
                 password=config.oracle_password.get_secret_value()
                 if hasattr(config.oracle_password, "get_secret_value")
                 else str(config.oracle_password),
@@ -152,7 +152,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
                 ddl_sql = self._build_create_table_sql(table_name, schema)
 
                 # Execute DDL using execute method
-                exec_result = connected_api.execute(ddl_sql)
+                exec_result = connected_api.execute_sql(ddl_sql)
                 if exec_result.is_failure:
                     return FlextResult[None].fail(
                         f"Failed to create table: {exec_result.error}"
