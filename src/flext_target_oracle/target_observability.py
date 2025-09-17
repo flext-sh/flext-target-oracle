@@ -10,7 +10,6 @@ import time
 import uuid
 
 from flext_core import FlextLogger, FlextTypes
-
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,

@@ -10,9 +10,9 @@ from decimal import Decimal
 from typing import Protocol
 
 import pytest
-from flext_core import FlextTypes
 from sqlalchemy import Engine, MetaData, Table, func, select, text
 
+from flext_core import FlextTypes
 from flext_target_oracle import (
     FlextTargetOracleConfig,
     FlextTargetOracleConnectionError,

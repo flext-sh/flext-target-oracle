@@ -15,13 +15,13 @@ from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
-from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from pydantic import SecretStr
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.pool import NullPool
 
+from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleConfig,
