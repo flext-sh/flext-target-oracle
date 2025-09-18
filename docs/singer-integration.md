@@ -560,7 +560,7 @@ async def test_singer_tap_integration():
 
 ## Compliance Roadmap
 
-### Version 0.9.0 Requirements
+### Version 0.9.9 Requirements
 
 - [ ] **Implement missing Singer SDK methods**
   - [ ] `_test_connection()`

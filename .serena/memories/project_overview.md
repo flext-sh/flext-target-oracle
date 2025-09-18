@@ -24,7 +24,7 @@ Production-grade Singer target for Oracle Database data loading, built with FLEX
 
 ## Current Status
 
-- **Version**: 0.9.0
+- **Version**: 0.9.9 RC
 - **Documentation**: 95% complete with enterprise-grade standards
 - **Implementation**: Critical security vulnerabilities block production deployment
 - **Priority**: Fix SQL injection vulnerability and implement missing Singer SDK methods

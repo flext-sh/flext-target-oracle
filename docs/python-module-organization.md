@@ -56,7 +56,7 @@ class FlextOracleTargetError(FlextExceptions.Error):
 FlextTargetOracle = FlextOracleTarget
 TargetOracle = FlextOracleTarget
 
-__version__ = "0.9.0"
+__version__ = "0.9.9"
 __all__: FlextTypes.Core.StringList = [
     # Primary implementation
     "FlextOracleTarget",
@@ -97,7 +97,7 @@ from flext_target_oracle.exceptions import (
 # FLEXT core re-exports for convenience
 from flext_core import FlextResult
 
-__version__ = "0.9.0"
+__version__ = "0.9.9"
 ```
 
 #### **Domain Configuration Layer**
@@ -817,9 +817,9 @@ class FlextOracleTargetConfig(FlextConfig):
 ### **Version Migration Strategy**
 
 ```python
-# Version 0.9.0 → 0.9.0 Migration Plan
+# Version 0.9.9 → 0.9.9 Migration Plan
 class TargetMigration_0_9_to_1_0:
-    """Migration from current structure to production-ready 0.9.0."""
+    """Migration from current structure to production-ready 0.9.9."""
 
     def migrate_exception_handling(self) -> FlextResult[None]:
         """Consolidate duplicated exceptions into single hierarchy."""
@@ -923,7 +923,7 @@ def _write_record(self, record: Record) -> None:
 
 ## 🚀 **Future Evolution Roadmap**
 
-### **Version 0.9.0 (Production Ready)**
+### **Version 0.9.9 (Production Ready)**
 
 **Module Structure Improvements**:
 
@@ -966,7 +966,7 @@ src/flext_target_oracle/
     └── parallel.py         # Parallel processing optimization
 ```
 
-### **Version 0.9.0 (Next Generation)**
+### **Version 0.9.9 (Next Generation)**
 
 **Module Architecture Evolution**:
 

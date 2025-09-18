@@ -81,8 +81,30 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
         self.schemas = {}
         self.state = {}
 
-    def execute(self) -> FlextResult[FlextTypes.Core.Dict]:
-        """Execute Oracle Target - implements FlextDomainService abstract method."""
+    def execute(self, payload: str | None = None) -> FlextResult[FlextTypes.Core.Dict]:
+        """Execute Oracle Target - implements FlextDomainService abstract method.
+
+        Backwards-compat: accept optional string payload (Singer message JSON). If
+        payload is provided, attempt to parse and process as a single message.
+        """
+        # If a payload (Singer message) is provided, try to process it
+        if payload is not None:
+            try:
+                # parse JSON string into dict
+                msg = __import__("json").loads(payload)
+                # Process single message if dict-like
+                if isinstance(msg, dict):
+                    proc = self.process_singer_message(msg)
+                    return FlextResult[FlextTypes.Core.Dict].ok(
+                        {"processed": proc.is_success}
+                    )
+                # If payload wasn't a dict, return a success with no-op
+                return FlextResult[FlextTypes.Core.Dict].ok({"processed": False})
+            except Exception as e:
+                return FlextResult[FlextTypes.Core.Dict].fail(
+                    f"Failed to process payload: {e}"
+                )
+
         connection_result = self.test_connection()
         if connection_result.is_failure:
             return FlextResult[FlextTypes.Core.Dict].fail(
@@ -98,6 +120,10 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
                 "target_schema": self.config.default_target_schema,
             }
         )
+
+    def initialize(self) -> FlextResult[None]:
+        """Compatibility shim for older tests: perform a connection test."""
+        return self.test_connection()
 
     # === Core Target Operations ===
 

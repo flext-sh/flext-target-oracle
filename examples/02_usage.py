@@ -4,7 +4,6 @@ This example demonstrates how to use the Oracle target to load
 Singer-formatted data into an Oracle database.
 """
 
-import asyncio
 import json
 from pathlib import Path
 
@@ -25,7 +24,7 @@ def load_singer_messages() -> list[dict[str, object]]:
         return [json.loads(line) for line in f if line.strip()]
 
 
-async def main() -> None:
+def main() -> None:
     """Run the example."""
     # Load configuration
     config_dict = load_config()
@@ -68,4 +67,4 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

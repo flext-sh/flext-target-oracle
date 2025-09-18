@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 
 import json
 import time
+from typing import cast
 
 import pytest
 from sqlalchemy import text
@@ -43,47 +44,50 @@ class TestOracleIntegration:
         key_properties = simple_schema["key_properties"]
 
         # Ensure table is created (synchronous API returning FlextResult)
-        result = connected_loader.ensure_table_exists(
+        schema_dict = cast("dict[str, object]", schema)
+        key_props = cast("list[str] | None", key_properties)
+
+        table_res = connected_loader.ensure_table_exists(
             stream_name,
-            schema,
-            key_properties,
+            schema_dict,
+            key_props,
         )
-        assert result.is_success
+        assert table_res.is_success
 
         # Verify table exists in database
         with oracle_engine.connect() as conn:
-            result = conn.execute(
+            cursor = conn.execute(
                 text(
                     """
-                  SELECT COUNT(*)
-                  FROM user_tables
-                  WHERE table_name = :table_name
-                  """,
+                    SELECT COUNT(*)
+                    FROM user_tables
+                    WHERE table_name = :table_name
+                    """,
                 ),
                 {"table_name": "TEST_USERS"},
             )
-            assert result.scalar() == 1
+            assert cursor.scalar() == 1
 
             # Verify columns
-            result = conn.execute(
+            cursor = conn.execute(
                 text(
                     """
-                  SELECT column_name, data_type
-                  FROM user_tab_columns
-                  WHERE table_name = :table_name
-                  ORDER BY column_id
-                  """,
+                    SELECT column_name, data_type
+                    FROM user_tab_columns
+                    WHERE table_name = :table_name
+                    ORDER BY column_id
+                    """,
                 ),
                 {"table_name": "TEST_USERS"},
             )
-            columns = {row[0]: row[1] for row in result}
+            columns = {row[0]: row[1] for row in cursor}
 
-            # Should have schema columns + SDC columns
-            assert "ID" in columns
-            assert "NAME" in columns
-            assert "EMAIL" in columns
-            assert "_SDC_EXTRACTED_AT" in columns
-            assert "_SDC_LOADED_AT" in columns
+        # Should have schema columns + SDC columns
+        assert "ID" in columns
+        assert "NAME" in columns
+        assert "EMAIL" in columns
+        assert "_SDC_EXTRACTED_AT" in columns
+        assert "_SDC_LOADED_AT" in columns
 
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
@@ -98,8 +102,14 @@ class TestOracleIntegration:
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
 
+        schema = cast("dict[str, object]", schema)
+        key_properties = cast("list[str] | None", key_properties)
+
         # Create table
-        connected_loader.ensure_table_exists(stream_name, schema, key_properties)
+        create_res = connected_loader.ensure_table_exists(
+            stream_name, schema, key_properties
+        )
+        assert create_res.is_success
 
         # Insert records
         records = [
@@ -112,10 +122,10 @@ class TestOracleIntegration:
 
         # Verify data in database
         with oracle_engine.connect() as conn:
-            result = conn.execute(
-                text("SELECT id, name, email FROM test_insert ORDER BY id"),
+            cursor = conn.execute(
+                text("SELECT id, name, email FROM test_insert ORDER BY id")
             )
-            rows = list(result)
+            rows = list(cursor)
 
             assert len(rows) == 2
             assert rows[0] == (1, "John Doe", "john@example.com")
@@ -142,6 +152,8 @@ class TestOracleIntegration:
         stream_name = "test_merge"
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
+        schema = cast("dict[str, object]", schema)
+        key_properties = cast("list[str] | None", key_properties)
 
         # Create table and insert initial data
         table_res = loader.ensure_table_exists(stream_name, schema, key_properties)
@@ -249,6 +261,8 @@ class TestOracleIntegration:
         stream_name = "test_json"
         schema = nested_schema["schema"]
         key_properties = nested_schema["key_properties"]
+        schema = cast("dict[str, object]", schema)
+        key_properties = cast("list[str] | None", key_properties)
 
         # Create table
         create_res = loader.ensure_table_exists(stream_name, schema, key_properties)
@@ -377,10 +391,11 @@ class TestOracleIntegration:
         oracle_config = oracle_config.model_copy(update={"truncate_before_load": True})
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
-
         stream_name = "test_truncate"
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
+        schema = cast("dict[str, object]", schema)
+        key_properties = cast("list[str] | None", key_properties)
 
         # Create table and insert initial data
         create_res = loader.ensure_table_exists(stream_name, schema, key_properties)
@@ -431,10 +446,11 @@ class TestOracleIntegration:
 
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
-
         stream_name = "test_indexes"
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
+        schema = cast("dict[str, object]", schema)
+        key_properties = cast("list[str] | None", key_properties)
 
         loader.ensure_table_exists(stream_name, schema, key_properties)
 
