@@ -30,6 +30,7 @@ def _flag(value: str) -> None:
 
 
 def test_cli_service_uses_dispatcher_when_flag_enabled() -> None:
+    """Test that CLI service uses dispatcher when flag is enabled."""
     with _flag("1"):
         service = FlextTargetOracleCliService()
         assert service._dispatcher is not None
@@ -39,6 +40,7 @@ def test_cli_service_uses_dispatcher_when_flag_enabled() -> None:
 
 
 def test_cli_service_falls_back_to_bus_when_flag_disabled() -> None:
+    """Test that CLI service falls back to bus when flag is disabled."""
     with _flag("0"):
         service = FlextTargetOracleCliService()
         assert service._dispatcher is None

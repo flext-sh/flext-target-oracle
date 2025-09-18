@@ -16,8 +16,10 @@ import sys
 import time
 from datetime import UTC
 
+from pydantic import SecretStr
+
 from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
 
 # Configure production-grade logging
 logging.basicConfig(
@@ -33,11 +35,11 @@ class ProductionConfig:
     """Production configuration management with environment variables."""
 
     @staticmethod
-    def create_from_environment() -> FlextOracleTargetConfig:
+    def create_from_environment() -> FlextTargetOracleConfig:
         """Create production configuration from environment variables.
 
         Returns:
-            FlextOracleTargetConfig: Production-ready configuration
+            FlextTargetOracleConfig: Production-ready configuration
 
         Raises:
             ValueError: If required environment variables are missing
@@ -74,9 +76,21 @@ class ProductionConfig:
                 if not val
             ]
             msg = f"Missing required environment variables: {', '.join(missing)}"
-            raise ValueError(
-                msg,
-            )
+            raise ValueError(msg)
+
+        # Type guards to help MyPy understand these are non-None after validation
+        if oracle_host is None:
+            msg = "ORACLE_HOST environment variable is required"
+            raise ValueError(msg)
+        if oracle_service is None:
+            msg = "ORACLE_SERVICE environment variable is required"
+            raise ValueError(msg)
+        if oracle_user is None:
+            msg = "ORACLE_USER environment variable is required"
+            raise ValueError(msg)
+        if oracle_password is None:
+            msg = "ORACLE_PASSWORD environment variable is required"
+            raise ValueError(msg)
 
         # Optional parameters with production defaults
         oracle_port = int(os.getenv("ORACLE_PORT", "1521"))
@@ -88,12 +102,12 @@ class ProductionConfig:
         load_method_str = os.getenv("LOAD_METHOD", "BULK_INSERT").upper()
         load_method = getattr(LoadMethod, load_method_str, LoadMethod.BULK_INSERT)
 
-        config = FlextOracleTargetConfig(
+        config = FlextTargetOracleConfig(
             oracle_host=oracle_host,
             oracle_port=oracle_port,
             oracle_service=oracle_service,
             oracle_user=oracle_user,
-            oracle_password=oracle_password,
+            oracle_password=SecretStr(oracle_password),
             default_target_schema=default_target_schema,
             load_method=load_method,
             batch_size=batch_size,
@@ -124,7 +138,7 @@ class ProductionConfig:
 class ProductionTargetManager:
     """Production-grade target manager with comprehensive error handling."""
 
-    def __init__(self, config: FlextOracleTargetConfig) -> None:
+    def __init__(self, config: FlextTargetOracleConfig) -> None:
         """Initialize production target manager.
 
         Args:
@@ -132,7 +146,7 @@ class ProductionTargetManager:
 
         """
         self.config = config
-        self.target: FlextOracleTarget | None = None
+        self.target: FlextTargetOracle | None = None
         self.shutdown_requested = False
 
         # Setup signal handlers for graceful shutdown
@@ -164,7 +178,7 @@ class ProductionTargetManager:
 
             # Step 2: Initialize target
             logger.info("Creating Oracle target instance")
-            self.target = FlextOracleTarget(self.config)
+            self.target = FlextTargetOracle(self.config)
 
             # Step 3: Test connectivity
             logger.info("Testing Oracle database connectivity")

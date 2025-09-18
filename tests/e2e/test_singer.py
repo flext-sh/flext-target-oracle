@@ -44,7 +44,9 @@ class TestSingerWorkflowE2E:
         oracle_config.create_foreign_key_indexes = True
 
         target = FlextTargetOracle(config=oracle_config)
-        await target.initialize()
+        # Test connection to ensure target is ready
+        connection_result = target.test_connection()
+        assert connection_result.is_success
 
         # Stream 1: Customers
         customer_schema = {
@@ -379,7 +381,9 @@ class TestSingerWorkflowE2E:
         oracle_config.sdc_mode = "merge"
 
         target = FlextTargetOracle(config=oracle_config)
-        await target.initialize()
+        # Test connection to ensure target is ready
+        connection_result = target.test_connection()
+        assert connection_result.is_success
 
         # Initial schema
         schema_v1 = {
@@ -538,7 +542,9 @@ class TestSingerWorkflowE2E:
         oracle_config.sdc_mode = "append"  # Faster for bulk loads
 
         target = FlextTargetOracle(config=oracle_config)
-        await target.initialize()
+        # Test connection to ensure target is ready
+        connection_result = target.test_connection()
+        assert connection_result.is_success
 
         # Schema for high-volume events
         schema = {

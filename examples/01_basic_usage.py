@@ -6,8 +6,8 @@ including configuration, initialization, and basic Singer message processing usi
 FLEXT ecosystem patterns.
 
 Key Concepts Demonstrated:
-    - FlextOracleTargetConfig creation and validation
-    - FlextOracleTarget initialization and setup
+    - FlextTargetOracleConfig creation and validation
+    - FlextTargetOracle initialization and setup
     - Singer message processing (SCHEMA, RECORD, STATE)
     - FlextResult railway-oriented error handling
     - Basic logging and error management
@@ -25,19 +25,21 @@ import asyncio
 import logging
 import os
 
+from pydantic import SecretStr
+
 from flext_core import FlextLogger, FlextTypes
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
 
 # Configure logging for the example
 logging.basicConfig(level=logging.INFO)
 logger = FlextLogger(__name__)
 
 
-def create_configuration() -> FlextOracleTargetConfig:
+def create_configuration() -> FlextTargetOracleConfig:
     """Create basic Oracle target configuration.
 
     Returns:
-      FlextOracleTargetConfig: Validated configuration for Oracle target
+      FlextTargetOracleConfig: Validated configuration for Oracle target
 
     Note:
       Using default Oracle XE configuration for simplicity. In production,
@@ -46,12 +48,12 @@ def create_configuration() -> FlextOracleTargetConfig:
     """
     logger.info("Creating Oracle target configuration")
 
-    config = FlextOracleTargetConfig(
+    config = FlextTargetOracleConfig(
         oracle_host="localhost",
         oracle_port=1521,
         oracle_service="XE",
         oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "system"),
-        oracle_password=os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
+        oracle_password=SecretStr(os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", "")),
         default_target_schema="FLEXT_EXAMPLES",
         load_method=LoadMethod.INSERT,
         batch_size=100,  # Small batch size for demo
@@ -182,13 +184,13 @@ async def demonstrate_basic_usage() -> None:
 
         # Step 2: Initialize target
         logger.info("Step 2: Initializing Oracle target")
-        target = FlextOracleTarget(config)
+        target = FlextTargetOracle(config)
 
         # Optional: Test connection
         logger.info("Testing Oracle connection")
-        connection_test = target._test_connection_impl()
-        if not connection_test:
-            logger.error("Oracle connection test failed")
+        connection_result = target.test_connection()
+        if connection_result.is_failure:
+            logger.error(f"Oracle connection test failed: {connection_result.error}")
             return
 
         logger.info("Oracle connection test successful")
@@ -197,7 +199,7 @@ async def demonstrate_basic_usage() -> None:
         logger.info("Step 3: Processing SCHEMA message")
         schema_message = create_sample_schema_message()
 
-        schema_result = await target.process_singer_message(schema_message)
+        schema_result = target.process_singer_message(schema_message)
         if schema_result.is_failure:
             logger.error(f"Schema processing failed: {schema_result.error}")
             return
@@ -261,11 +263,11 @@ async def demonstrate_error_handling() -> None:
 
     # Create invalid configuration to show validation errors
     try:
-        invalid_config = FlextOracleTargetConfig(
+        invalid_config = FlextTargetOracleConfig(
             oracle_host="",  # Invalid empty host
             oracle_service="XE",
             oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
-            oracle_password=os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
+            oracle_password=SecretStr(os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", "")),
         )
 
         validation_result = invalid_config.validate_domain_rules()
@@ -277,7 +279,7 @@ async def demonstrate_error_handling() -> None:
 
     # Demonstrate processing invalid messages
     config = create_configuration()
-    target = FlextOracleTarget(config)
+    target = FlextTargetOracle(config)
 
     # Invalid message type
     invalid_message = {"type": "INVALID", "data": "test"}

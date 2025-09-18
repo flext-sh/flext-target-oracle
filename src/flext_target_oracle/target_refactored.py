@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import sys
+from typing import cast
 
 from pydantic import Field, PrivateAttr
 
@@ -64,15 +65,16 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
         object.__setattr__(self, "_use_dispatcher", use_dispatcher)
 
         if use_dispatcher:
-            dispatcher: FlextDispatcher | None = FlextDispatcher(bus=self.command_bus)
-            register_result = dispatcher.register_handler(self.command_handler)
+            dispatcher_instance = FlextDispatcher(bus=self.command_bus)
+            register_result = dispatcher_instance.register_handler(self.command_handler)
             if register_result.is_failure:
                 self.log_error(
                     f"Dispatcher registration failed: {register_result.error}"
                 )
                 self.command_bus.register_handler(self.command_handler)
-                dispatcher = None
-            object.__setattr__(self, "_dispatcher", dispatcher)
+                object.__setattr__(self, "_dispatcher", None)
+            else:
+                object.__setattr__(self, "_dispatcher", dispatcher_instance)
         else:
             self.command_bus.register_handler(self.command_handler)
             object.__setattr__(self, "_dispatcher", None)
@@ -190,10 +192,13 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
     def _dispatch(self, command: object) -> FlextResult[object]:
         """Dispatch commands via dispatcher when enabled."""
         if self._dispatcher is not None:
-            metadata: dict[str, object] = {
-                "command": command.__class__.__name__,
-                "source": self.__class__.__name__,
-            }
+            metadata = cast(
+                "dict[str, object]",
+                {
+                    "command": command.__class__.__name__,
+                    "source": self.__class__.__name__,
+                },
+            )
             dispatch_result = self._dispatcher.dispatch(
                 command,
                 metadata=metadata,
