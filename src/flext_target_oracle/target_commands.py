@@ -207,12 +207,7 @@ class OracleTargetAboutCommand(FlextModels.Command):
             if self.format == "json":
                 formatted_output = json.dumps(about_info, indent=2)
             elif self.format == "yaml":
-                try:
-                    formatted_output = yaml.dump(about_info, default_flow_style=False)
-                except ImportError:
-                    return FlextResult[str].fail(
-                        "YAML format requires PyYAML dependency"
-                    )
+                formatted_output = yaml.dump(about_info, default_flow_style=False)
             else:
                 # Text format - extract configuration data safely
                 config_data = about_info.get("configuration", {})

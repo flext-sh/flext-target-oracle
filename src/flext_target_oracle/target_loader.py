@@ -9,7 +9,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import contextlib
 import json
+import logging
 from datetime import UTC, datetime
 from typing import ClassVar
 
@@ -23,6 +25,9 @@ from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleConnectionError,
 )
+
+# Module logger
+_logger = logging.getLogger(__name__)
 
 
 class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
@@ -111,6 +116,70 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
         except Exception as e:
             self.log_error("Failed to connect to Oracle", extra={"error": str(e)})
             return FlextResult[None].fail(f"Connection failed: {e}")
+
+    def connect(self) -> FlextResult[None]:
+        """Establish connection using underlying FlextDbOracleApi.
+
+        Exposed for tests and parity with previous loader helpers.
+        """
+        try:
+            # Some mocks/implementations return FlextResult, others may return truthy values
+            result = self.oracle_api.connect()
+            # If result looks like a FlextResult check for failure
+            if hasattr(result, "is_failure") and getattr(result, "is_failure"):
+                return FlextResult[None].fail(
+                    f"Connect failed: {getattr(result, 'error', None)}"
+                )
+
+            # Mark API as connected when successful
+            with contextlib.suppress(Exception):
+                setattr(self.oracle_api, "is_connected", True)
+
+            return FlextResult[None].ok(None)
+        except Exception as e:
+            _logger.exception("Failed to connect loader")
+            self.log_error("Failed to connect loader", extra={"error": str(e)})
+            return FlextResult[None].fail(f"Connect failed: {e}")
+
+    def disconnect(self) -> FlextResult[None]:
+        """Disconnect underlying FlextDbOracleApi (exposed for tests)."""
+        try:
+            result = self.oracle_api.disconnect()
+            if hasattr(result, "is_failure") and getattr(result, "is_failure"):
+                return FlextResult[None].fail(
+                    f"Disconnect failed: {getattr(result, 'error', None)}"
+                )
+
+            with contextlib.suppress(Exception):
+                setattr(self.oracle_api, "is_connected", False)
+
+            return FlextResult[None].ok(None)
+        except Exception as e:
+            _logger.exception("Failed to disconnect loader")
+            self.log_error("Failed to disconnect loader", extra={"error": str(e)})
+            return FlextResult[None].fail(f"Disconnect failed: {e}")
+
+    def insert_records(
+        self, stream_name: str, records: list[FlextTypes.Core.Dict]
+    ) -> FlextResult[None]:
+        """Insert multiple records - convenience wrapper used by tests.
+
+        Appends records to the internal buffer via load_record and flushes the batch.
+        """
+        try:
+            for record in records:
+                # Use existing load_record logic which handles buffering and auto-flush
+                load_res = self.load_record(stream_name, record)
+                if load_res.is_failure:
+                    return FlextResult[None].fail(
+                        f"Failed to load record: {load_res.error}"
+                    )
+
+            # Ensure remaining records are flushed
+            return self._flush_batch(stream_name)
+        except Exception as e:
+            self.log_error("Failed to insert records", extra={"error": str(e)})
+            return FlextResult[None].fail(f"Insert records failed: {e}")
 
     def ensure_table_exists(
         self,

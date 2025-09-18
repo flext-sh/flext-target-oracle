@@ -9,9 +9,11 @@ SPDX-License-Identifier: MIT
 
 import logging
 from datetime import UTC, datetime
+from types import TracebackType
 from typing import Never
 
 import pytest
+from _pytest.logging import LogCaptureFixture
 
 from flext_core import FlextLogger
 from flext_target_oracle import (
@@ -154,7 +156,7 @@ class TestRealOracleExceptions:
         assert "Invalid schema structure" in str(exc)
         assert exc.stream_name == "users"
         assert exc.schema_hash == "abc123def456"
-        assert len(exc.validation_errors) == 2
+        assert len(exc.validation_errors or []) == 2
         assert exc.error_code == "SCHEMA_ERROR"
 
     def test_schema_error_minimal(self) -> None:
@@ -183,7 +185,7 @@ class TestRealOracleExceptions:
         assert "Failed to process record" in str(exc)
         assert exc.stream_name == "orders"
         assert exc.record_count == 1500
-        assert len(exc.error_records) == 2
+        assert len(exc.error_records or []) == 2
         assert exc.operation == "bulk_insert"
         assert exc.error_code == "PROCESSING_ERROR"
 
@@ -240,7 +242,7 @@ class TestRealOracleExceptions:
         with pytest.raises(Exception):
             raise_connection_error()
 
-    def test_exception_context_manager(self) -> Never:
+    def test_exception_context_manager(self) -> None:
         """Test using exceptions in context managers."""
 
         class MockResource:
@@ -248,7 +250,10 @@ class TestRealOracleExceptions:
                 return self
 
             def __exit__(
-                self, exc_type: object, exc_val: object, exc_tb: object
+                self,
+                exc_type: type[BaseException] | None,
+                exc_val: BaseException | None,
+                exc_tb: TracebackType | None,
             ) -> bool:
                 if exc_type is FlextTargetOracleConnectionError:
                     # Handle connection errors
@@ -262,7 +267,7 @@ class TestRealOracleExceptions:
         with pytest.raises(FlextTargetOracleConnectionError), MockResource():
             _raise_connection_error()
 
-    def test_exception_logging(self, caplog: object) -> None:
+    def test_exception_logging(self, caplog: LogCaptureFixture) -> None:
         """Test method."""
         """Test exception logging behavior."""
         with caplog.at_level(logging.ERROR):
@@ -325,7 +330,7 @@ class TestRealOracleExceptions:
         after = datetime.now(UTC)
 
         assert exc.timestamp is not None
-        assert before <= exc.timestamp <= after
+        assert before.timestamp() <= exc.timestamp <= after.timestamp()
 
     def test_complex_error_scenario(self) -> None:
         """Test method."""
@@ -357,9 +362,17 @@ class TestRealOracleExceptions:
         )
 
         assert exc.record_count == 1000
-        assert len(exc.error_records) == 3
-        assert exc.context["batch_id"] == "batch-001"
-        assert exc.context["error_summary"]["validation_errors"] == 10
+        assert len(exc.error_records or []) == 3
+        assert (
+            exc.context
+            and isinstance(exc.context, dict)
+            and exc.context["batch_id"] == "batch-001"
+        )
+        assert (
+            exc.context
+            and isinstance(exc.context, dict)
+            and exc.context["error_summary"]["validation_errors"] == 10
+        )
 
     def test_authentication_error_methods(self) -> None:
         """Test method."""
@@ -428,8 +441,8 @@ class TestRealOracleExceptions:
             },
         )
 
-        assert len(exc.validation_errors) == 3
-        assert exc.context["breaking_changes"] is True
+        assert len(exc.validation_errors or []) == 3
+        assert exc.context and exc.context["breaking_changes"] is True
 
     def test_processing_error_bulk_details(self) -> None:
         """Test method."""
@@ -454,6 +467,14 @@ class TestRealOracleExceptions:
         )
 
         assert exc.record_count == 10000
-        assert len(exc.error_records) == 5
-        assert exc.context["successful_records"] == 9950
-        assert exc.context["performance"]["records_per_second"] == 5000
+        assert len(exc.error_records or []) == 5
+        assert (
+            exc.context
+            and isinstance(exc.context, dict)
+            and exc.context["successful_records"] == 9950
+        )
+        assert (
+            exc.context
+            and isinstance(exc.context, dict)
+            and exc.context["performance"]["records_per_second"] == 5000
+        )

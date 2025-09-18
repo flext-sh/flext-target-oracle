@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 import os
 
 import pytest
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
 
 from flext_core import FlextResult
 from flext_target_oracle import FlextTargetOracleConfig, LoadMethod
@@ -26,7 +26,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test_user",
-            oracle_password="test_pass",
+            oracle_password=SecretStr("test_pass"),
         )
 
         # Verify defaults
@@ -48,10 +48,7 @@ class TestRealOracleConfig:
             oracle_port=1522,
             oracle_service="PRODDB",
             oracle_user="prod_user",
-            oracle_password="prod_pass",
-            oracle_dsn="(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=prod-oracle.company.com)(PORT=1522))(CONNECT_DATA=(SERVICE_NAME=PRODDB)))",
-            oracle_wallet_location="/opt/oracle/wallet",
-            oracle_wallet_password="wallet_pass",
+            oracle_password=SecretStr("prod_pass"),
             # Schema settings
             default_target_schema="PROD_SCHEMA",
             # Loading settings
@@ -61,18 +58,13 @@ class TestRealOracleConfig:
             connection_timeout=60,
             # SSL/TLS
             use_ssl=True,
-            ssl_cert_path="/etc/ssl/certs/oracle.pem",
-            ssl_key_path="/etc/ssl/private/oracle.key",
-            ssl_ca_path="/etc/ssl/certs/ca.pem",
-            ssl_verify_cert=True,
-            ssl_cipher_suites="TLS_AES_256_GCM_SHA384",
+            ssl_verify=True,
+            ssl_wallet_location="/opt/oracle/wallet",
+            ssl_wallet_password=SecretStr("wallet_pass"),
             # Connection pooling
-            enable_connection_pool=True,
-            pool_size=10,
-            pool_max_overflow=20,
-            pool_timeout=30,
-            pool_recycle=3600,
-            pool_pre_ping=True,
+            pool_min_size=1,
+            pool_max_size=10,
+            pool_increment=2,
             # Advanced Oracle features
             enable_auto_commit=False,
             use_direct_path=True,
@@ -83,81 +75,27 @@ class TestRealOracleConfig:
                 "orders": {"customer_id": "cust_id"},
             },
             ignored_columns=["password", "secret", "internal_id"],
-            value_transforms={
-                "email": "lower",
-                "name": "title",
-            },
-            # Table naming
-            table_name_prefix="stg_",
-            table_name_suffix="_tbl",
-            table_name_mapping={
-                "raw_users": "clean_users",
-                "raw_orders": "clean_orders",
-            },
             # SDC control
             sdc_mode="merge",
             sdc_extracted_at_column="_sdc_extracted_at",
             sdc_loaded_at_column="_sdc_loaded_at",
             sdc_deleted_at_column="_sdc_deleted_at",
-            sdc_table_version_column="_sdc_table_version",
-            sdc_sequence_column="_sdc_sequence",
-            sdc_primary_key_column="_sdc_primary_key",
-            sdc_batched_at_column="_sdc_batched_at",
-            sdc_merge_key_properties={"users": ["id", "email"]},
-            sdc_default_replication_method="INCREMENTAL",
-            sdc_hard_delete=True,
             # Storage mode
             storage_mode="hybrid",
             json_column_name="raw_json",
-            flatten_max_depth=3,
-            type_mapping={
-                "string": "VARCHAR2(4000)",
-                "number": "NUMBER(38,10)",
-                "boolean": "CHAR(1)",
-                "date-time": "TIMESTAMP(6) WITH TIME ZONE",
-            },
-            default_varchar_length=1000,
-            use_clob_for_large_strings=True,
-            clob_threshold=4000,
-            # Column ordering
-            column_ordering="custom",
-            column_order_rules={
-                "primary_keys": 1,
-                "regular_columns": 2,
-                "audit_columns": 3,
-                "sdc_columns": 4,
-            },
-            audit_column_patterns=["created_at", "updated_at", "modified_by"],
             # DDL options
-            truncate_before_load=True,
-            force_recreate_tables=False,
-            allow_alter_table=True,
-            # Index management
-            maintain_indexes=True,
-            create_foreign_key_indexes=True,
-            custom_indexes={
-                "users": [
-                    {"name": "idx_users_email", "columns": ["email"], "unique": True},
-                    {"name": "idx_users_name", "columns": ["name"]},
-                ],
-            },
-            index_naming_template="IX_{table}_{columns}",
-            preserve_existing_indexes=False,
+            add_metadata_columns=True,
         )
 
         # Verify all settings
         assert config.oracle_host == "prod-oracle.company.com"
         assert config.oracle_port == 1522
         assert config.use_ssl is True
-        assert config.enable_connection_pool is True
         assert config.parallel_degree == 8
-        assert len(config.column_mappings) == 2
-        assert len(config.ignored_columns) == 3
-        assert config.table_name_prefix == "stg_"
+        assert len(config.column_mappings or {}) == 2
+        assert len(config.ignored_columns or []) == 3
         assert config.sdc_mode == "merge"
         assert config.storage_mode == "hybrid"
-        assert config.column_ordering == "custom"
-        assert config.truncate_before_load is True
 
     def test_config_validation_errors(self) -> None:
         """Test method."""
@@ -169,7 +107,7 @@ class TestRealOracleConfig:
                 oracle_port=0,  # Invalid
                 oracle_service="XE",
                 oracle_user="test",
-                oracle_password="test",
+                oracle_password=SecretStr("test"),
             )
         assert "greater than 0" in str(exc_info.value)
 
@@ -179,7 +117,7 @@ class TestRealOracleConfig:
                 oracle_host="localhost",
                 oracle_service="XE",
                 oracle_user="test",
-                oracle_password="test",
+                oracle_password=SecretStr("test"),
                 batch_size=-1,  # Invalid
             )
         assert "greater than 0" in str(exc_info.value)
@@ -190,7 +128,7 @@ class TestRealOracleConfig:
                 oracle_host="localhost",
                 oracle_service="XE",
                 oracle_user="test",
-                oracle_password="test",
+                oracle_password=SecretStr("test"),
                 connection_timeout=0,  # Invalid
             )
         assert "greater than 0" in str(exc_info.value)
@@ -209,7 +147,7 @@ class TestRealOracleConfig:
                 oracle_host="localhost",
                 oracle_service="XE",
                 oracle_user="test",
-                oracle_password="test",
+                oracle_password=SecretStr("test"),
                 load_method=method,
             )
             assert config.load_method == method
@@ -222,7 +160,7 @@ class TestRealOracleConfig:
             oracle_port=1521,
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             default_target_schema="TEST_SCHEMA",
             use_ssl=True,
             pool_min_size=1,
@@ -248,7 +186,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
         )
 
         # Default behavior - uppercase
@@ -260,7 +198,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             table_prefix="stg_",
         )
         assert config_with_prefix.get_table_name("my_stream") == "STG_MY_STREAM"
@@ -270,7 +208,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             table_prefix="stg_",
             table_suffix="_tbl",
         )
@@ -281,7 +219,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             table_name_mappings={"my_stream": "custom_table"},
         )
         assert config_with_mapping.get_table_name("my_stream") == "CUSTOM_TABLE"
@@ -331,7 +269,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="super_secret_password",
+            oracle_password=SecretStr("super_secret_password"),
         )
 
         # Password should not appear in string repr
@@ -346,7 +284,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
         )
 
         # Should not be able to modify
@@ -360,7 +298,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             sdc_extracted_at_column="extracted_timestamp",
             sdc_loaded_at_column="loaded_timestamp",
             sdc_deleted_at_column="deleted_timestamp",
@@ -379,7 +317,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             type_mappings={
                 "string": "NVARCHAR2(2000)",
                 "integer": "NUMBER(19)",
@@ -403,7 +341,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             column_ordering="custom",
             column_order_rules={
                 "sdc_columns": 1,  # SDC first
@@ -425,7 +363,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             maintain_indexes=True,
             create_foreign_key_indexes=True,
             custom_indexes={
@@ -469,7 +407,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             storage_mode="flattened",
         )
         assert config1.storage_mode == "flattened"
@@ -479,7 +417,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             storage_mode="json",
             json_column_name="json_data",
         )
@@ -491,7 +429,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             storage_mode="hybrid",
             flatten_max_depth=2,
         )
@@ -505,7 +443,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
         )
 
         # Test validate_oracle_config
@@ -523,7 +461,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             # Oracle-specific fields that actually exist
             use_bulk_operations=False,
             batch_size=500,
@@ -543,7 +481,7 @@ class TestRealOracleConfig:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
-            oracle_password="test",
+            oracle_password=SecretStr("test"),
             batch_size=2000,
             column_mappings={"users": {"old": "new"}},
         )

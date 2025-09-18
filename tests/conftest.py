@@ -11,6 +11,7 @@ import time
 from collections.abc import AsyncGenerator, Generator
 from contextlib import contextmanager
 from pathlib import Path
+from typing import cast
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
@@ -21,7 +22,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.pool import NullPool
 
 from flext_core import FlextLogger, FlextResult, FlextTypes
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleConfig,
@@ -222,7 +223,7 @@ def oracle_config() -> FlextTargetOracleConfig:
         oracle_port=ORACLE_PORT,
         oracle_service=ORACLE_SERVICE,
         oracle_user=TEST_SCHEMA,
-        oracle_password="test_password",
+        oracle_password=SecretStr("test_password"),
         default_target_schema=TEST_SCHEMA,
         batch_size=1000,
         load_method=LoadMethod.INSERT,
@@ -240,13 +241,14 @@ def oracle_config() -> FlextTargetOracleConfig:
 def oracle_api(oracle_config: FlextTargetOracleConfig) -> FlextDbOracleApi:
     """Create mocked FlextDbOracleApi instance."""
     # Create real config for reference
-    db_config = FlextDbOracleConfig(
+    db_config = FlextDbOracleModels.OracleConfig(
         host=oracle_config.oracle_host,
         port=oracle_config.oracle_port,
-        service_name=oracle_config.oracle_service,
+        name=oracle_config.oracle_service,
         username=oracle_config.oracle_user,
-        password=SecretStr(oracle_config.oracle_password),
-        oracle_schema=oracle_config.default_target_schema,
+        password=oracle_config.oracle_password.get_secret_value()
+        if hasattr(oracle_config.oracle_password, "get_secret_value")
+        else str(oracle_config.oracle_password),
     )
 
     # Create mock API with common method responses
@@ -298,7 +300,7 @@ def sample_config() -> FlextTargetOracleConfig:
         oracle_port=1521,
         oracle_service="XE",
         oracle_user="test_user",
-        oracle_password="test_password",
+        oracle_password=SecretStr("test_password"),
         default_target_schema="TEST_SCHEMA",
         batch_size=1000,
         load_method=LoadMethod.INSERT,
@@ -644,8 +646,8 @@ def large_dataset() -> list[FlextTypes.Core.Dict]:
         for i in range(10000)  # 10k records
     ]
 
-    result: list[FlextTypes.Core.Dict] = [schema]
-    result.extend(records)
+    result: list[dict[str, object]] = [cast("dict[str, object]", schema)]
+    result.extend(cast("list[dict[str, object]]", records))
     return result
 
 

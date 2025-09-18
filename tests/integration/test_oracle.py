@@ -13,8 +13,15 @@ import time
 
 import pytest
 from sqlalchemy import text
+from sqlalchemy.engine import Engine
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleLoader, LoadMethod
+from flext_core import FlextTypes
+from flext_target_oracle import (
+    FlextTargetOracle,
+    FlextTargetOracleConfig,
+    FlextTargetOracleLoader,
+    LoadMethod,
+)
 
 
 @pytest.mark.integration
@@ -26,17 +33,17 @@ class TestOracleIntegration:
     @pytest.mark.usefixtures("_clean_database")
     async def test_create_simple_table(
         self,
-        connected_loader: object,
-        oracle_engine: object,
-        simple_schema: object,
+        connected_loader: FlextTargetOracleLoader,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
     ) -> None:
         """Test creating a simple table with basic data types."""
         stream_name = "test_users"
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
 
-        # Ensure table is created
-        result = await connected_loader.ensure_table_exists(
+        # Ensure table is created (synchronous API returning FlextResult)
+        result = connected_loader.ensure_table_exists(
             stream_name,
             schema,
             key_properties,
@@ -82,9 +89,9 @@ class TestOracleIntegration:
     @pytest.mark.usefixtures("_clean_database")
     async def test_insert_and_retrieve_data(
         self,
-        connected_loader: object,
-        oracle_engine: object,
-        simple_schema: object,
+        connected_loader: FlextTargetOracleLoader,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
     ) -> None:
         """Test inserting data and retrieving it."""
         stream_name = "test_insert"
@@ -92,7 +99,7 @@ class TestOracleIntegration:
         key_properties = simple_schema["key_properties"]
 
         # Create table
-        await connected_loader.ensure_table_exists(stream_name, schema, key_properties)
+        connected_loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Insert records
         records = [
@@ -100,7 +107,7 @@ class TestOracleIntegration:
             {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
         ]
 
-        result = await connected_loader.insert_records(stream_name, records)
+        result = connected_loader.insert_records(stream_name, records)
         assert result.is_success
 
         # Verify data in database
@@ -116,35 +123,41 @@ class TestOracleIntegration:
 
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    @pytest.mark.usefixtures("_clean_database")
     async def test_merge_mode_updates(
         self,
-        oracle_config: object,
-        oracle_engine: object,
-        simple_schema: object,
+        oracle_config: FlextTargetOracleConfig,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
     ) -> None:
         """Test merge mode for updating existing records."""
+        # Pydantic models are value objects; use model_copy to produce a mutable copy
+        oracle_config = oracle_config.model_copy(update={})
         oracle_config.sdc_mode = "merge"
         loader = FlextTargetOracleLoader(oracle_config)
-        await loader.connect()
+
+        # synchronous connect via underlying API - call directly
+        connect_result = loader.connect()
+        assert connect_result.is_success
 
         stream_name = "test_merge"
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
 
         # Create table and insert initial data
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
+        table_res = loader.ensure_table_exists(stream_name, schema, key_properties)
+        assert table_res.is_success
 
         initial_records = [
             {"id": 1, "name": "Original Name", "email": "original@example.com"},
         ]
-        await loader.insert_records(stream_name, initial_records)
+        insert_result = loader.insert_records(stream_name, initial_records)
+        assert insert_result.is_success
 
         # Update the record
         updated_records = [
             {"id": 1, "name": "Updated Name", "email": "updated@example.com"},
         ]
-        result = await loader.insert_records(stream_name, updated_records)
+        result = loader.insert_records(stream_name, updated_records)
         assert result.is_success
 
         # Verify update
@@ -153,23 +166,27 @@ class TestOracleIntegration:
                 text("SELECT name, email FROM test_merge WHERE id = 1"),
             )
             row = result.fetchone()
+            assert row is not None
             assert row[0] == "Updated Name"
             assert row[1] == "updated@example.com"
 
-        await loader.disconnect()
+        disconnect_result = loader.disconnect()
+        assert disconnect_result.is_success
 
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
     async def test_bulk_insert_performance(
         self,
-        oracle_config: object,
-        oracle_engine: object,
+        oracle_config: FlextTargetOracleConfig,
+        oracle_engine: Engine,
     ) -> None:
         """Test bulk insert with large dataset."""
+        # Use a copy of the config to avoid mutating a shared fixture
+        oracle_config = oracle_config.model_copy(update={})
         oracle_config.load_method = LoadMethod.BULK_INSERT
         oracle_config.batch_size = 1000
         loader = FlextTargetOracleLoader(oracle_config)
-        await loader.connect()
+        assert loader.connect().is_success
 
         stream_name = "test_bulk"
         schema = {
@@ -183,7 +200,8 @@ class TestOracleIntegration:
         key_properties = ["id"]
 
         # Create table
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
+        table_res = loader.ensure_table_exists(stream_name, schema, key_properties)
+        assert table_res.is_success
 
         # Generate large dataset
         records = [
@@ -197,9 +215,8 @@ class TestOracleIntegration:
 
         # Measure bulk insert performance
         start_time = time.time()
-        result = await loader.insert_records(stream_name, records)
+        result = loader.insert_records(stream_name, records)
         elapsed = time.time() - start_time
-
         assert result.is_success
 
         # Verify all records inserted
@@ -210,28 +227,32 @@ class TestOracleIntegration:
         # Performance assertion (should be fast with bulk)
         assert elapsed < 10  # Should complete within 10 seconds
 
-        await loader.disconnect()
+        assert loader.disconnect().is_success
 
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
     async def test_json_storage_mode(
         self,
-        oracle_config: object,
-        oracle_engine: object,
-        nested_schema: object,
+        oracle_config: FlextTargetOracleConfig,
+        oracle_engine: Engine,
+        nested_schema: FlextTypes.Core.Dict,
     ) -> None:
         """Test JSON storage mode with nested data."""
-        oracle_config.storage_mode = "json"
-        oracle_config.json_column_name = "json_data"
+        oracle_config = oracle_config.model_copy(update={})
+        # storage_mode and json_column_name are defined on the config; use model_copy
+        oracle_config = oracle_config.model_copy(
+            update={"storage_mode": "json", "json_column_name": "json_data"}
+        )
         loader = FlextTargetOracleLoader(oracle_config)
-        await loader.connect()
+        assert loader.connect().is_success
 
         stream_name = "test_json"
         schema = nested_schema["schema"]
         key_properties = nested_schema["key_properties"]
 
         # Create table
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
+        create_res = loader.ensure_table_exists(stream_name, schema, key_properties)
+        assert create_res.is_success
 
         # Insert nested record
         record = {
@@ -247,40 +268,44 @@ class TestOracleIntegration:
             ],
             "total": 349.97,
         }
-
-        result = await loader.insert_records(stream_name, [record])
-        assert result.is_success
+        insert_res = loader.insert_records(stream_name, [record])
+        assert insert_res.is_success
 
         # Verify JSON data
         with oracle_engine.connect() as conn:
             result = conn.execute(text("SELECT json_data FROM test_json WHERE id = 1"))
             json_str = result.scalar()
+            # guard against None
+            assert json_str is not None
             stored_data = json.loads(json_str)
 
             assert stored_data["customer"]["name"] == "Acme Corp"
             assert stored_data["customer"]["address"]["city"] == "Anytown"
             assert len(stored_data["items"]) == 2
 
-        await loader.disconnect()
+        assert loader.disconnect().is_success
 
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
     async def test_column_ordering(
         self,
-        oracle_config: object,
-        oracle_engine: object,
+        oracle_config: FlextTargetOracleConfig,
+        oracle_engine: Engine,
     ) -> None:
         """Test column ordering in created tables."""
-        oracle_config.column_ordering = "alphabetical"
-        oracle_config.column_order_rules = {
-            "primary_keys": 1,
-            "regular_columns": 2,
-            "audit_columns": 3,
-            "sdc_columns": 4,
-        }
-
+        oracle_config = oracle_config.model_copy(
+            update={
+                "column_ordering": "alphabetical",
+                "column_order_rules": {
+                    "primary_keys": 1,
+                    "regular_columns": 2,
+                    "audit_columns": 3,
+                    "sdc_columns": 4,
+                },
+            }
+        )
         loader = FlextTargetOracleLoader(oracle_config)
-        await loader.connect()
+        assert loader.connect().is_success
 
         stream_name = "test_ordering"
         schema = {
@@ -295,7 +320,14 @@ class TestOracleIntegration:
         }
         key_properties = ["id"]
 
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
+        # ensure types match expected signatures
+        assert isinstance(schema, dict)
+        if not isinstance(key_properties, list):
+            key_props: list[str] | None = None
+        else:
+            key_props = key_properties
+
+        loader.ensure_table_exists(stream_name, schema, key_props)
 
         # Check column order
         with oracle_engine.connect() as conn:
@@ -331,28 +363,32 @@ class TestOracleIntegration:
                 columns.index(sdc) > columns.index("UPDATED_AT") for sdc in sdc_cols
             )
 
-        await loader.disconnect()
+        assert loader.disconnect().is_success
 
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
     async def test_truncate_before_load(
         self,
-        oracle_config: object,
-        oracle_engine: object,
-        simple_schema: object,
+        oracle_config: FlextTargetOracleConfig,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
     ) -> None:
         """Test truncate table before loading data."""
-        oracle_config.truncate_before_load = True
+        oracle_config = oracle_config.model_copy(update={"truncate_before_load": True})
         loader = FlextTargetOracleLoader(oracle_config)
-        await loader.connect()
+        assert loader.connect().is_success
 
         stream_name = "test_truncate"
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
 
         # Create table and insert initial data
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
-        await loader.insert_records(stream_name, [{"id": 1, "name": "Initial"}])
+        create_res = loader.ensure_table_exists(stream_name, schema, key_properties)
+        assert create_res.is_success
+        insert_initial = loader.insert_records(
+            stream_name, [{"id": 1, "name": "Initial"}]
+        )
+        assert insert_initial.is_success
 
         # Verify initial data exists
         with oracle_engine.connect() as conn:
@@ -360,39 +396,47 @@ class TestOracleIntegration:
             assert count == 1
 
         # Run ensure_table_exists again with truncate enabled
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
+        loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Table should be empty
         with oracle_engine.connect() as conn:
             count = conn.execute(text("SELECT COUNT(*) FROM test_truncate")).scalar()
             assert count == 0
 
-        await loader.disconnect()
+        assert loader.disconnect().is_success
 
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
     async def test_custom_indexes(
         self,
-        oracle_config: object,
-        oracle_engine: object,
-        simple_schema: object,
+        oracle_config: FlextTargetOracleConfig,
+        oracle_engine: Engine,
+        simple_schema: FlextTypes.Core.Dict,
     ) -> None:
         """Test creation of custom indexes."""
-        oracle_config.custom_indexes = {
-            "test_indexes": [
-                {"name": "IDX_EMAIL_UNIQUE", "columns": ["EMAIL"], "unique": True},
-                {"columns": ["NAME", "CREATED_AT"]},
-            ],
-        }
+        oracle_config = oracle_config.model_copy(
+            update={
+                "custom_indexes": {
+                    "test_indexes": [
+                        {
+                            "name": "IDX_EMAIL_UNIQUE",
+                            "columns": ["EMAIL"],
+                            "unique": True,
+                        },
+                        {"columns": ["NAME", "CREATED_AT"]},
+                    ]
+                }
+            }
+        )
 
         loader = FlextTargetOracleLoader(oracle_config)
-        await loader.connect()
+        assert loader.connect().is_success
 
         stream_name = "test_indexes"
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
 
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
+        loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Verify indexes created
         with oracle_engine.connect() as conn:
@@ -417,7 +461,7 @@ class TestOracleIntegration:
             composite_indexes = [idx for idx in indexes if "NAME" in idx]
             assert len(composite_indexes) > 0
 
-        await loader.disconnect()
+        assert loader.disconnect().is_success
 
 
 @pytest.mark.integration
@@ -429,20 +473,20 @@ class TestOracleTargetE2E:
     @pytest.mark.usefixtures("_clean_database")
     async def test_full_singer_workflow(
         self,
-        oracle_config: object,
-        oracle_engine: object,
-        singer_messages: object,
+        oracle_config: FlextTargetOracleConfig,
+        oracle_engine: Engine,
+        singer_messages: list[FlextTypes.Core.Dict],
     ) -> None:
         """Test complete Singer workflow: schema -> records -> state."""
         target = FlextTargetOracle(config=oracle_config)
 
         # Initialize target
-        init_result = await target.initialize()
+        init_result = target.initialize()
         assert init_result.is_success
 
         # Process messages
         for message in singer_messages:
-            result = await target.execute(json.dumps(message))
+            result = target.execute(json.dumps(message))
             assert result.is_success
 
         # Verify data in database
@@ -467,8 +511,8 @@ class TestOracleTargetE2E:
     @pytest.mark.usefixtures("_clean_database")
     async def test_column_mapping_and_filtering(
         self,
-        oracle_config: object,
-        oracle_engine: object,
+        oracle_config: FlextTargetOracleConfig,
+        oracle_engine: Engine,
     ) -> None:
         """Test column mapping and filtering features."""
         oracle_config.column_mappings = {
@@ -477,7 +521,7 @@ class TestOracleTargetE2E:
         oracle_config.ignored_columns = ["password", "internal_id"]
 
         target = FlextTargetOracle(config=oracle_config)
-        await target.initialize()
+        target.initialize()
 
         # Process schema with extra columns
         schema_msg = {
@@ -496,7 +540,7 @@ class TestOracleTargetE2E:
             "key_properties": ["id"],
         }
 
-        await target.execute(json.dumps(schema_msg))
+        target.execute(json.dumps(schema_msg))
 
         # Process record
         record_msg = {
@@ -511,7 +555,7 @@ class TestOracleTargetE2E:
             },
         }
 
-        await target.execute(json.dumps(record_msg))
+        target.execute(json.dumps(record_msg))
 
         # Verify column mapping and filtering
         with oracle_engine.connect() as conn:

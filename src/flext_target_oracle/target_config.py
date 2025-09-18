@@ -571,9 +571,6 @@ def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResul
     if not isinstance(config.pool_min_size, (int, float)) or config.pool_min_size < 0:
         return FlextResult[None].fail("Pool min size must be a non-negative number")
 
-    if not isinstance(config.pool_max_size, (int, float)):
-        return FlextResult[None].fail("Pool max size must be a valid number")
-
     if config.pool_max_size < config.pool_min_size:
         return FlextResult[None].fail(
             "Pool max size must be greater than or equal to pool min size"

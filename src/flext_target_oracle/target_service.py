@@ -84,10 +84,10 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
     def discover_catalog(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Discover available schemas and generate Singer catalog."""
         try:
+            streams_list: list[dict[str, object]] = []
             catalog: FlextTypes.Core.Dict = {
-                "streams": [],
+                "streams": streams_list,
             }
-            streams_list: list[dict[str, object]] = catalog["streams"]
 
             for stream_name, schema in self._schemas.items():
                 stream_entry: dict[str, object] = {

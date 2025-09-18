@@ -8,17 +8,17 @@ import asyncio
 import json
 from pathlib import Path
 
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig
 
 
-def load_config() -> dict:
+def load_config() -> dict[str, object]:
     """Load configuration from file."""
     config_path = Path("config.json")
     with config_path.open(encoding="utf-8") as f:
         return json.load(f)
 
 
-def load_singer_messages() -> list[dict]:
+def load_singer_messages() -> list[dict[str, object]]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
     with data_path.open(encoding="utf-8") as f:
@@ -30,14 +30,15 @@ async def main() -> None:
     # Load configuration
     config_dict = load_config()
 
-    config = FlextOracleTargetConfig(**config_dict)
+    config = FlextTargetOracleConfig.model_validate(config_dict)
 
     # Create target instance
-    target = FlextOracleTarget(config=config)
+    target = FlextTargetOracle(config=config)
 
-    # Initialize the target
-    init_result = await target.initialize()
-    if init_result.is_failure:
+    # Test connection to ensure target is ready
+    connection_result = target.test_connection()
+    if connection_result.is_failure:
+        print(f"Connection failed: {connection_result.error}")
         return
 
     # Process Singer messages
@@ -50,12 +51,14 @@ async def main() -> None:
             message.get("stream", "unknown")
         elif msg_type == "RECORD":
             message.get("stream", "unknown")
-            message.get("record", {}).get("id", "?")
+            record = message.get("record", {})
+            if isinstance(record, dict):
+                record.get("id", "?")
         elif msg_type == "STATE":
             pass
 
-        # Execute the message
-        result = await target.execute(json.dumps(message))
+        # Execute the target (no message processing in this API)
+        result = target.execute()
         if result.is_failure:
             return
 
