@@ -1,6 +1,6 @@
 # FLEXT Target Oracle
 
-**Type**: Singer Target | **Status**: Active Development | **Dependencies**: Python 3.13+, flext-core, flext-db-oracle, flext-meltano, singer-sdk
+**Type**: Singer Target | **Status**: 1.0.0 Release Preparation | **Dependencies**: Python 3.13+, flext-core, flext-db-oracle, flext-meltano, singer-sdk
 
 Production-grade Singer target for Oracle Database data loading, built with FLEXT ecosystem patterns and reliability standards.
 
@@ -184,7 +184,7 @@ targets:
 
 ## 📊 Current Status & Documentation
 
-**Current Status**: Version 0.9.0 - **Comprehensive Documentation Complete** with critical implementation issues identified.
+**Current Status**: Version 0.9.9 - **Comprehensive Documentation Complete** with critical implementation issues identified.
 
 ### ✅ **Documentation Status (2025-08-04)**
 
@@ -386,7 +386,7 @@ graph LR
 - [ ] **Error Recovery**: Test graceful handling of Oracle connection failures
 - [ ] **Schema Evolution**: Validate handling of schema changes and migrations
 
-**Status**: **Documentation Ready ✅** | **Implementation Blocked 🛑** (Security Issues)
+**Status**: **Documentation Ready ✅** · 1.0.0 Release Preparation | **Implementation Blocked 🛑** (Security Issues)
 
 ### Environment Variables
 

@@ -73,7 +73,7 @@
 
 ## Project Status
 
-### **Current Version**: 0.9.0 - Pre-production
+### **Current Version**: 0.9.9 - Pre-production
 
 > ⚠️ **Important**: This target is currently undergoing architectural improvements to address identified critical issues.
 

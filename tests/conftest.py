@@ -8,14 +8,13 @@ import asyncio
 import json
 import os
 import time
-from collections.abc import AsyncGenerator, Generator
+from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import cast
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-import pytest_asyncio
 from pydantic import SecretStr
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
@@ -262,10 +261,10 @@ def oracle_api(oracle_config: FlextTargetOracleConfig) -> FlextDbOracleApi:
     return mock_api
 
 
-@pytest_asyncio.fixture
-async def oracle_loader(
+@pytest.fixture
+def oracle_loader(
     oracle_config: FlextTargetOracleConfig,
-) -> AsyncGenerator[FlextTargetOracleLoader]:
+) -> Generator[FlextTargetOracleLoader]:
     """Create FlextTargetOracleLoader instance with mocked connection."""
     with patch("flext_target_oracle.target_client.FlextDbOracleApi") as mock_api_class:
         # Mock the API instance
@@ -605,12 +604,12 @@ def temp_config_file(tmp_path: Path) -> Path:
 
 
 # Async Fixtures
-@pytest_asyncio.fixture
-async def connected_loader(
+@pytest.fixture
+def connected_loader(
     oracle_loader: FlextTargetOracleLoader,
-) -> AsyncGenerator[FlextTargetOracleLoader]:
+) -> Generator[FlextTargetOracleLoader]:
     """Provide a connected FlextTargetOracleLoader instance."""
-    yield oracle_loader
+    return oracle_loader
 
 
 # Performance Testing Fixtures

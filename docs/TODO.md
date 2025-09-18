@@ -1,15 +1,15 @@
 # TODO - Status dos Desvios e Melhorias do Projeto
 
 **Data da Análise**: 2025-08-04  
-**Versão**: 0.9.0  
-**Status**: Documentação Atualizada - Implementação Pendente  
+**Versão**: 0.9.9  
+**Status**: Documentação Atualizada - Implementação Pendente · 1.0.0 Release Preparation
 **Última Atualização**: 2025-08-04 18:00
 
 ## 🚨 DESVIOS CRÍTICOS DE ARQUITETURA
 
 ### 1. **DUPLICAÇÃO DE EXCEÇÕES** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE
 
-**Status**: 📝 **DOCUMENTAÇÃO COMPLETA** - Hierarquia de exceções documentada com padrões FLEXT
+**Status**: 📝 **DOCUMENTAÇÃO COMPLETA** - Hierarquia de exceções documentada com padrões FLEXT · 1.0.0 Release Preparation
 
 **Problema**: Exceções definidas em dois locais diferentes:
 
@@ -40,7 +40,7 @@
 
 ### 2. **USO INCORRETO DE execute_ddl PARA DML** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE
 
-**Status**: 📝 **DOCUMENTADO** - Código documentado, mas problema persiste
+**Status**: 📝 **DOCUMENTADO** - Código documentado, mas problema persiste · 1.0.0 Release Preparation
 
 **Problema**: Uso de `execute_ddl()` para operações INSERT (loader.py:233)
 
@@ -134,7 +134,7 @@ class FlextOracleTarget(Target):
 
 ### 5. **SQL INJECTION RISK** - 🚨 **CRÍTICO - DOCUMENTADO MAS NÃO RESOLVIDO**
 
-**Status**: 📝 **DOCUMENTAÇÃO ATUALIZADA** - Vulnerabilidade claramente identificada e documentada
+**Status**: 📝 **DOCUMENTAÇÃO ATUALIZADA** - Vulnerabilidade claramente identificada e documentada · 1.0.0 Release Preparation
 
 **Problema**: Construção manual de SQL com string replace (loader.py:226-232)
 

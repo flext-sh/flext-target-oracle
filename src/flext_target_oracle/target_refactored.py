@@ -62,7 +62,7 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
         """Initialize CLI service using Pydantic post-init pattern."""
         # Register command handler using FlextBus
         use_dispatcher = FlextTargetOracleConstants.FeatureFlags.ENABLE_DISPATCHER
-        object.__setattr__(self, "_use_dispatcher", use_dispatcher)
+        setattr(self, "_use_dispatcher", use_dispatcher)
 
         if use_dispatcher:
             dispatcher_instance = FlextDispatcher(bus=self.command_bus)
@@ -72,12 +72,12 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
                     f"Dispatcher registration failed: {register_result.error}"
                 )
                 self.command_bus.register_handler(self.command_handler)
-                object.__setattr__(self, "_dispatcher", None)
+                setattr(self, "_dispatcher", None)
             else:
-                object.__setattr__(self, "_dispatcher", dispatcher_instance)
+                setattr(self, "_dispatcher", dispatcher_instance)
         else:
             self.command_bus.register_handler(self.command_handler)
-            object.__setattr__(self, "_dispatcher", None)
+            setattr(self, "_dispatcher", None)
 
     def execute(self) -> FlextResult[str]:
         """Execute CLI service - implements FlextDomainService abstract method."""
