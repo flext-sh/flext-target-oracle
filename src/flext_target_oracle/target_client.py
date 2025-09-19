@@ -44,10 +44,10 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
 
     # Singer protocol state
     schemas: dict[str, FlextTypes.Core.Dict] = Field(
-        default_factory=dict, description="Stream schemas"
+        default_factory=dict, description="Stream schemas",
     )
     state: FlextTypes.Core.Dict = Field(
-        default_factory=dict, description="Singer state"
+        default_factory=dict, description="Singer state",
     )
 
     def __init__(
@@ -96,19 +96,19 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
                 if isinstance(msg, dict):
                     proc = self.process_singer_message(msg)
                     return FlextResult[FlextTypes.Core.Dict].ok(
-                        {"processed": proc.is_success}
+                        {"processed": proc.is_success},
                     )
                 # If payload wasn't a dict, return a success with no-op
                 return FlextResult[FlextTypes.Core.Dict].ok({"processed": False})
             except Exception as e:
                 return FlextResult[FlextTypes.Core.Dict].fail(
-                    f"Failed to process payload: {e}"
+                    f"Failed to process payload: {e}",
                 )
 
         connection_result = self.test_connection()
         if connection_result.is_failure:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Oracle target execution failed: {connection_result.error}"
+                f"Oracle target execution failed: {connection_result.error}",
             )
 
         return FlextResult[FlextTypes.Core.Dict].ok(
@@ -118,7 +118,7 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
                 "oracle_host": self.config.oracle_host,
                 "oracle_service": self.config.oracle_service,
                 "target_schema": self.config.default_target_schema,
-            }
+            },
         )
 
     def initialize(self) -> FlextResult[None]:
@@ -167,13 +167,13 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
 
         except Exception as e:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Failed to discover catalog: {e}"
+                f"Failed to discover catalog: {e}",
             )
 
     # === Singer Protocol Operations ===
 
     def process_singer_messages(
-        self, messages: list[FlextTypes.Core.Dict]
+        self, messages: list[FlextTypes.Core.Dict],
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Process Singer messages with comprehensive statistics."""
         try:
@@ -184,7 +184,7 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
                 result = self._process_single_message(message)
                 if result.is_failure:
                     return FlextResult[FlextTypes.Core.Dict].fail(
-                        f"Failed to process message: {result.error}"
+                        f"Failed to process message: {result.error}",
                     )
 
                 if message.get("type") == "RECORD":
@@ -194,7 +194,7 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
             finalize_result = self.loader.finalize_all_streams()
             if finalize_result.is_failure:
                 return FlextResult[FlextTypes.Core.Dict].fail(
-                    f"Failed to finalize streams: {finalize_result.error}"
+                    f"Failed to finalize streams: {finalize_result.error}",
                 )
 
             execution_time_ms = int((time.time() - start_time) * 1000)
@@ -211,11 +211,11 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
 
         except Exception as e:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Message processing failed: {e}"
+                f"Message processing failed: {e}",
             )
 
     def process_singer_message(
-        self, message: FlextTypes.Core.Dict
+        self, message: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Process individual Singer message - async compatible."""
         return self._process_single_message(message)
@@ -236,7 +236,7 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
     # === Private Message Handlers ===
 
     def _process_single_message(
-        self, message: FlextTypes.Core.Dict
+        self, message: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Process a single Singer message with type dispatch."""
         message_type = message.get("type")
@@ -250,7 +250,7 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
         return FlextResult[None].fail(f"Unknown message type: {message_type}")
 
     def _handle_schema_message(
-        self, message: FlextTypes.Core.Dict
+        self, message: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Handle SCHEMA message with table creation."""
         try:
@@ -272,11 +272,11 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
                 key_properties = None
 
             table_result = self.loader.ensure_table_exists(
-                stream_name, schema, key_properties
+                stream_name, schema, key_properties,
             )
             if table_result.is_failure:
                 return FlextResult[None].fail(
-                    f"Failed to ensure table exists: {table_result.error}"
+                    f"Failed to ensure table exists: {table_result.error}",
                 )
 
             self.log_info(f"Processed schema for stream {stream_name}")
@@ -286,7 +286,7 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
             return FlextResult[None].fail(f"Schema handling failed: {e}")
 
     def _handle_record_message(
-        self, message: FlextTypes.Core.Dict
+        self, message: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Handle RECORD message with data loading."""
         try:

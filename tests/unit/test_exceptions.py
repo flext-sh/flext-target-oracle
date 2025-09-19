@@ -74,7 +74,7 @@ class TestRealOracleExceptions:
         """Test specific exception with context."""
         # Use a specific exception class that supports context parameters
         exc = FlextTargetOracleSchemaError(
-            "Error with context", stream_name="users", table_name="users_table"
+            "Error with context", stream_name="users", table_name="users_table",
         )
 
         # Test that the exception was created successfully

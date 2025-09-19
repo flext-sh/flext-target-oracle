@@ -69,7 +69,7 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
             register_result = dispatcher_instance.register_handler(self.command_handler)
             if register_result.is_failure:
                 self.log_error(
-                    f"Dispatcher registration failed: {register_result.error}"
+                    f"Dispatcher registration failed: {register_result.error}",
                 )
                 self.command_bus.register_handler(self.command_handler)
                 setattr(self, "_dispatcher", None)
@@ -82,7 +82,7 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
     def execute(self) -> FlextResult[str]:
         """Execute CLI service - implements FlextDomainService abstract method."""
         return FlextResult[str].ok(
-            "FLEXT Target Oracle CLI Service initialized successfully"
+            "FLEXT Target Oracle CLI Service initialized successfully",
         )
 
     def run_cli(self, args: list[str] | None = None) -> FlextResult[str]:
@@ -153,7 +153,7 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
 
         # Create command using factory - SOURCE OF TRUTH patterns
         command = OracleTargetCommandFactory.create_load_command(
-            config_file, state_file
+            config_file, state_file,
         )
 
         # Execute using command bus - Flext CQRS SOURCE OF TRUTH

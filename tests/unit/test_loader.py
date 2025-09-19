@@ -34,7 +34,7 @@ class LoaderProtocol(Protocol):
         ...
 
     def ensure_table_exists(
-        self, stream_name: str, schema: FlextTypes.Core.Dict
+        self, stream_name: str, schema: FlextTypes.Core.Dict,
     ) -> None:
         """Ensure Oracle table exists for the stream."""
         ...
@@ -571,7 +571,7 @@ class TestRealOracleLoader:
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("oracle_engine")
     async def test_real_type_conversions(
-        self, real_loader: object, _oracle_engine: Engine
+        self, real_loader: object, _oracle_engine: Engine,
     ) -> None:
         """Test various data type conversions in real Oracle."""
         stream_name = "type_test"
@@ -630,7 +630,7 @@ class TestRealOracleLoader:
 
     @pytest.mark.asyncio
     async def test_real_error_handling_invalid_schema(
-        self, real_loader: object
+        self, real_loader: object,
     ) -> None:
         """Test error handling with invalid schema."""
         stream_name = "invalid_schema"

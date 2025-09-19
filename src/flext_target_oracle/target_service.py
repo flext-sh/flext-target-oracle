@@ -35,10 +35,10 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
 
     # Internal state
     _schemas: dict[str, FlextTypes.Core.Dict] = Field(
-        default_factory=dict, description="Stream schemas"
+        default_factory=dict, description="Stream schemas",
     )
     _state: FlextTypes.Core.Dict = Field(
-        default_factory=dict, description="Singer state"
+        default_factory=dict, description="Singer state",
     )
 
     def __init__(self, config: FlextTargetOracleConfig, **_data: object) -> None:
@@ -61,7 +61,7 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
         connection_result = self.loader.test_connection()
         if connection_result.is_failure:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Oracle target service connection failed: {connection_result.error}"
+                f"Oracle target service connection failed: {connection_result.error}",
             )
 
         return FlextResult[FlextTypes.Core.Dict].ok(
@@ -70,7 +70,7 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
                 "status": "ready",
                 "config_valid": True,
                 "connection_tested": True,
-            }
+            },
         )
 
     def validate_configuration(self) -> FlextResult[None]:
@@ -112,11 +112,11 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
 
         except Exception as e:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Failed to discover catalog: {e}"
+                f"Failed to discover catalog: {e}",
             )
 
     def process_singer_messages(
-        self, messages: list[FlextTypes.Core.Dict]
+        self, messages: list[FlextTypes.Core.Dict],
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Process Singer messages (SCHEMA, RECORD, STATE)."""
         try:
@@ -127,7 +127,7 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
                 result = self._process_single_message(message)
                 if result.is_failure:
                     return FlextResult[FlextTypes.Core.Dict].fail(
-                        f"Failed to process message: {result.error}"
+                        f"Failed to process message: {result.error}",
                     )
 
                 if message.get("type") == "RECORD":
@@ -137,7 +137,7 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
             finalize_result = self.loader.finalize_all_streams()
             if finalize_result.is_failure:
                 return FlextResult[FlextTypes.Core.Dict].fail(
-                    f"Failed to finalize streams: {finalize_result.error}"
+                    f"Failed to finalize streams: {finalize_result.error}",
                 )
 
             execution_time_ms = int((time.time() - start_time) * 1000)
@@ -154,11 +154,11 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
 
         except Exception as e:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Message processing failed: {e}"
+                f"Message processing failed: {e}",
             )
 
     def _process_single_message(
-        self, message: FlextTypes.Core.Dict
+        self, message: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Process a single Singer message."""
         message_type = message.get("type")
@@ -192,11 +192,11 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
                 key_properties if isinstance(key_properties, list) else None
             )
             table_result = self.loader.ensure_table_exists(
-                stream_name, schema, key_properties_list
+                stream_name, schema, key_properties_list,
             )
             if table_result.is_failure:
                 return FlextResult[None].fail(
-                    f"Failed to ensure table exists: {table_result.error}"
+                    f"Failed to ensure table exists: {table_result.error}",
                 )
 
             self.log_info(f"Processed schema for stream {stream_name}")
