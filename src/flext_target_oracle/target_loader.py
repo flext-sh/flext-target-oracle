@@ -45,7 +45,8 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
 
     # Internal state fields (without underscore for Pydantic)
     record_buffers: dict[str, list[FlextTypes.Core.Dict]] = Field(
-        default_factory=dict, description="Record buffers by stream",
+        default_factory=dict,
+        description="Record buffers by stream",
     )
     total_records: int = Field(default=0, description="Total records processed")
 
@@ -160,7 +161,9 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             return FlextResult[None].fail(f"Disconnect failed: {e}")
 
     def insert_records(
-        self, stream_name: str, records: list[FlextTypes.Core.Dict],
+        self,
+        stream_name: str,
+        records: list[FlextTypes.Core.Dict],
     ) -> FlextResult[None]:
         """Insert multiple records - convenience wrapper used by tests.
 
@@ -280,7 +283,9 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             return FlextResult[FlextTypes.Core.Dict].fail(f"Finalization failed: {e}")
 
     def _build_create_table_sql(
-        self, table_name: str, _schema: FlextTypes.Core.Dict,
+        self,
+        table_name: str,
+        _schema: FlextTypes.Core.Dict,
     ) -> str:
         """Build CREATE TABLE SQL statement."""
         schema_name = self.config.default_target_schema

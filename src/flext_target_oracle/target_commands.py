@@ -33,7 +33,8 @@ class OracleTargetValidateCommand(FlextModels.Command):
 
     # Command-specific data using Pydantic fields
     config_file: str | None = Field(
-        default=None, description="Path to configuration file",
+        default=None,
+        description="Path to configuration file",
     )
 
     def execute(self) -> FlextResult[str]:
@@ -82,7 +83,8 @@ class OracleTargetValidateCommand(FlextModels.Command):
             oracle_api = FlextDbOracleApi(oracle_api_config)
 
             connection_service = OracleConnectionService(
-                config=config, oracle_api=oracle_api,
+                config=config,
+                oracle_api=oracle_api,
             )
 
             test_result = connection_service.execute()
@@ -107,7 +109,8 @@ class OracleTargetLoadCommand(FlextModels.Command):
 
     # Command-specific data using Pydantic fields
     config_file: str | None = Field(
-        default=None, description="Path to configuration file",
+        default=None,
+        description="Path to configuration file",
     )
     state_file: str | None = Field(default=None, description="Path to state file")
 
@@ -265,7 +268,8 @@ class OracleTargetCommandHandler(FlextHandlers[FlextModels.Command, str]):
         return FlextResult[str].fail(f"Unknown command type: {type(message).__name__}")
 
     def _handle_validate_command(
-        self, command: OracleTargetValidateCommand,
+        self,
+        command: OracleTargetValidateCommand,
     ) -> FlextResult[str]:
         """Handle Oracle target validation command."""
         return FlextResult[str].ok(
@@ -273,13 +277,15 @@ class OracleTargetCommandHandler(FlextHandlers[FlextModels.Command, str]):
         )
 
     def _handle_load_command(
-        self, command: OracleTargetLoadCommand,
+        self,
+        command: OracleTargetLoadCommand,
     ) -> FlextResult[str]:
         """Handle Oracle target load command."""
         return FlextResult[str].ok(f"Load command handled: {command.command_type}")
 
     def _handle_about_command(
-        self, command: OracleTargetAboutCommand,
+        self,
+        command: OracleTargetAboutCommand,
     ) -> FlextResult[str]:
         """Handle Oracle target about command."""
         return FlextResult[str].ok(f"About command handled: {command.command_type}")
@@ -301,7 +307,8 @@ class OracleTargetCommandFactory:
 
     @staticmethod
     def create_load_command(
-        config_file: str | None = None, state_file: str | None = None,
+        config_file: str | None = None,
+        state_file: str | None = None,
     ) -> OracleTargetLoadCommand:
         """Create load command using Flext CQRS SOURCE OF TRUTH."""
         return OracleTargetLoadCommand(

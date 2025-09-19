@@ -35,10 +35,12 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
 
     # Internal state
     _schemas: dict[str, FlextTypes.Core.Dict] = Field(
-        default_factory=dict, description="Stream schemas",
+        default_factory=dict,
+        description="Stream schemas",
     )
     _state: FlextTypes.Core.Dict = Field(
-        default_factory=dict, description="Singer state",
+        default_factory=dict,
+        description="Singer state",
     )
 
     def __init__(self, config: FlextTargetOracleConfig, **_data: object) -> None:
@@ -116,7 +118,8 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
             )
 
     def process_singer_messages(
-        self, messages: list[FlextTypes.Core.Dict],
+        self,
+        messages: list[FlextTypes.Core.Dict],
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Process Singer messages (SCHEMA, RECORD, STATE)."""
         try:
@@ -158,7 +161,8 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
             )
 
     def _process_single_message(
-        self, message: FlextTypes.Core.Dict,
+        self,
+        message: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Process a single Singer message."""
         message_type = message.get("type")
@@ -192,7 +196,9 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
                 key_properties if isinstance(key_properties, list) else None
             )
             table_result = self.loader.ensure_table_exists(
-                stream_name, schema, key_properties_list,
+                stream_name,
+                schema,
+                key_properties_list,
             )
             if table_result.is_failure:
                 return FlextResult[None].fail(
