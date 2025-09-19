@@ -110,10 +110,12 @@ class OracleConnectionService(FlextDomainService[None]):
 
     # Pydantic fields - seguindo FlextModels.Config padrão da SOURCE OF TRUTH
     config: FlextTargetOracleConfig = Field(
-        ..., description="Oracle target configuration",
+        ...,
+        description="Oracle target configuration",
     )
     oracle_api: FlextDbOracleApi = Field(
-        ..., description="Oracle database API instance",
+        ...,
+        description="Oracle database API instance",
     )
 
     # Connection model is computed property, not field
@@ -183,10 +185,12 @@ class OracleSchemaService(FlextDomainService[None]):
 
     # Pydantic fields - seguindo FlextModels.Config padrão da SOURCE OF TRUTH
     config: FlextTargetOracleConfig = Field(
-        ..., description="Oracle target configuration",
+        ...,
+        description="Oracle target configuration",
     )
     oracle_api: FlextDbOracleApi = Field(
-        ..., description="Oracle database API instance",
+        ...,
+        description="Oracle database API instance",
     )
 
     def execute(self) -> FlextResult[None]:
@@ -243,7 +247,8 @@ class OracleSchemaService(FlextDomainService[None]):
         try:
             # Check if table exists
             columns_result = await self.get_table_columns(
-                stream.table_name, self.config.default_target_schema,
+                stream.table_name,
+                self.config.default_target_schema,
             )
 
             if columns_result.is_failure:
@@ -383,16 +388,20 @@ class OracleBatchService(FlextDomainService[LoadStatisticsModel]):
 
     # Pydantic fields - seguindo FlextModels.Config padrão da SOURCE OF TRUTH
     config: FlextTargetOracleConfig = Field(
-        ..., description="Oracle target configuration",
+        ...,
+        description="Oracle target configuration",
     )
     oracle_api: FlextDbOracleApi = Field(
-        ..., description="Oracle database API instance",
+        ...,
+        description="Oracle database API instance",
     )
     batches: dict[str, object] = Field(
-        default_factory=dict, description="Batch storage",
+        default_factory=dict,
+        description="Batch storage",
     )
     statistics: dict[str, object] = Field(
-        default_factory=dict, description="Processing statistics",
+        default_factory=dict,
+        description="Processing statistics",
     )
 
     def execute(self) -> FlextResult[LoadStatisticsModel]:
@@ -492,7 +501,8 @@ class OracleRecordService(FlextDomainService[None]):
 
     # Pydantic fields - seguindo FlextModels.Config padrão da SOURCE OF TRUTH
     config: FlextTargetOracleConfig = Field(
-        ..., description="Oracle target configuration",
+        ...,
+        description="Oracle target configuration",
     )
 
     def execute(self) -> FlextResult[None]:

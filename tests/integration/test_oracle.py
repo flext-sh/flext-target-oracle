@@ -107,7 +107,9 @@ class TestOracleIntegration:
 
         # Create table
         create_res = connected_loader.ensure_table_exists(
-            stream_name, schema, key_properties,
+            stream_name,
+            schema,
+            key_properties,
         )
         assert create_res.is_success
 
@@ -141,8 +143,7 @@ class TestOracleIntegration:
     ) -> None:
         """Test merge mode for updating existing records."""
         # Pydantic models are value objects; use model_copy to produce a mutable copy
-        oracle_config = oracle_config.model_copy(update={})
-        oracle_config.sdc_mode = "merge"
+        oracle_config = oracle_config.model_copy(update={"sdc_mode": "merge"})
         loader = FlextTargetOracleLoader(oracle_config)
 
         # synchronous connect via underlying API - call directly
@@ -174,10 +175,10 @@ class TestOracleIntegration:
 
         # Verify update
         with oracle_engine.connect() as conn:
-            result = conn.execute(
+            cursor_result = conn.execute(
                 text("SELECT name, email FROM test_merge WHERE id = 1"),
             )
-            row = result.fetchone()
+            row = cursor_result.fetchone()
             assert row is not None
             assert row[0] == "Updated Name"
             assert row[1] == "updated@example.com"
@@ -194,9 +195,9 @@ class TestOracleIntegration:
     ) -> None:
         """Test bulk insert with large dataset."""
         # Use a copy of the config to avoid mutating a shared fixture
-        oracle_config = oracle_config.model_copy(update={})
-        oracle_config.load_method = LoadMethod.BULK_INSERT
-        oracle_config.batch_size = 1000
+        oracle_config = oracle_config.model_copy(
+            update={"load_method": LoadMethod.BULK_INSERT, "batch_size": 1000}
+        )
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
 
@@ -212,7 +213,9 @@ class TestOracleIntegration:
         key_properties = ["id"]
 
         # Create table
-        table_res = loader.ensure_table_exists(stream_name, schema, key_properties)
+        schema_dict = cast("dict[str, object]", schema)
+        key_props = cast("list[str] | None", key_properties)
+        table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.is_success
 
         # Generate large dataset
@@ -237,7 +240,7 @@ class TestOracleIntegration:
             assert count == 5000
 
         # Performance assertion (should be fast with bulk)
-        assert elapsed < 10  # Should complete within 10 seconds
+        assert elapsed < 10.0  # Should complete within 10 seconds
 
         assert loader.disconnect().is_success
 
@@ -335,13 +338,11 @@ class TestOracleIntegration:
         key_properties = ["id"]
 
         # ensure types match expected signatures
-        assert isinstance(schema, dict)
-        if not isinstance(key_properties, list):
-            key_props: list[str] | None = None
-        else:
-            key_props = key_properties
+        schema_dict = cast("dict[str, object]", schema)
+        key_props = cast("list[str] | None", key_properties)
 
-        loader.ensure_table_exists(stream_name, schema, key_props)
+        table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
+        assert table_res.is_success
 
         # Check column order
         with oracle_engine.connect() as conn:
@@ -401,7 +402,8 @@ class TestOracleIntegration:
         create_res = loader.ensure_table_exists(stream_name, schema, key_properties)
         assert create_res.is_success
         insert_initial = loader.insert_records(
-            stream_name, [{"id": 1, "name": "Initial"}],
+            stream_name,
+            [{"id": 1, "name": "Initial"}],
         )
         assert insert_initial.is_success
 
@@ -521,7 +523,7 @@ class TestOracleTargetE2E:
 
             # Check data inserted
             data_count = conn.execute(text("SELECT COUNT(*) FROM users")).scalar()
-            assert data_count > 0
+            assert data_count is not None and data_count > 0
 
     @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
@@ -531,10 +533,14 @@ class TestOracleTargetE2E:
         oracle_engine: Engine,
     ) -> None:
         """Test column mapping and filtering features."""
-        oracle_config.column_mappings = {
-            "users": {"name": "full_name", "email": "email_address"},
-        }
-        oracle_config.ignored_columns = ["password", "internal_id"]
+        oracle_config = oracle_config.model_copy(
+            update={
+                "column_mappings": {
+                    "users": {"name": "full_name", "email": "email_address"},
+                },
+                "ignored_columns": ["password", "internal_id"],
+            }
+        )
 
         target = FlextTargetOracle(config=oracle_config)
         target.initialize()
@@ -600,5 +606,6 @@ class TestOracleTargetE2E:
                 text("SELECT full_name, email_address FROM users WHERE id = 1"),
             )
             row = result.fetchone()
+            assert row is not None
             assert row[0] == "John Doe"
             assert row[1] == "john@example.com"

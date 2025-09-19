@@ -44,10 +44,12 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
 
     # Singer protocol state
     schemas: dict[str, FlextTypes.Core.Dict] = Field(
-        default_factory=dict, description="Stream schemas",
+        default_factory=dict,
+        description="Stream schemas",
     )
     state: FlextTypes.Core.Dict = Field(
-        default_factory=dict, description="Singer state",
+        default_factory=dict,
+        description="Singer state",
     )
 
     def __init__(
@@ -173,7 +175,8 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
     # === Singer Protocol Operations ===
 
     def process_singer_messages(
-        self, messages: list[FlextTypes.Core.Dict],
+        self,
+        messages: list[FlextTypes.Core.Dict],
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Process Singer messages with comprehensive statistics."""
         try:
@@ -215,7 +218,8 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
             )
 
     def process_singer_message(
-        self, message: FlextTypes.Core.Dict,
+        self,
+        message: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Process individual Singer message - async compatible."""
         return self._process_single_message(message)
@@ -236,7 +240,8 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
     # === Private Message Handlers ===
 
     def _process_single_message(
-        self, message: FlextTypes.Core.Dict,
+        self,
+        message: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Process a single Singer message with type dispatch."""
         message_type = message.get("type")
@@ -250,7 +255,8 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
         return FlextResult[None].fail(f"Unknown message type: {message_type}")
 
     def _handle_schema_message(
-        self, message: FlextTypes.Core.Dict,
+        self,
+        message: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Handle SCHEMA message with table creation."""
         try:
@@ -272,7 +278,9 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
                 key_properties = None
 
             table_result = self.loader.ensure_table_exists(
-                stream_name, schema, key_properties,
+                stream_name,
+                schema,
+                key_properties,
             )
             if table_result.is_failure:
                 return FlextResult[None].fail(
@@ -286,7 +294,8 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
             return FlextResult[None].fail(f"Schema handling failed: {e}")
 
     def _handle_record_message(
-        self, message: FlextTypes.Core.Dict,
+        self,
+        message: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Handle RECORD message with data loading."""
         try:

@@ -153,7 +153,8 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
 
         # Create command using factory - SOURCE OF TRUTH patterns
         command = OracleTargetCommandFactory.create_load_command(
-            config_file, state_file,
+            config_file,
+            state_file,
         )
 
         # Execute using command bus - Flext CQRS SOURCE OF TRUTH
