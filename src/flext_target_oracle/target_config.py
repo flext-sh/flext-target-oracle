@@ -573,7 +573,7 @@ def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResul
 
     if config.pool_max_size < config.pool_min_size:
         return FlextResult[None].fail(
-            "Pool max size must be greater than or equal to pool min size"
+            "Pool max size must be greater than or equal to pool min size",
         )
 
     # SSL configuration consistency validation
@@ -583,7 +583,7 @@ def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResul
         and not (config.ssl_wallet_location and str(config.ssl_wallet_location).strip())
     ):
         return FlextResult[None].fail(
-            "SSL wallet location is required when wallet password is provided"
+            "SSL wallet location is required when wallet password is provided",
         )
 
     return FlextResult[None].ok(None)

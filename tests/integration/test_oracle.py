@@ -107,7 +107,7 @@ class TestOracleIntegration:
 
         # Create table
         create_res = connected_loader.ensure_table_exists(
-            stream_name, schema, key_properties
+            stream_name, schema, key_properties,
         )
         assert create_res.is_success
 
@@ -123,7 +123,7 @@ class TestOracleIntegration:
         # Verify data in database
         with oracle_engine.connect() as conn:
             cursor = conn.execute(
-                text("SELECT id, name, email FROM test_insert ORDER BY id")
+                text("SELECT id, name, email FROM test_insert ORDER BY id"),
             )
             rows = list(cursor)
 
@@ -253,7 +253,7 @@ class TestOracleIntegration:
         oracle_config = oracle_config.model_copy(update={})
         # storage_mode and json_column_name are defined on the config; use model_copy
         oracle_config = oracle_config.model_copy(
-            update={"storage_mode": "json", "json_column_name": "json_data"}
+            update={"storage_mode": "json", "json_column_name": "json_data"},
         )
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
@@ -316,7 +316,7 @@ class TestOracleIntegration:
                     "audit_columns": 3,
                     "sdc_columns": 4,
                 },
-            }
+            },
         )
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
@@ -401,7 +401,7 @@ class TestOracleIntegration:
         create_res = loader.ensure_table_exists(stream_name, schema, key_properties)
         assert create_res.is_success
         insert_initial = loader.insert_records(
-            stream_name, [{"id": 1, "name": "Initial"}]
+            stream_name, [{"id": 1, "name": "Initial"}],
         )
         assert insert_initial.is_success
 
@@ -439,9 +439,9 @@ class TestOracleIntegration:
                             "unique": True,
                         },
                         {"columns": ["NAME", "CREATED_AT"]},
-                    ]
-                }
-            }
+                    ],
+                },
+            },
         )
 
         loader = FlextTargetOracleLoader(oracle_config)

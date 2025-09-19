@@ -45,7 +45,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
 
     # Internal state fields (without underscore for Pydantic)
     record_buffers: dict[str, list[FlextTypes.Core.Dict]] = Field(
-        default_factory=dict, description="Record buffers by stream"
+        default_factory=dict, description="Record buffers by stream",
     )
     total_records: int = Field(default=0, description="Total records processed")
 
@@ -84,7 +84,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
         connection_result = self.test_connection()
         if connection_result.is_failure:
             return FlextResult[FlextTypes.Core.Dict].fail(
-                f"Oracle connection failed: {connection_result.error}"
+                f"Oracle connection failed: {connection_result.error}",
             )
 
         return FlextResult[FlextTypes.Core.Dict].ok(
@@ -93,7 +93,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
                 "host": self.config.oracle_host,
                 "service": self.config.oracle_service,
                 "schema": self.config.default_target_schema,
-            }
+            },
         )
 
     def test_connection(self) -> FlextResult[None]:
@@ -103,11 +103,11 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             with self.oracle_api as connected_api:
                 # Test connection by getting tables
                 tables_result = connected_api.get_tables(
-                    schema=self.config.default_target_schema
+                    schema=self.config.default_target_schema,
                 )
                 if tables_result.is_failure:
                     return FlextResult[None].fail(
-                        f"Connection test failed: {tables_result.error}"
+                        f"Connection test failed: {tables_result.error}",
                     )
 
                 self.log_info("Oracle connection established successfully")
@@ -126,9 +126,9 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             # Some mocks/implementations return FlextResult, others may return truthy values
             result = self.oracle_api.connect()
             # If result looks like a FlextResult check for failure
-            if hasattr(result, "is_failure") and getattr(result, "is_failure"):
+            if hasattr(result, "is_failure") and result.is_failure:
                 return FlextResult[None].fail(
-                    f"Connect failed: {getattr(result, 'error', None)}"
+                    f"Connect failed: {getattr(result, 'error', None)}",
                 )
 
             # Mark API as connected when successful
@@ -145,9 +145,9 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
         """Disconnect underlying FlextDbOracleApi (exposed for tests)."""
         try:
             result = self.oracle_api.disconnect()
-            if hasattr(result, "is_failure") and getattr(result, "is_failure"):
+            if hasattr(result, "is_failure") and result.is_failure:
                 return FlextResult[None].fail(
-                    f"Disconnect failed: {getattr(result, 'error', None)}"
+                    f"Disconnect failed: {getattr(result, 'error', None)}",
                 )
 
             with contextlib.suppress(Exception):
@@ -160,7 +160,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             return FlextResult[None].fail(f"Disconnect failed: {e}")
 
     def insert_records(
-        self, stream_name: str, records: list[FlextTypes.Core.Dict]
+        self, stream_name: str, records: list[FlextTypes.Core.Dict],
     ) -> FlextResult[None]:
         """Insert multiple records - convenience wrapper used by tests.
 
@@ -172,7 +172,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
                 load_res = self.load_record(stream_name, record)
                 if load_res.is_failure:
                     return FlextResult[None].fail(
-                        f"Failed to load record: {load_res.error}"
+                        f"Failed to load record: {load_res.error}",
                     )
 
             # Ensure remaining records are flushed
@@ -194,12 +194,12 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             with self.oracle_api as connected_api:
                 # Check if table exists
                 tables_result = connected_api.get_tables(
-                    schema=self.config.default_target_schema
+                    schema=self.config.default_target_schema,
                 )
 
                 if tables_result.is_failure:
                     return FlextResult[None].fail(
-                        f"Failed to check tables: {tables_result.error}"
+                        f"Failed to check tables: {tables_result.error}",
                     )
 
                 # Handle case where tables_result.data might be None
@@ -224,7 +224,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
                 exec_result = connected_api.execute_sql(ddl_sql)
                 if exec_result.is_failure:
                     return FlextResult[None].fail(
-                        f"Failed to create table: {exec_result.error}"
+                        f"Failed to create table: {exec_result.error}",
                     )
 
                 self.log_info(f"Created table {table_name}")
@@ -280,7 +280,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             return FlextResult[FlextTypes.Core.Dict].fail(f"Finalization failed: {e}")
 
     def _build_create_table_sql(
-        self, table_name: str, _schema: FlextTypes.Core.Dict
+        self, table_name: str, _schema: FlextTypes.Core.Dict,
     ) -> str:
         """Build CREATE TABLE SQL statement."""
         schema_name = self.config.default_target_schema
@@ -331,7 +331,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
                     result = connected_api.execute_statement(insert_stmt)
                     if result.is_failure:
                         return FlextResult[None].fail(
-                            f"Batch insert failed: {result.error}"
+                            f"Batch insert failed: {result.error}",
                         )
 
                 # Clear buffer
