@@ -15,7 +15,7 @@
 - **flext-core Logging**: Use FlextLogger() for structured logging
 - **Dependency Injection**: Use get_flext_container() for service registration
 - **Error Handling**: Explicit FlextResult patterns, NO try/except fallbacks
-- **Domain Services**: Inherit from FlextDomainService for business logic
+- **Domain Services**: Inherit from FlextService for business logic
 
 ## Code Organization
 

@@ -1,4 +1,4 @@
-"""Oracle Target CLI using FlextDomainService and Flext CQRS SOURCE OF TRUTH.
+"""Oracle Target CLI using FlextService and Flext CQRS SOURCE OF TRUTH.
 
 ZERO DUPLICATION - Uses flext-core patterns exclusively.
 ZERO WRAPPERS - Direct method usage only.
@@ -18,9 +18,9 @@ from pydantic import Field, PrivateAttr
 from flext_core import (
     FlextBus,
     FlextDispatcher,
-    FlextDomainService,
     FlextLogger,
     FlextResult,
+    FlextService,
     FlextTypes,
 )
 from flext_target_oracle.constants import FlextTargetOracleConstants
@@ -30,17 +30,17 @@ from flext_target_oracle.target_commands import (
 )
 
 
-class FlextTargetOracleCliService(FlextDomainService[str]):
-    """Oracle Target CLI Service using FlextDomainService and Flext CQRS SOURCE OF TRUTH.
+class FlextTargetOracleCliService(FlextService[str]):
+    """Oracle Target CLI Service using FlextService and Flext CQRS SOURCE OF TRUTH.
 
-    ZERO DUPLICATION - Uses FlextDomainService base class directly.
+    ZERO DUPLICATION - Uses FlextService base class directly.
     ZERO WRAPPERS - No CLI abstractions, direct command execution.
     SOLID COMPLIANCE - Single responsibility: CLI orchestration only.
 
     Architecture:
     - Single Responsibility: CLI argument parsing and command dispatch
     - Open/Closed: Extensible through command factory
-    - Liskov Substitution: Proper FlextDomainService inheritance
+    - Liskov Substitution: Proper FlextService inheritance
     - Interface Segregation: Focused CLI interface
     - Dependency Inversion: Depends on Flext CQRS abstractions
     """
@@ -80,7 +80,7 @@ class FlextTargetOracleCliService(FlextDomainService[str]):
             setattr(self, "_dispatcher", None)
 
     def execute(self) -> FlextResult[str]:
-        """Execute CLI service - implements FlextDomainService abstract method."""
+        """Execute CLI service - implements FlextService abstract method."""
         return FlextResult[str].ok(
             "FLEXT Target Oracle CLI Service initialized successfully",
         )
@@ -249,7 +249,7 @@ Environment Variables:
 
 
 def main() -> None:
-    """Main CLI entry point using FlextDomainService and Flext CQRS SOURCE OF TRUTH."""
+    """Main CLI entry point using FlextService and Flext CQRS SOURCE OF TRUTH."""
     try:
         # Create CLI service using Pydantic patterns - SOURCE OF TRUTH
         cli_service = FlextTargetOracleCliService()

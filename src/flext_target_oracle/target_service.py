@@ -1,4 +1,4 @@
-"""Oracle Target Service using FlextDomainService and SOURCE OF TRUTH patterns.
+"""Oracle Target Service using FlextService and SOURCE OF TRUTH patterns.
 
 ZERO DUPLICATION - Uses flext-core and flext-meltano SOURCE OF TRUTH.
 SOLID COMPLIANCE - Single responsibility: Singer Target operations.
@@ -14,13 +14,13 @@ from typing import ClassVar
 
 from pydantic import Field
 
-from flext_core import FlextDomainService, FlextResult, FlextTypes
+from flext_core import FlextResult, FlextService, FlextTypes
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_loader import FlextTargetOracleLoader
 
 
-class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
-    """Oracle Singer Target service using FlextDomainService SOURCE OF TRUTH.
+class FlextTargetOracleService(FlextService[FlextTypes.Core.Dict]):
+    """Oracle Singer Target service using FlextService SOURCE OF TRUTH.
 
     ZERO DUPLICATION - Uses FlextMeltanoTarget and FlextTargetOracleLoader.
     SOLID COMPLIANCE - Single responsibility: Singer protocol operations.
@@ -48,7 +48,7 @@ class FlextTargetOracleService(FlextDomainService[FlextTypes.Core.Dict]):
         # Create loader instance
         loader = FlextTargetOracleLoader(config)
 
-        # Initialize FlextDomainService
+        # Initialize FlextService
         super().__init__()
 
         # Set Pydantic fields as instance attributes

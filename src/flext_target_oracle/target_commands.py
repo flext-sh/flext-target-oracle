@@ -256,6 +256,19 @@ class OracleTargetCommandHandler(FlextHandlers[FlextModels.Command, str]):
     ZERO DUPLICATION - Uses FlextHandlers directly.
     """
 
+    def __init__(self) -> None:
+        """Initialize Oracle target command handler."""
+        config = FlextModels.CqrsConfig.Handler(
+            handler_id="oracle_target_command_handler",
+            handler_name="Oracle Target Command Handler",
+            handler_type="command",
+            handler_mode="command",
+            command_timeout=30000,
+            max_command_retries=3,
+            metadata={"description": "Oracle target Singer command handler"},
+        )
+        super().__init__(config=config)
+
     def handle(self, message: FlextModels.Command) -> FlextResult[str]:
         """Handle Oracle target commands using type-based dispatch."""
         # Dispatch based on command type

@@ -1,4 +1,4 @@
-"""Unified Oracle Target using FlextDomainService and SOURCE OF TRUTH patterns.
+"""Unified Oracle Target using FlextService and SOURCE OF TRUTH patterns.
 
 ZERO DUPLICATION - Uses flext-core and flext-meltano exclusively.
 SOLID COMPLIANCE - Single class with single responsibility: Oracle Singer Target.
@@ -15,13 +15,13 @@ from typing import ClassVar
 
 from pydantic import Field
 
-from flext_core import FlextDomainService, FlextResult, FlextTypes
+from flext_core import FlextResult, FlextService, FlextTypes
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_loader import FlextTargetOracleLoader
 
 
-class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
-    """Unified Oracle Singer Target using FlextDomainService SOURCE OF TRUTH.
+class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
+    """Unified Oracle Singer Target using FlextService SOURCE OF TRUTH.
 
     ZERO DUPLICATION - Uses flext-core, flext-meltano, and flext-db-oracle exclusively.
     SOLID COMPLIANCE - Single responsibility: Oracle Singer Target operations.
@@ -30,7 +30,7 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
     Architecture:
         - Single Responsibility: Oracle Singer Target implementation
         - Open/Closed: Extensible through configuration and composition
-        - Liskov Substitution: Proper FlextDomainService inheritance
+        - Liskov Substitution: Proper FlextService inheritance
         - Interface Segregation: Focused Singer Target interface
         - Dependency Inversion: Depends on abstractions (flext-core patterns)
     """
@@ -73,7 +73,7 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
         # Create loader with validated config
         loader = FlextTargetOracleLoader(validated_config)
 
-        # Initialize FlextDomainService
+        # Initialize FlextService
         super().__init__()
 
         # Set Pydantic fields as instance attributes
@@ -84,7 +84,7 @@ class FlextTargetOracle(FlextDomainService[FlextTypes.Core.Dict]):
         self.state = {}
 
     def execute(self, payload: str | None = None) -> FlextResult[FlextTypes.Core.Dict]:
-        """Execute Oracle Target - implements FlextDomainService abstract method.
+        """Execute Oracle Target - implements FlextService abstract method.
 
         Backwards-compat: accept optional string payload (Singer message JSON). If
         payload is provided, attempt to parse and process as a single message.
