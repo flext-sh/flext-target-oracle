@@ -213,7 +213,7 @@ async def demonstrate_basic_usage() -> None:
         for i, record_message in enumerate(record_messages, 1):
             logger.info(f"Processing record {i}/{len(record_messages)}")
 
-            record_result = await target.process_singer_message(record_message)
+            record_result = target.process_singer_message(record_message)
             if record_result.is_failure:
                 logger.error(f"Record {i} processing failed: {record_result.error}")
                 return
@@ -224,7 +224,7 @@ async def demonstrate_basic_usage() -> None:
         logger.info("Step 5: Processing STATE message")
         state_message = create_sample_state_message()
 
-        state_result = await target.process_singer_message(state_message)
+        state_result = target.process_singer_message(state_message)
         if state_result.is_failure:
             logger.error(f"State processing failed: {state_result.error}")
             return
@@ -233,7 +233,7 @@ async def demonstrate_basic_usage() -> None:
 
         # Step 6: Finalize and get statistics
         logger.info("Step 6: Finalizing target and collecting statistics")
-        stats_result = await target.finalize()
+        stats_result = target.finalize()
         if stats_result.is_failure:
             logger.error(f"Target finalization failed: {stats_result.error}")
             return
@@ -282,8 +282,8 @@ async def demonstrate_error_handling() -> None:
     target = FlextTargetOracle(config)
 
     # Invalid message type
-    invalid_message = {"type": "INVALID", "data": "test"}
-    result = await target.process_singer_message(invalid_message)
+    invalid_message: dict[str, object] = {"type": "INVALID", "data": "test"}
+    result = target.process_singer_message(invalid_message)
 
     if result.is_failure:
         logger.info(f"Invalid message handled gracefully: {result.error}")
