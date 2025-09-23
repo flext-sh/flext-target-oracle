@@ -14,7 +14,7 @@ from typing import Protocol
 
 from pydantic import Field
 
-from flext_core import FlextDomainService, FlextResult, FlextTypes
+from flext_core import FlextResult, FlextService, FlextTypes
 from flext_db_oracle import FlextDbOracleApi
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_models import (
@@ -98,12 +98,12 @@ class RecordServiceProtocol(Protocol):
         ...
 
 
-class OracleConnectionService(FlextDomainService[None]):
+class OracleConnectionService(FlextService[None]):
     """Oracle database connection lifecycle management using flext-core domain patterns.
 
     Handles Oracle database connections, connection pooling,
     and connection health monitoring following Single Responsibility Principle.
-    Uses FlextDomainService foundation to eliminate duplication and ensure SOLID principles.
+    Uses FlextService foundation to eliminate duplication and ensure SOLID principles.
 
     Pydantic-based field definitions following flext-core SOURCE OF TRUTH patterns.
     """
@@ -150,12 +150,12 @@ class OracleConnectionService(FlextDomainService[None]):
                     f"Connection test failed: {tables_result.error}",
                 )
 
-            # Use FlextDomainService built-in logging instead of module logger
+            # Use FlextService built-in logging instead of module logger
             self.log_info("Oracle connection test successful")
             return FlextResult[None].ok(None)
 
     def execute(self) -> FlextResult[None]:
-        """Execute domain service - implements FlextDomainService abstract method.
+        """Execute domain service - implements FlextService abstract method.
 
         Executes the primary domain operation: testing Oracle connection.
 
@@ -175,12 +175,12 @@ class OracleConnectionService(FlextDomainService[None]):
         return FlextResult[OracleConnectionModel].ok(self.connection_model)
 
 
-class OracleSchemaService(FlextDomainService[None]):
+class OracleSchemaService(FlextService[None]):
     """Oracle schema and table management using flext-core domain patterns.
 
     Handles Oracle table creation, schema evolution, and metadata
     management following Single Responsibility Principle and
-    FlextDomainService patterns.
+    FlextService patterns.
     """
 
     # Pydantic fields - seguindo FlextModels.Config padrão da SOURCE OF TRUTH
@@ -194,7 +194,7 @@ class OracleSchemaService(FlextDomainService[None]):
     )
 
     def execute(self) -> FlextResult[None]:
-        """Execute domain service - implements FlextDomainService abstract method.
+        """Execute domain service - implements FlextService abstract method.
 
         For schema service, execute validates Oracle schema access.
 
@@ -379,11 +379,11 @@ class OracleSchemaService(FlextDomainService[None]):
             return FlextResult[None].fail(f"Table creation failed: {e}")
 
 
-class OracleBatchService(FlextDomainService[LoadStatisticsModel]):
+class OracleBatchService(FlextService[LoadStatisticsModel]):
     """Oracle batch processing using flext-core domain patterns.
 
     Handles batching of records for efficient Oracle loading
-    following Single Responsibility Principle and FlextDomainService patterns.
+    following Single Responsibility Principle and FlextService patterns.
     """
 
     # Pydantic fields - seguindo FlextModels.Config padrão da SOURCE OF TRUTH
@@ -405,7 +405,7 @@ class OracleBatchService(FlextDomainService[LoadStatisticsModel]):
     )
 
     def execute(self) -> FlextResult[LoadStatisticsModel]:
-        """Execute domain service - implements FlextDomainService abstract method.
+        """Execute domain service - implements FlextService abstract method.
 
         For batch service, execute finalizes all pending batches.
 
@@ -491,12 +491,12 @@ class OracleBatchService(FlextDomainService[LoadStatisticsModel]):
         return FlextResult[None].ok(None)
 
 
-class OracleRecordService(FlextDomainService[None]):
+class OracleRecordService(FlextService[None]):
     """Oracle record transformation using flext-core domain patterns.
 
     Handles Singer record transformation, validation, and mapping
     for Oracle storage following Single Responsibility Principle and
-    FlextDomainService patterns.
+    FlextService patterns.
     """
 
     # Pydantic fields - seguindo FlextModels.Config padrão da SOURCE OF TRUTH
@@ -506,7 +506,7 @@ class OracleRecordService(FlextDomainService[None]):
     )
 
     def execute(self) -> FlextResult[None]:
-        """Execute domain service - implements FlextDomainService abstract method.
+        """Execute domain service - implements FlextService abstract method.
 
         For record service, execute validates transformation capabilities.
 

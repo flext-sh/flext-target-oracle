@@ -1,4 +1,4 @@
-"""Oracle Data Loader using FlextDomainService and SOURCE OF TRUTH patterns.
+"""Oracle Data Loader using FlextService and SOURCE OF TRUTH patterns.
 
 ZERO DUPLICATION - Uses flext-db-oracle API exclusively.
 SOLID COMPLIANCE - Single responsibility: Oracle data loading only.
@@ -19,7 +19,7 @@ from pydantic import Field
 from sqlalchemy import MetaData, Table, insert
 from sqlalchemy.sql import Insert
 
-from flext_core import FlextDomainService, FlextResult, FlextTypes
+from flext_core import FlextResult, FlextService, FlextTypes
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_exceptions import (
@@ -30,8 +30,8 @@ from flext_target_oracle.target_exceptions import (
 _logger = logging.getLogger(__name__)
 
 
-class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
-    """Oracle data loader using FlextDomainService and flext-db-oracle SOURCE OF TRUTH.
+class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
+    """Oracle data loader using FlextService and flext-db-oracle SOURCE OF TRUTH.
 
     ZERO DUPLICATION - Uses ONLY public flext-db-oracle API.
     SOLID COMPLIANCE - Single responsibility: Oracle data loading operations.
@@ -67,7 +67,7 @@ class FlextTargetOracleLoader(FlextDomainService[FlextTypes.Core.Dict]):
             # Initialize Oracle API
             oracle_api = FlextDbOracleApi(oracle_config)
 
-            # Initialize FlextDomainService
+            # Initialize FlextService
             super().__init__()
 
             # Set Pydantic fields as instance attributes
