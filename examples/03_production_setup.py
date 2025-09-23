@@ -182,7 +182,8 @@ class ProductionTargetManager:
 
             # Step 3: Test connectivity
             logger.info("Testing Oracle database connectivity")
-            if not self.target._test_connection_impl():
+            connection_result = self.target.test_connection()
+            if connection_result.is_failure:
                 return FlextResult[None].fail("Oracle connectivity test failed")
 
             logger.info("Production target initialized successfully")
@@ -206,7 +207,7 @@ class ProductionTargetManager:
 
         """
         if not self.target:
-            return FlextResult[None].fail("Target not initialized")
+            return FlextResult[FlextTypes.Core.Dict].fail("Target not initialized")
 
         logger.info("Processing Singer stream with %d messages", len(messages))
 
@@ -238,7 +239,7 @@ class ProductionTargetManager:
                 )
 
                 # Process message with error handling
-                result = await self.target.process_singer_message(message)
+                result = self.target.process_singer_message(message)
 
                 if result.success:
                     stats["messages_processed"] += 1
@@ -268,7 +269,7 @@ class ProductionTargetManager:
 
             # Finalize target
             logger.info("Finalizing target operations")
-            finalize_result = await self.target.finalize()
+            finalize_result = self.target.finalize()
 
             if finalize_result.success:
                 # Merge finalization stats
@@ -362,7 +363,7 @@ class ProductionTargetManager:
             if self.target:
                 # Finalize any pending operations
                 logger.info("Finalizing pending operations")
-                await self.target.finalize()
+                self.target.finalize()
 
                 # Clean up resources (if needed)
                 logger.info("Cleaning up target resources")
