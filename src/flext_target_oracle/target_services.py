@@ -28,11 +28,11 @@ from flext_target_oracle.target_models import (
 class ConnectionServiceProtocol(Protocol):
     """Protocol for Oracle connection management services."""
 
-    def test_connection(self) -> FlextResult[None]:
+    def test_connection(self: object) -> FlextResult[None]:
         """Test Oracle database connection."""
         ...
 
-    def get_connection_info(self) -> FlextResult[OracleConnectionModel]:
+    def get_connection_info(self: object) -> FlextResult[OracleConnectionModel]:
         """Get connection information."""
         ...
 
@@ -120,7 +120,7 @@ class OracleConnectionService(FlextService[None]):
 
     # Connection model is computed property, not field
     @property
-    def connection_model(self) -> OracleConnectionModel:
+    def connection_model(self: object) -> OracleConnectionModel:
         """Get connection model using domain service configuration."""
         return OracleConnectionModel(
             host=self.config.oracle_host,
@@ -132,7 +132,7 @@ class OracleConnectionService(FlextService[None]):
             connection_timeout=self.config.connection_timeout,
         )
 
-    def test_connection(self) -> FlextResult[None]:
+    def test_connection(self: object) -> FlextResult[None]:
         """Test Oracle database connection using zero-fallback error handling.
 
         Returns:
@@ -154,7 +154,7 @@ class OracleConnectionService(FlextService[None]):
             self.log_info("Oracle connection test successful")
             return FlextResult[None].ok(None)
 
-    def execute(self) -> FlextResult[None]:
+    def execute(self: object) -> FlextResult[None]:
         """Execute domain service - implements FlextService abstract method.
 
         Executes the primary domain operation: testing Oracle connection.
@@ -165,7 +165,7 @@ class OracleConnectionService(FlextService[None]):
         """
         return self.test_connection()
 
-    def get_connection_info(self) -> FlextResult[OracleConnectionModel]:
+    def get_connection_info(self: object) -> FlextResult[OracleConnectionModel]:
         """Get connection information.
 
         Returns:
@@ -193,7 +193,7 @@ class OracleSchemaService(FlextService[None]):
         description="Oracle database API instance",
     )
 
-    def execute(self) -> FlextResult[None]:
+    def execute(self: object) -> FlextResult[None]:
         """Execute domain service - implements FlextService abstract method.
 
         For schema service, execute validates Oracle schema access.
@@ -204,7 +204,7 @@ class OracleSchemaService(FlextService[None]):
         """
         return self.validate_schema_access()
 
-    def validate_schema_access(self) -> FlextResult[None]:
+    def validate_schema_access(self: object) -> FlextResult[None]:
         """Validate Oracle schema access and permissions."""
         try:
             with self.oracle_api as connected_api:
@@ -354,7 +354,7 @@ class OracleSchemaService(FlextService[None]):
                 # Generate DDL SQL
                 table_name = stream.table_name
                 ddl_sql = f"CREATE TABLE {table_name} ("
-                column_definitions = []
+                column_definitions: list[str] = []
                 for col in columns:
                     col_def = f"{col['name']} {col['type']}"
                     if not col.get("nullable", True):
@@ -365,7 +365,7 @@ class OracleSchemaService(FlextService[None]):
 
                 ddl_sql += ", ".join(column_definitions) + ")"
 
-                exec_result = connected_api.execute_sql(ddl_sql)
+                exec_result: FlextResult[object] = connected_api.execute_sql(ddl_sql)
                 if exec_result.is_failure:
                     return FlextResult[None].fail(
                         f"Failed to create table: {exec_result.error}",
@@ -404,7 +404,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
         description="Processing statistics",
     )
 
-    def execute(self) -> FlextResult[LoadStatisticsModel]:
+    def execute(self: object) -> FlextResult[LoadStatisticsModel]:
         """Execute domain service - implements FlextService abstract method.
 
         For batch service, execute finalizes all pending batches.
@@ -426,7 +426,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
             # Flush all pending batches
             for stream_name in list(self.batches.keys()):
                 # Placeholder: In real implementation, check batch status
-                result = await self.flush_batch(stream_name)
+                result: FlextResult[object] = await self.flush_batch(stream_name)
                 if result.is_failure:
                     self.log_error(f"Failed to flush {stream_name}: {result.error}")
 
@@ -505,7 +505,7 @@ class OracleRecordService(FlextService[None]):
         description="Oracle target configuration",
     )
 
-    def execute(self) -> FlextResult[None]:
+    def execute(self: object) -> FlextResult[None]:
         """Execute domain service - implements FlextService abstract method.
 
         For record service, execute validates transformation capabilities.
@@ -573,8 +573,8 @@ class OracleRecordService(FlextService[None]):
     ) -> FlextResult[None]:
         """Validate record against schema."""
         try:
-            properties = schema.get("properties", {})
-            required_fields = schema.get("required", [])
+            properties: dict[str, object] = schema.get("properties", {})
+            required_fields: list[object] = schema.get("required", [])
 
             # Validate required fields
             required_validation = self._validate_required_fields(
@@ -653,22 +653,22 @@ class OracleTargetServiceFactory:
             oracle_api: Oracle database API instance
 
         """
-        self._config = config
+        self._config: dict[str, object] = config
         self._oracle_api = oracle_api
 
-    def create_connection_service(self) -> OracleConnectionService:
+    def create_connection_service(self: object) -> OracleConnectionService:
         """Create Oracle connection service."""
         return OracleConnectionService(config=self._config, oracle_api=self._oracle_api)
 
-    def create_schema_service(self) -> OracleSchemaService:
+    def create_schema_service(self: object) -> OracleSchemaService:
         """Create Oracle schema service."""
         return OracleSchemaService(config=self._config, oracle_api=self._oracle_api)
 
-    def create_batch_service(self) -> OracleBatchService:
+    def create_batch_service(self: object) -> OracleBatchService:
         """Create Oracle batch processing service."""
         return OracleBatchService(config=self._config, oracle_api=self._oracle_api)
 
-    def create_record_service(self) -> OracleRecordService:
+    def create_record_service(self: object) -> OracleRecordService:
         """Create Oracle record transformation service."""
         return OracleRecordService(config=self._config)
 

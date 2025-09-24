@@ -369,7 +369,6 @@ make oracle-connect
 PYTHONPATH=src python -c "
 from flext_target_oracle import FlextOracleTargetConfig
 from flext_target_oracle.loader import FlextOracleTargetLoader
-import logging
 logging.basicConfig(level=logging.DEBUG)
 config = FlextOracleTargetConfig(
     oracle_host='localhost',
@@ -436,7 +435,6 @@ except ValidationError as e:
 
 ```python
 # Enable debug logging for development
-import logging
 logging.basicConfig(
     level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'

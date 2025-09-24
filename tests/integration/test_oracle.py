@@ -277,7 +277,11 @@ class TestOracleIntegration:
             "customer": {
                 "id": 100,
                 "name": "Acme Corp",
-                "address": {"street": "123 Main St", "city": "Anytown", "zip": "12345"},
+                "address": {
+                    "street": "123 Main St",
+                    "city": "objecttown",
+                    "zip": "12345",
+                },
             },
             "items": [
                 {"product_id": 1, "quantity": 2, "price": 99.99},
@@ -297,7 +301,7 @@ class TestOracleIntegration:
             stored_data = json.loads(json_str)
 
             assert stored_data["customer"]["name"] == "Acme Corp"
-            assert stored_data["customer"]["address"]["city"] == "Anytown"
+            assert stored_data["customer"]["address"]["city"] == "objecttown"
             assert len(stored_data["items"]) == 2
 
         assert loader.disconnect().is_success

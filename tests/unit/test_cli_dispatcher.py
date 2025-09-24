@@ -11,9 +11,7 @@ pytest.importorskip(
     "flext_meltano",
     reason="Dispatcher pilot test requires flext-meltano optional dependency",
 )
-
-from flext_target_oracle.target_commands import OracleTargetCommandFactory
-from flext_target_oracle.target_refactored import FlextTargetOracleCliService
+from flext_target_oracle import FlextTargetOracleCliService, OracleTargetCommandFactory
 
 
 @contextmanager
