@@ -348,7 +348,7 @@ class TestRealOracleTarget:
                     "name": "John Doe",
                     "address": {
                         "street": "123 Main St",
-                        "city": "Anytown",
+                        "city": "objecttown",
                     },
                 },
                 "items": [

@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import contextlib
 import json
-import logging
 from datetime import UTC, datetime
 from typing import ClassVar
 
@@ -19,7 +18,7 @@ from pydantic import Field
 from sqlalchemy import MetaData, Table, insert
 from sqlalchemy.sql import Insert
 
-from flext_core import FlextResult, FlextService, FlextTypes
+from flext_core import FlextLogger, FlextResult, FlextService, FlextTypes
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_exceptions import (
@@ -27,7 +26,7 @@ from flext_target_oracle.target_exceptions import (
 )
 
 # Module logger
-_logger = logging.getLogger(__name__)
+_logger = FlextLogger(__name__)
 
 
 class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
@@ -71,7 +70,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
             super().__init__()
 
             # Set Pydantic fields as instance attributes
-            self.config = config
+            self.config: dict[str, object] = config
             self.oracle_api = oracle_api
             self.record_buffers = {}
             self.total_records = 0
@@ -80,9 +79,9 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
             msg = f"Failed to create Oracle API: {e}"
             raise FlextTargetOracleConnectionError(msg) from e
 
-    def execute(self) -> FlextResult[FlextTypes.Core.Dict]:
+    def execute(self: object) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute domain service - returns connection test result."""
-        connection_result = self.test_connection()
+        connection_result: FlextResult[object] = self.test_connection()
         if connection_result.is_failure:
             return FlextResult[FlextTypes.Core.Dict].fail(
                 f"Oracle connection failed: {connection_result.error}",
@@ -97,7 +96,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
             },
         )
 
-    def test_connection(self) -> FlextResult[None]:
+    def test_connection(self: object) -> FlextResult[None]:
         """Test connection to Oracle database using flext-db-oracle API."""
         try:
             # Use Oracle API context manager correctly
@@ -118,14 +117,14 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
             self.log_error("Failed to connect to Oracle", extra={"error": str(e)})
             return FlextResult[None].fail(f"Connection failed: {e}")
 
-    def connect(self) -> FlextResult[None]:
+    def connect(self: object) -> FlextResult[None]:
         """Establish connection using underlying FlextDbOracleApi.
 
         Exposed for tests and parity with previous loader helpers.
         """
         try:
             # Some mocks/implementations return FlextResult, others may return truthy values
-            result = self.oracle_api.connect()
+            result: FlextResult[object] = self.oracle_api.connect()
             # If result looks like a FlextResult check for failure
             if hasattr(result, "is_failure") and result.is_failure:
                 return FlextResult[None].fail(
@@ -142,10 +141,10 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
             self.log_error("Failed to connect loader", extra={"error": str(e)})
             return FlextResult[None].fail(f"Connect failed: {e}")
 
-    def disconnect(self) -> FlextResult[None]:
+    def disconnect(self: object) -> FlextResult[None]:
         """Disconnect underlying FlextDbOracleApi (exposed for tests)."""
         try:
-            result = self.oracle_api.disconnect()
+            result: FlextResult[object] = self.oracle_api.disconnect()
             if hasattr(result, "is_failure") and result.is_failure:
                 return FlextResult[None].fail(
                     f"Disconnect failed: {getattr(result, 'error', None)}",
@@ -224,7 +223,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
                 ddl_sql = self._build_create_table_sql(table_name, schema)
 
                 # Execute DDL using execute method
-                exec_result = connected_api.execute_sql(ddl_sql)
+                exec_result: FlextResult[object] = connected_api.execute_sql(ddl_sql)
                 if exec_result.is_failure:
                     return FlextResult[None].fail(
                         f"Failed to create table: {exec_result.error}",
@@ -260,13 +259,13 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
             self.log_error("Failed to load record", extra={"error": str(e)})
             return FlextResult[None].fail(f"Record loading failed: {e}")
 
-    def finalize_all_streams(self) -> FlextResult[FlextTypes.Core.Dict]:
+    def finalize_all_streams(self: object) -> FlextResult[FlextTypes.Core.Dict]:
         """Finalize all streams and return stats."""
         try:
             # Flush all remaining records
             for stream_name, records in self.record_buffers.items():
                 if records:
-                    result = self._flush_batch(stream_name)
+                    result: FlextResult[object] = self._flush_batch(stream_name)
                     if result.is_failure:
                         self.log_error(f"Failed to flush {stream_name}: {result.error}")
 
@@ -305,7 +304,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
     def _flush_batch(self, stream_name: str) -> FlextResult[None]:
         """Flush batch using direct SQL execution."""
         try:
-            records = self.record_buffers.get(stream_name, [])
+            records: list[object] = self.record_buffers.get(stream_name, [])
             if not records:
                 return FlextResult[None].ok(None)
 
@@ -321,7 +320,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
                     return FlextResult[None].fail("Invalid table name characters")
 
                 # Build INSERT SQL using SQLAlchemy 2.0 Core API - NO STRING CONCATENATION
-                metadata = MetaData()
+                metadata: dict[str, object] = MetaData()
                 table = Table(full_table_name, metadata)
 
                 # Execute batch using SQLAlchemy 2.0 Core API - NO STRING CONCATENATION
@@ -333,7 +332,9 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
                         _SDC_LOADED_AT=loaded_at,
                     )
 
-                    result = connected_api.execute_statement(insert_stmt)
+                    result: FlextResult[object] = connected_api.execute_statement(
+                        insert_stmt
+                    )
                     if result.is_failure:
                         return FlextResult[None].fail(
                             f"Batch insert failed: {result.error}",

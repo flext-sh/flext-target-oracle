@@ -60,9 +60,11 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
         """Initialize Oracle Singer Target with configuration validation."""
         # Convert config if needed
         if isinstance(config, dict):
-            validated_config = FlextTargetOracleConfig.model_validate(config)
+            validated_config: dict[str, object] = (
+                FlextTargetOracleConfig.model_validate(config)
+            )
         elif isinstance(config, FlextTargetOracleConfig):
-            validated_config = config
+            validated_config: dict[str, object] = config
         else:
             msg = (
                 "Configuration is required. Provide FlextTargetOracleConfig instance "
@@ -78,7 +80,7 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
 
         # Set Pydantic fields as instance attributes
         self.name = "flext-oracle-target"
-        self.config = validated_config
+        self.config: dict[str, object] = validated_config
         self.loader = loader
         self.schemas = {}
         self.state = {}
@@ -107,7 +109,7 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
                     f"Failed to process payload: {e}",
                 )
 
-        connection_result = self.test_connection()
+        connection_result: FlextResult[object] = self.test_connection()
         if connection_result.is_failure:
             return FlextResult[FlextTypes.Core.Dict].fail(
                 f"Oracle target execution failed: {connection_result.error}",
@@ -123,21 +125,21 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
             },
         )
 
-    def initialize(self) -> FlextResult[None]:
+    def initialize(self: object) -> FlextResult[None]:
         """Compatibility shim for older tests: perform a connection test."""
         return self.test_connection()
 
     # === Core Target Operations ===
 
-    def validate_configuration(self) -> FlextResult[None]:
+    def validate_configuration(self: object) -> FlextResult[None]:
         """Validate Oracle target configuration using domain rules."""
         return self.config.validate_domain_rules()
 
-    def test_connection(self) -> FlextResult[None]:
+    def test_connection(self: object) -> FlextResult[None]:
         """Test Oracle database connectivity using loader."""
         return self.loader.test_connection()
 
-    def discover_catalog(self) -> FlextResult[FlextTypes.Core.Dict]:
+    def discover_catalog(self: object) -> FlextResult[FlextTypes.Core.Dict]:
         """Discover available schemas and generate Singer catalog."""
         try:
             catalog: FlextTypes.Core.Dict = {
@@ -184,7 +186,7 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
             start_time = time.time()
 
             for message in messages:
-                result = self._process_single_message(message)
+                result: FlextResult[object] = self._process_single_message(message)
                 if result.is_failure:
                     return FlextResult[FlextTypes.Core.Dict].fail(
                         f"Failed to process message: {result.error}",
@@ -194,7 +196,7 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
                     records_processed += 1
 
             # Finalize all streams
-            finalize_result = self.loader.finalize_all_streams()
+            finalize_result: FlextResult[object] = self.loader.finalize_all_streams()
             if finalize_result.is_failure:
                 return FlextResult[FlextTypes.Core.Dict].fail(
                     f"Failed to finalize streams: {finalize_result.error}",
@@ -224,10 +226,10 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
         """Process individual Singer message - async compatible."""
         return self._process_single_message(message)
 
-    def finalize(self) -> FlextResult[FlextTypes.Core.Dict]:
+    def finalize(self: object) -> FlextResult[FlextTypes.Core.Dict]:
         """Finalize target processing and return comprehensive statistics."""
         try:
-            result = self.loader.finalize_all_streams()
+            result: FlextResult[object] = self.loader.finalize_all_streams()
             if result.is_success:
                 self.log_info("Oracle target finalization completed successfully")
                 return result
@@ -300,7 +302,7 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
         """Handle RECORD message with data loading."""
         try:
             stream_name = message.get("stream")
-            record_data = message.get("record")
+            record_data: dict[str, object] = message.get("record")
 
             if not isinstance(stream_name, str):
                 return FlextResult[None].fail("Invalid stream name in record message")
@@ -309,7 +311,9 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
                 return FlextResult[None].fail("Invalid record data in record message")
 
             # Load record using loader
-            result = self.loader.load_record(stream_name, record_data)
+            result: FlextResult[object] = self.loader.load_record(
+                stream_name, record_data
+            )
             if result.is_failure:
                 return FlextResult[None].fail(f"Failed to load record: {result.error}")
 
@@ -333,21 +337,21 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
 
     # === Singer SDK Compatibility (if needed) ===
 
-    def _test_connection(self) -> bool:
+    def _test_connection(self: object) -> bool:
         """Singer SDK connection test compatibility."""
-        result = self.test_connection()
+        result: FlextResult[object] = self.test_connection()
         return result.is_success
 
     def _write_record(self, stream_name: str, record: FlextTypes.Core.Dict) -> None:
         """Singer SDK record writing compatibility."""
-        result = self.loader.load_record(stream_name, record)
+        result: FlextResult[object] = self.loader.load_record(stream_name, record)
         if result.is_failure:
             msg = f"Failed to write record: {result.error}"
             raise RuntimeError(msg)
 
     # === Metrics and Information ===
 
-    def get_implementation_metrics(self) -> FlextTypes.Core.Dict:
+    def get_implementation_metrics(self: object) -> FlextTypes.Core.Dict:
         """Get Oracle-specific implementation metrics."""
         return {
             "oracle_host": self.config.oracle_host,

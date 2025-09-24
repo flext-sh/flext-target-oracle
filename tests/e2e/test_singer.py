@@ -175,7 +175,7 @@ class TestSingerWorkflowE2E:
                     "updated_at": now,
                     "address": {
                         "street": f"{i} Main St",
-                        "city": "Anytown",
+                        "city": "objecttown",
                         "state": "CA",
                         "zip": f"{90000 + i:05d}",
                     },

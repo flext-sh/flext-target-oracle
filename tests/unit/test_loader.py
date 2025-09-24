@@ -527,7 +527,7 @@ class TestRealOracleLoader:
                 "name": "John Doe",
                 "address": {
                     "street": "123 Main St",
-                    "city": "Anytown",
+                    "city": "objecttown",
                     "country": "USA",
                 },
             },

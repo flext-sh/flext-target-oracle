@@ -21,8 +21,8 @@ def _env_enabled(flag_name: str, default: str = "1") -> bool:
     return value.lower() not in {"0", "false", "no"}
 
 
-class FlextTargetOracleConstants:
-    """Target Oracle constants without inheritance - use direct imports."""
+class FlextTargetOracleConstants(FlextConstants):
+    """Target Oracle constants extending FlextConstants."""
 
     class Connection:
         """Connection-related constants for Oracle target."""

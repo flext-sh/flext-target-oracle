@@ -18,6 +18,7 @@ from flext_target_oracle.target_client import (
     FlextTargetOracle,
     TargetOracle,
 )
+from flext_target_oracle.target_commands import OracleTargetCommandFactory
 from flext_target_oracle.target_config import FlextTargetOracleConfig, LoadMethod
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
@@ -41,6 +42,7 @@ from flext_target_oracle.target_observability import (
     FlextOracleObs,
     configure_oracle_observability,
 )
+from flext_target_oracle.target_refactored import FlextTargetOracleCliService
 from flext_target_oracle.target_services import (
     BatchServiceProtocol,
     ConnectionServiceProtocol,
@@ -90,6 +92,7 @@ __all__: FlextTypes.Core.StringList = [
     "FlextTargetAbstractions",
     "FlextTargetOracle",
     "FlextTargetOracleAuthenticationError",
+    "FlextTargetOracleCliService",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConnectionError",
     "FlextTargetOracleError",
@@ -106,6 +109,7 @@ __all__: FlextTypes.Core.StringList = [
     "OracleRecordService",
     "OracleSchemaService",
     "OracleTableMetadataModel",
+    "OracleTargetCommandFactory",
     "OracleTargetServiceFactory",
     "RecordServiceProtocol",
     "SchemaServiceProtocol",

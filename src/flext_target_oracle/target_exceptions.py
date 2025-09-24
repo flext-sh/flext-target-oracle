@@ -22,7 +22,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
     class ConfigurationError(FlextExceptions.ConfigurationError):
         """Oracle configuration error using flext-core foundation."""
 
-    class ConnectionError(FlextExceptions.ConnectionError):
+    class OracleConnectionError(FlextExceptions.ConnectionError):
         """Oracle connection error with Oracle-specific context."""
 
         def __init__(
@@ -62,7 +62,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             )
 
         @property
-        def host(self) -> str | None:
+        def host(self: object) -> str | None:
             """Get connection host."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -71,7 +71,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def port(self) -> int | None:
+        def port(self: object) -> int | None:
             """Get connection port."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -80,7 +80,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def service_name(self) -> str | None:
+        def service_name(self: object) -> str | None:
             """Get Oracle service name."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -89,7 +89,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def user(self) -> str | None:
+        def user(self: object) -> str | None:
             """Get connection user."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -98,7 +98,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def dsn(self) -> str | None:
+        def dsn(self: object) -> str | None:
             """Get Oracle DSN."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -143,7 +143,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             )
 
         @property
-        def user(self) -> str | None:
+        def user(self: object) -> str | None:
             """Get authentication user."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -152,7 +152,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def wallet_location(self) -> str | None:
+        def wallet_location(self: object) -> str | None:
             """Get wallet location."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -197,7 +197,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             )
 
         @property
-        def stream_name(self) -> str | None:
+        def stream_name(self: object) -> str | None:
             """Get stream name."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -206,7 +206,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def record_count(self) -> int | None:
+        def record_count(self: object) -> int | None:
             """Get record count."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -215,7 +215,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def error_records(self) -> list[dict[str, object]] | None:
+        def error_records(self: object) -> list[dict[str, object]] | None:
             """Get error records."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -229,7 +229,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                     return normalized
             return None
 
-    class TimeoutError(FlextExceptions.TimeoutError):
+    class OracleTimeoutError(FlextExceptions.TimeoutError):
         """Oracle timeout error using flext-core foundation."""
 
     # Domain-specific Oracle exceptions extending flext-core patterns
@@ -270,7 +270,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             )
 
         @property
-        def stream_name(self) -> str | None:
+        def stream_name(self: object) -> str | None:
             """Get stream name."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -279,7 +279,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def table_name(self) -> str | None:
+        def table_name(self: object) -> str | None:
             """Get table name."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -288,7 +288,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def schema_hash(self) -> str | None:
+        def schema_hash(self: object) -> str | None:
             """Get schema hash."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -297,7 +297,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def validation_errors(self) -> list[str] | None:
+        def validation_errors(self: object) -> list[str] | None:
             """Get validation errors."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -343,7 +343,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             )
 
         @property
-        def sql_statement(self) -> str | None:
+        def sql_statement(self: object) -> str | None:
             """Get SQL statement."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):

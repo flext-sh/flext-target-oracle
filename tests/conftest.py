@@ -7,7 +7,6 @@ SPDX-License-Identifier: MIT
 import asyncio
 import json
 import os
-import time
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
@@ -28,6 +27,7 @@ from flext_target_oracle import (
     FlextTargetOracleLoader,
     LoadMethod,
 )
+from flext_tests import FlextTestDocker
 
 # Constants
 logger = FlextLogger(__name__)
@@ -62,122 +62,23 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop]:
     loop.close()
 
 
-@pytest.fixture(scope="session", autouse=True)
-def oracle_container() -> Generator[None]:
-    """Manage Oracle Docker container lifecycle for tests."""
-    # Check if container is already running
-    check_cmd = [
-        "docker",
-        "ps",
-        "-a",
-        "--filter",
-        f"name={ORACLE_CONTAINER_NAME}",
-        "--format",
-        "{{.Status}}",
-    ]
-    try:
+# Docker container management with FlextTestDocker
+@pytest.fixture(scope="session")
+def docker_control() -> FlextTestDocker:
+    """Provide Docker control instance for tests."""
+    return FlextTestDocker()
 
-        async def _run(cmd: FlextTypes.Core.StringList) -> tuple[int, str, str]:
-            process = await asyncio.create_subprocess_exec(
-                *cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-            stdout, stderr = await process.communicate()
-            # process.returncode could be None if not terminated, use 0 as default
-            return process.returncode or 0, stdout.decode(), stderr.decode()
 
-        rc, out, _err = asyncio.run(_run(check_cmd))
-        container_status = out.strip() if rc == 0 else ""
+@pytest.fixture(scope="session")
+def shared_oracle_container(docker_control: FlextTestDocker) -> FlextTestDocker:
+    """Managed Oracle container using FlextTestDocker with auto-start."""
+    result = docker_control.start_container("flext-oracle-db-test")
+    if result.is_failure:
+        pytest.skip(f"Failed to start Oracle container: {result.error}")
 
-        if "Up" in container_status:
-            yield
-            return
-    except Exception as e:
-        # Docker command failed, continue with container startup
-        # This is acceptable behavior when Docker is not available
-        # In fixture setup, we continue with the test setup process
-        # Log the exception for debugging purposes
-        logger.debug(f"Expected Docker command failure: {e}")
-        assert True  # Explicit assertion instead of pass
+    yield "flext-oracle-db-test"
 
-    # Start Oracle container using docker-compose
-    try:
-        # Stop any existing containers
-        asyncio.run(
-            _run(
-                [
-                    "/usr/bin/docker-compose",
-                    "-f",
-                    str(DOCKER_COMPOSE_PATH),
-                    "down",
-                    "-v",
-                ],
-            ),
-        )
-
-        # Start new container
-        rc, _out, err = asyncio.run(
-            _run(
-                [
-                    "/usr/bin/docker-compose",
-                    "-f",
-                    str(DOCKER_COMPOSE_PATH),
-                    "up",
-                    "-d",
-                    "oracle-xe",
-                ],
-            ),
-        )
-        if rc != 0:
-            msg = f"Failed to start docker-compose: {err}"
-            raise RuntimeError(msg)
-
-        # Wait for Oracle to be ready
-        max_attempts = 60  # 5 minutes max
-        for attempt in range(max_attempts):
-            try:
-                engine = create_engine(
-                    f"oracle+oracledb://{ORACLE_USER}:{ORACLE_PASSWORD}@{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SERVICE}",
-                    poolclass=NullPool,
-                )
-                with engine.connect() as conn:
-                    conn.execute(text("SELECT 1 FROM DUAL"))
-                break
-            except Exception as e:
-                if attempt == max_attempts - 1:
-                    msg = "Oracle container failed to start within timeout"
-                    raise RuntimeError(msg) from e
-                time.sleep(5)
-
-        # Create test schema
-        with engine.connect() as conn:
-            try:
-                conn.execute(
-                    text(f"CREATE USER {TEST_SCHEMA} IDENTIFIED BY test_password"),
-                )
-                conn.execute(text(f"GRANT ALL PRIVILEGES TO {TEST_SCHEMA}"))
-                conn.commit()
-            except Exception:
-                # Schema might already exist - expected behavior for test setup
-                logger.debug("Schema might already exist - expected behavior")
-
-        yield
-
-    finally:
-        # Cleanup: stop container
-        if os.environ.get("KEEP_TEST_DB") != "true":
-            asyncio.run(
-                _run(
-                    [
-                        "/usr/bin/docker-compose",
-                        "-f",
-                        str(DOCKER_COMPOSE_PATH),
-                        "down",
-                        "-v",
-                    ],
-                ),
-            )
+    docker_control.stop_container("flext-oracle-db-test", remove=False)
 
 
 @pytest.fixture(scope="session")

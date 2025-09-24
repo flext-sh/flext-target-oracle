@@ -156,7 +156,7 @@ def create_sample_state_message() -> FlextTypes.Core.Dict:
     }
 
 
-async def demonstrate_basic_usage() -> None:
+def demonstrate_basic_usage() -> None:
     """Demonstrate basic FLEXT Target Oracle usage patterns.
 
     This function shows the complete workflow of:
@@ -253,7 +253,7 @@ async def demonstrate_basic_usage() -> None:
         raise
 
 
-async def demonstrate_error_handling() -> None:
+def demonstrate_error_handling() -> None:
     """Demonstrate error handling patterns with FlextResult.
 
     Shows how to handle various error scenarios gracefully using

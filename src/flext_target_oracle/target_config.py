@@ -391,7 +391,7 @@ class FlextTargetOracleConfig(FlextModels.Value):
             raise ValueError(msg)
         return v
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextResult[None]:
         """Validate business rules implementation required by FlextModels.
 
         Implements abstract method from FlextModels by delegating to
@@ -403,7 +403,7 @@ class FlextTargetOracleConfig(FlextModels.Value):
         """
         return self.validate_domain_rules()
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self: object) -> FlextResult[None]:
         """Validate business rules using Chain of Responsibility pattern."""
         try:
             # Use flext-core validation function - ZERO DUPLICATION
@@ -411,11 +411,11 @@ class FlextTargetOracleConfig(FlextModels.Value):
         except Exception as e:
             return FlextResult[None].fail(f"Configuration validation failed: {e}")
 
-    def validate_oracle_config(self) -> FlextResult[None]:
+    def validate_oracle_config(self: object) -> FlextResult[None]:
         """Validate Oracle configuration - alias for validate_domain_rules for test compatibility."""
         return self.validate_domain_rules()
 
-    def get_oracle_config(self) -> dict[str, object]:
+    def get_oracle_config(self: object) -> dict[str, object]:
         """Convert to flext-db-oracle configuration format."""
         oracle_config = {
             "host": self.oracle_host,
