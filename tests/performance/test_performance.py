@@ -263,7 +263,7 @@ class TestPerformance:
         assert result.is_success
 
         # Monitor memory during large batch processing
-        memory_samples = []
+        memory_samples: list[int | bool] = []
         gc.collect()
         base_memory = self.get_memory_usage()
 
