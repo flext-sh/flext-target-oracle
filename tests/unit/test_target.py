@@ -31,7 +31,7 @@ class TestRealOracleTarget:
         """Create real target instance."""
         return FlextTargetOracle(config=oracle_config)
 
-    def test_real_initialize(self, real_target: object) -> None:
+    def test_self(self, real_target: object) -> None:
         """Test real target initialization."""
         result = real_target.initialize()
         assert result.is_success
@@ -42,7 +42,7 @@ class TestRealOracleTarget:
         # Should initialize loader
         assert real_target._loader is not None
 
-    def test_real_discover_catalog(self, real_target: object) -> None:
+    def test_self(self, real_target: object) -> None:
         """Test catalog discovery."""
         real_target.initialize()
 
@@ -54,7 +54,7 @@ class TestRealOracleTarget:
         assert "streams" in catalog
         assert len(catalog["streams"]) == 0  # No streams initially
 
-    def test_real_validate_configuration(self, real_target: object) -> None:
+    def test_self(self, real_target: object) -> None:
         """Test configuration validation."""
         result = real_target.validate_configuration()
         assert result.is_success
@@ -136,7 +136,7 @@ class TestRealOracleTarget:
             count = conn.execute(text("SELECT COUNT(*) FROM users")).scalar()
             assert count == 1
 
-    def test_real_process_state_message(self, real_target: object) -> None:
+    def test_self(self, real_target: object) -> None:
         """Test processing state message."""
         real_target.initialize()
 
@@ -155,7 +155,7 @@ class TestRealOracleTarget:
 
         # State should be emitted (check via logs or return value)
 
-    def test_real_process_activate_version_message(self, real_target: object) -> None:
+    def test_self(self, real_target: object) -> None:
         """Test processing ACTIVATE_VERSION message."""
         real_target.initialize()
 
@@ -384,7 +384,7 @@ class TestRealOracleTarget:
             customer_cols = [row[0] for row in result]
             assert len(customer_cols) > 0
 
-    def test_real_error_handling_invalid_json(self, real_target: object) -> None:
+    def test_self(self, real_target: object) -> None:
         """Test error handling with invalid JSON."""
         real_target.initialize()
 
@@ -393,7 +393,7 @@ class TestRealOracleTarget:
         assert result.is_failure
         assert isinstance(result.error, FlextTargetOracleProcessingError)
 
-    def test_real_error_handling_missing_stream(self, real_target: object) -> None:
+    def test_self(self, real_target: object) -> None:
         """Test error handling with missing stream in record."""
         real_target.initialize()
 
@@ -553,7 +553,7 @@ class TestRealOracleTarget:
         # State messages are written to stdout, not returned
         # In real test, would capture stdout to verify content
 
-    def test_real_compatibility_methods(self, real_target: object) -> None:
+    def test_self(self, real_target: object) -> None:
         """Test Singer compatibility methods."""
         real_target.initialize()
 

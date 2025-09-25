@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 """Production Setup Example - Enterprise-Grade Oracle Target Configuration.
 
 This example demonstrates production-ready configuration and deployment patterns
@@ -463,7 +463,12 @@ def create_production_sample_stream() -> list[FlextTypes.Core.Dict]:
       List of Singer messages representing a production workload
 
     """
-    messages = []
+    messages: list[
+        dict[
+            str,
+            dict[str, dict[str, dict[str, str]] | list[str] | str] | list[str] | str,
+        ]
+    ] = []
 
     # Schema message for customer orders
     schema_message = {

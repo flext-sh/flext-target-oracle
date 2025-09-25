@@ -269,7 +269,7 @@ class TestRealOracleExceptions:
         with pytest.raises(FlextTargetOracleConnectionError), MockResource():
             _raise_connection_error()
 
-    def test_exception_logging(self, caplog: LogCaptureFixture) -> None:
+    def test_self(self, caplog: LogCaptureFixture) -> None:
         """Test method."""
         """Test exception logging behavior."""
         with caplog.at_level(logging.ERROR):

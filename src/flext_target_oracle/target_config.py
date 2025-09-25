@@ -175,7 +175,7 @@ class FlextTargetOracleConfig(FlextModels.Value):
     sdc_mode: str = Field(
         default="append",
         description="SDC mode: 'append' (always insert new rows) or 'merge' (update existing rows)",
-        pattern="^(append|merge)$",
+        pattern="^(Union[append, merge])$",
     )
     sdc_primary_key_suffix: str = Field(
         default="_sdc_loaded_at",
@@ -208,7 +208,7 @@ class FlextTargetOracleConfig(FlextModels.Value):
     storage_mode: str = Field(
         default="flattened",
         description="Storage mode: 'flattened' (flatten nested data), 'json' (store as JSON), 'hybrid' (mix based on depth)",
-        pattern="^(flattened|json|hybrid)$",
+        pattern="^(Union[Union[flattened, json], hybrid])$",
     )
     max_flattening_depth: int = Field(
         default=3,
@@ -253,7 +253,7 @@ class FlextTargetOracleConfig(FlextModels.Value):
     column_ordering: str = Field(
         default="alphabetical",
         description="Column ordering in CREATE TABLE: 'alphabetical', 'schema_order', 'custom'",
-        pattern="^(alphabetical|schema_order|custom)$",
+        pattern="^(Union[Union[alphabetical, schema_order], custom])$",
     )
     column_order_rules: dict[str, int] = Field(
         default_factory=lambda: {
