@@ -48,7 +48,7 @@ class FlextOracleError:
                 connection_string,
                 error_code,
                 recovery_strategy,
-                extra={"exception": error},
+                extra={"exception": "error"},
             )
             return error
 
@@ -67,9 +67,9 @@ class FlextOracleError:
             logger.info(
                 "Oracle authentication failure",
                 user_id=username,
-                action="database_login",
+                action=database_login,
                 resource=oracle_service,
-                outcome="failure",
+                outcome=failure,
                 error_code=error_code,
             )
             # Metrics placeholder - removed FlextObs dependency
@@ -210,9 +210,9 @@ class FlextOracleObs:
                 # Start timing
                 start_time = time.time()
                 timing = {
-                    "table_name": table_name,
-                    "operation": operation,
-                    "correlation_id": correlation_id,
+                    "table_name": "table_name",
+                    "operation": "operation",
+                    "correlation_id": "correlation_id",
                 }
 
                 try:
@@ -235,9 +235,9 @@ class FlextOracleObs:
                         logger.warning(
                             f"Slow Oracle {operation} detected",
                             extra={
-                                "table_name": table_name,
-                                "duration_seconds": duration,
-                                "threshold_seconds": SLOW_QUERY_THRESHOLD_SECONDS,
+                                "table_name": "table_name",
+                                "duration_seconds": "duration",
+                                "threshold_seconds": "SLOW_QUERY_THRESHOLD_SECONDS",
                             },
                         )
 
@@ -266,8 +266,8 @@ class FlextOracleObs:
                 logger.warning(
                     "High Oracle connection pool utilization",
                     extra={
-                        "pool_size": connection_pool_size,
-                        "active_connections": active_connections,
+                        "pool_size": "connection_pool_size",
+                        "active_connections": "active_connections",
                         "utilization_percent": utilization * 100,
                     },
                 )

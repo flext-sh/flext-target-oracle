@@ -6,11 +6,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import threading
 from enum import StrEnum
+from typing import ClassVar
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 
-from flext_core import FlextModels, FlextResult, FlextTypes
+from flext_core import FlextConfig, FlextResult, FlextTypes
 
 from .constants import FlextTargetOracleConstants
 
@@ -24,62 +26,87 @@ class LoadMethod(StrEnum):
     BULK_MERGE = "BULK_MERGE"
 
 
-class FlextTargetOracleConfig(FlextModels.Value):
-    """Type-safe Oracle target configuration with comprehensive validation."""
+class FlextTargetOracleConfig(FlextConfig):
+    """Oracle Target Configuration extending FlextConfig.
 
+    Follows standardized [Project]Config pattern:
+    - Extends FlextConfig from flext-core
+    - Uses SecretStr for sensitive data
+    - All defaults from FlextTargetOracleConstants
+    - Proper Pydantic 2 validation
+    - Singleton pattern with proper typing
+
+    Type-safe Oracle target configuration with comprehensive validation.
+    """
+
+    # Singleton pattern attributes
+    _global_instance: ClassVar[FlextTargetOracleConfig | None] = None
+    _lock: ClassVar[threading.Lock] = threading.Lock()
+
+    # Oracle Database Configuration
     oracle_host: str = Field(
         ...,
         description="Oracle database hostname or IP address",
         min_length=1,
         max_length=255,
     )
+
     oracle_port: int = Field(
         default=FlextTargetOracleConstants.Connection.DEFAULT_PORT,
-        description="Oracle listener port number",
         ge=FlextTargetOracleConstants.Connection.MIN_PORT,
         le=FlextTargetOracleConstants.Connection.MAX_PORT,
+        description="Oracle listener port number",
     )
+
     oracle_service: str = Field(
         ...,
         description="Oracle service name for connection",
         min_length=1,
         max_length=64,
     )
+
     oracle_user: str = Field(
         ...,
         description="Oracle database username",
         min_length=1,
         max_length=128,
     )
+
     oracle_password: SecretStr = Field(
         ...,
-        description="Oracle database password",
+        description="Oracle database password (sensitive)",
     )
+
     default_target_schema: str = Field(
-        default="target",
+        default=target,
         description="Default target schema for table creation",
         min_length=1,
         max_length=128,
     )
+
+    # Data Loading Configuration
     load_method: LoadMethod = Field(
         default=LoadMethod.INSERT,
         description="Oracle data loading strategy",
     )
+
     use_bulk_operations: bool = Field(
         default=True,
         description="Enable Oracle bulk operations for performance",
     )
+
     batch_size: int = Field(
         default=FlextTargetOracleConstants.Processing.DEFAULT_BATCH_SIZE,
-        description="Number of records per batch for processing",
         gt=0,
         le=50000,  # Reasonable upper limit for Oracle batch operations
+        description="Number of records per batch for processing",
     )
+
     connection_timeout: int = Field(
         default=FlextTargetOracleConstants.Connection.DEFAULT_CONNECTION_TIMEOUT,
-        description="Database connection timeout in seconds",
         gt=0,
         le=3600,  # Maximum 1 hour timeout
+        description="Database connection timeout in seconds",
     )
 
     # SSL/TLS Configuration
@@ -87,199 +114,105 @@ class FlextTargetOracleConfig(FlextModels.Value):
         default=False,
         description="Enable SSL/TLS for Oracle connection (TCP/TCPS)",
     )
+
     ssl_verify: bool = Field(
         default=True,
         description="Verify SSL certificates",
     )
+
     ssl_wallet_location: str | None = Field(
         default=None,
-        description="Oracle wallet location for SSL connections",
         max_length=500,
+        description="Oracle wallet location for SSL connections",
     )
+
     ssl_wallet_password: SecretStr | None = Field(
         default=None,
-        description="Oracle wallet password",
+        description="Oracle wallet password (sensitive)",
     )
+
     disable_dn_matching: bool = Field(
         default=False,
         description="Disable DN (Distinguished Name) matching for SSL connections",
     )
 
-    # Connection pool configuration
+    # Connection Pool Configuration
     pool_min_size: int = Field(
         default=1,
+        ge=1,
+        le=100,
         description="Minimum number of connections in pool",
-        ge=1,
-        le=100,
-    )
-    pool_max_size: int = Field(
-        default=10,
-        description="Maximum number of connections in pool",
-        ge=1,
-        le=100,
-    )
-    pool_increment: int = Field(
-        default=1,
-        description="Number of connections to add when pool is exhausted",
-        ge=1,
-        le=10,
     )
 
-    # Advanced Oracle features
+    pool_max_size: int = Field(
+        default=10,
+        ge=1,
+        le=100,
+        description="Maximum number of connections in pool",
+    )
+
+    pool_increment: int = Field(
+        default=1,
+        ge=1,
+        le=10,
+        description="Number of connections to add when pool is exhausted",
+    )
+
+    # Advanced Oracle Features
     enable_auto_commit: bool = Field(
         default=True,
         description="Enable auto-commit for each batch",
     )
+
     use_direct_path: bool = Field(
         default=False,
         description="Use Oracle direct path load for bulk operations",
     )
+
     parallel_degree: int | None = Field(
         default=None,
-        description="Degree of parallelism for Oracle operations",
         ge=1,
         le=64,
+        description="Degree of parallelism for Oracle operations",
     )
 
-    # Column modification support
-    column_mappings: dict[str, FlextTypes.Core.Dict] | None = Field(
+    # Table and Column Configuration
+    table_prefix: str | None = Field(
         default=None,
-        description="Column name mappings and transformations",
+        max_length=30,
+        description="Prefix to add to all table names",
     )
-    ignored_columns: FlextTypes.Core.StringList | None = Field(
+
+    table_suffix: str | None = Field(
         default=None,
-        description="List of columns to ignore during loading",
+        max_length=30,
+        description="Suffix to add to all table names",
     )
+
     add_metadata_columns: bool = Field(
         default=True,
         description="Add Singer metadata columns (_sdc_*)",
     )
 
-    # Table naming control
-    table_prefix: str | None = Field(
-        default=None,
-        description="Prefix to add to all table names",
-        max_length=30,
-    )
-    table_suffix: str | None = Field(
-        default=None,
-        description="Suffix to add to all table names",
-        max_length=30,
-    )
-    table_name_mappings: FlextTypes.Core.Headers | None = Field(
-        default=None,
-        description="Custom table name mappings for specific streams",
-    )
-
-    # SDC (Singer Data Capture) mode control
-    sdc_mode: str = Field(
-        default="append",
-        description="SDC mode: 'append' (always insert new rows) or 'merge' (update existing rows)",
-        pattern="^(Union[append, merge])$",
-    )
-    sdc_primary_key_suffix: str = Field(
-        default="_sdc_loaded_at",
-        description="Column suffix for composite primary key in append mode",
-    )
-    sdc_merge_key_properties: dict[str, FlextTypes.Core.StringList] | None = Field(
-        default=None,
-        description="Key properties to use for merge operations per stream",
-    )
-
-    # SDC column name customization
-    sdc_extracted_at_column: str = Field(
-        default="_SDC_EXTRACTED_AT",
-        description="Name for extraction timestamp column",
-    )
-    sdc_loaded_at_column: str = Field(
-        default="_SDC_LOADED_AT",
-        description="Name for load timestamp column",
-    )
-    sdc_deleted_at_column: str = Field(
-        default="_SDC_DELETED_AT",
-        description="Name for deletion timestamp column",
-    )
-    sdc_sequence_column: str = Field(
-        default="_SDC_SEQUENCE",
-        description="Name for sequence number column",
-    )
-
-    # Data storage mode
-    storage_mode: str = Field(
-        default="flattened",
-        description="Storage mode: 'flattened' (flatten nested data), 'json' (store as JSON), 'hybrid' (mix based on depth)",
-        pattern="^(Union[Union[flattened, json], hybrid])$",
-    )
-    max_flattening_depth: int = Field(
-        default=3,
-        description="Maximum depth for flattening nested structures (for hybrid mode)",
-        ge=1,
-        le=10,
-    )
-    json_column_name: str = Field(
-        default="DATA",
-        description="Column name for JSON storage mode",
-    )
-
+    # Data Storage Configuration
     default_string_length: int = Field(
         default=4000,
-        description="Default length for VARCHAR2 columns",
         ge=1,
         le=32767,
+        description="Default length for VARCHAR2 columns",
     )
+
     default_timestamp_precision: int = Field(
         default=6,
-        description="Default precision for TIMESTAMP columns",
         ge=0,
         le=9,
+        description="Default precision for TIMESTAMP columns",
     )
+
     use_clob_threshold: int = Field(
         default=4000,
-        description="String length threshold to use CLOB instead of VARCHAR2",
         ge=1,
-    )
-    type_mappings: FlextTypes.Core.Headers | None = Field(
-        default=None,
-        description="Custom JSON to Oracle type mappings (e.g., {'number': 'NUMBER(38,10)'})",
-    )
-
-    # Column-specific type overrides
-    column_type_overrides: dict[str, FlextTypes.Core.Headers] | None = Field(
-        default=None,
-        description="Per-stream column type overrides (e.g., {'stream_name': {'column_name': 'DATE'}})",
-    )
-
-    # DDL Generation Control
-    column_ordering: str = Field(
-        default="alphabetical",
-        description="Column ordering in CREATE TABLE: 'alphabetical', 'schema_order', 'custom'",
-        pattern="^(Union[Union[alphabetical, schema_order], custom])$",
-    )
-    column_order_rules: dict[str, int] = Field(
-        default_factory=lambda: {
-            "primary_keys": 1,
-            "regular_columns": 2,
-            "audit_columns": 3,
-            "sdc_columns": 4,
-        },
-        description="Priority order for column groups (lower number = higher priority)",
-    )
-    audit_column_patterns: FlextTypes.Core.StringList = Field(
-        default_factory=lambda: [
-            "created_at",
-            "created_by",
-            "created_date",
-            "updated_at",
-            "updated_by",
-            "updated_date",
-            "modified_at",
-            "modified_by",
-            "modified_date",
-            "deleted_at",
-            "deleted_by",
-            "deleted_date",
-        ],
-        description="Patterns to identify audit columns",
+        description="String length threshold to use CLOB instead of VARCHAR2",
     )
 
     # Table Management
@@ -287,10 +220,12 @@ class FlextTargetOracleConfig(FlextModels.Value):
         default=False,
         description="Truncate table before loading data",
     )
+
     force_recreate_tables: bool = Field(
         default=False,
         description="Drop and recreate tables even if they exist",
     )
+
     allow_alter_table: bool = Field(
         default=False,
         description="Allow ALTER TABLE for schema evolution",
@@ -301,68 +236,30 @@ class FlextTargetOracleConfig(FlextModels.Value):
         default=True,
         description="Maintain existing indexes when modifying tables",
     )
+
     create_foreign_key_indexes: bool = Field(
         default=True,
         description="Create indexes for foreign key relationships from schema",
     )
-    custom_indexes: dict[str, list[FlextTypes.Core.Dict]] | None = Field(
-        default=None,
-        description="Custom indexes per stream (e.g., {'stream': [{'name': 'idx_custom', 'columns': ['col1', 'col2']}]})",
-    )
-    index_naming_template: str = Field(
-        default="IDX_{table}_{columns}",
-        description="Template for index names ({table}, {columns}, {type} placeholders)",
-    )
-    preserve_existing_indexes: bool = Field(
-        default=True,
-        description="Preserve indexes not defined in schema when updating",
-    )
 
+    # Pydantic 2 field validators
     @field_validator("oracle_port")
     @classmethod
     def validate_oracle_port(cls, v: int) -> int:
-        """Validate Oracle port number is within valid TCP port range.
-
-        Ensures the Oracle listener port is within the standard TCP port range
-        and commonly used for Oracle database connections.
-
-        Args:
-            v: Port number to validate
-
-        Returns:
-            Validated port number
-
-        Raises:
-            ValueError: If port is outside valid range (1-65535)
-
-        """
+        """Validate Oracle port number is within valid TCP port range."""
         if not (
             FlextTargetOracleConstants.Connection.MIN_PORT
             <= v
             <= FlextTargetOracleConstants.Connection.MAX_PORT
         ):
-            msg: str = f"Oracle port must be between {FlextTargetOracleConstants.Connection.MIN_PORT} and {FlextTargetOracleConstants.Connection.MAX_PORT}"
+            msg = f"Oracle port must be between {FlextTargetOracleConstants.Connection.MIN_PORT} and {FlextTargetOracleConstants.Connection.MAX_PORT}"
             raise ValueError(msg)
         return v
 
     @field_validator("batch_size")
     @classmethod
     def validate_batch_size(cls, v: int) -> int:
-        """Validate batch size is positive and within reasonable limits.
-
-        Ensures batch size is positive and doesn't exceed Oracle's practical
-        limits for bulk operations and memory usage.
-
-        Args:
-            v: Batch size to validate
-
-        Returns:
-            Validated batch size
-
-        Raises:
-            ValueError: If batch size is not positive
-
-        """
+        """Validate batch size is positive and within reasonable limits."""
         if v <= 0:
             msg = "Batch size must be positive"
             raise ValueError(msg)
@@ -371,64 +268,53 @@ class FlextTargetOracleConfig(FlextModels.Value):
     @field_validator("connection_timeout")
     @classmethod
     def validate_connection_timeout(cls, v: int) -> int:
-        """Validate connection timeout is positive and reasonable.
-
-        Ensures connection timeout allows sufficient time for database
-        connection establishment while preventing indefinite hangs.
-
-        Args:
-            v: Timeout value in seconds to validate
-
-        Returns:
-            Validated timeout value
-
-        Raises:
-            ValueError: If timeout is not positive
-
-        """
+        """Validate connection timeout is positive and reasonable."""
         if v <= 0:
             msg = "Connection timeout must be positive"
             raise ValueError(msg)
         return v
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
-        """Validate business rules implementation required by FlextModels.
+    @model_validator(mode="after")
+    def validate_pool_configuration(self) -> FlextTargetOracleConfig:
+        """Validate connection pool configuration."""
+        if self.pool_min_size > self.pool_max_size:
+            msg = "pool_min_size cannot be greater than pool_max_size"
+            raise ValueError(msg)
 
-        Implements abstract method from FlextModels by delegating to
-        validate_domain_rules for backwards compatibility and consistency.
+        if self.pool_increment > self.pool_max_size:
+            msg = "pool_increment cannot be greater than pool_max_size"
+            raise ValueError(msg)
 
-        Returns:
-            FlextResult[None]: Success if all business rules pass
+        return self
 
-        """
-        return self.validate_domain_rules()
+    @model_validator(mode="after")
+    def validate_ssl_configuration(self) -> FlextTargetOracleConfig:
+        """Validate SSL configuration."""
+        if (
+            self.use_ssl
+            and self.ssl_wallet_location
+            and self.ssl_wallet_password is None
+        ):
+            msg = "ssl_wallet_password is required when ssl_wallet_location is provided"
+            raise ValueError(msg)
 
-    def validate_domain_rules(self: object) -> FlextResult[None]:
-        """Validate business rules using Chain of Responsibility pattern."""
-        try:
-            # Use flext-core validation function - ZERO DUPLICATION
-            return validate_oracle_configuration(self)
-        except Exception as e:
-            return FlextResult[None].fail(f"Configuration validation failed: {e}")
+        return self
 
-    def validate_oracle_config(self: object) -> FlextResult[None]:
-        """Validate Oracle configuration - alias for validate_domain_rules for test compatibility."""
-        return self.validate_domain_rules()
-
-    def get_oracle_config(self: object) -> dict[str, object]:
+    # Configuration helper methods
+    def get_oracle_config(self) -> dict[str, object]:
         """Convert to flext-db-oracle configuration format."""
-        oracle_config = {
+        oracle_config: dict[str, object] = {
             "host": self.oracle_host,
             "port": self.oracle_port,
             "service_name": self.oracle_service,
             "username": self.oracle_user,
             "password": self.oracle_password.get_secret_value(),
-            "sid": None,  # Use service_name instead of SID
+            "sid": "None",  # Use service_name instead of SID
             "timeout": self.connection_timeout,
             "pool_min": self.pool_min_size,
             "pool_max": self.pool_max_size,
             "pool_increment": self.pool_increment,
-            "encoding": "UTF-8",
+            "encoding": UTF - 8,
             "ssl_enabled": self.use_ssl,
             "autocommit": self.enable_auto_commit,
             "ssl_server_dn_match": not self.disable_dn_matching,
@@ -438,7 +324,9 @@ class FlextTargetOracleConfig(FlextModels.Value):
         if self.use_ssl and self.ssl_wallet_location:
             oracle_config["ssl_wallet_location"] = self.ssl_wallet_location
             if self.ssl_wallet_password:
-                oracle_config["ssl_wallet_password"] = self.ssl_wallet_password
+                oracle_config["ssl_wallet_password"] = (
+                    self.ssl_wallet_password.get_secret_value()
+                )
 
         # Add advanced Oracle features if enabled
         if self.use_direct_path:
@@ -448,12 +336,38 @@ class FlextTargetOracleConfig(FlextModels.Value):
 
         return oracle_config
 
+    def get_target_config(self) -> dict[str, object]:
+        """Get target-specific configuration dictionary."""
+        return {
+            "default_target_schema": self.default_target_schema,
+            "load_method": self.load_method.value,
+            "use_bulk_operations": self.use_bulk_operations,
+            "batch_size": self.batch_size,
+            "add_metadata_columns": self.add_metadata_columns,
+            "table_prefix": self.table_prefix,
+            "table_suffix": self.table_suffix,
+        }
+
+    def get_storage_config(self) -> dict[str, object]:
+        """Get data storage configuration dictionary."""
+        return {
+            "default_string_length": self.default_string_length,
+            "default_timestamp_precision": self.default_timestamp_precision,
+            "use_clob_threshold": self.use_clob_threshold,
+        }
+
+    def get_table_management_config(self) -> dict[str, object]:
+        """Get table management configuration dictionary."""
+        return {
+            "truncate_before_load": self.truncate_before_load,
+            "force_recreate_tables": self.force_recreate_tables,
+            "allow_alter_table": self.allow_alter_table,
+            "maintain_indexes": self.maintain_indexes,
+            "create_foreign_key_indexes": self.create_foreign_key_indexes,
+        }
+
     def get_table_name(self, stream_name: str) -> str:
         """Generate Oracle table name from Singer stream name."""
-        # Check custom mapping first
-        if self.table_name_mappings and stream_name in self.table_name_mappings:
-            return self.table_name_mappings[stream_name].upper()
-
         # Standard transformation
         base_name = stream_name.replace("-", "_").replace(".", "_")
 
@@ -463,87 +377,119 @@ class FlextTargetOracleConfig(FlextModels.Value):
         if self.table_suffix:
             base_name = f"{base_name}{self.table_suffix}"
 
-        # Convert to uppercase
+        # Convert to uppercase and ensure Oracle naming limit (30 characters)
         table_name = base_name.upper()
-
-        # Ensure Oracle naming limit (30 characters)
         oracle_table_name_limit = 30
+
         if len(table_name) > oracle_table_name_limit:
             # Truncate intelligently - keep prefix/suffix if possible
             if self.table_prefix and self.table_suffix:
                 prefix_len = len(self.table_prefix)
                 suffix_len = len(self.table_suffix)
-                remaining = 30 - prefix_len - suffix_len
+                remaining = oracle_table_name_limit - prefix_len - suffix_len
                 if remaining > 0:
                     core = table_name[prefix_len:-suffix_len][:remaining]
                     table_name = f"{self.table_prefix}{core}{self.table_suffix}".upper()
                 else:
-                    table_name = table_name[:30]
+                    table_name = table_name[:oracle_table_name_limit]
             else:
-                table_name = table_name[:30]
+                table_name = table_name[:oracle_table_name_limit]
 
         return table_name
 
-    def map_column_name(self, stream_name: str, column_name: str) -> str:
-        """Map a column name based on configured mappings.
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate Oracle target configuration business rules."""
+        try:
+            # Validate Oracle configuration
+            if not self.oracle_host:
+                return FlextResult[None].fail("Oracle host is required")
 
-        Args:
-            stream_name: The stream/table name
-            column_name: The original column name
+            if not self.oracle_user:
+                return FlextResult[None].fail("Oracle username is required")
 
-        Returns:
-            The mapped column name or original if no mapping exists
+            if not self.oracle_password.get_secret_value():
+                return FlextResult[None].fail("Oracle password is required")
 
-        """
-        if self.column_mappings and stream_name in self.column_mappings:
-            stream_mappings = self.column_mappings[stream_name]
-            if column_name in stream_mappings:
-                mapped = stream_mappings[column_name]
-                if isinstance(mapped, dict) and "name" in mapped:
-                    return str(mapped["name"])
-                if isinstance(mapped, str):
-                    return mapped
-        return column_name
+            # Validate service name
+            if not self.oracle_service:
+                return FlextResult[None].fail("Oracle service name is required")
 
-    def should_ignore_column(self, column_name: str) -> bool:
-        """Check if a column should be ignored during loading.
+            # Validate SSL configuration
+            if (
+                self.use_ssl
+                and self.ssl_wallet_location
+                and self.ssl_wallet_password is None
+            ):
+                return FlextResult[None].fail(
+                    "SSL wallet password is required when wallet location is provided"
+                )
 
-        Args:
-            column_name: The column name to check
+            # Validate pool configuration
+            if self.pool_min_size > self.pool_max_size:
+                return FlextResult[None].fail(
+                    "pool_min_size cannot be greater than pool_max_size"
+                )
 
-        Returns:
-            True if the column should be ignored
+            return FlextResult[None].ok(None)
 
-        """
-        if self.ignored_columns:
-            return column_name in self.ignored_columns
-        return False
+        except Exception as e:
+            return FlextResult[None].fail(f"Business rules validation failed: {e}")
 
-    def get_column_transform(
-        self,
-        stream_name: str,
-        column_name: str,
-    ) -> FlextTypes.Core.Dict | None:
-        """Get transformation configuration for a column.
+    @classmethod
+    def create_for_environment(
+        cls, environment: str, **overrides: object
+    ) -> FlextTargetOracleConfig:
+        """Create configuration for specific environment."""
+        env_overrides: dict[str, object] = {}
 
-        Args:
-            stream_name: The stream/table name
-            column_name: The column name
+        if environment == "production":
+            env_overrides.update({
+                "batch_size": FlextTargetOracleConstants.Processing.DEFAULT_BATCH_SIZE,
+                "use_bulk_operations": "True",
+                "pool_max_size": 10,
+                "connection_timeout": 300,  # 5 minutes for production
+            })
+        elif environment == "development":
+            env_overrides.update({
+                "batch_size": 1000,  # Smaller batches for development
+                "use_bulk_operations": "False",
+                "pool_max_size": 2,
+                "connection_timeout": 60,
+            })
+        elif environment == "staging":
+            env_overrides.update({
+                "batch_size": FlextTargetOracleConstants.Processing.DEFAULT_BATCH_SIZE
+                // 2,
+                "use_bulk_operations": "True",
+                "pool_max_size": 5,
+                "connection_timeout": 180,
+            })
 
-        Returns:
-            Transformation configuration dict or None
+        all_overrides = {**env_overrides, **overrides}
+        # Pydantic BaseSettings handles kwargs validation and type conversion automatically
+        return cls(**all_overrides)
 
-        """
-        if self.column_mappings and stream_name in self.column_mappings:
-            stream_mappings = self.column_mappings[stream_name]
-            if column_name in stream_mappings:
-                mapped = stream_mappings[column_name]
-                if isinstance(mapped, dict) and "transform" in mapped:
-                    transform_value = mapped["transform"]
-                    if isinstance(transform_value, dict):
-                        return dict(transform_value)
-                    return None
-        return None
+    # Singleton pattern override for proper typing
+    @classmethod
+    def get_global_instance(cls) -> FlextTargetOracleConfig:
+        """Get the global singleton instance of FlextTargetOracleConfig."""
+        if cls._global_instance is None:
+            with cls._lock:
+                if cls._global_instance is None:
+                    # This will require manual initialization with required fields
+                    # in production use
+                    cls._global_instance = cls(
+                        oracle_host=localhost,
+                        oracle_service=xe,
+                        oracle_user=target_user,
+                        oracle_password=SecretStr("default_password"),
+                    )
+        return cls._global_instance
+
+    @classmethod
+    def reset_global_instance(cls) -> None:
+        """Reset the global FlextTargetOracleConfig instance (mainly for testing)."""
+        cls._global_instance = None
 
 
 def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResult[None]:

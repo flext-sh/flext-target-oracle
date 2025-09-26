@@ -9,6 +9,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import override
+
 from flext_core import FlextConstants, FlextExceptions, FlextTypes
 
 
@@ -25,6 +27,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
     class OracleConnectionError(FlextExceptions.ConnectionError):
         """Oracle connection error with Oracle-specific context."""
 
+        @override
         def __init__(
             self,
             message: str,
@@ -112,6 +115,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
     class AuthenticationError(FlextExceptions.AuthenticationError):
         """Oracle authentication error with Oracle-specific context."""
 
+        @override
         def __init__(
             self,
             message: str,
@@ -163,6 +167,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
     class ProcessingError(FlextExceptions.ProcessingError):
         """Oracle processing error with Oracle-specific context."""
 
+        @override
         def __init__(
             self,
             message: str,
@@ -224,7 +229,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                     # Rebuild to ensure precise element typing
                     normalized: list[dict[str, object]] = [
                         {**item}
-                        for item in value  # shallow copy as dict[str, object]
+                        for item in value  # shallow copy as dict["str", "object"]
                     ]
                     return normalized
             return None
@@ -236,6 +241,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
     class SchemaError(ValidationError):
         """Oracle schema-specific validation errors."""
 
+        @override
         def __init__(
             self,
             message: str,
@@ -312,6 +318,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
     class SQLError(ProcessingError):
         """Oracle SQL execution errors."""
 
+        @override
         def __init__(
             self,
             message: str,

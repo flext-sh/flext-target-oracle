@@ -1,4 +1,4 @@
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 """Production Setup Example - Enterprise-Grade Oracle Target Configuration.
 
 This example demonstrates production-ready configuration and deployment patterns
@@ -327,7 +327,7 @@ class ProductionTargetManager:
             # Check 2: Oracle connectivity
             if self.target:
                 try:
-                    connectivity_result = self.target._test_connection_impl()  # noqa: SLF001
+                    connectivity_result = self.target.test_connection()
                     health_status["checks"]["oracle_connectivity"] = connectivity_result
                     if not connectivity_result:
                         health_status["status"] = "degraded"
@@ -338,7 +338,7 @@ class ProductionTargetManager:
 
             # Add configuration metrics
             health_status["metrics"] = (
-                self.target._get_implementation_metrics() if self.target else {}  # noqa: SLF001
+                self.target.get_implementation_metrics() if self.target else {}
             )
 
             logger.debug("Health check completed: %s", health_status["status"])

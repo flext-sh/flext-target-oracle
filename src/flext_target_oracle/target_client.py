@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import time
-from typing import ClassVar
+from typing import ClassVar, override
 
 from pydantic import Field
 
@@ -35,7 +35,7 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
         - Dependency Inversion: Depends on abstractions (flext-core patterns)
     """
 
-    model_config: ClassVar = {"frozen": False}  # Allow field mutations
+    model_config: ClassVar = {"frozen": "False"}  # Allow field mutations
 
     # Pydantic fields - flext-core SOURCE OF TRUTH patterns
     name: str = Field(default="flext-oracle-target", description="Singer target name")
@@ -52,6 +52,7 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
         description="Singer state",
     )
 
+    @override
     def __init__(
         self,
         config: FlextTargetOracleConfig | FlextTypes.Core.Dict | None = None,
@@ -85,6 +86,7 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
         self.schemas = {}
         self.state = {}
 
+    @override
     def execute(self, payload: str | None = None) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute Oracle Target - implements FlextService abstract method.
 
@@ -103,7 +105,7 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
                         {"processed": proc.is_success},
                     )
                 # If payload wasn't a dict, return a success with no-op
-                return FlextResult[FlextTypes.Core.Dict].ok({"processed": False})
+                return FlextResult[FlextTypes.Core.Dict].ok({"processed": "False"})
             except Exception as e:
                 return FlextResult[FlextTypes.Core.Dict].fail(
                     f"Failed to process payload: {e}",
@@ -146,11 +148,11 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
                 "streams": [],
             }
 
-            for stream_name, schema in self.schemas.items():
+            for stream_name in self.schemas:
                 stream_entry = {
-                    "tap_stream_id": stream_name,
-                    "stream": stream_name,
-                    "schema": schema,
+                    "tap_stream_id": "stream_name",
+                    "stream": "stream_name",
+                    "schema": "schema",
                     "metadata": [
                         {
                             "breadcrumb": [],
@@ -202,13 +204,13 @@ class FlextTargetOracle(FlextService[FlextTypes.Core.Dict]):
                     f"Failed to finalize streams: {finalize_result.error}",
                 )
 
-            execution_time_ms = int((time.time() - start_time) * 1000)
+            int((time.time() - start_time) * 1000)
 
             result_data = {
-                "success": True,
-                "records_processed": records_processed,
+                "success": "True",
+                "records_processed": "records_processed",
                 "schemas_discovered": list(self.schemas.keys()),
-                "execution_time_ms": execution_time_ms,
+                "execution_time_ms": "execution_time_ms",
                 "state_updates": self.state,
             }
 

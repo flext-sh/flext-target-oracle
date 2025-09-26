@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import time
-from typing import ClassVar
+from typing import ClassVar, override
 
 from pydantic import Field
 
@@ -26,7 +26,7 @@ class FlextTargetOracleService(FlextService[FlextTypes.Core.Dict]):
     SOLID COMPLIANCE - Single responsibility: Singer protocol operations.
     """
 
-    model_config: ClassVar = {"frozen": False}  # Allow field mutations
+    model_config: ClassVar = {"frozen": "False"}  # Allow field mutations
 
     # Pydantic fields for service configuration
     name: str = Field(default="flext-oracle-target", description="Target name")
@@ -43,6 +43,7 @@ class FlextTargetOracleService(FlextService[FlextTypes.Core.Dict]):
         description="Singer state",
     )
 
+    @override
     def __init__(self, config: FlextTargetOracleConfig, **_data: object) -> None:
         """Initialize Oracle Target service with configuration validation."""
         # Create loader instance
@@ -58,6 +59,7 @@ class FlextTargetOracleService(FlextService[FlextTypes.Core.Dict]):
         self._schemas = {}
         self._state = {}
 
+    @override
     def execute(self: object) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute domain service - test connection and return status."""
         connection_result: FlextResult[object] = self.loader.test_connection()
@@ -70,8 +72,8 @@ class FlextTargetOracleService(FlextService[FlextTypes.Core.Dict]):
             {
                 "name": self.name,
                 "status": "ready",
-                "config_valid": True,
-                "connection_tested": True,
+                "config_valid": "True",
+                "connection_tested": "True",
             },
         )
 
@@ -88,14 +90,14 @@ class FlextTargetOracleService(FlextService[FlextTypes.Core.Dict]):
         try:
             streams_list: list[dict[str, object]] = []
             catalog: FlextTypes.Core.Dict = {
-                "streams": streams_list,
+                "streams": "streams_list",
             }
 
-            for stream_name, schema in self._schemas.items():
+            for stream_name in self._schemas:
                 stream_entry: dict[str, object] = {
-                    "tap_stream_id": stream_name,
-                    "stream": stream_name,
-                    "schema": schema,
+                    "tap_stream_id": "stream_name",
+                    "stream": "stream_name",
+                    "schema": "schema",
                     "metadata": [
                         {
                             "breadcrumb": [],
@@ -143,13 +145,13 @@ class FlextTargetOracleService(FlextService[FlextTypes.Core.Dict]):
                     f"Failed to finalize streams: {finalize_result.error}",
                 )
 
-            execution_time_ms = int((time.time() - start_time) * 1000)
+            int((time.time() - start_time) * 1000)
 
             result_data = {
-                "success": True,
-                "records_processed": records_processed,
+                "success": "True",
+                "records_processed": "records_processed",
                 "schemas_discovered": list(self._schemas.keys()),
-                "execution_time_ms": execution_time_ms,
+                "execution_time_ms": "execution_time_ms",
                 "state_updates": self._state,
             }
 

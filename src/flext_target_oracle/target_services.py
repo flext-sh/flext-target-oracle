@@ -1,3 +1,7 @@
+"""Module docstring."""
+
+from __future__ import annotations
+
 """Target Services for FLEXT Target Oracle.
 
 This module provides specialized services following Single Responsibility Principle
@@ -10,7 +14,7 @@ SPDX-License-Identifier: MIT
 
 import asyncio
 from datetime import UTC, datetime
-from typing import Protocol
+from typing import Protocol, override
 
 from pydantic import Field
 
@@ -154,6 +158,10 @@ class OracleConnectionService(FlextService[None]):
             self.log_info("Oracle connection test successful")
             return FlextResult[None].ok(None)
 
+    @override
+    @override
+    @override
+    @override
     def execute(self: object) -> FlextResult[None]:
         """Execute domain service - implements FlextService abstract method.
 
@@ -193,6 +201,10 @@ class OracleSchemaService(FlextService[None]):
         description="Oracle database API instance",
     )
 
+    @override
+    @override
+    @override
+    @override
     def execute(self: object) -> FlextResult[None]:
         """Execute domain service - implements FlextService abstract method.
 
@@ -326,17 +338,17 @@ class OracleSchemaService(FlextService[None]):
                     {
                         "name": "DATA",
                         "type": "CLOB",
-                        "nullable": True,
+                        "nullable": "True",
                     },
                     {
                         "name": "_SDC_EXTRACTED_AT",
                         "type": "TIMESTAMP",
-                        "nullable": True,
+                        "nullable": "True",
                     },
                     {
                         "name": "_SDC_LOADED_AT",
                         "type": "TIMESTAMP",
-                        "nullable": True,
+                        "nullable": "True",
                         "default": "CURRENT_TIMESTAMP",
                     },
                 ]
@@ -347,7 +359,7 @@ class OracleSchemaService(FlextService[None]):
                         {
                             "name": "_SDC_SEQUENCE",
                             "type": "NUMBER",
-                            "nullable": False,
+                            "nullable": "False",
                         },
                     )
 
@@ -404,6 +416,10 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
         description="Processing statistics",
     )
 
+    @override
+    @override
+    @override
+    @override
     def execute(self: object) -> FlextResult[LoadStatisticsModel]:
         """Execute domain service - implements FlextService abstract method.
 
@@ -442,7 +458,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
 
             # Create aggregated statistics
             aggregated_stats = LoadStatisticsModel(
-                stream_name="ALL_STREAMS",
+                stream_name=ALL_STREAMS,
                 total_records_processed=total_records,
                 successful_records=total_successful,
                 failed_records=total_failed,
@@ -505,6 +521,10 @@ class OracleRecordService(FlextService[None]):
         description="Oracle target configuration",
     )
 
+    @override
+    @override
+    @override
+    @override
     def execute(self: object) -> FlextResult[None]:
         """Execute domain service - implements FlextService abstract method.
 
@@ -641,6 +661,7 @@ class OracleRecordService(FlextService[None]):
 class OracleTargetServiceFactory:
     """Factory for creating Oracle target services with dependency injection."""
 
+    @override
     def __init__(
         self,
         config: FlextTargetOracleConfig,
