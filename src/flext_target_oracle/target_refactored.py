@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import sys
-from typing import cast
+from typing import cast, override
 
 from pydantic import Field, PrivateAttr
 
@@ -81,6 +81,7 @@ class FlextTargetOracleCliService(FlextService[str]):
             self.command_bus.register_handler(self.command_handler)
             setattr(self, "_dispatcher", None)
 
+    @override
     def execute(self: object) -> FlextResult[str]:
         """Execute CLI service - implements FlextService abstract method."""
         return FlextResult[str].ok(
@@ -232,7 +233,7 @@ Commands:
 Options:
     --config, -c    Path to configuration file
     --state, -s     Path to state file (load command only)
-    --format, -f    Output format: json, text, yaml (about command only)
+    --format, -f    Output format: "json", text, yaml (about command only)
     --help, -h      Show this help message
 
 Examples:

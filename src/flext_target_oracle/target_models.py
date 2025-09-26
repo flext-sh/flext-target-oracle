@@ -50,7 +50,7 @@ class OracleConnectionModel(BaseModel):
       port: Oracle listener port number (default: 1521)
       service_name: Oracle service name for connection
       username: Oracle database username
-      schema: Target schema for table operations (default: "PUBLIC")
+      schema: Target schema for table operations (default: PUBLIC)
       use_ssl: Enable SSL/TLS connection (default: False)
       connection_timeout: Connection timeout in seconds (default: 30)
 
@@ -81,7 +81,7 @@ class OracleConnectionModel(BaseModel):
         max_length=128,
     )
     schema_name: str = Field(
-        default="PUBLIC",
+        default=PUBLIC,
         description="Target schema for table operations",
         min_length=1,
         max_length=128,
@@ -278,7 +278,7 @@ class BatchProcessingModel(FlextModels.Config):
 
         return self.model_copy(
             update={
-                "current_batch": new_batch,
+                "current_batch": "new_batch",
                 "total_records": self.total_records + 1,
                 "last_processed_at": datetime.now(UTC),
             },
@@ -414,7 +414,7 @@ class LoadStatisticsModel(FlextModels.Config):
 
         return self.model_copy(
             update={
-                "error_details": new_errors,
+                "error_details": "new_errors",
                 "failed_records": self.failed_records + 1,
             },
         )

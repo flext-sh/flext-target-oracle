@@ -45,7 +45,7 @@ test-unit: ## Run unit tests only (no Docker required)
 	@echo "$(BLUE)🧪 Running unit tests...$(RESET)"
 	@./scripts/run_tests.sh --unit
 
-test-integration: ## Run integration tests with Oracle Docker
+test-integration: ## Run integration tests with Docker with Oracle Docker
 	@echo "$(BLUE)🧪 Running integration tests...$(RESET)"
 	@./scripts/run_tests.sh --integration
 
@@ -141,7 +141,7 @@ ci-test: ## Run tests in CI mode
 		--maxfail=5 \
 		-v
 
-ci-lint: ## Run linting in CI mode
+ci-lint: ## Run linting (ZERO TOLERANCE) in CI mode
 	@echo "$(BLUE)🤖 Running linting in CI mode...$(RESET)"
 	@poetry run ruff check . --output-format=github
 	@poetry run mypy src/ --junit-xml=reports/mypy.xml

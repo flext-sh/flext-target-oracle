@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextResult, FlextTypes
+from flext_core import FlextResult
 from flext_meltano import (
     FlextMeltanoBridge,
     FlextMeltanoConfig,
@@ -54,6 +54,7 @@ from flext_target_oracle.target_services import (
     RecordServiceProtocol,
     SchemaServiceProtocol,
 )
+from flext_target_oracle.typings import FlextTargetOracleTypes
 
 # Backward compatibility aliases
 FlextOracleTargetConfig = FlextTargetOracleConfig
@@ -67,7 +68,7 @@ FlextOracleTargetLoader = FlextTargetOracleLoader
 __version__ = "0.9.0"
 __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
-__all__: FlextTypes.Core.StringList = [
+__all__: FlextTargetOracleTypes.Core.StringList = [
     # Data Models
     "BatchProcessingModel",
     "BatchServiceProtocol",

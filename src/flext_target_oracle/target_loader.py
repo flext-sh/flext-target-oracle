@@ -12,11 +12,9 @@ from __future__ import annotations
 import contextlib
 import json
 from datetime import UTC, datetime
-from typing import ClassVar
+from typing import ClassVar, override
 
 from pydantic import Field
-from sqlalchemy import MetaData, Table, insert
-from sqlalchemy.sql import Insert
 
 from flext_core import FlextLogger, FlextResult, FlextService, FlextTypes
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
@@ -36,7 +34,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
     SOLID COMPLIANCE - Single responsibility: Oracle data loading operations.
     """
 
-    model_config: ClassVar = {"frozen": False}  # Allow field mutations
+    model_config: ClassVar = {"frozen": "False"}  # Allow field mutations
 
     # Pydantic fields for configuration and state
     config: FlextTargetOracleConfig = Field(description="Oracle target configuration")
@@ -49,6 +47,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
     )
     total_records: int = Field(default=0, description="Total records processed")
 
+    @override
     def __init__(self, config: FlextTargetOracleConfig, **_data: object) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
@@ -79,6 +78,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
             msg = f"Failed to create Oracle API: {e}"
             raise FlextTargetOracleConnectionError(msg) from e
 
+    @override
     def execute(self: object) -> FlextResult[FlextTypes.Core.Dict]:
         """Execute domain service - returns connection test result."""
         connection_result: FlextResult[object] = self.test_connection()
@@ -302,7 +302,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
         return sql.strip()
 
     def _flush_batch(self, stream_name: str) -> FlextResult[None]:
-        """Flush batch using direct SQL execution."""
+        """Flush batch using flext-db-oracle API exclusively - NO direct SQLAlchemy."""
         try:
             records: list[object] = self.record_buffers.get(stream_name, [])
             if not records:
@@ -314,26 +314,23 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
             loaded_at = datetime.now(UTC)
 
             with self.oracle_api as connected_api:
-                # Use SQLAlchemy 2.0 Core API - NO STRING CONCATENATION
-                # Validate table name contains only safe characters
-                if not all(c.isalnum() or c in "._" for c in full_table_name):
-                    return FlextResult[None].fail("Invalid table name characters")
-
-                # Build INSERT SQL using SQLAlchemy 2.0 Core API - NO STRING CONCATENATION
-                metadata: dict[str, object] = MetaData()
-                table = Table(full_table_name, metadata)
-
-                # Execute batch using SQLAlchemy 2.0 Core API - NO STRING CONCATENATION
+                # Use flext-db-oracle API for all SQL operations - ZERO direct SQLAlchemy
                 for record in records:
-                    # Build proper SQLAlchemy INSERT statement for each record - NO STRING CONCATENATION
-                    insert_stmt: Insert = insert(table).values(
-                        DATA=json.dumps(record),
-                        _SDC_EXTRACTED_AT=record.get("_sdc_extracted_at", loaded_at),
-                        _SDC_LOADED_AT=loaded_at,
-                    )
+                    # Build parameterized INSERT statement through flext-db-oracle
+                    insert_sql = f"""
+                    INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT)
+                    VALUES (: "data", : "extracted_at", :loaded_at)
+                    """
 
-                    result: FlextResult[object] = connected_api.execute_statement(
-                        insert_stmt
+                    # Execute parameterized query through flext-db-oracle
+                    params = {
+                        "data": json.dumps(record),
+                        "extracted_at": record.get("_sdc_extracted_at", loaded_at),
+                        "loaded_at": "loaded_at",
+                    }
+
+                    result: FlextResult[object] = connected_api.execute_sql(
+                        insert_sql, parameters=params
                     )
                     if result.is_failure:
                         return FlextResult[None].fail(
@@ -347,7 +344,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
                 return FlextResult[None].ok(None)
 
         except Exception as e:
-            self.log_error("Failed to flush batch", extra={"error": str(e)})
+            self.log_error("Failed to flush batch", extra={{"error": str(e)}})
             return FlextResult[None].fail(f"Batch flush failed: {e}")
 
 
