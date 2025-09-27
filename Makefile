@@ -119,7 +119,49 @@ dev-setup: std-install-dev ## Complete development setup with test dependencies
 	@pip install -r requirements-test.txt
 	@echo "$(GREEN)✅ Development environment ready$(RESET)"
 
-validate: std-validate-setup ## Validate project and dependencies
+# ============================================================================
+# QUALITY GATES (MANDATORY - ZERO TOLERANCE)
+# ============================================================================
+
+.PHONY: validate
+validate: lint type-check security test ## Run all quality gates (MANDATORY ORDER)
+
+.PHONY: check
+check: lint type-check ## Quick health check
+
+.PHONY: lint
+lint: ## Run linting (ZERO TOLERANCE)
+	@echo "$(BLUE)🔍 Running linting...$(RESET)"
+	@poetry run ruff check .
+
+.PHONY: type-check
+type-check: ## Run type checking with Pyrefly (ZERO TOLERANCE)
+	@echo "$(BLUE)🔍 Running type checking...$(RESET)"
+	@PYTHONPATH=src poetry run pyrefly check .
+
+.PHONY: security
+security: ## Run security scanning
+	@echo "$(BLUE)🔒 Running security scans...$(RESET)"
+	@poetry run bandit -r src/
+	@poetry run pip-audit
+
+.PHONY: test
+test: ## Run tests with coverage (MANDATORY)
+	@echo "$(BLUE)🧪 Running tests with coverage...$(RESET)"
+	@poetry run pytest --cov=flext_target_oracle --cov-report=term-missing --cov-fail-under=75
+
+.PHONY: format
+format: ## Format code
+	@echo "$(BLUE)🎨 Formatting code...$(RESET)"
+	@poetry run ruff format .
+
+.PHONY: fix
+fix: ## Auto-fix issues
+	@echo "$(BLUE)🔧 Auto-fixing issues...$(RESET)"
+	@poetry run ruff check . --fix
+	@poetry run ruff format .
+
+validate-setup: std-validate-setup ## Validate project and dependencies
 	@echo "$(BLUE)🔍 Validating project setup...$(RESET)"
 	@test -f pytest.ini || { echo "$(RED)❌ pytest.ini missing$(RESET)"; exit 1; }
 	@test -f conftest.py || { echo "$(RED)❌ conftest.py missing$(RESET)"; exit 1; }

@@ -14,6 +14,9 @@ from flext_meltano import (
     FlextSingerTypes,
     FlextTargetAbstractions,
 )
+
+# Standardized [Project]Models and [Project]Utilities patterns
+from flext_target_oracle.models import FlextTargetOracleModels
 from flext_target_oracle.target_client import (
     FlextTargetOracle,
     TargetOracle,
@@ -28,6 +31,8 @@ from flext_target_oracle.target_exceptions import (
     FlextTargetOracleSchemaError,
 )
 from flext_target_oracle.target_loader import FlextTargetOracleLoader
+
+# Legacy model imports for backward compatibility
 from flext_target_oracle.target_models import (
     BatchProcessingModel,
     LoadMethodModel,
@@ -55,6 +60,7 @@ from flext_target_oracle.target_services import (
     SchemaServiceProtocol,
 )
 from flext_target_oracle.typings import FlextTargetOracleTypes
+from flext_target_oracle.utilities import FlextTargetOracleUtilities
 
 # Backward compatibility aliases
 FlextOracleTargetConfig = FlextTargetOracleConfig
@@ -98,8 +104,12 @@ __all__: FlextTargetOracleTypes.Core.StringList = [
     "FlextTargetOracleConnectionError",
     "FlextTargetOracleError",
     "FlextTargetOracleLoader",
+    # Standardized Patterns
+    "FlextTargetOracleModels",
+    "FlextTargetOracleModels",
     "FlextTargetOracleProcessingError",
     "FlextTargetOracleSchemaError",
+    "FlextTargetOracleUtilities",
     "LoadMethod",
     "LoadMethodModel",
     "LoadStatisticsModel",
