@@ -18,12 +18,14 @@ from pydantic import Field
 
 from flext_core import FlextLogger, FlextResult, FlextService, FlextTypes
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
+
+# Module logger
+from flext_target_oracle.models import FlextTargetOracleModels
 from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleConnectionError,
 )
 
-# Module logger
 _logger = FlextLogger(__name__)
 
 
@@ -260,19 +262,42 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Core.Dict]):
             return FlextResult[None].fail(f"Record loading failed: {e}")
 
     def finalize_all_streams(self: object) -> FlextResult[FlextTypes.Core.Dict]:
-        """Finalize all streams and return stats."""
+        """Finalize all streams and return stats using standardized models."""
         try:
+            start_time = str(datetime.now(UTC))
+            operation_id = f"finalize_{int(datetime.now(UTC).timestamp())}"
+
+            # Create loading operation tracking using models
+            loading_operation = FlextTargetOracleModels.OracleLoadingOperation(
+                operation_id=operation_id,
+                stream_name="all_streams",
+                operation_type="finalize",
+                start_time=start_time,
+                records_loaded=self.total_records,
+            )
+
             # Flush all remaining records
             for stream_name, records in self.record_buffers.items():
                 if records:
                     result: FlextResult[object] = self._flush_batch(stream_name)
                     if result.is_failure:
+                        loading_operation.records_failed += len(records)
                         self.log_error(f"Failed to flush {stream_name}: {result.error}")
 
+            # Calculate final statistics
+            end_time = str(datetime.now(UTC))
+            loading_operation.end_time = end_time
+
+            # Use models to structure comprehensive statistics
             stats: FlextTypes.Core.Dict = {
                 "total_records": self.total_records,
                 "streams_processed": len(self.record_buffers),
                 "status": "completed",
+                "loading_operation": loading_operation.model_dump(),
+                "buffer_status": {
+                    stream: len(records)
+                    for stream, records in self.record_buffers.items()
+                },
             }
 
             return FlextResult[FlextTypes.Core.Dict].ok(stats)
