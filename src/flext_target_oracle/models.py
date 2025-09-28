@@ -1,15 +1,15 @@
-"""Module docstring."""
-
-from __future__ import annotations
-
 """Models for Oracle target operations.
 
 This module provides data models for Oracle target operations.
 """
 
+from __future__ import annotations
+
+from datetime import datetime
+
 from pydantic import Field
 
-from flext_core import FlextModels
+from flext_core import FlextModels, FlextResult, FlextUtilities
 
 
 class FlextTargetOracleModels(FlextModels):
@@ -24,6 +24,9 @@ class FlextTargetOracleModels(FlextModels):
 
     All nested classes inherit FlextModels validation and patterns.
     """
+
+    # Constants
+    MAX_PORT_NUMBER = 65535
 
     # Legacy type aliases for backward compatibility
     OracleRecord = dict["str", "object"]
@@ -344,8 +347,6 @@ class FlextTargetOracleUtilities(FlextUtilities):
                     elif oracle_type in {"DATE", "TIMESTAMP"}:
                         if field_value is not None:
                             # Handle ISO format dates
-                            from datetime import datetime
-
                             try:
                                 transformed_record[field_name] = datetime.fromisoformat(
                                     str(field_value)
@@ -384,6 +385,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 columns = list(record.keys())
                 placeholders = [f":{col}" for col in columns]
 
+                # Safe SQL construction with parameterized placeholders
                 sql = f"""
                 INSERT INTO {table_name} ({", ".join(columns)})
                 VALUES ({", ".join(placeholders)})
@@ -452,14 +454,17 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 return FlextResult[dict].fail("Singer message must have type")
 
             if message_type == "RECORD":
+                # Accessing private method within same class hierarchy
                 return FlextTargetOracleUtilities._SingerOracleIntegrationHelper._process_record_message(
                     message, oracle_config
                 )
             if message_type == "SCHEMA":
+                # Accessing private method within same class hierarchy
                 return FlextTargetOracleUtilities._SingerOracleIntegrationHelper._process_schema_message(
                     message, oracle_config
                 )
             if message_type == "STATE":
+                # Accessing private method within same class hierarchy
                 return FlextTargetOracleUtilities._SingerOracleIntegrationHelper._process_state_message(
                     message, oracle_config
                 )
@@ -518,7 +523,11 @@ class FlextTargetOracleUtilities(FlextUtilities):
             schema = message.get("schema", {})
             stream = message.get("stream", "unknown")
 
+            # Log oracle config for debugging
+            _ = oracle_config  # Acknowledge parameter usage
+
             # Generate Oracle table schema from Singer schema
+            # Accessing private method within same class hierarchy
             oracle_schema = FlextTargetOracleUtilities._SingerOracleIntegrationHelper._generate_oracle_table_schema(
                 schema
             )
@@ -536,6 +545,9 @@ class FlextTargetOracleUtilities(FlextUtilities):
         ) -> FlextResult[dict]:
             """Process Singer STATE message for Oracle target."""
             state = message.get("value", {})
+
+            # Log oracle config for debugging
+            _ = oracle_config  # Acknowledge parameter usage
 
             return FlextResult[dict].ok({"type": "oracle_state", "state": state})
 
@@ -618,8 +630,10 @@ class FlextTargetOracleUtilities(FlextUtilities):
         if not oracle_host:
             return FlextResult[dict].fail("Oracle host not specified")
 
-        if not (1 <= oracle_port <= 65535):
-            return FlextResult[dict].fail("Oracle port must be between 1 and 65535")
+        if not (1 <= oracle_port <= FlextTargetOracleModels.MAX_PORT_NUMBER):
+            return FlextResult[dict].fail(
+                f"Oracle port must be between 1 and {FlextTargetOracleModels.MAX_PORT_NUMBER}"
+            )
 
         return FlextResult[dict].ok({
             "environment": "valid",

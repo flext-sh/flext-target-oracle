@@ -15,7 +15,7 @@ from typing import ClassVar, override
 from pydantic import Field
 
 from flext_core import FlextResult, FlextService, FlextTypes
-from flext_target_oracle.target_config import FlextTargetOracleConfig
+from flext_target_oracle.config import FlextTargetOracleConfig
 from flext_target_oracle.target_loader import FlextTargetOracleLoader
 
 
