@@ -6,13 +6,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import threading
 from enum import StrEnum
-from typing import ClassVar
+from typing import Self
 
-from flext_core import FlextResult, FlextTypes
+from pydantic_settings import SettingsConfigDict
 
-from .models import FlextTargetOracleModels
+from flext_core import FlextConfig, FlextResult, FlextTypes
 
 
 class LoadMethod(StrEnum):
@@ -24,20 +23,45 @@ class LoadMethod(StrEnum):
     BULK_MERGE = "BULK_MERGE"
 
 
-class FlextTargetOracleConfig(FlextTargetOracleModels.OracleTargetConfig):
-    """Oracle Target Configuration following standardized [Project]Models pattern.
+class FlextTargetOracleConfig(FlextConfig):
+    """Oracle Target Configuration using enhanced FlextConfig patterns.
 
-    This class now properly extends FlextTargetOracleModels.OracleTargetConfig,
-    ensuring we use the standardized models throughout the codebase instead
-    of duplicating validation logic.
-
-    All configuration fields and validation are now inherited from the
-    FlextTargetOracleModels.OracleTargetConfig class.
+    This class extends FlextConfig and includes all the configuration fields
+    needed for Oracle target operations. Uses the enhanced singleton pattern
+    with get_or_create_shared_instance for thread-safe configuration management.
     """
 
-    # Singleton pattern attributes
-    _global_instance: ClassVar[FlextTargetOracleConfig | None] = None
-    _lock: ClassVar[threading.Lock] = threading.Lock()
+    # Oracle connection settings - moved from models to main config
+    oracle_host: str = "localhost"
+    oracle_port: int = 1521
+    oracle_service_name: str = "XE"
+    oracle_user: str = "target_user"
+    oracle_password: str = "default_password"
+
+    # Target configuration
+    default_target_schema: str = "SINGER_DATA"
+    table_prefix: str = ""
+    table_suffix: str = ""
+
+    # Loading configuration
+    batch_size: int = 5000
+    use_bulk_operations: bool = True
+    parallel_degree: int = 1
+
+    # Transaction settings
+    autocommit: bool = False
+    commit_interval: int = 1000
+    transaction_timeout: int = 300
+
+    model_config = SettingsConfigDict(
+        env_prefix="FLEXT_TARGET_ORACLE_",
+        case_sensitive=False,
+        extra="ignore",
+        str_strip_whitespace=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        frozen=False,
+    )
 
     # Configuration helper methods that leverage the base model
     def get_oracle_config(self) -> dict[str, object]:
@@ -135,42 +159,61 @@ class FlextTargetOracleConfig(FlextTargetOracleModels.OracleTargetConfig):
         all_overrides = {**env_overrides, **overrides}
         return cls(**all_overrides)
 
-    # Singleton pattern override for proper typing
     @classmethod
-    def get_global_instance(cls) -> FlextTargetOracleConfig:
-        """Get the global singleton instance of FlextTargetOracleConfig."""
-        if cls._global_instance is None:
-            with cls._lock:
-                if cls._global_instance is None:
-                    # This will require manual initialization with required fields
-                    # in production use
-                    cls._global_instance = cls(
-                        oracle_host="localhost",
-                        oracle_service_name="xe",
-                        oracle_user="target_user",
-                        oracle_password="default_password",
-                    )
-        return cls._global_instance
+    def get_global_instance(cls) -> Self:
+        """Get the global singleton instance using enhanced FlextConfig pattern."""
+        return cls.get_or_create_shared_instance(project_name="flext-target-oracle")
 
     @classmethod
-    def reset_global_instance(cls) -> None:
-        """Reset the global FlextTargetOracleConfig instance (mainly for testing)."""
-        cls._global_instance = None
+    def create_for_development(cls, **overrides: object) -> Self:
+        """Create configuration for development environment."""
+        dev_overrides: dict[str, object] = {
+            "batch_size": 1000,  # Smaller batches for development
+            "use_bulk_operations": False,
+            "transaction_timeout": 60,
+            **overrides,
+        }
+        return cls.get_or_create_shared_instance(
+            project_name="flext-target-oracle", **dev_overrides
+        )
+
+    @classmethod
+    def create_for_production(cls, **overrides: object) -> Self:
+        """Create configuration for production environment."""
+        prod_overrides: dict[str, object] = {
+            "batch_size": 5000,
+            "use_bulk_operations": True,
+            "transaction_timeout": 300,  # 5 minutes for production
+            **overrides,
+        }
+        return cls.get_or_create_shared_instance(
+            project_name="flext-target-oracle", **prod_overrides
+        )
+
+    @classmethod
+    def create_for_testing(cls, **overrides: object) -> Self:
+        """Create configuration for testing environment."""
+        test_overrides: dict[str, object] = {
+            "batch_size": 100,
+            "use_bulk_operations": False,
+            "transaction_timeout": 30,
+            "oracle_host": "localhost",
+            "oracle_service_name": "XE",
+            **overrides,
+        }
+        return cls.get_or_create_shared_instance(
+            project_name="flext-target-oracle", **test_overrides
+        )
 
 
 def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResult[None]:
-    """Validate Oracle configuration using flext-core FlextValidations - ZERO DUPLICATION."""
-    # Required string fields validation using flext-core
+    """Validate Oracle configuration using FlextConfig patterns - ZERO DUPLICATION."""
+    # Required string fields validation using direct validation
     required_fields = [
         (config.oracle_host, "Oracle host is required"),
-        (config.oracle_service, "Oracle service is required"),
+        (config.oracle_service_name, "Oracle service name is required"),
         (config.oracle_user, "Oracle username is required"),
-        (
-            config.oracle_password.get_secret_value()
-            if config.oracle_password
-            else None,
-            "Oracle password is required",
-        ),
+        (config.oracle_password, "Oracle password is required"),
         (config.default_target_schema, "Target schema is required"),
     ]
 
@@ -179,24 +222,21 @@ def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResul
         if not (field_value and str(field_value).strip()):
             return FlextResult[None].fail(error_message)
 
-    # Validate pool size constraints using direct number validation
-    if not isinstance(config.pool_min_size, (int, float)) or config.pool_min_size < 0:
-        return FlextResult[None].fail("Pool min size must be a non-negative number")
+    # Validate Oracle port range
+    if not (1 <= config.oracle_port <= 65535):
+        return FlextResult[None].fail("Oracle port must be between 1 and 65535")
 
-    if config.pool_max_size < config.pool_min_size:
-        return FlextResult[None].fail(
-            "Pool max size must be greater than or equal to pool min size",
-        )
+    # Validate batch size constraints
+    if config.batch_size < 1:
+        return FlextResult[None].fail("Batch size must be at least 1")
 
-    # SSL configuration consistency validation
-    if (
-        config.use_ssl
-        and config.ssl_wallet_password
-        and not (config.ssl_wallet_location and str(config.ssl_wallet_location).strip())
-    ):
-        return FlextResult[None].fail(
-            "SSL wallet location is required when wallet password is provided",
-        )
+    # Validate parallel degree
+    if config.parallel_degree < 1:
+        return FlextResult[None].fail("Parallel degree must be at least 1")
+
+    # Validate transaction timeout
+    if config.transaction_timeout < 1:
+        return FlextResult[None].fail("Transaction timeout must be at least 1 second")
 
     return FlextResult[None].ok(None)
 
