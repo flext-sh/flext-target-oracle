@@ -37,8 +37,6 @@ class OracleTargetValidateCommand(FlextModels.Command):
     )
 
     @override
-    @override
-    @override
     def execute(self: object) -> FlextResult[str]:
         """Execute validation using pure flext-core patterns."""
         try:
@@ -113,8 +111,6 @@ class OracleTargetLoadCommand(FlextModels.Command):
     state_file: str | None = Field(default=None, description="Path to state file")
 
     @override
-    @override
-    @override
     def execute(self: object) -> FlextResult[str]:
         """Execute load using pure flext-core patterns."""
         try:
@@ -169,8 +165,6 @@ class OracleTargetAboutCommand(FlextModels.Command):
     # Command-specific data using Pydantic fields
     format: str = Field(default=json, description="Output format (json, text, yaml)")
 
-    @override
-    @override
     @override
     def execute(self: object) -> FlextResult[str]:
         """Execute about using pure flext-core patterns."""

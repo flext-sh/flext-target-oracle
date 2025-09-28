@@ -7,6 +7,8 @@ from __future__ import annotations
 This module provides data models for Oracle target operations.
 """
 
+from pydantic import Field
+
 from flext_core import FlextModels
 
 
