@@ -14,6 +14,7 @@ from flext_meltano import (
     FlextSingerTypes,
     FlextTargetAbstractions,
 )
+from flext_target_oracle.config import FlextTargetOracleConfig, LoadMethod
 
 # Standardized [Project]Models and [Project]Utilities patterns
 from flext_target_oracle.models import FlextTargetOracleModels
@@ -22,7 +23,6 @@ from flext_target_oracle.target_client import (
     TargetOracle,
 )
 from flext_target_oracle.target_commands import OracleTargetCommandFactory
-from flext_target_oracle.target_config import FlextTargetOracleConfig, LoadMethod
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,

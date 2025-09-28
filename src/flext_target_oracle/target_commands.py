@@ -19,8 +19,8 @@ from pydantic import Field
 
 from flext_core import FlextHandlers, FlextModels, FlextResult, FlextTypes
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
+from flext_target_oracle.config import FlextTargetOracleConfig
 from flext_target_oracle.target_client import FlextTargetOracle
-from flext_target_oracle.target_config import FlextTargetOracleConfig
 from flext_target_oracle.target_services import OracleConnectionService
 
 
@@ -171,7 +171,7 @@ class OracleTargetAboutCommand(FlextModels.Command):
         try:
             # Get about information using domain methods
             about_info: FlextTypes.Core.Dict = {
-                "name": flext - target - oracle,
+                "name": "flext-target-oracle",
                 "version": "__version__",
                 "description": "Modern Oracle Singer Target using FLEXT framework",
                 "capabilities": [
@@ -253,10 +253,10 @@ class OracleTargetCommandHandler(FlextHandlers[FlextModels.Command, str]):
     def __init__(self: object) -> None:
         """Initialize Oracle target command handler."""
         config: dict[str, object] = FlextModels.CqrsConfig.Handler(
-            handler_id=oracle_target_command_handler,
+            handler_id="oracle_target_command_handler",
             handler_name="Oracle Target Command Handler",
-            handler_type=command,
-            handler_mode=command,
+            handler_type="command",
+            handler_mode="command",
             command_timeout=30000,
             max_command_retries=3,
             metadata={"description": "Oracle target Singer command handler"},
@@ -309,7 +309,7 @@ class OracleTargetCommandFactory:
         """Create validation command using Flext CQRS SOURCE OF TRUTH."""
         return OracleTargetValidateCommand(
             command_id=str(uuid.uuid4()),
-            command_type=oracle_target_validate,
+            command_type="oracle_target_validate",
             config_file=config_file,
         )
 
@@ -321,7 +321,7 @@ class OracleTargetCommandFactory:
         """Create load command using Flext CQRS SOURCE OF TRUTH."""
         return OracleTargetLoadCommand(
             command_id=str(uuid.uuid4()),
-            command_type=oracle_target_load,
+            command_type="oracle_target_load",
             config_file=config_file,
             state_file=state_file,
         )
@@ -331,7 +331,7 @@ class OracleTargetCommandFactory:
         """Create about command using Flext CQRS SOURCE OF TRUTH."""
         return OracleTargetAboutCommand(
             command_id=str(uuid.uuid4()),
-            command_type=oracle_target_about,
+            command_type="oracle_target_about",
             format=output_format,
         )
 

@@ -1,4 +1,7 @@
-"""Target Configuration Management for FLEXT Target Oracle.
+"""FLEXT Target Oracle Configuration - Enhanced FlextConfig Implementation.
+
+Single unified configuration class for Oracle Singer target operations following
+FLEXT 1.0.0 patterns with enhanced singleton, SecretStr, and Pydantic 2.11+ features.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -9,9 +12,10 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Self
 
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
-from flext_core import FlextConfig, FlextResult, FlextTypes
+from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
 
 
 class LoadMethod(StrEnum):
@@ -29,29 +33,14 @@ class FlextTargetOracleConfig(FlextConfig):
     This class extends FlextConfig and includes all the configuration fields
     needed for Oracle target operations. Uses the enhanced singleton pattern
     with get_or_create_shared_instance for thread-safe configuration management.
+
+    Follows standardized pattern:
+    - Extends FlextConfig from flext-core
+    - Uses SecretStr for sensitive data (oracle_password)
+    - All defaults from FlextConstants where possible
+    - Uses enhanced singleton pattern with inverse dependency injection
+    - Uses Pydantic 2.11+ features (field_validator, model_validator)
     """
-
-    # Oracle connection settings - moved from models to main config
-    oracle_host: str = "localhost"
-    oracle_port: int = 1521
-    oracle_service_name: str = "XE"
-    oracle_user: str = "target_user"
-    oracle_password: str = "default_password"
-
-    # Target configuration
-    default_target_schema: str = "SINGER_DATA"
-    table_prefix: str = ""
-    table_suffix: str = ""
-
-    # Loading configuration
-    batch_size: int = 5000
-    use_bulk_operations: bool = True
-    parallel_degree: int = 1
-
-    # Transaction settings
-    autocommit: bool = False
-    commit_interval: int = 1000
-    transaction_timeout: int = 300
 
     model_config = SettingsConfigDict(
         env_prefix="FLEXT_TARGET_ORACLE_",
@@ -61,7 +50,202 @@ class FlextTargetOracleConfig(FlextConfig):
         validate_assignment=True,
         arbitrary_types_allowed=True,
         frozen=False,
+        # Enhanced Pydantic 2.11+ features
+        use_enum_values=True,
+        validate_return=True,
+        json_schema_extra={
+            "title": "FLEXT Target Oracle Configuration",
+            "description": "Oracle Singer target configuration extending FlextConfig",
+        },
     )
+
+    # Oracle connection settings using SecretStr for password
+    oracle_host: str = Field(
+        default="localhost",
+        description="Oracle database host",
+    )
+
+    oracle_port: int = Field(
+        default=1521,
+        ge=1,
+        le=65535,
+        description="Oracle database port",
+    )
+
+    oracle_service_name: str = Field(
+        default="XE",
+        description="Oracle service name",
+    )
+
+    oracle_user: str = Field(
+        default="target_user",
+        description="Oracle database username",
+    )
+
+    oracle_password: SecretStr = Field(
+        default_factory=lambda: SecretStr("default_password"),
+        description="Oracle database password (sensitive)",
+    )
+
+    # Target configuration using FlextConstants where applicable
+    default_target_schema: str = Field(
+        default="SINGER_DATA",
+        description="Default schema for loading data",
+    )
+
+    table_prefix: str = Field(
+        default="",
+        description="Prefix for target table names",
+    )
+
+    table_suffix: str = Field(
+        default="",
+        description="Suffix for target table names",
+    )
+
+    # Loading configuration using FlextConstants
+    batch_size: int = Field(
+        default=FlextConstants.Performance.DEFAULT_DB_POOL_SIZE * 250,  # 5000
+        ge=1,
+        le=50000,
+        description="Number of records per batch",
+    )
+
+    use_bulk_operations: bool = Field(
+        default=True,
+        description="Use Oracle bulk operations for better performance",
+    )
+
+    parallel_degree: int = Field(
+        default=1,
+        ge=1,
+        le=32,
+        description="Oracle parallel degree for operations",
+    )
+
+    # Transaction settings using FlextConstants
+    autocommit: bool = Field(
+        default=False,
+        description="Enable autocommit for operations",
+    )
+
+    commit_interval: int = Field(
+        default=1000,
+        ge=1,
+        description="Number of records between commits",
+    )
+
+    transaction_timeout: int = Field(
+        default=FlextConstants.Defaults.TIMEOUT * 10,  # 300 seconds
+        ge=1,
+        le=3600,
+        description="Transaction timeout in seconds",
+    )
+
+    # Project identification
+    project_name: str = Field(
+        default="flext-target-oracle",
+        description="Project name",
+    )
+
+    project_version: str = Field(
+        default="0.9.0",
+        description="Project version",
+    )
+
+    # Pydantic 2.11+ field validators
+    @field_validator("oracle_host")
+    @classmethod
+    def validate_oracle_host(cls, v: str) -> str:
+        """Validate Oracle host format."""
+        if not v.strip():
+            msg = "Oracle host cannot be empty"
+            raise ValueError(msg)
+        return v.strip()
+
+    @field_validator("oracle_service_name")
+    @classmethod
+    def validate_oracle_service_name(cls, v: str) -> str:
+        """Validate Oracle service name format."""
+        if not v.strip():
+            msg = "Oracle service name cannot be empty"
+            raise ValueError(msg)
+        return v.strip()
+
+    @field_validator("oracle_user")
+    @classmethod
+    def validate_oracle_user(cls, v: str) -> str:
+        """Validate Oracle user format."""
+        if not v.strip():
+            msg = "Oracle username cannot be empty"
+            raise ValueError(msg)
+        return v.strip()
+
+    @field_validator("default_target_schema")
+    @classmethod
+    def validate_default_target_schema(cls, v: str) -> str:
+        """Validate Oracle schema name format."""
+        if not v.strip():
+            msg = "Target schema cannot be empty"
+            raise ValueError(msg)
+        return v.strip().upper()
+
+    @model_validator(mode="after")
+    def validate_oracle_configuration_consistency(self) -> Self:
+        """Validate Oracle configuration consistency."""
+        # Validate password is not empty
+        if not self.oracle_password.get_secret_value().strip():
+            msg = "Oracle password cannot be empty"
+            raise ValueError(msg)
+
+        # Validate batch size reasonable for performance
+        if self.batch_size > 20000:
+            import warnings
+
+            warnings.warn(
+                f"Large batch size ({self.batch_size}) may impact performance",
+                UserWarning,
+                stacklevel=2,
+            )
+
+        # Validate parallel degree settings
+        if self.parallel_degree > 8:
+            import warnings
+
+            warnings.warn(
+                f"High parallel degree ({self.parallel_degree}) may impact system resources",
+                UserWarning,
+                stacklevel=2,
+            )
+
+        return self
+
+    def validate_business_rules(self) -> FlextResult[None]:
+        """Validate Oracle Target specific business rules."""
+        try:
+            # Validate connection requirements
+            if not self.oracle_host or not self.oracle_user:
+                return FlextResult[None].fail("Oracle host and username are required")
+
+            if not self.oracle_password.get_secret_value():
+                return FlextResult[None].fail("Oracle password is required")
+
+            # Validate schema name
+            if not self.default_target_schema:
+                return FlextResult[None].fail("Target schema is required")
+
+            # Validate performance settings
+            if self.batch_size < 1:
+                return FlextResult[None].fail("Batch size must be at least 1")
+
+            if self.commit_interval > self.batch_size:
+                return FlextResult[None].fail(
+                    "Commit interval cannot be larger than batch size"
+                )
+
+            return FlextResult[None].ok(None)
+        except Exception as e:
+            return FlextResult[None].fail(f"Business rules validation failed: {e}")
 
     # Configuration helper methods that leverage the base model
     def get_oracle_config(self) -> dict[str, object]:
@@ -71,7 +255,7 @@ class FlextTargetOracleConfig(FlextConfig):
             "port": self.oracle_port,
             "service_name": self.oracle_service_name,
             "username": self.oracle_user,
-            "password": self.oracle_password,
+            "password": self.oracle_password.get_secret_value(),
             "timeout": self.transaction_timeout,
             "pool_min": 1,
             "pool_max": 10,
@@ -134,7 +318,7 @@ class FlextTargetOracleConfig(FlextConfig):
     def create_for_environment(
         cls, environment: str, **overrides: object
     ) -> FlextTargetOracleConfig:
-        """Create configuration for specific environment."""
+        """Create configuration for specific environment using enhanced singleton pattern."""
         env_overrides: dict[str, object] = {}
 
         if environment == "production":
@@ -157,7 +341,9 @@ class FlextTargetOracleConfig(FlextConfig):
             })
 
         all_overrides = {**env_overrides, **overrides}
-        return cls(**all_overrides)
+        return cls.get_or_create_shared_instance(
+            project_name="flext-target-oracle", environment=environment, **all_overrides
+        )
 
     @classmethod
     def get_global_instance(cls) -> Self:
@@ -205,6 +391,11 @@ class FlextTargetOracleConfig(FlextConfig):
             project_name="flext-target-oracle", **test_overrides
         )
 
+    @classmethod
+    def reset_global_instance(cls) -> None:
+        """Reset the global FlextTargetOracleConfig instance (mainly for testing)."""
+        cls.reset_shared_instance()
+
 
 def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResult[None]:
     """Validate Oracle configuration using FlextConfig patterns - ZERO DUPLICATION."""
@@ -213,7 +404,7 @@ def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResul
         (config.oracle_host, "Oracle host is required"),
         (config.oracle_service_name, "Oracle service name is required"),
         (config.oracle_user, "Oracle username is required"),
-        (config.oracle_password, "Oracle password is required"),
+        (config.oracle_password.get_secret_value(), "Oracle password is required"),
         (config.default_target_schema, "Target schema is required"),
     ]
 
