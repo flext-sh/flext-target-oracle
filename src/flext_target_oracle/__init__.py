@@ -18,10 +18,8 @@ from flext_target_oracle.config import FlextTargetOracleConfig, LoadMethod
 
 # Standardized [Project]Models and [Project]Utilities patterns
 from flext_target_oracle.models import FlextTargetOracleModels
-from flext_target_oracle.target_client import (
-    FlextTargetOracle,
-    TargetOracle,
-)
+from flext_target_oracle.protocols import FlextTargetOracleProtocols
+from flext_target_oracle.target_client import FlextTargetOracle
 from flext_target_oracle.target_commands import OracleTargetCommandFactory
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
@@ -62,15 +60,6 @@ from flext_target_oracle.target_services import (
 from flext_target_oracle.typings import FlextTargetOracleTypes
 from flext_target_oracle.utilities import FlextTargetOracleUtilities
 
-# Backward compatibility aliases
-FlextOracleTargetConfig = FlextTargetOracleConfig
-FlextOracleTargetError = FlextTargetOracleError
-FlextOracleTargetAuthenticationError = FlextTargetOracleAuthenticationError
-FlextOracleTargetConnectionError = FlextTargetOracleConnectionError
-FlextOracleTargetProcessingError = FlextTargetOracleProcessingError
-FlextOracleTargetSchemaError = FlextTargetOracleSchemaError
-FlextOracleTargetLoader = FlextTargetOracleLoader
-
 __version__ = "0.9.0"
 __version_info__ = tuple(int(x) for x in __version__.split(".") if x.isdigit())
 
@@ -86,13 +75,6 @@ __all__: FlextTargetOracleTypes.Core.StringList = [
     # Observability
     "FlextOracleError",
     "FlextOracleObs",
-    "FlextOracleTargetAuthenticationError",
-    "FlextOracleTargetConfig",
-    "FlextOracleTargetConnectionError",
-    "FlextOracleTargetError",
-    "FlextOracleTargetLoader",
-    "FlextOracleTargetProcessingError",
-    "FlextOracleTargetSchemaError",
     # Core Classes
     "FlextResult",
     "FlextSingerTypes",
@@ -106,8 +88,8 @@ __all__: FlextTargetOracleTypes.Core.StringList = [
     "FlextTargetOracleLoader",
     # Standardized Patterns
     "FlextTargetOracleModels",
-    "FlextTargetOracleModels",
     "FlextTargetOracleProcessingError",
+    "FlextTargetOracleProtocols",
     "FlextTargetOracleSchemaError",
     "FlextTargetOracleUtilities",
     "LoadMethod",
@@ -126,8 +108,6 @@ __all__: FlextTargetOracleTypes.Core.StringList = [
     "SchemaServiceProtocol",
     "SingerStreamModel",
     "StorageModeModel",
-    # Core Classes
-    "TargetOracle",
     # Metadata
     "__version__",
     "__version_info__",
