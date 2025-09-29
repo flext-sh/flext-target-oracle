@@ -66,7 +66,7 @@ class FlextTargetOracleConfig(FlextConfig):
     )
 
     oracle_port: int = Field(
-        default=1521,
+        default=FlextConstants.Platform.DATABASE_DEFAULT_PORT,
         ge=1,
         le=65535,
         description="Oracle database port",
@@ -130,7 +130,7 @@ class FlextTargetOracleConfig(FlextConfig):
     )
 
     commit_interval: int = Field(
-        default=1000,
+        default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
         ge=1,
         description="Number of records between commits",
     )
@@ -199,7 +199,7 @@ class FlextTargetOracleConfig(FlextConfig):
             raise ValueError(msg)
 
         # Validate batch size reasonable for performance
-        if self.batch_size > 20000:
+        if self.batch_size > FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 5:
             import warnings
 
             warnings.warn(
@@ -209,7 +209,7 @@ class FlextTargetOracleConfig(FlextConfig):
             )
 
         # Validate parallel degree settings
-        if self.parallel_degree > 8:
+        if self.parallel_degree > FlextConstants.Container.MAX_WORKERS:
             import warnings
 
             warnings.warn(
@@ -257,9 +257,9 @@ class FlextTargetOracleConfig(FlextConfig):
             "username": self.oracle_user,
             "password": self.oracle_password.get_secret_value(),
             "timeout": self.transaction_timeout,
-            "pool_min": 1,
-            "pool_max": 10,
-            "pool_increment": 1,
+            "pool_min": FlextConstants.Performance.MIN_DB_POOL_SIZE,
+            "pool_max": FlextConstants.Performance.DEFAULT_DB_POOL_SIZE * 5,
+            "pool_increment": FlextConstants.Performance.MIN_DB_POOL_SIZE,
             "encoding": "UTF-8",
             "ssl_enabled": False,
             "autocommit": self.autocommit,
@@ -296,7 +296,7 @@ class FlextTargetOracleConfig(FlextConfig):
 
         # Convert to uppercase and ensure Oracle naming limit (30 characters)
         table_name = base_name.upper()
-        oracle_table_name_limit = 30
+        oracle_table_name_limit = FlextConstants.Limits.MAX_STRING_LENGTH
 
         if len(table_name) > oracle_table_name_limit:
             # Truncate intelligently - keep prefix/suffix if possible
@@ -323,21 +323,23 @@ class FlextTargetOracleConfig(FlextConfig):
 
         if environment == "production":
             env_overrides.update({
-                "batch_size": 5000,
+                "batch_size": FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 2,
                 "use_bulk_operations": True,
-                "transaction_timeout": 300,  # 5 minutes for production
+                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT
+                * 10,  # 5 minutes for production
             })
         elif environment == "development":
             env_overrides.update({
-                "batch_size": 1000,  # Smaller batches for development
+                "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
                 "use_bulk_operations": False,
-                "transaction_timeout": 60,
+                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 2,
             })
         elif environment == "staging":
             env_overrides.update({
-                "batch_size": 2500,
+                "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
+                * 2.5,
                 "use_bulk_operations": True,
-                "transaction_timeout": 180,
+                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 6,
             })
 
         all_overrides = {**env_overrides, **overrides}
@@ -354,9 +356,9 @@ class FlextTargetOracleConfig(FlextConfig):
     def create_for_development(cls, **overrides: object) -> Self:
         """Create configuration for development environment."""
         dev_overrides: dict[str, object] = {
-            "batch_size": 1000,  # Smaller batches for development
+            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
             "use_bulk_operations": False,
-            "transaction_timeout": 60,
+            "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 2,
             **overrides,
         }
         return cls.get_or_create_shared_instance(
@@ -367,9 +369,10 @@ class FlextTargetOracleConfig(FlextConfig):
     def create_for_production(cls, **overrides: object) -> Self:
         """Create configuration for production environment."""
         prod_overrides: dict[str, object] = {
-            "batch_size": 5000,
+            "batch_size": FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 2,
             "use_bulk_operations": True,
-            "transaction_timeout": 300,  # 5 minutes for production
+            "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT
+            * 10,  # 5 minutes for production
             **overrides,
         }
         return cls.get_or_create_shared_instance(
@@ -380,9 +383,9 @@ class FlextTargetOracleConfig(FlextConfig):
     def create_for_testing(cls, **overrides: object) -> Self:
         """Create configuration for testing environment."""
         test_overrides: dict[str, object] = {
-            "batch_size": 100,
+            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
             "use_bulk_operations": False,
-            "transaction_timeout": 30,
+            "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT,
             "oracle_host": "localhost",
             "oracle_service_name": "XE",
             **overrides,

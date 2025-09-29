@@ -430,11 +430,6 @@ class FlextTargetOracle(
         }
 
 
-# Compatibility alias
-TargetOracle = FlextTargetOracle
-
-
 __all__ = [
     "FlextTargetOracle",
-    "TargetOracle",
 ]
