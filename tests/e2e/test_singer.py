@@ -604,7 +604,7 @@ class TestSingerWorkflowE2E:
                 assert result.is_success
 
             # Small delay between batches to simulate real streaming
-            sleep(0.1)
+            time.sleep(0.1)
 
         end_time = time.time()
         elapsed = end_time - start_time

@@ -11,13 +11,12 @@ and uses dependency injection via FlextContainer
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
-
 from typing import Protocol, override
-
-from pydantic import Field
 
 from flext_core import FlextResult, FlextService, FlextTypes
 from flext_db_oracle import FlextDbOracleApi
+from pydantic import Field
+
 from flext_target_oracle.config import FlextTargetOracleConfig
 from flext_target_oracle.target_models import (
     LoadMethodModel,
@@ -25,6 +24,10 @@ from flext_target_oracle.target_models import (
     OracleConnectionModel,
     SingerStreamModel,
 )
+from flext_target_oracle.utilities import FlextTargetOracleUtilities
+
+# Constants
+ALL_STREAMS = "__ALL_STREAMS__"
 
 
 class ConnectionServiceProtocol(Protocol):
@@ -32,11 +35,9 @@ class ConnectionServiceProtocol(Protocol):
 
     def test_connection(self: object) -> FlextResult[None]:
         """Test Oracle database connection."""
-        ...
 
     def get_connection_info(self: object) -> FlextResult[OracleConnectionModel]:
         """Get connection information."""
-        ...
 
 
 class SchemaServiceProtocol(Protocol):
@@ -49,7 +50,6 @@ class SchemaServiceProtocol(Protocol):
         key_properties: FlextTypes.Core.StringList | None = None,
     ) -> FlextResult[None]:
         """Ensure table exists for Singer stream."""
-        ...
 
     def get_table_columns(
         self,
@@ -57,7 +57,6 @@ class SchemaServiceProtocol(Protocol):
         schema_name: str,
     ) -> FlextResult[list[FlextTypes.Core.Dict]]:
         """Get table column definitions."""
-        ...
 
 
 class BatchServiceProtocol(Protocol):
@@ -69,15 +68,12 @@ class BatchServiceProtocol(Protocol):
         _record: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Add record to batch processing queue."""
-        ...
 
     def flush_batch(self, stream_name: str) -> FlextResult[None]:
         """Flush pending batch for stream."""
-        ...
 
     def flush_all_batches(self) -> FlextResult[LoadStatisticsModel]:
         """Flush all pending batches."""
-        ...
 
 
 class RecordServiceProtocol(Protocol):
@@ -89,7 +85,6 @@ class RecordServiceProtocol(Protocol):
         stream: SingerStreamModel,
     ) -> FlextResult[FlextTypes.Core.Dict]:
         """Transform Singer record for Oracle storage."""
-        ...
 
     def validate_record(
         self,
@@ -97,7 +92,6 @@ class RecordServiceProtocol(Protocol):
         schema: FlextTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Validate record against schema."""
-        ...
 
 
 class OracleConnectionService(FlextService[None]):
@@ -124,8 +118,6 @@ class OracleConnectionService(FlextService[None]):
         """Initialize Oracle connection service."""
         super().__init__(**data)
         # ZERO TOLERANCE FIX: Use FlextTargetOracleUtilities for ALL business logic
-        from flext_target_oracle.utilities import FlextTargetOracleUtilities
-
         self._utilities = FlextTargetOracleUtilities()
 
     # Connection model is computed property, not field
@@ -247,8 +239,6 @@ class OracleSchemaService(FlextService[None]):
         """Initialize Oracle schema service."""
         super().__init__(**data)
         # ZERO TOLERANCE FIX: Use FlextTargetOracleUtilities for ALL business logic
-        from flext_target_oracle.utilities import FlextTargetOracleUtilities
-
         self._utilities = FlextTargetOracleUtilities()
 
     @override
@@ -479,7 +469,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
             FlextResult[LoadStatisticsModel] with aggregated statistics
 
         """
-        return run(self.finalize_all())
+        return self.finalize_all()
 
     def finalize_all(self) -> FlextResult[LoadStatisticsModel]:
         """Flush all pending batches and return aggregated statistics.
@@ -575,8 +565,6 @@ class OracleRecordService(FlextService[None]):
         """Initialize Oracle record service."""
         super().__init__(**data)
         # ZERO TOLERANCE FIX: Use FlextTargetOracleUtilities for ALL business logic
-        from flext_target_oracle.utilities import FlextTargetOracleUtilities
-
         self._utilities = FlextTargetOracleUtilities()
 
     @override
