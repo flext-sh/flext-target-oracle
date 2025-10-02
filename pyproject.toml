@@ -1,194 +1,116 @@
 [build-system]
-    requires = [
-        "poetry-core>=1.9.0",
-    ]
-    build-backend = "poetry.core.masonry.api"
+requires = [ "poetry-core>=1.9.0",]
+build-backend = "poetry.core.masonry.api"
 
 [project]
-    name = "flext-target-oracle"
-    version = "0.9.0"
-    description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
-    readme = "README.md"
-    requires-python = ">=3.13,<3.14"
-    keywords = [
-        "flext",
-        "enterprise",
-        "async",
-        "typed",
-        "oracle",
-        "database",
-        "library",
-        "data-loading",
-        "etl",
-    ]
-    classifiers = [
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.13",
-        "Programming Language :: Python :: 3 :: Only",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-        "Typing :: Typed",
-        "Topic :: Database",
-        "Topic :: System :: Archiving",
-    ]
-    dependencies = [
-        "pydantic>=2.11.0",
-        "flext-core",
-        "flext-db-oracle",
-        "flext-meltano",
-        "flext-cli",
-        "click>=8.0.0",
-        "rich>=13.0.0",
-    ]
+name = "flext-target-oracle"
+version = "0.9.0"
+description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+keywords = [ "flext", "enterprise", "", "typed", "oracle", "database", "library", "data-loading", "etl",]
+classifiers = [ "Development Status :: 5 - Production/Stable", "Intended Audience :: Developers", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent", "Programming Language :: Python :: 3.13", "Programming Language :: Python :: 3 :: Only", "Topic :: Software Development :: Libraries :: Python Modules", "Typing :: Typed", "Topic :: Database", "Topic :: System :: Archiving",]
+dependencies = [ "pydantic>=2.11.0", "flext-core", "flext-db-oracle", "flext-meltano", "flext-cli", "click>=8.0.0", "rich>=13.0.0",]
 [[project.authors]]
-    name  = "FLEXT Team"
-    email = "team@flext.sh"
+name = "FLEXT Team"
+email = "team@flext.sh"
 
 [[project.maintainers]]
-    name  = "FLEXT Team"
-    email = "team@flext.sh"
+name = "FLEXT Team"
+email = "team@flext.sh"
 
 [project.license]
-    text = "MIT"
+text = "MIT"
 
 [project.urls]
-    Homepage      = "https://github.com/flext-sh/flext"
-    Repository    = "https://github.com/flext-sh/flext"
-    Documentation = "https://github.com/flext-sh/flext/blob/main/README.md"
+Homepage = "https://github.com/flext-sh/flext"
+Repository = "https://github.com/flext-sh/flext"
+Documentation = "https://github.com/flext-sh/flext/blob/main/README.md"
 
 [project.scripts]
-    target-oracle       = "flext_target_oracle.target:cli"
-    flext-target-oracle = "flext_target_oracle.target:cli"
+target-oracle = "flext_target_oracle.target:cli"
+flext-target-oracle = "flext_target_oracle.target:cli"
 
 [tool.ruff]
-    extend = "../ruff-shared.toml"
+extend = "../ruff-shared.toml"
 
 [tool.bandit]
-    exclude_dirs = [
-        "tests",
-        "build",
-        "dist",
-    ]
-    skips = [
-        "B101",
-        "B601",
-    ]
+exclude_dirs = [ "tests", "build", "dist",]
+skips = [ "B101", "B601",]
 
 [tool.poetry]
 [[tool.poetry.packages]]
-    include = "flext_target_oracle"
-    from    = "src"
+include = "flext_target_oracle"
+from = "src"
 
 [tool.deptry]
-    known_first_party = [
-        "flext_target_oracle",
-    ]
-
-[tool.poetry.dependencies]
-    python   = ">=3.13,<3.14"
-    pydantic = ">=2.11.0"
-    click    = ">=8.0.0"
-    rich     = ">=13.0.0"
-
-[tool.pytest.ini_options]
-    minversion = "8.0"
-    asyncio_mode = "auto"
-    addopts = [
-        "-ra",
-        "--strict-markers",
-        "--strict-config",
-        "--maxfail=1",
-        "--tb=short",
-    ]
-    testpaths = [
-        "tests",
-    ]
-    markers = [
-        "unit: Unit tests",
-        "integration: Integration tests",
-        "slow: Slow tests",
-        "smoke: Smoke tests",
-        "e2e: End-to-end tests",
-    ]
-
-[tool.coverage.run]
-    source = [
-        "src",
-    ]
-    branch = true
-    omit = [
-        "*/tests/*",
-        "*/test_*",
-        "*/__pycache__/*",
-        "*/venv/*",
-        "*/.venv/*",
-    ]
-
-[tool.coverage.report]
-    exclude_lines = [
-        "pragma: no cover",
-        "def __repr__",
-        "raise AssertionError",
-        "raise NotImplementedError",
-    ]
-
-[tool.ruff.lint.isort]
-    known-first-party = [
-        "flext_target_oracle",
-    ]
-
-[tool.poetry.dependencies.flext-core]
-    path    = "../flext-core"
-    develop = true
-
-[tool.poetry.dependencies.flext-db-oracle]
-    path    = "../flext-db-oracle"
-    develop = true
-
-[tool.poetry.dependencies.flext-meltano]
-    path    = "../flext-meltano"
-    develop = true
-
-[tool.poetry.dependencies.flext-observability]
-    path    = "../flext-observability"
-    develop = true
-
-[tool.poetry.dependencies.flext-cli]
-    path    = "../flext-cli"
-    develop = true
-
-[tool.poetry.group.dev.dependencies]
-    pytest           = ">=8.0.0"
-    pytest-cov       = ">=6.2.1"
-    pytest-asyncio   = ">=1.1.0"
-    pytest-mock      = ">=3.14.1"
-    pytest-xdist     = ">=3.8.0"
-    pytest-timeout   = ">=2.4.0"
-    pytest-sugar     = ">=1.0.0"
-    pytest-clarity   = ">=1.0.1"
-    pytest-benchmark = ">=5.1.0"
-    ruff             = ">=0.8.0"
-    pip-audit        = ">=2.9.0"
-    pre-commit       = ">=4.2.0"
-    detect-secrets   = ">=1.5.0"
-    vulture          = ">=2.14"
-    radon            = ">=6.0.1"
-    commitizen       = ">=4.8.3"
-    pyrefly          = "^0.34.0"
-
-[tool.poetry.group.dev.dependencies.bandit]
-    extras = [
-        "toml",
-    ]
-    version = ">=1.8.0"
+known_first_party = [ "flext_target_oracle",]
 
 [tool.pyrefly]
-    python-version = "3.13"
-    search-path = [
-        "examples",
-        "scripts",
-        "src",
-        "tests",
-    ]
+python-version = "3.13"
+search-path = [ "examples", "src", "tests",]
+
+[tool.poetry.dependencies]
+python = ">=3.13,<3.14"
+pydantic = ">=2.11.0"
+click = ">=8.0.0"
+rich = ">=13.0.0"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = [ "-ra", "--strict-markers", "--strict-config", "--maxfail=1", "--tb=short",]
+testpaths = [ "tests",]
+markers = [ "unit: Unit tests", "integration: Integration tests", "slow: Slow tests", "smoke: Smoke tests", "e2e: End-to-end tests",]
+
+[tool.coverage.run]
+source = [ "src",]
+branch = true
+omit = [ "*/tests/*", "*/test_*", "*/__pycache__/*", "*/venv/*", "*/.venv/*",]
+
+[tool.coverage.report]
+exclude_lines = [ "pragma: no cover", "def __repr__", "raise AssertionError", "raise NotImplementedError",]
+
+[tool.ruff.lint.isort]
+known-first-party = [ "flext_target_oracle",]
+
+[tool.poetry.dependencies.flext-core]
+path = "../flext-core"
+develop = true
+
+[tool.poetry.dependencies.flext-db-oracle]
+path = "../flext-db-oracle"
+develop = true
+
+[tool.poetry.dependencies.flext-meltano]
+path = "../flext-meltano"
+develop = true
+
+[tool.poetry.dependencies.flext-observability]
+path = "../flext-observability"
+develop = true
+
+[tool.poetry.dependencies.flext-cli]
+path = "../flext-cli"
+develop = true
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.0.0"
+pytest-cov = ">=6.2.1"
+pytest-mock = ">=3.14.1"
+pytest-xdist = ">=3.8.0"
+pytest-timeout = ">=2.4.0"
+pytest-sugar = ">=1.0.0"
+pytest-clarity = ">=1.0.1"
+pytest-benchmark = ">=5.1.0"
+ruff = ">=0.8.0"
+pip-audit = ">=2.9.0"
+pre-commit = ">=4.2.0"
+detect-secrets = ">=1.5.0"
+vulture = ">=2.14"
+radon = ">=6.0.1"
+commitizen = ">=4.8.3"
+pyrefly = "^0.34.0"
+
+[tool.poetry.group.dev.dependencies.bandit]
+extras = [ "toml",]
+version = ">=1.8.0"

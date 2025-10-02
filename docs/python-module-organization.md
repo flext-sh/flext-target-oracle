@@ -167,16 +167,16 @@ class FlextOracleTarget(Target):
     name = "flext-oracle-target"
     config_class = FlextOracleTargetConfig
 
-    async def process_singer_message(self, message: dict) -> FlextResult[None]:
+    def process_singer_message(self, message: dict) -> FlextResult[None]:
         """Process Singer messages with railway-oriented error handling."""
 
-    async def _handle_schema(self, message: dict) -> FlextResult[None]:
+    def _handle_schema(self, message: dict) -> FlextResult[None]:
         """Handle SCHEMA messages with table management."""
 
-    async def _handle_record(self, message: dict) -> FlextResult[None]:
+    def _handle_record(self, message: dict) -> FlextResult[None]:
         """Handle RECORD messages with batched loading."""
 
-    async def finalize(self) -> FlextResult[FlextTypes.Core.Dict]:
+    def finalize(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Finalize streams and return statistics."""
 ```
 
@@ -218,13 +218,13 @@ class FlextOracleTargetLoader:
     def __init__(self, config: FlextOracleTargetConfig) -> None:
         """Initialize with flext-db-oracle integration."""
 
-    async def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[None]:
+    def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[None]:
         """Ensure target table exists with proper schema."""
 
-    async def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]:
+    def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]:
         """Load record with batching and error handling."""
 
-    async def finalize_all_streams(self) -> FlextResult[FlextTypes.Core.Dict]:
+    def finalize_all_streams(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Finalize all streams and return statistics."""
 ```
 
@@ -322,7 +322,7 @@ src/flext_target_oracle/
 
 ```python
 # ✅ CORRECT - Railway-oriented programming throughout
-async def process_record(self, stream_name: str, record_data: dict) -> FlextResult[None]:
+def process_record(self, stream_name: str, record_data: dict) -> FlextResult[None]:
     """Process single record with proper error handling."""
     return (
         self._validate_record(record_data)
@@ -331,7 +331,7 @@ async def process_record(self, stream_name: str, record_data: dict) -> FlextResu
     )
 
 # ❌ INCORRECT - Exception-based error handling
-async def process_record_bad(self, stream_name: str, record_data: dict) -> None:
+def process_record_bad(self, stream_name: str, record_data: dict) -> None:
     if not record_data:
         raise ValueError("Record cannot be empty")  # Breaks railway pattern
 
@@ -386,7 +386,7 @@ from flext_core import FlextLogger
 
 logger = FlextLogger(__name__)
 
-async def process_batch(self, stream_name: str, records: list) -> FlextResult[None]:
+def process_batch(self, stream_name: str, records: list) -> FlextResult[None]:
     """Process batch with comprehensive logging."""
 
     logger.info(
@@ -400,7 +400,7 @@ async def process_batch(self, stream_name: str, records: list) -> FlextResult[No
     )
 
     try:
-        result = await self._process_batch_impl(stream_name, records)
+        result = self._process_batch_impl(stream_name, records)
 
         if result.success:
             logger.info(
@@ -491,7 +491,6 @@ from pydantic import Field, field_validator  # Third-party validation
 
 # ✅ CORRECT - Standard library imports
 import json
-import asyncio
 from datetime import UTC, datetime
 from typing import  Dict, List
 
@@ -597,7 +596,7 @@ from flext_target_oracle import FlextOracleTarget
 class TestSingerCompliance:
     """Test Singer specification compliance."""
 
-    async def test_schema_record_state_flow(self, oracle_target):
+    def test_schema_record_state_flow(self, oracle_target):
         """Test complete Singer message flow."""
 
         # SCHEMA message
@@ -614,7 +613,7 @@ class TestSingerCompliance:
             }
         }
 
-        result = await oracle_target.process_singer_message(schema_msg)
+        result = oracle_target.process_singer_message(schema_msg)
         assert result.success, f"Schema processing failed: {result.error}"
 
         # RECORD messages
@@ -629,7 +628,7 @@ class TestSingerCompliance:
                 }
             }
 
-            result = await oracle_target.process_singer_message(record_msg)
+            result = oracle_target.process_singer_message(record_msg)
             assert result.success, f"Record {i} failed: {result.error}"
 
         # STATE message
@@ -638,11 +637,11 @@ class TestSingerCompliance:
             "value": {"bookmarks": {"test_users": {"last_id": 4}}}
         }
 
-        result = await oracle_target.process_singer_message(state_msg)
+        result = oracle_target.process_singer_message(state_msg)
         assert result.success, f"State processing failed: {result.error}"
 
         # Finalization
-        stats_result = await oracle_target.finalize()
+        stats_result = oracle_target.finalize()
         assert stats_result.success, f"Finalization failed: {stats_result.error}"
         assert stats_result.data["total_records"] == 5
 ```
@@ -659,13 +658,13 @@ from typing import Dict, List, Optional, Union
 
 from flext_core import FlextResult
 
-async def process_singer_message(
+def process_singer_message(
     self,
     message: Dict[str, object]
 ) -> FlextResult[None]:
     """Process Singer message with complete type safety."""
 
-async def load_records(
+def load_records(
     self,
     stream_name: str,
     records: List[Dict[str, object]]
@@ -688,8 +687,8 @@ def map_result(
     return FlextResult[None].fail(result.error)
 
 # ❌ MISSING type annotations (forbidden)
-async def process_message(self, message):  # Missing types
-    return await self.handle_message(message)
+def process_message(self, message):  # Missing types
+    return self.handle_message(message)
 ```
 
 ### **Documentation Standards**
@@ -726,7 +725,7 @@ def ensure_table_exists(
         ...         "name": {"type": "string"}
         ...     }
         ... }
-        >>> result = await loader.ensure_table_exists("users", schema)
+        >>> result = loader.ensure_table_exists("users", schema)
         >>> if result.success:
         ...     print("Table ready for loading")
         ... else:

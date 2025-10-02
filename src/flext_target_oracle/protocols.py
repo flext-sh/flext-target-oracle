@@ -537,7 +537,7 @@ class FlextTargetOracleProtocols(FlextProtocols):
         """Protocol for Oracle monitoring operations."""
 
         def track_operation_metrics(
-            self, operation: str, duration: float, success: bool
+            self, operation: str, duration: float, *, success: bool
         ) -> FlextResult[bool]:
             """Track Oracle operation metrics.
 
@@ -562,7 +562,7 @@ class FlextTargetOracleProtocols(FlextProtocols):
             ...
 
         def create_performance_report(
-            self, time_range: str, include_details: bool = False
+            self, time_range: str, *, include_details: bool = False
         ) -> FlextResult[dict[str, object]]:
             """Create Oracle performance report.
 

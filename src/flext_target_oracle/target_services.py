@@ -12,7 +12,6 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-import asyncio
 from typing import Protocol, override
 
 from pydantic import Field
@@ -43,7 +42,7 @@ class ConnectionServiceProtocol(Protocol):
 class SchemaServiceProtocol(Protocol):
     """Protocol for Oracle schema management services."""
 
-    async def ensure_table_exists(
+    def ensure_table_exists(
         self,
         stream: SingerStreamModel,
         schema: FlextTypes.Core.Dict,
@@ -52,7 +51,7 @@ class SchemaServiceProtocol(Protocol):
         """Ensure table exists for Singer stream."""
         ...
 
-    async def get_table_columns(
+    def get_table_columns(
         self,
         table_name: str,
         schema_name: str,
@@ -64,7 +63,7 @@ class SchemaServiceProtocol(Protocol):
 class BatchServiceProtocol(Protocol):
     """Protocol for batch processing services."""
 
-    async def add_record(
+    def add_record(
         self,
         stream_name: str,
         _record: FlextTypes.Core.Dict,
@@ -72,11 +71,11 @@ class BatchServiceProtocol(Protocol):
         """Add record to batch processing queue."""
         ...
 
-    async def flush_batch(self, stream_name: str) -> FlextResult[None]:
+    def flush_batch(self, stream_name: str) -> FlextResult[None]:
         """Flush pending batch for stream."""
         ...
 
-    async def flush_all_batches(self) -> FlextResult[LoadStatisticsModel]:
+    def flush_all_batches(self) -> FlextResult[LoadStatisticsModel]:
         """Flush all pending batches."""
         ...
 
@@ -134,13 +133,13 @@ class OracleConnectionService(FlextService[None]):
     def connection_model(self: object) -> OracleConnectionModel:
         """Get connection model using domain service configuration."""
         return OracleConnectionModel(
-            host=self.config.oracle_host,
-            port=self.config.oracle_port,
-            service_name=self.config.oracle_service,
-            username=self.config.oracle_user,
-            schema=self.config.default_target_schema,
-            use_ssl=self.config.use_ssl,
-            connection_timeout=self.config.connection_timeout,
+            host=self._config.oracle_host,
+            port=self._config.oracle_port,
+            service_name=self._config.oracle_service,
+            username=self._config.oracle_user,
+            schema=self._config.default_target_schema,
+            use_ssl=self._config.use_ssl,
+            connection_timeout=self._config.connection_timeout,
         )
 
     def test_connection(self: object) -> FlextResult[None]:
@@ -151,20 +150,16 @@ class OracleConnectionService(FlextService[None]):
 
         """
         # ZERO TOLERANCE FIX: Use utilities for connection validation
-        config_dict = {
-            "oracle_host": self.config.oracle_host,
-            "oracle_port": self.config.oracle_port,
-            "oracle_service": self.config.oracle_service,
-            "oracle_user": self.config.oracle_user,
-            "default_target_schema": self.config.default_target_schema,
-            "use_ssl": self.config.use_ssl,
-            "connection_timeout": self.config.connection_timeout,
-        }
-
         validation_result = (
-            self._utilities.ConfigValidation.validate_oracle_connection_config(
-                config_dict
-            )
+            self._utilities.ConfigValidation.validate_oracle_connection_config({
+                "oracle_host": self._config.oracle_host,
+                "oracle_port": self._config.oracle_port,
+                "oracle_service": self._config.oracle_service,
+                "oracle_user": self._config.oracle_user,
+                "default_target_schema": self._config.default_target_schema,
+                "use_ssl": self._config.use_ssl,
+                "connection_timeout": self._config.connection_timeout,
+            })
         )
         if validation_result.is_failure:
             return FlextResult[None].fail(
@@ -174,7 +169,7 @@ class OracleConnectionService(FlextService[None]):
         # Use direct API access with explicit FlextResult error handling - NO fallbacks
         with self.oracle_api as connected_api:
             tables_result = connected_api.get_tables(
-                schema=self.config.default_target_schema,
+                schema=self._config.default_target_schema,
             )
 
             if tables_result.is_failure:
@@ -185,10 +180,10 @@ class OracleConnectionService(FlextService[None]):
             # ZERO TOLERANCE FIX: Use utilities for connection diagnostics
             diagnostics_result = (
                 self._utilities.ConnectionManagement.generate_connection_diagnostics(
-                    host=self.config.oracle_host,
-                    port=self.config.oracle_port,
-                    service_name=self.config.oracle_service,
-                    schema=self.config.default_target_schema,
+                    host=self._config.oracle_host,
+                    port=self._config.oracle_port,
+                    service_name=self._config.oracle_service,
+                    schema=self._config.default_target_schema,
                     table_count=len(tables_result.value)
                     if isinstance(tables_result.value, list)
                     else 0,
@@ -274,7 +269,7 @@ class OracleSchemaService(FlextService[None]):
             # ZERO TOLERANCE FIX: Use utilities for schema validation
             schema_validation = (
                 self._utilities.SchemaValidation.validate_oracle_schema_access(
-                    schema_name=self.config.default_target_schema,
+                    schema_name=self._config.default_target_schema,
                     required_permissions=["CREATE", "INSERT", "UPDATE", "SELECT"],
                 )
             )
@@ -287,7 +282,7 @@ class OracleSchemaService(FlextService[None]):
             with self.oracle_api as connected_api:
                 # Test schema access by attempting to list tables
                 tables_result = connected_api.get_tables(
-                    schema=self.config.default_target_schema,
+                    schema=self._config.default_target_schema,
                 )
 
                 if tables_result.is_failure:
@@ -296,7 +291,7 @@ class OracleSchemaService(FlextService[None]):
                     )
 
                 self.log_info(
-                    f"Schema access validated for {self.config.default_target_schema}",
+                    f"Schema access validated for {self._config.default_target_schema}",
                 )
                 return FlextResult[None].ok(None)
 
@@ -304,7 +299,7 @@ class OracleSchemaService(FlextService[None]):
             self.log_error(f"Schema access validation failed: {e}")
             return FlextResult[None].fail(f"Schema validation failed: {e}")
 
-    async def ensure_table_exists(
+    def ensure_table_exists(
         self,
         stream: SingerStreamModel,
         schema: FlextTypes.Core.Dict,
@@ -323,15 +318,15 @@ class OracleSchemaService(FlextService[None]):
         """
         try:
             # Check if table exists
-            columns_result = await self.get_table_columns(
+            columns_result = self.get_table_columns(
                 stream.table_name,
-                self.config.default_target_schema,
+                self._config.default_target_schema,
             )
 
             if columns_result.is_failure:
                 # Table doesn't exist, create it
                 self.log_info(f"Creating table {stream.table_name}")
-                return await self._create_table(stream, schema, key_properties)
+                return self._create_table(stream, schema, key_properties)
             # Table exists, optionally evolve schema
             self.log_info(f"Table {stream.table_name} already exists")
             return FlextResult[None].ok(None)
@@ -340,7 +335,7 @@ class OracleSchemaService(FlextService[None]):
             self.log_error(f"Failed to ensure table exists: {e}")
             return FlextResult[None].fail(f"Table existence check failed: {e}")
 
-    async def get_table_columns(
+    def get_table_columns(
         self,
         table_name: str,
         schema_name: str | None = None,
@@ -378,7 +373,7 @@ class OracleSchemaService(FlextService[None]):
                 f"Column retrieval failed: {e}",
             )
 
-    async def _create_table(
+    def _create_table(
         self,
         stream: SingerStreamModel,
         schema: FlextTypes.Core.Dict,
@@ -401,7 +396,7 @@ class OracleSchemaService(FlextService[None]):
                 table_name=stream.table_name,
                 schema=schema,
                 key_properties=key_properties or [],
-                add_metadata_columns=self.config.add_metadata_columns,
+                add_metadata_columns=self._config.add_metadata_columns,
             )
 
             if ddl_result.is_failure:
@@ -484,9 +479,9 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
             FlextResult[LoadStatisticsModel] with aggregated statistics
 
         """
-        return asyncio.run(self.finalize_all())
+        return run(self.finalize_all())
 
-    async def finalize_all(self) -> FlextResult[LoadStatisticsModel]:
+    def finalize_all(self) -> FlextResult[LoadStatisticsModel]:
         """Flush all pending batches and return aggregated statistics.
 
         Returns:
@@ -497,7 +492,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
             # Flush all pending batches
             for stream_name in list(self.batches.keys()):
                 # Placeholder: In real implementation, check batch status
-                result: FlextResult[object] = await self.flush_batch(stream_name)
+                result: FlextResult[object] = self.flush_batch(stream_name)
                 if result.is_failure:
                     self.log_error(f"Failed to flush {stream_name}: {result.error}")
 
@@ -518,7 +513,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
                 successful_records=total_successful,
                 failed_records=total_failed,
                 batches_processed=total_batches,
-                load_method_used=LoadMethodModel(self.config.load_method.value),
+                load_method_used=LoadMethodModel(self._config.load_method.value),
                 error_details=all_errors,
             ).finalize()
 
@@ -528,7 +523,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
             self.log_error(f"Failed to flush all batches: {e}")
             return FlextResult[LoadStatisticsModel].fail(f"Batch flush all failed: {e}")
 
-    async def add_record(
+    def add_record(
         self,
         stream_name: str,
         _record: FlextTypes.Core.Dict,
@@ -543,11 +538,11 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
             FlextResult indicating success/failure
 
         """
-        # Implementation placeholder for proper async batch management
+        # Implementation placeholder for proper batch management
         self.log_info(f"Adding record to batch for stream {stream_name}")
         return FlextResult[None].ok(None)
 
-    async def flush_batch(self, stream_name: str) -> FlextResult[None]:
+    def flush_batch(self, stream_name: str) -> FlextResult[None]:
         """Flush pending batch for stream.
 
         Args:
@@ -659,7 +654,7 @@ class OracleRecordService(FlextService[None]):
                 transformed_record[mapped_name] = final_value
 
             # ZERO TOLERANCE FIX: Use utilities for metadata column handling
-            if self.config.add_metadata_columns:
+            if self._config.add_metadata_columns:
                 metadata_result = (
                     self._utilities.MetadataProcessing.add_singer_metadata_columns(
                         record=transformed_record,
@@ -732,8 +727,13 @@ class OracleTargetServiceFactory:
             oracle_api: Oracle database API instance
 
         """
-        self._config: dict[str, object] = config
+        self._config: FlextTargetOracleConfig = config
         self._oracle_api = oracle_api
+
+    @property
+    def config(self) -> FlextTargetOracleConfig:
+        """Get configuration object."""
+        return self._config
 
     def create_connection_service(self: object) -> OracleConnectionService:
         """Create Oracle connection service."""

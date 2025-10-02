@@ -30,9 +30,8 @@ from flext_target_oracle import (
 class TestOracleIntegration:
     """Integration tests with real Oracle database."""
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_create_simple_table(
+    def test_create_simple_table(
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: Engine,
@@ -89,9 +88,8 @@ class TestOracleIntegration:
         assert "_SDC_EXTRACTED_AT" in columns
         assert "_SDC_LOADED_AT" in columns
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_insert_and_retrieve_data(
+    def test_insert_and_retrieve_data(
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: Engine,
@@ -133,9 +131,8 @@ class TestOracleIntegration:
             assert rows[0] == (1, "John Doe", "john@example.com")
             assert rows[1] == (2, "Jane Smith", "jane@example.com")
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_merge_mode_updates(
+    def test_merge_mode_updates(
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
@@ -186,9 +183,8 @@ class TestOracleIntegration:
         disconnect_result = loader.disconnect()
         assert disconnect_result.is_success
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_bulk_insert_performance(
+    def test_bulk_insert_performance(
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
@@ -244,9 +240,8 @@ class TestOracleIntegration:
 
         assert loader.disconnect().is_success
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_json_storage_mode(
+    def test_json_storage_mode(
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
@@ -306,9 +301,8 @@ class TestOracleIntegration:
 
         assert loader.disconnect().is_success
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_column_ordering(
+    def test_column_ordering(
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
@@ -384,9 +378,8 @@ class TestOracleIntegration:
 
         assert loader.disconnect().is_success
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_truncate_before_load(
+    def test_truncate_before_load(
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
@@ -426,9 +419,8 @@ class TestOracleIntegration:
 
         assert loader.disconnect().is_success
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_custom_indexes(
+    def test_custom_indexes(
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
@@ -491,9 +483,8 @@ class TestOracleIntegration:
 class TestOracleTargetE2E:
     """End-to-end tests using the full FlextTargetOracle."""
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_full_singer_workflow(
+    def test_full_singer_workflow(
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
@@ -529,9 +520,8 @@ class TestOracleTargetE2E:
             data_count = conn.execute(text("SELECT COUNT(*) FROM users")).scalar()
             assert data_count is not None and data_count > 0
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_column_mapping_and_filtering(
+    def test_column_mapping_and_filtering(
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,

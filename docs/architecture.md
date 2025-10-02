@@ -85,13 +85,13 @@ class FlextOracleTarget(Target):
     """Singer Target implementation with FLEXT patterns."""
 
     # Singer protocol compliance
-    async def process_singer_message(self, message: dict) -> FlextResult[None]
-    async def _handle_schema(self, message: dict) -> FlextResult[None]
-    async def _handle_record(self, message: dict) -> FlextResult[None]
-    async def _handle_state(self, message: dict) -> FlextResult[None]
+    def process_singer_message(self, message: dict) -> FlextResult[None]
+    def _handle_schema(self, message: dict) -> FlextResult[None]
+    def _handle_record(self, message: dict) -> FlextResult[None]
+    def _handle_state(self, message: dict) -> FlextResult[None]
 
     # Lifecycle management
-    async def finalize(self) -> FlextResult[FlextTypes.Core.Dict]
+    def finalize(self) -> FlextResult[FlextTypes.Core.Dict]
 ```
 
 **Key Patterns**:
@@ -146,11 +146,11 @@ class FlextOracleTargetLoader:
         self._record_buffers: dict[str, list[dict]] = {}
 
     # Table management
-    async def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[None]
+    def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[None]
 
     # Data loading with batching
-    async def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]
-    async def finalize_all_streams(self) -> FlextResult[FlextTypes.Core.Dict]
+    def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]
+    def finalize_all_streams(self) -> FlextResult[FlextTypes.Core.Dict]
 ```
 
 **Key Patterns**:
@@ -251,14 +251,14 @@ class BatchProcessor:
         self._buffers: dict[str, list[Record]] = {}
         self._batch_size = batch_size
 
-    async def add_record(self, stream: str, record: dict) -> FlextResult[None]:
+    def add_record(self, stream: str, record: dict) -> FlextResult[None]:
         # Add to buffer
         buffer = self._buffers.setdefault(stream, [])
         buffer.append(record)
 
         # Flush if batch size reached
         if len(buffer) >= self._batch_size:
-            return await self._flush_batch(stream)
+            return self._flush_batch(stream)
 
         return FlextResult[None].ok(None)
 ```

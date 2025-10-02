@@ -188,15 +188,15 @@ with self.oracle_api as connected_api:
 
 ---
 
-### 7. **CONFIGURAÇÃO ASYNC MAL PROJETADA** - PRIORIDADE MÉDIA
+### 7. **CONFIGURAÇÃO MAL PROJETADA** - PRIORIDADE MÉDIA
 
-**Problema**: Muitos métodos async desnecessários
+**Problema**: Muitos métodos desnecessários
 
 **Código Problemático**:
 
 ```python
-async def ensure_table_exists(...)  # Não precisa ser async
-async def _create_table(...)        # Não precisa ser async
+def ensure_table_exists(...)  # Não precisa ser 
+def _create_table(...)        # Não precisa ser 
 ```
 
 **Impacto**:
@@ -208,7 +208,7 @@ async def _create_table(...)        # Não precisa ser async
 **Solução**:
 
 - Tornar métodos síncronos onde apropriado
-- Manter async apenas onde necessário
+- Manter apenas onde necessário
 
 ---
 

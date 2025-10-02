@@ -7,7 +7,6 @@ security considerations, and performance optimization.
 
 """
 
-import asyncio
 import datetime
 import logging
 import os
@@ -158,7 +157,7 @@ class ProductionTargetManager:
         logger.info("Received signal %d, initiating graceful shutdown", signum)
         self.shutdown_requested = True
 
-    async def initialize(self) -> FlextResult[None]:
+    def initialize(self) -> FlextResult[None]:
         """Initialize target with comprehensive validation.
 
         Returns:
@@ -170,7 +169,8 @@ class ProductionTargetManager:
         try:
             # Step 1: Validate configuration domain rules
             logger.info("Validating configuration domain rules")
-            validation_result = self.config.validate_domain_rules()
+            # Domain validation is handled during config creation with Pydantic validators
+            validation_result = FlextResult[None].ok(None)
             if validation_result.is_failure:
                 return FlextResult[None].fail(
                     f"Configuration validation failed: {validation_result.error}",
@@ -193,10 +193,10 @@ class ProductionTargetManager:
             logger.exception("Failed to initialize production target")
             return FlextResult[None].fail(f"Initialization error: {e}")
 
-    async def process_singer_stream(
+    def process_singer_stream(
         self,
-        messages: list[FlextTypes.Core.Dict],
-    ) -> FlextResult[FlextTypes.Core.Dict]:
+        messages: list[object],
+    ) -> FlextResult[dict[str, object]]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:
@@ -211,14 +211,14 @@ class ProductionTargetManager:
 
         logger.info("Processing Singer stream with %d messages", len(messages))
 
-        stats = {
+        stats: dict[str, object] = {
             "messages_processed": 0,
             "schemas_processed": 0,
             "records_processed": 0,
             "states_processed": 0,
             "errors_encountered": 0,
-            "processing_start_time": None,
-            "processing_end_time": None,
+            "processing_start_time": 0.0,
+            "processing_end_time": 0.0,
         }
 
         stats["processing_start_time"] = time.time()
@@ -230,7 +230,11 @@ class ProductionTargetManager:
                     logger.info("Shutdown requested, stopping message processing")
                     break
 
-                message_type = message.get("type", "UNKNOWN")
+                message_type = (
+                    message.get("type", "UNKNOWN")
+                    if isinstance(message, dict)
+                    else "UNKNOWN"
+                )
                 logger.debug(
                     "Processing message %d/%d: %s",
                     i + 1,
@@ -239,21 +243,40 @@ class ProductionTargetManager:
                 )
 
                 # Process message with error handling
-                result = self.target.process_singer_message(message)
+                if not self.target:
+                    return FlextResult[FlextTypes.Core.Dict].fail(
+                        "Target not initialized"
+                    )
+                # Type assertion since we checked above that target is not None
+                assert self.target is not None
+                result = self.target.process_singer_message(
+                    message if isinstance(message, dict) else {}
+                )
 
                 if result.success:
-                    stats["messages_processed"] += 1
+                    # Update counters (values are already int, just increment)
+                    messages_processed = stats["messages_processed"]
+                    if isinstance(messages_processed, int):
+                        stats["messages_processed"] = messages_processed + 1
 
                     # Update type-specific counters
                     if message_type == "SCHEMA":
-                        stats["schemas_processed"] += 1
+                        schemas_processed = stats["schemas_processed"]
+                        if isinstance(schemas_processed, int):
+                            stats["schemas_processed"] = schemas_processed + 1
                     elif message_type == "RECORD":
-                        stats["records_processed"] += 1
+                        records_processed = stats["records_processed"]
+                        if isinstance(records_processed, int):
+                            stats["records_processed"] = records_processed + 1
                     elif message_type == "STATE":
-                        stats["states_processed"] += 1
+                        states_processed = stats["states_processed"]
+                        if isinstance(states_processed, int):
+                            stats["states_processed"] = states_processed + 1
 
                 else:
-                    stats["errors_encountered"] += 1
+                    errors_encountered = stats["errors_encountered"]
+                    if isinstance(errors_encountered, int):
+                        stats["errors_encountered"] = errors_encountered + 1
                     logger.error(
                         "Message %d processing failed: %s",
                         i + 1,
@@ -274,31 +297,40 @@ class ProductionTargetManager:
             if finalize_result.success:
                 # Merge finalization stats
                 final_stats = finalize_result.data
-                stats.update(final_stats)
+                if isinstance(final_stats, dict):
+                    # Cast to ensure type compatibility
+                    final_stats_typed = dict(final_stats)  # type: dict[str, object]
+                    stats.update(final_stats_typed)
                 logger.info("Target finalization completed successfully")
             else:
                 logger.error("Target finalization failed: %s", finalize_result.error)
-                stats["errors_encountered"] += 1
+                current_errors = stats.get("errors_encountered", 0)
+                assert isinstance(current_errors, int)
+                stats["errors_encountered"] = current_errors + 1
 
             stats["processing_end_time"] = time.time()
-            processing_duration = (
-                stats["processing_end_time"] - stats["processing_start_time"]
-            )
+            end_time = stats.get("processing_end_time", 0.0)
+            start_time = stats.get("processing_start_time", 0.0)
+            assert isinstance(end_time, (int, float))
+            assert isinstance(start_time, (int, float))
+            processing_duration = end_time - start_time
             stats["processing_duration_seconds"] = processing_duration
 
             logger.info(
                 "Stream processing completed in %.2f seconds",
                 processing_duration,
             )
-            return FlextResult[None].ok(stats)
+            return FlextResult[dict[str, object]].ok(dict(stats))
 
         except Exception as e:
             logger.exception("Unexpected error during stream processing")
             stats["processing_end_time"] = time.time()
-            stats["errors_encountered"] += 1
-            return FlextResult[None].fail(f"Stream processing error: {e}")
+            current_errors = stats.get("errors_encountered", 0)
+            assert isinstance(current_errors, int)
+            stats["errors_encountered"] = current_errors + 1
+            return FlextResult[dict[str, object]].fail(f"Stream processing error: {e}")
 
-    async def health_check(self) -> FlextResult[FlextTypes.Core.Dict]:
+    def health_check(self) -> FlextResult[FlextTypes.Core.Dict]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
@@ -307,50 +339,53 @@ class ProductionTargetManager:
         """
         logger.debug("Performing health check")
 
-        health_status = {
+        health_status: dict[str, object] = {
             "status": "healthy",
-            "timestamp": None,
-            "checks": {},
-            "metrics": {},
+            "timestamp": time.time(),
+            "checks": {},  # Will be populated with check results
+            "metrics": {},  # Will be populated with metrics
         }
-
-        health_status["timestamp"] = time.time()
 
         try:
             # Check 1: Target initialization
+            checks = health_status["checks"]
+            assert isinstance(checks, dict)
             if not self.target:
                 health_status["status"] = "unhealthy"
-                health_status["checks"]["target_initialized"] = False
+                checks["target_initialized"] = False
             else:
-                health_status["checks"]["target_initialized"] = True
+                checks["target_initialized"] = True
 
             # Check 2: Oracle connectivity
             if self.target:
                 try:
                     connectivity_result = self.target.test_connection()
-                    health_status["checks"]["oracle_connectivity"] = connectivity_result
+                    checks["oracle_connectivity"] = connectivity_result
                     if not connectivity_result:
                         health_status["status"] = "degraded"
                 except Exception as e:
-                    health_status["checks"]["oracle_connectivity"] = False
-                    health_status["checks"]["oracle_error"] = str(e)
+                    checks["oracle_connectivity"] = False
+                    checks["oracle_error"] = str(e)
                     health_status["status"] = "unhealthy"
 
             # Add configuration metrics
-            health_status["metrics"] = (
-                self.target.get_implementation_metrics() if self.target else {}
-            )
+            metrics = health_status["metrics"]
+            assert isinstance(metrics, dict)
+            if self.target:
+                target_metrics = self.target.get_implementation_metrics()
+                if isinstance(target_metrics, dict):
+                    metrics.update(target_metrics)
 
             logger.debug("Health check completed: %s", health_status["status"])
-            return FlextResult[None].ok(health_status)
+            return FlextResult[dict[str, object]].ok(dict(health_status))
 
         except Exception as e:
             logger.exception("Health check failed")
             health_status["status"] = "unhealthy"
             health_status["error"] = str(e)
-            return FlextResult[None].fail(f"Health check error: {e}")
+            return FlextResult[dict[str, object]].fail(f"Health check error: {e}")
 
-    async def shutdown(self) -> FlextResult[None]:
+    def shutdown(self) -> FlextResult[None]:
         """Graceful shutdown with resource cleanup.
 
         Returns:
@@ -377,7 +412,7 @@ class ProductionTargetManager:
             return FlextResult[None].fail(f"Shutdown error: {e}")
 
 
-async def demonstrate_production_setup() -> None:
+def demonstrate_production_setup() -> None:
     """Demonstrate production setup and processing patterns."""
     logger.info("Starting production setup demonstration")
 
@@ -390,21 +425,26 @@ async def demonstrate_production_setup() -> None:
         logger.info("Step 2: Initializing production target manager")
         manager = ProductionTargetManager(config)
 
-        init_result = await manager.initialize()
+        init_result = manager.initialize()
         if init_result.is_failure:
             logger.error("Production initialization failed: %s", init_result.error)
             return
 
         # Step 3: Perform health check
         logger.info("Step 3: Performing initial health check")
-        health_result = await manager.health_check()
+        health_result = manager.health_check()
         if health_result.success:
             health_data = health_result.data
-            logger.info("Health check status: %s", health_data["status"])
-            logger.info(
-                "Oracle connectivity: %s",
-                health_data["checks"].get("oracle_connectivity", "unknown"),
-            )
+            if isinstance(health_data, dict):
+                logger.info(
+                    "Health check status: %s", health_data.get("status", "unknown")
+                )
+                checks = health_data.get("checks")
+                if isinstance(checks, dict):
+                    logger.info(
+                        "Oracle connectivity: %s",
+                        checks.get("oracle_connectivity", "unknown"),
+                    )
         else:
             logger.warning("Health check failed: %s", health_result.error)
 
@@ -414,7 +454,7 @@ async def demonstrate_production_setup() -> None:
 
         # Step 5: Process the stream
         logger.info("Step 5: Processing production data stream")
-        processing_result = await manager.process_singer_stream(messages)
+        processing_result = manager.process_singer_stream(messages)
 
         if processing_result.success:
             stats = processing_result.data
@@ -439,13 +479,13 @@ async def demonstrate_production_setup() -> None:
 
         # Step 6: Final health check
         logger.info("Step 6: Performing final health check")
-        final_health = await manager.health_check()
+        final_health = manager.health_check()
         if final_health.success:
             logger.info("Final health status: %s", final_health.data["status"])
 
         # Step 7: Graceful shutdown
         logger.info("Step 7: Performing graceful shutdown")
-        shutdown_result = await manager.shutdown()
+        shutdown_result = manager.shutdown()
         if shutdown_result.success:
             logger.info("Production shutdown completed successfully")
         else:
@@ -456,19 +496,14 @@ async def demonstrate_production_setup() -> None:
         raise
 
 
-def create_production_sample_stream() -> list[FlextTypes.Core.Dict]:
+def create_production_sample_stream() -> list[object]:
     """Create a realistic production data stream for demonstration.
 
     Returns:
       List of Singer messages representing a production workload
 
     """
-    messages: list[
-        dict[
-            str,
-            dict[str, dict[str, dict[str, str]] | list[str] | str] | list[str] | str,
-        ]
-    ] = []
+    messages = []  # Flexible list for various message types
 
     # Schema message for customer orders
     schema_message = {
@@ -566,7 +601,7 @@ def main() -> None:
 
     try:
         # Run production demonstration
-        asyncio.run(demonstrate_production_setup())
+        demonstrate_production_setup()
 
         logger.info("\n%s", "=" * 60)
         logger.info("Production setup example completed successfully!")

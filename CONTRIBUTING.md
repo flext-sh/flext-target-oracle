@@ -87,7 +87,7 @@ pytest tests/unit/test_loader.py::TestOracleLoaderConnection::test_connect_succe
    ```python
    @pytest.mark.integration
    @pytest.mark.oracle
-   async def test_database_operation(oracle_loader, oracle_engine):
+   def test_database_operation(oracle_loader, oracle_engine):
        # Test with real database
    ```
 

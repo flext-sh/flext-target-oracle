@@ -105,8 +105,7 @@ class TestRealOracleLoader:
         assert exc_info.value.host == "localhost"
         assert exc_info.value.port == 1521
 
-    @pytest.mark.asyncio
-    async def test_real_ensure_table_exists_new_table(
+    def test_real_ensure_table_exists_new_table(
         self,
         real_loader: LoaderProtocol,
         _simple_schema: FlextTypes.Core.Dict,
@@ -117,7 +116,7 @@ class TestRealOracleLoader:
         schema = _simple_schema["schema"]
         key_properties = _simple_schema["key_properties"]
 
-        result = await real_loader.ensure_table_exists(
+        result = real_loader.ensure_table_exists(
             stream_name,
             schema,
             key_properties,
@@ -161,8 +160,7 @@ class TestRealOracleLoader:
             assert "_SDC_EXTRACTED_AT" in columns
             assert "_SDC_LOADED_AT" in columns
 
-    @pytest.mark.asyncio
-    async def test_real_ensure_table_exists_existing_table(
+    def test_real_ensure_table_exists_existing_table(
         self,
         real_loader: LoaderProtocol,
         _simple_schema: FlextTypes.Core.Dict,
@@ -185,15 +183,14 @@ class TestRealOracleLoader:
         key_properties = _simple_schema["key_properties"]
 
         # Should handle existing table
-        result = await real_loader.ensure_table_exists(
+        result = real_loader.ensure_table_exists(
             stream_name,
             schema,
             key_properties,
         )
         assert result.is_success
 
-    @pytest.mark.asyncio
-    async def test_real_force_recreate_table(
+    def test_real_force_recreate_table(
         self,
         _oracle_engine: Engine,
         _simple_schema: FlextTypes.Core.Dict,
@@ -236,7 +233,7 @@ class TestRealOracleLoader:
         key_properties = _simple_schema["key_properties"]
 
         # Force recreate
-        result = await loader.ensure_table_exists(stream_name, schema, key_properties)
+        result = loader.ensure_table_exists(stream_name, schema, key_properties)
         assert result.is_success
 
         # Verify old data is gone and new structure exists
@@ -262,8 +259,7 @@ class TestRealOracleLoader:
             assert "NAME" in columns  # New column from schema
             assert "OLD_COLUMN" not in columns  # Old column gone
 
-    @pytest.mark.asyncio
-    async def test_real_truncate_before_load(
+    def test_real_truncate_before_load(
         self,
         _oracle_engine: Engine,
         _simple_schema: FlextTypes.Core.Dict,
@@ -310,7 +306,7 @@ class TestRealOracleLoader:
         key_properties = _simple_schema["key_properties"]
 
         # Ensure table exists with truncate
-        result = await loader.ensure_table_exists(stream_name, schema, key_properties)
+        result = loader.ensure_table_exists(stream_name, schema, key_properties)
         assert result.is_success
 
         # Verify table is empty
@@ -319,8 +315,7 @@ class TestRealOracleLoader:
             count = conn.execute(select(func.count()).select_from(table)).scalar()
             assert count == 0
 
-    @pytest.mark.asyncio
-    async def test_real_load_record_single(
+    def test_real_load_record_single(
         self,
         real_loader: LoaderProtocol,
         _simple_schema: FlextTypes.Core.Dict,
@@ -332,7 +327,7 @@ class TestRealOracleLoader:
         key_properties = _simple_schema["key_properties"]
 
         # Ensure table exists
-        await real_loader.ensure_table_exists(stream_name, schema, key_properties)
+        real_loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Load single record
         record = {
@@ -341,11 +336,11 @@ class TestRealOracleLoader:
             "email": "test@example.com",
         }
 
-        result = await real_loader.load_record(stream_name, record, schema)
+        result = real_loader.load_record(stream_name, record, schema)
         assert result.is_success
 
         # Finalize to flush
-        await real_loader.finalize_all_streams()
+        real_loader.finalize_all_streams()
 
         # Verify in database
         with _oracle_engine.connect() as conn:
@@ -359,8 +354,7 @@ class TestRealOracleLoader:
             assert row[1] == "Test User"
             assert row[2] == "test@example.com"
 
-    @pytest.mark.asyncio
-    async def test_real_load_record_batch(
+    def test_real_load_record_batch(
         self,
         real_loader: LoaderProtocol,
         _simple_schema: FlextTypes.Core.Dict,
@@ -372,7 +366,7 @@ class TestRealOracleLoader:
         key_properties = _simple_schema["key_properties"]
 
         # Ensure table exists
-        await real_loader.ensure_table_exists(stream_name, schema, key_properties)
+        real_loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Load batch of records
         for i in range(10):
@@ -381,11 +375,11 @@ class TestRealOracleLoader:
                 "name": f"User {i + 1}",
                 "email": f"user{i + 1}@example.com",
             }
-            result = await real_loader.load_record(stream_name, record, schema)
+            result = real_loader.load_record(stream_name, record, schema)
             assert result.is_success
 
         # Finalize to flush
-        await real_loader.finalize_all_streams()
+        real_loader.finalize_all_streams()
 
         # Verify in database
         with _oracle_engine.connect() as conn:
@@ -393,9 +387,8 @@ class TestRealOracleLoader:
             count = conn.execute(select(func.count()).select_from(table)).scalar()
             assert count == 10
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("oracle_engine")
-    async def test_real_bulk_insert_mode(
+    def test_real_bulk_insert_mode(
         self,
         _oracle_engine: Engine,
         _simple_schema: FlextTypes.Core.Dict,
@@ -421,7 +414,7 @@ class TestRealOracleLoader:
         key_properties = _simple_schema["key_properties"]
 
         # Ensure table exists
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
+        loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Load records - should trigger bulk insert when batch is full
         for i in range(12):  # More than batch size
@@ -430,11 +423,11 @@ class TestRealOracleLoader:
                 "name": f"Bulk User {i + 1}",
                 "email": f"bulk{i + 1}@example.com",
             }
-            result = await loader.load_record(stream_name, record, schema)
+            result = loader.load_record(stream_name, record, schema)
             assert result.is_success
 
         # Finalize to flush remaining
-        await loader.finalize_all_streams()
+        loader.finalize_all_streams()
 
         # Verify all records
         with _oracle_engine.connect() as conn:
@@ -442,8 +435,7 @@ class TestRealOracleLoader:
             count = conn.execute(select(func.count()).select_from(table)).scalar()
             assert count == 12
 
-    @pytest.mark.asyncio
-    async def test_real_merge_mode(
+    def test_real_merge_mode(
         self,
         _oracle_engine: Engine,
         _simple_schema: FlextTypes.Core.Dict,
@@ -469,7 +461,7 @@ class TestRealOracleLoader:
         key_properties = _simple_schema["key_properties"]
 
         # Ensure table exists
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
+        loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Insert initial record
         record1 = {
@@ -477,8 +469,8 @@ class TestRealOracleLoader:
             "name": "Original Name",
             "email": "original@example.com",
         }
-        await loader.load_record(stream_name, record1, schema)
-        await loader.finalize_all_streams()
+        loader.load_record(stream_name, record1, schema)
+        loader.finalize_all_streams()
 
         # Update the record
         record2 = {
@@ -486,8 +478,8 @@ class TestRealOracleLoader:
             "name": "Updated Name",
             "email": "updated@example.com",
         }
-        await loader.load_record(stream_name, record2, schema)
-        await loader.finalize_all_streams()
+        loader.load_record(stream_name, record2, schema)
+        loader.finalize_all_streams()
 
         # Verify update
         with _oracle_engine.connect() as conn:
@@ -504,8 +496,7 @@ class TestRealOracleLoader:
             count = conn.execute(select(func.count()).select_from(table)).scalar()
             assert count == 1
 
-    @pytest.mark.asyncio
-    async def test_real_nested_json_flattening(
+    def test_real_nested_json_flattening(
         self,
         real_loader: LoaderProtocol,
         nested_schema: FlextTypes.Core.Dict,
@@ -517,7 +508,7 @@ class TestRealOracleLoader:
         key_properties = nested_schema["key_properties"]
 
         # Ensure table exists
-        await real_loader.ensure_table_exists(stream_name, schema, key_properties)
+        real_loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Load nested record
         record = {
@@ -538,10 +529,10 @@ class TestRealOracleLoader:
             "total": 349.97,
         }
 
-        result = await real_loader.load_record(stream_name, record, schema)
+        result = real_loader.load_record(stream_name, record, schema)
         assert result.is_success
 
-        await real_loader.finalize_all_streams()
+        real_loader.finalize_all_streams()
 
         # Verify flattened columns
         with _oracle_engine.connect() as conn:
@@ -570,9 +561,8 @@ class TestRealOracleLoader:
             assert "CUSTOMER__ADDRESS__STREET" in customer_cols
             assert "CUSTOMER__ADDRESS__CITY" in customer_cols
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("oracle_engine")
-    async def test_real_type_conversions(
+    def test_real_type_conversions(
         self,
         real_loader: object,
         _oracle_engine: Engine,
@@ -595,7 +585,7 @@ class TestRealOracleLoader:
         key_properties = ["id"]
 
         # Ensure table exists
-        await real_loader.ensure_table_exists(stream_name, schema, key_properties)
+        real_loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Load record with various types
         record = {
@@ -608,10 +598,10 @@ class TestRealOracleLoader:
             "metadata": {"color": "black", "weight": 150},
         }
 
-        result = await real_loader.load_record(stream_name, record, schema)
+        result = real_loader.load_record(stream_name, record, schema)
         assert result.is_success
 
-        await real_loader.finalize_all_streams()
+        real_loader.finalize_all_streams()
 
         # Verify types in database
         with _oracle_engine.connect() as conn:
@@ -632,8 +622,7 @@ class TestRealOracleLoader:
             assert row[3] == 1  # BOOLEAN -> NUMBER(1)
             assert row[4] is not None  # DATETIME -> TIMESTAMP
 
-    @pytest.mark.asyncio
-    async def test_real_error_handling_invalid_schema(
+    def test_real_error_handling_invalid_schema(
         self,
         real_loader: object,
     ) -> None:
@@ -648,10 +637,9 @@ class TestRealOracleLoader:
         }
 
         with pytest.raises(FlextTargetOracleSchemaError):
-            await real_loader.ensure_table_exists(stream_name, invalid_schema, ["id"])
+            real_loader.ensure_table_exists(stream_name, invalid_schema, ["id"])
 
-    @pytest.mark.asyncio
-    async def test_real_column_ordering(
+    def test_real_column_ordering(
         self,
         _oracle_engine: Engine,
         _simple_schema: FlextTypes.Core.Dict,
@@ -694,7 +682,7 @@ class TestRealOracleLoader:
         }
         key_properties = ["id"]
 
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
+        loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Check column order
         with _oracle_engine.connect() as conn:
@@ -734,8 +722,7 @@ class TestRealOracleLoader:
             for sdc_col in sdc_cols:
                 assert column_names.index(sdc_col) > column_names.index("UPDATED_AT")
 
-    @pytest.mark.asyncio
-    async def test_real_custom_indexes(
+    def test_real_custom_indexes(
         self,
         _oracle_engine: Engine,
         _simple_schema: FlextTypes.Core.Dict,
@@ -764,7 +751,7 @@ class TestRealOracleLoader:
         schema = _simple_schema["schema"]
         key_properties = _simple_schema["key_properties"]
 
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
+        loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Verify indexes created
         with _oracle_engine.connect() as conn:
@@ -788,8 +775,7 @@ class TestRealOracleLoader:
             assert "IDX_NAME" in indexes
             assert indexes["IDX_NAME"] == "NONUNIQUE"
 
-    @pytest.mark.asyncio
-    async def test_real_finalize_streams_metrics(
+    def test_real_finalize_streams_metrics(
         self,
         real_loader: LoaderProtocol,
         _simple_schema: FlextTypes.Core.Dict,
@@ -800,7 +786,7 @@ class TestRealOracleLoader:
         key_properties = _simple_schema["key_properties"]
 
         # Ensure table exists
-        await real_loader.ensure_table_exists(stream_name, schema, key_properties)
+        real_loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Load some records
         for i in range(5):
@@ -809,10 +795,10 @@ class TestRealOracleLoader:
                 "name": f"User {i + 1}",
                 "email": f"user{i + 1}@example.com",
             }
-            await real_loader.load_record(stream_name, record, schema)
+            real_loader.load_record(stream_name, record, schema)
 
         # Finalize and get metrics
-        result = await real_loader.finalize_all_streams()
+        result = real_loader.finalize_all_streams()
         assert result.is_success
 
         metrics = result.value
@@ -843,8 +829,7 @@ class TestRealOracleLoader:
         real_loader.config.table_name_mapping = {"my_stream": "custom_table"}
         assert real_loader._get_table_name("my_stream") == "CUSTOM_TABLE"
 
-    @pytest.mark.asyncio
-    async def test_real_parallel_and_direct_path(
+    def test_real_parallel_and_direct_path(
         self,
         _oracle_engine: Engine,
         _simple_schema: FlextTypes.Core.Dict,
@@ -871,7 +856,7 @@ class TestRealOracleLoader:
         schema = _simple_schema["schema"]
         key_properties = _simple_schema["key_properties"]
 
-        await loader.ensure_table_exists(stream_name, schema, key_properties)
+        loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Load many records to test performance options
         for i in range(200):
@@ -880,9 +865,9 @@ class TestRealOracleLoader:
                 "name": f"Parallel User {i + 1}",
                 "email": f"parallel{i + 1}@example.com",
             }
-            await loader.load_record(stream_name, record, schema)
+            loader.load_record(stream_name, record, schema)
 
-        await loader.finalize_all_streams()
+        loader.finalize_all_streams()
 
         # Verify all records loaded
         with _oracle_engine.connect() as conn:

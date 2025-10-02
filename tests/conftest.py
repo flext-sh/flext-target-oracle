@@ -4,14 +4,13 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-import asyncio
 import json
 import os
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from typing import cast
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from pydantic import SecretStr
@@ -55,9 +54,9 @@ def pytest_configure(config: pytest.Config) -> None:
 
 
 @pytest.fixture(scope="session")
-def event_loop() -> Generator[asyncio.AbstractEventLoop]:
-    """Create event loop for async tests."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+def event_loop() -> Generator[AbstractEventLoop]:
+    """Create event loop for tests."""
+    loop = get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
 
@@ -280,9 +279,9 @@ def mock_oracle_api() -> Mock:
 
 
 @pytest.fixture
-def mock_loader() -> AsyncMock:
+def mock_loader() -> Mock:
     """Create mocked FlextTargetOracleLoader for unit tests."""
-    mock = AsyncMock(spec=FlextTargetOracleLoader)
+    mock = Mock(spec=FlextTargetOracleLoader)
     mock.connect.return_value = MagicMock(is_success=True, value=None)
     mock.disconnect.return_value = MagicMock(is_success=True, value=None)
     mock.ensure_table_exists.return_value = MagicMock(is_success=True, value=None)
@@ -504,7 +503,7 @@ def temp_config_file(tmp_path: Path) -> Path:
     return config_file
 
 
-# Async Fixtures
+# Fixtures
 @pytest.fixture
 def connected_loader(
     oracle_loader: FlextTargetOracleLoader,

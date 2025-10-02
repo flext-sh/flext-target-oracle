@@ -9,7 +9,6 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 
-import asyncio
 import json
 import time
 from datetime import UTC, datetime
@@ -27,9 +26,8 @@ from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, Load
 class TestSingerWorkflowE2E:
     """Complete Singer workflow end-to-end tests."""
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_complete_ecommerce_workflow(
+    def test_complete_ecommerce_workflow(
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: object,
@@ -155,7 +153,7 @@ class TestSingerWorkflowE2E:
             order_schema,
             order_item_schema,
         ]:
-            result = await target.execute(json.dumps(schema))
+            result = target.execute(json.dumps(schema))
             assert result.is_success
 
         # Generate test data
@@ -187,7 +185,7 @@ class TestSingerWorkflowE2E:
                 "time_extracted": now,
             }
             customers.append(customer)
-            result = await target.execute(json.dumps(customer))
+            result = target.execute(json.dumps(customer))
             assert result.is_success
 
         # Insert products
@@ -212,7 +210,7 @@ class TestSingerWorkflowE2E:
                 "time_extracted": now,
             }
             products.append(product)
-            result = await target.execute(json.dumps(product))
+            result = target.execute(json.dumps(product))
             assert result.is_success
 
         # Insert orders with items
@@ -263,13 +261,13 @@ class TestSingerWorkflowE2E:
                         "time_extracted": now,
                     }
 
-                    result = await target.execute(json.dumps(order_item))
+                    result = target.execute(json.dumps(order_item))
                     assert result.is_success
                     order_item_id += 1
 
                 # Update order with total
                 order["record"]["total_amount"] = round(order_total, 2)
-                result = await target.execute(json.dumps(order))
+                result = target.execute(json.dumps(order))
                 assert result.is_success
                 order_id += 1
 
@@ -296,7 +294,7 @@ class TestSingerWorkflowE2E:
                 },
             },
         }
-        result = await target.execute(json.dumps(state))
+        result = target.execute(json.dumps(state))
         assert result.is_success
 
         # Verify data in Oracle
@@ -369,9 +367,8 @@ class TestSingerWorkflowE2E:
             ).fetchall()
             assert len(result) > 0
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_schema_evolution_workflow(
+    def test_schema_evolution_workflow(
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: object,
@@ -401,7 +398,7 @@ class TestSingerWorkflowE2E:
         }
 
         # Create table with initial schema
-        result = await target.execute(json.dumps(schema_v1))
+        result = target.execute(json.dumps(schema_v1))
         assert result.is_success
 
         # Insert initial data
@@ -414,7 +411,7 @@ class TestSingerWorkflowE2E:
                 "created_at": datetime.now(UTC).isoformat(),
             },
         }
-        result = await target.execute(json.dumps(record_v1))
+        result = target.execute(json.dumps(record_v1))
         assert result.is_success
 
         # Evolved schema - add new columns
@@ -444,7 +441,7 @@ class TestSingerWorkflowE2E:
         }
 
         # Apply evolved schema
-        result = await target.execute(json.dumps(schema_v2))
+        result = target.execute(json.dumps(schema_v2))
         assert result.is_success
 
         # Insert data with new columns
@@ -465,7 +462,7 @@ class TestSingerWorkflowE2E:
                 "updated_at": datetime.now(UTC).isoformat(),
             },
         }
-        result = await target.execute(json.dumps(record_v2))
+        result = target.execute(json.dumps(record_v2))
         assert result.is_success
 
         # Update existing record with new fields
@@ -486,7 +483,7 @@ class TestSingerWorkflowE2E:
                 "updated_at": datetime.now(UTC).isoformat(),
             },
         }
-        result = await target.execute(json.dumps(record_v1_updated))
+        result = target.execute(json.dumps(record_v1_updated))
         assert result.is_success
 
         # Verify schema evolution in database
@@ -526,9 +523,8 @@ class TestSingerWorkflowE2E:
             assert records[0][2] == "initial@example.com"  # First record updated
             assert records[1][2] == "evolved@example.com"  # Second record
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("_clean_database")
-    async def test_high_volume_streaming(
+    def test_high_volume_streaming(
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: object,
@@ -571,7 +567,7 @@ class TestSingerWorkflowE2E:
             "key_properties": ["event_id"],
         }
 
-        result = await target.execute(json.dumps(schema))
+        result = target.execute(json.dumps(schema))
         assert result.is_success
 
         # Generate and stream large volume of events
@@ -604,11 +600,11 @@ class TestSingerWorkflowE2E:
                         },
                     },
                 }
-                result = await target.execute(json.dumps(event))
+                result = target.execute(json.dumps(event))
                 assert result.is_success
 
             # Small delay between batches to simulate real streaming
-            await asyncio.sleep(0.1)
+            sleep(0.1)
 
         end_time = time.time()
         elapsed = end_time - start_time

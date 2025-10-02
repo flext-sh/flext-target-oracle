@@ -65,11 +65,9 @@ class FlextTargetOracle(
         """Initialize Oracle Singer Target with configuration validation."""
         # Convert config if needed
         if isinstance(config, dict):
-            validated_config: dict[str, object] = (
-                FlextTargetOracleConfig.model_validate(config)
-            )
+            validated_config = FlextTargetOracleConfig.model_validate(config)
         elif isinstance(config, FlextTargetOracleConfig):
-            validated_config: dict[str, object] = config
+            validated_config = config
         else:
             msg = (
                 "Configuration is required. Provide FlextTargetOracleConfig instance "
@@ -85,10 +83,16 @@ class FlextTargetOracle(
 
         # Set Pydantic fields as instance attributes
         self.name = "flext-oracle-target"
-        self.config: dict[str, object] = validated_config
+        self.config = validated_config
         self.loader = loader
         self.schemas = {}
         self.state = {}
+
+        # Initialize missing attributes for testing
+        self._start_time = time.time()
+        self._loader = loader
+        self._stream_schemas = {}
+        self._ignored_columns = []
 
     @override
     def execute(
@@ -260,7 +264,7 @@ class FlextTargetOracle(
         self,
         message: FlextTargetOracleTypes.Core.Dict,
     ) -> FlextResult[None]:
-        """Process individual Singer message - async compatible."""
+        """Process individual Singer message - compatible."""
         return self._process_single_message(message)
 
     def finalize(self: object) -> FlextResult[FlextTargetOracleTypes.Core.Dict]:
@@ -428,6 +432,10 @@ class FlextTargetOracle(
             "configured_schemas": list(self.schemas.keys()),
             "current_state": self.state,
         }
+
+    def write_record(self, record_data: str) -> FlextResult[None]:
+        """Write a Singer record (stub - not implemented)."""
+        return FlextResult[None].fail("write_record not implemented in stub")
 
 
 __all__ = [
