@@ -98,6 +98,21 @@ class FlextTargetOracleConstants(FlextConstants):
             "FLEXT_TARGET_ORACLE_ENABLE_DISPATCHER",
         )
 
+    class Observability:
+        """Observability and monitoring constants."""
+
+        # Security audit constants
+        DATABASE_LOGIN: Final[str] = "database_login"
+        FAILURE: Final[str] = "failure"
+
+        # Performance monitoring thresholds
+        SLOW_QUERY_THRESHOLD_SECONDS: Final[float] = (
+            30.0  # 30 second threshold for slow queries
+        )
+        HIGH_UTILIZATION_THRESHOLD: Final[float] = (
+            0.8  # 80% threshold for high resource utilization
+        )
+
 
 __all__ = [
     "FlextTargetOracleConstants",

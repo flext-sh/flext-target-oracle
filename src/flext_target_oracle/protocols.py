@@ -26,7 +26,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[object]: Target instance or error
 
             """
-            ...
 
         def load_records(
             self,
@@ -46,7 +45,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[int]: Number of records loaded or error
 
             """
-            ...
 
         def validate_target_config(
             self, config: dict[str, object]
@@ -60,7 +58,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[bool]: Configuration validation status
 
             """
-            ...
 
         def get_target_capabilities(self) -> FlextResult[dict[str, object]]:
             """Get Oracle target capabilities.
@@ -69,7 +66,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Target capabilities or error
 
             """
-            ...
 
     @runtime_checkable
     class ConnectionProtocol(FlextProtocols.Domain.Service, Protocol):
@@ -82,7 +78,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[None]: Connection test result or error
 
             """
-            ...
 
         def get_connection_info(self) -> FlextResult[dict[str, object]]:
             """Get Oracle connection information.
@@ -91,7 +86,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Connection information or error
 
             """
-            ...
 
         def establish_connection(
             self, config: dict[str, object]
@@ -105,7 +99,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[object]: Connection instance or error
 
             """
-            ...
 
         def close_connection(self, connection: object) -> FlextResult[bool]:
             """Close Oracle connection.
@@ -117,7 +110,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[bool]: Close operation success status
 
             """
-            ...
 
         def validate_credentials(self, config: dict[str, object]) -> FlextResult[bool]:
             """Validate Oracle credentials.
@@ -129,7 +121,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[bool]: Credential validation status
 
             """
-            ...
 
     @runtime_checkable
     class SchemaProtocol(FlextProtocols.Domain.Service, Protocol):
@@ -152,7 +143,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[None]: Success or error
 
             """
-            ...
 
         def get_table_columns(
             self,
@@ -169,7 +159,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[list[dict[str, object]]]: Column definitions or error
 
             """
-            ...
 
         def validate_table_schema(
             self, table_name: str, schema: dict[str, object]
@@ -184,7 +173,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[bool]: Schema validation status
 
             """
-            ...
 
         def create_table_from_schema(
             self,
@@ -203,7 +191,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Table creation result or error
 
             """
-            ...
 
     @runtime_checkable
     class BatchProtocol(FlextProtocols.Domain.Service, Protocol):
@@ -224,7 +211,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[None]: Success or error
 
             """
-            ...
 
         def flush_batch(self, stream_name: str) -> FlextResult[None]:
             """Flush pending batch for stream.
@@ -236,7 +222,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[None]: Flush operation result or error
 
             """
-            ...
 
         def flush_all_batches(self) -> FlextResult[dict[str, object]]:
             """Flush all pending batches.
@@ -245,7 +230,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Load statistics or error
 
             """
-            ...
 
         def get_batch_size(self, stream_name: str) -> FlextResult[int]:
             """Get current batch size for stream.
@@ -257,7 +241,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[int]: Current batch size or error
 
             """
-            ...
 
         def optimize_batch_size(
             self, stream_name: str, performance_metrics: dict[str, object]
@@ -272,7 +255,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[int]: Optimal batch size or error
 
             """
-            ...
 
     @runtime_checkable
     class RecordProtocol(FlextProtocols.Domain.Service, Protocol):
@@ -293,7 +275,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Transformed record or error
 
             """
-            ...
 
         def validate_record(
             self,
@@ -310,7 +291,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[None]: Validation result or error
 
             """
-            ...
 
         def map_singer_to_oracle_types(
             self, record: dict[str, object], type_mapping: dict[str, str]
@@ -325,7 +305,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Oracle-typed record or error
 
             """
-            ...
 
         def sanitize_record_for_oracle(
             self, record: dict[str, object]
@@ -339,7 +318,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Sanitized record or error
 
             """
-            ...
 
     @runtime_checkable
     class SingerProtocol(FlextProtocols.Domain.Service, Protocol):
@@ -357,7 +335,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Schema processing result or error
 
             """
-            ...
 
         def process_record_message(
             self, message: dict[str, object]
@@ -371,7 +348,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Record processing result or error
 
             """
-            ...
 
         def process_state_message(
             self, message: dict[str, object]
@@ -385,7 +361,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: State processing result or error
 
             """
-            ...
 
         def validate_singer_message(
             self, message: dict[str, object]
@@ -399,7 +374,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[bool]: Message validation status
 
             """
-            ...
 
         def get_singer_capabilities(self) -> FlextResult[dict[str, object]]:
             """Get Singer target capabilities.
@@ -408,7 +382,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Singer capabilities or error
 
             """
-            ...
 
     @runtime_checkable
     class PerformanceProtocol(FlextProtocols.Domain.Service, Protocol):
@@ -427,7 +400,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Pool optimization result or error
 
             """
-            ...
 
         def monitor_query_performance(
             self, query: str, execution_time: float
@@ -442,7 +414,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Performance metrics or error
 
             """
-            ...
 
         def optimize_insert_performance(
             self, table_name: str, record_count: int, current_metrics: dict[str, object]
@@ -458,7 +429,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Performance optimization result or error
 
             """
-            ...
 
         def get_performance_metrics(self) -> FlextResult[dict[str, object]]:
             """Get Oracle target performance metrics.
@@ -467,7 +437,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Performance metrics or error
 
             """
-            ...
 
     @runtime_checkable
     class SecurityProtocol(FlextProtocols.Domain.Service, Protocol):
@@ -485,7 +454,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Encrypted credentials or error
 
             """
-            ...
 
         def validate_ssl_connection(
             self, config: dict[str, object]
@@ -499,7 +467,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[bool]: SSL validation status
 
             """
-            ...
 
         def audit_database_operations(
             self, operation: str, details: dict[str, object]
@@ -514,7 +481,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[bool]: Audit logging success status
 
             """
-            ...
 
         def validate_access_permissions(
             self, user: str, operation: str, resource: str
@@ -530,7 +496,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[bool]: Permission validation status
 
             """
-            ...
 
     @runtime_checkable
     class MonitoringProtocol(FlextProtocols.Domain.Service, Protocol):
@@ -550,7 +515,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[bool]: Metric tracking success status
 
             """
-            ...
 
         def get_health_status(self) -> FlextResult[dict[str, object]]:
             """Get Oracle target health status.
@@ -559,7 +523,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Health status or error
 
             """
-            ...
 
         def create_performance_report(
             self, time_range: str, *, include_details: bool = False
@@ -574,7 +537,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[dict[str, object]]: Performance report or error
 
             """
-            ...
 
         def alert_on_threshold_breach(
             self, metric_name: str, threshold: float, current_value: float
@@ -590,7 +552,6 @@ class FlextTargetOracleProtocols(FlextProtocols):
                 FlextResult[bool]: Alert creation success status
 
             """
-            ...
 
 
 __all__ = [

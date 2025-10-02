@@ -13,6 +13,9 @@ from pydantic import BaseModel, Field, field_validator
 
 from flext_core import FlextModels, FlextResult, FlextTypes
 
+# Oracle schema constants
+PUBLIC = "PUBLIC"
+
 
 class LoadMethodModel(StrEnum):
     """Data loading methods for Oracle target operations.

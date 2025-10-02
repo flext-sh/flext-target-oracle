@@ -10,6 +10,7 @@ import time
 import uuid
 
 from flext_core import FlextLogger, FlextTypes
+
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,
@@ -19,10 +20,8 @@ from flext_target_oracle.target_exceptions import (
 
 logger = FlextLogger(__name__)
 
-
-# Performance monitoring thresholds
-SLOW_QUERY_THRESHOLD_SECONDS = 30.0  # 30 second threshold for slow queries
-HIGH_UTILIZATION_THRESHOLD = 0.8  # 80% threshold for high resource utilization
+# Security audit constants - moved to FlextTargetOracleConstants.Observability
+# Performance monitoring thresholds - moved to FlextTargetOracleConstants.Observability
 
 
 class FlextOracleError:
@@ -67,9 +66,9 @@ class FlextOracleError:
             logger.info(
                 "Oracle authentication failure",
                 user_id=username,
-                action=database_login,
+                action=FlextTargetOracleConstants.Observability.DATABASE_LOGIN,
                 resource=oracle_service,
-                outcome=failure,
+                outcome=FlextTargetOracleConstants.Observability.FAILURE,
                 error_code=error_code,
             )
             # Metrics placeholder - removed FlextObs dependency
@@ -231,13 +230,16 @@ class FlextOracleObs:
                     )
 
                     # Metrics and alerting placeholder - removed FlextObs dependency
-                    if duration > SLOW_QUERY_THRESHOLD_SECONDS:
+                    if (
+                        duration
+                        > FlextTargetOracleConstants.Observability.SLOW_QUERY_THRESHOLD_SECONDS
+                    ):
                         logger.warning(
                             f"Slow Oracle {operation} detected",
                             extra={
                                 "table_name": "table_name",
                                 "duration_seconds": "duration",
-                                "threshold_seconds": "SLOW_QUERY_THRESHOLD_SECONDS",
+                                "threshold_seconds": FlextTargetOracleConstants.Observability.SLOW_QUERY_THRESHOLD_SECONDS,
                             },
                         )
 
@@ -262,7 +264,10 @@ class FlextOracleObs:
             )
 
             # Metrics and alerting placeholder - removed FlextObs dependency
-            if utilization > HIGH_UTILIZATION_THRESHOLD:
+            if (
+                utilization
+                > FlextTargetOracleConstants.Observability.HIGH_UTILIZATION_THRESHOLD
+            ):
                 logger.warning(
                     "High Oracle connection pool utilization",
                     extra={

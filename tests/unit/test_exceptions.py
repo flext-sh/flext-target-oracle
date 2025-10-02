@@ -10,12 +10,11 @@ SPDX-License-Identifier: MIT
 import logging
 from datetime import UTC, datetime
 from types import TracebackType
-from typing import Never
 
 import pytest
 from _pytest.logging import LogCaptureFixture
-
 from flext_core import FlextLogger
+
 from flext_target_oracle import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,

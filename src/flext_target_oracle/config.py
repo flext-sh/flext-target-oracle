@@ -12,10 +12,9 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Self
 
+from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
-
-from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
 
 
 class LoadMethod(StrEnum):
@@ -86,6 +85,87 @@ class FlextTargetOracleConfig(FlextConfig):
         default_factory=lambda: SecretStr("default_password"),
         description="Oracle database password (sensitive)",
     )
+
+    # Backward compatibility properties for old attribute names
+    @property
+    def host(self) -> str:
+        """Backward compatibility property for oracle_host."""
+        return self.oracle_host
+
+    @property
+    def port(self) -> int:
+        """Backward compatibility property for oracle_port."""
+        return self.oracle_port
+
+    @property
+    def service_name(self) -> str:
+        """Backward compatibility property for oracle_service_name."""
+        return self.oracle_service_name
+
+    @property
+    def username(self) -> str:
+        """Backward compatibility property for oracle_username."""
+        return self.oracle_user
+
+    @property
+    def protocol(self) -> str:
+        """Backward compatibility property for connection protocol."""
+        return "tcps"  # Default protocol for Oracle connections
+
+    @property
+    def ssl_enabled(self) -> bool:
+        """Backward compatibility property for SSL configuration."""
+        return True  # Default SSL enabled for Oracle connections
+
+    @property
+    def pool_min(self) -> int:
+        """Backward compatibility property for minimum pool size."""
+        return 1  # Default minimum pool size
+
+    @property
+    def pool_max(self) -> int:
+        """Backward compatibility property for maximum pool size."""
+        return 10  # Default maximum pool size
+
+    @property
+    def connection_pool_size(self) -> int:
+        """Backward compatibility property for connection pool size."""
+        return self.pool_max
+
+    @property
+    def connection_pool_max_overflow(self) -> int:
+        """Backward compatibility property for connection pool max overflow."""
+        return self.pool_max * 2  # Default overflow
+
+    @property
+    def use_ssl(self) -> bool:
+        """Backward compatibility property for SSL usage."""
+        return self.ssl_enabled
+
+    @property
+    def column_mappings(self) -> dict[str, str]:
+        """Backward compatibility property for column mappings."""
+        return {}
+
+    @property
+    def ignored_columns(self) -> list[str]:
+        """Backward compatibility property for ignored columns."""
+        return []
+
+    @property
+    def custom_type_mappings(self) -> dict[str, str]:
+        """Backward compatibility property for custom type mappings."""
+        return {}
+
+    @property
+    def load_method(self) -> str:
+        """Backward compatibility property for load method."""
+        return "upsert"  # Default load method
+
+    @property
+    def allow_alter_table(self) -> bool:
+        """Backward compatibility property for allow alter table."""
+        return True  # Default allow alter table
 
     # Target configuration using FlextConstants where applicable
     default_target_schema: str = Field(

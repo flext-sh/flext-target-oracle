@@ -27,11 +27,9 @@ class LoaderProtocol(Protocol):
 
     def load_record(self, stream_name: str, record: FlextTypes.Core.Dict) -> None:
         """Load a single record into Oracle."""
-        ...
 
     def load_batch(self, stream_name: str, records: list[FlextTypes.Core.Dict]) -> None:
         """Load a batch of records into Oracle."""
-        ...
 
     def ensure_table_exists(
         self,
@@ -39,11 +37,9 @@ class LoaderProtocol(Protocol):
         schema: FlextTypes.Core.Dict,
     ) -> None:
         """Ensure Oracle table exists for the stream."""
-        ...
 
     def finalize_streams(self, stream_name: str) -> FlextTypes.Core.Dict:
         """Finalize Oracle streams and return metrics."""
-        ...
 
 
 def safe_table_name(name: str) -> str:
