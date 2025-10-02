@@ -52,17 +52,16 @@ class TestPerformance:
         process = psutil.Process(os.getpid())
         return process.memory_info().rss / 1024 / 1024
 
-    @pytest.mark.asyncio
     @pytest.mark.benchmark
     @pytest.mark.usefixtures("oracle_engine", "clean_database")
-    async def test_insert_throughput(
+    def test_insert_throughput(
         self,
         performance_config: FlextTargetOracleConfig,
         fake: Faker,
     ) -> None:
         """Benchmark INSERT throughput with different batch sizes."""
         target = FlextTargetOracle(config=performance_config)
-        await target.initialize()
+        target.initialize()
 
         # Test schema
         schema = {
@@ -83,7 +82,7 @@ class TestPerformance:
             "key_properties": ["id"],
         }
 
-        result = await target.execute(json.dumps(schema))
+        result = target.execute(json.dumps(schema))
         assert result.is_success
 
         # Test different batch sizes
@@ -122,7 +121,7 @@ class TestPerformance:
 
             # Insert records
             for record in records:
-                result = await target.execute(json.dumps(record))
+                result = target.execute(json.dumps(record))
                 assert result.is_success
 
             end_time = time.time()
@@ -154,9 +153,8 @@ class TestPerformance:
         best_throughput = max(r["records_per_second"] for r in results)
         assert best_throughput > 1000  # Should handle > 1k records/sec
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("oracle_engine", "clean_database")
-    async def test_bulk_vs_standard_performance(
+    def test_bulk_vs_standard_performance(
         self,
         oracle_config: FlextTargetOracleConfig,
         fake: Faker,
@@ -183,9 +181,9 @@ class TestPerformance:
         oracle_config.load_method = LoadMethod.INSERT
         oracle_config.batch_size = 100
         target_standard = FlextTargetOracle(config=oracle_config)
-        await target_standard.initialize()
+        target_standard.initialize()
 
-        result = await target_standard.execute(json.dumps(schema))
+        result = target_standard.execute(json.dumps(schema))
         assert result.is_success
 
         start_time = time.time()
@@ -199,7 +197,7 @@ class TestPerformance:
                     "value": fake.pyfloat(),
                 },
             }
-            await target_standard.execute(json.dumps(record))
+            target_standard.execute(json.dumps(record))
 
         standard_time = time.time() - start_time
         standard_rate = (record_count // 10) / standard_time
@@ -212,7 +210,7 @@ class TestPerformance:
         oracle_config.batch_size = 1000
         oracle_config.use_direct_path = True
         target_bulk = FlextTargetOracle(config=oracle_config)
-        await target_bulk.initialize()
+        target_bulk.initialize()
 
         start_time = time.time()
         for i in range(record_count):
@@ -225,7 +223,7 @@ class TestPerformance:
                     "value": fake.pyfloat(),
                 },
             }
-            await target_bulk.execute(json.dumps(record))
+            target_bulk.execute(json.dumps(record))
 
         bulk_time = time.time() - start_time
         bulk_rate = record_count / bulk_time
@@ -233,16 +231,15 @@ class TestPerformance:
         # Bulk should be significantly faster
         assert bulk_rate > standard_rate * 5  # At least 5x faster
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("oracle_engine", "clean_database")
-    async def test_memory_efficiency(
+    def test_memory_efficiency(
         self,
         performance_config: FlextTargetOracleConfig,
         fake: Faker,
     ) -> None:
         """Test memory efficiency with large batches."""
         target = FlextTargetOracle(config=performance_config)
-        await target.initialize()
+        target.initialize()
 
         # Schema with large text fields
         schema = {
@@ -259,7 +256,7 @@ class TestPerformance:
             "key_properties": ["id"],
         }
 
-        result = await target.execute(json.dumps(schema))
+        result = target.execute(json.dumps(schema))
         assert result.is_success
 
         # Monitor memory during large batch processing
@@ -292,7 +289,7 @@ class TestPerformance:
                         },
                     },
                 }
-                await target.execute(json.dumps(record))
+                target.execute(json.dumps(record))
 
             # Force garbage collection
             gc.collect()
@@ -309,16 +306,15 @@ class TestPerformance:
         assert avg_growth < 100  # Should not grow more than 100MB per wave
         assert total_memory < 500  # Total should stay under 500MB
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("oracle_engine", "clean_database")
-    async def test_concurrent_streams(
+    def test_concurrent_streams(
         self,
         performance_config: FlextTargetOracleConfig,
         fake: Faker,
     ) -> None:
         """Test performance with multiple concurrent streams."""
         target = FlextTargetOracle(config=performance_config)
-        await target.initialize()
+        target.initialize()
 
         # Define multiple streams
         streams = ["orders", "customers", "products", "inventory", "transactions"]
@@ -338,7 +334,7 @@ class TestPerformance:
                 },
                 "key_properties": ["id"],
             }
-            result = await target.execute(json.dumps(schema))
+            result = target.execute(json.dumps(schema))
             assert result.is_success
 
         # Generate interleaved records from multiple streams
@@ -357,7 +353,7 @@ class TestPerformance:
                     "timestamp": datetime.now(UTC).isoformat(),
                 },
             }
-            result = await target.execute(json.dumps(record))
+            result = target.execute(json.dumps(record))
             assert result.is_success
 
         elapsed = time.time() - start_time
@@ -369,15 +365,14 @@ class TestPerformance:
         # Performance assertion
         assert throughput > 500  # Should handle > 500 records/sec with multiple streams
 
-    @pytest.mark.asyncio
     @pytest.mark.usefixtures("oracle_engine", "clean_database")
-    async def test_scalability(
+    def test_scalability(
         self,
         performance_config: FlextTargetOracleConfig,
     ) -> None:
         """Test scalability with increasing data volume."""
         target = FlextTargetOracle(config=performance_config)
-        await target.initialize()
+        target.initialize()
 
         schema = {
             "type": "SCHEMA",
@@ -392,7 +387,7 @@ class TestPerformance:
             "key_properties": ["id"],
         }
 
-        result = await target.execute(json.dumps(schema))
+        result = target.execute(json.dumps(schema))
         assert result.is_success
 
         # Test with increasing data sizes
@@ -411,7 +406,7 @@ class TestPerformance:
                         "data": f"Record {i} of {size}",
                     },
                 }
-                await target.execute(json.dumps(record))
+                target.execute(json.dumps(record))
 
             elapsed = time.time() - start_time
             throughput = size / elapsed

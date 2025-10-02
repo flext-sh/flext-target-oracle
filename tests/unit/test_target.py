@@ -9,8 +9,10 @@ SPDX-License-Identifier: MIT
 
 import json
 from datetime import UTC, datetime
+from typing import Any
 
 import pytest
+from _pytest.capture import CaptureFixture
 from sqlalchemy import Engine, text
 
 from flext_target_oracle import (
@@ -27,11 +29,11 @@ class TestRealOracleTarget:
     """Test Oracle target with real database connection."""
 
     @pytest.fixture
-    def real_target(self, oracle_config: object) -> object:
+    def real_target(self, oracle_config: FlextTargetOracleConfig) -> FlextTargetOracle:
         """Create real target instance."""
         return FlextTargetOracle(config=oracle_config)
 
-    def test_target_initialization(self, real_target: object) -> None:
+    def test_target_initialization(self, real_target: FlextTargetOracle) -> None:
         """Test real target initialization."""
         result = real_target.initialize()
         assert result.is_success
@@ -42,7 +44,7 @@ class TestRealOracleTarget:
         # Should initialize loader
         assert real_target._loader is not None
 
-    def test_catalog_discovery(self, real_target: object) -> None:
+    def test_catalog_discovery(self, real_target: FlextTargetOracle) -> None:
         """Test catalog discovery."""
         real_target.initialize()
 
@@ -54,7 +56,7 @@ class TestRealOracleTarget:
         assert "streams" in catalog
         assert len(catalog["streams"]) == 0  # No streams initially
 
-    def test_configuration_validation(self, real_target: object) -> None:
+    def test_configuration_validation(self, real_target: FlextTargetOracle) -> None:
         """Test configuration validation."""
         result = real_target.validate_configuration()
         assert result.is_success
@@ -66,8 +68,8 @@ class TestRealOracleTarget:
 
     def test_real_process_schema_message(
         self,
-        real_target: object,
-        simple_schema: object,
+        real_target: FlextTargetOracle,
+        simple_schema: dict[str, Any],
     ) -> None:
         """Test processing schema message."""
         real_target.initialize()
@@ -89,11 +91,10 @@ class TestRealOracleTarget:
             == simple_schema["schema"]
         )
 
-    @pytest.mark.asyncio
-    async def test_real_process_record_message(
+    def test_real_process_record_message(
         self,
-        real_target: object,
-        simple_schema: object,
+        real_target: FlextTargetOracle,
+        simple_schema: dict[str, Any],
         oracle_engine: Engine,
     ) -> None:
         """Test processing record message with real database."""
@@ -136,7 +137,7 @@ class TestRealOracleTarget:
             count = conn.execute(text("SELECT COUNT(*) FROM users")).scalar()
             assert count == 1
 
-    def test_state_message_processing(self, real_target: object) -> None:
+    def test_state_message_processing(self, real_target: FlextTargetOracle) -> None:
         """Test processing state message."""
         real_target.initialize()
 
@@ -155,7 +156,7 @@ class TestRealOracleTarget:
 
         # State should be emitted (check via logs or return value)
 
-    def test_activate_version_message(self, real_target: object) -> None:
+    def test_activate_version_message(self, real_target: FlextTargetOracle) -> None:
         """Test processing ACTIVATE_VERSION message."""
         real_target.initialize()
 
@@ -170,8 +171,8 @@ class TestRealOracleTarget:
 
     def test_real_batch_processing(
         self,
-        real_target: object,
-        simple_schema: object,
+        real_target: FlextTargetOracle,
+        simple_schema: dict[str, Any],
         oracle_engine: Engine,
     ) -> None:
         """Test batch processing with real database."""
@@ -212,8 +213,8 @@ class TestRealOracleTarget:
 
     def test_real_column_mapping(
         self,
-        real_target: object,
-        simple_schema: object,
+        real_target: FlextTargetOracle,
+        simple_schema: dict[str, Any],
         oracle_engine: Engine,
     ) -> None:
         """Test column mapping with real database."""
@@ -271,7 +272,7 @@ class TestRealOracleTarget:
 
     def test_real_ignored_columns(
         self,
-        real_target: object,
+        real_target: FlextTargetOracle,
     ) -> None:
         """Test ignored columns with real database."""
         # Configure ignored columns
@@ -321,9 +322,9 @@ class TestRealOracleTarget:
 
     def test_real_nested_json_handling(
         self,
-        real_target: object,
-        nested_schema: object,
-        oracle_engine: object,
+        real_target: FlextTargetOracle,
+        nested_schema: dict[str, Any],
+        oracle_engine: Engine,
     ) -> None:
         """Test nested JSON handling with real database."""
         real_target.initialize()
@@ -384,7 +385,7 @@ class TestRealOracleTarget:
             customer_cols = [row[0] for row in result]
             assert len(customer_cols) > 0
 
-    def test_error_handling_invalid_json(self, real_target: object) -> None:
+    def test_error_handling_invalid_json(self, real_target: FlextTargetOracle) -> None:
         """Test error handling with invalid JSON."""
         real_target.initialize()
 
@@ -393,7 +394,9 @@ class TestRealOracleTarget:
         assert result.is_failure
         assert isinstance(result.error, FlextTargetOracleProcessingError)
 
-    def test_error_handling_missing_stream(self, real_target: object) -> None:
+    def test_error_handling_missing_stream(
+        self, real_target: FlextTargetOracle
+    ) -> None:
         """Test error handling with missing stream in record."""
         real_target.initialize()
 
@@ -410,8 +413,8 @@ class TestRealOracleTarget:
 
     def test_real_metrics_collection(
         self,
-        real_target: object,
-        simple_schema: object,
+        real_target: FlextTargetOracle,
+        simple_schema: dict[str, Any],
     ) -> None:
         """Test metrics collection with real processing."""
         real_target.initialize()
@@ -532,8 +535,8 @@ class TestRealOracleTarget:
 
     def test_real_write_state_messages(
         self,
-        real_target: object,
-        capfd: object,
+        real_target: FlextTargetOracle,
+        capfd: CaptureFixture[str],
     ) -> None:
         """Test writing state messages to stdout."""
         real_target.initialize()
@@ -553,7 +556,7 @@ class TestRealOracleTarget:
         # State messages are written to stdout, not returned
         # In real test, would capture stdout to verify content
 
-    def test_singer_compatibility_methods(self, real_target: object) -> None:
+    def test_singer_compatibility_methods(self, real_target: FlextTargetOracle) -> None:
         """Test Singer compatibility methods."""
         real_target.initialize()
 
@@ -573,9 +576,9 @@ class TestRealOracleTarget:
 
     def test_real_large_batch_processing(
         self,
-        real_target: object,
-        simple_schema: object,
-        oracle_engine: object,
+        real_target: FlextTargetOracle,
+        simple_schema: dict[str, Any],
+        oracle_engine: Engine,
     ) -> None:
         """Test processing large batches with real database."""
         # Configure for large batches
@@ -616,8 +619,8 @@ class TestRealOracleTarget:
 
     def test_real_schema_evolution(
         self,
-        real_target: object,
-        oracle_engine: object,
+        real_target: FlextTargetOracle,
+        oracle_engine: Engine,
     ) -> None:
         """Test schema evolution with real database."""
         # Enable schema evolution

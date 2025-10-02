@@ -117,10 +117,9 @@ target = FlextOracleTarget(config)
 ### Singer Message Processing
 
 ```python
-import asyncio
 from flext_target_oracle import FlextOracleTarget
 
-async def process_data():
+def process_data():
     # Schema message
     schema_msg = {
         "type": "SCHEMA",
@@ -143,23 +142,23 @@ async def process_data():
     }
 
     # Process with FlextResult pattern
-    schema_result = await target.process_singer_message(schema_msg)
+    schema_result = target.process_singer_message(schema_msg)
     if schema_result.is_failure:
         print(f"Schema processing failed: {schema_result.error}")
         return
 
-    record_result = await target.process_singer_message(record_msg)
+    record_result = target.process_singer_message(record_msg)
     if record_result.is_failure:
         print(f"Record processing failed: {record_result.error}")
         return
 
     # Finalize and get statistics
-    stats_result = await target.finalize()
+    stats_result = target.finalize()
     if stats_result.success:
         print(f"Processed {stats_result.data['total_records']} records")
 
-# Run async processing
-asyncio.run(process_data())
+# Run processing
+run(process_data())
 ```
 
 ### Meltano Integration

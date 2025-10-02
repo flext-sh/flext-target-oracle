@@ -175,7 +175,7 @@ class BadConfig:
 
 ```python
 # ✅ All operations return FlextResult
-async def process_record(record: dict) -> FlextResult[None]:
+def process_record(record: dict) -> FlextResult[None]:
     """Process a single record with proper error handling."""
     try:
         # Validate input
@@ -183,7 +183,7 @@ async def process_record(record: dict) -> FlextResult[None]:
             return FlextResult[None].fail("Record cannot be empty")
 
         # Process record
-        result = await some_operation(record)
+        result = some_operation(record)
         if result.is_failure:
             return result  # Propagate failure
 
@@ -194,12 +194,12 @@ async def process_record(record: dict) -> FlextResult[None]:
         return FlextResult[None].fail(f"Processing failed: {e}")
 
 # ✅ Chain FlextResult operations
-async def process_batch(records: list[dict]) -> FlextResult[Stats]:
+def process_batch(records: list[dict]) -> FlextResult[Stats]:
     """Process batch of records with early termination on failure."""
     stats = Stats()
 
     for record in records:
-        result = await process_record(record)
+        result = process_record(record)
         if result.is_failure:
             return FlextResult[None].fail(f"Batch failed on record: {result.error}")
 
@@ -318,7 +318,7 @@ with loader.oracle_api as connected_api:
 
 ```python
 # Test table creation and schema evolution
-async def test_table_management():
+def test_table_management():
     """Test table operations during development."""
 
     # Schema definition
@@ -332,7 +332,7 @@ async def test_table_management():
     }
 
     # Ensure table exists
-    result = await loader.ensure_table_exists("test_stream", schema)
+    result = loader.ensure_table_exists("test_stream", schema)
     if result.is_failure:
         print(f"Table creation failed: {result.error}")
         return
@@ -344,7 +344,7 @@ async def test_table_management():
         "created_at": "2025-08-04T10:00:00Z"
     }
 
-    result = await loader.load_record("test_stream", test_record)
+    result = loader.load_record("test_stream", test_record)
     if result.success:
         print("Record loaded successfully")
     else:
@@ -542,20 +542,20 @@ class TestOracleIntegration:
         """Create target with Oracle connection."""
         return FlextOracleTarget(sample_config)
 
-    async def test_end_to_end_processing(self, oracle_target):
+    def test_end_to_end_processing(self, oracle_target):
         """Test complete Singer message processing."""
         # Schema message
         schema_msg = {...}
-        result = await oracle_target.process_singer_message(schema_msg)
+        result = oracle_target.process_singer_message(schema_msg)
         assert result.success
 
         # Record messages
         record_msg = {...}
-        result = await oracle_target.process_singer_message(record_msg)
+        result = oracle_target.process_singer_message(record_msg)
         assert result.success
 
         # Finalization
-        stats_result = await oracle_target.finalize()
+        stats_result = oracle_target.finalize()
         assert stats_result.success
         assert stats_result.data["total_records"] > 0
 ```
@@ -594,7 +594,7 @@ def sample_records():
 import time
 from typing import List
 
-async def benchmark_batch_sizes(records: List[dict]):
+def benchmark_batch_sizes(records: List[dict]):
     """Benchmark different batch sizes."""
 
     batch_sizes = [100, 500, 1000, 2000, 5000]
@@ -612,13 +612,13 @@ async def benchmark_batch_sizes(records: List[dict]):
 
         # Process all records
         for record in records:
-            await target.process_singer_message({
+            target.process_singer_message({
                 "type": "RECORD",
                 "stream": "test_stream",
                 "record": record
             })
 
-        await target.finalize()
+        target.finalize()
 
         duration = time.time() - start_time
         results[batch_size] = {

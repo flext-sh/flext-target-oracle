@@ -84,7 +84,7 @@ python examples/performance_tuning.py
 All examples demonstrate railway-oriented programming with FlextResult patterns:
 
 ```python
-result = await target.process_singer_message(message)
+result = target.process_singer_message(message)
 if result.is_failure:
     logger.error(f"Processing failed: {result.error}")
     return result

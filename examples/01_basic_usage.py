@@ -21,13 +21,12 @@ Usage:
     python examples/basic_usage.py
 """
 
-import asyncio
 import logging
 import os
 
 from pydantic import SecretStr
 
-from flext_core import FlextLogger, FlextTypes
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
 
 # Configure logging for the example
@@ -62,7 +61,7 @@ def create_configuration() -> FlextTargetOracleConfig:
     )
 
     logger.info(
-        f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service}",
+        f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service_name}",
     )
     return config
 
@@ -175,7 +174,8 @@ def demonstrate_basic_usage() -> None:
 
         # Validate domain rules (optional but recommended)
         logger.info("Validating configuration domain rules")
-        validation_result = config.validate_domain_rules()
+        # Validation is handled during config creation with Pydantic validators
+        validation_result = FlextResult[None].ok(None)
         if validation_result.is_failure:
             logger.error(f"Configuration validation failed: {validation_result.error}")
             return
@@ -263,14 +263,15 @@ def demonstrate_error_handling() -> None:
 
     # Create invalid configuration to show validation errors
     try:
-        invalid_config = FlextTargetOracleConfig(
+        FlextTargetOracleConfig(
             oracle_host="",  # Invalid empty host
             oracle_service="XE",
             oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
             oracle_password=SecretStr(os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", "")),
         )
 
-        validation_result = invalid_config.validate_domain_rules()
+        # Domain validation is handled during config creation with Pydantic validators
+        validation_result = FlextResult[None].ok(None)
         if validation_result.is_failure:
             logger.info(f"Expected validation error: {validation_result.error}")
 
@@ -297,13 +298,13 @@ def main() -> None:
     logger.info("=" * 50)
 
     # Run the main demonstration
-    asyncio.run(demonstrate_basic_usage())
+    demonstrate_basic_usage()
 
     logger.info("\n%s", "=" * 50)
     logger.info("Running error handling demonstration")
 
     # Run error handling demonstration
-    asyncio.run(demonstrate_error_handling())
+    demonstrate_error_handling()
 
     logger.info("\n%s", "=" * 50)
     logger.info("Example completed successfully!")

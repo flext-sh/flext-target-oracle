@@ -211,13 +211,13 @@ class TestNewFeature:
 ```python
 @pytest.mark.integration
 @pytest.mark.oracle
-async def test_real_database_operation(oracle_loader, oracle_engine):
+def test_real_database_operation(oracle_loader, oracle_engine):
     """Test with real Oracle database."""
     # Create table
-    await oracle_loader.ensure_table_exists("test", schema, keys)
+    oracle_loader.ensure_table_exists("test", schema, keys)
 
     # Insert data
-    await oracle_loader.insert_records("test", records)
+    oracle_loader.insert_records("test", records)
 
     # Verify in database
     with oracle_engine.connect() as conn:
