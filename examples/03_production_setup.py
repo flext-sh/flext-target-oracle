@@ -14,6 +14,7 @@ import signal
 import sys
 import time
 from datetime import UTC
+from typing import cast
 
 from pydantic import SecretStr
 
@@ -503,7 +504,7 @@ def create_production_sample_stream() -> list[object]:
       List of Singer messages representing a production workload
 
     """
-    messages = []  # Flexible list for various message types
+    messages: list[object] = []  # Flexible list for various message types
 
     # Schema message for customer orders
     schema_message = {
@@ -528,7 +529,7 @@ def create_production_sample_stream() -> list[object]:
         },
         "key_properties": ["order_id"],
     }
-    messages.append(schema_message)
+    messages.append(cast("object", schema_message))
 
     # Generate sample records (simulate production volume)
     base_date = datetime.datetime(2025, 1, 1, tzinfo=UTC)
@@ -558,7 +559,7 @@ def create_production_sample_stream() -> list[object]:
                 + "Z",
             },
         }
-        messages.append(record_message)
+        messages.append(cast("object", record_message))
 
     # State message
     state_message = {
