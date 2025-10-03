@@ -35,7 +35,7 @@ class TestOracleIntegration:
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: Engine,
-        simple_schema: FlextTypes.Core.Dict,
+        simple_schema: FlextTypes.Dict,
     ) -> None:
         """Test creating a simple table with basic data types."""
         stream_name = "test_users"
@@ -43,8 +43,8 @@ class TestOracleIntegration:
         key_properties = simple_schema["key_properties"]
 
         # Ensure table is created (synchronous API returning FlextResult)
-        schema_dict = cast("dict[str, object]", schema)
-        key_props = cast("list[str] | None", key_properties)
+        schema_dict = cast("FlextTypes.Dict", schema)
+        key_props = cast("FlextTypes.StringList | None", key_properties)
 
         table_res = connected_loader.ensure_table_exists(
             stream_name,
@@ -93,15 +93,15 @@ class TestOracleIntegration:
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: Engine,
-        simple_schema: FlextTypes.Core.Dict,
+        simple_schema: FlextTypes.Dict,
     ) -> None:
         """Test inserting data and retrieving it."""
         stream_name = "test_insert"
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
 
-        schema = cast("dict[str, object]", schema)
-        key_properties = cast("list[str] | None", key_properties)
+        schema = cast("FlextTypes.Dict", schema)
+        key_properties = cast("FlextTypes.StringList | None", key_properties)
 
         # Create table
         create_res = connected_loader.ensure_table_exists(
@@ -136,7 +136,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
-        simple_schema: FlextTypes.Core.Dict,
+        simple_schema: FlextTypes.Dict,
     ) -> None:
         """Test merge mode for updating existing records."""
         # Pydantic models are value objects; use model_copy to produce a mutable copy
@@ -150,8 +150,8 @@ class TestOracleIntegration:
         stream_name = "test_merge"
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
-        schema = cast("dict[str, object]", schema)
-        key_properties = cast("list[str] | None", key_properties)
+        schema = cast("FlextTypes.Dict", schema)
+        key_properties = cast("FlextTypes.StringList | None", key_properties)
 
         # Create table and insert initial data
         table_res = loader.ensure_table_exists(stream_name, schema, key_properties)
@@ -209,8 +209,8 @@ class TestOracleIntegration:
         key_properties = ["id"]
 
         # Create table
-        schema_dict = cast("dict[str, object]", schema)
-        key_props = cast("list[str] | None", key_properties)
+        schema_dict = cast("FlextTypes.Dict", schema)
+        key_props = cast("FlextTypes.StringList | None", key_properties)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.is_success
 
@@ -245,7 +245,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
-        nested_schema: FlextTypes.Core.Dict,
+        nested_schema: FlextTypes.Dict,
     ) -> None:
         """Test JSON storage mode with nested data."""
         oracle_config = oracle_config.model_copy(update={})
@@ -259,8 +259,8 @@ class TestOracleIntegration:
         stream_name = "test_json"
         schema = nested_schema["schema"]
         key_properties = nested_schema["key_properties"]
-        schema = cast("dict[str, object]", schema)
-        key_properties = cast("list[str] | None", key_properties)
+        schema = cast("FlextTypes.Dict", schema)
+        key_properties = cast("FlextTypes.StringList | None", key_properties)
 
         # Create table
         create_res = loader.ensure_table_exists(stream_name, schema, key_properties)
@@ -336,8 +336,8 @@ class TestOracleIntegration:
         key_properties = ["id"]
 
         # ensure types match expected signatures
-        schema_dict = cast("dict[str, object]", schema)
-        key_props = cast("list[str] | None", key_properties)
+        schema_dict = cast("FlextTypes.Dict", schema)
+        key_props = cast("FlextTypes.StringList | None", key_properties)
 
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.is_success
@@ -383,7 +383,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
-        simple_schema: FlextTypes.Core.Dict,
+        simple_schema: FlextTypes.Dict,
     ) -> None:
         """Test truncate table before loading data."""
         oracle_config = oracle_config.model_copy(update={"truncate_before_load": True})
@@ -392,8 +392,8 @@ class TestOracleIntegration:
         stream_name = "test_truncate"
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
-        schema = cast("dict[str, object]", schema)
-        key_properties = cast("list[str] | None", key_properties)
+        schema = cast("FlextTypes.Dict", schema)
+        key_properties = cast("FlextTypes.StringList | None", key_properties)
 
         # Create table and insert initial data
         create_res = loader.ensure_table_exists(stream_name, schema, key_properties)
@@ -424,7 +424,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
-        simple_schema: FlextTypes.Core.Dict,
+        simple_schema: FlextTypes.Dict,
     ) -> None:
         """Test creation of custom indexes."""
         oracle_config = oracle_config.model_copy(
@@ -447,8 +447,8 @@ class TestOracleIntegration:
         stream_name = "test_indexes"
         schema = simple_schema["schema"]
         key_properties = simple_schema["key_properties"]
-        schema = cast("dict[str, object]", schema)
-        key_properties = cast("list[str] | None", key_properties)
+        schema = cast("FlextTypes.Dict", schema)
+        key_properties = cast("FlextTypes.StringList | None", key_properties)
 
         loader.ensure_table_exists(stream_name, schema, key_properties)
 
@@ -488,7 +488,7 @@ class TestOracleTargetE2E:
         self,
         oracle_config: FlextTargetOracleConfig,
         oracle_engine: Engine,
-        singer_messages: list[FlextTypes.Core.Dict],
+        singer_messages: list[FlextTypes.Dict],
     ) -> None:
         """Test complete Singer workflow: schema -> records -> state."""
         target = FlextTargetOracle(config=oracle_config)

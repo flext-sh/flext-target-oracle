@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from pydantic import Field
 
-from flext_core import FlextModels
+from flext_core import FlextModels, FlextTypes
 
 
 class FlextTargetOracleModels(FlextModels):
@@ -92,7 +92,7 @@ class FlextTargetOracleModels(FlextModels):
 
         # Error tracking
         error_count: int = Field(default=0, description="Number of processing errors")
-        failed_messages: list[str] = Field(
+        failed_messages: FlextTypes.StringList = Field(
             default_factory=list, description="Failed message IDs"
         )
 
@@ -108,7 +108,7 @@ class FlextTargetOracleModels(FlextModels):
         columns: list[dict] = Field(
             default_factory=list, description="Table column definitions"
         )
-        primary_keys: list[str] = Field(
+        primary_keys: FlextTypes.StringList = Field(
             default_factory=list, description="Primary key column names"
         )
         indexes: list[dict] = Field(
@@ -126,7 +126,7 @@ class FlextTargetOracleModels(FlextModels):
         # Singer metadata
         singer_stream_name: str = Field(description="Singer stream name")
         singer_schema: dict = Field(description="Singer schema definition")
-        key_properties: list[str] = Field(
+        key_properties: FlextTypes.StringList = Field(
             default_factory=list, description="Singer key properties"
         )
 

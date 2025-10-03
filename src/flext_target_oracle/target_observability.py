@@ -10,7 +10,6 @@ import time
 import uuid
 
 from flext_core import FlextLogger, FlextTypes
-
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,
@@ -100,7 +99,7 @@ class FlextOracleError:
         def schema_validation_failed(
             *,
             stream_name: str,
-            schema_errors: FlextTypes.Core.StringList,
+            schema_errors: FlextTypes.StringList,
             singer_specification: str = "1.5.0",
         ) -> FlextTargetOracleSchemaError:
             """Singer schema validation failure with detailed errors."""

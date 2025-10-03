@@ -200,8 +200,8 @@ For new DDL/DML operations:
 def process_record(
     self,
     stream_name: str,
-    record: Dict[str, object],
-    schema: Dict[str, object],
+    record: FlextTypes.Dict,
+    schema: FlextTypes.Dict,
 ) -> FlextResult[None]:
     """Process a single record for insertion.
 

@@ -66,11 +66,11 @@ def create_configuration() -> FlextTargetOracleConfig:
     return config
 
 
-def create_sample_schema_message() -> FlextTypes.Core.Dict:
+def create_sample_schema_message() -> FlextTypes.Dict:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
-      Dict[str, object]: Singer SCHEMA message for users table
+      FlextTypes.Dict: Singer SCHEMA message for users table
 
     """
     return {
@@ -91,11 +91,11 @@ def create_sample_schema_message() -> FlextTypes.Core.Dict:
     }
 
 
-def create_sample_record_messages() -> list[FlextTypes.Core.Dict]:
+def create_sample_record_messages() -> list[FlextTypes.Dict]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
-      List[Dict[str, object]]: List of Singer RECORD messages
+      List[FlextTypes.Dict]: List of Singer RECORD messages
 
     """
     return [
@@ -135,11 +135,11 @@ def create_sample_record_messages() -> list[FlextTypes.Core.Dict]:
     ]
 
 
-def create_sample_state_message() -> FlextTypes.Core.Dict:
+def create_sample_state_message() -> FlextTypes.Dict:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
-      Dict[str, object]: Singer STATE message with bookmark information
+      FlextTypes.Dict: Singer STATE message with bookmark information
 
     """
     return {
@@ -283,7 +283,7 @@ def demonstrate_error_handling() -> None:
     target = FlextTargetOracle(config)
 
     # Invalid message type
-    invalid_message: dict[str, object] = {"type": "INVALID", "data": "test"}
+    invalid_message: FlextTypes.Dict = {"type": "INVALID", "data": "test"}
     result = target.process_singer_message(invalid_message)
 
     if result.is_failure:
