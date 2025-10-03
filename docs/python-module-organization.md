@@ -57,7 +57,7 @@ FlextTargetOracle = FlextOracleTarget
 TargetOracle = FlextOracleTarget
 
 __version__ = "0.9.9"
-__all__: FlextTypes.Core.StringList = [
+__all__: FlextTypes.StringList = [
     # Primary implementation
     "FlextOracleTarget",
     "FlextOracleTargetConfig",
@@ -176,7 +176,7 @@ class FlextOracleTarget(Target):
     def _handle_record(self, message: dict) -> FlextResult[None]:
         """Handle RECORD messages with batched loading."""
 
-    def finalize(self) -> FlextResult[FlextTypes.Core.Dict]:
+    def finalize(self) -> FlextResult[FlextTypes.Dict]:
         """Finalize streams and return statistics."""
 ```
 
@@ -224,7 +224,7 @@ class FlextOracleTargetLoader:
     def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]:
         """Load record with batching and error handling."""
 
-    def finalize_all_streams(self) -> FlextResult[FlextTypes.Core.Dict]:
+    def finalize_all_streams(self) -> FlextResult[FlextTypes.Dict]:
         """Finalize all streams and return statistics."""
 ```
 
@@ -660,14 +660,14 @@ from flext_core import FlextResult
 
 def process_singer_message(
     self,
-    message: Dict[str, object]
+    message: FlextTypes.Dict
 ) -> FlextResult[None]:
     """Process Singer message with complete type safety."""
 
 def load_records(
     self,
     stream_name: str,
-    records: List[Dict[str, object]]
+    records: List[FlextTypes.Dict]
 ) -> FlextResult[Dict[str, Union[int, str]]]:
     """Load records with specific return type."""
 
@@ -697,7 +697,7 @@ def process_message(self, message):  # Missing types
 def ensure_table_exists(
     self,
     stream_name: str,
-    schema: Dict[str, object]
+    schema: FlextTypes.Dict
 ) -> FlextResult[None]:
     """
     Ensure Oracle table exists for Singer stream with proper schema.
@@ -849,7 +849,7 @@ from typing import Dict, Optional
 
 def process_singer_message(
     self,
-    message: Dict[str, object]
+    message: FlextTypes.Dict
 ) -> FlextResult[None]:
     """
     DEPRECATED: Custom message processing method.

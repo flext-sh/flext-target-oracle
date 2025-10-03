@@ -39,21 +39,15 @@ class FlextTargetOracleTypes(FlextTypes):
         """Singer target protocol complex types."""
 
         type TargetConfiguration = dict[
-            str, str | int | bool | dict[str, FlextTypes.Core.ConfigValue]
+            str, str | int | bool | dict[str, FlextTypes.ConfigValue]
         ]
         type StreamConfiguration = dict[
-            str, str | bool | dict[str, FlextTypes.Core.JsonValue]
+            str, str | bool | dict[str, FlextTypes.JsonValue]
         ]
-        type MessageProcessing = dict[
-            str, str | list[dict[str, FlextTypes.Core.JsonValue]]
-        ]
-        type RecordHandling = dict[
-            str, str | dict[str, FlextTypes.Core.JsonValue] | bool
-        ]
-        type StateManagement = dict[str, str | dict[str, FlextTypes.Core.JsonValue]]
-        type BatchProcessing = dict[
-            str, str | int | dict[str, FlextTypes.Core.JsonValue]
-        ]
+        type MessageProcessing = dict[str, str | list[dict[str, FlextTypes.JsonValue]]]
+        type RecordHandling = dict[str, str | dict[str, FlextTypes.JsonValue] | bool]
+        type StateManagement = dict[str, str | dict[str, FlextTypes.JsonValue]]
+        type BatchProcessing = dict[str, str | int | dict[str, FlextTypes.JsonValue]]
 
     # =========================================================================
     # ORACLE DATABASE TYPES - Complex Oracle database operation types
@@ -63,17 +57,15 @@ class FlextTargetOracleTypes(FlextTypes):
         """Oracle database operation complex types."""
 
         type DatabaseConfiguration = dict[
-            str, str | int | bool | dict[str, FlextTypes.Core.ConfigValue]
+            str, str | int | bool | dict[str, FlextTypes.ConfigValue]
         ]
         type ConnectionManagement = dict[
-            str, str | int | dict[str, FlextTypes.Core.JsonValue]
+            str, str | int | dict[str, FlextTypes.JsonValue]
         ]
-        type SessionSettings = dict[
-            str, str | bool | dict[str, FlextTypes.Core.ConfigValue]
-        ]
-        type TransactionControl = dict[str, str | bool | dict[str, object]]
-        type DatabaseMetadata = dict[str, str | dict[str, FlextTypes.Core.JsonValue]]
-        type PerformanceSettings = dict[str, int | float | dict[str, object]]
+        type SessionSettings = dict[str, str | bool | dict[str, FlextTypes.ConfigValue]]
+        type TransactionControl = dict[str, str | bool | FlextTypes.Dict]
+        type DatabaseMetadata = dict[str, str | dict[str, FlextTypes.JsonValue]]
+        type PerformanceSettings = dict[str, int | float | FlextTypes.Dict]
 
     # =========================================================================
     # ORACLE TABLE TYPES - Complex Oracle table and schema types
@@ -83,17 +75,17 @@ class FlextTargetOracleTypes(FlextTypes):
         """Oracle table and schema complex types."""
 
         type TableConfiguration = dict[
-            str, str | bool | dict[str, FlextTypes.Core.ConfigValue]
+            str, str | bool | dict[str, FlextTypes.ConfigValue]
         ]
         type SchemaDefinition = dict[
-            str, str | list[str] | dict[str, FlextTypes.Core.JsonValue]
+            str, str | FlextTypes.StringList | dict[str, FlextTypes.JsonValue]
         ]
-        type ColumnMapping = dict[str, str | dict[str, FlextTypes.Core.JsonValue]]
-        type IndexConfiguration = dict[str, str | list[str] | dict[str, object]]
-        type ConstraintDefinition = dict[
-            str, str | dict[str, FlextTypes.Core.JsonValue]
+        type ColumnMapping = dict[str, str | dict[str, FlextTypes.JsonValue]]
+        type IndexConfiguration = dict[
+            str, str | FlextTypes.StringList | FlextTypes.Dict
         ]
-        type TablespaceSettings = dict[str, str | int | dict[str, object]]
+        type ConstraintDefinition = dict[str, str | dict[str, FlextTypes.JsonValue]]
+        type TablespaceSettings = dict[str, str | int | FlextTypes.Dict]
 
     # =========================================================================
     # ORACLE SQL TYPES - Complex Oracle SQL operation types
@@ -103,15 +95,15 @@ class FlextTargetOracleTypes(FlextTypes):
         """Oracle SQL operation complex types."""
 
         type SqlConfiguration = dict[
-            str, str | bool | int | dict[str, FlextTypes.Core.ConfigValue]
+            str, str | bool | int | dict[str, FlextTypes.ConfigValue]
         ]
-        type QueryExecution = dict[str, str | dict[str, FlextTypes.Core.JsonValue]]
-        type BulkOperations = dict[str, str | int | list[str] | dict[str, object]]
-        type PreparedStatements = dict[str, str | dict[str, FlextTypes.Core.JsonValue]]
-        type SqlOptimization = dict[
-            str, bool | str | dict[str, FlextTypes.Core.ConfigValue]
+        type QueryExecution = dict[str, str | dict[str, FlextTypes.JsonValue]]
+        type BulkOperations = dict[
+            str, str | int | FlextTypes.StringList | FlextTypes.Dict
         ]
-        type ResultSetHandling = dict[str, str | int | dict[str, object]]
+        type PreparedStatements = dict[str, str | dict[str, FlextTypes.JsonValue]]
+        type SqlOptimization = dict[str, bool | str | dict[str, FlextTypes.ConfigValue]]
+        type ResultSetHandling = dict[str, str | int | FlextTypes.Dict]
 
     # =========================================================================
     # ORACLE PERFORMANCE TYPES - Complex Oracle performance optimization types
@@ -121,17 +113,13 @@ class FlextTargetOracleTypes(FlextTypes):
         """Oracle performance optimization complex types."""
 
         type PerformanceConfiguration = dict[
-            str, str | int | dict[str, FlextTypes.Core.ConfigValue]
+            str, str | int | dict[str, FlextTypes.ConfigValue]
         ]
-        type ConnectionPooling = dict[
-            str, int | bool | dict[str, FlextTypes.Core.JsonValue]
-        ]
-        type BulkLoadOptimization = dict[str, str | int | dict[str, object]]
-        type QueryOptimization = dict[str, str | dict[str, FlextTypes.Core.JsonValue]]
-        type CachingStrategy = dict[
-            str, bool | str | dict[str, FlextTypes.Core.ConfigValue]
-        ]
-        type ParallelProcessing = dict[str, int | str | dict[str, object]]
+        type ConnectionPooling = dict[str, int | bool | dict[str, FlextTypes.JsonValue]]
+        type BulkLoadOptimization = dict[str, str | int | FlextTypes.Dict]
+        type QueryOptimization = dict[str, str | dict[str, FlextTypes.JsonValue]]
+        type CachingStrategy = dict[str, bool | str | dict[str, FlextTypes.ConfigValue]]
+        type ParallelProcessing = dict[str, int | str | FlextTypes.Dict]
 
     # =========================================================================
     # DATA TRANSFORMATION TYPES - Complex data transformation types
@@ -141,13 +129,13 @@ class FlextTargetOracleTypes(FlextTypes):
         """Data transformation complex types."""
 
         type TransformationConfiguration = dict[
-            str, str | bool | dict[str, FlextTypes.Core.ConfigValue]
+            str, str | bool | dict[str, FlextTypes.ConfigValue]
         ]
-        type FieldMapping = dict[str, str | list[str] | dict[str, object]]
-        type DataValidation = dict[str, str | dict[str, FlextTypes.Core.JsonValue]]
-        type TypeConversion = dict[str, bool | str | dict[str, object]]
-        type FilteringRules = dict[str, str | dict[str, FlextTypes.Core.JsonValue]]
-        type TransformationResult = dict[str, dict[str, FlextTypes.Core.JsonValue]]
+        type FieldMapping = dict[str, str | FlextTypes.StringList | FlextTypes.Dict]
+        type DataValidation = dict[str, str | dict[str, FlextTypes.JsonValue]]
+        type TypeConversion = dict[str, bool | str | FlextTypes.Dict]
+        type FilteringRules = dict[str, str | dict[str, FlextTypes.JsonValue]]
+        type TransformationResult = dict[str, dict[str, FlextTypes.JsonValue]]
 
     # =========================================================================
     # STREAM PROCESSING TYPES - Complex stream handling types
@@ -157,13 +145,13 @@ class FlextTargetOracleTypes(FlextTypes):
         """Stream processing complex types."""
 
         type StreamConfiguration = dict[
-            str, str | bool | int | dict[str, FlextTypes.Core.ConfigValue]
+            str, str | bool | int | dict[str, FlextTypes.ConfigValue]
         ]
-        type StreamMetadata = dict[str, str | dict[str, FlextTypes.Core.JsonValue]]
-        type StreamRecord = dict[str, FlextTypes.Core.JsonValue | dict[str, object]]
-        type StreamState = dict[str, str | int | dict[str, FlextTypes.Core.JsonValue]]
-        type StreamBookmark = dict[str, str | int | dict[str, object]]
-        type StreamSchema = dict[str, str | dict[str, FlextTypes.Core.JsonValue] | bool]
+        type StreamMetadata = dict[str, str | dict[str, FlextTypes.JsonValue]]
+        type StreamRecord = dict[str, FlextTypes.JsonValue | FlextTypes.Dict]
+        type StreamState = dict[str, str | int | dict[str, FlextTypes.JsonValue]]
+        type StreamBookmark = dict[str, str | int | FlextTypes.Dict]
+        type StreamSchema = dict[str, str | dict[str, FlextTypes.JsonValue] | bool]
 
     # =========================================================================
     # ERROR HANDLING TYPES - Complex error management types
@@ -173,18 +161,14 @@ class FlextTargetOracleTypes(FlextTypes):
         """Error handling complex types."""
 
         type ErrorConfiguration = dict[
-            str, bool | str | int | dict[str, FlextTypes.Core.ConfigValue]
+            str, bool | str | int | dict[str, FlextTypes.ConfigValue]
         ]
-        type ErrorRecovery = dict[str, str | bool | dict[str, object]]
-        type ErrorReporting = dict[
-            str, str | int | dict[str, FlextTypes.Core.JsonValue]
-        ]
-        type ErrorClassification = dict[str, str | int | dict[str, object]]
-        type ErrorMetrics = dict[
-            str, int | float | dict[str, FlextTypes.Core.JsonValue]
-        ]
+        type ErrorRecovery = dict[str, str | bool | FlextTypes.Dict]
+        type ErrorReporting = dict[str, str | int | dict[str, FlextTypes.JsonValue]]
+        type ErrorClassification = dict[str, str | int | FlextTypes.Dict]
+        type ErrorMetrics = dict[str, int | float | dict[str, FlextTypes.JsonValue]]
         type ErrorTracking = list[
-            dict[str, str | int | dict[str, FlextTypes.Core.JsonValue]]
+            dict[str, str | int | dict[str, FlextTypes.JsonValue]]
         ]
 
     # =========================================================================
@@ -226,19 +210,17 @@ class FlextTargetOracleTypes(FlextTypes):
 
         # Singer target Oracle-specific project configurations
         type SingerTargetOracleProjectConfig = dict[
-            str, FlextTypes.Core.ConfigValue | object
+            str, FlextTypes.ConfigValue | object
         ]
-        type OracleLoaderConfig = dict[str, str | int | bool | list[str]]
-        type SingerProtocolConfig = dict[str, bool | str | dict[str, object]]
-        type TargetOraclePipelineConfig = dict[
-            str, FlextTypes.Core.ConfigValue | object
-        ]
+        type OracleLoaderConfig = dict[str, str | int | bool | FlextTypes.StringList]
+        type SingerProtocolConfig = dict[str, bool | str | FlextTypes.Dict]
+        type TargetOraclePipelineConfig = dict[str, FlextTypes.ConfigValue | object]
 
 
 # =============================================================================
 # PUBLIC API EXPORTS - Singer Oracle target TypeVars and types
 # =============================================================================
 
-__all__: list[str] = [
+__all__: FlextTypes.StringList = [
     "FlextTargetOracleTypes",
 ]

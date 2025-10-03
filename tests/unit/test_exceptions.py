@@ -13,8 +13,8 @@ from types import TracebackType
 
 import pytest
 from _pytest.logging import LogCaptureFixture
-from flext_core import FlextLogger
 
+from flext_core import FlextLogger
 from flext_target_oracle import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,
