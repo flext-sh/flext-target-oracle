@@ -195,8 +195,8 @@ with self.oracle_api as connected_api:
 **Código Problemático**:
 
 ```python
-def ensure_table_exists(...)  # Não precisa ser 
-def _create_table(...)        # Não precisa ser 
+def ensure_table_exists(...)  # Não precisa ser
+def _create_table(...)        # Não precisa ser
 ```
 
 **Impacto**:
