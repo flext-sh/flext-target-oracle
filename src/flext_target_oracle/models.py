@@ -5,9 +5,8 @@ This module provides data models for Oracle target operations.
 
 from __future__ import annotations
 
-from pydantic import Field
-
 from flext_core import FlextModels, FlextTypes
+from pydantic import Field
 
 
 class FlextTargetOracleModels(FlextModels):
@@ -105,13 +104,13 @@ class FlextTargetOracleModels(FlextModels):
         full_table_name: str = Field(description="Fully qualified table name")
 
         # Table structure
-        columns: list[dict] = Field(
+        columns: list[FlextTypes.Dict] = Field(
             default_factory=list, description="Table column definitions"
         )
         primary_keys: FlextTypes.StringList = Field(
             default_factory=list, description="Primary key column names"
         )
-        indexes: list[dict] = Field(
+        indexes: list[FlextTypes.Dict] = Field(
             default_factory=list, description="Table index definitions"
         )
 

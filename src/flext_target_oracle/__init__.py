@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Final
 
+from flext_core import FlextResult
 from flext_meltano import (
     FlextMeltanoBridge,
     FlextMeltanoConfig,
@@ -16,7 +17,6 @@ from flext_meltano import (
     FlextTargetAbstractions,
 )
 
-from flext_core import FlextResult
 from flext_target_oracle.config import FlextTargetOracleConfig, LoadMethod
 from flext_target_oracle.models import FlextTargetOracleModels
 from flext_target_oracle.protocols import FlextTargetOracleProtocols

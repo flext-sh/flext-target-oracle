@@ -362,6 +362,30 @@ class FlextTargetOracleExceptions(FlextExceptions):
         """Oracle record processing errors."""
 
 
+# Module-level aliases for backward compatibility
+FlextTargetOracleError = FlextTargetOracleExceptions.Error
+FlextTargetOracleConfigurationError = FlextTargetOracleExceptions.ConfigurationError
+FlextTargetOracleConnectionError = FlextTargetOracleExceptions.OracleConnectionError
+FlextTargetOracleValidationError = FlextTargetOracleExceptions.ValidationError
+FlextTargetOracleAuthenticationError = FlextTargetOracleExceptions.AuthenticationError
+FlextTargetOracleProcessingError = FlextTargetOracleExceptions.ProcessingError
+FlextTargetOracleTimeoutError = FlextTargetOracleExceptions.OracleTimeoutError
+FlextTargetOracleSchemaError = FlextTargetOracleExceptions.SchemaError
+FlextTargetOracleLoadError = FlextTargetOracleExceptions.LoadError
+FlextTargetOracleSQLError = FlextTargetOracleExceptions.SQLError
+FlextTargetOracleRecordError = FlextTargetOracleExceptions.RecordError
+
 __all__: FlextTypes.StringList = [
+    "FlextTargetOracleAuthenticationError",
+    "FlextTargetOracleConfigurationError",
+    "FlextTargetOracleConnectionError",
+    "FlextTargetOracleError",
     "FlextTargetOracleExceptions",
+    "FlextTargetOracleLoadError",
+    "FlextTargetOracleProcessingError",
+    "FlextTargetOracleRecordError",
+    "FlextTargetOracleSQLError",
+    "FlextTargetOracleSchemaError",
+    "FlextTargetOracleTimeoutError",
+    "FlextTargetOracleValidationError",
 ]

@@ -12,9 +12,8 @@ from __future__ import annotations
 import os
 from typing import ClassVar, Final
 
-from flext_db_oracle import FlextDbOracleConstants
-
 from flext_core import FlextConstants
+from flext_db_oracle import FlextDbOracleConstants
 
 
 def _env_enabled(flag_name: str, default: str = "1") -> bool:

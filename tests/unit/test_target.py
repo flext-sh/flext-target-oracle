@@ -12,9 +12,9 @@ from datetime import UTC, datetime
 
 import pytest
 from _pytest.capture import CaptureFixture
+from flext_core import FlextTypes
 from sqlalchemy import Engine, text
 
-from flext_core import FlextTypes
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleConfig,

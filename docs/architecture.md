@@ -143,7 +143,7 @@ class FlextOracleTargetLoader:
     def __init__(self, config: FlextOracleTargetConfig):
         # flext-db-oracle integration
         self.oracle_api = FlextDbOracleApi(oracle_config)
-        self._record_buffers: dict[str, list[dict]] = {}
+        self._record_buffers: dict[str, list[FlextTypes.Dict]] = {}
 
     # Table management
     def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[None]

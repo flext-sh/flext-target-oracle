@@ -1,6 +1,6 @@
 """Target Oracle protocols for FLEXT ecosystem."""
 
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 from flext_core import FlextProtocols, FlextResult, FlextTypes
 
@@ -42,9 +42,7 @@ class FlextTargetOracleProtocols:
         class ConnectionProtocol(FlextProtocols.Domain.Service, Protocol):
             """Protocol for Oracle connection management."""
 
-            def connect(
-                self, config: FlextTypes.Dict
-            ) -> FlextResult[FlextTypes.Any]: ...
+            def connect(self, config: FlextTypes.Dict) -> FlextResult[Any]: ...
 
         @runtime_checkable
         class SchemaProtocol(FlextProtocols.Domain.Service, Protocol):

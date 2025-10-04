@@ -13,8 +13,6 @@ from __future__ import annotations
 import sys
 from typing import cast, override
 
-from pydantic import Field, PrivateAttr
-
 from flext_core import (
     FlextBus,
     FlextDispatcher,
@@ -23,6 +21,8 @@ from flext_core import (
     FlextService,
     FlextTypes,
 )
+from pydantic import Field, PrivateAttr
+
 from flext_target_oracle.constants import FlextTargetOracleConstants
 from flext_target_oracle.target_commands import (
     OracleTargetCommandFactory,

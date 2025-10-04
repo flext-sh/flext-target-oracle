@@ -194,7 +194,7 @@ def process_record(record: dict) -> FlextResult[None]:
         return FlextResult[None].fail(f"Processing failed: {e}")
 
 # ✅ Chain FlextResult operations
-def process_batch(records: list[dict]) -> FlextResult[Stats]:
+def process_batch(records: list[FlextTypes.Dict]) -> FlextResult[Stats]:
     """Process batch of records with early termination on failure."""
     stats = Stats()
 
@@ -594,7 +594,7 @@ def sample_records():
 import time
 from typing import List
 
-def benchmark_batch_sizes(records: List[dict]):
+def benchmark_batch_sizes(records: List[FlextTypes.Dict]):
     """Benchmark different batch sizes."""
 
     batch_sizes = [100, 500, 1000, 2000, 5000]
