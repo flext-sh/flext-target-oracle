@@ -13,10 +13,10 @@ import time
 from typing import cast
 
 import pytest
+from flext_core import FlextTypes
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
-from flext_core import FlextTypes
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleConfig,

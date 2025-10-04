@@ -9,9 +9,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, Field, field_validator
-
 from flext_core import FlextModels, FlextResult, FlextTypes
+from pydantic import BaseModel, Field, field_validator
 
 # Oracle schema constants
 PUBLIC = "PUBLIC"

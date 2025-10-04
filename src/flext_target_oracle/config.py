@@ -12,10 +12,9 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Self
 
+from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
-
-from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
 
 
 class LoadMethod(StrEnum):

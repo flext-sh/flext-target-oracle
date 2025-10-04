@@ -16,9 +16,9 @@ import time
 from datetime import UTC
 from typing import cast
 
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from pydantic import SecretStr
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
 
 # Configure production-grade logging

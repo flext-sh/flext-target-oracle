@@ -15,10 +15,10 @@ from pathlib import Path
 from typing import override
 
 import yaml
+from flext_core import FlextHandlers, FlextModels, FlextResult, FlextTypes
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from pydantic import Field
 
-from flext_core import FlextHandlers, FlextModels, FlextResult, FlextTypes
 from flext_target_oracle.config import FlextTargetOracleConfig
 from flext_target_oracle.target_client import FlextTargetOracle
 from flext_target_oracle.target_services import OracleConnectionService

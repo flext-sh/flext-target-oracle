@@ -10,9 +10,9 @@ SPDX-License-Identifier: MIT
 import os
 
 import pytest
+from flext_core import FlextResult
 from pydantic import SecretStr, ValidationError
 
-from flext_core import FlextResult
 from flext_target_oracle import FlextTargetOracleConfig, LoadMethod
 
 
