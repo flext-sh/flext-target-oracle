@@ -26,7 +26,7 @@ from flext_target_oracle.target_exceptions import (
     FlextTargetOracleConnectionError,
 )
 
-_logger = FlextLogger(__name__)
+logger = FlextLogger(__name__)
 
 
 class FlextTargetOracleLoader(FlextService[FlextTypes.Dict]):
@@ -139,7 +139,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Dict]):
 
             return FlextResult[None].ok(None)
         except Exception as e:
-            _logger.exception("Failed to connect loader")
+            logger.exception("Failed to connect loader")
             self.log_error("Failed to connect loader", extra={"error": str(e)})
             return FlextResult[None].fail(f"Connect failed: {e}")
 
@@ -157,7 +157,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Dict]):
 
             return FlextResult[None].ok(None)
         except Exception as e:
-            _logger.exception("Failed to disconnect loader")
+            logger.exception("Failed to disconnect loader")
             self.log_error("Failed to disconnect loader", extra={"error": str(e)})
             return FlextResult[None].fail(f"Disconnect failed: {e}")
 
