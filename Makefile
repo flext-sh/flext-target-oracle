@@ -231,3 +231,55 @@ ti: test-integration ## Alias for test-integration
 c: coverage ## Alias for coverage
 l: std-lint ## Alias for lint
 f: std-format ## Alias for format
+# =============================================================================
+# MAINTENANCE
+# =============================================================================
+
+.PHONY: clean
+clean: ## Clean build artifacts and cruft
+	@echo "🧹 Cleaning $(PROJECT_NAME) - removing build artifacts, cache files, and cruft..."
+
+	# Build artifacts
+	rm -rf build/ dist/ *.egg-info/
+
+	# Test artifacts
+	rm -rf .pytest_cache/ htmlcov/ .coverage .coverage.* coverage.xml
+
+	# Python cache directories
+	rm -rf .mypy_cache/ .pyrefly_cache/ .ruff_cache/
+
+	# Python bytecode
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	find . -type f -name "*.pyo" -delete 2>/dev/null || true
+
+	# Temporary files
+	find . -type f -name "*.tmp" -delete 2>/dev/null || true
+	find . -type f -name "*.temp" -delete 2>/dev/null || true
+	find . -type f -name ".DS_Store" -delete 2>/dev/null || true
+
+	# Log files
+	find . -type f -name "*.log" -delete 2>/dev/null || true
+
+	# Editor files
+	find . -type f -name ".vscode/settings.json" -delete 2>/dev/null || true
+	find . -type f -name ".idea/" -type d -exec rm -rf {} + 2>/dev/null || true
+
+	
+	# Target-specific files
+	rm -rf state.json state-*.json
+	rm -rf data/ output/ temp/
+
+	@echo "✅ $(PROJECT_NAME) cleanup complete"
+
+.PHONY: clean-all
+clean-all: clean ## Deep clean including venv
+	rm -rf .venv/
+
+.PHONY: reset
+reset: clean-all setup ## Reset project
+
+# =============================================================================
+# DIAGNOSTICS
+# =============================================================================
+
