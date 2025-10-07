@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 import logging
 from datetime import UTC, datetime
 from types import TracebackType
+from typing import Never
 
 import pytest
 from _pytest.logging import LogCaptureFixture
