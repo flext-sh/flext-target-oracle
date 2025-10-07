@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 
 import json
 import os
+from asyncio import AbstractEventLoop, get_event_loop_policy
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
