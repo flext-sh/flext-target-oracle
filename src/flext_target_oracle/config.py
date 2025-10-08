@@ -497,8 +497,14 @@ def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResul
             return FlextResult[None].fail(error_message)
 
     # Validate Oracle port range
-    if not (1 <= config.oracle_port <= 65535):
-        return FlextResult[None].fail("Oracle port must be between 1 and 65535")
+    if not (
+        FlextConstants.Network.MIN_PORT
+        <= config.oracle_port
+        <= FlextConstants.Network.MAX_PORT
+    ):
+        return FlextResult[None].fail(
+            f"Oracle port must be between {FlextConstants.Network.MIN_PORT} and {FlextConstants.Network.MAX_PORT}"
+        )
 
     # Validate batch size constraints
     if config.batch_size < 1:

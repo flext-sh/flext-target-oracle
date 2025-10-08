@@ -433,7 +433,7 @@ class FlextTargetOracle(
             "current_state": self.state,
         }
 
-    def write_record(self, record_data: str) -> FlextResult[None]:
+    def write_record(self, _record_data: str) -> FlextResult[None]:
         """Write a Singer record (stub - not implemented)."""
         return FlextResult[None].fail("write_record not implemented in stub")
 
