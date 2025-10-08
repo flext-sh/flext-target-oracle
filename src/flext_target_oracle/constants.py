@@ -28,9 +28,6 @@ class FlextTargetOracleConstants(FlextConstants):
     Composes with FlextDbOracleConstants to avoid duplication and ensure consistency.
     """
 
-    # Import Oracle database-specific constants from flext-db-oracle (composition pattern)
-    from flext_db_oracle.constants import FlextDbOracleConstants
-
     class Connection:
         """Connection-related constants for Oracle target."""
 

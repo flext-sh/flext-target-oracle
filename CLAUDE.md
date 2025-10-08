@@ -450,7 +450,7 @@ class TestOracleErrorResilience:
 
 ```bash
 # Oracle Target Development Workflow
-cd /home/marlonsc/flext/flext-target-oracle
+cd .
 
 # Quality Validation (MANDATORY before commits)
 make validate                    # Complete: lint + type + security + test (90%+)

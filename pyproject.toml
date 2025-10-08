@@ -28,7 +28,6 @@
     ]
     description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
     keywords = [
-        "",
         "data-loading",
         "database",
         "enterprise",
