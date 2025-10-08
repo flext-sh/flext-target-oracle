@@ -6,7 +6,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from datetime import UTC
+import json
+from datetime import UTC, datetime
 from typing import ClassVar
 
 from flext_core import FlextConstants, FlextResult, FlextTypes, FlextUtilities
@@ -186,9 +187,12 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 "array": "CLOB",
             }
 
-            if singer_type == "string" and format_spec:
-                if format_spec in {"date", "date-time"} or format_spec == "time":
-                    return "TIMESTAMP"
+            if (
+                singer_type == "string"
+                and format_spec
+                and (format_spec in {"date", "date-time"} or format_spec == "time")
+            ):
+                return "TIMESTAMP"
 
             return type_mapping.get(singer_type, "CLOB")
 
@@ -270,7 +274,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 column_list = ", ".join(f'"{col.upper()}"' for col in columns)
                 placeholder_list = ", ".join("?" for _ in columns)
 
-                statement = f'INSERT INTO "{table_name.upper()}" ({column_list}) VALUES ({placeholder_list})'
+                statement = f'INSERT INTO "{table_name.upper()}" ({column_list}) VALUES ({placeholder_list})'  # noqa: S608
                 return FlextResult[str].ok(statement)
 
             except Exception as e:
@@ -302,8 +306,6 @@ class FlextTargetOracleUtilities(FlextUtilities):
                         transformed[key.upper()] = 1 if value else 0
                     # Convert complex types to JSON string
                     elif isinstance(value, (dict, list)):
-                        import json
-
                         transformed[key.upper()] = json.dumps(value)
                     else:
                         transformed[key.upper()] = value
@@ -493,8 +495,6 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
             """
             try:
-                from datetime import datetime
-
                 state = {
                     "streams": stream_states,
                     "target_type": "oracle",
@@ -529,8 +529,6 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
             """
             try:
-                from datetime import datetime
-
                 updated_state = current_state.copy()
 
                 if "streams" not in updated_state:
