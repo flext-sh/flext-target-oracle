@@ -12,9 +12,8 @@ from flext_core import FlextResult
 from flext_meltano import (
     FlextMeltanoBridge,
     FlextMeltanoConfig,
+    FlextMeltanoTargetAbstractions,
     FlextMeltanoTypes,
-    FlextSingerTypes,
-    FlextTargetAbstractions,
 )
 
 from flext_target_oracle.config import FlextTargetOracleConfig, LoadMethod
@@ -73,12 +72,12 @@ __all__ = [
     "ConnectionServiceProtocol",
     "FlextMeltanoBridge",
     "FlextMeltanoConfig",
+    "FlextMeltanoTargetAbstractions",
+    "FlextMeltanoTypes",
     "FlextMeltanoTypes",
     "FlextOracleError",
     "FlextOracleObs",
     "FlextResult",
-    "FlextSingerTypes",
-    "FlextTargetAbstractions",
     "FlextTargetOracle",
     "FlextTargetOracleAuthenticationError",
     "FlextTargetOracleCliService",

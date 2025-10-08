@@ -114,7 +114,7 @@ class OracleConnectionService(FlextService[None]):
         description="Oracle database API instance",
     )
 
-    def __init__(self, **data) -> None:
+    def __init__(self, **data: object) -> None:
         """Initialize Oracle connection service."""
         super().__init__(**data)
         # ZERO TOLERANCE FIX: Use FlextTargetOracleUtilities for ALL business logic
@@ -235,7 +235,7 @@ class OracleSchemaService(FlextService[None]):
         description="Oracle database API instance",
     )
 
-    def __init__(self, **data) -> None:
+    def __init__(self, **data: object) -> None:
         """Initialize Oracle schema service."""
         super().__init__(**data)
         # ZERO TOLERANCE FIX: Use FlextTargetOracleUtilities for ALL business logic
@@ -561,7 +561,7 @@ class OracleRecordService(FlextService[None]):
         description="Oracle target configuration",
     )
 
-    def __init__(self, **data) -> None:
+    def __init__(self, **data: object) -> None:
         """Initialize Oracle record service."""
         super().__init__(**data)
         # ZERO TOLERANCE FIX: Use FlextTargetOracleUtilities for ALL business logic

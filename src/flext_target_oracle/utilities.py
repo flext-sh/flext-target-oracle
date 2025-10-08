@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import UTC
 from typing import ClassVar
 
-from flext_core import FlextResult, FlextTypes, FlextUtilities
+from flext_core import FlextConstants, FlextResult, FlextTypes, FlextUtilities
 
 
 class FlextTargetOracleUtilities(FlextUtilities):
@@ -418,9 +418,13 @@ class FlextTargetOracleUtilities(FlextUtilities):
             # Validate port number
             try:
                 port = int(config["port"])
-                if port < 1 or port > 65535:
+                if not (
+                    FlextConstants.Network.MIN_PORT
+                    <= port
+                    <= FlextConstants.Network.MAX_PORT
+                ):
                     return FlextResult[FlextTypes.Dict].fail(
-                        "Oracle port must be between 1 and 65535"
+                        f"Oracle port must be between {FlextConstants.Network.MIN_PORT} and {FlextConstants.Network.MAX_PORT}"
                     )
             except (ValueError, TypeError):
                 return FlextResult[FlextTypes.Dict].fail(
