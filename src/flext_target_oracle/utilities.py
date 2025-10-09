@@ -274,7 +274,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 column_list = ", ".join(f'"{col.upper()}"' for col in columns)
                 placeholder_list = ", ".join("?" for _ in columns)
 
-                statement = f'INSERT INTO "{table_name.upper()}" ({column_list}) VALUES ({placeholder_list})'  # noqa: S608
+                statement = f'INSERT INTO "{table_name.upper()}" ({column_list}) VALUES ({placeholder_list})'
                 return FlextResult[str].ok(statement)
 
             except Exception as e:

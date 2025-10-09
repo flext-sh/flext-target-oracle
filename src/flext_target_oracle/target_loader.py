@@ -345,7 +345,7 @@ class FlextTargetOracleLoader(FlextService[FlextTypes.Dict]):
                     insert_sql = f"""
                     INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT)
                     VALUES (: "data", : "extracted_at", :loaded_at)
-                    """  # noqa: S608
+                    """
 
                     # Execute parameterized query through flext-db-oracle
                     params = {
