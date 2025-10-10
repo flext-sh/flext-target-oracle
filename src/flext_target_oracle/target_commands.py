@@ -252,7 +252,7 @@ class OracleTargetCommandHandler(FlextHandlers[FlextModels.Command, str]):
     @override
     def __init__(self: object) -> None:
         """Initialize Oracle target command handler."""
-        config: FlextTypes.Dict = FlextModels.CqrsConfig.Handler(
+        config: FlextTypes.Dict = FlextModels.Cqrs.Handler(
             handler_id="oracle_target_command_handler",
             handler_name="Oracle Target Command Handler",
             handler_type="command",
