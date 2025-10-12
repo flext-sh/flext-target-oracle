@@ -13,12 +13,12 @@ FLEXT Target Oracle implements a layered architecture following Clean Architectu
 The target is built on foundational FLEXT patterns:
 
 ```python
-# FlextResult Railway Pattern - Consistent error handling
-from flext_core import FlextResult, FlextModels.Value, FlextLogger
+# FlextCore.Result Railway Pattern - Consistent error handling
+from flext_core import FlextCore
 
 # Configuration with domain validation
-class FlextOracleTargetConfig(FlextModels.Value):
-    def validate_domain_rules(self) -> FlextResult[None]:
+class FlextOracleTargetConfig(FlextCore.Models.Value):
+    def validate_domain_rules(self) -> FlextCore.Result[None]:
         # Chain of Responsibility validation pattern
 ```
 
@@ -85,18 +85,18 @@ class FlextOracleTarget(Target):
     """Singer Target implementation with FLEXT patterns."""
 
     # Singer protocol compliance
-    def process_singer_message(self, message: dict) -> FlextResult[None]
-    def _handle_schema(self, message: dict) -> FlextResult[None]
-    def _handle_record(self, message: dict) -> FlextResult[None]
-    def _handle_state(self, message: dict) -> FlextResult[None]
+    def process_singer_message(self, message: dict) -> FlextCore.Result[None]
+    def _handle_schema(self, message: dict) -> FlextCore.Result[None]
+    def _handle_record(self, message: dict) -> FlextCore.Result[None]
+    def _handle_state(self, message: dict) -> FlextCore.Result[None]
 
     # Lifecycle management
-    def finalize(self) -> FlextResult[FlextTypes.Dict]
+    def finalize(self) -> FlextCore.Result[FlextCore.Types.Dict]
 ```
 
 **Key Patterns**:
 
-- **FlextResult Railway Pattern**: All operations return `FlextResult<T>`
+- **FlextCore.Result Railway Pattern**: All operations return `FlextCore.Result<T>`
 - **Message Type Routing**: Dispatch based on Singer message type
 - **Dependency Injection**: Uses `FlextOracleTargetLoader` for data operations
 
@@ -105,7 +105,7 @@ class FlextOracleTarget(Target):
 **Responsibility**: Configuration management with domain validation
 
 ```python
-class FlextOracleTargetConfig(FlextModels.Value):
+class FlextOracleTargetConfig(FlextCore.Models.Value):
     """Type-safe configuration with business rule validation."""
 
     # Required Oracle connection parameters
@@ -122,7 +122,7 @@ class FlextOracleTargetConfig(FlextModels.Value):
     use_bulk_operations: bool = True
     connection_timeout: int = 30
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self) -> FlextCore.Result[None]:
         """Chain of Responsibility validation pattern."""
 ```
 
@@ -143,14 +143,14 @@ class FlextOracleTargetLoader:
     def __init__(self, config: FlextOracleTargetConfig):
         # flext-db-oracle integration
         self.oracle_api = FlextDbOracleApi(oracle_config)
-        self._record_buffers: dict[str, list[FlextTypes.Dict]] = {}
+        self._record_buffers: dict[str, list[FlextCore.Types.Dict]] = {}
 
     # Table management
-    def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[None]
+    def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextCore.Result[None]
 
     # Data loading with batching
-    def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]
-    def finalize_all_streams(self) -> FlextResult[FlextTypes.Dict]
+    def load_record(self, stream_name: str, record_data: dict) -> FlextCore.Result[None]
+    def finalize_all_streams(self) -> FlextCore.Result[FlextCore.Types.Dict]
 ```
 
 **Key Patterns**:
@@ -177,16 +177,16 @@ sequenceDiagram
     FL->>API: get_tables(schema_name)
     API->>DB: SELECT table_name FROM all_tables
     DB-->>API: Table list
-    API-->>FL: FlextResult[List[str]]
+    API-->>FL: FlextCore.Result[FlextCore.Types.StringList]
 
     alt Table doesn't exist
         FL->>API: execute_ddl(CREATE TABLE)
         API->>DB: CREATE TABLE statement
         DB-->>API: Success/Error
-        API-->>FL: FlextResult[None]
+        API-->>FL: FlextCore.Result[None]
     end
 
-    FL-->>FT: FlextResult[None]
+    FL-->>FT: FlextCore.Result[None]
     FT-->>ST: Processing result
 
     Note over ST,DB: RECORD Message Processing
@@ -199,11 +199,11 @@ sequenceDiagram
             FL->>API: execute_dml(INSERT batch)
             API->>DB: Batch INSERT
             DB-->>API: Success/Error
-            API-->>FL: FlextResult[None]
+            API-->>FL: FlextCore.Result[None]
             FL->>FL: Clear buffer
         end
 
-        FL-->>FT: FlextResult[None]
+        FL-->>FT: FlextCore.Result[None]
         FT-->>ST: Processing result
     end
 
@@ -215,10 +215,10 @@ sequenceDiagram
         FL->>API: execute_dml(Final batch)
         API->>DB: INSERT remaining records
         DB-->>API: Success/Error
-        API-->>FL: FlextResult[None]
+        API-->>FL: FlextCore.Result[None]
     end
 
-    FL-->>FT: FlextResult[Statistics]
+    FL-->>FT: FlextCore.Result[Statistics]
     FT-->>ST: Final statistics
 ```
 
@@ -226,10 +226,10 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A[Operation Start] --> B{FlextResult Pattern}
+    A[Operation Start] --> B{FlextCore.Result Pattern}
     B -->|Success| C[Continue Pipeline]
     B -->|Failure| D[Log Error with Context]
-    D --> E[Return FlextResult[None].fail()]
+    D --> E[Return FlextCore.Result[None].fail()]
     E --> F[Caller Handles Error]
     F --> G{Recoverable?}
     G -->|Yes| H[Retry with Backoff]
@@ -251,7 +251,7 @@ class BatchProcessor:
         self._buffers: dict[str, list[Record]] = {}
         self._batch_size = batch_size
 
-    def add_record(self, stream: str, record: dict) -> FlextResult[None]:
+    def add_record(self, stream: str, record: dict) -> FlextCore.Result[None]:
         # Add to buffer
         buffer = self._buffers.setdefault(stream, [])
         buffer.append(record)
@@ -260,7 +260,7 @@ class BatchProcessor:
         if len(buffer) >= self._batch_size:
             return self._flush_batch(stream)
 
-        return FlextResult[None].ok(None)
+        return FlextCore.Result[None].ok(None)
 ```
 
 ### Connection Management
@@ -328,7 +328,7 @@ tests/
 ### Test Patterns
 
 ```python
-# FlextResult testing pattern
+# FlextCore.Result testing pattern
 def test_operation_success():
     result = operation()
     assert result.success
@@ -429,7 +429,7 @@ networks:
 
 ```python
 # Structured logging with correlation IDs
-logger = FlextLogger(__name__)
+logger = FlextCore.Logger(__name__)
 logger.info("Batch processing started", extra={
     "stream_name": stream_name,
     "batch_size": len(records),

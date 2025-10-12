@@ -6,14 +6,14 @@ from __future__ import annotations
 
 This module provides specialized services following Single Responsibility Principle
 to support Oracle Singer target operations. Each service has a focused responsibility
-and uses dependency injection via FlextContainer
+and uses dependency injection via FlextCore.Container
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 """
 from typing import Protocol, override
 
-from flext_core import FlextResult, FlextService, FlextTypes
+from flext_core import FlextCore
 from flext_db_oracle import FlextDbOracleApi
 from pydantic import Field
 
@@ -33,10 +33,10 @@ ALL_STREAMS = "__ALL_STREAMS__"
 class ConnectionServiceProtocol(Protocol):
     """Protocol for Oracle connection management services."""
 
-    def test_connection(self: object) -> FlextResult[None]:
+    def test_connection(self: object) -> FlextCore.Result[None]:
         """Test Oracle database connection."""
 
-    def get_connection_info(self: object) -> FlextResult[OracleConnectionModel]:
+    def get_connection_info(self: object) -> FlextCore.Result[OracleConnectionModel]:
         """Get connection information."""
 
 
@@ -46,16 +46,16 @@ class SchemaServiceProtocol(Protocol):
     def ensure_table_exists(
         self,
         stream: SingerStreamModel,
-        schema: FlextTypes.Dict,
-        key_properties: FlextTypes.StringList | None = None,
-    ) -> FlextResult[None]:
+        schema: FlextCore.Types.Dict,
+        key_properties: FlextCore.Types.StringList | None = None,
+    ) -> FlextCore.Result[None]:
         """Ensure table exists for Singer stream."""
 
     def get_table_columns(
         self,
         table_name: str,
         schema_name: str,
-    ) -> FlextResult[list[FlextTypes.Dict]]:
+    ) -> FlextCore.Result[list[FlextCore.Types.Dict]]:
         """Get table column definitions."""
 
 
@@ -65,14 +65,14 @@ class BatchServiceProtocol(Protocol):
     def add_record(
         self,
         stream_name: str,
-        _record: FlextTypes.Dict,
-    ) -> FlextResult[None]:
+        _record: FlextCore.Types.Dict,
+    ) -> FlextCore.Result[None]:
         """Add record to batch processing queue."""
 
-    def flush_batch(self, stream_name: str) -> FlextResult[None]:
+    def flush_batch(self, stream_name: str) -> FlextCore.Result[None]:
         """Flush pending batch for stream."""
 
-    def flush_all_batches(self) -> FlextResult[LoadStatisticsModel]:
+    def flush_all_batches(self) -> FlextCore.Result[LoadStatisticsModel]:
         """Flush all pending batches."""
 
 
@@ -81,30 +81,30 @@ class RecordServiceProtocol(Protocol):
 
     def transform_record(
         self,
-        record: FlextTypes.Dict,
+        record: FlextCore.Types.Dict,
         stream: SingerStreamModel,
-    ) -> FlextResult[FlextTypes.Dict]:
+    ) -> FlextCore.Result[FlextCore.Types.Dict]:
         """Transform Singer record for Oracle storage."""
 
     def validate_record(
         self,
-        record: FlextTypes.Dict,
-        schema: FlextTypes.Dict,
-    ) -> FlextResult[None]:
+        record: FlextCore.Types.Dict,
+        schema: FlextCore.Types.Dict,
+    ) -> FlextCore.Result[None]:
         """Validate record against schema."""
 
 
-class OracleConnectionService(FlextService[None]):
+class OracleConnectionService(FlextCore.Service[None]):
     """Oracle database connection lifecycle management using flext-core domain patterns.
 
     Handles Oracle database connections, connection pooling,
     and connection health monitoring following Single Responsibility Principle.
-    Uses FlextService foundation to eliminate duplication and ensure SOLID principles.
+    Uses FlextCore.Service foundation to eliminate duplication and ensure SOLID principles.
 
     Pydantic-based field definitions following flext-core SOURCE OF TRUTH patterns.
     """
 
-    # Pydantic fields - seguindo FlextModels.Config padrão da SOURCE OF TRUTH
+    # Pydantic fields - seguindo FlextCore.Models.Config padrão da SOURCE OF TRUTH
     config: FlextTargetOracleConfig = Field(
         ...,
         description="Oracle target configuration",
@@ -134,11 +134,11 @@ class OracleConnectionService(FlextService[None]):
             connection_timeout=self._config.connection_timeout,
         )
 
-    def test_connection(self: object) -> FlextResult[None]:
+    def test_connection(self: object) -> FlextCore.Result[None]:
         """Test Oracle database connection using zero-fallback error handling.
 
         Returns:
-            FlextResult indicating connection success/failure
+            FlextCore.Result indicating connection success/failure
 
         """
         # ZERO TOLERANCE FIX: Use utilities for connection validation
@@ -154,18 +154,18 @@ class OracleConnectionService(FlextService[None]):
             })
         )
         if validation_result.is_failure:
-            return FlextResult[None].fail(
+            return FlextCore.Result[None].fail(
                 f"Connection configuration validation failed: {validation_result.error}"
             )
 
-        # Use direct API access with explicit FlextResult error handling - NO fallbacks
+        # Use direct API access with explicit FlextCore.Result error handling - NO fallbacks
         with self.oracle_api as connected_api:
             tables_result = connected_api.get_tables(
                 schema=self._config.default_target_schema,
             )
 
             if tables_result.is_failure:
-                return FlextResult[None].fail(
+                return FlextCore.Result[None].fail(
                     f"Connection test failed: {tables_result.error}",
                 )
 
@@ -191,41 +191,41 @@ class OracleConnectionService(FlextService[None]):
                     f"Diagnostics generation failed: {diagnostics_result.error}"
                 )
 
-            # Use FlextService built-in logging instead of module logger
+            # Use FlextCore.Service built-in logging instead of module logger
             self.log_info("Oracle connection test successful")
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
 
     @override
-    def execute(self: object) -> FlextResult[None]:
-        """Execute domain service - implements FlextService abstract method.
+    def execute(self: object) -> FlextCore.Result[None]:
+        """Execute domain service - implements FlextCore.Service abstract method.
 
         Executes the primary domain operation: testing Oracle connection.
 
         Returns:
-            FlextResult[None] indicating connection test success/failure
+            FlextCore.Result[None] indicating connection test success/failure
 
         """
         return self.test_connection()
 
-    def get_connection_info(self: object) -> FlextResult[OracleConnectionModel]:
+    def get_connection_info(self: object) -> FlextCore.Result[OracleConnectionModel]:
         """Get connection information.
 
         Returns:
-            FlextResult containing connection model
+            FlextCore.Result containing connection model
 
         """
-        return FlextResult[OracleConnectionModel].ok(self.connection_model)
+        return FlextCore.Result[OracleConnectionModel].ok(self.connection_model)
 
 
-class OracleSchemaService(FlextService[None]):
+class OracleSchemaService(FlextCore.Service[None]):
     """Oracle schema and table management using flext-core domain patterns.
 
     Handles Oracle table creation, schema evolution, and metadata
     management following Single Responsibility Principle and
-    FlextService patterns.
+    FlextCore.Service patterns.
     """
 
-    # Pydantic fields - seguindo FlextModels.Config padrão da SOURCE OF TRUTH
+    # Pydantic fields - seguindo FlextCore.Models.Config padrão da SOURCE OF TRUTH
     config: FlextTargetOracleConfig = Field(
         ...,
         description="Oracle target configuration",
@@ -242,18 +242,18 @@ class OracleSchemaService(FlextService[None]):
         self._utilities = FlextTargetOracleUtilities()
 
     @override
-    def execute(self: object) -> FlextResult[None]:
-        """Execute domain service - implements FlextService abstract method.
+    def execute(self: object) -> FlextCore.Result[None]:
+        """Execute domain service - implements FlextCore.Service abstract method.
 
         For schema service, execute validates Oracle schema access.
 
         Returns:
-            FlextResult[None] indicating schema access validation
+            FlextCore.Result[None] indicating schema access validation
 
         """
         return self.validate_schema_access()
 
-    def validate_schema_access(self: object) -> FlextResult[None]:
+    def validate_schema_access(self: object) -> FlextCore.Result[None]:
         """Validate Oracle schema access and permissions."""
         try:
             # ZERO TOLERANCE FIX: Use utilities for schema validation
@@ -265,7 +265,7 @@ class OracleSchemaService(FlextService[None]):
             )
 
             if schema_validation.is_failure:
-                return FlextResult[None].fail(
+                return FlextCore.Result[None].fail(
                     f"Schema validation failed: {schema_validation.error}"
                 )
 
@@ -276,25 +276,25 @@ class OracleSchemaService(FlextService[None]):
                 )
 
                 if tables_result.is_failure:
-                    return FlextResult[None].fail(
+                    return FlextCore.Result[None].fail(
                         f"Schema access validation failed: {tables_result.error}",
                     )
 
                 self.log_info(
                     f"Schema access validated for {self._config.default_target_schema}",
                 )
-                return FlextResult[None].ok(None)
+                return FlextCore.Result[None].ok(None)
 
         except Exception as e:
             self.log_error(f"Schema access validation failed: {e}")
-            return FlextResult[None].fail(f"Schema validation failed: {e}")
+            return FlextCore.Result[None].fail(f"Schema validation failed: {e}")
 
     def ensure_table_exists(
         self,
         stream: SingerStreamModel,
-        schema: FlextTypes.Dict,
-        key_properties: FlextTypes.StringList | None = None,
-    ) -> FlextResult[None]:
+        schema: FlextCore.Types.Dict,
+        key_properties: FlextCore.Types.StringList | None = None,
+    ) -> FlextCore.Result[None]:
         """Ensure Oracle table exists for stream data.
 
         Args:
@@ -303,7 +303,7 @@ class OracleSchemaService(FlextService[None]):
             key_properties: Primary key columns
 
         Returns:
-            FlextResult indicating success/failure
+            FlextCore.Result indicating success/failure
 
         """
         try:
@@ -319,17 +319,17 @@ class OracleSchemaService(FlextService[None]):
                 return self._create_table(stream, schema, key_properties)
             # Table exists, optionally evolve schema
             self.log_info(f"Table {stream.table_name} already exists")
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
 
         except Exception as e:
             self.log_error(f"Failed to ensure table exists: {e}")
-            return FlextResult[None].fail(f"Table existence check failed: {e}")
+            return FlextCore.Result[None].fail(f"Table existence check failed: {e}")
 
     def get_table_columns(
         self,
         table_name: str,
         schema_name: str | None = None,
-    ) -> FlextResult[list[FlextTypes.Dict]]:
+    ) -> FlextCore.Result[list[FlextCore.Types.Dict]]:
         """Get column information for Oracle table.
 
         Args:
@@ -337,7 +337,7 @@ class OracleSchemaService(FlextService[None]):
             schema_name: Oracle schema name
 
         Returns:
-            FlextResult containing column definitions
+            FlextCore.Result containing column definitions
 
         """
         try:
@@ -349,26 +349,26 @@ class OracleSchemaService(FlextService[None]):
                 )
 
                 if columns_result.is_failure:
-                    return FlextResult[list[FlextTypes.Dict]].fail(
+                    return FlextCore.Result[list[FlextCore.Types.Dict]].fail(
                         f"Failed to get columns: {columns_result.error}",
                     )
 
-                return FlextResult[list[FlextTypes.Dict]].ok(
+                return FlextCore.Result[list[FlextCore.Types.Dict]].ok(
                     columns_result.data or [],
                 )
 
         except Exception as e:
             self.log_error(f"Failed to get table columns: {e}")
-            return FlextResult[list[FlextTypes.Dict]].fail(
+            return FlextCore.Result[list[FlextCore.Types.Dict]].fail(
                 f"Column retrieval failed: {e}",
             )
 
     def _create_table(
         self,
         stream: SingerStreamModel,
-        schema: FlextTypes.Dict,
-        key_properties: FlextTypes.StringList | None = None,
-    ) -> FlextResult[None]:
+        schema: FlextCore.Types.Dict,
+        key_properties: FlextCore.Types.StringList | None = None,
+    ) -> FlextCore.Result[None]:
         """Create Oracle table based on stream configuration.
 
         Args:
@@ -377,7 +377,7 @@ class OracleSchemaService(FlextService[None]):
             key_properties: Primary key columns
 
         Returns:
-            FlextResult indicating success/failure
+            FlextCore.Result indicating success/failure
 
         """
         try:
@@ -390,7 +390,7 @@ class OracleSchemaService(FlextService[None]):
             )
 
             if ddl_result.is_failure:
-                return FlextResult[None].fail(
+                return FlextCore.Result[None].fail(
                     f"DDL generation failed: {ddl_result.error}"
                 )
 
@@ -402,13 +402,15 @@ class OracleSchemaService(FlextService[None]):
                 )
 
                 if validation_result.is_failure:
-                    return FlextResult[None].fail(
+                    return FlextCore.Result[None].fail(
                         f"DDL validation failed: {validation_result.error}"
                     )
 
-                exec_result: FlextResult[object] = connected_api.execute_sql(ddl_sql)
+                exec_result: FlextCore.Result[object] = connected_api.execute_sql(
+                    ddl_sql
+                )
                 if exec_result.is_failure:
-                    return FlextResult[None].fail(
+                    return FlextCore.Result[None].fail(
                         f"Failed to create table: {exec_result.error}",
                     )
 
@@ -427,21 +429,21 @@ class OracleSchemaService(FlextService[None]):
                     )
 
                 self.log_info(f"Created table {stream.table_name}")
-                return FlextResult[None].ok(None)
+                return FlextCore.Result[None].ok(None)
 
         except Exception as e:
             self.log_error(f"Failed to create table: {e}")
-            return FlextResult[None].fail(f"Table creation failed: {e}")
+            return FlextCore.Result[None].fail(f"Table creation failed: {e}")
 
 
-class OracleBatchService(FlextService[LoadStatisticsModel]):
+class OracleBatchService(FlextCore.Service[LoadStatisticsModel]):
     """Oracle batch processing using flext-core domain patterns.
 
     Handles batching of records for efficient Oracle loading
-    following Single Responsibility Principle and FlextService patterns.
+    following Single Responsibility Principle and FlextCore.Service patterns.
     """
 
-    # Pydantic fields - seguindo FlextModels.Config padrão da SOURCE OF TRUTH
+    # Pydantic fields - seguindo FlextCore.Models.Config padrão da SOURCE OF TRUTH
     config: FlextTargetOracleConfig = Field(
         ...,
         description="Oracle target configuration",
@@ -450,39 +452,39 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
         ...,
         description="Oracle database API instance",
     )
-    batches: FlextTypes.Dict = Field(
+    batches: FlextCore.Types.Dict = Field(
         default_factory=dict,
         description="Batch storage",
     )
-    statistics: FlextTypes.Dict = Field(
+    statistics: FlextCore.Types.Dict = Field(
         default_factory=dict,
         description="Processing statistics",
     )
 
     @override
-    def execute(self: object) -> FlextResult[LoadStatisticsModel]:
-        """Execute domain service - implements FlextService abstract method.
+    def execute(self: object) -> FlextCore.Result[LoadStatisticsModel]:
+        """Execute domain service - implements FlextCore.Service abstract method.
 
         For batch service, execute finalizes all pending batches.
 
         Returns:
-            FlextResult[LoadStatisticsModel] with aggregated statistics
+            FlextCore.Result[LoadStatisticsModel] with aggregated statistics
 
         """
         return self.finalize_all()
 
-    def finalize_all(self) -> FlextResult[LoadStatisticsModel]:
+    def finalize_all(self) -> FlextCore.Result[LoadStatisticsModel]:
         """Flush all pending batches and return aggregated statistics.
 
         Returns:
-            FlextResult[LoadStatisticsModel]: Aggregated statistics from all batches
+            FlextCore.Result[LoadStatisticsModel]: Aggregated statistics from all batches
 
         """
         try:
             # Flush all pending batches
             for stream_name in list(self.batches.keys()):
                 # Placeholder: In real implementation, check batch status
-                result: FlextResult[object] = self.flush_batch(stream_name)
+                result: FlextCore.Result[object] = self.flush_batch(stream_name)
                 if result.is_failure:
                     self.log_error(f"Failed to flush {stream_name}: {result.error}")
 
@@ -491,7 +493,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
             total_successful = 0
             total_failed = 0
             total_batches = 0
-            all_errors: FlextTypes.StringList = []
+            all_errors: FlextCore.Types.StringList = []
 
             # For now, return empty statistics - to be implemented with real batch processing
             # In real implementation: for stats in self.statistics.values(): ...
@@ -507,17 +509,19 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
                 error_details=all_errors,
             ).finalize()
 
-            return FlextResult[LoadStatisticsModel].ok(aggregated_stats)
+            return FlextCore.Result[LoadStatisticsModel].ok(aggregated_stats)
 
         except Exception as e:
             self.log_error(f"Failed to flush all batches: {e}")
-            return FlextResult[LoadStatisticsModel].fail(f"Batch flush all failed: {e}")
+            return FlextCore.Result[LoadStatisticsModel].fail(
+                f"Batch flush all failed: {e}"
+            )
 
     def add_record(
         self,
         stream_name: str,
-        _record: FlextTypes.Dict,
-    ) -> FlextResult[None]:
+        _record: FlextCore.Types.Dict,
+    ) -> FlextCore.Result[None]:
         """Add record to batch processing queue.
 
         Args:
@@ -525,37 +529,37 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
             record: Record to add to batch
 
         Returns:
-            FlextResult indicating success/failure
+            FlextCore.Result indicating success/failure
 
         """
         # Implementation placeholder for proper batch management
         self.log_info(f"Adding record to batch for stream {stream_name}")
-        return FlextResult[None].ok(None)
+        return FlextCore.Result[None].ok(None)
 
-    def flush_batch(self, stream_name: str) -> FlextResult[None]:
+    def flush_batch(self, stream_name: str) -> FlextCore.Result[None]:
         """Flush pending batch for stream.
 
         Args:
             stream_name: Name of the stream to flush
 
         Returns:
-            FlextResult indicating success/failure
+            FlextCore.Result indicating success/failure
 
         """
         # Implementation placeholder for proper batch flushing
         self.log_info(f"Flushing batch for stream {stream_name}")
-        return FlextResult[None].ok(None)
+        return FlextCore.Result[None].ok(None)
 
 
-class OracleRecordService(FlextService[None]):
+class OracleRecordService(FlextCore.Service[None]):
     """Oracle record transformation using flext-core domain patterns.
 
     Handles Singer record transformation, validation, and mapping
     for Oracle storage following Single Responsibility Principle and
-    FlextService patterns.
+    FlextCore.Service patterns.
     """
 
-    # Pydantic fields - seguindo FlextModels.Config padrão da SOURCE OF TRUTH
+    # Pydantic fields - seguindo FlextCore.Models.Config padrão da SOURCE OF TRUTH
     config: FlextTargetOracleConfig = Field(
         ...,
         description="Oracle target configuration",
@@ -568,23 +572,23 @@ class OracleRecordService(FlextService[None]):
         self._utilities = FlextTargetOracleUtilities()
 
     @override
-    def execute(self: object) -> FlextResult[None]:
-        """Execute domain service - implements FlextService abstract method.
+    def execute(self: object) -> FlextCore.Result[None]:
+        """Execute domain service - implements FlextCore.Service abstract method.
 
         For record service, execute validates transformation capabilities.
 
         Returns:
-            FlextResult[None] indicating service readiness
+            FlextCore.Result[None] indicating service readiness
 
         """
         self.log_info("Record transformation service is ready")
-        return FlextResult[None].ok(None)
+        return FlextCore.Result[None].ok(None)
 
     def transform_record(
         self,
-        record: FlextTypes.Dict,
+        record: FlextCore.Types.Dict,
         stream: SingerStreamModel,
-    ) -> FlextResult[FlextTypes.Dict]:
+    ) -> FlextCore.Result[FlextCore.Types.Dict]:
         """Transform Singer record for Oracle storage.
 
         Args:
@@ -592,7 +596,7 @@ class OracleRecordService(FlextService[None]):
             stream: Singer stream model
 
         Returns:
-            FlextResult containing transformed record
+            FlextCore.Result containing transformed record
 
         """
         try:
@@ -602,7 +606,7 @@ class OracleRecordService(FlextService[None]):
                 self._utilities.SingerUtilities.validate_record_structure(record)
             )
             if validation_result.is_failure:
-                return FlextResult[FlextTypes.Dict].fail(
+                return FlextCore.Result[FlextCore.Types.Dict].fail(
                     f"Record validation failed: {validation_result.error}"
                 )
 
@@ -657,19 +661,19 @@ class OracleRecordService(FlextService[None]):
                         f"Metadata addition failed: {metadata_result.error}"
                     )
 
-            return FlextResult[FlextTypes.Dict].ok(transformed_record)
+            return FlextCore.Result[FlextCore.Types.Dict].ok(transformed_record)
 
         except Exception as e:
             self.log_error(f"Failed to transform record: {e}")
-            return FlextResult[FlextTypes.Dict].fail(
+            return FlextCore.Result[FlextCore.Types.Dict].fail(
                 f"Record transformation failed: {e}",
             )
 
     def validate_record(
         self,
-        record: FlextTypes.Dict,
-        schema: FlextTypes.Dict,
-    ) -> FlextResult[None]:
+        record: FlextCore.Types.Dict,
+        schema: FlextCore.Types.Dict,
+    ) -> FlextCore.Result[None]:
         """Validate record against schema."""
         try:
             # ZERO TOLERANCE FIX: Use utilities for comprehensive record validation
@@ -680,7 +684,7 @@ class OracleRecordService(FlextService[None]):
             )
 
             if validation_result.is_failure:
-                return FlextResult[None].fail(validation_result.error)
+                return FlextCore.Result[None].fail(validation_result.error)
 
             # ZERO TOLERANCE FIX: Use utilities for Oracle-specific validations
             oracle_validation = (
@@ -690,13 +694,13 @@ class OracleRecordService(FlextService[None]):
             )
 
             if oracle_validation.is_failure:
-                return FlextResult[None].fail(oracle_validation.error)
+                return FlextCore.Result[None].fail(oracle_validation.error)
 
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
 
         except Exception as e:
             self.log_error(f"Failed to validate record: {e}")
-            return FlextResult[None].fail(f"Record validation failed: {e}")
+            return FlextCore.Result[None].fail(f"Record validation failed: {e}")
 
 
 class OracleTargetServiceFactory:

@@ -16,7 +16,7 @@ import time
 from datetime import UTC
 from typing import cast
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextCore
 from pydantic import SecretStr
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
@@ -28,7 +28,7 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(), logging.FileHandler("flext_target_oracle.log")],
 )
 
-logger = FlextLogger(__name__)
+logger = FlextCore.Logger(__name__)
 
 
 class ProductionConfig:
@@ -158,11 +158,11 @@ class ProductionTargetManager:
         logger.info("Received signal %d, initiating graceful shutdown", signum)
         self.shutdown_requested = True
 
-    def initialize(self) -> FlextResult[None]:
+    def initialize(self) -> FlextCore.Result[None]:
         """Initialize target with comprehensive validation.
 
         Returns:
-            FlextResult[None]: Success if initialization complete, failure with error details
+            FlextCore.Result[None]: Success if initialization complete, failure with error details
 
         """
         logger.info("Initializing production Oracle target")
@@ -171,9 +171,9 @@ class ProductionTargetManager:
             # Step 1: Validate configuration domain rules
             logger.info("Validating configuration domain rules")
             # Domain validation is handled during config creation with Pydantic validators
-            validation_result = FlextResult[None].ok(None)
+            validation_result = FlextCore.Result[None].ok(None)
             if validation_result.is_failure:
-                return FlextResult[None].fail(
+                return FlextCore.Result[None].fail(
                     f"Configuration validation failed: {validation_result.error}",
                 )
 
@@ -185,34 +185,34 @@ class ProductionTargetManager:
             logger.info("Testing Oracle database connectivity")
             connection_result = self.target.test_connection()
             if connection_result.is_failure:
-                return FlextResult[None].fail("Oracle connectivity test failed")
+                return FlextCore.Result[None].fail("Oracle connectivity test failed")
 
             logger.info("Production target initialized successfully")
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
 
         except Exception as e:
             logger.exception("Failed to initialize production target")
-            return FlextResult[None].fail(f"Initialization error: {e}")
+            return FlextCore.Result[None].fail(f"Initialization error: {e}")
 
     def process_singer_stream(
         self,
-        messages: FlextTypes.List,
-    ) -> FlextResult[FlextTypes.Dict]:
+        messages: FlextCore.Types.List,
+    ) -> FlextCore.Result[FlextCore.Types.Dict]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:
             messages: List of Singer messages (SCHEMA, RECORD, STATE)
 
         Returns:
-            FlextResult with processing statistics and status
+            FlextCore.Result with processing statistics and status
 
         """
         if not self.target:
-            return FlextResult[FlextTypes.Dict].fail("Target not initialized")
+            return FlextCore.Result[FlextCore.Types.Dict].fail("Target not initialized")
 
         logger.info("Processing Singer stream with %d messages", len(messages))
 
-        stats: FlextTypes.Dict = {
+        stats: FlextCore.Types.Dict = {
             "messages_processed": 0,
             "schemas_processed": 0,
             "records_processed": 0,
@@ -245,7 +245,9 @@ class ProductionTargetManager:
 
                 # Process message with error handling
                 if not self.target:
-                    return FlextResult[FlextTypes.Dict].fail("Target not initialized")
+                    return FlextCore.Result[FlextCore.Types.Dict].fail(
+                        "Target not initialized"
+                    )
                 # Type assertion since we checked above that target is not None
                 assert self.target is not None
                 result = self.target.process_singer_message(
@@ -319,7 +321,7 @@ class ProductionTargetManager:
                 "Stream processing completed in %.2f seconds",
                 processing_duration,
             )
-            return FlextResult[FlextTypes.Dict].ok(dict(stats))
+            return FlextCore.Result[FlextCore.Types.Dict].ok(dict(stats))
 
         except Exception as e:
             logger.exception("Unexpected error during stream processing")
@@ -327,18 +329,20 @@ class ProductionTargetManager:
             current_errors = stats.get("errors_encountered", 0)
             assert isinstance(current_errors, int)
             stats["errors_encountered"] = current_errors + 1
-            return FlextResult[FlextTypes.Dict].fail(f"Stream processing error: {e}")
+            return FlextCore.Result[FlextCore.Types.Dict].fail(
+                f"Stream processing error: {e}"
+            )
 
-    def health_check(self) -> FlextResult[FlextTypes.Dict]:
+    def health_check(self) -> FlextCore.Result[FlextCore.Types.Dict]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
-            FlextResult with health status and metrics
+            FlextCore.Result with health status and metrics
 
         """
         logger.debug("Performing health check")
 
-        health_status: FlextTypes.Dict = {
+        health_status: FlextCore.Types.Dict = {
             "status": "healthy",
             "timestamp": time.time(),
             "checks": {},  # Will be populated with check results
@@ -376,19 +380,21 @@ class ProductionTargetManager:
                     metrics.update(target_metrics)
 
             logger.debug("Health check completed: %s", health_status["status"])
-            return FlextResult[FlextTypes.Dict].ok(dict(health_status))
+            return FlextCore.Result[FlextCore.Types.Dict].ok(dict(health_status))
 
         except Exception as e:
             logger.exception("Health check failed")
             health_status["status"] = "unhealthy"
             health_status["error"] = str(e)
-            return FlextResult[FlextTypes.Dict].fail(f"Health check error: {e}")
+            return FlextCore.Result[FlextCore.Types.Dict].fail(
+                f"Health check error: {e}"
+            )
 
-    def shutdown(self) -> FlextResult[None]:
+    def shutdown(self) -> FlextCore.Result[None]:
         """Graceful shutdown with resource cleanup.
 
         Returns:
-            FlextResult[None]: Success if shutdown completed cleanly
+            FlextCore.Result[None]: Success if shutdown completed cleanly
 
         """
         logger.info("Starting graceful shutdown")
@@ -404,11 +410,11 @@ class ProductionTargetManager:
                 self.target = None
 
             logger.info("Graceful shutdown completed")
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
 
         except Exception as e:
             logger.exception("Error during shutdown")
-            return FlextResult[None].fail(f"Shutdown error: {e}")
+            return FlextCore.Result[None].fail(f"Shutdown error: {e}")
 
 
 def demonstrate_production_setup() -> None:
@@ -495,14 +501,14 @@ def demonstrate_production_setup() -> None:
         raise
 
 
-def create_production_sample_stream() -> FlextTypes.List:
+def create_production_sample_stream() -> FlextCore.Types.List:
     """Create a realistic production data stream for demonstration.
 
     Returns:
       List of Singer messages representing a production workload
 
     """
-    messages: FlextTypes.List = []  # Flexible list for various message types
+    messages: FlextCore.Types.List = []  # Flexible list for various message types
 
     # Schema message for customer orders
     schema_message = {

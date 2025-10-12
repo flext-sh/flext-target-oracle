@@ -1,4 +1,4 @@
-"""FLEXT Target Oracle Configuration - Enhanced FlextConfig Implementation.
+"""FLEXT Target Oracle Configuration - Enhanced FlextCore.Config Implementation.
 
 Single unified configuration class for Oracle Singer target operations following
 FLEXT 1.0.0 patterns with enhanced singleton, SecretStr, and Pydantic 2.11+ features.
@@ -12,7 +12,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Self
 
-from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
+from flext_core import FlextCore
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
@@ -26,17 +26,17 @@ class LoadMethod(StrEnum):
     BULK_MERGE = "BULK_MERGE"
 
 
-class FlextTargetOracleConfig(FlextConfig):
-    """Oracle Target Configuration using enhanced FlextConfig patterns.
+class FlextTargetOracleConfig(FlextCore.Config):
+    """Oracle Target Configuration using enhanced FlextCore.Config patterns.
 
-    This class extends FlextConfig and includes all the configuration fields
+    This class extends FlextCore.Config and includes all the configuration fields
     needed for Oracle target operations. Uses the enhanced singleton pattern
     with get_or_create_shared_instance for thread-safe configuration management.
 
     Follows standardized pattern:
-    - Extends FlextConfig from flext-core
+    - Extends FlextCore.Config from flext-core
     - Uses SecretStr for sensitive data (oracle_password)
-    - All defaults from FlextConstants where possible
+    - All defaults from FlextCore.Constants where possible
     - Uses enhanced singleton pattern with inverse dependency injection
     - Uses Pydantic 2.11+ features (field_validator, model_validator)
     """
@@ -54,7 +54,7 @@ class FlextTargetOracleConfig(FlextConfig):
         validate_return=True,
         json_schema_extra={
             "title": "FLEXT Target Oracle Configuration",
-            "description": "Oracle Singer target configuration extending FlextConfig",
+            "description": "Oracle Singer target configuration extending FlextCore.Config",
         },
     )
 
@@ -65,7 +65,7 @@ class FlextTargetOracleConfig(FlextConfig):
     )
 
     oracle_port: int = Field(
-        default=FlextConstants.Platform.DATABASE_DEFAULT_PORT,
+        default=FlextCore.Constants.Platform.DATABASE_DEFAULT_PORT,
         ge=1,
         le=65535,
         description="Oracle database port",
@@ -143,17 +143,17 @@ class FlextTargetOracleConfig(FlextConfig):
         return self.ssl_enabled
 
     @property
-    def column_mappings(self) -> FlextTypes.StringDict:
+    def column_mappings(self) -> FlextCore.Types.StringDict:
         """Backward compatibility property for column mappings."""
         return {}
 
     @property
-    def ignored_columns(self) -> FlextTypes.StringList:
+    def ignored_columns(self) -> FlextCore.Types.StringList:
         """Backward compatibility property for ignored columns."""
         return []
 
     @property
-    def custom_type_mappings(self) -> FlextTypes.StringDict:
+    def custom_type_mappings(self) -> FlextCore.Types.StringDict:
         """Backward compatibility property for custom type mappings."""
         return {}
 
@@ -167,7 +167,7 @@ class FlextTargetOracleConfig(FlextConfig):
         """Backward compatibility property for allow alter table."""
         return True  # Default allow alter table
 
-    # Target configuration using FlextConstants where applicable
+    # Target configuration using FlextCore.Constants where applicable
     default_target_schema: str = Field(
         default="SINGER_DATA",
         description="Default schema for loading data",
@@ -183,9 +183,9 @@ class FlextTargetOracleConfig(FlextConfig):
         description="Suffix for target table names",
     )
 
-    # Loading configuration using FlextConstants
+    # Loading configuration using FlextCore.Constants
     batch_size: int = Field(
-        default=FlextConstants.Performance.DEFAULT_DB_POOL_SIZE * 250,  # 5000
+        default=FlextCore.Constants.Performance.DEFAULT_DB_POOL_SIZE * 250,  # 5000
         ge=1,
         le=50000,
         description="Number of records per batch",
@@ -203,20 +203,20 @@ class FlextTargetOracleConfig(FlextConfig):
         description="Oracle parallel degree for operations",
     )
 
-    # Transaction settings using FlextConstants
+    # Transaction settings using FlextCore.Constants
     autocommit: bool = Field(
         default=False,
         description="Enable autocommit for operations",
     )
 
     commit_interval: int = Field(
-        default=FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,
+        default=FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE,
         ge=1,
         description="Number of records between commits",
     )
 
     transaction_timeout: int = Field(
-        default=FlextConstants.Defaults.TIMEOUT * 10,  # 300 seconds
+        default=FlextCore.Constants.Defaults.TIMEOUT * 10,  # 300 seconds
         ge=1,
         le=3600,
         description="Transaction timeout in seconds",
@@ -279,7 +279,10 @@ class FlextTargetOracleConfig(FlextConfig):
             raise ValueError(msg)
 
         # Validate batch size reasonable for performance
-        if self.batch_size > FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 5:
+        if (
+            self.batch_size
+            > FlextCore.Constants.Performance.BatchProcessing.MAX_ITEMS // 5
+        ):
             import warnings
 
             warnings.warn(
@@ -289,7 +292,7 @@ class FlextTargetOracleConfig(FlextConfig):
             )
 
         # Validate parallel degree settings
-        if self.parallel_degree > FlextConstants.Container.MAX_WORKERS:
+        if self.parallel_degree > FlextCore.Constants.Container.MAX_WORKERS:
             import warnings
 
             warnings.warn(
@@ -300,46 +303,48 @@ class FlextTargetOracleConfig(FlextConfig):
 
         return self
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextCore.Result[None]:
         """Validate Oracle Target specific business rules."""
         try:
             # Validate connection requirements
             if not self.oracle_host or not self.oracle_user:
-                return FlextResult[None].fail("Oracle host and username are required")
+                return FlextCore.Result[None].fail(
+                    "Oracle host and username are required"
+                )
 
             if not self.oracle_password.get_secret_value():
-                return FlextResult[None].fail("Oracle password is required")
+                return FlextCore.Result[None].fail("Oracle password is required")
 
             # Validate schema name
             if not self.default_target_schema:
-                return FlextResult[None].fail("Target schema is required")
+                return FlextCore.Result[None].fail("Target schema is required")
 
             # Validate performance settings
             if self.batch_size < 1:
-                return FlextResult[None].fail("Batch size must be at least 1")
+                return FlextCore.Result[None].fail("Batch size must be at least 1")
 
             if self.commit_interval > self.batch_size:
-                return FlextResult[None].fail(
+                return FlextCore.Result[None].fail(
                     "Commit interval cannot be larger than batch size"
                 )
 
-            return FlextResult[None].ok(None)
+            return FlextCore.Result[None].ok(None)
         except Exception as e:
-            return FlextResult[None].fail(f"Business rules validation failed: {e}")
+            return FlextCore.Result[None].fail(f"Business rules validation failed: {e}")
 
     # Configuration helper methods that leverage the base model
-    def get_oracle_config(self) -> FlextTypes.Dict:
+    def get_oracle_config(self) -> FlextCore.Types.Dict:
         """Convert to flext-db-oracle configuration format."""
-        oracle_config: FlextTypes.Dict = {
+        oracle_config: FlextCore.Types.Dict = {
             "host": self.oracle_host,
             "port": self.oracle_port,
             "service_name": self.oracle_service_name,
             "username": self.oracle_user,
             "password": self.oracle_password.get_secret_value(),
             "timeout": self.transaction_timeout,
-            "pool_min": FlextConstants.Performance.MIN_DB_POOL_SIZE,
-            "pool_max": FlextConstants.Performance.DEFAULT_DB_POOL_SIZE * 5,
-            "pool_increment": FlextConstants.Performance.MIN_DB_POOL_SIZE,
+            "pool_min": FlextCore.Constants.Performance.MIN_DB_POOL_SIZE,
+            "pool_max": FlextCore.Constants.Performance.DEFAULT_DB_POOL_SIZE * 5,
+            "pool_increment": FlextCore.Constants.Performance.MIN_DB_POOL_SIZE,
             "encoding": "UTF-8",
             "ssl_enabled": False,
             "autocommit": self.autocommit,
@@ -353,7 +358,7 @@ class FlextTargetOracleConfig(FlextConfig):
 
         return oracle_config
 
-    def get_target_config(self) -> FlextTypes.Dict:
+    def get_target_config(self) -> FlextCore.Types.Dict:
         """Get target-specific configuration dictionary."""
         return {
             "default_target_schema": self.default_target_schema,
@@ -376,7 +381,7 @@ class FlextTargetOracleConfig(FlextConfig):
 
         # Convert to uppercase and ensure Oracle naming limit (30 characters)
         table_name = base_name.upper()
-        oracle_table_name_limit = FlextConstants.Limits.MAX_STRING_LENGTH
+        oracle_table_name_limit = FlextCore.Constants.Limits.MAX_STRING_LENGTH
 
         if len(table_name) > oracle_table_name_limit:
             # Truncate intelligently - keep prefix/suffix if possible
@@ -399,27 +404,28 @@ class FlextTargetOracleConfig(FlextConfig):
         cls, environment: str, **overrides: object
     ) -> FlextTargetOracleConfig:
         """Create configuration for specific environment using enhanced singleton pattern."""
-        env_overrides: FlextTypes.Dict = {}
+        env_overrides: FlextCore.Types.Dict = {}
 
         if environment == "production":
             env_overrides.update({
-                "batch_size": FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 2,
+                "batch_size": FlextCore.Constants.Performance.BatchProcessing.MAX_ITEMS
+                // 2,
                 "use_bulk_operations": True,
-                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT
+                "transaction_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT
                 * 10,  # 5 minutes for production
             })
         elif environment == "development":
             env_overrides.update({
-                "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
+                "batch_size": FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
                 "use_bulk_operations": False,
-                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 2,
+                "transaction_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT * 2,
             })
         elif environment == "staging":
             env_overrides.update({
-                "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
+                "batch_size": FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE
                 * 2.5,
                 "use_bulk_operations": True,
-                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 6,
+                "transaction_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT * 6,
             })
 
         all_overrides = {**env_overrides, **overrides}
@@ -429,16 +435,16 @@ class FlextTargetOracleConfig(FlextConfig):
 
     @classmethod
     def get_global_instance(cls) -> Self:
-        """Get the global singleton instance using enhanced FlextConfig pattern."""
+        """Get the global singleton instance using enhanced FlextCore.Config pattern."""
         return cls.get_or_create_shared_instance(project_name="flext-target-oracle")
 
     @classmethod
     def create_for_development(cls, **overrides: object) -> Self:
         """Create configuration for development environment."""
-        dev_overrides: FlextTypes.Dict = {
-            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
+        dev_overrides: FlextCore.Types.Dict = {
+            "batch_size": FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
             "use_bulk_operations": False,
-            "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 2,
+            "transaction_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT * 2,
             **overrides,
         }
         return cls.get_or_create_shared_instance(
@@ -448,10 +454,11 @@ class FlextTargetOracleConfig(FlextConfig):
     @classmethod
     def create_for_production(cls, **overrides: object) -> Self:
         """Create configuration for production environment."""
-        prod_overrides: FlextTypes.Dict = {
-            "batch_size": FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 2,
+        prod_overrides: FlextCore.Types.Dict = {
+            "batch_size": FlextCore.Constants.Performance.BatchProcessing.MAX_ITEMS
+            // 2,
             "use_bulk_operations": True,
-            "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT
+            "transaction_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT
             * 10,  # 5 minutes for production
             **overrides,
         }
@@ -462,10 +469,11 @@ class FlextTargetOracleConfig(FlextConfig):
     @classmethod
     def create_for_testing(cls, **overrides: object) -> Self:
         """Create configuration for testing environment."""
-        test_overrides: FlextTypes.Dict = {
-            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
+        test_overrides: FlextCore.Types.Dict = {
+            "batch_size": FlextCore.Constants.Performance.BatchProcessing.DEFAULT_SIZE
+            // 10,
             "use_bulk_operations": False,
-            "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT,
+            "transaction_timeout": FlextCore.Constants.Network.DEFAULT_TIMEOUT,
             "oracle_host": "localhost",
             "oracle_service_name": "XE",
             **overrides,
@@ -480,8 +488,10 @@ class FlextTargetOracleConfig(FlextConfig):
         cls.reset_shared_instance()
 
 
-def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResult[None]:
-    """Validate Oracle configuration using FlextConfig patterns - ZERO DUPLICATION."""
+def validate_oracle_configuration(
+    config: FlextTargetOracleConfig,
+) -> FlextCore.Result[None]:
+    """Validate Oracle configuration using FlextCore.Config patterns - ZERO DUPLICATION."""
     # Required string fields validation using direct validation
     required_fields = [
         (config.oracle_host, "Oracle host is required"),
@@ -494,34 +504,36 @@ def validate_oracle_configuration(config: FlextTargetOracleConfig) -> FlextResul
     # Validate required string fields using direct validation
     for field_value, error_message in required_fields:
         if not (field_value and str(field_value).strip()):
-            return FlextResult[None].fail(error_message)
+            return FlextCore.Result[None].fail(error_message)
 
     # Validate Oracle port range
     if not (
-        FlextConstants.Network.MIN_PORT
+        FlextCore.Constants.Network.MIN_PORT
         <= config.oracle_port
-        <= FlextConstants.Network.MAX_PORT
+        <= FlextCore.Constants.Network.MAX_PORT
     ):
-        return FlextResult[None].fail(
-            f"Oracle port must be between {FlextConstants.Network.MIN_PORT} and {FlextConstants.Network.MAX_PORT}"
+        return FlextCore.Result[None].fail(
+            f"Oracle port must be between {FlextCore.Constants.Network.MIN_PORT} and {FlextCore.Constants.Network.MAX_PORT}"
         )
 
     # Validate batch size constraints
     if config.batch_size < 1:
-        return FlextResult[None].fail("Batch size must be at least 1")
+        return FlextCore.Result[None].fail("Batch size must be at least 1")
 
     # Validate parallel degree
     if config.parallel_degree < 1:
-        return FlextResult[None].fail("Parallel degree must be at least 1")
+        return FlextCore.Result[None].fail("Parallel degree must be at least 1")
 
     # Validate transaction timeout
     if config.transaction_timeout < 1:
-        return FlextResult[None].fail("Transaction timeout must be at least 1 second")
+        return FlextCore.Result[None].fail(
+            "Transaction timeout must be at least 1 second"
+        )
 
-    return FlextResult[None].ok(None)
+    return FlextCore.Result[None].ok(None)
 
 
-__all__: FlextTypes.StringList = [
+__all__: FlextCore.Types.StringList = [
     "FlextTargetOracleConfig",
     "LoadMethod",
     "validate_oracle_configuration",

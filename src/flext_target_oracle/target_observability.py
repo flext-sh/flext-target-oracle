@@ -9,7 +9,7 @@ from __future__ import annotations
 import time
 import uuid
 
-from flext_core import FlextLogger, FlextTypes
+from flext_core import FlextCore
 
 from flext_target_oracle.constants import FlextTargetOracleConstants
 from flext_target_oracle.target_exceptions import (
@@ -19,7 +19,7 @@ from flext_target_oracle.target_exceptions import (
     FlextTargetOracleSchemaError,
 )
 
-logger = FlextLogger(__name__)
+logger = FlextCore.Logger(__name__)
 
 # Security audit constants - moved to FlextTargetOracleConstants.Observability
 # Performance monitoring thresholds - moved to FlextTargetOracleConstants.Observability
@@ -101,7 +101,7 @@ class FlextOracleError:
         def schema_validation_failed(
             *,
             stream_name: str,
-            schema_errors: FlextTypes.StringList,
+            schema_errors: FlextCore.Types.StringList,
             singer_specification: str = "1.5.0",
         ) -> FlextTargetOracleSchemaError:
             """Singer schema validation failure with detailed errors."""
@@ -322,7 +322,7 @@ def configure_oracle_observability(
     # configure_observability placeholder - removed for simplicity
 
     # Set Oracle-specific context in FlextObs
-    # Note: Without FlextContext, we log the configuration directly
+    # Note: Without FlextCore.Context, we log the configuration directly
 
     logger.info(
         "Oracle observability configured",

@@ -5,12 +5,12 @@ This module provides data models for Oracle target operations.
 
 from __future__ import annotations
 
-from flext_core import FlextModels, FlextTypes
+from flext_core import FlextCore
 from pydantic import Field
 
 
-class FlextTargetOracleModels(FlextModels):
-    """Comprehensive models for Oracle target operations extending FlextModels.
+class FlextTargetOracleModels(FlextCore.Models):
+    """Comprehensive models for Oracle target operations extending FlextCore.Models.
 
     Provides standardized models for all Oracle target domain entities including:
     - Singer message processing and validation
@@ -19,13 +19,13 @@ class FlextTargetOracleModels(FlextModels):
     - Performance monitoring and metrics collection
     - Error handling and recovery operations
 
-    All nested classes inherit FlextModels validation and patterns.
+    All nested classes inherit FlextCore.Models validation and patterns.
     """
 
     # Constants
     MAX_PORT_NUMBER = 65535
 
-    class OracleTargetConfig(FlextModels.BaseConfig):
+    class OracleTargetConfig(FlextCore.Models.BaseConfig):
         """Configuration for Oracle target operations."""
 
         # Oracle connection settings
@@ -71,7 +71,7 @@ class FlextTargetOracleModels(FlextModels):
             default=300, description="Transaction timeout in seconds"
         )
 
-    class SingerMessageProcessing(FlextModels.BaseModel):
+    class SingerMessageProcessing(FlextCore.Models.BaseModel):
         """Singer message processing configuration and state."""
 
         # Message processing state
@@ -91,11 +91,11 @@ class FlextTargetOracleModels(FlextModels):
 
         # Error tracking
         error_count: int = Field(default=0, description="Number of processing errors")
-        failed_messages: FlextTypes.StringList = Field(
+        failed_messages: FlextCore.Types.StringList = Field(
             default_factory=list, description="Failed message IDs"
         )
 
-    class OracleTableMetadata(FlextModels.BaseModel):
+    class OracleTableMetadata(FlextCore.Models.BaseModel):
         """Oracle table metadata for target operations."""
 
         # Table identification
@@ -104,13 +104,13 @@ class FlextTargetOracleModels(FlextModels):
         full_table_name: str = Field(description="Fully qualified table name")
 
         # Table structure
-        columns: list[FlextTypes.Dict] = Field(
+        columns: list[FlextCore.Types.Dict] = Field(
             default_factory=list, description="Table column definitions"
         )
-        primary_keys: FlextTypes.StringList = Field(
+        primary_keys: FlextCore.Types.StringList = Field(
             default_factory=list, description="Primary key column names"
         )
-        indexes: list[FlextTypes.Dict] = Field(
+        indexes: list[FlextCore.Types.Dict] = Field(
             default_factory=list, description="Table index definitions"
         )
 
@@ -125,11 +125,11 @@ class FlextTargetOracleModels(FlextModels):
         # Singer metadata
         singer_stream_name: str = Field(description="Singer stream name")
         singer_schema: dict = Field(description="Singer schema definition")
-        key_properties: FlextTypes.StringList = Field(
+        key_properties: FlextCore.Types.StringList = Field(
             default_factory=list, description="Singer key properties"
         )
 
-    class OracleLoadingOperation(FlextModels.BaseModel):
+    class OracleLoadingOperation(FlextCore.Models.BaseModel):
         """Oracle data loading operation tracking."""
 
         # Operation identification
@@ -160,7 +160,7 @@ class FlextTargetOracleModels(FlextModels):
         )
         batch_count: int = Field(default=0, description="Number of batches processed")
 
-    class OracleErrorRecovery(FlextModels.BaseModel):
+    class OracleErrorRecovery(FlextCore.Models.BaseModel):
         """Oracle error handling and recovery configuration."""
 
         # Retry configuration
@@ -189,7 +189,7 @@ class FlextTargetOracleModels(FlextModels):
             default=True, description="Handle Oracle constraint violations gracefully"
         )
 
-    class OraclePerformanceMetrics(FlextModels.BaseModel):
+    class OraclePerformanceMetrics(FlextCore.Models.BaseModel):
         """Performance metrics for Oracle target operations."""
 
         # Throughput metrics

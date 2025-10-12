@@ -14,7 +14,7 @@ from typing import cast
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextCore
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from flext_tests import FlextTestDocker
 from pydantic import SecretStr
@@ -30,7 +30,7 @@ from flext_target_oracle import (
 )
 
 # Constants
-logger = FlextLogger(__name__)
+logger = FlextCore.Logger(__name__)
 ORACLE_CONTAINER_NAME = "flext-oracle-test"
 ORACLE_IMAGE = "gvenzl/oracle-xe:21-slim"
 ORACLE_HOST = "localhost"
@@ -154,9 +154,9 @@ def oracle_api(oracle_config: FlextTargetOracleConfig) -> FlextDbOracleApi:
     # Create mock API with common method responses
     mock_api = MagicMock()
     mock_api.config = db_config
-    mock_api.connect.return_value = FlextResult.ok("Connected successfully")
-    mock_api.disconnect.return_value = FlextResult.ok("Disconnected successfully")
-    mock_api.test_connection.return_value = FlextResult.ok(data=True)
+    mock_api.connect.return_value = FlextCore.Result.ok("Connected successfully")
+    mock_api.disconnect.return_value = FlextCore.Result.ok("Disconnected successfully")
+    mock_api.test_connection.return_value = FlextCore.Result.ok(data=True)
     mock_api.is_connected = True
 
     return mock_api
@@ -173,15 +173,17 @@ def oracle_loader(
         mock_api_class.return_value = mock_api
 
         # Mock successful connection
-        mock_api.connect.return_value = FlextResult.ok("Connected successfully")
-        mock_api.disconnect.return_value = FlextResult.ok("Disconnected successfully")
+        mock_api.connect.return_value = FlextCore.Result.ok("Connected successfully")
+        mock_api.disconnect.return_value = FlextCore.Result.ok(
+            "Disconnected successfully"
+        )
         mock_api.is_connected = True
 
         # Create loader with mocked API
         loader = FlextTargetOracleLoader(oracle_config)
 
         # Mock the connect result to avoid real database connection
-        FlextResult.ok("Mocked connection successful")
+        FlextCore.Result.ok("Mocked connection successful")
 
         yield loader
 
@@ -292,7 +294,7 @@ def mock_loader() -> Mock:
 
 # Test Data Fixtures
 @pytest.fixture
-def schema() -> FlextTypes.Dict:
+def schema() -> FlextCore.Types.Dict:
     """Simple Singer schema message for unit testing."""
     return {
         "type": "SCHEMA",
@@ -310,7 +312,7 @@ def schema() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def record() -> FlextTypes.Dict:
+def record() -> FlextCore.Types.Dict:
     """Simple Singer record message for unit testing."""
     return {
         "type": "RECORD",
@@ -324,7 +326,7 @@ def record() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def state() -> FlextTypes.Dict:
+def state() -> FlextCore.Types.Dict:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -333,7 +335,7 @@ def state() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def simple_schema() -> FlextTypes.Dict:
+def simple_schema() -> FlextCore.Types.Dict:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
@@ -352,7 +354,7 @@ def simple_schema() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def nested_schema() -> FlextTypes.Dict:
+def nested_schema() -> FlextCore.Types.Dict:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
@@ -396,7 +398,7 @@ def nested_schema() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def sample_record() -> FlextTypes.Dict:
+def sample_record() -> FlextCore.Types.Dict:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -413,7 +415,7 @@ def sample_record() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def batch_records() -> list[FlextTypes.Dict]:
+def batch_records() -> list[FlextCore.Types.Dict]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -432,7 +434,7 @@ def batch_records() -> list[FlextTypes.Dict]:
 
 
 @pytest.fixture
-def state_message() -> FlextTypes.Dict:
+def state_message() -> FlextCore.Types.Dict:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -450,10 +452,10 @@ def state_message() -> FlextTypes.Dict:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema: FlextTypes.Dict,
-    sample_record: FlextTypes.Dict,
-    state_message: FlextTypes.Dict,
-) -> list[FlextTypes.Dict]:
+    simple_schema: FlextCore.Types.Dict,
+    sample_record: FlextCore.Types.Dict,
+    state_message: FlextCore.Types.Dict,
+) -> list[FlextCore.Types.Dict]:
     """Complete Singer message stream for testing."""
     return [
         simple_schema,
@@ -515,7 +517,7 @@ def connected_loader(
 
 # Performance Testing Fixtures
 @pytest.fixture
-def large_dataset() -> list[FlextTypes.Dict]:
+def large_dataset() -> list[FlextCore.Types.Dict]:
     """Generate large dataset for performance testing."""
     schema = {
         "type": "SCHEMA",
@@ -546,8 +548,8 @@ def large_dataset() -> list[FlextTypes.Dict]:
         for i in range(10000)  # 10k records
     ]
 
-    result: list[FlextTypes.Dict] = [cast("FlextTypes.Dict", schema)]
-    result.extend(cast("list[FlextTypes.Dict]", records))
+    result: list[FlextCore.Types.Dict] = [cast("FlextCore.Types.Dict", schema)]
+    result.extend(cast("list[FlextCore.Types.Dict]", records))
     return result
 
 

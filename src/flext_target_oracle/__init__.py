@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from typing import Final
 
-from flext_core import FlextResult
 from flext_meltano import (
     FlextMeltanoBridge,
     FlextMeltanoConfig,
@@ -71,6 +70,7 @@ __all__ = [
     "BatchProcessingModel",
     "BatchServiceProtocol",
     "ConnectionServiceProtocol",
+    "FlextCore.Result",
     "FlextMeltanoBridge",
     "FlextMeltanoConfig",
     "FlextMeltanoTargetAbstractions",
@@ -78,7 +78,6 @@ __all__ = [
     "FlextMeltanoTypes",
     "FlextOracleError",
     "FlextOracleObs",
-    "FlextResult",
     "FlextTargetOracle",
     "FlextTargetOracleAuthenticationError",
     "FlextTargetOracleCliService",
