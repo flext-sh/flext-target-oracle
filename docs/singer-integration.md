@@ -108,7 +108,7 @@ def _handle_state(self, message: FlextCore.Types.Dict) -> FlextCore.Result[None]
 | RECORD message handling  | ✅ Complete | `_handle_record()`          |
 | STATE message handling   | ✅ Complete | `_handle_state()`           |
 | Batch processing         | ✅ Complete | Configurable batch sizes    |
-| Error handling           | ✅ Complete | FlextCore.Result pattern         |
+| Error handling           | ✅ Complete | FlextCore.Result pattern    |
 | JSON storage             | ✅ Complete | CLOB-based flexible storage |
 | Configuration validation | ✅ Complete | Pydantic + domain rules     |
 
