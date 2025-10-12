@@ -14,7 +14,7 @@ from typing import Never
 
 import pytest
 from _pytest.logging import LogCaptureFixture
-from flext_core import FlextLogger
+from flext_core import FlextCore
 
 from flext_target_oracle import (
     FlextTargetOracleAuthenticationError,
@@ -30,7 +30,7 @@ class TestRealOracleExceptions:
 
     def _log_exception(self) -> None:
         """Helper method for logging exceptions."""
-        logger = FlextLogger(__name__)
+        logger = FlextCore.Logger(__name__)
         logger.error("Error occurred")
 
     def _raise_processing_error(self, original_error: ValueError) -> Never:

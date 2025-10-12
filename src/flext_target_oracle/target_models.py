@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from flext_core import FlextModels, FlextResult, FlextTypes
+from flext_core import FlextCore
 from pydantic import BaseModel, Field, field_validator
 
 # Oracle schema constants
@@ -116,24 +116,26 @@ class OracleConnectionModel(BaseModel):
             return f"{protocol}://{self.username}@{self.host}:{self.port}/{self.service_name}"
         return f"{protocol}://{self.host}:{self.port}/{self.service_name}"
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextCore.Result[None]:
         """Validate Oracle connection business rules."""
         # Validate host is reachable format
         if not self.host or self.host.isspace():
-            return FlextResult[None].fail("Host cannot be empty or whitespace")
+            return FlextCore.Result[None].fail("Host cannot be empty or whitespace")
 
         # Validate service name format
         if not self.service_name or self.service_name.isspace():
-            return FlextResult[None].fail("Service name cannot be empty or whitespace")
+            return FlextCore.Result[None].fail(
+                "Service name cannot be empty or whitespace"
+            )
 
         # Validate username
         if not self.username or self.username.isspace():
-            return FlextResult[None].fail("Username cannot be empty or whitespace")
+            return FlextCore.Result[None].fail("Username cannot be empty or whitespace")
 
-        return FlextResult[None].ok(None)
+        return FlextCore.Result[None].ok(None)
 
 
-class SingerStreamModel(FlextModels.Config):
+class SingerStreamModel(FlextCore.Models.Config):
     """Singer stream definition with Oracle mappings.
 
     Immutable value object representing a Singer stream configuration
@@ -169,15 +171,15 @@ class SingerStreamModel(FlextModels.Config):
         min_length=1,
         max_length=128,
     )
-    key_properties: FlextTypes.StringList = Field(
+    key_properties: FlextCore.Types.StringList = Field(
         default_factory=list,
         description="List of primary key column names",
     )
-    column_mappings: FlextTypes.StringDict = Field(
+    column_mappings: FlextCore.Types.StringDict = Field(
         default_factory=dict,
         description="Column name mappings (singer_name -> oracle_name)",
     )
-    ignored_columns: FlextTypes.StringList = Field(
+    ignored_columns: FlextCore.Types.StringList = Field(
         default_factory=list,
         description="List of columns to ignore during loading",
     )
@@ -211,7 +213,7 @@ class SingerStreamModel(FlextModels.Config):
         return f"{self.schema_name}.{self.table_name}"
 
 
-class BatchProcessingModel(FlextModels.Config):
+class BatchProcessingModel(FlextCore.Models.Config):
     """Batch processing configuration and state.
 
     Immutable value object representing batch processing configuration
@@ -239,7 +241,7 @@ class BatchProcessingModel(FlextModels.Config):
         gt=0,
         le=50000,
     )
-    current_batch: list[FlextTypes.Dict] = Field(
+    current_batch: list[FlextCore.Types.Dict] = Field(
         default_factory=list,
         description="Current batch of records",
     )
@@ -273,7 +275,7 @@ class BatchProcessingModel(FlextModels.Config):
         """Current number of records in the batch."""
         return len(self.current_batch)
 
-    def add_record(self, record: FlextTypes.Dict) -> BatchProcessingModel:
+    def add_record(self, record: FlextCore.Types.Dict) -> BatchProcessingModel:
         """Add a record to the current batch (immutable operation)."""
         new_batch = self.current_batch.copy()
         new_batch.append(record)
@@ -296,16 +298,18 @@ class BatchProcessingModel(FlextModels.Config):
             },
         )
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextCore.Result[None]:
         """Validate business rules for batch processing."""
         if not self.stream_name or self.stream_name.isspace():
-            return FlextResult[None].fail("Stream name cannot be empty or whitespace")
+            return FlextCore.Result[None].fail(
+                "Stream name cannot be empty or whitespace"
+            )
         if self.batch_size <= 0:
-            return FlextResult[None].fail("Batch size must be positive")
-        return FlextResult[None].ok(None)
+            return FlextCore.Result[None].fail("Batch size must be positive")
+        return FlextCore.Result[None].ok(None)
 
 
-class LoadStatisticsModel(FlextModels.Config):
+class LoadStatisticsModel(FlextCore.Models.Config):
     """Data loading statistics and metrics.
 
     Immutable value object representing comprehensive statistics
@@ -363,7 +367,7 @@ class LoadStatisticsModel(FlextModels.Config):
         default=LoadMethodModel.INSERT,
         description="Loading method that was used",
     )
-    error_details: FlextTypes.StringList = Field(
+    error_details: FlextCore.Types.StringList = Field(
         default_factory=list,
         description="List of error messages encountered",
     )
@@ -421,25 +425,31 @@ class LoadStatisticsModel(FlextModels.Config):
             },
         )
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self: object) -> FlextCore.Result[None]:
         """Validate business rules for load statistics."""
         if not self.stream_name or self.stream_name.isspace():
-            return FlextResult[None].fail("Stream name cannot be empty or whitespace")
+            return FlextCore.Result[None].fail(
+                "Stream name cannot be empty or whitespace"
+            )
         if self.successful_records < 0:
-            return FlextResult[None].fail("Successful records count cannot be negative")
+            return FlextCore.Result[None].fail(
+                "Successful records count cannot be negative"
+            )
         if self.failed_records < 0:
-            return FlextResult[None].fail("Failed records count cannot be negative")
+            return FlextCore.Result[None].fail(
+                "Failed records count cannot be negative"
+            )
         if (
             self.total_records_processed
             != self.successful_records + self.failed_records
         ):
-            return FlextResult[None].fail(
+            return FlextCore.Result[None].fail(
                 "Total records must equal successful + failed records",
             )
-        return FlextResult[None].ok(None)
+        return FlextCore.Result[None].ok(None)
 
 
-class OracleTableMetadataModel(FlextModels.Config):
+class OracleTableMetadataModel(FlextCore.Models.Config):
     """Oracle table metadata and schema information.
 
     Immutable value object representing Oracle table structure
@@ -470,15 +480,15 @@ class OracleTableMetadataModel(FlextModels.Config):
         min_length=1,
         max_length=128,
     )
-    columns: list[FlextTypes.Dict] = Field(
+    columns: list[FlextCore.Types.Dict] = Field(
         default_factory=list,
         description="List of column definitions",
     )
-    primary_key_columns: FlextTypes.StringList = Field(
+    primary_key_columns: FlextCore.Types.StringList = Field(
         default_factory=list,
         description="List of primary key column names",
     )
-    indexes: list[FlextTypes.Dict] = Field(
+    indexes: list[FlextCore.Types.Dict] = Field(
         default_factory=list,
         description="List of index definitions",
     )
@@ -508,7 +518,7 @@ class OracleTableMetadataModel(FlextModels.Config):
         column_names = [str(col.get("name", "")).upper() for col in self.columns]
         return column_name.upper() in column_names
 
-    def get_column_names(self: object) -> FlextTypes.StringList:
+    def get_column_names(self: object) -> FlextCore.Types.StringList:
         """Get list of all column names."""
         return [str(col.get("name", "")) for col in self.columns if col.get("name")]
 

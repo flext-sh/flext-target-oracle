@@ -1,6 +1,6 @@
 """Constants for FLEXT Target Oracle module.
 
-This module defines centralized constants following the FlextConstants pattern
+This module defines centralized constants following the FlextCore.Constants pattern
 from flext-core, extending it with Oracle target-specific constants.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -12,7 +12,7 @@ from __future__ import annotations
 import os
 from typing import ClassVar, Final
 
-from flext_core import FlextConstants
+from flext_core import FlextCore
 from flext_db_oracle import FlextDbOracleConstants
 
 
@@ -22,8 +22,8 @@ def _env_enabled(flag_name: str, default: str = "1") -> bool:
     return value.lower() not in {"0", "false", "no"}
 
 
-class FlextTargetOracleConstants(FlextConstants):
-    """Target Oracle constants extending FlextConstants.
+class FlextTargetOracleConstants(FlextCore.Constants):
+    """Target Oracle constants extending FlextCore.Constants.
 
     Composes with FlextDbOracleConstants to avoid duplication and ensure consistency.
     """
