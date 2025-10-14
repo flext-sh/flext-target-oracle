@@ -71,7 +71,7 @@ class FlextTargetOracleModels(FlextCore.Models):
             default=300, description="Transaction timeout in seconds"
         )
 
-    class SingerMessageProcessing(FlextCore.Models.BaseModel):
+    class SingerMessageProcessing(FlextCore.Models.StrictArbitraryTypesModel):
         """Singer message processing configuration and state."""
 
         # Message processing state
@@ -95,7 +95,7 @@ class FlextTargetOracleModels(FlextCore.Models):
             default_factory=list, description="Failed message IDs"
         )
 
-    class OracleTableMetadata(FlextCore.Models.BaseModel):
+    class OracleTableMetadata(FlextCore.Models.StrictArbitraryTypesModel):
         """Oracle table metadata for target operations."""
 
         # Table identification
@@ -129,7 +129,7 @@ class FlextTargetOracleModels(FlextCore.Models):
             default_factory=list, description="Singer key properties"
         )
 
-    class OracleLoadingOperation(FlextCore.Models.BaseModel):
+    class OracleLoadingOperation(FlextCore.Models.StrictArbitraryTypesModel):
         """Oracle data loading operation tracking."""
 
         # Operation identification
@@ -160,7 +160,7 @@ class FlextTargetOracleModels(FlextCore.Models):
         )
         batch_count: int = Field(default=0, description="Number of batches processed")
 
-    class OracleErrorRecovery(FlextCore.Models.BaseModel):
+    class OracleErrorRecovery(FlextCore.Models.StrictArbitraryTypesModel):
         """Oracle error handling and recovery configuration."""
 
         # Retry configuration
@@ -189,7 +189,7 @@ class FlextTargetOracleModels(FlextCore.Models):
             default=True, description="Handle Oracle constraint violations gracefully"
         )
 
-    class OraclePerformanceMetrics(FlextCore.Models.BaseModel):
+    class OraclePerformanceMetrics(FlextCore.Models.StrictArbitraryTypesModel):
         """Performance metrics for Oracle target operations."""
 
         # Throughput metrics
