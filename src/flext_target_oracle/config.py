@@ -5,6 +5,7 @@ FLEXT 1.0.0 patterns with enhanced singleton, SecretStr, and Pydantic 2.11+ feat
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
