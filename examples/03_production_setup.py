@@ -300,7 +300,7 @@ class ProductionTargetManager:
                 final_stats = finalize_result.data
                 if isinstance(final_stats, dict):
                     # Cast to ensure type compatibility
-                    final_stats_typed = dict(final_stats)
+                    final_stats_typed = dict[str, object](final_stats)
                     stats.update(final_stats_typed)
                 logger.info("Target finalization completed successfully")
             else:

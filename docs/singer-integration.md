@@ -146,7 +146,7 @@ class FlextOracleTarget(Target):
 
     def _write_record(self, record: Record) -> None:
         """Write single record - Singer SDK requirement."""
-        # Convert Record to dict and process
+        # Convert Record to dict[str, object] and process
 
     def _write_records(self, records: List[Record]) -> None:
         """Write batch of records - Singer SDK requirement."""

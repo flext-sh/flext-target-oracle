@@ -494,7 +494,7 @@ class TestRealOracleConfig:
         # Password should be masked
         assert config_dict["oracle_password"] != "test"
 
-        # Can recreate from dict (with password)
+        # Can recreate from dict[str, object] (with password)
         config_dict["oracle_password"] = "test"
         new_config = FlextTargetOracleConfig(**config_dict)
         assert new_config.oracle_host == config.oracle_host
