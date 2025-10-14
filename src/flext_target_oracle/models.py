@@ -124,7 +124,7 @@ class FlextTargetOracleModels(FlextCore.Models):
 
         # Singer metadata
         singer_stream_name: str = Field(description="Singer stream name")
-        singer_schema: dict = Field(description="Singer schema definition")
+        singer_schema: dict[str, object] = Field(description="Singer schema definition")
         key_properties: FlextCore.Types.StringList = Field(
             default_factory=list, description="Singer key properties"
         )
