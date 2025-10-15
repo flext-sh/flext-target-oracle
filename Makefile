@@ -186,7 +186,7 @@ ci-test: ## Run tests in CI mode
 ci-lint: ## Run linting (ZERO TOLERANCE) in CI mode
 	@echo "$(BLUE)🤖 Running linting in CI mode...$(RESET)"
 	@poetry run ruff check . --output-format=github
-	@poetry run mypy src/ --junit-xml=reports/mypy.xml
+	@poetry run pyrefly check .
 
 # ============================================================================
 # 🛠️ UTILITIES
