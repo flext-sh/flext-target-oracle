@@ -14,19 +14,19 @@ Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
 
 """
-from typing import Protocol, override  # noqa: E402
+from typing import Protocol, override
 
-from flext_db_oracle import FlextDbOracleApi  # noqa: E402
-from pydantic import Field  # noqa: E402
+from flext_db_oracle import FlextDbOracleApi
+from pydantic import Field
 
-from flext_target_oracle.config import FlextTargetOracleConfig  # noqa: E402
-from flext_target_oracle.target_models import (  # noqa: E402
+from flext_target_oracle.config import FlextTargetOracleConfig
+from flext_target_oracle.target_models import (
     LoadMethodModel,
     LoadStatisticsModel,
     OracleConnectionModel,
     SingerStreamModel,
 )
-from flext_target_oracle.utilities import FlextTargetOracleUtilities  # noqa: E402
+from flext_target_oracle.utilities import FlextTargetOracleUtilities
 
 # Constants
 ALL_STREAMS = "__ALL_STREAMS__"
@@ -145,17 +145,15 @@ class OracleConnectionService(FlextService[None]):
         """
         # ZERO TOLERANCE FIX: Use utilities for connection validation
         validation_result = (
-            self._utilities.ConfigValidation.validate_oracle_connection_config(
-                {
-                    "oracle_host": self._config.oracle_host,
-                    "oracle_port": self._config.oracle_port,
-                    "oracle_service": self._config.oracle_service,
-                    "oracle_user": self._config.oracle_user,
-                    "default_target_schema": self._config.default_target_schema,
-                    "use_ssl": self._config.use_ssl,
-                    "connection_timeout": self._config.connection_timeout,
-                }
-            )
+            self._utilities.ConfigValidation.validate_oracle_connection_config({
+                "oracle_host": self._config.oracle_host,
+                "oracle_port": self._config.oracle_port,
+                "oracle_service": self._config.oracle_service,
+                "oracle_user": self._config.oracle_user,
+                "default_target_schema": self._config.default_target_schema,
+                "use_ssl": self._config.use_ssl,
+                "connection_timeout": self._config.connection_timeout,
+            })
         )
         if validation_result.is_failure:
             return FlextResult[None].fail(
