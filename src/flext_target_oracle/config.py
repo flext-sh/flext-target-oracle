@@ -403,32 +403,25 @@ class FlextTargetOracleConfig(FlextConfig):
         env_overrides: FlextTypes.Dict = {}
 
         if environment == "production":
-            env_overrides.update(
-                {
-                    "batch_size": FlextConstants.Performance.BatchProcessing.MAX_ITEMS
-                    // 2,
-                    "use_bulk_operations": True,
-                    "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT
-                    * 10,  # 5 minutes for production
-                }
-            )
+            env_overrides.update({
+                "batch_size": FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 2,
+                "use_bulk_operations": True,
+                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT
+                * 10,  # 5 minutes for production
+            })
         elif environment == "development":
-            env_overrides.update(
-                {
-                    "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
-                    "use_bulk_operations": False,
-                    "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 2,
-                }
-            )
+            env_overrides.update({
+                "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
+                "use_bulk_operations": False,
+                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 2,
+            })
         elif environment == "staging":
-            env_overrides.update(
-                {
-                    "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
-                    * 2.5,
-                    "use_bulk_operations": True,
-                    "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 6,
-                }
-            )
+            env_overrides.update({
+                "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
+                * 2.5,
+                "use_bulk_operations": True,
+                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 6,
+            })
 
         all_overrides = {**env_overrides, **overrides}
         return cls.get_or_create_shared_instance(

@@ -116,9 +116,9 @@ class FlextTargetOracle(
                         {"processed": proc.is_success},
                     )
                 # If payload wasn't a dict, return a success with no-op
-                return FlextResult[FlextTargetOracleTypes.Core.Dict].ok(
-                    {"processed": "False"}
-                )
+                return FlextResult[FlextTargetOracleTypes.Core.Dict].ok({
+                    "processed": "False"
+                })
             except Exception as e:
                 return FlextResult[FlextTargetOracleTypes.Core.Dict].fail(
                     f"Failed to process payload: {e}",
