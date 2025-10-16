@@ -12,20 +12,20 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextCore
+from flext_core import FlextConstants, FlextExceptions, FlextTypes
 
 
-class FlextTargetOracleExceptions(FlextCore.Exceptions):
+class FlextTargetOracleExceptions(FlextExceptions):
     """Oracle Target exceptions using flext-core SOURCE OF TRUTH."""
 
     # Main Oracle error - inherits from base error
-    class Error(FlextCore.Exceptions.Error):
+    class Error(FlextExceptions.Error):
         """Oracle Target main error - inherits from base error."""
 
-    class ConfigurationError(FlextCore.Exceptions.ConfigurationError):
+    class ConfigurationError(FlextExceptions.ConfigurationError):
         """Oracle configuration error using flext-core foundation."""
 
-    class OracleConnectionError(FlextCore.Exceptions.ConnectionError):
+    class OracleConnectionError(FlextExceptions.ConnectionError):
         """Oracle connection error with Oracle-specific context."""
 
         @override
@@ -39,7 +39,7 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
             user: str | None = None,
             dsn: str | None = None,
             code: str | None = None,
-            context: FlextCore.Types.Dict | None = None,
+            context: FlextTypes.Dict | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -60,7 +60,7 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
 
             super().__init__(
                 message=message,
-                code=code or FlextCore.Constants.Errors.CONNECTION_ERROR,
+                code=code or FlextConstants.Errors.CONNECTION_ERROR,
                 context=oracle_context,
                 correlation_id=correlation_id,
             )
@@ -110,10 +110,10 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
                 return value if isinstance(value, str) else None
             return None
 
-    class ValidationError(FlextCore.Exceptions.ValidationError):
+    class ValidationError(FlextExceptions.ValidationError):
         """Oracle validation error using flext-core foundation."""
 
-    class AuthenticationError(FlextCore.Exceptions.AuthenticationError):
+    class AuthenticationError(FlextExceptions.AuthenticationError):
         """Oracle authentication error with Oracle-specific context."""
 
         @override
@@ -125,7 +125,7 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
             auth_method: str | None = None,
             wallet_location: str | None = None,
             code: str | None = None,
-            context: FlextCore.Types.Dict | None = None,
+            context: FlextTypes.Dict | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -142,7 +142,7 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
 
             super().__init__(
                 message=message,
-                code=code or FlextCore.Constants.Errors.AUTHENTICATION_ERROR,
+                code=code or FlextConstants.Errors.AUTHENTICATION_ERROR,
                 context=oracle_context,
                 correlation_id=correlation_id,
             )
@@ -165,7 +165,7 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
                 return value if isinstance(value, str) else None
             return None
 
-    class ProcessingError(FlextCore.Exceptions.ProcessingError):
+    class ProcessingError(FlextExceptions.ProcessingError):
         """Oracle processing error with Oracle-specific context."""
 
         @override
@@ -175,10 +175,10 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
             *,
             stream_name: str | None = None,
             record_count: int | None = None,
-            error_records: list[FlextCore.Types.Dict] | None = None,
+            error_records: list[FlextTypes.Dict] | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: FlextCore.Types.Dict | None = None,
+            context: FlextTypes.Dict | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -197,7 +197,7 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
 
             super().__init__(
                 message=message,
-                code=code or FlextCore.Constants.Errors.PROCESSING_ERROR,
+                code=code or FlextConstants.Errors.PROCESSING_ERROR,
                 context=oracle_context,
                 correlation_id=correlation_id,
             )
@@ -221,21 +221,21 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
             return None
 
         @property
-        def error_records(self: object) -> list[FlextCore.Types.Dict] | None:
+        def error_records(self: object) -> list[FlextTypes.Dict] | None:
             """Get error records."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
                 value = ctx.get("error_records")
                 if isinstance(value, list) and all(isinstance(i, dict) for i in value):
                     # Rebuild to ensure precise element typing
-                    normalized: list[FlextCore.Types.Dict] = [
+                    normalized: list[FlextTypes.Dict] = [
                         {**item}
                         for item in value  # shallow copy as dict["str", "object"]
                     ]
                     return normalized
             return None
 
-    class OracleTimeoutError(FlextCore.Exceptions.TimeoutError):
+    class OracleTimeoutError(FlextExceptions.TimeoutError):
         """Oracle timeout error using flext-core foundation."""
 
     # Domain-specific Oracle exceptions extending flext-core patterns
@@ -250,9 +250,9 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
             stream_name: str | None = None,
             table_name: str | None = None,
             schema_hash: str | None = None,
-            validation_errors: FlextCore.Types.StringList | None = None,
+            validation_errors: FlextTypes.StringList | None = None,
             code: str | None = None,
-            context: FlextCore.Types.Dict | None = None,
+            context: FlextTypes.Dict | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -271,7 +271,7 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
 
             super().__init__(
                 message=message,
-                code=code or FlextCore.Constants.Errors.VALIDATION_ERROR,
+                code=code or FlextConstants.Errors.VALIDATION_ERROR,
                 context=oracle_context,
                 correlation_id=correlation_id,
             )
@@ -304,7 +304,7 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
             return None
 
         @property
-        def validation_errors(self: object) -> FlextCore.Types.StringList | None:
+        def validation_errors(self: object) -> FlextTypes.StringList | None:
             """Get validation errors."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -328,7 +328,7 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
             table_name: str | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: FlextCore.Types.Dict | None = None,
+            context: FlextTypes.Dict | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -345,7 +345,7 @@ class FlextTargetOracleExceptions(FlextCore.Exceptions):
 
             super().__init__(
                 message=message,
-                code=code or FlextCore.Constants.Errors.OPERATION_ERROR,
+                code=code or FlextConstants.Errors.OPERATION_ERROR,
                 context=oracle_context,
                 correlation_id=correlation_id,
             )
@@ -376,7 +376,7 @@ FlextTargetOracleLoadError = FlextTargetOracleExceptions.LoadError
 FlextTargetOracleSQLError = FlextTargetOracleExceptions.SQLError
 FlextTargetOracleRecordError = FlextTargetOracleExceptions.RecordError
 
-__all__: FlextCore.Types.StringList = [
+__all__: FlextTypes.StringList = [
     "FlextTargetOracleAuthenticationError",
     "FlextTargetOracleConfigurationError",
     "FlextTargetOracleConnectionError",

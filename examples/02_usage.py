@@ -7,19 +7,19 @@ Singer-formatted data into an Oracle database.
 import json
 from pathlib import Path
 
-from flext_core import FlextCore
+from flext_core import FlextTypes
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig
 
 
-def load_config() -> FlextCore.Types.Dict:
+def load_config() -> FlextTypes.Dict:
     """Load configuration from file."""
     config_path = Path("config.json")
     with config_path.open(encoding="utf-8") as f:
         return json.load(f)
 
 
-def load_singer_messages() -> list[FlextCore.Types.Dict]:
+def load_singer_messages() -> list[FlextTypes.Dict]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
     with data_path.open(encoding="utf-8") as f:
