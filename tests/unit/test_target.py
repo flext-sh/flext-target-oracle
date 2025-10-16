@@ -13,7 +13,7 @@ from datetime import UTC, datetime
 
 import pytest
 from _pytest.capture import CaptureFixture
-from flext_core import FlextCore
+from flext_core import FlextTypes
 from sqlalchemy import Engine, text
 
 from flext_target_oracle import (
@@ -70,7 +70,7 @@ class TestRealOracleTarget:
     def test_real_process_schema_message(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: FlextCore.Types.Dict,
+        simple_schema: FlextTypes.Dict,
     ) -> None:
         """Test processing schema message."""
         real_target.initialize()
@@ -95,7 +95,7 @@ class TestRealOracleTarget:
     def test_real_process_record_message(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: FlextCore.Types.Dict,
+        simple_schema: FlextTypes.Dict,
         oracle_engine: Engine,
     ) -> None:
         """Test processing record message with real database."""
@@ -173,7 +173,7 @@ class TestRealOracleTarget:
     def test_real_batch_processing(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: FlextCore.Types.Dict,
+        simple_schema: FlextTypes.Dict,
         oracle_engine: Engine,
     ) -> None:
         """Test batch processing with real database."""
@@ -215,7 +215,7 @@ class TestRealOracleTarget:
     def test_real_column_mapping(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: FlextCore.Types.Dict,
+        simple_schema: FlextTypes.Dict,
         oracle_engine: Engine,
     ) -> None:
         """Test column mapping with real database."""
@@ -324,7 +324,7 @@ class TestRealOracleTarget:
     def test_real_nested_json_handling(
         self,
         real_target: FlextTargetOracle,
-        nested_schema: FlextCore.Types.Dict,
+        nested_schema: FlextTypes.Dict,
         oracle_engine: Engine,
     ) -> None:
         """Test nested JSON handling with real database."""
@@ -415,7 +415,7 @@ class TestRealOracleTarget:
     def test_real_metrics_collection(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: FlextCore.Types.Dict,
+        simple_schema: FlextTypes.Dict,
     ) -> None:
         """Test metrics collection with real processing."""
         real_target.initialize()
@@ -578,7 +578,7 @@ class TestRealOracleTarget:
     def test_real_large_batch_processing(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: FlextCore.Types.Dict,
+        simple_schema: FlextTypes.Dict,
         oracle_engine: Engine,
     ) -> None:
         """Test processing large batches with real database."""

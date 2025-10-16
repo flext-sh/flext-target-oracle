@@ -79,9 +79,9 @@ python examples/performance_tuning.py
 
 ## Common Patterns
 
-### FlextCore.Result Error Handling
+### FlextResult Error Handling
 
-All examples demonstrate railway-oriented programming with FlextCore.Result patterns:
+All examples demonstrate railway-oriented programming with FlextResult patterns:
 
 ```python
 result = target.process_singer_message(message)
@@ -112,10 +112,29 @@ if validation_result.is_failure:
 Integration with FLEXT core patterns and flext-db-oracle:
 
 ```python
-from flext_core import FlextCore
+from flext_core import FlextBus
+from flext_core import FlextConfig
+from flext_core import FlextConstants
+from flext_core import FlextContainer
+from flext_core import FlextContext
+from flext_core import FlextDecorators
+from flext_core import FlextDispatcher
+from flext_core import FlextExceptions
+from flext_core import FlextHandlers
+from flext_core import FlextLogger
+from flext_core import FlextMixins
+from flext_core import FlextModels
+from flext_core import FlextProcessors
+from flext_core import FlextProtocols
+from flext_core import FlextRegistry
+from flext_core import FlextResult
+from flext_core import FlextRuntime
+from flext_core import FlextService
+from flext_core import FlextTypes
+from flext_core import FlextUtilities
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig
 
-logger = FlextCore.Logger(__name__)
+logger = FlextLogger(__name__)
 ```
 
 ## Testing Examples
@@ -130,7 +149,7 @@ pytest examples/tests/ -m integration
 
 ## Contributing Examples
 
-1. **Follow FLEXT Patterns**: Use FlextCore.Result, FlextCore.Models.Value, and structured logging
+1. **Follow FLEXT Patterns**: Use FlextResult, FlextModels.Value, and structured logging
 2. **Document Thoroughly**: Include comprehensive docstrings and comments
 3. **Test Coverage**: Add corresponding tests in examples/tests/
 4. **Security Awareness**: Highlight security considerations and best practices

@@ -137,19 +137,38 @@ make test                   # Must maintain 90%+ coverage
 
 ```python
 # ✅ GOOD: FLEXT patterns
-from flext_core import FlextCore
+from flext_core import FlextBus
+from flext_core import FlextConfig
+from flext_core import FlextConstants
+from flext_core import FlextContainer
+from flext_core import FlextContext
+from flext_core import FlextDecorators
+from flext_core import FlextDispatcher
+from flext_core import FlextExceptions
+from flext_core import FlextHandlers
+from flext_core import FlextLogger
+from flext_core import FlextMixins
+from flext_core import FlextModels
+from flext_core import FlextProcessors
+from flext_core import FlextProtocols
+from flext_core import FlextRegistry
+from flext_core import FlextResult
+from flext_core import FlextRuntime
+from flext_core import FlextService
+from flext_core import FlextTypes
+from flext_core import FlextUtilities
 
-def operation() -> FlextCore.Result[Data]:
-    """Clear docstring with FlextCore.Result return type."""
+def operation() -> FlextResult[Data]:
+    """Clear docstring with FlextResult return type."""
     try:
         # Business logic here
-        return FlextCore.Result[None].ok(data)
+        return FlextResult[None].ok(data)
     except Exception as e:
         logger.exception("Operation failed")
-        return FlextCore.Result[None].fail(f"Operation failed: {e}")
+        return FlextResult[None].fail(f"Operation failed: {e}")
 
 # ✅ GOOD: Configuration with validation
-class Config(FlextCore.Models.Value):
+class Config(FlextModels.Value):
     field: str = Field(..., description="Required field")
 
     @field_validator("field")
@@ -171,48 +190,48 @@ class BadConfig:
 
 ## FLEXT Pattern Implementation
 
-### FlextCore.Result Railway Pattern
+### FlextResult Railway Pattern
 
 ```python
-# ✅ All operations return FlextCore.Result
-def process_record(record: dict) -> FlextCore.Result[None]:
+# ✅ All operations return FlextResult
+def process_record(record: dict) -> FlextResult[None]:
     """Process a single record with proper error handling."""
     try:
         # Validate input
         if not record:
-            return FlextCore.Result[None].fail("Record cannot be empty")
+            return FlextResult[None].fail("Record cannot be empty")
 
         # Process record
         result = some_operation(record)
         if result.is_failure:
             return result  # Propagate failure
 
-        return FlextCore.Result[None].ok(None)
+        return FlextResult[None].ok(None)
 
     except Exception as e:
         logger.exception("Record processing failed")
-        return FlextCore.Result[None].fail(f"Processing failed: {e}")
+        return FlextResult[None].fail(f"Processing failed: {e}")
 
-# ✅ Chain FlextCore.Result operations
-def process_batch(records: list[FlextCore.Types.Dict]) -> FlextCore.Result[Stats]:
+# ✅ Chain FlextResult operations
+def process_batch(records: list[FlextTypes.Dict]) -> FlextResult[Stats]:
     """Process batch of records with early termination on failure."""
     stats = Stats()
 
     for record in records:
         result = process_record(record)
         if result.is_failure:
-            return FlextCore.Result[None].fail(f"Batch failed on record: {result.error}")
+            return FlextResult[None].fail(f"Batch failed on record: {result.error}")
 
         stats.increment()
 
-    return FlextCore.Result[None].ok(stats)
+    return FlextResult[None].ok(stats)
 ```
 
 ### Configuration Patterns
 
 ```python
-# ✅ FlextCore.Models.Value with domain validation
-class FlextOracleTargetConfig(FlextCore.Models.Value):
+# ✅ FlextModels.Value with domain validation
+class FlextOracleTargetConfig(FlextModels.Value):
     """Type-safe configuration with business rule validation."""
 
     # Required fields with clear validation
@@ -233,7 +252,7 @@ class FlextOracleTargetConfig(FlextCore.Models.Value):
         return v.strip()
 
     # Domain rule validation
-    def validate_domain_rules(self) -> FlextCore.Result[None]:
+    def validate_domain_rules(self) -> FlextResult[None]:
         """Validate business rules using Chain of Responsibility."""
         validator = ConfigurationValidator()
         return validator.validate(self)
@@ -243,9 +262,28 @@ class FlextOracleTargetConfig(FlextCore.Models.Value):
 
 ```python
 # ✅ Structured logging with context
-from flext_core import FlextCore
+from flext_core import FlextBus
+from flext_core import FlextConfig
+from flext_core import FlextConstants
+from flext_core import FlextContainer
+from flext_core import FlextContext
+from flext_core import FlextDecorators
+from flext_core import FlextDispatcher
+from flext_core import FlextExceptions
+from flext_core import FlextHandlers
+from flext_core import FlextLogger
+from flext_core import FlextMixins
+from flext_core import FlextModels
+from flext_core import FlextProcessors
+from flext_core import FlextProtocols
+from flext_core import FlextRegistry
+from flext_core import FlextResult
+from flext_core import FlextRuntime
+from flext_core import FlextService
+from flext_core import FlextTypes
+from flext_core import FlextUtilities
 
-logger = FlextCore.Logger(__name__)
+logger = FlextLogger(__name__)
 
 def process_with_logging(stream_name: str, batch_size: int):
     """Example of proper logging with context."""
@@ -393,7 +431,7 @@ from flext_target_oracle import (
     FlextOracleTarget,
     FlextOracleTargetConfig,
     LoadMethod,
-    FlextCore.Result  # Re-exported from flext-core
+    FlextResult  # Re-exported from flext-core
 )
 
 # ✅ Debug imports
@@ -487,7 +525,7 @@ def profile_batch_processing():
 ```python
 """Test template for new functionality."""
 import pytest
-from flext_target_oracle import FlextOracleTargetConfig, FlextCore.Result
+from flext_target_oracle import FlextOracleTargetConfig, FlextResult
 
 class TestNewFeature:
     """Test suite for new feature."""
@@ -594,7 +632,7 @@ def sample_records():
 import time
 from typing import List
 
-def benchmark_batch_sizes(records: List[FlextCore.Types.Dict]):
+def benchmark_batch_sizes(records: List[FlextTypes.Dict]):
     """Benchmark different batch sizes."""
 
     batch_sizes = [100, 500, 1000, 2000, 5000]

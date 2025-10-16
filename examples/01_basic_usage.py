@@ -9,7 +9,7 @@ Key Concepts Demonstrated:
     - FlextTargetOracleConfig creation and validation
     - FlextTargetOracle initialization and setup
     - Singer message processing (SCHEMA, RECORD, STATE)
-    - FlextCore.Result railway-oriented error handling
+    - FlextResult railway-oriented error handling
     - Basic logging and error management
 
 Prerequisites:
@@ -24,14 +24,14 @@ Usage:
 import logging
 import os
 
-from flext_core import FlextCore
+from flext_core import FlextLogger, FlextResult, FlextTypes
 from pydantic import SecretStr
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
 
 # Configure logging for the example
 logging.basicConfig(level=logging.INFO)
-logger = FlextCore.Logger(__name__)
+logger = FlextLogger(__name__)
 
 
 def create_configuration() -> FlextTargetOracleConfig:
@@ -66,11 +66,11 @@ def create_configuration() -> FlextTargetOracleConfig:
     return config
 
 
-def create_sample_schema_message() -> FlextCore.Types.Dict:
+def create_sample_schema_message() -> FlextTypes.Dict:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
-      FlextCore.Types.Dict: Singer SCHEMA message for users table
+      FlextTypes.Dict: Singer SCHEMA message for users table
 
     """
     return {
@@ -91,11 +91,11 @@ def create_sample_schema_message() -> FlextCore.Types.Dict:
     }
 
 
-def create_sample_record_messages() -> list[FlextCore.Types.Dict]:
+def create_sample_record_messages() -> list[FlextTypes.Dict]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
-      List[FlextCore.Types.Dict]: List of Singer RECORD messages
+      List[FlextTypes.Dict]: List of Singer RECORD messages
 
     """
     return [
@@ -135,11 +135,11 @@ def create_sample_record_messages() -> list[FlextCore.Types.Dict]:
     ]
 
 
-def create_sample_state_message() -> FlextCore.Types.Dict:
+def create_sample_state_message() -> FlextTypes.Dict:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
-      FlextCore.Types.Dict: Singer STATE message with bookmark information
+      FlextTypes.Dict: Singer STATE message with bookmark information
 
     """
     return {
@@ -162,7 +162,7 @@ def demonstrate_basic_usage() -> None:
     1. Configuration creation and validation
     2. Target initialization
     3. Singer message processing (SCHEMA, RECORD, STATE)
-    4. Error handling with FlextCore.Result patterns
+    4. Error handling with FlextResult patterns
     5. Statistics collection and reporting
     """
     logger.info("Starting FLEXT Target Oracle basic usage demonstration")
@@ -175,7 +175,7 @@ def demonstrate_basic_usage() -> None:
         # Validate domain rules (optional but recommended)
         logger.info("Validating configuration domain rules")
         # Validation is handled during config creation with Pydantic validators
-        validation_result = FlextCore.Result[None].ok(None)
+        validation_result = FlextResult[None].ok(None)
         if validation_result.is_failure:
             logger.error(f"Configuration validation failed: {validation_result.error}")
             return
@@ -254,7 +254,7 @@ def demonstrate_basic_usage() -> None:
 
 
 def demonstrate_error_handling() -> None:
-    """Demonstrate error handling patterns with FlextCore.Result.
+    """Demonstrate error handling patterns with FlextResult.
 
     Shows how to handle various error scenarios gracefully using
     FLEXT error handling patterns.
@@ -271,7 +271,7 @@ def demonstrate_error_handling() -> None:
         )
 
         # Domain validation is handled during config creation with Pydantic validators
-        validation_result = FlextCore.Result[None].ok(None)
+        validation_result = FlextResult[None].ok(None)
         if validation_result.is_failure:
             logger.info(f"Expected validation error: {validation_result.error}")
 
@@ -283,7 +283,7 @@ def demonstrate_error_handling() -> None:
     target = FlextTargetOracle(config)
 
     # Invalid message type
-    invalid_message: FlextCore.Types.Dict = {"type": "INVALID", "data": "test"}
+    invalid_message: FlextTypes.Dict = {"type": "INVALID", "data": "test"}
     result = target.process_singer_message(invalid_message)
 
     if result.is_failure:

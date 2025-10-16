@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 import os
 
 import pytest
-from flext_core import FlextCore
+from flext_core import FlextResult
 from pydantic import SecretStr, ValidationError
 
 from flext_target_oracle import FlextTargetOracleConfig, LoadMethod
@@ -449,7 +449,7 @@ class TestRealOracleConfig:
 
         # Test validate_oracle_config
         result = config.validate_oracle_config()
-        assert isinstance(result, FlextCore.Result)
+        assert isinstance(result, FlextResult)
         assert result.is_success
 
         # Config with missing required fields would fail
