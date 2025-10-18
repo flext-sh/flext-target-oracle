@@ -16,7 +16,7 @@ import time
 from datetime import UTC
 from typing import cast
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from pydantic import SecretStr
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
@@ -196,8 +196,8 @@ class ProductionTargetManager:
 
     def process_singer_stream(
         self,
-        messages: FlextTypes.List,
-    ) -> FlextResult[FlextTypes.Dict]:
+        messages: list[object],
+    ) -> FlextResult[dict[str, object]]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:
@@ -208,11 +208,11 @@ class ProductionTargetManager:
 
         """
         if not self.target:
-            return FlextResult[FlextTypes.Dict].fail("Target not initialized")
+            return FlextResult[dict[str, object]].fail("Target not initialized")
 
         logger.info("Processing Singer stream with %d messages", len(messages))
 
-        stats: FlextTypes.Dict = {
+        stats: dict[str, object] = {
             "messages_processed": 0,
             "schemas_processed": 0,
             "records_processed": 0,
@@ -245,7 +245,7 @@ class ProductionTargetManager:
 
                 # Process message with error handling
                 if not self.target:
-                    return FlextResult[FlextTypes.Dict].fail("Target not initialized")
+                    return FlextResult[dict[str, object]].fail("Target not initialized")
                 # Type assertion since we checked above that target is not None
                 assert self.target is not None
                 result = self.target.process_singer_message(
@@ -319,7 +319,7 @@ class ProductionTargetManager:
                 "Stream processing completed in %.2f seconds",
                 processing_duration,
             )
-            return FlextResult[FlextTypes.Dict].ok(dict(stats))
+            return FlextResult[dict[str, object]].ok(dict(stats))
 
         except Exception as e:
             logger.exception("Unexpected error during stream processing")
@@ -327,9 +327,9 @@ class ProductionTargetManager:
             current_errors = stats.get("errors_encountered", 0)
             assert isinstance(current_errors, int)
             stats["errors_encountered"] = current_errors + 1
-            return FlextResult[FlextTypes.Dict].fail(f"Stream processing error: {e}")
+            return FlextResult[dict[str, object]].fail(f"Stream processing error: {e}")
 
-    def health_check(self) -> FlextResult[FlextTypes.Dict]:
+    def health_check(self) -> FlextResult[dict[str, object]]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
@@ -338,7 +338,7 @@ class ProductionTargetManager:
         """
         logger.debug("Performing health check")
 
-        health_status: FlextTypes.Dict = {
+        health_status: dict[str, object] = {
             "status": "healthy",
             "timestamp": time.time(),
             "checks": {},  # Will be populated with check results
@@ -376,13 +376,13 @@ class ProductionTargetManager:
                     metrics.update(target_metrics)
 
             logger.debug("Health check completed: %s", health_status["status"])
-            return FlextResult[FlextTypes.Dict].ok(dict(health_status))
+            return FlextResult[dict[str, object]].ok(dict(health_status))
 
         except Exception as e:
             logger.exception("Health check failed")
             health_status["status"] = "unhealthy"
             health_status["error"] = str(e)
-            return FlextResult[FlextTypes.Dict].fail(f"Health check error: {e}")
+            return FlextResult[dict[str, object]].fail(f"Health check error: {e}")
 
     def shutdown(self) -> FlextResult[None]:
         """Graceful shutdown with resource cleanup.
@@ -495,14 +495,14 @@ def demonstrate_production_setup() -> None:
         raise
 
 
-def create_production_sample_stream() -> FlextTypes.List:
+def create_production_sample_stream() -> list[object]:
     """Create a realistic production data stream for demonstration.
 
     Returns:
       List of Singer messages representing a production workload
 
     """
-    messages: FlextTypes.List = []  # Flexible list for various message types
+    messages: list[object] = []  # Flexible list for various message types
 
     # Schema message for customer orders
     schema_message = {

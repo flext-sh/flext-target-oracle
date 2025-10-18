@@ -24,7 +24,7 @@ Usage:
 import logging
 import os
 
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from pydantic import SecretStr
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
@@ -66,11 +66,11 @@ def create_configuration() -> FlextTargetOracleConfig:
     return config
 
 
-def create_sample_schema_message() -> FlextTypes.Dict:
+def create_sample_schema_message() -> dict[str, object]:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
-      FlextTypes.Dict: Singer SCHEMA message for users table
+      dict[str, object]: Singer SCHEMA message for users table
 
     """
     return {
@@ -91,11 +91,11 @@ def create_sample_schema_message() -> FlextTypes.Dict:
     }
 
 
-def create_sample_record_messages() -> list[FlextTypes.Dict]:
+def create_sample_record_messages() -> list[dict[str, object]]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
-      List[FlextTypes.Dict]: List of Singer RECORD messages
+      List[dict[str, object]]: List of Singer RECORD messages
 
     """
     return [
@@ -135,11 +135,11 @@ def create_sample_record_messages() -> list[FlextTypes.Dict]:
     ]
 
 
-def create_sample_state_message() -> FlextTypes.Dict:
+def create_sample_state_message() -> dict[str, object]:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
-      FlextTypes.Dict: Singer STATE message with bookmark information
+      dict[str, object]: Singer STATE message with bookmark information
 
     """
     return {
@@ -283,7 +283,7 @@ def demonstrate_error_handling() -> None:
     target = FlextTargetOracle(config)
 
     # Invalid message type
-    invalid_message: FlextTypes.Dict = {"type": "INVALID", "data": "test"}
+    invalid_message: dict[str, object] = {"type": "INVALID", "data": "test"}
     result = target.process_singer_message(invalid_message)
 
     if result.is_failure:

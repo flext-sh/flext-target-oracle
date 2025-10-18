@@ -5,7 +5,7 @@ This module provides data models for Oracle target operations.
 
 from __future__ import annotations
 
-from flext_core import FlextModels, FlextTypes
+from flext_core import FlextModels
 from pydantic import Field
 
 
@@ -91,7 +91,7 @@ class FlextTargetOracleModels(FlextModels):
 
         # Error tracking
         error_count: int = Field(default=0, description="Number of processing errors")
-        failed_messages: FlextTypes.StringList = Field(
+        failed_messages: list[str] = Field(
             default_factory=list, description="Failed message IDs"
         )
 
@@ -104,13 +104,13 @@ class FlextTargetOracleModels(FlextModels):
         full_table_name: str = Field(description="Fully qualified table name")
 
         # Table structure
-        columns: list[FlextTypes.Dict] = Field(
+        columns: list[dict[str, object]] = Field(
             default_factory=list, description="Table column definitions"
         )
-        primary_keys: FlextTypes.StringList = Field(
+        primary_keys: list[str] = Field(
             default_factory=list, description="Primary key column names"
         )
-        indexes: list[FlextTypes.Dict] = Field(
+        indexes: list[dict[str, object]] = Field(
             default_factory=list, description="Table index definitions"
         )
 
@@ -125,7 +125,7 @@ class FlextTargetOracleModels(FlextModels):
         # Singer metadata
         singer_stream_name: str = Field(description="Singer stream name")
         singer_schema: dict[str, object] = Field(description="Singer schema definition")
-        key_properties: FlextTypes.StringList = Field(
+        key_properties: list[str] = Field(
             default_factory=list, description="Singer key properties"
         )
 
