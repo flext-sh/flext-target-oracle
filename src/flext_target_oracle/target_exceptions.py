@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextConstants, FlextExceptions, FlextTypes
+from flext_core import FlextConstants, FlextExceptions
 
 
 class FlextTargetOracleExceptions(FlextExceptions):
@@ -39,7 +39,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             user: str | None = None,
             dsn: str | None = None,
             code: str | None = None,
-            context: FlextTypes.Dict | None = None,
+            context: dict[str, object] | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -125,7 +125,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             auth_method: str | None = None,
             wallet_location: str | None = None,
             code: str | None = None,
-            context: FlextTypes.Dict | None = None,
+            context: dict[str, object] | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -175,10 +175,10 @@ class FlextTargetOracleExceptions(FlextExceptions):
             *,
             stream_name: str | None = None,
             record_count: int | None = None,
-            error_records: list[FlextTypes.Dict] | None = None,
+            error_records: list[dict[str, object]] | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: FlextTypes.Dict | None = None,
+            context: dict[str, object] | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -221,14 +221,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def error_records(self: object) -> list[FlextTypes.Dict] | None:
+        def error_records(self: object) -> list[dict[str, object]] | None:
             """Get error records."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
                 value = ctx.get("error_records")
                 if isinstance(value, list) and all(isinstance(i, dict) for i in value):
                     # Rebuild to ensure precise element typing
-                    normalized: list[FlextTypes.Dict] = [
+                    normalized: list[dict[str, object]] = [
                         {**item}
                         for item in value  # shallow copy as dict["str", "object"]
                     ]
@@ -250,9 +250,9 @@ class FlextTargetOracleExceptions(FlextExceptions):
             stream_name: str | None = None,
             table_name: str | None = None,
             schema_hash: str | None = None,
-            validation_errors: FlextTypes.StringList | None = None,
+            validation_errors: list[str] | None = None,
             code: str | None = None,
-            context: FlextTypes.Dict | None = None,
+            context: dict[str, object] | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -304,7 +304,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             return None
 
         @property
-        def validation_errors(self: object) -> FlextTypes.StringList | None:
+        def validation_errors(self: object) -> list[str] | None:
             """Get validation errors."""
             ctx = getattr(self, "context", None)
             if isinstance(ctx, dict):
@@ -328,7 +328,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             table_name: str | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: FlextTypes.Dict | None = None,
+            context: dict[str, object] | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -376,7 +376,7 @@ FlextTargetOracleLoadError = FlextTargetOracleExceptions.LoadError
 FlextTargetOracleSQLError = FlextTargetOracleExceptions.SQLError
 FlextTargetOracleRecordError = FlextTargetOracleExceptions.RecordError
 
-__all__: FlextTypes.StringList = [
+__all__: list[str] = [
     "FlextTargetOracleAuthenticationError",
     "FlextTargetOracleConfigurationError",
     "FlextTargetOracleConnectionError",

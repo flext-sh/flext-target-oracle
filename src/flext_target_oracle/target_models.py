@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from flext_core import FlextModels, FlextResult, FlextTypes
+from flext_core import FlextModels, FlextResult
 from pydantic import BaseModel, Field, field_validator
 
 # Oracle schema constants
@@ -170,15 +170,15 @@ class SingerStreamModel(FlextModels.Config):
         min_length=1,
         max_length=128,
     )
-    key_properties: FlextTypes.StringList = Field(
+    key_properties: list[str] = Field(
         default_factory=list,
         description="List of primary key column names",
     )
-    column_mappings: FlextTypes.StringDict = Field(
+    column_mappings: dict[str, str] = Field(
         default_factory=dict,
         description="Column name mappings (singer_name -> oracle_name)",
     )
-    ignored_columns: FlextTypes.StringList = Field(
+    ignored_columns: list[str] = Field(
         default_factory=list,
         description="List of columns to ignore during loading",
     )
@@ -240,7 +240,7 @@ class BatchProcessingModel(FlextModels.Config):
         gt=0,
         le=50000,
     )
-    current_batch: list[FlextTypes.Dict] = Field(
+    current_batch: list[dict[str, object]] = Field(
         default_factory=list,
         description="Current batch of records",
     )
@@ -274,7 +274,7 @@ class BatchProcessingModel(FlextModels.Config):
         """Current number of records in the batch."""
         return len(self.current_batch)
 
-    def add_record(self, record: FlextTypes.Dict) -> BatchProcessingModel:
+    def add_record(self, record: dict[str, object]) -> BatchProcessingModel:
         """Add a record to the current batch (immutable operation)."""
         new_batch = self.current_batch.copy()
         new_batch.append(record)
@@ -364,7 +364,7 @@ class LoadStatisticsModel(FlextModels.Config):
         default=LoadMethodModel.INSERT,
         description="Loading method that was used",
     )
-    error_details: FlextTypes.StringList = Field(
+    error_details: list[str] = Field(
         default_factory=list,
         description="List of error messages encountered",
     )
@@ -471,15 +471,15 @@ class OracleTableMetadataModel(FlextModels.Config):
         min_length=1,
         max_length=128,
     )
-    columns: list[FlextTypes.Dict] = Field(
+    columns: list[dict[str, object]] = Field(
         default_factory=list,
         description="List of column definitions",
     )
-    primary_key_columns: FlextTypes.StringList = Field(
+    primary_key_columns: list[str] = Field(
         default_factory=list,
         description="List of primary key column names",
     )
-    indexes: list[FlextTypes.Dict] = Field(
+    indexes: list[dict[str, object]] = Field(
         default_factory=list,
         description="List of index definitions",
     )
@@ -509,7 +509,7 @@ class OracleTableMetadataModel(FlextModels.Config):
         column_names = [str(col.get("name", "")).upper() for col in self.columns]
         return column_name.upper() in column_names
 
-    def get_column_names(self: object) -> FlextTypes.StringList:
+    def get_column_names(self: object) -> list[str]:
         """Get list of all column names."""
         return [str(col.get("name", "")) for col in self.columns if col.get("name")]
 

@@ -2,7 +2,7 @@
 
 from typing import Protocol, runtime_checkable
 
-from flext_core import FlextProtocols, FlextResult, FlextTypes
+from flext_core import FlextProtocols, FlextResult
 
 
 class FlextTargetOracleProtocols:
@@ -29,63 +29,70 @@ class FlextTargetOracleProtocols:
         class TargetProtocol(FlextProtocols.Service, Protocol):
             """Protocol for Oracle target operations."""
 
-            def process_record(self, record: FlextTypes.Dict) -> FlextResult[None]: ...
+            def process_record(self, record: dict[str, object]) -> FlextResult[None]:
+                """Process a Singer record for Oracle target."""
 
         @runtime_checkable
         class ConnectionProtocol(FlextProtocols.Service, Protocol):
             """Protocol for Oracle connection management."""
 
-            def connect(self, config: FlextTypes.Dict) -> FlextResult[object]: ...
+            def connect(self, config: dict[str, object]) -> FlextResult[object]:
+                """Connect to Oracle database."""
 
         @runtime_checkable
         class SchemaProtocol(FlextProtocols.Service, Protocol):
             """Protocol for Oracle schema management."""
 
-            def create_table(self, schema: FlextTypes.Dict) -> FlextResult[None]: ...
+            def create_table(self, schema: dict[str, object]) -> FlextResult[None]:
+                """Create Oracle table from schema."""
 
         @runtime_checkable
         class BatchProtocol(FlextProtocols.Service, Protocol):
             """Protocol for Oracle batch operations."""
 
             def execute_batch(
-                self, records: list[FlextTypes.Dict]
-            ) -> FlextResult[None]: ...
+                self, records: list[dict[str, object]]
+            ) -> FlextResult[None]:
+                """Execute batch of Oracle operations."""
 
         @runtime_checkable
         class RecordProtocol(FlextProtocols.Service, Protocol):
             """Protocol for Oracle record processing."""
 
             def transform_record(
-                self, record: FlextTypes.Dict
-            ) -> FlextResult[FlextTypes.Dict]: ...
+                self, record: dict[str, object]
+            ) -> FlextResult[dict[str, object]]:
+                """Transform Singer record for Oracle."""
 
         @runtime_checkable
         class SingerProtocol(FlextProtocols.Service, Protocol):
             """Protocol for Singer message handling."""
 
-            def process_message(
-                self, message: FlextTypes.Dict
-            ) -> FlextResult[None]: ...
+            def process_message(self, message: dict[str, object]) -> FlextResult[None]:
+                """Process Singer message."""
 
         @runtime_checkable
         class PerformanceProtocol(FlextProtocols.Service, Protocol):
             """Protocol for Oracle performance optimization."""
 
-            def optimize_batch_size(self, size: int) -> FlextResult[int]: ...
+            def optimize_batch_size(self, size: int) -> FlextResult[int]:
+                """Optimize batch size for Oracle operations."""
 
         @runtime_checkable
         class SecurityProtocol(FlextProtocols.Service, Protocol):
             """Protocol for Oracle security operations."""
 
             def validate_credentials(
-                self, config: FlextTypes.Dict
-            ) -> FlextResult[bool]: ...
+                self, config: dict[str, object]
+            ) -> FlextResult[bool]:
+                """Validate Oracle credentials."""
 
         @runtime_checkable
         class MonitoringProtocol(FlextProtocols.Service, Protocol):
             """Protocol for Oracle loading monitoring."""
 
-            def track_progress(self, records: int) -> FlextResult[None]: ...
+            def track_progress(self, records: int) -> FlextResult[None]:
+                """Track progress of Oracle loading operations."""
 
     # ============================================================================
     # BACKWARD COMPATIBILITY ALIASES (100% COMPATIBILITY)

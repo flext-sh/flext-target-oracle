@@ -20,7 +20,6 @@ from flext_core import (
     FlextLogger,
     FlextResult,
     FlextService,
-    FlextTypes,
 )
 from pydantic import Field, PrivateAttr
 
@@ -89,7 +88,7 @@ class FlextTargetOracleCliService(FlextService[str]):
             "FLEXT Target Oracle CLI Service initialized successfully",
         )
 
-    def run_cli(self, args: FlextTypes.StringList | None = None) -> FlextResult[str]:
+    def run_cli(self, args: list[str] | None = None) -> FlextResult[str]:
         """Run CLI with pure Python argument parsing - NO Click/Rich usage."""
         if args is None:
             args = sys.argv[1:]
@@ -115,7 +114,7 @@ class FlextTargetOracleCliService(FlextService[str]):
             self.log_error(f"CLI execution error: {e}")
             return FlextResult[str].fail(f"CLI error: {e}")
 
-    def _handle_validate_command(self, args: FlextTypes.StringList) -> FlextResult[str]:
+    def _handle_validate_command(self, args: list[str]) -> FlextResult[str]:
         """Handle validate command using Flext CQRS SOURCE OF TRUTH."""
         config_file = None
 
@@ -139,7 +138,7 @@ class FlextTargetOracleCliService(FlextService[str]):
         self.log_error(f"Validation failed: {result.error}")
         return FlextResult[str].fail(str(result.error))
 
-    def _handle_load_command(self, args: FlextTypes.StringList) -> FlextResult[str]:
+    def _handle_load_command(self, args: list[str]) -> FlextResult[str]:
         """Handle load command using Flext CQRS SOURCE OF TRUTH."""
         config_file = None
         state_file = None
@@ -170,7 +169,7 @@ class FlextTargetOracleCliService(FlextService[str]):
         self.log_error(f"Load failed: {result.error}")
         return FlextResult[str].fail(str(result.error))
 
-    def _handle_about_command(self, args: FlextTypes.StringList) -> FlextResult[str]:
+    def _handle_about_command(self, args: list[str]) -> FlextResult[str]:
         """Handle about command using Flext CQRS SOURCE OF TRUTH."""
         format_type = "json"
 
@@ -198,7 +197,7 @@ class FlextTargetOracleCliService(FlextService[str]):
         """Dispatch commands via dispatcher when enabled."""
         if self._dispatcher is not None:
             metadata = cast(
-                "FlextTypes.Dict",
+                "dict[str, object]",
                 {
                     "command": command.__class__.__name__,
                     "source": self.__class__.__name__,
@@ -276,7 +275,7 @@ if __name__ == "__main__":
     main()
 
 
-__all__: FlextTypes.StringList = [
+__all__: list[str] = [
     "FlextTargetOracleCliService",
     "main",
 ]

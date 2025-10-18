@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import override
 
 import yaml
-from flext_core import FlextHandlers, FlextModels, FlextResult, FlextTypes
+from flext_core import FlextHandlers, FlextModels, FlextResult
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from pydantic import Field
 
@@ -50,7 +50,7 @@ class OracleTargetValidateCommand(FlextModels.Command):
                         f"Configuration file not found: {self.config_file}",
                     )
 
-                config_data: FlextTypes.Dict = json.loads(
+                config_data: dict[str, object] = json.loads(
                     config_path.read_text(encoding="utf-8")
                 )
                 config: FlextTargetOracleConfig = FlextTargetOracleConfig(**config_data)
@@ -125,7 +125,7 @@ class OracleTargetLoadCommand(FlextModels.Command):
                         f"Configuration file not found: {self.config_file}",
                     )
 
-                config_data: FlextTypes.Dict = json.loads(
+                config_data: dict[str, object] = json.loads(
                     config_path.read_text(encoding="utf-8")
                 )
                 config: FlextTargetOracleConfig = FlextTargetOracleConfig(**config_data)
@@ -171,7 +171,7 @@ class OracleTargetAboutCommand(FlextModels.Command):
         """Execute about using pure flext-core patterns."""
         try:
             # Get about information using domain methods
-            about_info: FlextTypes.Dict = {
+            about_info: dict[str, object] = {
                 "name": "flext-target-oracle",
                 "version": "__version__",
                 "description": "Modern Oracle Singer Target using FLEXT framework",
@@ -207,7 +207,7 @@ class OracleTargetAboutCommand(FlextModels.Command):
                 formatted_output = yaml.dump(about_info, default_flow_style=False)
             else:
                 # Text format - extract configuration data safely
-                config_data: FlextTypes.Dict = about_info.get("configuration", {})
+                config_data: dict[str, object] = about_info.get("configuration", {})
                 required_items = (
                     config_data.get("required", [])
                     if isinstance(config_data, dict)
@@ -218,7 +218,7 @@ class OracleTargetAboutCommand(FlextModels.Command):
                     if isinstance(config_data, dict)
                     else []
                 )
-                capabilities: FlextTypes.List = about_info.get("capabilities", [])
+                capabilities: list[object] = about_info.get("capabilities", [])
                 capabilities_list = (
                     capabilities if isinstance(capabilities, list) else []
                 )
@@ -253,7 +253,7 @@ class OracleTargetCommandHandler(FlextHandlers[FlextModels.Command, str]):
     @override
     def __init__(self: object) -> None:
         """Initialize Oracle target command handler."""
-        config: FlextTypes.Dict = FlextModels.Cqrs.Handler(
+        config: dict[str, object] = FlextModels.Cqrs.Handler(
             handler_id="oracle_target_command_handler",
             handler_name="Oracle Target Command Handler",
             handler_type="command",
@@ -337,7 +337,7 @@ class OracleTargetCommandFactory:
         )
 
 
-__all__: FlextTypes.StringList = [
+__all__: list[str] = [
     "OracleTargetAboutCommand",
     "OracleTargetCommandFactory",
     "OracleTargetCommandHandler",

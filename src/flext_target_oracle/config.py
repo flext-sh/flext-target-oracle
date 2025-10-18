@@ -13,7 +13,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Self
 
-from flext_core import FlextConfig, FlextConstants, FlextResult, FlextTypes
+from flext_core import FlextConfig, FlextConstants, FlextResult
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
@@ -144,17 +144,17 @@ class FlextTargetOracleConfig(FlextConfig):
         return self.ssl_enabled
 
     @property
-    def column_mappings(self) -> FlextTypes.StringDict:
+    def column_mappings(self) -> dict[str, str]:
         """Backward compatibility property for column mappings."""
         return {}
 
     @property
-    def ignored_columns(self) -> FlextTypes.StringList:
+    def ignored_columns(self) -> list[str]:
         """Backward compatibility property for ignored columns."""
         return []
 
     @property
-    def custom_type_mappings(self) -> FlextTypes.StringDict:
+    def custom_type_mappings(self) -> dict[str, str]:
         """Backward compatibility property for custom type mappings."""
         return {}
 
@@ -329,9 +329,9 @@ class FlextTargetOracleConfig(FlextConfig):
             return FlextResult[None].fail(f"Business rules validation failed: {e}")
 
     # Configuration helper methods that leverage the base model
-    def get_oracle_config(self) -> FlextTypes.Dict:
+    def get_oracle_config(self) -> dict[str, object]:
         """Convert to flext-db-oracle configuration format."""
-        oracle_config: FlextTypes.Dict = {
+        oracle_config: dict[str, object] = {
             "host": self.oracle_host,
             "port": self.oracle_port,
             "service_name": self.oracle_service_name,
@@ -354,7 +354,7 @@ class FlextTargetOracleConfig(FlextConfig):
 
         return oracle_config
 
-    def get_target_config(self) -> FlextTypes.Dict:
+    def get_target_config(self) -> dict[str, object]:
         """Get target-specific configuration dictionary."""
         return {
             "default_target_schema": self.default_target_schema,
@@ -400,7 +400,7 @@ class FlextTargetOracleConfig(FlextConfig):
         cls, environment: str, **overrides: object
     ) -> FlextTargetOracleConfig:
         """Create configuration for specific environment using enhanced singleton pattern."""
-        env_overrides: FlextTypes.Dict = {}
+        env_overrides: dict[str, object] = {}
 
         if environment == "production":
             env_overrides.update({
@@ -436,7 +436,7 @@ class FlextTargetOracleConfig(FlextConfig):
     @classmethod
     def create_for_development(cls, **overrides: object) -> Self:
         """Create configuration for development environment."""
-        dev_overrides: FlextTypes.Dict = {
+        dev_overrides: dict[str, object] = {
             "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
             "use_bulk_operations": False,
             "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 2,
@@ -449,7 +449,7 @@ class FlextTargetOracleConfig(FlextConfig):
     @classmethod
     def create_for_production(cls, **overrides: object) -> Self:
         """Create configuration for production environment."""
-        prod_overrides: FlextTypes.Dict = {
+        prod_overrides: dict[str, object] = {
             "batch_size": FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 2,
             "use_bulk_operations": True,
             "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT
@@ -463,7 +463,7 @@ class FlextTargetOracleConfig(FlextConfig):
     @classmethod
     def create_for_testing(cls, **overrides: object) -> Self:
         """Create configuration for testing environment."""
-        test_overrides: FlextTypes.Dict = {
+        test_overrides: dict[str, object] = {
             "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
             "use_bulk_operations": False,
             "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT,
@@ -524,7 +524,7 @@ def validate_oracle_configuration(
     return FlextResult[None].ok(None)
 
 
-__all__: FlextTypes.StringList = [
+__all__: list[str] = [
     "FlextTargetOracleConfig",
     "LoadMethod",
     "validate_oracle_configuration",

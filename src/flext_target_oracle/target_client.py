@@ -14,7 +14,7 @@ from __future__ import annotations
 import time
 from typing import ClassVar, override
 
-from flext_core import FlextResult, FlextService, FlextTypes
+from flext_core import FlextResult, FlextService
 from pydantic import Field
 
 from flext_target_oracle.config import FlextTargetOracleConfig
@@ -60,7 +60,7 @@ class FlextTargetOracle(
     @override
     def __init__(
         self,
-        config: FlextTargetOracleConfig | FlextTypes.Dict | None = None,
+        config: FlextTargetOracleConfig | dict[str, object] | None = None,
         **_data: object,
     ) -> None:
         """Initialize Oracle Singer Target with configuration validation."""
@@ -348,7 +348,7 @@ class FlextTargetOracle(
         """Handle RECORD message with data loading."""
         try:
             stream_name = message.get("stream")
-            record_data: FlextTypes.Dict = message.get("record")
+            record_data: dict[str, object] = message.get("record")
 
             if not isinstance(stream_name, str):
                 return FlextResult[None].fail("Invalid stream name in record message")

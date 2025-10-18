@@ -15,7 +15,7 @@ from typing import cast
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from flext_core import FlextLogger, FlextResult, FlextTypes
+from flext_core import FlextLogger, FlextResult
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from flext_tests import FlextTestDocker
 from pydantic import SecretStr
@@ -293,7 +293,7 @@ def mock_loader() -> Mock:
 
 # Test Data Fixtures
 @pytest.fixture
-def schema() -> FlextTypes.Dict:
+def schema() -> dict[str, object]:
     """Simple Singer schema message for unit testing."""
     return {
         "type": "SCHEMA",
@@ -311,7 +311,7 @@ def schema() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def record() -> FlextTypes.Dict:
+def record() -> dict[str, object]:
     """Simple Singer record message for unit testing."""
     return {
         "type": "RECORD",
@@ -325,7 +325,7 @@ def record() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def state() -> FlextTypes.Dict:
+def state() -> dict[str, object]:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -334,7 +334,7 @@ def state() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def simple_schema() -> FlextTypes.Dict:
+def simple_schema() -> dict[str, object]:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
@@ -353,7 +353,7 @@ def simple_schema() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def nested_schema() -> FlextTypes.Dict:
+def nested_schema() -> dict[str, object]:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
@@ -397,7 +397,7 @@ def nested_schema() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def sample_record() -> FlextTypes.Dict:
+def sample_record() -> dict[str, object]:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -414,7 +414,7 @@ def sample_record() -> FlextTypes.Dict:
 
 
 @pytest.fixture
-def batch_records() -> list[FlextTypes.Dict]:
+def batch_records() -> list[dict[str, object]]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -433,7 +433,7 @@ def batch_records() -> list[FlextTypes.Dict]:
 
 
 @pytest.fixture
-def state_message() -> FlextTypes.Dict:
+def state_message() -> dict[str, object]:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -451,10 +451,10 @@ def state_message() -> FlextTypes.Dict:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema: FlextTypes.Dict,
-    sample_record: FlextTypes.Dict,
-    state_message: FlextTypes.Dict,
-) -> list[FlextTypes.Dict]:
+    simple_schema: dict[str, object],
+    sample_record: dict[str, object],
+    state_message: dict[str, object],
+) -> list[dict[str, object]]:
     """Complete Singer message stream for testing."""
     return [
         simple_schema,
@@ -516,7 +516,7 @@ def connected_loader(
 
 # Performance Testing Fixtures
 @pytest.fixture
-def large_dataset() -> list[FlextTypes.Dict]:
+def large_dataset() -> list[dict[str, object]]:
     """Generate large dataset for performance testing."""
     schema = {
         "type": "SCHEMA",
@@ -547,8 +547,8 @@ def large_dataset() -> list[FlextTypes.Dict]:
         for i in range(10000)  # 10k records
     ]
 
-    result: list[FlextTypes.Dict] = [cast("FlextTypes.Dict", schema)]
-    result.extend(cast("list[FlextTypes.Dict]", records))
+    result: list[dict[str, object]] = [cast("dict[str, object]", schema)]
+    result.extend(cast("list[dict[str, object]]", records))
     return result
 
 

@@ -11,7 +11,6 @@ from decimal import Decimal
 from typing import Protocol
 
 import pytest
-from flext_core import FlextTypes
 from sqlalchemy import Engine, MetaData, Table, func, select, text
 
 from flext_target_oracle import (
@@ -26,20 +25,20 @@ from flext_target_oracle import (
 class LoaderProtocol(Protocol):
     """Protocol for loader objects in tests."""
 
-    def load_record(self, stream_name: str, record: FlextTypes.Dict) -> None:
+    def load_record(self, stream_name: str, record: dict[str, object]) -> None:
         """Load a single record into Oracle."""
 
-    def load_batch(self, stream_name: str, records: list[FlextTypes.Dict]) -> None:
+    def load_batch(self, stream_name: str, records: list[dict[str, object]]) -> None:
         """Load a batch of records into Oracle."""
 
     def ensure_table_exists(
         self,
         stream_name: str,
-        schema: FlextTypes.Dict,
+        schema: dict[str, object],
     ) -> None:
         """Ensure Oracle table exists for the stream."""
 
-    def finalize_streams(self, stream_name: str) -> FlextTypes.Dict:
+    def finalize_streams(self, stream_name: str) -> dict[str, object]:
         """Finalize Oracle streams and return metrics."""
 
 
@@ -105,7 +104,7 @@ class TestRealOracleLoader:
     def test_real_ensure_table_exists_new_table(
         self,
         real_loader: LoaderProtocol,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _oracle_engine: Engine,
     ) -> None:
         """Test creating a new table in real Oracle."""
@@ -160,7 +159,7 @@ class TestRealOracleLoader:
     def test_real_ensure_table_exists_existing_table(
         self,
         real_loader: LoaderProtocol,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _oracle_engine: Engine,
     ) -> None:
         """Test handling existing table in real Oracle."""
@@ -190,7 +189,7 @@ class TestRealOracleLoader:
     def test_real_force_recreate_table(
         self,
         _oracle_engine: Engine,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _clean_database: Callable[[], None],
     ) -> None:
         """Test force recreating table in real Oracle."""
@@ -259,7 +258,7 @@ class TestRealOracleLoader:
     def test_real_truncate_before_load(
         self,
         _oracle_engine: Engine,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _clean_database: Callable[[], None],
     ) -> None:
         """Test truncating table before load in real Oracle."""
@@ -315,7 +314,7 @@ class TestRealOracleLoader:
     def test_real_load_record_single(
         self,
         real_loader: LoaderProtocol,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _oracle_engine: Engine,
     ) -> None:
         """Test loading a single record into real Oracle."""
@@ -354,7 +353,7 @@ class TestRealOracleLoader:
     def test_real_load_record_batch(
         self,
         real_loader: LoaderProtocol,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _oracle_engine: Engine,
     ) -> None:
         """Test loading batch of records into real Oracle."""
@@ -388,7 +387,7 @@ class TestRealOracleLoader:
     def test_real_bulk_insert_mode(
         self,
         _oracle_engine: Engine,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _clean_database: Callable[[], None],
     ) -> None:
         """Test bulk insert mode with real Oracle."""
@@ -435,7 +434,7 @@ class TestRealOracleLoader:
     def test_real_merge_mode(
         self,
         _oracle_engine: Engine,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _clean_database: Callable[[], None],
     ) -> None:
         """Test merge mode (upsert) with real Oracle."""
@@ -496,7 +495,7 @@ class TestRealOracleLoader:
     def test_real_nested_json_flattening(
         self,
         real_loader: LoaderProtocol,
-        nested_schema: FlextTypes.Dict,
+        nested_schema: dict[str, object],
         _oracle_engine: Engine,
     ) -> None:
         """Test flattening nested JSON structures in real Oracle."""
@@ -639,7 +638,7 @@ class TestRealOracleLoader:
     def test_real_column_ordering(
         self,
         _oracle_engine: Engine,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _clean_database: Callable[[], None],
     ) -> None:
         """Test column ordering in real Oracle."""
@@ -722,7 +721,7 @@ class TestRealOracleLoader:
     def test_real_custom_indexes(
         self,
         _oracle_engine: Engine,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _clean_database: Callable[[], None],
     ) -> None:
         """Test custom index creation in real Oracle."""
@@ -775,7 +774,7 @@ class TestRealOracleLoader:
     def test_real_finalize_streams_metrics(
         self,
         real_loader: LoaderProtocol,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
     ) -> None:
         """Test finalize streams with metrics in real Oracle."""
         stream_name = "metrics_test"
@@ -810,7 +809,7 @@ class TestRealOracleLoader:
         self,
         real_loader: object,
         _oracle_engine: Engine,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _clean_database: Callable[[], None],
     ) -> None:
         """Test method."""
@@ -829,7 +828,7 @@ class TestRealOracleLoader:
     def test_real_parallel_and_direct_path(
         self,
         _oracle_engine: Engine,
-        _simple_schema: FlextTypes.Dict,
+        _simple_schema: dict[str, object],
         _clean_database: Callable[[], None],
     ) -> None:
         """Test parallel and direct path options in real Oracle."""
