@@ -25,7 +25,7 @@ class FlextTargetOracleModels(FlextModels):
     # Constants
     MAX_PORT_NUMBER = 65535
 
-    class OracleTargetConfig(FlextModels.BaseConfig):
+    class OracleTargetConfig(FlextModels.ArbitraryTypesModel):
         """Configuration for Oracle target operations."""
 
         # Oracle connection settings

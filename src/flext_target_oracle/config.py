@@ -66,7 +66,7 @@ class FlextTargetOracleConfig(FlextConfig):
     )
 
     oracle_port: int = Field(
-        default=FlextConstants.Platform.DATABASE_DEFAULT_PORT,
+        default=1521,
         ge=1,
         le=65535,
         description="Oracle database port",

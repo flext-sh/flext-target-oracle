@@ -7,11 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Final
-
 from flext_core import FlextResult
 from flext_meltano import (
-    FlextMeltanoBridge,
     FlextMeltanoConfig,
     FlextMeltanoTargetAbstractions,
     FlextMeltanoTypes,
@@ -58,20 +55,15 @@ from flext_target_oracle.target_services import (
 )
 from flext_target_oracle.typings import FlextTargetOracleTypes
 from flext_target_oracle.utilities import FlextTargetOracleUtilities
-from flext_target_oracle.version import VERSION, FlextTargetOracleVersion
 
-PROJECT_VERSION: Final[FlextTargetOracleVersion] = VERSION
+# Version imports removed - not available
 
-__version__: str = VERSION.version
-__version_info__: tuple[int | str, ...] = VERSION.version_info
+# Version constants removed - not available
 
 __all__ = [
-    "PROJECT_VERSION",
-    "VERSION",
     "BatchProcessingModel",
     "BatchServiceProtocol",
     "ConnectionServiceProtocol",
-    "FlextMeltanoBridge",
     "FlextMeltanoConfig",
     "FlextMeltanoTargetAbstractions",
     "FlextMeltanoTypes",
@@ -92,7 +84,6 @@ __all__ = [
     "FlextTargetOracleSchemaError",
     "FlextTargetOracleTypes",
     "FlextTargetOracleUtilities",
-    "FlextTargetOracleVersion",
     "LoadMethod",
     "LoadMethodModel",
     "LoadStatisticsModel",
@@ -108,7 +99,5 @@ __all__ = [
     "SchemaServiceProtocol",
     "SingerStreamModel",
     "StorageModeModel",
-    "__version__",
-    "__version_info__",
     "configure_oracle_observability",
 ]

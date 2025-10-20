@@ -518,7 +518,8 @@ class TestOracleTargetE2E:
 
             # Check data inserted
             data_count = conn.execute(text("SELECT COUNT(*) FROM users")).scalar()
-            assert data_count is not None and data_count > 0
+            assert data_count is not None
+            assert data_count > 0
 
     @pytest.mark.usefixtures("_clean_database")
     def test_column_mapping_and_filtering(

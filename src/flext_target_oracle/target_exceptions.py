@@ -19,7 +19,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
     """Oracle Target exceptions using flext-core SOURCE OF TRUTH."""
 
     # Main Oracle error - inherits from base error
-    class Error(FlextExceptions.Error):
+    class Error(FlextExceptions.BaseError):
         """Oracle Target main error - inherits from base error."""
 
     class ConfigurationError(FlextExceptions.ConfigurationError):
@@ -165,7 +165,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 return value if isinstance(value, str) else None
             return None
 
-    class ProcessingError(FlextExceptions.ProcessingError):
+    class ProcessingError(FlextExceptions.OperationError):
         """Oracle processing error with Oracle-specific context."""
 
         @override
