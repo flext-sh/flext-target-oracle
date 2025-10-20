@@ -14,7 +14,8 @@ import os
 from typing import ClassVar, Final
 
 from flext_core import FlextConstants
-from flext_db_oracle import FlextDbOracleConstants
+
+# No longer importing from flext_db_oracle
 
 
 def _env_enabled(flag_name: str, default: str = "1") -> bool:
@@ -26,38 +27,28 @@ def _env_enabled(flag_name: str, default: str = "1") -> bool:
 class FlextTargetOracleConstants(FlextConstants):
     """Target Oracle constants extending FlextConstants.
 
-    Composes with FlextDbOracleConstants to avoid duplication and ensure consistency.
+    Composes with 1000 to avoid duplication and ensure consistency.
     """
 
     class Connection:
         """Connection-related constants for Oracle target."""
 
-        DEFAULT_PORT: Final[int] = FlextDbOracleConstants.Network.DEFAULT_PORT
-        MIN_PORT: Final[int] = FlextDbOracleConstants.Network.MIN_PORT
-        MAX_PORT: Final[int] = FlextDbOracleConstants.Network.MAX_PORT
-        DEFAULT_CONNECTION_TIMEOUT: Final[int] = (
-            FlextDbOracleConstants.Connection.DEFAULT_CONNECTION_TIMEOUT
-        )
+        DEFAULT_PORT: Final[int] = 1521
+        MIN_PORT: Final[int] = 1024
+        MAX_PORT: Final[int] = 65535
+        DEFAULT_CONNECTION_TIMEOUT: Final[int] = 30
 
         # Oracle-specific connection settings
-        DEFAULT_HOST: Final[str] = FlextDbOracleConstants.Defaults.DEFAULT_HOST
-        DEFAULT_SERVICE_NAME: Final[str] = (
-            FlextDbOracleConstants.Defaults.DEFAULT_SERVICE_NAME
-        )
-        DEFAULT_USERNAME: Final[str] = FlextDbOracleConstants.Defaults.DEFAULT_USERNAME
+        DEFAULT_HOST: Final[str] = "localhost"
+        DEFAULT_SERVICE_NAME: Final[str] = "XE"
+        DEFAULT_USERNAME: Final[str] = "system"
 
     class Processing:
         """Processing-related constants for Oracle target."""
 
-        DEFAULT_BATCH_SIZE: Final[int] = (
-            FlextDbOracleConstants.Defaults.DEFAULT_BATCH_SIZE
-        )
-        DEFAULT_COMMIT_SIZE: Final[int] = (
-            FlextDbOracleConstants.Performance.DEFAULT_COMMIT_SIZE
-        )
-        DEFAULT_QUERY_TIMEOUT: Final[int] = (
-            FlextDbOracleConstants.Defaults.DEFAULT_QUERY_TIMEOUT
-        )
+        DEFAULT_BATCH_SIZE: Final[int] = 1000
+        DEFAULT_COMMIT_SIZE: Final[int] = 1000
+        DEFAULT_QUERY_TIMEOUT: Final[int] = 30
 
         DEFAULT_MAX_PARALLEL_STREAMS: Final[int] = (
             4  # Singer-specific parallel streams setting
@@ -66,28 +57,16 @@ class FlextTargetOracleConstants(FlextConstants):
     class Loading:
         """Target-specific loading configuration."""
 
-        DEFAULT_POOL_MIN: Final[int] = (
-            FlextDbOracleConstants.Connection.DEFAULT_POOL_MIN
-        )
-        DEFAULT_POOL_MAX: Final[int] = (
-            FlextDbOracleConstants.Connection.DEFAULT_POOL_MAX
-        )
-        DEFAULT_POOL_TIMEOUT: Final[int] = (
-            FlextDbOracleConstants.Connection.DEFAULT_POOL_TIMEOUT
-        )
+        DEFAULT_POOL_MIN: Final[int] = 5
+        DEFAULT_POOL_MAX: Final[int] = 20
+        DEFAULT_POOL_TIMEOUT: Final[int] = 30
 
     class Validation:
         """Target-specific validation configuration."""
 
-        MAX_TABLE_NAME_LENGTH: Final[int] = (
-            FlextDbOracleConstants.Validation.MAX_TABLE_NAME_LENGTH
-        )
-        MAX_COLUMN_NAME_LENGTH: Final[int] = (
-            FlextDbOracleConstants.Validation.MAX_COLUMN_NAME_LENGTH
-        )
-        MAX_IDENTIFIER_LENGTH: Final[int] = (
-            FlextDbOracleConstants.Validation.MAX_IDENTIFIER_LENGTH
-        )
+        MAX_TABLE_NAME_LENGTH: Final[int] = 30
+        MAX_COLUMN_NAME_LENGTH: Final[int] = 30
+        MAX_IDENTIFIER_LENGTH: Final[int] = 30
 
     class FeatureFlags:
         """Feature toggles for progressive dispatcher rollout."""

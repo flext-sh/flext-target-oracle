@@ -134,7 +134,7 @@ class OracleConnectionModel(BaseModel):
         return FlextResult[None].ok(None)
 
 
-class SingerStreamModel(FlextModels.Config):
+class SingerStreamModel(FlextModels.ArbitraryTypesModel):
     """Singer stream definition with Oracle mappings.
 
     Immutable value object representing a Singer stream configuration
@@ -212,7 +212,7 @@ class SingerStreamModel(FlextModels.Config):
         return f"{self.schema_name}.{self.table_name}"
 
 
-class BatchProcessingModel(FlextModels.Config):
+class BatchProcessingModel(FlextModels.ArbitraryTypesModel):
     """Batch processing configuration and state.
 
     Immutable value object representing batch processing configuration
@@ -306,7 +306,7 @@ class BatchProcessingModel(FlextModels.Config):
         return FlextResult[None].ok(None)
 
 
-class LoadStatisticsModel(FlextModels.Config):
+class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
     """Data loading statistics and metrics.
 
     Immutable value object representing comprehensive statistics
@@ -440,7 +440,7 @@ class LoadStatisticsModel(FlextModels.Config):
         return FlextResult[None].ok(None)
 
 
-class OracleTableMetadataModel(FlextModels.Config):
+class OracleTableMetadataModel(FlextModels.ArbitraryTypesModel):
     """Oracle table metadata and schema information.
 
     Immutable value object representing Oracle table structure

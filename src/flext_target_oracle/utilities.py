@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from flext_core import FlextConstants, FlextResult, FlextUtilities
 
@@ -53,9 +53,9 @@ class FlextTargetOracleUtilities(FlextUtilities):
         @staticmethod
         def create_schema_message(
             stream_name: str,
-            schema: dict[str, object],
+            schema: dict[str, Any],
             key_properties: list[str] | None = None,
-        ) -> dict[str, object]:
+        ) -> dict[str, Any]:
             """Create Singer SCHEMA message for Oracle table definition.
 
             Args:
@@ -78,9 +78,9 @@ class FlextTargetOracleUtilities(FlextUtilities):
         @staticmethod
         def create_record_message(
             stream_name: str,
-            record: dict[str, object],
+            record: dict[str, Any],
             time_extracted: str | None = None,
-        ) -> dict[str, object]:
+        ) -> dict[str, Any]:
             """Create Singer RECORD message for Oracle data insertion.
 
             Args:
@@ -102,7 +102,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
             return message
 
         @staticmethod
-        def create_state_message(state: dict[str, object]) -> dict[str, object]:
+        def create_state_message(state: dict[str, Any]) -> dict[str, Any]:
             """Create Singer STATE message for Oracle target checkpointing.
 
             Args:
@@ -116,8 +116,8 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
         @staticmethod
         def validate_singer_message(
-            message: dict[str, object],
-        ) -> FlextResult[dict[str, object]]:
+            message: dict[str, Any],
+        ) -> FlextResult[dict[str, Any]]:
             """Validate Singer message format and required fields.
 
             Args:
@@ -128,13 +128,13 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
             """
             if not isinstance(message, dict):
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[dict[str, Any]].fail(
                     "Singer message must be a dictionary"
                 )
 
             message_type = message.get("type")
             if message_type not in {"SCHEMA", "RECORD", "STATE"}:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[dict[str, Any]].fail(
                     f"Invalid Singer message type: {message_type}"
                 )
 
@@ -142,7 +142,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 required_fields = ["stream", "schema"]
                 for field in required_fields:
                     if field not in message:
-                        return FlextResult[dict[str, object]].fail(
+                        return FlextResult[dict[str, Any]].fail(
                             f"Missing required field for SCHEMA: {field}"
                         )
 
@@ -150,17 +150,17 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 required_fields = ["stream", "record"]
                 for field in required_fields:
                     if field not in message:
-                        return FlextResult[dict[str, object]].fail(
+                        return FlextResult[dict[str, Any]].fail(
                             f"Missing required field for RECORD: {field}"
                         )
 
             elif message_type == "STATE":
                 if "value" not in message:
-                    return FlextResult[dict[str, object]].fail(
+                    return FlextResult[dict[str, Any]].fail(
                         "Missing required field for STATE: value"
                     )
 
-            return FlextResult[dict[str, object]].ok(message)
+            return FlextResult[dict[str, Any]].ok(message)
 
     class OracleDataProcessing:
         """Oracle database-specific data processing utilities."""
@@ -200,7 +200,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
         @staticmethod
         def generate_oracle_table_ddl(
             table_name: str,
-            schema: dict[str, object],
+            schema: dict[str, Any],
             key_properties: list[str] | None = None,
         ) -> FlextResult[str]:
             """Generate Oracle DDL for creating table from Singer schema.
@@ -215,7 +215,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
             """
             try:
-                properties = schema.get("properties", {})
+                properties: dict[str, Any] = schema.get("properties", {})
                 if not properties:
                     return FlextResult[str].fail("Schema properties cannot be empty")
 
@@ -276,7 +276,8 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 placeholder_list = ", ".join("?" for _ in columns)
 
                 # Parameterized INSERT with placeholders - safe SQL generation
-                statement = f'INSERT INTO "{table_name.upper()}" ({column_list}) VALUES ({placeholder_list})'  # noqa: S608
+                # Table name is validated and quoted to prevent injection
+                statement = f'INSERT INTO "{table_name.upper()}" ({column_list}) VALUES ({placeholder_list})'
                 return FlextResult[str].ok(statement)
 
             except Exception as e:
@@ -286,8 +287,8 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
         @staticmethod
         def transform_record_for_oracle(
-            record: dict[str, object],
-        ) -> FlextResult[dict[str, object]]:
+            record: dict[str, Any],
+        ) -> FlextResult[dict[str, Any]]:
             """Transform Singer record for Oracle database insertion.
 
             Args:
@@ -312,10 +313,10 @@ class FlextTargetOracleUtilities(FlextUtilities):
                     else:
                         transformed[key.upper()] = value
 
-                return FlextResult[dict[str, object]].ok(transformed)
+                return FlextResult[dict[str, Any]].ok(transformed)
 
             except Exception as e:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[dict[str, Any]].fail(
                     f"Failed to transform record for Oracle: {e}"
                 )
 
@@ -324,8 +325,8 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
         @staticmethod
         def process_schema_stream(
-            stream_name: str, schema_message: dict[str, object]
-        ) -> FlextResult[dict[str, object]]:
+            stream_name: str, schema_message: dict[str, Any]
+        ) -> FlextResult[dict[str, Any]]:
             """Process Singer schema stream for Oracle table management.
 
             Args:
@@ -337,15 +338,15 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
             """
             try:
-                schema = schema_message.get("schema", {})
-                key_properties = schema_message.get("key_properties", [])
+                schema: dict[str, Any] = schema_message.get("schema", {})
+                key_properties: list[str] = schema_message.get("key_properties", [])
 
                 # Generate Oracle table DDL
                 ddl_result = FlextTargetOracleUtilities.OracleDataProcessing.generate_oracle_table_ddl(
                     stream_name, schema, key_properties
                 )
                 if ddl_result.is_failure:
-                    return FlextResult[dict[str, object]].fail(
+                    return FlextResult[dict[str, Any]].fail(
                         f"DDL generation failed: {ddl_result.error}"
                     )
 
@@ -357,17 +358,17 @@ class FlextTargetOracleUtilities(FlextUtilities):
                     "properties": schema.get("properties", {}),
                 }
 
-                return FlextResult[dict[str, object]].ok(processed_schema)
+                return FlextResult[dict[str, Any]].ok(processed_schema)
 
             except Exception as e:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[dict[str, Any]].fail(
                     f"Failed to process schema stream: {e}"
                 )
 
         @staticmethod
         def batch_records_for_oracle(
-            records: list[dict[str, object]], batch_size: int = 1000
-        ) -> FlextResult[list[list[dict[str, object]]]]:
+            records: list[dict[str, Any]], batch_size: int = 1000
+        ) -> FlextResult[list[list[dict[str, Any]]]]:
             """Batch Singer records for efficient Oracle bulk operations.
 
             Args:
@@ -379,7 +380,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
             """
             if batch_size <= 0:
-                return FlextResult[list[list[dict[str, object]]]].fail(
+                return FlextResult[list[list[dict[str, Any]]]].fail(
                     "Batch size must be positive"
                 )
 
@@ -389,10 +390,10 @@ class FlextTargetOracleUtilities(FlextUtilities):
                     batch = records[i : i + batch_size]
                     batches.append(batch)
 
-                return FlextResult[list[list[dict[str, object]]]].ok(batches)
+                return FlextResult[list[list[dict[str, Any]]]].ok(batches)
 
             except Exception as e:
-                return FlextResult[list[list[dict[str, object]]]].fail(
+                return FlextResult[list[list[dict[str, Any]]]].fail(
                     f"Failed to batch records: {e}"
                 )
 
@@ -401,8 +402,8 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
         @staticmethod
         def validate_oracle_connection_config(
-            config: dict[str, object],
-        ) -> FlextResult[dict[str, object]]:
+            config: dict[str, Any],
+        ) -> FlextResult[dict[str, Any]]:
             """Validate Oracle connection configuration.
 
             Args:
@@ -415,7 +416,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
             required_fields = ["host", "port", "service_name", "username", "password"]
             for field in required_fields:
                 if field not in config or not config[field]:
-                    return FlextResult[dict[str, object]].fail(
+                    return FlextResult[dict[str, Any]].fail(
                         f"Missing required Oracle config field: {field}"
                     )
 
@@ -427,20 +428,20 @@ class FlextTargetOracleUtilities(FlextUtilities):
                     <= port
                     <= FlextConstants.Network.MAX_PORT
                 ):
-                    return FlextResult[dict[str, object]].fail(
+                    return FlextResult[dict[str, Any]].fail(
                         f"Oracle port must be between {FlextConstants.Network.MIN_PORT} and {FlextConstants.Network.MAX_PORT}"
                     )
             except (ValueError, TypeError):
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[dict[str, Any]].fail(
                     "Oracle port must be a valid integer"
                 )
 
-            return FlextResult[dict[str, object]].ok(config)
+            return FlextResult[dict[str, Any]].ok(config)
 
         @staticmethod
         def validate_oracle_target_config(
-            config: dict[str, object],
-        ) -> FlextResult[dict[str, object]]:
+            config: dict[str, Any],
+        ) -> FlextResult[dict[str, Any]]:
             """Validate Oracle target-specific configuration.
 
             Args:
@@ -455,9 +456,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 "batch_size", FlextTargetOracleUtilities.DEFAULT_BATCH_SIZE
             )
             if batch_size <= 0:
-                return FlextResult[dict[str, object]].fail(
-                    "Batch size must be positive"
-                )
+                return FlextResult[dict[str, Any]].fail("Batch size must be positive")
 
             # Validate connection pool size
             pool_size = config.get("connection_pool_size", 5)
@@ -465,7 +464,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 pool_size <= 0
                 or pool_size > FlextTargetOracleUtilities.MAX_CONNECTION_POOL_SIZE
             ):
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[dict[str, Any]].fail(
                     f"Connection pool size must be between 1 and {FlextTargetOracleUtilities.MAX_CONNECTION_POOL_SIZE}"
                 )
 
@@ -474,20 +473,20 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 "commit_interval", FlextTargetOracleUtilities.DEFAULT_COMMIT_INTERVAL
             )
             if commit_interval <= 0:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[dict[str, Any]].fail(
                     "Commit interval must be positive"
                 )
 
-            return FlextResult[dict[str, object]].ok(config)
+            return FlextResult[dict[str, Any]].ok(config)
 
     class StateManagement:
         """Singer state management utilities for Oracle target."""
 
         @staticmethod
         def create_oracle_target_state(
-            stream_states: dict[str, object],
-            target_metadata: dict[str, object] | None = None,
-        ) -> FlextResult[dict[str, object]]:
+            stream_states: dict[str, Any],
+            target_metadata: dict[str, Any] | None = None,
+        ) -> FlextResult[dict[str, Any]]:
             """Create Oracle target state for Singer checkpointing.
 
             Args:
@@ -508,19 +507,19 @@ class FlextTargetOracleUtilities(FlextUtilities):
                 if target_metadata:
                     state["target_metadata"] = target_metadata
 
-                return FlextResult[dict[str, object]].ok(state)
+                return FlextResult[dict[str, Any]].ok(state)
 
             except Exception as e:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[dict[str, Any]].fail(
                     f"Failed to create Oracle target state: {e}"
                 )
 
         @staticmethod
         def update_stream_state(
-            current_state: dict[str, object],
+            current_state: dict[str, Any],
             stream_name: str,
-            last_processed_record: dict[str, object],
-        ) -> FlextResult[dict[str, object]]:
+            last_processed_record: dict[str, Any],
+        ) -> FlextResult[dict[str, Any]]:
             """Update state for a specific stream in Oracle target.
 
             Args:
@@ -543,10 +542,10 @@ class FlextTargetOracleUtilities(FlextUtilities):
                     "last_updated": datetime.now(UTC).isoformat(),
                 }
 
-                return FlextResult[dict[str, object]].ok(updated_state)
+                return FlextResult[dict[str, Any]].ok(updated_state)
 
             except Exception as e:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[dict[str, Any]].fail(
                     f"Failed to update stream state: {e}"
                 )
 
@@ -628,19 +627,19 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
     # Proxy methods for backward compatibility (minimal)
     def validate_singer_message(
-        self, message: dict[str, object]
-    ) -> FlextResult[dict[str, object]]:
+        self, message: dict[str, Any]
+    ) -> FlextResult[dict[str, Any]]:
         """Proxy to SingerUtilities.validate_singer_message."""
         return self.SingerUtilities.validate_singer_message(message)
 
     def transform_record_for_oracle(
-        self, record: dict[str, object]
-    ) -> FlextResult[dict[str, object]]:
+        self, record: dict[str, Any]
+    ) -> FlextResult[dict[str, Any]]:
         """Proxy to OracleDataProcessing.transform_record_for_oracle."""
         return self.OracleDataProcessing.transform_record_for_oracle(record)
 
     def validate_oracle_connection_config(
-        self, config: dict[str, object]
-    ) -> FlextResult[dict[str, object]]:
+        self, config: dict[str, Any]
+    ) -> FlextResult[dict[str, Any]]:
         """Proxy to ConfigValidation.validate_oracle_connection_config."""
         return self.ConfigValidation.validate_oracle_connection_config(config)

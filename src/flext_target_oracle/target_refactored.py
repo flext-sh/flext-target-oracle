@@ -47,7 +47,7 @@ class FlextTargetOracleCliService(FlextService[str]):
 
     # Pydantic fields - flext-core SOURCE OF TRUTH patterns
     command_bus: FlextBus = Field(
-        default_factory=FlextBus.create_command_bus,
+        default_factory=FlextBus,
         description="Command bus for routing commands",
     )
     command_handler: OracleTargetCommandHandler = Field(
