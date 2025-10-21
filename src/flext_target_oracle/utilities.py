@@ -17,7 +17,7 @@ from flext_core import FlextConstants, FlextResult, FlextUtilities
 class FlextTargetOracleUtilities(FlextUtilities):
     """Single unified utilities class for Singer target Oracle database operations.
 
-    This class provides comprehensive Oracle database target functionality for Singer protocol
+    This class provides complete Oracle database target functionality for Singer protocol
     integration, including connection management, SQL generation, bulk operations, transaction
     handling, and performance optimization for enterprise Oracle deployments.
 
@@ -26,16 +26,16 @@ class FlextTargetOracleUtilities(FlextUtilities):
     - High-performance bulk insert operations and batch processing
     - Singer protocol compliance with stream-to-table mapping
     - Oracle-specific SQL generation with hints and optimization
-    - Comprehensive transaction management with ACID compliance
+    - Complete transaction management with ACID compliance
     - Oracle performance monitoring and query optimization
     - Enterprise security with parameterized queries and SQL injection prevention
 
     Attributes:
-        ORACLE_DEFAULT_PORT: Default Oracle database port (1521)
-        ORACLE_DEFAULT_SERVICE: Default Oracle service name (XE)
-        DEFAULT_BATCH_SIZE: Default batch size for bulk operations (1000)
-        MAX_CONNECTION_POOL_SIZE: Maximum connection pool size (20)
-        DEFAULT_COMMIT_INTERVAL: Default commit interval for transactions (1000)
+    ORACLE_DEFAULT_PORT: Default Oracle database port (1521)
+    ORACLE_DEFAULT_SERVICE: Default Oracle service name (XE)
+    DEFAULT_BATCH_SIZE: Default batch size for bulk operations (1000)
+    MAX_CONNECTION_POOL_SIZE: Maximum connection pool size (20)
+    DEFAULT_COMMIT_INTERVAL: Default commit interval for transactions (1000)
 
     """
 
@@ -59,12 +59,12 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Create Singer SCHEMA message for Oracle table definition.
 
             Args:
-                stream_name: Name of the Singer stream
-                schema: JSON schema definition for the stream
-                key_properties: List of key property names
+            stream_name: Name of the Singer stream
+            schema: JSON schema definition for the stream
+            key_properties: List of key property names
 
             Returns:
-                Singer SCHEMA message dictionary
+            Singer SCHEMA message dictionary
 
             """
             return {
@@ -84,12 +84,12 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Create Singer RECORD message for Oracle data insertion.
 
             Args:
-                stream_name: Name of the Singer stream
-                record: Data record to insert
-                time_extracted: Optional extraction timestamp
+            stream_name: Name of the Singer stream
+            record: Data record to insert
+            time_extracted: Optional extraction timestamp
 
             Returns:
-                Singer RECORD message dictionary
+            Singer RECORD message dictionary
 
             """
             message = {
@@ -106,10 +106,10 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Create Singer STATE message for Oracle target checkpointing.
 
             Args:
-                state: State data for checkpointing
+            state: State data for checkpointing
 
             Returns:
-                Singer STATE message dictionary
+            Singer STATE message dictionary
 
             """
             return {"type": "STATE", "value": state}
@@ -121,10 +121,10 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Validate Singer message format and required fields.
 
             Args:
-                message: Singer message to validate
+            message: Singer message to validate
 
             Returns:
-                FlextResult containing validated message or error
+            FlextResult containing validated message or error
 
             """
             if not isinstance(message, dict):
@@ -172,11 +172,11 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Map Singer JSON schema type to Oracle SQL type.
 
             Args:
-                singer_type: Singer data type (string, integer, number, boolean, etc.)
-                format_spec: Optional format specification (date-time, date, etc.)
+            singer_type: Singer data type (string, integer, number, boolean, etc.)
+            format_spec: Optional format specification (date-time, date, etc.)
 
             Returns:
-                Oracle SQL type string
+            Oracle SQL type string
 
             """
             type_mapping = {
@@ -206,12 +206,12 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Generate Oracle DDL for creating table from Singer schema.
 
             Args:
-                table_name: Name of the Oracle table to create
-                schema: Singer JSON schema
-                key_properties: List of key property names
+            table_name: Name of the Oracle table to create
+            schema: Singer JSON schema
+            key_properties: List of key property names
 
             Returns:
-                FlextResult containing Oracle DDL string or error
+            FlextResult containing Oracle DDL string or error
 
             """
             try:
@@ -261,11 +261,11 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Prepare parameterized Oracle INSERT statement.
 
             Args:
-                table_name: Name of the Oracle table
-                columns: List of column names
+            table_name: Name of the Oracle table
+            columns: List of column names
 
             Returns:
-                FlextResult containing Oracle INSERT statement or error
+            FlextResult containing Oracle INSERT statement or error
 
             """
             if not columns:
@@ -292,10 +292,10 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Transform Singer record for Oracle database insertion.
 
             Args:
-                record: Singer record data
+            record: Singer record data
 
             Returns:
-                FlextResult containing transformed record or error
+            FlextResult containing transformed record or error
 
             """
             try:
@@ -330,11 +330,11 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Process Singer schema stream for Oracle table management.
 
             Args:
-                stream_name: Name of the Singer stream
-                schema_message: Singer SCHEMA message
+            stream_name: Name of the Singer stream
+            schema_message: Singer SCHEMA message
 
             Returns:
-                FlextResult containing processed schema information or error
+            FlextResult containing processed schema information or error
 
             """
             try:
@@ -372,11 +372,11 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Batch Singer records for efficient Oracle bulk operations.
 
             Args:
-                records: List of Singer records
-                batch_size: Size of each batch (default: 1000)
+            records: List of Singer records
+            batch_size: Size of each batch (default: 1000)
 
             Returns:
-                FlextResult containing list of batches or error
+            FlextResult containing list of batches or error
 
             """
             if batch_size <= 0:
@@ -407,10 +407,10 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Validate Oracle connection configuration.
 
             Args:
-                config: Oracle connection configuration
+            config: Oracle connection configuration
 
             Returns:
-                FlextResult containing validated config or error
+            FlextResult containing validated config or error
 
             """
             required_fields = ["host", "port", "service_name", "username", "password"]
@@ -445,10 +445,10 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Validate Oracle target-specific configuration.
 
             Args:
-                config: Oracle target configuration
+            config: Oracle target configuration
 
             Returns:
-                FlextResult containing validated config or error
+            FlextResult containing validated config or error
 
             """
             # Validate batch size
@@ -490,11 +490,11 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Create Oracle target state for Singer checkpointing.
 
             Args:
-                stream_states: Dictionary of stream states
-                target_metadata: Optional target-specific metadata
+            stream_states: Dictionary of stream states
+            target_metadata: Optional target-specific metadata
 
             Returns:
-                FlextResult containing Oracle target state or error
+            FlextResult containing Oracle target state or error
 
             """
             try:
@@ -523,12 +523,12 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Update state for a specific stream in Oracle target.
 
             Args:
-                current_state: Current Singer state
-                stream_name: Name of the stream to update
-                last_processed_record: Last processed record data
+            current_state: Current Singer state
+            stream_name: Name of the stream to update
+            last_processed_record: Last processed record data
 
             Returns:
-                FlextResult containing updated state or error
+            FlextResult containing updated state or error
 
             """
             try:
@@ -560,11 +560,11 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Calculate optimal batch size for Oracle bulk operations.
 
             Args:
-                table_row_size_bytes: Average size of table row in bytes
-                available_memory_mb: Available memory for batching in MB
+            table_row_size_bytes: Average size of table row in bytes
+            available_memory_mb: Available memory for batching in MB
 
             Returns:
-                FlextResult containing optimal batch size or error
+            FlextResult containing optimal batch size or error
 
             """
             try:
@@ -595,11 +595,11 @@ class FlextTargetOracleUtilities(FlextUtilities):
             """Generate Oracle SQL hints for performance optimization.
 
             Args:
-                operation_type: Type of operation (INSERT, UPDATE, DELETE, SELECT)
-                table_size: Size category of table (small, medium, large)
+            operation_type: Type of operation (INSERT, UPDATE, DELETE, SELECT)
+            table_size: Size category of table (small, medium, large)
 
             Returns:
-                FlextResult containing Oracle hints string or error
+            FlextResult containing Oracle hints string or error
 
             """
             try:

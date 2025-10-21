@@ -33,17 +33,17 @@ from flext_target_oracle.target_commands import (
 class FlextTargetOracleCliService(FlextService[str]):
     """Oracle Target CLI Service using FlextService and Flext CQRS SOURCE OF TRUTH.
 
-    ZERO DUPLICATION - Uses FlextService base class directly.
-    ZERO WRAPPERS - No CLI abstractions, direct command execution.
-    SOLID COMPLIANCE - Single responsibility: CLI orchestration only.
+ ZERO DUPLICATION - Uses FlextService base class directly.
+ ZERO WRAPPERS - No CLI abstractions, direct command execution.
+ SOLID COMPLIANCE - Single responsibility: CLI orchestration only.
 
-    Architecture:
-    - Single Responsibility: CLI argument parsing and command dispatch
-    - Open/Closed: Extensible through command factory
-    - Liskov Substitution: Proper FlextService inheritance
-    - Interface Segregation: Focused CLI interface
-    - Dependency Inversion: Depends on Flext CQRS abstractions
-    """
+ Architecture:
+ - Single Responsibility: CLI argument parsing and command dispatch
+ - Open/Closed: Extensible through command factory
+ - Liskov Substitution: Proper FlextService inheritance
+ - Interface Segregation: Focused CLI interface
+ - Dependency Inversion: Depends on Flext CQRS abstractions
+ """
 
     # Pydantic fields - flext-core SOURCE OF TRUTH patterns
     command_bus: FlextBus = Field(
@@ -252,7 +252,7 @@ Environment Variables:
 
 
 def main() -> None:
-    """Main CLI entry point using FlextService and Flext CQRS SOURCE OF TRUTH."""
+ """Main CLI entry point using FlextService and Flext CQRS SOURCE OF TRUTH."""
     try:
         # Create CLI service using Pydantic patterns - SOURCE OF TRUTH
         cli_service = FlextTargetOracleCliService()

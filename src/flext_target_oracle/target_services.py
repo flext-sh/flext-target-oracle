@@ -117,7 +117,7 @@ class OracleConnectionService(FlextService[None]):
     def __init__(self, **data: object) -> None:
         """Initialize Oracle connection service."""
         super().__init__(**data)
-        # ZERO TOLERANCE FIX: Use FlextTargetOracleUtilities for ALL business logic
+        # Zero Tolerance FIX: Use FlextTargetOracleUtilities for ALL business logic
         self._utilities = FlextTargetOracleUtilities()
 
     # Connection model is computed property, not field
@@ -138,10 +138,10 @@ class OracleConnectionService(FlextService[None]):
         """Test Oracle database connection using zero-fallback error handling.
 
         Returns:
-            FlextResult indicating connection success/failure
+        FlextResult indicating connection success/failure
 
         """
-        # ZERO TOLERANCE FIX: Use utilities for connection validation
+        # Zero Tolerance FIX: Use utilities for connection validation
         validation_result = (
             self._utilities.ConfigValidation.validate_oracle_connection_config({
                 "oracle_host": self._config.oracle_host,
@@ -169,7 +169,7 @@ class OracleConnectionService(FlextService[None]):
                     f"Connection test failed: {tables_result.error}",
                 )
 
-            # ZERO TOLERANCE FIX: Use utilities for connection diagnostics
+            # Zero Tolerance FIX: Use utilities for connection diagnostics
             diagnostics_result = (
                 self._utilities.ConnectionManagement.generate_connection_diagnostics(
                     host=self._config.oracle_host,
@@ -202,7 +202,7 @@ class OracleConnectionService(FlextService[None]):
         Executes the primary domain operation: testing Oracle connection.
 
         Returns:
-            FlextResult[None] indicating connection test success/failure
+        FlextResult[None] indicating connection test success/failure
 
         """
         return self.test_connection()
@@ -211,7 +211,7 @@ class OracleConnectionService(FlextService[None]):
         """Get connection information.
 
         Returns:
-            FlextResult containing connection model
+        FlextResult containing connection model
 
         """
         return FlextResult[OracleConnectionModel].ok(self.connection_model)
@@ -238,7 +238,7 @@ class OracleSchemaService(FlextService[None]):
     def __init__(self, **data: object) -> None:
         """Initialize Oracle schema service."""
         super().__init__(**data)
-        # ZERO TOLERANCE FIX: Use FlextTargetOracleUtilities for ALL business logic
+        # Zero Tolerance FIX: Use FlextTargetOracleUtilities for ALL business logic
         self._utilities = FlextTargetOracleUtilities()
 
     @override
@@ -248,7 +248,7 @@ class OracleSchemaService(FlextService[None]):
         For schema service, execute validates Oracle schema access.
 
         Returns:
-            FlextResult[None] indicating schema access validation
+        FlextResult[None] indicating schema access validation
 
         """
         return self.validate_schema_access()
@@ -256,7 +256,7 @@ class OracleSchemaService(FlextService[None]):
     def validate_schema_access(self: object) -> FlextResult[None]:
         """Validate Oracle schema access and permissions."""
         try:
-            # ZERO TOLERANCE FIX: Use utilities for schema validation
+            # Zero Tolerance FIX: Use utilities for schema validation
             schema_validation = (
                 self._utilities.SchemaValidation.validate_oracle_schema_access(
                     schema_name=self._config.default_target_schema,
@@ -298,12 +298,12 @@ class OracleSchemaService(FlextService[None]):
         """Ensure Oracle table exists for stream data.
 
         Args:
-            stream: Singer stream configuration
-            schema: JSON schema for the stream
-            key_properties: Primary key columns
+        stream: Singer stream configuration
+        schema: JSON schema for the stream
+        key_properties: Primary key columns
 
         Returns:
-            FlextResult indicating success/failure
+        FlextResult indicating success/failure
 
         """
         try:
@@ -333,11 +333,11 @@ class OracleSchemaService(FlextService[None]):
         """Get column information for Oracle table.
 
         Args:
-            table_name: Name of the table
-            schema_name: Oracle schema name
+        table_name: Name of the table
+        schema_name: Oracle schema name
 
         Returns:
-            FlextResult containing column definitions
+        FlextResult containing column definitions
 
         """
         try:
@@ -372,16 +372,16 @@ class OracleSchemaService(FlextService[None]):
         """Create Oracle table based on stream configuration.
 
         Args:
-            stream: Singer stream configuration
-            schema: JSON schema
-            key_properties: Primary key columns
+        stream: Singer stream configuration
+        schema: JSON schema
+        key_properties: Primary key columns
 
         Returns:
-            FlextResult indicating success/failure
+        FlextResult indicating success/failure
 
         """
         try:
-            # ZERO TOLERANCE FIX: Use utilities for DDL generation
+            # Zero Tolerance FIX: Use utilities for DDL generation
             ddl_result = self._utilities.TableManagement.generate_create_table_ddl(
                 table_name=stream.table_name,
                 schema=schema,
@@ -395,7 +395,7 @@ class OracleSchemaService(FlextService[None]):
                 )
 
             with self.oracle_api as connected_api:
-                # ZERO TOLERANCE FIX: Use utilities for DDL validation before execution
+                # Zero Tolerance FIX: Use utilities for DDL validation before execution
                 ddl_sql = ddl_result.value
                 validation_result = self._utilities.TableManagement.validate_ddl_syntax(
                     ddl_sql
@@ -412,7 +412,7 @@ class OracleSchemaService(FlextService[None]):
                         f"Failed to create table: {exec_result.error}",
                     )
 
-                # ZERO TOLERANCE FIX: Use utilities for post-creation validation
+                # Zero Tolerance FIX: Use utilities for post-creation validation
                 verification_result = (
                     self._utilities.TableManagement.verify_table_creation(
                         table_name=stream.table_name,
@@ -466,7 +466,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
         For batch service, execute finalizes all pending batches.
 
         Returns:
-            FlextResult[LoadStatisticsModel] with aggregated statistics
+        FlextResult[LoadStatisticsModel] with aggregated statistics
 
         """
         return self.finalize_all()
@@ -475,7 +475,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
         """Flush all pending batches and return aggregated statistics.
 
         Returns:
-            FlextResult[LoadStatisticsModel]: Aggregated statistics from all batches
+        FlextResult[LoadStatisticsModel]: Aggregated statistics from all batches
 
         """
         try:
@@ -521,11 +521,11 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
         """Add record to batch processing queue.
 
         Args:
-            stream_name: Name of the stream
-            record: Record to add to batch
+        stream_name: Name of the stream
+        record: Record to add to batch
 
         Returns:
-            FlextResult indicating success/failure
+        FlextResult indicating success/failure
 
         """
         # Implementation placeholder for proper batch management
@@ -536,10 +536,10 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
         """Flush pending batch for stream.
 
         Args:
-            stream_name: Name of the stream to flush
+        stream_name: Name of the stream to flush
 
         Returns:
-            FlextResult indicating success/failure
+        FlextResult indicating success/failure
 
         """
         # Implementation placeholder for proper batch flushing
@@ -564,7 +564,7 @@ class OracleRecordService(FlextService[None]):
     def __init__(self, **data: object) -> None:
         """Initialize Oracle record service."""
         super().__init__(**data)
-        # ZERO TOLERANCE FIX: Use FlextTargetOracleUtilities for ALL business logic
+        # Zero Tolerance FIX: Use FlextTargetOracleUtilities for ALL business logic
         self._utilities = FlextTargetOracleUtilities()
 
     @override
@@ -574,7 +574,7 @@ class OracleRecordService(FlextService[None]):
         For record service, execute validates transformation capabilities.
 
         Returns:
-            FlextResult[None] indicating service readiness
+        FlextResult[None] indicating service readiness
 
         """
         self.log_info("Record transformation service is ready")
@@ -588,15 +588,15 @@ class OracleRecordService(FlextService[None]):
         """Transform Singer record for Oracle storage.
 
         Args:
-            record: Original Singer record
-            stream: Singer stream model
+        record: Original Singer record
+        stream: Singer stream model
 
         Returns:
-            FlextResult containing transformed record
+        FlextResult containing transformed record
 
         """
         try:
-            # ZERO TOLERANCE FIX: Use utilities for Singer message parsing and validation
+            # Zero Tolerance FIX: Use utilities for Singer message parsing and validation
             # First validate the record structure
             validation_result = (
                 self._utilities.SingerUtilities.validate_record_structure(record)
@@ -617,7 +617,7 @@ class OracleRecordService(FlextService[None]):
                 # Apply column name mapping
                 mapped_name = stream.column_mappings.get(col_name, col_name)
 
-                # ZERO TOLERANCE FIX: Use utilities for data type conversion
+                # Zero Tolerance FIX: Use utilities for data type conversion
                 conversion_result = self._utilities.DataTransformation.convert_singer_value_to_oracle(
                     value=original_value,
                     target_type="VARCHAR2",  # Default, should be determined from stream schema
@@ -631,7 +631,7 @@ class OracleRecordService(FlextService[None]):
                     )
                     final_value = original_value
 
-                # ZERO TOLERANCE FIX: Use utilities for value sanitization
+                # Zero Tolerance FIX: Use utilities for value sanitization
                 if isinstance(final_value, str):
                     final_value = (
                         self._utilities.DataTransformation.sanitize_oracle_value(
@@ -641,7 +641,7 @@ class OracleRecordService(FlextService[None]):
 
                 transformed_record[mapped_name] = final_value
 
-            # ZERO TOLERANCE FIX: Use utilities for metadata column handling
+            # Zero Tolerance FIX: Use utilities for metadata column handling
             if self._config.add_metadata_columns:
                 metadata_result = (
                     self._utilities.MetadataProcessing.add_singer_metadata_columns(
@@ -672,7 +672,7 @@ class OracleRecordService(FlextService[None]):
     ) -> FlextResult[None]:
         """Validate record against schema."""
         try:
-            # ZERO TOLERANCE FIX: Use utilities for comprehensive record validation
+            # Zero Tolerance FIX: Use utilities for complete record validation
             validation_result = (
                 self._utilities.SchemaValidation.validate_record_against_schema(
                     record=record, schema=schema
@@ -682,7 +682,7 @@ class OracleRecordService(FlextService[None]):
             if validation_result.is_failure:
                 return FlextResult[None].fail(validation_result.error)
 
-            # ZERO TOLERANCE FIX: Use utilities for Oracle-specific validations
+            # Zero Tolerance FIX: Use utilities for Oracle-specific validations
             oracle_validation = (
                 self._utilities.SchemaValidation.validate_oracle_constraints(
                     record=record, schema=schema
@@ -711,8 +711,8 @@ class OracleTargetServiceFactory:
         """Initialize service factory.
 
         Args:
-            config: Oracle target configuration
-            oracle_api: Oracle database API instance
+        config: Oracle target configuration
+        oracle_api: Oracle database API instance
 
         """
         self._config: FlextTargetOracleConfig = config

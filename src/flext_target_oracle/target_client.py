@@ -33,11 +33,11 @@ class FlextTargetOracle(
     UNIFIED PATTERN - All functionality consolidated in one class.
 
     Architecture:
-        - Single Responsibility: Oracle Singer Target implementation
-        - Open/Closed: Extensible through configuration and composition
-        - Liskov Substitution: Proper FlextService inheritance
-        - Interface Segregation: Focused Singer Target interface
-        - Dependency Inversion: Depends on abstractions (flext-core patterns)
+    - Single Responsibility: Oracle Singer Target implementation
+    - Open/Closed: Extensible through configuration and composition
+    - Liskov Substitution: Proper FlextService inheritance
+    - Interface Segregation: Focused Singer Target interface
+    - Dependency Inversion: Depends on abstractions (flext-core patterns)
     """
 
     model_config: ClassVar = {"frozen": "False"}  # Allow field mutations
@@ -197,7 +197,7 @@ class FlextTargetOracle(
         self,
         messages: list[FlextTargetOracleTypes.Core.Dict],
     ) -> FlextResult[FlextTargetOracleTypes.Core.Dict]:
-        """Process Singer messages with comprehensive statistics using standardized models."""
+        """Process Singer messages with complete statistics using standardized models."""
         try:
             # Initialize processing state using FlextTargetOracleModels
             processing_state = FlextTargetOracleModels.SingerMessageProcessing(
@@ -271,7 +271,7 @@ class FlextTargetOracle(
         return self._process_single_message(message)
 
     def finalize(self: object) -> FlextResult[FlextTargetOracleTypes.Core.Dict]:
-        """Finalize target processing and return comprehensive statistics."""
+        """Finalize target processing and return complete statistics."""
         try:
             result: FlextResult[object] = self.loader.finalize_all_streams()
             if result.is_success:
@@ -419,7 +419,7 @@ class FlextTargetOracle(
             error_rate=0.0,  # Default optimistic rate
         )
 
-        # Return comprehensive metrics including config and performance data
+        # Return complete metrics including config and performance data
         return {
             "oracle_host": self.config.oracle_host,
             "oracle_port": self.config.oracle_port,

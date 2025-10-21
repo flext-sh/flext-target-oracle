@@ -46,16 +46,16 @@ class OracleConnectionModel(BaseModel):
     """Oracle database connection parameters model.
 
     Immutable value object representing Oracle database connection
-    configuration with comprehensive validation for production use.
+    configuration with complete validation for production use.
 
     Attributes:
-      host: Oracle database hostname or IP address
-      port: Oracle listener port number (default: 1521)
-      service_name: Oracle service name for connection
-      username: Oracle database username
-      schema: Target schema for table operations (default: PUBLIC)
-      use_ssl: Enable SSL/TLS connection (default: False)
-      connection_timeout: Connection timeout in seconds (default: 30)
+    host: Oracle database hostname or IP address
+    port: Oracle listener port number (default: 1521)
+    service_name: Oracle service name for connection
+    username: Oracle database username
+    schema: Target schema for table operations (default: PUBLIC)
+    use_ssl: Enable SSL/TLS connection (default: False)
+    connection_timeout: Connection timeout in seconds (default: 30)
 
     """
 
@@ -105,10 +105,10 @@ class OracleConnectionModel(BaseModel):
         """Generate Oracle connection string.
 
         Args:
-            include_credentials: Whether to include username in connection string
+        include_credentials: Whether to include username in connection string
 
         Returns:
-            Oracle connection string for logging and diagnostics
+        Oracle connection string for logging and diagnostics
 
         """
         protocol = "tcps" if self.use_ssl else "tcp"
@@ -141,14 +141,14 @@ class SingerStreamModel(FlextModels.ArbitraryTypesModel):
     with Oracle-specific table mappings and transformation rules.
 
     Attributes:
-      stream_name: Singer stream identifier
-      table_name: Oracle table name (derived or mapped)
-      schema_name: Oracle schema name for the table
-      key_properties: List of primary key column names
-      column_mappings: Column name mappings (singer_name -> oracle_name)
-      ignored_columns: List of columns to ignore during loading
-      storage_mode: How to store the data (flattened, json, hybrid)
-      load_method: Loading strategy for this stream
+    stream_name: Singer stream identifier
+    table_name: Oracle table name (derived or mapped)
+    schema_name: Oracle schema name for the table
+    key_properties: List of primary key column names
+    column_mappings: Column name mappings (singer_name -> oracle_name)
+    ignored_columns: List of columns to ignore during loading
+    storage_mode: How to store the data (flattened, json, hybrid)
+    load_method: Loading strategy for this stream
 
     """
 
@@ -219,13 +219,13 @@ class BatchProcessingModel(FlextModels.ArbitraryTypesModel):
     and current state for Oracle data loading operations.
 
     Attributes:
-      stream_name: Singer stream being processed
-      batch_size: Number of records per batch
-      current_batch: Current batch of records
-      total_records: Total records processed so far
-      batch_count: Number of batches processed
-      last_processed_at: Timestamp of last record processing
-      has_pending_records: Whether there are records waiting to be flushed
+    stream_name: Singer stream being processed
+    batch_size: Number of records per batch
+    current_batch: Current batch of records
+    total_records: Total records processed so far
+    batch_count: Number of batches processed
+    last_processed_at: Timestamp of last record processing
+    has_pending_records: Whether there are records waiting to be flushed
 
     """
 
@@ -309,21 +309,21 @@ class BatchProcessingModel(FlextModels.ArbitraryTypesModel):
 class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
     """Data loading statistics and metrics.
 
-    Immutable value object representing comprehensive statistics
+    Immutable value object representing complete statistics
     about Oracle data loading operations for monitoring and reporting.
 
     Attributes:
-      stream_name: Singer stream name
-      total_records_processed: Total number of records processed
-      successful_records: Number of successfully loaded records
-      failed_records: Number of failed records
-      batches_processed: Number of batches processed
-      processing_start_time: When processing started
-      processing_end_time: When processing ended (None if ongoing)
-      load_method_used: Loading method that was used
-      average_batch_size: Average number of records per batch
-      throughput_records_per_second: Processing throughput
-      error_details: List of error messages encountered
+    stream_name: Singer stream name
+    total_records_processed: Total number of records processed
+    successful_records: Number of successfully loaded records
+    failed_records: Number of failed records
+    batches_processed: Number of batches processed
+    processing_start_time: When processing started
+    processing_end_time: When processing ended (None if ongoing)
+    load_method_used: Loading method that was used
+    average_batch_size: Average number of records per batch
+    throughput_records_per_second: Processing throughput
+    error_details: List of error messages encountered
 
     """
 
@@ -447,15 +447,15 @@ class OracleTableMetadataModel(FlextModels.ArbitraryTypesModel):
     and metadata for Singer stream processing.
 
     Attributes:
-      table_name: Oracle table name
-      schema_name: Oracle schema name
-      columns: List of column definitions
-      primary_key_columns: List of primary key column names
-      indexes: List of index definitions
-      table_exists: Whether the table exists in Oracle
-      created_at: When the table was created
-      last_modified: When the table was last modified
-      singer_stream_name: Associated Singer stream name
+    table_name: Oracle table name
+    schema_name: Oracle schema name
+    columns: List of column definitions
+    primary_key_columns: List of primary key column names
+    indexes: List of index definitions
+    table_exists: Whether the table exists in Oracle
+    created_at: When the table was created
+    last_modified: When the table was last modified
+    singer_stream_name: Associated Singer stream name
 
     """
 
