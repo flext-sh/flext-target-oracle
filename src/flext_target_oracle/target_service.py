@@ -252,7 +252,7 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
             return FlextResult[None].fail(f"State handling failed: {e}")
 
     def finalize(self: object) -> FlextResult[dict[str, object]]:
-        """Finalize target processing and return comprehensive statistics."""
+        """Finalize target processing and return complete statistics."""
         try:
             result: FlextResult[object] = self.loader.finalize_all_streams()
             if result.is_success:

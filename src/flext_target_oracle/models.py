@@ -10,7 +10,7 @@ from pydantic import Field
 
 
 class FlextTargetOracleModels(FlextModels):
-    """Comprehensive models for Oracle target operations extending FlextModels.
+    """Complete models for Oracle target operations extending FlextModels.
 
     Provides standardized models for all Oracle target domain entities including:
     - Singer message processing and validation
@@ -231,10 +231,10 @@ class FlextTargetOracleModels(FlextModels):
         )
 
 
-# ZERO TOLERANCE CONSOLIDATION - FlextTargetOracleUtilities moved to utilities.py
+# Zero Tolerance CONSOLIDATION - FlextTargetOracleUtilities moved to utilities.py
 #
-# CRITICAL: FlextTargetOracleUtilities was DUPLICATED between models.py and utilities.py.
-# This was a ZERO TOLERANCE violation of the user's explicit requirements.
+# Critical: FlextTargetOracleUtilities was DUPLICATED between models.py and utilities.py.
+# This was a Zero Tolerance violation of the user's explicit requirements.
 #
 # RESOLUTION: Import from utilities.py to eliminate duplication completely.
 

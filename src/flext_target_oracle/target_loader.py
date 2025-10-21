@@ -289,7 +289,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
             end_time = str(datetime.now(UTC))
             loading_operation.end_time = end_time
 
-            # Use models to structure comprehensive statistics
+            # Use models to structure complete statistics
             stats: dict[str, object] = {
                 "total_records": self.total_records,
                 "streams_processed": len(self.record_buffers),
@@ -319,14 +319,14 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
         # Create simple JSON table for Singer data
         sql = (
             """
-        CREATE TABLE """
+ CREATE TABLE """
             + full_table_name
             + """ (
-            DATA CLOB,
-            _SDC_EXTRACTED_AT TIMESTAMP,
-            _SDC_LOADED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        """
+ DATA CLOB,
+ _SDC_EXTRACTED_AT TIMESTAMP,
+ _SDC_LOADED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+ )
+ """
         )
 
         return sql.strip()
