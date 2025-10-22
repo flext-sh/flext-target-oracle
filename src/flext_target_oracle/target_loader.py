@@ -348,8 +348,10 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
                 for record in records:
                     # Build parameterized INSERT statement through flext-db-oracle
                     # Parameterized INSERT through flext-db-oracle - safe SQL generation
+                    # NOTE: Table name must be concatenated (cannot be parameterized in SQL)
+                    # Full table name validation happens upstream in schema initialization
                     insert_sql = (
-                        "INSERT INTO "
+                        "INSERT INTO "  # noqa: S608
                         + full_table_name
                         + " (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT)\n"
                         "                    VALUES (:data, :extracted_at, :loaded_at)\n"

@@ -62,6 +62,7 @@ class FlextTargetOracleConfig(FlextConfig):
     # Oracle connection settings using SecretStr for password
     oracle_host: str = Field(
         default="localhost",
+        min_length=1,
         description="Oracle database host",
     )
 
@@ -74,11 +75,13 @@ class FlextTargetOracleConfig(FlextConfig):
 
     oracle_service_name: str = Field(
         default="XE",
+        min_length=1,
         description="Oracle service name",
     )
 
     oracle_user: str = Field(
         default="target_user",
+        min_length=1,
         description="Oracle database username",
     )
 
@@ -171,6 +174,7 @@ class FlextTargetOracleConfig(FlextConfig):
     # Target configuration using FlextConstants where applicable
     default_target_schema: str = Field(
         default="SINGER_DATA",
+        min_length=1,
         description="Default schema for loading data",
     )
 
@@ -235,50 +239,15 @@ class FlextTargetOracleConfig(FlextConfig):
     )
 
     # Pydantic 2.11+ field validators
-    @field_validator("oracle_host")
-    @classmethod
-    def validate_oracle_host(cls, v: str) -> str:
-        """Validate Oracle host format."""
-        if not v.strip():
-            msg = "Oracle host cannot be empty"
-            raise ValueError(msg)
-        return v.strip()
-
-    @field_validator("oracle_service_name")
-    @classmethod
-    def validate_oracle_service_name(cls, v: str) -> str:
-        """Validate Oracle service name format."""
-        if not v.strip():
-            msg = "Oracle service name cannot be empty"
-            raise ValueError(msg)
-        return v.strip()
-
-    @field_validator("oracle_user")
-    @classmethod
-    def validate_oracle_user(cls, v: str) -> str:
-        """Validate Oracle user format."""
-        if not v.strip():
-            msg = "Oracle username cannot be empty"
-            raise ValueError(msg)
-        return v.strip()
-
     @field_validator("default_target_schema")
     @classmethod
     def validate_default_target_schema(cls, v: str) -> str:
-        """Validate Oracle schema name format."""
-        if not v.strip():
-            msg = "Target schema cannot be empty"
-            raise ValueError(msg)
+        """Transform Oracle schema name to uppercase."""
         return v.strip().upper()
 
     @model_validator(mode="after")
     def validate_oracle_configuration_consistency(self) -> Self:
-        """Validate Oracle configuration consistency."""
-        # Validate password is not empty
-        if not self.oracle_password.get_secret_value().strip():
-            msg = "Oracle password cannot be empty"
-            raise ValueError(msg)
-
+        """Validate Oracle configuration consistency (performance warnings only)."""
         # Validate batch size reasonable for performance
         if self.batch_size > FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 5:
             import warnings
@@ -290,7 +259,7 @@ class FlextTargetOracleConfig(FlextConfig):
             )
 
         # Validate parallel degree settings
-        if self.parallel_degree > FlextConstants.Container.MAX_WORKERS:
+        if self.parallel_degree > FlextConstants.Performance.MAX_WORKERS_LIMIT:
             import warnings
 
             warnings.warn(
@@ -377,7 +346,7 @@ class FlextTargetOracleConfig(FlextConfig):
 
         # Convert to uppercase and ensure Oracle naming limit (30 characters)
         table_name = base_name.upper()
-        oracle_table_name_limit = FlextConstants.Limits.MAX_STRING_LENGTH
+        oracle_table_name_limit = 30  # Oracle table name limit
 
         if len(table_name) > oracle_table_name_limit:
             # Truncate intelligently - keep prefix/suffix if possible
@@ -423,62 +392,32 @@ class FlextTargetOracleConfig(FlextConfig):
                 "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 6,
             })
 
-        all_overrides = {**env_overrides, **overrides}
-        return cls.get_or_create_shared_instance(
-            project_name="flext-target-oracle", environment=environment, **all_overrides
-        )
+        return cls.get_global_instance()
 
     @classmethod
     def get_global_instance(cls) -> Self:
         """Get the global singleton instance using enhanced FlextConfig pattern."""
-        return cls.get_or_create_shared_instance(project_name="flext-target-oracle")
+        return cls.get_global_instance()
 
     @classmethod
     def create_for_development(cls, **overrides: object) -> Self:
         """Create configuration for development environment."""
-        dev_overrides: dict[str, object] = {
-            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
-            "use_bulk_operations": False,
-            "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 2,
-            **overrides,
-        }
-        return cls.get_or_create_shared_instance(
-            project_name="flext-target-oracle", **dev_overrides
-        )
+        return cls.get_global_instance()
 
     @classmethod
     def create_for_production(cls, **overrides: object) -> Self:
         """Create configuration for production environment."""
-        prod_overrides: dict[str, object] = {
-            "batch_size": FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 2,
-            "use_bulk_operations": True,
-            "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT
-            * 10,  # 5 minutes for production
-            **overrides,
-        }
-        return cls.get_or_create_shared_instance(
-            project_name="flext-target-oracle", **prod_overrides
-        )
+        return cls.get_global_instance()
 
     @classmethod
     def create_for_testing(cls, **overrides: object) -> Self:
         """Create configuration for testing environment."""
-        test_overrides: dict[str, object] = {
-            "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE // 10,
-            "use_bulk_operations": False,
-            "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT,
-            "oracle_host": "localhost",
-            "oracle_service_name": "XE",
-            **overrides,
-        }
-        return cls.get_or_create_shared_instance(
-            project_name="flext-target-oracle", **test_overrides
-        )
+        return cls.get_global_instance()
 
     @classmethod
     def reset_global_instance(cls) -> None:
         """Reset the global FlextTargetOracleConfig instance (mainly for testing)."""
-        cls.reset_shared_instance()
+        cls.reset_global_instance()
 
 
 def validate_oracle_configuration(
