@@ -23,8 +23,9 @@
         "flext-core",
         "flext-db-oracle",
         "flext-meltano",
-        "pydantic>=2.11.0",
+        "pydantic (>=2.12.3)",
         "rich>=13.0.0",
+        "pydantic-core (>=2.41.4)",
     ]
     description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
     keywords = [
@@ -87,9 +88,9 @@
 
     [tool.poetry.dependencies]
         click    = ">=8.0.0"
-        pydantic = ">=2.11.0"
+        pydantic = ">=2.12.3"
         python   = ">=3.13,<3.14"
-        rich     = ">=13.0.0"
+        rich = "=14.2.0"
 
 [tool.pytest.ini_options]
     addopts = [
@@ -120,19 +121,19 @@
             develop = true
             path    = "../flext-core"
 
-        [tool.poetry.dependencies.flext-db-oracle]
+                        [tool.poetry.dependencies.flext-db-oracle]
             develop = true
             path    = "../flext-db-oracle"
 
-        [tool.poetry.dependencies.flext-meltano]
+                                        [tool.poetry.dependencies.flext-meltano]
             develop = true
             path    = "../flext-meltano"
 
-        [tool.poetry.dependencies.flext-observability]
+                                                        [tool.poetry.dependencies.flext-observability]
             develop = true
             path    = "../flext-observability"
 
-        [tool.poetry.dependencies.flext-cli]
+                                                                        [tool.poetry.dependencies.flext-cli]
             develop = true
             path    = "../flext-cli"
 
@@ -145,7 +146,7 @@
         pytest           = ">=8.0.0"
         pytest-benchmark = ">=5.1.0"
         pytest-clarity   = ">=1.0.1"
-        pytest-cov       = ">=6.2.1"
+        pytest-cov = "=7.0.0"
         pytest-mock      = ">=3.14.1"
         pytest-sugar     = ">=1.0.0"
         pytest-timeout   = ">=2.4.0"
