@@ -351,7 +351,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
                     # NOTE: Table name must be concatenated (cannot be parameterized in SQL)
                     # Full table name validation happens upstream in schema initialization
                     insert_sql = (
-                        "INSERT INTO "  # noqa: S608
+                        "INSERT INTO "
                         + full_table_name
                         + " (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT)\n"
                         "                    VALUES (:data, :extracted_at, :loaded_at)\n"

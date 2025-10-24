@@ -277,7 +277,7 @@ class FlextTargetOracleUtilities(FlextUtilities):
 
                 # Parameterized INSERT with placeholders - safe SQL generation
                 # Table name is validated and quoted to prevent injection
-                statement = f'INSERT INTO "{table_name.upper()}" ({column_list}) VALUES ({placeholder_list})'  # noqa: S608
+                statement = f'INSERT INTO "{table_name.upper()}" ({column_list}) VALUES ({placeholder_list})'
                 return FlextResult[str].ok(statement)
 
             except Exception as e:
