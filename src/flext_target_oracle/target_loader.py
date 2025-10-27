@@ -136,7 +136,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
 
             # Mark API as connected when successful
             with contextlib.suppress(Exception):
-                setattr(self.oracle_api, "is_connected", True)
+                self.oracle_api.is_connected = True
 
             return FlextResult[None].ok(None)
         except Exception as e:
@@ -154,7 +154,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
                 )
 
             with contextlib.suppress(Exception):
-                setattr(self.oracle_api, "is_connected", False)
+                self.oracle_api.is_connected = False
 
             return FlextResult[None].ok(None)
         except Exception as e:
