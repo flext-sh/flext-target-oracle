@@ -260,7 +260,9 @@ class OracleTargetCommandHandler(FlextHandlers[FlextModels.Command, str]):
             handler_mode="command",
             command_timeout=30000,
             max_command_retries=3,
-            metadata={"description": "Oracle target Singer command handler"},
+            metadata=FlextModels.Metadata(
+                attributes={"description": "Oracle target Singer command handler"}
+            ),
         )
         super().__init__(config=config)
 
