@@ -13,7 +13,7 @@ from __future__ import annotations
 import time
 from typing import ClassVar, override
 
-from flext_core import FlextResult, FlextService, FlextTypes
+from flext_core import FlextResult, FlextService, t
 from pydantic import Field
 
 from flext_target_oracle.config import FlextTargetOracleConfig
@@ -35,7 +35,7 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
     loader: FlextTargetOracleLoader = Field(description="Oracle data loader")
 
     # Internal state
-    _schemas: FlextTypes.NestedDict = Field(
+    _schemas: t.NestedDict = Field(
         default_factory=dict,
         description="Stream schemas",
     )

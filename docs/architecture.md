@@ -22,18 +22,18 @@ from flext_core import FlextContext
 from flext_core import FlextDecorators
 from flext_core import FlextDispatcher
 from flext_core import FlextExceptions
-from flext_core import FlextHandlers
+from flext_core import h
 from flext_core import FlextLogger
-from flext_core import FlextMixins
+from flext_core import x
 from flext_core import FlextModels
 from flext_core import FlextProcessors
-from flext_core import FlextProtocols
+from flext_core import p
 from flext_core import FlextRegistry
 from flext_core import FlextResult
 from flext_core import FlextRuntime
 from flext_core import FlextService
-from flext_core import FlextTypes
-from flext_core import FlextUtilities
+from flext_core import t
+from flext_core import u
 
 # Configuration with domain validation
 class FlextOracleTargetConfig(FlextModels.Value):
@@ -110,7 +110,7 @@ class FlextOracleTarget(Target):
     def _handle_state(self, message: dict) -> FlextResult[None]
 
     # Lifecycle management
-    def finalize(self) -> FlextResult[FlextTypes.Dict]
+    def finalize(self) -> FlextResult[t.Dict]
 ```
 
 **Key Patterns**:
@@ -162,14 +162,14 @@ class FlextOracleTargetLoader:
     def __init__(self, config: FlextOracleTargetConfig):
         # flext-db-oracle integration
         self.oracle_api = FlextDbOracleApi(oracle_config)
-        self._record_buffers: dict[str, list[FlextTypes.Dict]] = {}
+        self._record_buffers: dict[str, list[t.Dict]] = {}
 
     # Table management
     def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[None]
 
     # Data loading with batching
     def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]
-    def finalize_all_streams(self) -> FlextResult[FlextTypes.Dict]
+    def finalize_all_streams(self) -> FlextResult[t.Dict]
 ```
 
 **Key Patterns**:
@@ -196,7 +196,7 @@ sequenceDiagram
     FL->>API: get_tables(schema_name)
     API->>DB: SELECT table_name FROM all_tables
     DB-->>API: Table list
-    API-->>FL: FlextResult[FlextTypes.StringList]
+    API-->>FL: FlextResult[t.StringList]
 
     alt Table doesn't exist
         FL->>API: execute_ddl(CREATE TABLE)

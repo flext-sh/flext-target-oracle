@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import override
 
 import yaml
-from flext_core import FlextHandlers, FlextModels, FlextResult
+from flext_core import FlextModels, FlextResult, h
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from pydantic import Field
 
@@ -244,10 +244,10 @@ Optional Configuration:
             return FlextResult[str].fail(f"About error: {e}")
 
 
-class OracleTargetCommandHandler(FlextHandlers[FlextModels.Command, str]):
+class OracleTargetCommandHandler(h[FlextModels.Command, str]):
     """Oracle target command handler using Flext CQRS SOURCE OF TRUTH.
 
-    ZERO DUPLICATION - Uses FlextHandlers directly.
+    ZERO DUPLICATION - Uses h directly.
     """
 
     @override
