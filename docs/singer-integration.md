@@ -31,7 +31,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
 **Implementation**:
 
 ```python
-def _handle_schema(self, message: FlextTypes.Dict) -> FlextResult[None]:
+def _handle_schema(self, message: t.Dict) -> FlextResult[None]:
     """Handle SCHEMA message with table creation/evolution."""
     stream_name = message.get("stream")
     schema = message.get("schema", {})
@@ -62,7 +62,7 @@ def _handle_schema(self, message: FlextTypes.Dict) -> FlextResult[None]:
 **Implementation**:
 
 ```python
-def _handle_record(self, message: FlextTypes.Dict) -> FlextResult[None]:
+def _handle_record(self, message: t.Dict) -> FlextResult[None]:
     """Handle RECORD message with batched loading."""
     stream_name = message.get("stream")
     record_data = message.get("record")
@@ -91,7 +91,7 @@ def _handle_record(self, message: FlextTypes.Dict) -> FlextResult[None]:
 **Implementation**:
 
 ```python
-def _handle_state(self, message: FlextTypes.Dict) -> FlextResult[None]:
+def _handle_state(self, message: t.Dict) -> FlextResult[None]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
     logger.debug("State message received - forwarding to Meltano")

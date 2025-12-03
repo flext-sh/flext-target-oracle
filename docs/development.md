@@ -145,18 +145,18 @@ from flext_core import FlextContext
 from flext_core import FlextDecorators
 from flext_core import FlextDispatcher
 from flext_core import FlextExceptions
-from flext_core import FlextHandlers
+from flext_core import h
 from flext_core import FlextLogger
-from flext_core import FlextMixins
+from flext_core import x
 from flext_core import FlextModels
 from flext_core import FlextProcessors
-from flext_core import FlextProtocols
+from flext_core import p
 from flext_core import FlextRegistry
 from flext_core import FlextResult
 from flext_core import FlextRuntime
 from flext_core import FlextService
-from flext_core import FlextTypes
-from flext_core import FlextUtilities
+from flext_core import t
+from flext_core import u
 
 def operation() -> FlextResult[Data]:
     """Clear docstring with FlextResult return type."""
@@ -213,7 +213,7 @@ def process_record(record: dict) -> FlextResult[None]:
         return FlextResult[None].fail(f"Processing failed: {e}")
 
 # ✅ Chain FlextResult operations
-def process_batch(records: list[FlextTypes.Dict]) -> FlextResult[Stats]:
+def process_batch(records: list[t.Dict]) -> FlextResult[Stats]:
     """Process batch of records with early termination on failure."""
     stats = Stats()
 
@@ -270,18 +270,18 @@ from flext_core import FlextContext
 from flext_core import FlextDecorators
 from flext_core import FlextDispatcher
 from flext_core import FlextExceptions
-from flext_core import FlextHandlers
+from flext_core import h
 from flext_core import FlextLogger
-from flext_core import FlextMixins
+from flext_core import x
 from flext_core import FlextModels
 from flext_core import FlextProcessors
-from flext_core import FlextProtocols
+from flext_core import p
 from flext_core import FlextRegistry
 from flext_core import FlextResult
 from flext_core import FlextRuntime
 from flext_core import FlextService
-from flext_core import FlextTypes
-from flext_core import FlextUtilities
+from flext_core import t
+from flext_core import u
 
 logger = FlextLogger(__name__)
 
@@ -632,7 +632,7 @@ def sample_records():
 import time
 from typing import List
 
-def benchmark_batch_sizes(records: List[FlextTypes.Dict]):
+def benchmark_batch_sizes(records: List[t.Dict]):
     """Benchmark different batch sizes."""
 
     batch_sizes = [100, 500, 1000, 2000, 5000]

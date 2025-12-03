@@ -11,10 +11,10 @@ import json
 from datetime import UTC, datetime
 from typing import ClassVar
 
-from flext_core import FlextConstants, FlextResult, FlextUtilities
+from flext_core import FlextConstants, FlextResult, u
 
 
-class FlextTargetOracleUtilities(FlextUtilities):
+class FlextTargetOracleUtilities(u):
     """Single unified utilities class for Singer target Oracle database operations.
 
     This class provides complete Oracle database target functionality for Singer protocol
