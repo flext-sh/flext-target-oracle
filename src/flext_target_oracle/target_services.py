@@ -522,7 +522,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
 
         Args:
         stream_name: Name of the stream
-        record: Record to add to batch
+        _record: Record to add to batch
 
         Returns:
         FlextResult indicating success/failure

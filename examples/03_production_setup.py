@@ -246,8 +246,7 @@ class ProductionTargetManager:
                 # Process message with error handling
                 if not self.target:
                     return FlextResult[dict[str, object]].fail("Target not initialized")
-                # Type assertion since we checked above that target is not None
-                assert self.target is not None
+                # Target is guaranteed to be not None at this point due to check above
                 result = self.target.process_singer_message(
                     message if isinstance(message, dict) else {},
                 )
@@ -304,16 +303,15 @@ class ProductionTargetManager:
             else:
                 logger.error("Target finalization failed: %s", finalize_result.error)
                 current_errors = stats.get("errors_encountered", 0)
-                assert isinstance(current_errors, int)
-                stats["errors_encountered"] = current_errors + 1
+                if isinstance(current_errors, int):
+                    stats["errors_encountered"] = current_errors + 1
 
             stats["processing_end_time"] = time.time()
             end_time = stats.get("processing_end_time", 0.0)
             start_time = stats.get("processing_start_time", 0.0)
-            assert isinstance(end_time, (int, float))
-            assert isinstance(start_time, (int, float))
-            processing_duration = end_time - start_time
-            stats["processing_duration_seconds"] = processing_duration
+            if isinstance(end_time, (int, float)) and isinstance(start_time, (int, float)):
+                processing_duration = end_time - start_time
+                stats["processing_duration_seconds"] = processing_duration
 
             logger.info(
                 "Stream processing completed in %.2f seconds",
@@ -325,8 +323,8 @@ class ProductionTargetManager:
             logger.exception("Unexpected error during stream processing")
             stats["processing_end_time"] = time.time()
             current_errors = stats.get("errors_encountered", 0)
-            assert isinstance(current_errors, int)
-            stats["errors_encountered"] = current_errors + 1
+            if isinstance(current_errors, int):
+                stats["errors_encountered"] = current_errors + 1
             return FlextResult[dict[str, object]].fail(f"Stream processing error: {e}")
 
     def health_check(self) -> FlextResult[dict[str, object]]:
@@ -348,7 +346,6 @@ class ProductionTargetManager:
         try:
             # Check 1: Target initialization
             checks = health_status["checks"]
-            assert isinstance(checks, dict)
             if not self.target:
                 health_status["status"] = "unhealthy"
                 checks["target_initialized"] = False
@@ -369,7 +366,6 @@ class ProductionTargetManager:
 
             # Add configuration metrics
             metrics = health_status["metrics"]
-            assert isinstance(metrics, dict)
             if self.target:
                 target_metrics = self.target.get_implementation_metrics()
                 if isinstance(target_metrics, dict):

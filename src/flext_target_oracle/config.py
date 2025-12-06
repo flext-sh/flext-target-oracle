@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import warnings
 from enum import StrEnum
 from typing import Self
 
@@ -250,8 +251,6 @@ class FlextTargetOracleConfig(FlextConfig):
         """Validate Oracle configuration consistency (performance warnings only)."""
         # Validate batch size reasonable for performance
         if self.batch_size > FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 5:
-            import warnings
-
             warnings.warn(
                 f"Large batch size ({self.batch_size}) may impact performance",
                 UserWarning,
@@ -260,8 +259,6 @@ class FlextTargetOracleConfig(FlextConfig):
 
         # Validate parallel degree settings
         if self.parallel_degree > FlextConstants.Performance.MAX_WORKERS_LIMIT:
-            import warnings
-
             warnings.warn(
                 f"High parallel degree ({self.parallel_degree}) may impact system resources",
                 UserWarning,
