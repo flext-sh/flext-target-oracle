@@ -290,7 +290,7 @@ class FlextTargetOracleConfig(FlextConfig):
 
             if self.commit_interval > self.batch_size:
                 return FlextResult[None].fail(
-                    "Commit interval cannot be larger than batch size"
+                    "Commit interval cannot be larger than batch size",
                 )
 
             return FlextResult[None].ok(None)
@@ -366,7 +366,9 @@ class FlextTargetOracleConfig(FlextConfig):
 
     @classmethod
     def create_for_environment(
-        cls, environment: str, **_overrides: object
+        cls,
+        environment: str,
+        **_overrides: object,
     ) -> FlextTargetOracleConfig:
         """Create configuration for specific environment using enhanced singleton pattern."""
         env_overrides: dict[str, object] = {}
@@ -445,7 +447,7 @@ def validate_oracle_configuration(
         <= FlextConstants.Network.MAX_PORT
     ):
         return FlextResult[None].fail(
-            f"Oracle port must be between {FlextConstants.Network.MIN_PORT} and {FlextConstants.Network.MAX_PORT}"
+            f"Oracle port must be between {FlextConstants.Network.MIN_PORT} and {FlextConstants.Network.MAX_PORT}",
         )
 
     # Validate batch size constraints

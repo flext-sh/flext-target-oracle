@@ -365,7 +365,8 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
                     }
 
                     result: FlextResult[object] = connected_api.execute_sql(
-                        insert_sql, parameters=params
+                        insert_sql,
+                        parameters=params,
                     )
                     if result.is_failure:
                         return FlextResult[None].fail(

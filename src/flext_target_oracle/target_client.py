@@ -24,7 +24,7 @@ from flext_target_oracle.typings import FlextTargetOracleTypes
 
 
 class FlextTargetOracle(
-    FlextService[FlextTargetOracleTypes.SingerTarget.MessageProcessing]
+    FlextService[FlextTargetOracleTypes.SingerTarget.MessageProcessing],
 ):
     """Unified Oracle Singer Target using FlextService SOURCE OF TRUTH.
 
@@ -97,7 +97,8 @@ class FlextTargetOracle(
 
     @override
     def execute(
-        self, payload: str | None = None
+        self,
+        payload: str | None = None,
     ) -> FlextResult[FlextTargetOracleTypes.Core.Dict]:
         """Execute Oracle Target - implements FlextService abstract method.
 
@@ -117,7 +118,7 @@ class FlextTargetOracle(
                     )
                 # If payload wasn't a dict, return a success with no-op
                 return FlextResult[FlextTargetOracleTypes.Core.Dict].ok({
-                    "processed": "False"
+                    "processed": "False",
                 })
             except Exception as e:
                 return FlextResult[FlextTargetOracleTypes.Core.Dict].fail(
@@ -213,7 +214,7 @@ class FlextTargetOracle(
                 if result.is_failure:
                     processing_state.error_count += 1
                     processing_state.failed_messages.append(
-                        str(message.get("type", "unknown"))
+                        str(message.get("type", "unknown")),
                     )
                     return FlextResult[FlextTargetOracleTypes.Core.Dict].fail(
                         f"Failed to process message: {result.error}",
@@ -282,7 +283,7 @@ class FlextTargetOracle(
         except Exception as e:
             self.log_error("Failed to finalize target", extra={"error": str(e)})
             return FlextResult[FlextTargetOracleTypes.Core.Dict].fail(
-                f"Finalization failed: {e}"
+                f"Finalization failed: {e}",
             )
 
     # === Private Message Handlers ===
@@ -358,7 +359,8 @@ class FlextTargetOracle(
 
             # Load record using loader
             result: FlextResult[object] = self.loader.load_record(
-                stream_name, record_data
+                stream_name,
+                record_data,
             )
             if result.is_failure:
                 return FlextResult[None].fail(f"Failed to load record: {result.error}")
@@ -369,7 +371,8 @@ class FlextTargetOracle(
             return FlextResult[None].fail(f"Record handling failed: {e}")
 
     def _handle_state_message(
-        self, message: FlextTargetOracleTypes.Core.Dict
+        self,
+        message: FlextTargetOracleTypes.Core.Dict,
     ) -> FlextResult[None]:
         """Handle STATE message with state persistence."""
         try:
@@ -391,7 +394,9 @@ class FlextTargetOracle(
         return result.is_success
 
     def _write_record(
-        self, stream_name: str, record: FlextTargetOracleTypes.Core.Dict
+        self,
+        stream_name: str,
+        record: FlextTargetOracleTypes.Core.Dict,
     ) -> None:
         """Singer SDK record writing compatibility."""
         result: FlextResult[object] = self.loader.load_record(stream_name, record)
@@ -425,7 +430,8 @@ class FlextTargetOracle(
             "oracle_port": self.config.oracle_port,
             "default_schema": self.config.default_target_schema,
             "load_method": getattr(self.config, "load_method", {}).get(
-                "value", "INSERT"
+                "value",
+                "INSERT",
             )
             if hasattr(self.config, "load_method")
             else "INSERT",

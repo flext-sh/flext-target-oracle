@@ -276,7 +276,7 @@ def demonstrate_error_handling() -> None:
             logger.info(f"Expected validation error: {validation_result.error}")
 
     except Exception as e:
-        logger.info(f"Configuration creation failed as expected: {e}")
+        logger.info("Configuration creation failed as expected: %s", e)
 
     # Demonstrate processing invalid messages
     config = create_configuration()

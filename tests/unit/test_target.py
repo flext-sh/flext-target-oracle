@@ -395,7 +395,8 @@ class TestRealOracleTarget:
         assert isinstance(result.error, FlextTargetOracleProcessingError)
 
     def test_error_handling_missing_stream(
-        self, real_target: FlextTargetOracle
+        self,
+        real_target: FlextTargetOracle,
     ) -> None:
         """Test error handling with missing stream in record."""
         real_target.initialize()

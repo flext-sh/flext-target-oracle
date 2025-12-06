@@ -155,7 +155,7 @@ class OracleConnectionService(FlextService[None]):
         )
         if validation_result.is_failure:
             return FlextResult[None].fail(
-                f"Connection configuration validation failed: {validation_result.error}"
+                f"Connection configuration validation failed: {validation_result.error}",
             )
 
         # Use direct API access with explicit FlextResult error handling - NO fallbacks
@@ -184,11 +184,11 @@ class OracleConnectionService(FlextService[None]):
 
             if diagnostics_result.is_success:
                 self.log_info(
-                    f"Oracle connection test successful: {diagnostics_result.value}"
+                    f"Oracle connection test successful: {diagnostics_result.value}",
                 )
             else:
                 self.log_warning(
-                    f"Diagnostics generation failed: {diagnostics_result.error}"
+                    f"Diagnostics generation failed: {diagnostics_result.error}",
                 )
 
             # Use FlextService built-in logging instead of module logger
@@ -266,7 +266,7 @@ class OracleSchemaService(FlextService[None]):
 
             if schema_validation.is_failure:
                 return FlextResult[None].fail(
-                    f"Schema validation failed: {schema_validation.error}"
+                    f"Schema validation failed: {schema_validation.error}",
                 )
 
             with self.oracle_api as connected_api:
@@ -391,19 +391,19 @@ class OracleSchemaService(FlextService[None]):
 
             if ddl_result.is_failure:
                 return FlextResult[None].fail(
-                    f"DDL generation failed: {ddl_result.error}"
+                    f"DDL generation failed: {ddl_result.error}",
                 )
 
             with self.oracle_api as connected_api:
                 # Zero Tolerance FIX: Use utilities for DDL validation before execution
                 ddl_sql = ddl_result.value
                 validation_result = self._utilities.TableManagement.validate_ddl_syntax(
-                    ddl_sql
+                    ddl_sql,
                 )
 
                 if validation_result.is_failure:
                     return FlextResult[None].fail(
-                        f"DDL validation failed: {validation_result.error}"
+                        f"DDL validation failed: {validation_result.error}",
                     )
 
                 exec_result: FlextResult[object] = connected_api.execute_sql(ddl_sql)
@@ -423,7 +423,7 @@ class OracleSchemaService(FlextService[None]):
 
                 if verification_result.is_failure:
                     self.log_warning(
-                        f"Table creation verification failed: {verification_result.error}"
+                        f"Table creation verification failed: {verification_result.error}",
                     )
 
                 self.log_info(f"Created table {stream.table_name}")
@@ -603,7 +603,7 @@ class OracleRecordService(FlextService[None]):
             )
             if validation_result.is_failure:
                 return FlextResult[dict[str, object]].fail(
-                    f"Record validation failed: {validation_result.error}"
+                    f"Record validation failed: {validation_result.error}",
                 )
 
             transformed_record = {}
@@ -627,7 +627,7 @@ class OracleRecordService(FlextService[None]):
                     final_value = conversion_result.value
                 else:
                     self.log_warning(
-                        f"Value conversion failed for {col_name}: {conversion_result.error}"
+                        f"Value conversion failed for {col_name}: {conversion_result.error}",
                     )
                     final_value = original_value
 
@@ -635,7 +635,7 @@ class OracleRecordService(FlextService[None]):
                 if isinstance(final_value, str):
                     final_value = (
                         self._utilities.DataTransformation.sanitize_oracle_value(
-                            final_value
+                            final_value,
                         )
                     )
 
@@ -654,7 +654,7 @@ class OracleRecordService(FlextService[None]):
                     transformed_record = metadata_result.value
                 else:
                     self.log_warning(
-                        f"Metadata addition failed: {metadata_result.error}"
+                        f"Metadata addition failed: {metadata_result.error}",
                     )
 
             return FlextResult[dict[str, object]].ok(transformed_record)
@@ -675,7 +675,8 @@ class OracleRecordService(FlextService[None]):
             # Zero Tolerance FIX: Use utilities for complete record validation
             validation_result = (
                 self._utilities.SchemaValidation.validate_record_against_schema(
-                    record=record, schema=schema
+                    record=record,
+                    schema=schema,
                 )
             )
 
@@ -685,7 +686,8 @@ class OracleRecordService(FlextService[None]):
             # Zero Tolerance FIX: Use utilities for Oracle-specific validations
             oracle_validation = (
                 self._utilities.SchemaValidation.validate_oracle_constraints(
-                    record=record, schema=schema
+                    record=record,
+                    schema=schema,
                 )
             )
 
