@@ -192,7 +192,7 @@ class TestOracleIntegration:
         """Test bulk insert with large dataset."""
         # Use a copy of the config to avoid mutating a shared fixture
         oracle_config = oracle_config.model_copy(
-            update={"load_method": LoadMethod.BULK_INSERT, "batch_size": 1000}
+            update={"load_method": LoadMethod.BULK_INSERT, "batch_size": 1000},
         )
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
@@ -534,7 +534,7 @@ class TestOracleTargetE2E:
                     "users": {"name": "full_name", "email": "email_address"},
                 },
                 "ignored_columns": ["password", "internal_id"],
-            }
+            },
         )
 
         target = FlextTargetOracle(config=oracle_config)

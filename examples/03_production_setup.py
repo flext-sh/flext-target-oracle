@@ -249,7 +249,7 @@ class ProductionTargetManager:
                 # Type assertion since we checked above that target is not None
                 assert self.target is not None
                 result = self.target.process_singer_message(
-                    message if isinstance(message, dict) else {}
+                    message if isinstance(message, dict) else {},
                 )
 
                 if result.success:
@@ -436,7 +436,8 @@ def demonstrate_production_setup() -> None:
             health_data = health_result.data
             if isinstance(health_data, dict):
                 logger.info(
-                    "Health check status: %s", health_data.get("status", "unknown")
+                    "Health check status: %s",
+                    health_data.get("status", "unknown"),
                 )
                 checks = health_data.get("checks")
                 if isinstance(checks, dict):

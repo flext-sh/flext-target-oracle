@@ -223,7 +223,8 @@ class FlextOracleObs:
 
                     # Log performance metrics
                     logger.info(
-                        f"Oracle {operation} performance",
+                        "Oracle %s performance",
+                        operation,
                         table_name=table_name,
                         operation=operation,
                         duration_seconds=duration,
@@ -236,7 +237,8 @@ class FlextOracleObs:
                         > FlextTargetOracleConstants.Observability.SLOW_QUERY_THRESHOLD_SECONDS
                     ):
                         logger.warning(
-                            f"Slow Oracle {operation} detected",
+                            "Slow Oracle %s detected",
+                            operation,
                             extra={
                                 "table_name": "table_name",
                                 "duration_seconds": "duration",

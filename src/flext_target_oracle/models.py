@@ -30,24 +30,29 @@ class FlextTargetOracleModels(FlextModels):
 
         # Oracle connection settings
         oracle_host: str = Field(
-            default="localhost", description="Oracle database host"
+            default="localhost",
+            description="Oracle database host",
         )
         oracle_port: int = Field(default=1521, description="Oracle database port")
         oracle_service_name: str = Field(
-            default="XE", description="Oracle service name"
+            default="XE",
+            description="Oracle service name",
         )
         oracle_user: str = Field(description="Oracle database username")
         oracle_password: str = Field(description="Oracle database password")
 
         # Target configuration
         default_target_schema: str = Field(
-            default="SINGER_DATA", description="Default schema for loading data"
+            default="SINGER_DATA",
+            description="Default schema for loading data",
         )
         table_prefix: str = Field(
-            default="", description="Prefix for target table names"
+            default="",
+            description="Prefix for target table names",
         )
         table_suffix: str = Field(
-            default="", description="Suffix for target table names"
+            default="",
+            description="Suffix for target table names",
         )
 
         # Loading configuration
@@ -57,18 +62,22 @@ class FlextTargetOracleModels(FlextModels):
             description="Use Oracle bulk operations for better performance",
         )
         parallel_degree: int = Field(
-            default=1, description="Oracle parallel degree for operations"
+            default=1,
+            description="Oracle parallel degree for operations",
         )
 
         # Transaction settings
         autocommit: bool = Field(
-            default=False, description="Enable autocommit for operations"
+            default=False,
+            description="Enable autocommit for operations",
         )
         commit_interval: int = Field(
-            default=1000, description="Number of records between commits"
+            default=1000,
+            description="Number of records between commits",
         )
         transaction_timeout: int = Field(
-            default=300, description="Transaction timeout in seconds"
+            default=300,
+            description="Transaction timeout in seconds",
         )
 
     class SingerMessageProcessing(FlextModels.ArbitraryTypesModel):
@@ -83,16 +92,19 @@ class FlextTargetOracleModels(FlextModels):
         # Processing performance
         processing_start_time: str = Field(description="Processing start timestamp")
         last_processed_time: str | None = Field(
-            default=None, description="Last message processing timestamp"
+            default=None,
+            description="Last message processing timestamp",
         )
         records_per_second: float = Field(
-            default=0.0, description="Current processing rate"
+            default=0.0,
+            description="Current processing rate",
         )
 
         # Error tracking
         error_count: int = Field(default=0, description="Number of processing errors")
         failed_messages: list[str] = Field(
-            default_factory=list, description="Failed message IDs"
+            default_factory=list,
+            description="Failed message IDs",
         )
 
     class OracleTableMetadata(FlextModels.ArbitraryTypesModel):
@@ -105,28 +117,34 @@ class FlextTargetOracleModels(FlextModels):
 
         # Table structure
         columns: list[dict[str, object]] = Field(
-            default_factory=list, description="Table column definitions"
+            default_factory=list,
+            description="Table column definitions",
         )
         primary_keys: list[str] = Field(
-            default_factory=list, description="Primary key column names"
+            default_factory=list,
+            description="Primary key column names",
         )
         indexes: list[dict[str, object]] = Field(
-            default_factory=list, description="Table index definitions"
+            default_factory=list,
+            description="Table index definitions",
         )
 
         # Table statistics
         row_count: int | None = Field(
-            default=None, description="Current table row count"
+            default=None,
+            description="Current table row count",
         )
         last_analyzed: str | None = Field(
-            default=None, description="Last table statistics analysis time"
+            default=None,
+            description="Last table statistics analysis time",
         )
 
         # Singer metadata
         singer_stream_name: str = Field(description="Singer stream name")
         singer_schema: dict[str, object] = Field(description="Singer schema definition")
         key_properties: list[str] = Field(
-            default_factory=list, description="Singer key properties"
+            default_factory=list,
+            description="Singer key properties",
         )
 
     class OracleLoadingOperation(FlextModels.ArbitraryTypesModel):
@@ -139,10 +157,12 @@ class FlextTargetOracleModels(FlextModels):
 
         # Operation metrics
         records_loaded: int = Field(
-            default=0, description="Records successfully loaded"
+            default=0,
+            description="Records successfully loaded",
         )
         records_failed: int = Field(
-            default=0, description="Records that failed to load"
+            default=0,
+            description="Records that failed to load",
         )
         bytes_processed: int = Field(default=0, description="Total bytes processed")
 
@@ -153,10 +173,12 @@ class FlextTargetOracleModels(FlextModels):
 
         # Oracle-specific metrics
         oracle_execution_time: float = Field(
-            default=0.0, description="Oracle query execution time"
+            default=0.0,
+            description="Oracle query execution time",
         )
         oracle_commit_time: float = Field(
-            default=0.0, description="Oracle transaction commit time"
+            default=0.0,
+            description="Oracle transaction commit time",
         )
         batch_count: int = Field(default=0, description="Number of batches processed")
 
@@ -167,26 +189,32 @@ class FlextTargetOracleModels(FlextModels):
         max_retries: int = Field(default=3, description="Maximum retry attempts")
         retry_delay: float = Field(default=1.0, description="Delay between retries")
         exponential_backoff: bool = Field(
-            default=True, description="Use exponential backoff for retries"
+            default=True,
+            description="Use exponential backoff for retries",
         )
 
         # Error handling options
         continue_on_error: bool = Field(
-            default=False, description="Continue processing after non-fatal errors"
+            default=False,
+            description="Continue processing after non-fatal errors",
         )
         rollback_on_error: bool = Field(
-            default=True, description="Rollback transaction on error"
+            default=True,
+            description="Rollback transaction on error",
         )
         log_failed_records: bool = Field(
-            default=True, description="Log records that fail to load"
+            default=True,
+            description="Log records that fail to load",
         )
 
         # Oracle-specific error handling
         ignore_duplicate_key_errors: bool = Field(
-            default=False, description="Ignore Oracle duplicate key constraint errors"
+            default=False,
+            description="Ignore Oracle duplicate key constraint errors",
         )
         handle_constraint_violations: bool = Field(
-            default=True, description="Handle Oracle constraint violations gracefully"
+            default=True,
+            description="Handle Oracle constraint violations gracefully",
         )
 
     class OraclePerformanceMetrics(FlextModels.ArbitraryTypesModel):
@@ -194,40 +222,50 @@ class FlextTargetOracleModels(FlextModels):
 
         # Throughput metrics
         records_per_second: float = Field(
-            default=0.0, description="Records processed per second"
+            default=0.0,
+            description="Records processed per second",
         )
         bytes_per_second: float = Field(
-            default=0.0, description="Bytes processed per second"
+            default=0.0,
+            description="Bytes processed per second",
         )
         batches_per_second: float = Field(
-            default=0.0, description="Batches processed per second"
+            default=0.0,
+            description="Batches processed per second",
         )
 
         # Oracle database metrics
         oracle_connections_used: int = Field(
-            default=0, description="Number of Oracle connections used"
+            default=0,
+            description="Number of Oracle connections used",
         )
         oracle_connection_pool_size: int = Field(
-            default=0, description="Oracle connection pool size"
+            default=0,
+            description="Oracle connection pool size",
         )
         average_oracle_response_time: float = Field(
-            default=0.0, description="Average Oracle response time in milliseconds"
+            default=0.0,
+            description="Average Oracle response time in milliseconds",
         )
 
         # Resource utilization
         memory_usage_mb: float = Field(
-            default=0.0, description="Memory usage in megabytes"
+            default=0.0,
+            description="Memory usage in megabytes",
         )
         cpu_usage_percent: float = Field(
-            default=0.0, description="CPU usage percentage"
+            default=0.0,
+            description="CPU usage percentage",
         )
 
         # Quality metrics
         success_rate: float = Field(
-            default=0.0, description="Operation success rate (0-100)"
+            default=0.0,
+            description="Operation success rate (0-100)",
         )
         error_rate: float = Field(
-            default=0.0, description="Operation error rate (0-100)"
+            default=0.0,
+            description="Operation error rate (0-100)",
         )
 
 

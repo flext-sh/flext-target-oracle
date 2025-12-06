@@ -51,7 +51,7 @@ class OracleTargetValidateCommand(FlextModels.Command):
                     )
 
                 config_data: dict[str, object] = json.loads(
-                    config_path.read_text(encoding="utf-8")
+                    config_path.read_text(encoding="utf-8"),
                 )
                 config: FlextTargetOracleConfig = FlextTargetOracleConfig(**config_data)
             else:
@@ -126,7 +126,7 @@ class OracleTargetLoadCommand(FlextModels.Command):
                     )
 
                 config_data: dict[str, object] = json.loads(
-                    config_path.read_text(encoding="utf-8")
+                    config_path.read_text(encoding="utf-8"),
                 )
                 config: FlextTargetOracleConfig = FlextTargetOracleConfig(**config_data)
             else:
@@ -261,7 +261,7 @@ class OracleTargetCommandHandler(h[FlextModels.Command, str]):
             command_timeout=30000,
             max_command_retries=3,
             metadata=FlextModels.Metadata(
-                attributes={"description": "Oracle target Singer command handler"}
+                attributes={"description": "Oracle target Singer command handler"},
             ),
         )
         super().__init__(config=config)

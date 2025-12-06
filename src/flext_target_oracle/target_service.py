@@ -228,7 +228,8 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
 
             # Load record using loader
             result: FlextResult[object] = self.loader.load_record(
-                stream_name, record_data
+                stream_name,
+                record_data,
             )
             if result.is_failure:
                 return FlextResult[None].fail(f"Failed to load record: {result.error}")

@@ -67,7 +67,7 @@ class FlextTargetOracleCliService(FlextService[str]):
         if use_dispatcher:
             dispatcher_instance = FlextDispatcher(bus=self.command_bus)
             register_result: FlextResult[object] = dispatcher_instance.register_handler(
-                self.command_handler
+                self.command_handler,
             )
             if register_result.is_failure:
                 self.log_error(

@@ -51,7 +51,8 @@ class FlextTargetOracleProtocols:
             """Protocol for Oracle batch operations."""
 
             def execute_batch(
-                self, records: list[dict[str, object]]
+                self,
+                records: list[dict[str, object]],
             ) -> FlextResult[None]:
                 """Execute batch of Oracle operations."""
 
@@ -60,7 +61,8 @@ class FlextTargetOracleProtocols:
             """Protocol for Oracle record processing."""
 
             def transform_record(
-                self, record: dict[str, object]
+                self,
+                record: dict[str, object],
             ) -> FlextResult[dict[str, object]]:
                 """Transform Singer record for Oracle."""
 
@@ -83,7 +85,8 @@ class FlextTargetOracleProtocols:
             """Protocol for Oracle security operations."""
 
             def validate_credentials(
-                self, config: dict[str, object]
+                self,
+                config: dict[str, object],
             ) -> FlextResult[bool]:
                 """Validate Oracle credentials."""
 
@@ -98,15 +101,41 @@ class FlextTargetOracleProtocols:
     # BACKWARD COMPATIBILITY ALIASES (100% COMPATIBILITY)
     # ============================================================================
 
-    TargetProtocol = TargetOracle.TargetProtocol
-    ConnectionProtocol = TargetOracle.ConnectionProtocol
-    SchemaProtocol = TargetOracle.SchemaProtocol
-    BatchProtocol = TargetOracle.BatchProtocol
-    RecordProtocol = TargetOracle.RecordProtocol
-    SingerProtocol = TargetOracle.SingerProtocol
-    PerformanceProtocol = TargetOracle.PerformanceProtocol
-    SecurityProtocol = TargetOracle.SecurityProtocol
-    MonitoringProtocol = TargetOracle.MonitoringProtocol
+    @runtime_checkable
+    class TargetProtocol(TargetOracle.TargetProtocol):
+        """TargetProtocol - real inheritance."""
+
+    @runtime_checkable
+    class ConnectionProtocol(TargetOracle.ConnectionProtocol):
+        """ConnectionProtocol - real inheritance."""
+
+    @runtime_checkable
+    class SchemaProtocol(TargetOracle.SchemaProtocol):
+        """SchemaProtocol - real inheritance."""
+
+    @runtime_checkable
+    class BatchProtocol(TargetOracle.BatchProtocol):
+        """BatchProtocol - real inheritance."""
+
+    @runtime_checkable
+    class RecordProtocol(TargetOracle.RecordProtocol):
+        """RecordProtocol - real inheritance."""
+
+    @runtime_checkable
+    class SingerProtocol(TargetOracle.SingerProtocol):
+        """SingerProtocol - real inheritance."""
+
+    @runtime_checkable
+    class PerformanceProtocol(TargetOracle.PerformanceProtocol):
+        """PerformanceProtocol - real inheritance."""
+
+    @runtime_checkable
+    class SecurityProtocol(TargetOracle.SecurityProtocol):
+        """SecurityProtocol - real inheritance."""
+
+    @runtime_checkable
+    class MonitoringProtocol(TargetOracle.MonitoringProtocol):
+        """MonitoringProtocol - real inheritance."""
 
 
 __all__ = [
