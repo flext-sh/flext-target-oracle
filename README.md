@@ -32,9 +32,9 @@ graph TB
 
 ### Core Dependencies
 
-- **[flext-core](../flext-core)**: Foundational patterns (FlextResult, FlextModels.Value, logging)
-- **[flext-meltano](../flext-meltano)**: Singer SDK integration and Target base classes
-- **[flext-db-oracle](../flext-db-oracle)**: Oracle database operations and connectivity
+- **[flext-core](https://github.com/organization/flext/tree/main/flext-core/)**: Foundational patterns (FlextResult, FlextModels.Value, logging)
+- **[flext-meltano](https://github.com/organization/flext/tree/main/flext-meltano/)**: Singer SDK integration and Target base classes
+- **[flext-db-oracle](https://github.com/organization/flext/tree/main/flext-db-oracle/)**: Oracle database operations and connectivity
 - **[Singer SDK](https://sdk.meltano.com/)**: Data integration protocol implementation
 
 ## 🏗️ Architecture
@@ -303,9 +303,9 @@ make oracle-performance     # Run performance benchmarks
 
 ### FLEXT Ecosystem Dependencies
 
-- **[flext-core](../flext-core)**: Foundational patterns and utilities
-- **[flext-meltano](../flext-meltano)**: Singer SDK integration layer
-- **[flext-db-oracle](../flext-db-oracle)**: Oracle database operations
+- **[flext-core](https://github.com/organization/flext/tree/main/flext-core/)**: Foundational patterns and utilities
+- **[flext-meltano](https://github.com/organization/flext/tree/main/flext-meltano/)**: Singer SDK integration layer
+- **[flext-db-oracle](https://github.com/organization/flext/tree/main/flext-db-oracle/)**: Oracle database operations
 - **[Singer SDK](https://sdk.meltano.com/)**: Data integration protocol
 
 ## 📚 **Complete Documentation Hub**
@@ -314,8 +314,8 @@ make oracle-performance     # Run performance benchmarks
 
 - **[Architecture Guide](docs/architecture.md)**: Complete Clean Architecture + DDD implementation patterns
 - **[Development Guide](docs/development.md)**: Comprehensive development workflows and FLEXT ecosystem integration
-- **[Singer Integration](docs/singer-integration.md)**: Detailed Singer SDK compliance and protocol implementation
-- **[Python Module Organization](docs/python-module-organization.md)**: Enterprise Python module structure standards
+- **[Singer Integration](docs/guides/singer-integration.md)**: Detailed Singer SDK compliance and protocol implementation
+- **[Python Module Organization](docs/guides/python-module-organization.md)**: Enterprise Python module structure standards
 - **[Documentation Hub](docs/README.md)**: Central navigation for all project documentation
 - **[Current Status & Issues](docs/TODO.md)**: Honest assessment of completed work vs. pending implementation
 

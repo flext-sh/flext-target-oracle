@@ -135,10 +135,10 @@ graph TB
 
 ### Core Dependencies
 
-- **[flext-core](../../flext-core/)**: Foundational patterns (FlextResult, FlextModels.Value, logging)
-- **[flext-meltano](../../flext-meltano/)**: Singer SDK integration and Target base classes
-- **[flext-db-oracle](../../flext-db-oracle/)**: Oracle database operations and connectivity
-- **[flext-observability](../../flext-observability/)**: Monitoring and metrics (planned integration)
+- **[flext-core](https://github.com/organization/flext/tree/main/flext-core/)**: Foundational patterns (FlextResult, FlextModels.Value, logging)
+- **[flext-meltano](https://github.com/organization/flext/tree/main/flext-meltano/)**: Singer SDK integration and Target base classes
+- **[flext-db-oracle](https://github.com/organization/flext/tree/main/flext-db-oracle/)**: Oracle database operations and connectivity
+- **[flext-observability](https://github.com/organization/flext/tree/main/flext-observability/)**: Monitoring and metrics (planned integration)
 
 ## Documentation Standards
 

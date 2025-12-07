@@ -20,11 +20,11 @@ from pydantic import Field
 from flext_target_oracle.config import FlextTargetOracleConfig
 from flext_target_oracle.models import FlextTargetOracleModels
 from flext_target_oracle.target_loader import FlextTargetOracleLoader
-from flext_target_oracle.typings import FlextTargetOracleTypes
+from flext_target_oracle.typings import t
 
 
 class FlextTargetOracle(
-    FlextService[FlextTargetOracleTypes.SingerTarget.MessageProcessing],
+    FlextService[t.SingerTarget.MessageProcessing],
 ):
     """Unified Oracle Singer Target using FlextService SOURCE OF TRUTH.
 
@@ -48,11 +48,11 @@ class FlextTargetOracle(
     loader: FlextTargetOracleLoader = Field(description="Oracle data loader service")
 
     # Singer protocol state
-    schemas: dict[str, FlextTargetOracleTypes.StreamProcessing.StreamSchema] = Field(
+    schemas: dict[str, t.StreamProcessing.StreamSchema] = Field(
         default_factory=dict,
         description="Stream schemas",
     )
-    state: FlextTargetOracleTypes.StreamProcessing.StreamState = Field(
+    state: t.StreamProcessing.StreamState = Field(
         default_factory=dict,
         description="Singer state",
     )
@@ -99,7 +99,7 @@ class FlextTargetOracle(
     def execute(
         self,
         payload: str | None = None,
-    ) -> FlextResult[FlextTargetOracleTypes.Core.Dict]:
+    ) -> FlextResult[t.Core.Dict]:
         """Execute Oracle Target - implements FlextService abstract method.
 
         Backwards-compat: accept optional string payload (Singer message JSON). If
@@ -113,25 +113,25 @@ class FlextTargetOracle(
                 # Process single message if dict-like
                 if isinstance(msg, dict):
                     proc = self.process_singer_message(msg)
-                    return FlextResult[FlextTargetOracleTypes.Core.Dict].ok(
+                    return FlextResult[t.Core.Dict].ok(
                         {"processed": proc.is_success},
                     )
                 # If payload wasn't a dict, return a success with no-op
-                return FlextResult[FlextTargetOracleTypes.Core.Dict].ok({
+                return FlextResult[t.Core.Dict].ok({
                     "processed": "False",
                 })
             except Exception as e:
-                return FlextResult[FlextTargetOracleTypes.Core.Dict].fail(
+                return FlextResult[t.Core.Dict].fail(
                     f"Failed to process payload: {e}",
                 )
 
         connection_result: FlextResult[object] = self.test_connection()
         if connection_result.is_failure:
-            return FlextResult[FlextTargetOracleTypes.Core.Dict].fail(
+            return FlextResult[t.Core.Dict].fail(
                 f"Oracle target execution failed: {connection_result.error}",
             )
 
-        return FlextResult[FlextTargetOracleTypes.Core.Dict].ok(
+        return FlextResult[t.Core.Dict].ok(
             {
                 "name": self.name,
                 "status": "ready",
@@ -157,10 +157,10 @@ class FlextTargetOracle(
 
     def discover_catalog(
         self: object,
-    ) -> FlextResult[FlextTargetOracleTypes.Core.Dict]:
+    ) -> FlextResult[t.Core.Dict]:
         """Discover available schemas and generate Singer catalog."""
         try:
-            catalog: FlextTargetOracleTypes.Core.Dict = {
+            catalog: t.Core.Dict = {
                 "streams": [],
             }
 
@@ -185,10 +185,10 @@ class FlextTargetOracle(
                 if isinstance(streams, list):
                     streams.append(stream_entry)
 
-            return FlextResult[FlextTargetOracleTypes.Core.Dict].ok(catalog)
+            return FlextResult[t.Core.Dict].ok(catalog)
 
         except Exception as e:
-            return FlextResult[FlextTargetOracleTypes.Core.Dict].fail(
+            return FlextResult[t.Core.Dict].fail(
                 f"Failed to discover catalog: {e}",
             )
 
@@ -196,8 +196,8 @@ class FlextTargetOracle(
 
     def process_singer_messages(
         self,
-        messages: list[FlextTargetOracleTypes.Core.Dict],
-    ) -> FlextResult[FlextTargetOracleTypes.Core.Dict]:
+        messages: list[t.Core.Dict],
+    ) -> FlextResult[t.Core.Dict]:
         """Process Singer messages with complete statistics using standardized models."""
         try:
             # Initialize processing state using FlextTargetOracleModels
@@ -216,7 +216,7 @@ class FlextTargetOracle(
                     processing_state.failed_messages.append(
                         str(message.get("type", "unknown")),
                     )
-                    return FlextResult[FlextTargetOracleTypes.Core.Dict].fail(
+                    return FlextResult[t.Core.Dict].fail(
                         f"Failed to process message: {result.error}",
                     )
 
@@ -234,7 +234,7 @@ class FlextTargetOracle(
             finalize_result: FlextResult[object] = self.loader.finalize_all_streams()
             if finalize_result.is_failure:
                 processing_state.error_count += 1
-                return FlextResult[FlextTargetOracleTypes.Core.Dict].fail(
+                return FlextResult[t.Core.Dict].fail(
                     f"Failed to finalize streams: {finalize_result.error}",
                 )
 
@@ -257,21 +257,21 @@ class FlextTargetOracle(
                 "processing_statistics": processing_state.model_dump(),
             }
 
-            return FlextResult[FlextTargetOracleTypes.Core.Dict].ok(result_data)
+            return FlextResult[t.Core.Dict].ok(result_data)
 
         except Exception as e:
-            return FlextResult[FlextTargetOracleTypes.Core.Dict].fail(
+            return FlextResult[t.Core.Dict].fail(
                 f"Message processing failed: {e}",
             )
 
     def process_singer_message(
         self,
-        message: FlextTargetOracleTypes.Core.Dict,
+        message: t.Core.Dict,
     ) -> FlextResult[None]:
         """Process individual Singer message - compatible."""
         return self._process_single_message(message)
 
-    def finalize(self: object) -> FlextResult[FlextTargetOracleTypes.Core.Dict]:
+    def finalize(self: object) -> FlextResult[t.Core.Dict]:
         """Finalize target processing and return complete statistics."""
         try:
             result: FlextResult[object] = self.loader.finalize_all_streams()
@@ -282,7 +282,7 @@ class FlextTargetOracle(
 
         except Exception as e:
             self.log_error("Failed to finalize target", extra={"error": str(e)})
-            return FlextResult[FlextTargetOracleTypes.Core.Dict].fail(
+            return FlextResult[t.Core.Dict].fail(
                 f"Finalization failed: {e}",
             )
 
@@ -290,7 +290,7 @@ class FlextTargetOracle(
 
     def _process_single_message(
         self,
-        message: FlextTargetOracleTypes.Core.Dict,
+        message: t.Core.Dict,
     ) -> FlextResult[None]:
         """Process a single Singer message with type dispatch."""
         message_type = message.get("type")
@@ -305,7 +305,7 @@ class FlextTargetOracle(
 
     def _handle_schema_message(
         self,
-        message: FlextTargetOracleTypes.Core.Dict,
+        message: t.Core.Dict,
     ) -> FlextResult[None]:
         """Handle SCHEMA message with table creation."""
         try:
@@ -344,7 +344,7 @@ class FlextTargetOracle(
 
     def _handle_record_message(
         self,
-        message: FlextTargetOracleTypes.Core.Dict,
+        message: t.Core.Dict,
     ) -> FlextResult[None]:
         """Handle RECORD message with data loading."""
         try:
@@ -372,7 +372,7 @@ class FlextTargetOracle(
 
     def _handle_state_message(
         self,
-        message: FlextTargetOracleTypes.Core.Dict,
+        message: t.Core.Dict,
     ) -> FlextResult[None]:
         """Handle STATE message with state persistence."""
         try:
@@ -396,7 +396,7 @@ class FlextTargetOracle(
     def _write_record(
         self,
         stream_name: str,
-        record: FlextTargetOracleTypes.Core.Dict,
+        record: t.Core.Dict,
     ) -> None:
         """Singer SDK record writing compatibility."""
         result: FlextResult[object] = self.loader.load_record(stream_name, record)
@@ -406,7 +406,7 @@ class FlextTargetOracle(
 
     # === Metrics and Information ===
 
-    def get_implementation_metrics(self: object) -> FlextTargetOracleTypes.Core.Dict:
+    def get_implementation_metrics(self: object) -> t.Core.Dict:
         """Get Oracle-specific implementation metrics using standardized models."""
         # Use FlextTargetOracleModels.OraclePerformanceMetrics for structured metrics
         performance_metrics = FlextTargetOracleModels.OraclePerformanceMetrics(

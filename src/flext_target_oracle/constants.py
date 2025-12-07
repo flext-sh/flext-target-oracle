@@ -43,8 +43,11 @@ class FlextTargetOracleConstants(FlextConstants):
         DEFAULT_SERVICE_NAME: Final[str] = "XE"
         DEFAULT_USERNAME: Final[str] = "system"
 
-    class Processing:
-        """Processing-related constants for Oracle target."""
+    class TargetOracleProcessing:
+        """Processing-related constants for Oracle target.
+
+        Note: Does not override parent Processing class to avoid inheritance conflicts.
+        """
 
         DEFAULT_BATCH_SIZE: Final[int] = 1000
         DEFAULT_COMMIT_SIZE: Final[int] = 1000
@@ -61,8 +64,11 @@ class FlextTargetOracleConstants(FlextConstants):
         DEFAULT_POOL_MAX: Final[int] = 20
         DEFAULT_POOL_TIMEOUT: Final[int] = 30
 
-    class Validation:
-        """Target-specific validation configuration."""
+    class TargetOracleValidation:
+        """Target-specific validation configuration.
+
+        Note: Does not override parent Validation class to avoid inheritance conflicts.
+        """
 
         MAX_TABLE_NAME_LENGTH: Final[int] = 30
         MAX_COLUMN_NAME_LENGTH: Final[int] = 30
@@ -91,6 +97,9 @@ class FlextTargetOracleConstants(FlextConstants):
         )
 
 
+c = FlextTargetOracleConstants
+
 __all__ = [
     "FlextTargetOracleConstants",
+    "c",
 ]
