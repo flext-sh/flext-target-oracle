@@ -2,142 +2,211 @@
 
 from typing import Protocol, runtime_checkable
 
-from flext_core import FlextResult, p
+from flext_db_oracle.protocols import FlextDbOracleProtocols as p_db_oracle
+from flext_meltano.protocols import FlextMeltanoProtocols as p_meltano
 
 
-class FlextTargetOracleProtocols:
-    """Singer Target Oracle protocols with explicit re-exports from p foundation.
+class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
+    """Singer Target Oracle protocols extending Oracle and Meltano protocols.
 
-    Domain Extension Pattern (Phase 3):
-    - Explicit re-export of foundation protocols (not inheritance)
-    - Domain-specific protocols organized in TargetOracle namespace
-    - 100% backward compatibility through aliases
+    Extends both FlextDbOracleProtocols and FlextMeltanoProtocols via multiple inheritance
+    to inherit all Oracle protocols, Meltano protocols, and foundation protocols.
+
+    Architecture:
+    - EXTENDS: FlextDbOracleProtocols (inherits .Database.* protocols)
+    - EXTENDS: FlextMeltanoProtocols (inherits .Meltano.* protocols)
+    - ADDS: Target Oracle-specific protocols in TargetOracle namespace
+    - PROVIDES: Root-level alias `p` for convenient access
     """
 
-    # ============================================================================
-    # RE-EXPORT FOUNDATION PROTOCOLS (EXPLICIT PATTERN)
-    # ============================================================================
-
-    # ============================================================================
-    # SINGER TARGET ORACLE-SPECIFIC PROTOCOLS (DOMAIN NAMESPACE)
-    # ============================================================================
-
     class TargetOracle:
-        """Singer Target Oracle domain protocols for Oracle database loading."""
+        """Singer Target Oracle domain protocols for Oracle database loading.
+
+        Provides protocol definitions for Oracle target operations, connection management,
+        schema management, batch operations, record processing, Singer message handling,
+        performance optimization, security operations, and monitoring.
+        """
 
         @runtime_checkable
-        class TargetProtocol(p.Service, Protocol):
-            """Protocol for Oracle target operations."""
+        class TargetProtocol(p_db_oracle.Service[object], Protocol):
+            """Protocol for Oracle target operations.
 
-            def process_record(self, record: dict[str, object]) -> FlextResult[None]:
-                """Process a Singer record for Oracle target."""
+            Defines the interface for processing Singer records for Oracle target.
+            """
+
+            def process_record(
+                self, record: dict[str, object]
+            ) -> p_meltano.Result[bool]:
+                """Process a Singer record for Oracle target.
+
+                Args:
+                    record: Singer record to process.
+
+                Returns:
+                    Result indicating success or failure of the processing operation.
+
+                """
 
         @runtime_checkable
-        class ConnectionProtocol(p.Service, Protocol):
-            """Protocol for Oracle connection management."""
+        class ConnectionProtocol(p_db_oracle.Service[object], Protocol):
+            """Protocol for Oracle connection management.
 
-            def connect(self, config: dict[str, object]) -> FlextResult[object]:
-                """Connect to Oracle database."""
+            Defines the interface for managing Oracle database connections.
+            """
+
+            def connect(self, config: dict[str, object]) -> p_meltano.Result[object]:
+                """Connect to Oracle database.
+
+                Args:
+                    config: Connection configuration dictionary.
+
+                Returns:
+                    Result containing the connection object.
+
+                """
 
         @runtime_checkable
-        class SchemaProtocol(p.Service, Protocol):
-            """Protocol for Oracle schema management."""
+        class SchemaProtocol(p_db_oracle.Service[object], Protocol):
+            """Protocol for Oracle schema management.
 
-            def create_table(self, schema: dict[str, object]) -> FlextResult[None]:
-                """Create Oracle table from schema."""
+            Defines the interface for managing Oracle database schemas.
+            """
+
+            def create_table(self, schema: dict[str, object]) -> p_meltano.Result[bool]:
+                """Create Oracle table from schema.
+
+                Args:
+                    schema: Table schema definition.
+
+                Returns:
+                    Result indicating success or failure of the table creation.
+
+                """
 
         @runtime_checkable
-        class BatchProtocol(p.Service, Protocol):
-            """Protocol for Oracle batch operations."""
+        class BatchProtocol(p_db_oracle.Service[object], Protocol):
+            """Protocol for Oracle batch operations.
+
+            Defines the interface for executing batch operations on Oracle database.
+            """
 
             def execute_batch(
                 self,
                 records: list[dict[str, object]],
-            ) -> FlextResult[None]:
-                """Execute batch of Oracle operations."""
+            ) -> p_meltano.Result[bool]:
+                """Execute batch of Oracle operations.
+
+                Args:
+                    records: List of records to process in batch.
+
+                Returns:
+                    Result indicating success or failure of the batch operation.
+
+                """
 
         @runtime_checkable
-        class RecordProtocol(p.Service, Protocol):
-            """Protocol for Oracle record processing."""
+        class RecordProtocol(p_db_oracle.Service[object], Protocol):
+            """Protocol for Oracle record processing.
+
+            Defines the interface for transforming and processing records for Oracle.
+            """
 
             def transform_record(
                 self,
                 record: dict[str, object],
-            ) -> FlextResult[dict[str, object]]:
-                """Transform Singer record for Oracle."""
+            ) -> p_meltano.Result[dict[str, object]]:
+                """Transform Singer record for Oracle.
+
+                Args:
+                    record: Singer record to transform.
+
+                Returns:
+                    Result containing the transformed record.
+
+                """
 
         @runtime_checkable
-        class SingerProtocol(p.Service, Protocol):
-            """Protocol for Singer message handling."""
+        class SingerProtocol(p_db_oracle.Service[object], Protocol):
+            """Protocol for Singer message handling.
 
-            def process_message(self, message: dict[str, object]) -> FlextResult[None]:
-                """Process Singer message."""
+            Defines the interface for processing Singer messages.
+            """
+
+            def process_message(
+                self, message: dict[str, object]
+            ) -> p_meltano.Result[bool]:
+                """Process Singer message.
+
+                Args:
+                    message: Singer message to process.
+
+                Returns:
+                    Result indicating success or failure of the message processing.
+
+                """
 
         @runtime_checkable
-        class PerformanceProtocol(p.Service, Protocol):
-            """Protocol for Oracle performance optimization."""
+        class PerformanceProtocol(p_db_oracle.Service[object], Protocol):
+            """Protocol for Oracle performance optimization.
 
-            def optimize_batch_size(self, size: int) -> FlextResult[int]:
-                """Optimize batch size for Oracle operations."""
+            Defines the interface for optimizing Oracle operations performance.
+            """
+
+            def optimize_batch_size(self, size: int) -> p_meltano.Result[int]:
+                """Optimize batch size for Oracle operations.
+
+                Args:
+                    size: Current batch size.
+
+                Returns:
+                    Result containing the optimized batch size.
+
+                """
 
         @runtime_checkable
-        class SecurityProtocol(p.Service, Protocol):
-            """Protocol for Oracle security operations."""
+        class SecurityProtocol(p_db_oracle.Service[object], Protocol):
+            """Protocol for Oracle security operations.
+
+            Defines the interface for validating Oracle credentials and security.
+            """
 
             def validate_credentials(
                 self,
                 config: dict[str, object],
-            ) -> FlextResult[bool]:
-                """Validate Oracle credentials."""
+            ) -> p_meltano.Result[bool]:
+                """Validate Oracle credentials.
+
+                Args:
+                    config: Configuration containing credentials.
+
+                Returns:
+                    Result indicating whether the credentials are valid.
+
+                """
 
         @runtime_checkable
-        class MonitoringProtocol(p.Service, Protocol):
-            """Protocol for Oracle loading monitoring."""
+        class MonitoringProtocol(p_db_oracle.Service[object], Protocol):
+            """Protocol for Oracle loading monitoring.
 
-            def track_progress(self, records: int) -> FlextResult[None]:
-                """Track progress of Oracle loading operations."""
+            Defines the interface for monitoring Oracle loading operations.
+            """
 
-    # ============================================================================
-    # BACKWARD COMPATIBILITY ALIASES (100% COMPATIBILITY)
-    # ============================================================================
+            def track_progress(self, records: int) -> p_meltano.Result[bool]:
+                """Track progress of Oracle loading operations.
 
-    @runtime_checkable
-    class TargetProtocol(TargetOracle.TargetProtocol):
-        """TargetProtocol - real inheritance."""
+                Args:
+                    records: Number of records processed.
 
-    @runtime_checkable
-    class ConnectionProtocol(TargetOracle.ConnectionProtocol):
-        """ConnectionProtocol - real inheritance."""
+                Returns:
+                    Result indicating success or failure of tracking.
 
-    @runtime_checkable
-    class SchemaProtocol(TargetOracle.SchemaProtocol):
-        """SchemaProtocol - real inheritance."""
+                """
 
-    @runtime_checkable
-    class BatchProtocol(TargetOracle.BatchProtocol):
-        """BatchProtocol - real inheritance."""
 
-    @runtime_checkable
-    class RecordProtocol(TargetOracle.RecordProtocol):
-        """RecordProtocol - real inheritance."""
-
-    @runtime_checkable
-    class SingerProtocol(TargetOracle.SingerProtocol):
-        """SingerProtocol - real inheritance."""
-
-    @runtime_checkable
-    class PerformanceProtocol(TargetOracle.PerformanceProtocol):
-        """PerformanceProtocol - real inheritance."""
-
-    @runtime_checkable
-    class SecurityProtocol(TargetOracle.SecurityProtocol):
-        """SecurityProtocol - real inheritance."""
-
-    @runtime_checkable
-    class MonitoringProtocol(TargetOracle.MonitoringProtocol):
-        """MonitoringProtocol - real inheritance."""
-
+# Runtime alias for simplified usage
+p = FlextTargetOracleProtocols
 
 __all__ = [
     "FlextTargetOracleProtocols",
+    "p",
 ]
