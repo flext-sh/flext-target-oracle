@@ -10,14 +10,14 @@
 | ----------------------------------------------- | ----------------------------------------------------- | ------------------------- |
 | **[Architecture Guide](architecture.md)**       | Detailed technical architecture and design patterns   | Developers, Architects    |
 | **[Development Guide](development.md)**         | Development workflows, testing, and contributing      | Contributors, Maintainers |
-| **[Singer Integration](singer-integration.md)** | Singer SDK compliance and protocol implementation     | Integration Engineers     |
+| **[Singer Integration](guides/singer-integration.md)** | Singer SDK compliance and protocol implementation     | Integration Engineers     |
 | **[TODO & Issues](TODO.md)**                    | Known issues, technical debt, and improvement roadmap | All Stakeholders          |
 
 ### 🚀 **Getting Started**
 
 1. **New Developer Setup**: Start with [Development Guide](development.md#quick-start)
 2. **Architecture Understanding**: Read [Architecture Guide](architecture.md#overview)
-3. **Singer Integration**: Review [Singer Integration](singer-integration.md#overview)
+3. **Singer Integration**: Review [Singer Integration](guides/singer-integration.md#overview)
 4. **Known Issues**: Check [TODO & Issues](TODO.md) for current status
 
 ## Document Overview
@@ -48,7 +48,7 @@
 - **Performance Development**: Optimization techniques and benchmarking
 - **Contributing Guidelines**: Standards and pull request process
 
-### [Singer Integration](singer-integration.md)
+### [Singer Integration](guides/singer-integration.md)
 
 > **Singer SDK compliance, protocol implementation, and integration patterns**
 
@@ -163,7 +163,7 @@ graph TB
 
 1. **Technical Issues**: Check [Development Guide](development.md#debugging-and-troubleshooting)
 2. **Architecture Questions**: Review [Architecture Guide](architecture.md)
-3. **Singer Integration**: See [Singer Integration](singer-integration.md)
+3. **Singer Integration**: See [Singer Integration](guides/singer-integration.md)
 4. **Known Issues**: Consult [TODO & Issues](TODO.md)
 
 ### Contributing to Documentation

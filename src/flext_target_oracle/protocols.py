@@ -15,192 +15,215 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
     Architecture:
     - EXTENDS: FlextDbOracleProtocols (inherits .Database.* protocols)
     - EXTENDS: FlextMeltanoProtocols (inherits .Meltano.* protocols)
-    - ADDS: Target Oracle-specific protocols in TargetOracle namespace
+    - ADDS: Target Oracle-specific protocols in Target.Oracle namespace
     - PROVIDES: Root-level alias `p` for convenient access
+
+    Usage:
+    from flext_target_oracle.protocols import p
+
+    # Foundation protocols (inherited)
+    result: p.Result[str]
+    service: p.Service[str]
+
+    # Oracle protocols (inherited)
+    connection: p.Database.ConnectionProtocol
+
+    # Meltano protocols (inherited)
+    target: p.Meltano.TargetProtocol
+
+    # Target Oracle-specific protocols
+    target_protocol: p.Target.Oracle.TargetProtocol
     """
 
-    class TargetOracle:
-        """Singer Target Oracle domain protocols for Oracle database loading.
+    class Target:
+        """Singer Target domain protocols."""
 
-        Provides protocol definitions for Oracle target operations, connection management,
-        schema management, batch operations, record processing, Singer message handling,
-        performance optimization, security operations, and monitoring.
-        """
+        class Oracle:
+            """Singer Target Oracle domain protocols for Oracle database loading.
 
-        @runtime_checkable
-        class TargetProtocol(p_db_oracle.Service[object], Protocol):
-            """Protocol for Oracle target operations.
-
-            Defines the interface for processing Singer records for Oracle target.
+            Provides protocol definitions for Oracle target operations, connection management,
+            schema management, batch operations, record processing, Singer message handling,
+            performance optimization, security operations, and monitoring.
             """
 
-            def process_record(
-                self, record: dict[str, object]
-            ) -> p_meltano.Result[bool]:
-                """Process a Singer record for Oracle target.
+            @runtime_checkable
+            class TargetProtocol(p_db_oracle.Service[object], Protocol):
+                """Protocol for Oracle target operations.
 
-                Args:
-                    record: Singer record to process.
-
-                Returns:
-                    Result indicating success or failure of the processing operation.
-
+                Defines the interface for processing Singer records for Oracle target.
                 """
 
-        @runtime_checkable
-        class ConnectionProtocol(p_db_oracle.Service[object], Protocol):
-            """Protocol for Oracle connection management.
+                def process_record(
+                    self, record: dict[str, object]
+                ) -> p_meltano.Result[bool]:
+                    """Process a Singer record for Oracle target.
 
-            Defines the interface for managing Oracle database connections.
-            """
+                    Args:
+                        record: Singer record to process.
 
-            def connect(self, config: dict[str, object]) -> p_meltano.Result[object]:
-                """Connect to Oracle database.
+                    Returns:
+                        Result indicating success or failure of the processing operation.
 
-                Args:
-                    config: Connection configuration dictionary.
+                    """
 
-                Returns:
-                    Result containing the connection object.
+            @runtime_checkable
+            class ConnectionProtocol(p_db_oracle.Service[object], Protocol):
+                """Protocol for Oracle connection management.
 
+                Defines the interface for managing Oracle database connections.
                 """
 
-        @runtime_checkable
-        class SchemaProtocol(p_db_oracle.Service[object], Protocol):
-            """Protocol for Oracle schema management.
+                def connect(
+                    self, config: dict[str, object]
+                ) -> p_meltano.Result[object]:
+                    """Connect to Oracle database.
 
-            Defines the interface for managing Oracle database schemas.
-            """
+                    Args:
+                        config: Connection configuration dictionary.
 
-            def create_table(self, schema: dict[str, object]) -> p_meltano.Result[bool]:
-                """Create Oracle table from schema.
+                    Returns:
+                        Result containing the connection object.
 
-                Args:
-                    schema: Table schema definition.
+                    """
 
-                Returns:
-                    Result indicating success or failure of the table creation.
+            @runtime_checkable
+            class SchemaProtocol(p_db_oracle.Service[object], Protocol):
+                """Protocol for Oracle schema management.
 
+                Defines the interface for managing Oracle database schemas.
                 """
 
-        @runtime_checkable
-        class BatchProtocol(p_db_oracle.Service[object], Protocol):
-            """Protocol for Oracle batch operations.
+                def create_table(
+                    self, schema: dict[str, object]
+                ) -> p_meltano.Result[bool]:
+                    """Create Oracle table from schema.
 
-            Defines the interface for executing batch operations on Oracle database.
-            """
+                    Args:
+                        schema: Table schema definition.
 
-            def execute_batch(
-                self,
-                records: list[dict[str, object]],
-            ) -> p_meltano.Result[bool]:
-                """Execute batch of Oracle operations.
+                    Returns:
+                        Result indicating success or failure of the table creation.
 
-                Args:
-                    records: List of records to process in batch.
+                    """
 
-                Returns:
-                    Result indicating success or failure of the batch operation.
+            @runtime_checkable
+            class BatchProtocol(p_db_oracle.Service[object], Protocol):
+                """Protocol for Oracle batch operations.
 
+                Defines the interface for executing batch operations on Oracle database.
                 """
 
-        @runtime_checkable
-        class RecordProtocol(p_db_oracle.Service[object], Protocol):
-            """Protocol for Oracle record processing.
+                def execute_batch(
+                    self,
+                    records: list[dict[str, object]],
+                ) -> p_meltano.Result[bool]:
+                    """Execute batch of Oracle operations.
 
-            Defines the interface for transforming and processing records for Oracle.
-            """
+                    Args:
+                        records: List of records to process in batch.
 
-            def transform_record(
-                self,
-                record: dict[str, object],
-            ) -> p_meltano.Result[dict[str, object]]:
-                """Transform Singer record for Oracle.
+                    Returns:
+                        Result indicating success or failure of the batch operation.
 
-                Args:
-                    record: Singer record to transform.
+                    """
 
-                Returns:
-                    Result containing the transformed record.
+            @runtime_checkable
+            class RecordProtocol(p_db_oracle.Service[object], Protocol):
+                """Protocol for Oracle record processing.
 
+                Defines the interface for transforming and processing records for Oracle.
                 """
 
-        @runtime_checkable
-        class SingerProtocol(p_db_oracle.Service[object], Protocol):
-            """Protocol for Singer message handling.
+                def transform_record(
+                    self,
+                    record: dict[str, object],
+                ) -> p_meltano.Result[dict[str, object]]:
+                    """Transform Singer record for Oracle.
 
-            Defines the interface for processing Singer messages.
-            """
+                    Args:
+                        record: Singer record to transform.
 
-            def process_message(
-                self, message: dict[str, object]
-            ) -> p_meltano.Result[bool]:
-                """Process Singer message.
+                    Returns:
+                        Result containing the transformed record.
 
-                Args:
-                    message: Singer message to process.
+                    """
 
-                Returns:
-                    Result indicating success or failure of the message processing.
+            @runtime_checkable
+            class SingerProtocol(p_db_oracle.Service[object], Protocol):
+                """Protocol for Singer message handling.
 
+                Defines the interface for processing Singer messages.
                 """
 
-        @runtime_checkable
-        class PerformanceProtocol(p_db_oracle.Service[object], Protocol):
-            """Protocol for Oracle performance optimization.
+                def process_message(
+                    self, message: dict[str, object]
+                ) -> p_meltano.Result[bool]:
+                    """Process Singer message.
 
-            Defines the interface for optimizing Oracle operations performance.
-            """
+                    Args:
+                        message: Singer message to process.
 
-            def optimize_batch_size(self, size: int) -> p_meltano.Result[int]:
-                """Optimize batch size for Oracle operations.
+                    Returns:
+                        Result indicating success or failure of the message processing.
 
-                Args:
-                    size: Current batch size.
+                    """
 
-                Returns:
-                    Result containing the optimized batch size.
+            @runtime_checkable
+            class PerformanceProtocol(p_db_oracle.Service[object], Protocol):
+                """Protocol for Oracle performance optimization.
 
+                Defines the interface for optimizing Oracle operations performance.
                 """
 
-        @runtime_checkable
-        class SecurityProtocol(p_db_oracle.Service[object], Protocol):
-            """Protocol for Oracle security operations.
+                def optimize_batch_size(self, size: int) -> p_meltano.Result[int]:
+                    """Optimize batch size for Oracle operations.
 
-            Defines the interface for validating Oracle credentials and security.
-            """
+                    Args:
+                        size: Current batch size.
 
-            def validate_credentials(
-                self,
-                config: dict[str, object],
-            ) -> p_meltano.Result[bool]:
-                """Validate Oracle credentials.
+                    Returns:
+                        Result containing the optimized batch size.
 
-                Args:
-                    config: Configuration containing credentials.
+                    """
 
-                Returns:
-                    Result indicating whether the credentials are valid.
+            @runtime_checkable
+            class SecurityProtocol(p_db_oracle.Service[object], Protocol):
+                """Protocol for Oracle security operations.
 
+                Defines the interface for validating Oracle credentials and security.
                 """
 
-        @runtime_checkable
-        class MonitoringProtocol(p_db_oracle.Service[object], Protocol):
-            """Protocol for Oracle loading monitoring.
+                def validate_credentials(
+                    self,
+                    config: dict[str, object],
+                ) -> p_meltano.Result[bool]:
+                    """Validate Oracle credentials.
 
-            Defines the interface for monitoring Oracle loading operations.
-            """
+                    Args:
+                        config: Configuration containing credentials.
 
-            def track_progress(self, records: int) -> p_meltano.Result[bool]:
-                """Track progress of Oracle loading operations.
+                    Returns:
+                        Result indicating whether the credentials are valid.
 
-                Args:
-                    records: Number of records processed.
+                    """
 
-                Returns:
-                    Result indicating success or failure of tracking.
+            @runtime_checkable
+            class MonitoringProtocol(p_db_oracle.Service[object], Protocol):
+                """Protocol for Oracle loading monitoring.
 
+                Defines the interface for monitoring Oracle loading operations.
                 """
+
+                def track_progress(self, records: int) -> p_meltano.Result[bool]:
+                    """Track progress of Oracle loading operations.
+
+                    Args:
+                        records: Number of records processed.
+
+                    Returns:
+                        Result indicating success or failure of tracking.
+
+                    """
 
 
 # Runtime alias for simplified usage

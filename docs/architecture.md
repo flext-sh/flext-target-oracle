@@ -478,6 +478,24 @@ metrics.histogram("oracle_target.batch_duration").observe(duration)
 
 ---
 
+## Related Documentation
+
+**Within Project**:
+- [Getting Started](getting-started.md) - Installation and basic usage
+- [API Reference](api-reference.md) - Complete API documentation
+- [Examples](../examples/) - Working code examples
+
+**Across Projects**:
+- [flext-core Foundation](https://github.com/organization/flext/tree/main/flext-core/docs/architecture/overview.md) - Clean architecture and CQRS patterns
+- [flext-core Service Patterns](https://github.com/organization/flext/tree/main/flext-core/docs/guides/service-patterns.md) - Service patterns and dependency injection
+- [flext-db-oracle Integration](https://github.com/organization/flext/tree/main/flext-db-oracle/CLAUDE.md) - Oracle database integration
+- [flext-meltano Pipelines](https://github.com/organization/flext/tree/main/flext-meltano/CLAUDE.md) - Data integration and ELT orchestration
+
+**External Resources**:
+- [PEP 257 - Docstring Conventions](https://peps.python.org/pep-0257/)
+- [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
+
+---
 **Document Version**: 1.0  
 **Last Updated**: 2025-08-04  
 **Next Review**: 2025-08-11

@@ -6,6 +6,7 @@ This module provides data models for Oracle target operations.
 from __future__ import annotations
 
 from flext_core import FlextModels
+from flext_core.utilities import u as flext_u
 from pydantic import Field
 
 
@@ -21,6 +22,14 @@ class FlextTargetOracleModels(FlextModels):
 
     All nested classes inherit FlextModels validation and patterns.
     """
+
+    def __init_subclass__(cls, **kwargs: object) -> None:
+        """Warn when FlextTargetOracleModels is subclassed directly."""
+        super().__init_subclass__(**kwargs)
+        flext_u.Deprecation.warn_once(
+            f"subclass:{cls.__name__}",
+            "Subclassing FlextTargetOracleModels is deprecated. Use FlextModels directly with composition instead.",
+        )
 
     # Constants
     MAX_PORT_NUMBER = 65535
@@ -278,3 +287,12 @@ class FlextTargetOracleModels(FlextModels):
 
 
 # Note: This import ensures backward compatibility while eliminating duplication
+
+m = FlextTargetOracleModels
+m_target_oracle = FlextTargetOracleModels
+
+__all__ = [
+    "FlextTargetOracleModels",
+    "m",
+    "m_target_oracle",
+]
