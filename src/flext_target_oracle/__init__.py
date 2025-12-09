@@ -15,7 +15,7 @@ from flext_meltano import (
 )
 
 from flext_target_oracle.config import FlextTargetOracleConfig, LoadMethod
-from flext_target_oracle.models import FlextTargetOracleModels
+from flext_target_oracle.models import FlextTargetOracleModels, m, m_target_oracle
 from flext_target_oracle.protocols import FlextTargetOracleProtocols
 from flext_target_oracle.target_client import FlextTargetOracle
 from flext_target_oracle.target_commands import OracleTargetCommandFactory
@@ -55,6 +55,9 @@ from flext_target_oracle.target_services import (
 )
 from flext_target_oracle.typings import FlextTargetOracleTypes
 from flext_target_oracle.utilities import FlextTargetOracleUtilities
+
+# Domain-specific aliases
+u = FlextTargetOracleUtilities  # Utilities (FlextTargetOracleUtilities extends FlextDbOracleUtilities)
 
 # Version imports removed - not available
 
@@ -100,4 +103,8 @@ __all__ = [
     "SingerStreamModel",
     "StorageModeModel",
     "configure_oracle_observability",
+    "m",
+    "m_target_oracle",
+    # Domain-specific aliases
+    "u",
 ]
