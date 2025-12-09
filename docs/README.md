@@ -6,12 +6,12 @@
 
 ### 📚 **Core Documentation**
 
-| Document                                        | Purpose                                               | Audience                  |
-| ----------------------------------------------- | ----------------------------------------------------- | ------------------------- |
-| **[Architecture Guide](architecture.md)**       | Detailed technical architecture and design patterns   | Developers, Architects    |
-| **[Development Guide](development.md)**         | Development workflows, testing, and contributing      | Contributors, Maintainers |
+| Document                                               | Purpose                                               | Audience                  |
+| ------------------------------------------------------ | ----------------------------------------------------- | ------------------------- |
+| **[Architecture Guide](architecture.md)**              | Detailed technical architecture and design patterns   | Developers, Architects    |
+| **[Development Guide](development.md)**                | Development workflows, testing, and contributing      | Contributors, Maintainers |
 | **[Singer Integration](guides/singer-integration.md)** | Singer SDK compliance and protocol implementation     | Integration Engineers     |
-| **[TODO & Issues](TODO.md)**                    | Known issues, technical debt, and improvement roadmap | All Stakeholders          |
+| **[TODO & Issues](TODO.md)**                           | Known issues, technical debt, and improvement roadmap | All Stakeholders          |
 
 ### 🚀 **Getting Started**
 

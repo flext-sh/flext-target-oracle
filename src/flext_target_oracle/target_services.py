@@ -143,15 +143,17 @@ class OracleConnectionService(FlextService[None]):
         """
         # Zero Tolerance FIX: Use utilities for connection validation
         validation_result = (
-            self._utilities.ConfigValidation.validate_oracle_connection_config({
-                "oracle_host": self._config.oracle_host,
-                "oracle_port": self._config.oracle_port,
-                "oracle_service": self._config.oracle_service,
-                "oracle_user": self._config.oracle_user,
-                "default_target_schema": self._config.default_target_schema,
-                "use_ssl": self._config.use_ssl,
-                "connection_timeout": self._config.connection_timeout,
-            })
+            self._utilities.ConfigValidation.validate_oracle_connection_config(
+                {
+                    "oracle_host": self._config.oracle_host,
+                    "oracle_port": self._config.oracle_port,
+                    "oracle_service": self._config.oracle_service,
+                    "oracle_user": self._config.oracle_user,
+                    "default_target_schema": self._config.default_target_schema,
+                    "use_ssl": self._config.use_ssl,
+                    "connection_timeout": self._config.connection_timeout,
+                }
+            )
         )
         if validation_result.is_failure:
             return r[None].fail(
