@@ -360,7 +360,7 @@ class FlextTargetOracleUtilities(u_core):
                 processed_schema = {
                     "stream_name": stream_name,
                     "oracle_table_name": stream_name.upper(),
-                    "ddl": ddl_result.unwrap(),
+                    "ddl": ddl_result.value,
                     "key_properties": key_properties,
                     "properties": schema.get("properties", {}),
                 }
