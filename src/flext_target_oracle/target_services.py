@@ -17,7 +17,7 @@ from flext_core import FlextService, r
 from flext_db_oracle import FlextDbOracleApi
 from pydantic import Field
 
-from flext_target_oracle.config import FlextTargetOracleConfig
+from flext_target_oracle.config import FlextTargetOracleSettings
 from flext_target_oracle.target_models import (
     LoadMethodModel,
     LoadStatisticsModel,
@@ -105,7 +105,7 @@ class OracleConnectionService(FlextService[None]):
     """
 
     # Pydantic fields - following FlextModels.Config pattern from SOURCE OF TRUTH
-    config: FlextTargetOracleConfig = Field(
+    config: FlextTargetOracleSettings = Field(
         ...,
         description="Oracle target configuration",
     )
@@ -226,7 +226,7 @@ class OracleSchemaService(FlextService[None]):
     """
 
     # Pydantic fields - following FlextModels.Config pattern from SOURCE OF TRUTH
-    config: FlextTargetOracleConfig = Field(
+    config: FlextTargetOracleSettings = Field(
         ...,
         description="Oracle target configuration",
     )
@@ -442,7 +442,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
     """
 
     # Pydantic fields - following FlextModels.Config pattern from SOURCE OF TRUTH
-    config: FlextTargetOracleConfig = Field(
+    config: FlextTargetOracleSettings = Field(
         ...,
         description="Oracle target configuration",
     )
@@ -556,7 +556,7 @@ class OracleRecordService(FlextService[None]):
     """
 
     # Pydantic fields - following FlextModels.Config pattern from SOURCE OF TRUTH
-    config: FlextTargetOracleConfig = Field(
+    config: FlextTargetOracleSettings = Field(
         ...,
         description="Oracle target configuration",
     )
@@ -707,7 +707,7 @@ class OracleTargetServiceFactory:
     @override
     def __init__(
         self,
-        config: FlextTargetOracleConfig,
+        config: FlextTargetOracleSettings,
         oracle_api: FlextDbOracleApi,
     ) -> None:
         """Initialize service factory.
@@ -717,11 +717,11 @@ class OracleTargetServiceFactory:
         oracle_api: Oracle database API instance
 
         """
-        self._config: FlextTargetOracleConfig = config
+        self._config: FlextTargetOracleSettings = config
         self._oracle_api = oracle_api
 
     @property
-    def config(self) -> FlextTargetOracleConfig:
+    def config(self) -> FlextTargetOracleSettings:
         """Get configuration object."""
         return self._config
 

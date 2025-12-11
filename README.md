@@ -95,10 +95,10 @@ pip install flext-target-oracle
 ### Basic Configuration
 
 ```python
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig, LoadMethod
+from flext_target_oracle import FlextOracleTarget, FlextOracleTargetSettings, LoadMethod
 
 # Create configuration using FLEXT patterns
-config = FlextOracleTargetConfig(
+config = FlextOracleTargetSettings(
     oracle_host="localhost",
     oracle_port=1521,
     oracle_service="XE",

@@ -19,7 +19,7 @@ from typing import cast
 from flext_core import FlextLogger, FlextResult
 from pydantic import SecretStr
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
 
 # Configure production-grade logging
 logging.basicConfig(
@@ -35,11 +35,11 @@ class ProductionConfig:
     """Production configuration management with environment variables."""
 
     @staticmethod
-    def create_from_environment() -> FlextTargetOracleConfig:
+    def create_from_environment() -> FlextTargetOracleSettings:
         """Create production configuration from environment variables.
 
         Returns:
-            FlextTargetOracleConfig: Production-ready configuration
+            FlextTargetOracleSettings: Production-ready configuration
 
         Raises:
             ValueError: If required environment variables are missing
@@ -102,7 +102,7 @@ class ProductionConfig:
         load_method_str = os.getenv("LOAD_METHOD", "BULK_INSERT").upper()
         load_method = getattr(LoadMethod, load_method_str, LoadMethod.BULK_INSERT)
 
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host=oracle_host,
             oracle_port=oracle_port,
             oracle_service=oracle_service,
@@ -138,7 +138,7 @@ class ProductionConfig:
 class ProductionTargetManager:
     """Production-grade target manager with comprehensive error handling."""
 
-    def __init__(self, config: FlextTargetOracleConfig) -> None:
+    def __init__(self, config: FlextTargetOracleSettings) -> None:
         """Initialize production target manager.
 
         Args:

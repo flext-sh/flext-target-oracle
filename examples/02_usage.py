@@ -7,7 +7,7 @@ Singer-formatted data into an Oracle database.
 import json
 from pathlib import Path
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 
 def load_config() -> dict[str, object]:
@@ -29,7 +29,7 @@ def main() -> None:
     # Load configuration
     config_dict = load_config()
 
-    config = FlextTargetOracleConfig.model_validate(config_dict)
+    config = FlextTargetOracleSettings.model_validate(config_dict)
 
     # Create target instance
     target = FlextTargetOracle(config=config)

@@ -14,10 +14,10 @@ import pytest
 from sqlalchemy import Engine, MetaData, Table, func, select, text
 
 from flext_target_oracle import (
-    FlextTargetOracleConfig,
     FlextTargetOracleConnectionError,
     FlextTargetOracleLoader,
     FlextTargetOracleSchemaError,
+    FlextTargetOracleSettings,
     LoadMethod,
 )
 
@@ -54,7 +54,7 @@ class TestRealOracleLoader:
     @pytest.fixture
     def real_loader(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         _oracle_engine: Engine,
         _clean_database: None,
     ) -> FlextTargetOracleLoader:
@@ -67,7 +67,7 @@ class TestRealOracleLoader:
 
     def test_real_connect_disconnect(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
     ) -> None:
         """Test real connection and disconnection."""
         loader = FlextTargetOracleLoader(oracle_config)
@@ -84,7 +84,7 @@ class TestRealOracleLoader:
     def test_real_connect_with_invalid_credentials(self) -> None:
         """Test method."""
         """Test connection with invalid credentials."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -193,7 +193,7 @@ class TestRealOracleLoader:
         _clean_database: Callable[[], None],
     ) -> None:
         """Test force recreating table in real Oracle."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -262,7 +262,7 @@ class TestRealOracleLoader:
         _clean_database: Callable[[], None],
     ) -> None:
         """Test truncating table before load in real Oracle."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -391,7 +391,7 @@ class TestRealOracleLoader:
         _clean_database: Callable[[], None],
     ) -> None:
         """Test bulk insert mode with real Oracle."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -438,7 +438,7 @@ class TestRealOracleLoader:
         _clean_database: Callable[[], None],
     ) -> None:
         """Test merge mode (upsert) with real Oracle."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -642,7 +642,7 @@ class TestRealOracleLoader:
         _clean_database: Callable[[], None],
     ) -> None:
         """Test column ordering in real Oracle."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -725,7 +725,7 @@ class TestRealOracleLoader:
         _clean_database: Callable[[], None],
     ) -> None:
         """Test custom index creation in real Oracle."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -832,7 +832,7 @@ class TestRealOracleLoader:
         _clean_database: Callable[[], None],
     ) -> None:
         """Test parallel and direct path options in real Oracle."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",

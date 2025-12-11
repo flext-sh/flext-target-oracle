@@ -368,10 +368,10 @@ class FlextTargetOracleError(FlextTargetOracleExceptions.Error):
     """FlextTargetOracleError - real inheritance from Error."""
 
 
-class FlextTargetOracleConfigurationError(
+class FlextTargetOracleSettingsurationError(
     FlextTargetOracleExceptions.ConfigurationError,
 ):
-    """FlextTargetOracleConfigurationError - real inheritance from ConfigurationError."""
+    """FlextTargetOracleSettingsurationError - real inheritance from ConfigurationError."""
 
 
 class FlextTargetOracleConnectionError(
@@ -416,7 +416,6 @@ class FlextTargetOracleRecordError(FlextTargetOracleExceptions.RecordError):
 
 __all__: list[str] = [
     "FlextTargetOracleAuthenticationError",
-    "FlextTargetOracleConfigurationError",
     "FlextTargetOracleConnectionError",
     "FlextTargetOracleError",
     "FlextTargetOracleExceptions",
@@ -425,6 +424,7 @@ __all__: list[str] = [
     "FlextTargetOracleRecordError",
     "FlextTargetOracleSQLError",
     "FlextTargetOracleSchemaError",
+    "FlextTargetOracleSettingsurationError",
     "FlextTargetOracleTimeoutError",
     "FlextTargetOracleValidationError",
 ]

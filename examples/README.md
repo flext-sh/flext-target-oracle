@@ -95,7 +95,7 @@ if result.is_failure:
 Type-safe configuration with domain validation:
 
 ```python
-config = FlextOracleTargetConfig(
+config = FlextOracleTargetSettings(
     oracle_host="localhost",
     oracle_service="XE",
     oracle_user="target_user",
@@ -113,7 +113,7 @@ Integration with FLEXT core patterns and flext-db-oracle:
 
 ```python
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -132,7 +132,7 @@ from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
 from flext_core import u
-from flext_target_oracle import FlextOracleTarget, FlextOracleTargetConfig
+from flext_target_oracle import FlextOracleTarget, FlextOracleTargetSettings
 
 logger = FlextLogger(__name__)
 ```

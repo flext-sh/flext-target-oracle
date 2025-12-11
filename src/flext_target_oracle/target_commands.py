@@ -20,7 +20,7 @@ from flext_core import FlextModels, FlextResult, h
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from pydantic import Field
 
-from flext_target_oracle.config import FlextTargetOracleConfig
+from flext_target_oracle.config import FlextTargetOracleSettings
 from flext_target_oracle.target_client import FlextTargetOracle
 from flext_target_oracle.target_services import OracleConnectionService
 
@@ -53,11 +53,13 @@ class OracleTargetValidateCommand(FlextModels.Command):
                 config_data: dict[str, object] = json.loads(
                     config_path.read_text(encoding="utf-8"),
                 )
-                config: FlextTargetOracleConfig = FlextTargetOracleConfig(**config_data)
+                config: FlextTargetOracleSettings = FlextTargetOracleSettings(
+                    **config_data
+                )
             else:
-                # Use FlextTargetOracleConfig's built-in environment loading
+                # Use FlextTargetOracleSettings's built-in environment loading
                 # This uses Pydantic BaseSettings to automatically load environment variables
-                config: FlextTargetOracleConfig = FlextTargetOracleConfig()
+                config: FlextTargetOracleSettings = FlextTargetOracleSettings()
 
             # Validate configuration using domain method
             validation_result: FlextResult[object] = config.validate_domain_rules()
@@ -128,11 +130,13 @@ class OracleTargetLoadCommand(FlextModels.Command):
                 config_data: dict[str, object] = json.loads(
                     config_path.read_text(encoding="utf-8"),
                 )
-                config: FlextTargetOracleConfig = FlextTargetOracleConfig(**config_data)
+                config: FlextTargetOracleSettings = FlextTargetOracleSettings(
+                    **config_data
+                )
             else:
-                # Use FlextTargetOracleConfig's built-in environment loading
+                # Use FlextTargetOracleSettings's built-in environment loading
                 # This uses Pydantic BaseSettings to automatically load environment variables
-                config: FlextTargetOracleConfig = FlextTargetOracleConfig()
+                config: FlextTargetOracleSettings = FlextTargetOracleSettings()
 
             # Create target instance using SOURCE OF TRUTH factory pattern
             # Create FlextTargetOracle instance directly - it accepts config in constructor

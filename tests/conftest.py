@@ -25,8 +25,8 @@ from sqlalchemy.pool import NullPool
 
 from flext_target_oracle import (
     FlextTargetOracle,
-    FlextTargetOracleConfig,
     FlextTargetOracleLoader,
+    FlextTargetOracleSettings,
     LoadMethod,
 )
 
@@ -117,9 +117,9 @@ def clean_database(oracle_engine: Engine) -> None:
 
 
 @pytest.fixture
-def oracle_config() -> FlextTargetOracleConfig:
+def oracle_config() -> FlextTargetOracleSettings:
     """Create Oracle target configuration for tests."""
-    return FlextTargetOracleConfig(
+    return FlextTargetOracleSettings(
         oracle_host=ORACLE_HOST,
         oracle_port=ORACLE_PORT,
         oracle_service=ORACLE_SERVICE,
@@ -139,7 +139,7 @@ def oracle_config() -> FlextTargetOracleConfig:
 
 
 @pytest.fixture
-def oracle_api(oracle_config: FlextTargetOracleConfig) -> FlextDbOracleApi:
+def oracle_api(oracle_config: FlextTargetOracleSettings) -> FlextDbOracleApi:
     """Create mocked FlextDbOracleApi instance."""
     # Create real config for reference
     db_config = FlextDbOracleModels.OracleConfig(
@@ -165,7 +165,7 @@ def oracle_api(oracle_config: FlextTargetOracleConfig) -> FlextDbOracleApi:
 
 @pytest.fixture
 def oracle_loader(
-    oracle_config: FlextTargetOracleConfig,
+    oracle_config: FlextTargetOracleSettings,
 ) -> Generator[FlextTargetOracleLoader]:
     """Create FlextTargetOracleLoader instance with mocked connection."""
     with patch("flext_target_oracle.target_client.FlextDbOracleApi") as mock_api_class:
@@ -188,15 +188,15 @@ def oracle_loader(
 
 
 @pytest.fixture
-def oracle_target(oracle_config: FlextTargetOracleConfig) -> FlextTargetOracle:
+def oracle_target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle:
     """Create FlextTargetOracle instance."""
     return FlextTargetOracle(config=oracle_config)
 
 
 @pytest.fixture
-def sample_config() -> FlextTargetOracleConfig:
+def sample_config() -> FlextTargetOracleSettings:
     """Sample configuration for unit testing (no Oracle connection required)."""
-    return FlextTargetOracleConfig(
+    return FlextTargetOracleSettings(
         oracle_host="localhost",
         oracle_port=1521,
         oracle_service="XE",
@@ -210,7 +210,7 @@ def sample_config() -> FlextTargetOracleConfig:
 
 
 @pytest.fixture
-def sample_target(sample_config: FlextTargetOracleConfig) -> FlextTargetOracle:
+def sample_target(sample_config: FlextTargetOracleSettings) -> FlextTargetOracle:
     """Create FlextTargetOracle instance for unit testing."""
     return FlextTargetOracle(config=sample_config)
 

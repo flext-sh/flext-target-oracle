@@ -138,7 +138,7 @@ make test                   # Must maintain 90%+ coverage
 ```python
 # ✅ GOOD: FLEXT patterns
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -231,7 +231,7 @@ def process_batch(records: list[t.Dict]) -> FlextResult[Stats]:
 
 ```python
 # ✅ FlextModels.Value with domain validation
-class FlextOracleTargetConfig(FlextModels.Value):
+class FlextOracleTargetSettings(FlextModels.Value):
     """Type-safe configuration with business rule validation."""
 
     # Required fields with clear validation
@@ -263,7 +263,7 @@ class FlextOracleTargetConfig(FlextModels.Value):
 ```python
 # ✅ Structured logging with context
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -327,11 +327,11 @@ def process_with_logging(stream_name: str, batch_size: int):
 ### Database Connection Testing
 
 ```python # Test Oracle connectivity manually
-from flext_target_oracle import FlextOracleTargetConfig
+from flext_target_oracle import FlextOracleTargetSettings
 from flext_target_oracle.loader import FlextOracleTargetLoader
 
 # Create test configuration
-config = FlextOracleTargetConfig(
+config = FlextOracleTargetSettings(
     oracle_host="localhost",
     oracle_port=10521,
     oracle_service="XE",
@@ -405,10 +405,10 @@ make oracle-connect
 
 # Debug with Python
 PYTHONPATH=src python -c "
-from flext_target_oracle import FlextOracleTargetConfig
+from flext_target_oracle import FlextOracleTargetSettings
 from flext_target_oracle.loader import FlextOracleTargetLoader
 logging.basicConfig(level=logging.DEBUG)
-config = FlextOracleTargetConfig(
+config = FlextOracleTargetSettings(
     oracle_host='localhost',
     oracle_port=10521,
     oracle_service='XE',
@@ -429,7 +429,7 @@ from flext_target_oracle import something_that_doesnt_exist
 # ✅ Check available imports
 from flext_target_oracle import (
     FlextOracleTarget,
-    FlextOracleTargetConfig,
+    FlextOracleTargetSettings,
     LoadMethod,
     FlextResult  # Re-exported from flext-core
 )
@@ -442,7 +442,7 @@ python -c "from flext_target_oracle import *; print(dir())"
 
 ```python
 # ❌ Invalid configuration
-config = FlextOracleTargetConfig(
+config = FlextOracleTargetSettings(
     oracle_host="",  # Empty host will fail validation
     oracle_port=70000,  # Port too high
     batch_size=-1  # Negative batch size
@@ -450,7 +450,7 @@ config = FlextOracleTargetConfig(
 
 # ✅ Valid configuration with proper validation
 try:
-    config = FlextOracleTargetConfig(
+    config = FlextOracleTargetSettings(
         oracle_host="localhost",
         oracle_port=1521,
         oracle_service="XE",
@@ -489,7 +489,7 @@ make shell
 
 # In shell:
 >>> from flext_target_oracle import *
->>> config = FlextOracleTargetConfig(...)
+>>> config = FlextOracleTargetSettings(...)
 >>> # Interactive testing
 ```
 
@@ -525,7 +525,7 @@ def profile_batch_processing():
 ```python
 """Test template for new functionality."""
 import pytest
-from flext_target_oracle import FlextOracleTargetConfig, FlextResult
+from flext_target_oracle import FlextOracleTargetSettings, FlextResult
 
 class TestNewFeature:
     """Test suite for new feature."""
@@ -533,7 +533,7 @@ class TestNewFeature:
     def test_success_case(self):
         """Test successful operation."""
         # Arrange
-        config = FlextOracleTargetConfig(...)
+        config = FlextOracleTargetSettings(...)
 
         # Act
         result = new_feature_operation(config)
@@ -545,7 +545,7 @@ class TestNewFeature:
     def test_failure_case(self):
         """Test failure handling."""
         # Arrange
-        invalid_config = FlextOracleTargetConfig(...)
+        invalid_config = FlextOracleTargetSettings(...)
 
         # Act
         result = new_feature_operation(invalid_config)
@@ -639,7 +639,7 @@ def benchmark_batch_sizes(records: List[t.Dict]):
     results = {}
 
     for batch_size in batch_sizes:
-        config = FlextOracleTargetConfig(
+        config = FlextOracleTargetSettings(
             # ... other config
             batch_size=batch_size
         )

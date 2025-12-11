@@ -19,8 +19,8 @@ from sqlalchemy.engine import Engine
 
 from flext_target_oracle import (
     FlextTargetOracle,
-    FlextTargetOracleConfig,
     FlextTargetOracleLoader,
+    FlextTargetOracleSettings,
     LoadMethod,
 )
 
@@ -134,7 +134,7 @@ class TestOracleIntegration:
     @pytest.mark.usefixtures("_clean_database")
     def test_merge_mode_updates(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
         simple_schema: dict[str, object],
     ) -> None:
@@ -186,7 +186,7 @@ class TestOracleIntegration:
     @pytest.mark.usefixtures("_clean_database")
     def test_bulk_insert_performance(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
     ) -> None:
         """Test bulk insert with large dataset."""
@@ -243,7 +243,7 @@ class TestOracleIntegration:
     @pytest.mark.usefixtures("_clean_database")
     def test_json_storage_mode(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
         nested_schema: dict[str, object],
     ) -> None:
@@ -304,7 +304,7 @@ class TestOracleIntegration:
     @pytest.mark.usefixtures("_clean_database")
     def test_column_ordering(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
     ) -> None:
         """Test column ordering in created tables."""
@@ -381,7 +381,7 @@ class TestOracleIntegration:
     @pytest.mark.usefixtures("_clean_database")
     def test_truncate_before_load(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
         simple_schema: dict[str, object],
     ) -> None:
@@ -422,7 +422,7 @@ class TestOracleIntegration:
     @pytest.mark.usefixtures("_clean_database")
     def test_custom_indexes(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
         simple_schema: dict[str, object],
     ) -> None:
@@ -486,7 +486,7 @@ class TestOracleTargetE2E:
     @pytest.mark.usefixtures("_clean_database")
     def test_full_singer_workflow(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
         singer_messages: list[dict[str, object]],
     ) -> None:
@@ -524,7 +524,7 @@ class TestOracleTargetE2E:
     @pytest.mark.usefixtures("_clean_database")
     def test_column_mapping_and_filtering(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
     ) -> None:
         """Test column mapping and filtering features."""

@@ -15,7 +15,7 @@ The target is built on foundational FLEXT patterns:
 ```python
 # FlextResult Railway Pattern - Consistent error handling
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -36,7 +36,7 @@ from flext_core import t
 from flext_core import u
 
 # Configuration with domain validation
-class FlextOracleTargetConfig(FlextModels.Value):
+class FlextOracleTargetSettings(FlextModels.Value):
     def validate_domain_rules(self) -> FlextResult[None]:
         # Chain of Responsibility validation pattern
 ```
@@ -68,7 +68,7 @@ class FlextOracleTargetConfig(FlextModels.Value):
 ┌─────────────────────────────────────────────────┐
 │               Domain Layer                      │
 │   ┌─────────────────────────────────────────┐   │
-│   │     FlextOracleTargetConfig            │   │
+│   │     FlextOracleTargetSettings            │   │
 │   │   • Configuration validation           │   │
 │   │   • Business rules                     │   │
 │   │   • Domain entities                    │   │
@@ -119,12 +119,12 @@ class FlextOracleTarget(Target):
 - **Message Type Routing**: Dispatch based on Singer message type
 - **Dependency Injection**: Uses `FlextOracleTargetLoader` for data operations
 
-### 2. FlextOracleTargetConfig (Domain Layer)
+### 2. FlextOracleTargetSettings (Domain Layer)
 
 **Responsibility**: Configuration management with domain validation
 
 ```python
-class FlextOracleTargetConfig(FlextModels.Value):
+class FlextOracleTargetSettings(FlextModels.Value):
     """Type-safe configuration with business rule validation."""
 
     # Required Oracle connection parameters
@@ -159,7 +159,7 @@ class FlextOracleTargetConfig(FlextModels.Value):
 class FlextOracleTargetLoader:
     """Oracle data loading with batch processing."""
 
-    def __init__(self, config: FlextOracleTargetConfig):
+    def __init__(self, config: FlextOracleTargetSettings):
         # flext-db-oracle integration
         self.oracle_api = FlextDbOracleApi(oracle_config)
         self._record_buffers: dict[str, list[t.Dict]] = {}
@@ -374,7 +374,7 @@ graph TB
     subgraph "FLEXT Target Oracle"
         FTO[FlextOracleTarget]
         FTL[FlextOracleTargetLoader]
-        FTC[FlextOracleTargetConfig]
+        FTC[FlextOracleTargetSettings]
     end
 
     subgraph "External Systems"
@@ -399,7 +399,7 @@ graph TB
 
 ```python
 # flext-core patterns
-config = FlextOracleTargetConfig(...)
+config = FlextOracleTargetSettings(...)
 validation_result = config.validate_domain_rules()
 
 # flext-db-oracle integration

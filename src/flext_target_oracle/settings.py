@@ -1,4 +1,4 @@
-"""FLEXT Target Oracle Configuration - Enhanced FlextConfig Implementation.
+"""FLEXT Target Oracle Configuration - Enhanced FlextSettings Implementation.
 
 Single unified configuration class for Oracle Singer target operations following
 FLEXT 1.0.0 patterns with enhanced singleton, SecretStr, and Pydantic 2.11+ features.
@@ -14,7 +14,7 @@ import warnings
 from enum import StrEnum
 from typing import Self
 
-from flext_core import FlextConfig, FlextConstants, FlextResult
+from flext_core import FlextConstants, FlextResult, FlextSettings
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
@@ -28,15 +28,15 @@ class LoadMethod(StrEnum):
     BULK_MERGE = "BULK_MERGE"
 
 
-class FlextTargetOracleConfig(FlextConfig):
-    """Oracle Target Configuration using enhanced FlextConfig patterns.
+class FlextTargetOracleSettings(FlextSettings):
+    """Oracle Target Configuration using enhanced FlextSettings patterns.
 
-    This class extends FlextConfig and includes all the configuration fields
+    This class extends FlextSettings and includes all the configuration fields
     needed for Oracle target operations. Uses the enhanced singleton pattern
     with get_or_create_shared_instance for thread-safe configuration management.
 
     Follows standardized pattern:
-    - Extends FlextConfig from flext-core
+    - Extends FlextSettings from flext-core
     - Uses SecretStr for sensitive data (oracle_password)
     - All defaults from FlextConstants where possible
     - Uses enhanced singleton pattern with inverse dependency injection
@@ -56,7 +56,7 @@ class FlextTargetOracleConfig(FlextConfig):
         validate_return=True,
         json_schema_extra={
             "title": "FLEXT Target Oracle Configuration",
-            "description": "Oracle Singer target configuration extending FlextConfig",
+            "description": "Oracle Singer target configuration extending FlextSettings",
         },
     )
 
@@ -366,7 +366,7 @@ class FlextTargetOracleConfig(FlextConfig):
         cls,
         environment: str,
         **_overrides: object,
-    ) -> FlextTargetOracleConfig:
+    ) -> FlextTargetOracleSettings:
         """Create configuration for specific environment using enhanced singleton pattern."""
         env_overrides: dict[str, object] = {}
 
@@ -395,7 +395,7 @@ class FlextTargetOracleConfig(FlextConfig):
 
     @classmethod
     def get_global_instance(cls) -> Self:
-        """Get the global singleton instance using enhanced FlextConfig pattern."""
+        """Get the global singleton instance using enhanced FlextSettings pattern."""
         return cls.get_global_instance()
 
     @classmethod
@@ -415,14 +415,14 @@ class FlextTargetOracleConfig(FlextConfig):
 
     @classmethod
     def reset_global_instance(cls) -> None:
-        """Reset the global FlextTargetOracleConfig instance (mainly for testing)."""
+        """Reset the global FlextTargetOracleSettings instance (mainly for testing)."""
         cls.reset_global_instance()
 
 
 def validate_oracle_configuration(
-    config: FlextTargetOracleConfig,
+    config: FlextTargetOracleSettings,
 ) -> FlextResult[None]:
-    """Validate Oracle configuration using FlextConfig patterns - ZERO DUPLICATION."""
+    """Validate Oracle configuration using FlextSettings patterns - ZERO DUPLICATION."""
     # Required string fields validation using direct validation
     required_fields = [
         (config.oracle_host, "Oracle host is required"),
@@ -463,7 +463,7 @@ def validate_oracle_configuration(
 
 
 __all__: list[str] = [
-    "FlextTargetOracleConfig",
+    "FlextTargetOracleSettings",
     "LoadMethod",
     "validate_oracle_configuration",
 ]

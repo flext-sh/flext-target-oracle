@@ -19,7 +19,7 @@ import psutil
 import pytest
 from faker import Faker
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
 
 
 @pytest.mark.performance
@@ -36,8 +36,8 @@ class TestPerformance:
     @pytest.fixture
     def performance_config(
         self,
-        oracle_config: FlextTargetOracleConfig,
-    ) -> FlextTargetOracleConfig:
+        oracle_config: FlextTargetOracleSettings,
+    ) -> FlextTargetOracleSettings:
         """Configure for optimal performance."""
         oracle_config.batch_size = 10000
         oracle_config.load_method = LoadMethod.BULK_INSERT
@@ -57,7 +57,7 @@ class TestPerformance:
     @pytest.mark.usefixtures("oracle_engine", "clean_database")
     def test_insert_throughput(
         self,
-        performance_config: FlextTargetOracleConfig,
+        performance_config: FlextTargetOracleSettings,
         fake: Faker,
     ) -> None:
         """Benchmark INSERT throughput with different batch sizes."""
@@ -157,7 +157,7 @@ class TestPerformance:
     @pytest.mark.usefixtures("oracle_engine", "clean_database")
     def test_bulk_vs_standard_performance(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         fake: Faker,
     ) -> None:
         """Compare BULK INSERT vs standard INSERT performance."""
@@ -235,7 +235,7 @@ class TestPerformance:
     @pytest.mark.usefixtures("oracle_engine", "clean_database")
     def test_memory_efficiency(
         self,
-        performance_config: FlextTargetOracleConfig,
+        performance_config: FlextTargetOracleSettings,
         fake: Faker,
     ) -> None:
         """Test memory efficiency with large batches."""
@@ -310,7 +310,7 @@ class TestPerformance:
     @pytest.mark.usefixtures("oracle_engine", "clean_database")
     def test_concurrent_streams(
         self,
-        performance_config: FlextTargetOracleConfig,
+        performance_config: FlextTargetOracleSettings,
         fake: Faker,
     ) -> None:
         """Test performance with multiple concurrent streams."""
@@ -369,7 +369,7 @@ class TestPerformance:
     @pytest.mark.usefixtures("oracle_engine", "clean_database")
     def test_scalability(
         self,
-        performance_config: FlextTargetOracleConfig,
+        performance_config: FlextTargetOracleSettings,
     ) -> None:
         """Test scalability with increasing data volume."""
         target = FlextTargetOracle(config=performance_config)

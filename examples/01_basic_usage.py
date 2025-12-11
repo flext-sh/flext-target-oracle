@@ -6,7 +6,7 @@ including configuration, initialization, and basic Singer message processing usi
 FLEXT ecosystem patterns.
 
 Key Concepts Demonstrated:
-    - FlextTargetOracleConfig creation and validation
+    - FlextTargetOracleSettings creation and validation
     - FlextTargetOracle initialization and setup
     - Singer message processing (SCHEMA, RECORD, STATE)
     - FlextResult railway-oriented error handling
@@ -27,18 +27,18 @@ import os
 from flext_core import FlextLogger, FlextResult
 from pydantic import SecretStr
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
 
 # Configure logging for the example
 logging.basicConfig(level=logging.INFO)
 logger = FlextLogger(__name__)
 
 
-def create_configuration() -> FlextTargetOracleConfig:
+def create_configuration() -> FlextTargetOracleSettings:
     """Create basic Oracle target configuration.
 
     Returns:
-      FlextTargetOracleConfig: Validated configuration for Oracle target
+      FlextTargetOracleSettings: Validated configuration for Oracle target
 
     Note:
       Using default Oracle XE configuration for simplicity. In production,
@@ -47,7 +47,7 @@ def create_configuration() -> FlextTargetOracleConfig:
     """
     logger.info("Creating Oracle target configuration")
 
-    config = FlextTargetOracleConfig(
+    config = FlextTargetOracleSettings(
         oracle_host="localhost",
         oracle_port=1521,
         oracle_service="XE",
@@ -263,7 +263,7 @@ def demonstrate_error_handling() -> None:
 
     # Create invalid configuration to show validation errors
     try:
-        FlextTargetOracleConfig(
+        FlextTargetOracleSettings(
             oracle_host="",  # Invalid empty host
             oracle_service="XE",
             oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
