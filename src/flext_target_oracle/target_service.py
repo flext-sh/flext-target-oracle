@@ -16,7 +16,7 @@ from typing import ClassVar, override
 from flext_core import FlextResult, FlextService, t
 from pydantic import Field
 
-from flext_target_oracle.config import FlextTargetOracleConfig
+from flext_target_oracle.config import FlextTargetOracleSettings
 from flext_target_oracle.target_loader import FlextTargetOracleLoader
 
 
@@ -31,7 +31,7 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
 
     # Pydantic fields for service configuration
     name: str = Field(default="flext-oracle-target", description="Target name")
-    config: FlextTargetOracleConfig = Field(description="Oracle target configuration")
+    config: FlextTargetOracleSettings = Field(description="Oracle target configuration")
     loader: FlextTargetOracleLoader = Field(description="Oracle data loader")
 
     # Internal state
@@ -45,7 +45,7 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
     )
 
     @override
-    def __init__(self, config: FlextTargetOracleConfig, **_data: object) -> None:
+    def __init__(self, config: FlextTargetOracleSettings, **_data: object) -> None:
         """Initialize Oracle Target service with configuration validation."""
         # Create loader instance
         loader = FlextTargetOracleLoader(config)

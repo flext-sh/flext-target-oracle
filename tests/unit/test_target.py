@@ -17,9 +17,9 @@ from sqlalchemy import Engine, text
 
 from flext_target_oracle import (
     FlextTargetOracle,
-    FlextTargetOracleConfig,
     FlextTargetOracleProcessingError,
     FlextTargetOracleSchemaError,
+    FlextTargetOracleSettings,
     LoadMethod,
 )
 
@@ -29,7 +29,9 @@ class TestRealOracleTarget:
     """Test Oracle target with real database connection."""
 
     @pytest.fixture
-    def real_target(self, oracle_config: FlextTargetOracleConfig) -> FlextTargetOracle:
+    def real_target(
+        self, oracle_config: FlextTargetOracleSettings
+    ) -> FlextTargetOracle:
         """Create real target instance."""
         return FlextTargetOracle(config=oracle_config)
 
@@ -454,7 +456,7 @@ class TestRealOracleTarget:
 
     def test_real_connection_pooling(self) -> None:
         """Test connection pooling configuration."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             host="localhost",
             port=1521,
             service_name="test",
@@ -469,7 +471,7 @@ class TestRealOracleTarget:
         assert target.config.connection_pool_max_overflow == 20
 
         # Test SSL configuration
-        ssl_config = FlextTargetOracleConfig(
+        ssl_config = FlextTargetOracleSettings(
             host="localhost",
             port=1521,
             service_name="test",

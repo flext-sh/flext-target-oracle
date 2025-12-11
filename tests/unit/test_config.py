@@ -14,7 +14,7 @@ import pytest
 from flext_core import FlextResult
 from pydantic import SecretStr, ValidationError
 
-from flext_target_oracle import FlextTargetOracleConfig, LoadMethod
+from flext_target_oracle import FlextTargetOracleSettings, LoadMethod
 
 
 class TestRealOracleConfig:
@@ -23,7 +23,7 @@ class TestRealOracleConfig:
     def test_minimal_config_creation(self) -> None:
         """Test method."""
         """Test creating config with minimal required fields."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test_user",
@@ -43,7 +43,7 @@ class TestRealOracleConfig:
     def test_full_config_creation(self) -> None:
         """Test method."""
         """Test creating config with all fields."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             # Basic connection
             oracle_host="prod-oracle.company.com",
             oracle_port=1522,
@@ -103,7 +103,7 @@ class TestRealOracleConfig:
         """Test config validation with invalid values."""
         # Invalid port
         with pytest.raises(ValidationError) as exc_info:
-            FlextTargetOracleConfig(
+            FlextTargetOracleSettings(
                 oracle_host="localhost",
                 oracle_port=0,  # Invalid
                 oracle_service="XE",
@@ -114,7 +114,7 @@ class TestRealOracleConfig:
 
         # Invalid batch size
         with pytest.raises(ValidationError) as exc_info:
-            FlextTargetOracleConfig(
+            FlextTargetOracleSettings(
                 oracle_host="localhost",
                 oracle_service="XE",
                 oracle_user="test",
@@ -125,7 +125,7 @@ class TestRealOracleConfig:
 
         # Invalid timeout
         with pytest.raises(ValidationError) as exc_info:
-            FlextTargetOracleConfig(
+            FlextTargetOracleSettings(
                 oracle_host="localhost",
                 oracle_service="XE",
                 oracle_user="test",
@@ -144,7 +144,7 @@ class TestRealOracleConfig:
 
         # Test creating config with each method
         for method in LoadMethod:
-            config = FlextTargetOracleConfig(
+            config = FlextTargetOracleSettings(
                 oracle_host="localhost",
                 oracle_service="XE",
                 oracle_user="test",
@@ -156,7 +156,7 @@ class TestRealOracleConfig:
     def test_get_oracle_config(self) -> None:
         """Test method."""
         """Test get_oracle_config method."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
             oracle_service="XE",
@@ -183,7 +183,7 @@ class TestRealOracleConfig:
     def test_get_table_name_variations(self) -> None:
         """Test method."""
         """Test get_table_name with various configurations."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -195,7 +195,7 @@ class TestRealOracleConfig:
         assert config.get_table_name("CamelCase") == "CAMELCASE"
 
         # With prefix (create new config since it's immutable)
-        config_with_prefix = FlextTargetOracleConfig(
+        config_with_prefix = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -205,7 +205,7 @@ class TestRealOracleConfig:
         assert config_with_prefix.get_table_name("my_stream") == "STG_MY_STREAM"
 
         # With suffix (create new config since it's immutable)
-        config_with_suffix = FlextTargetOracleConfig(
+        config_with_suffix = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -216,7 +216,7 @@ class TestRealOracleConfig:
         assert config_with_suffix.get_table_name("my_stream") == "STG_MY_STREAM_TBL"
 
         # With mapping (create new config since it's immutable)
-        config_with_mapping = FlextTargetOracleConfig(
+        config_with_mapping = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -240,7 +240,7 @@ class TestRealOracleConfig:
 
         try:
             # Would work with proper env var handling in config
-            config = FlextTargetOracleConfig(
+            config = FlextTargetOracleSettings(
                 oracle_host=os.environ.get("ORACLE_HOST", "localhost"),
                 oracle_port=int(os.environ.get("ORACLE_PORT", "1521")),
                 oracle_service=os.environ.get("ORACLE_SERVICE", "XE"),
@@ -266,7 +266,7 @@ class TestRealOracleConfig:
     def test_config_password_hiding(self) -> None:
         """Test method."""
         """Test password is hidden in string representation."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -281,7 +281,7 @@ class TestRealOracleConfig:
     def test_config_immutability(self) -> None:
         """Test method."""
         """Test config is immutable after creation."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -295,7 +295,7 @@ class TestRealOracleConfig:
     def test_sdc_column_customization(self) -> None:
         """Test method."""
         """Test SDC column name customization."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -314,7 +314,7 @@ class TestRealOracleConfig:
     def test_type_mapping_configuration(self) -> None:
         """Test method."""
         """Test type mapping configuration."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -338,7 +338,7 @@ class TestRealOracleConfig:
     def test_column_ordering_rules(self) -> None:
         """Test method."""
         """Test column ordering rules configuration."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -360,7 +360,7 @@ class TestRealOracleConfig:
     def test_index_configuration(self) -> None:
         """Test method."""
         """Test index management configuration."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -404,7 +404,7 @@ class TestRealOracleConfig:
         """Test method."""
         """Test different storage mode configurations."""
         # Flattened mode (default)
-        config1 = FlextTargetOracleConfig(
+        config1 = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -414,7 +414,7 @@ class TestRealOracleConfig:
         assert config1.storage_mode == "flattened"
 
         # JSON mode
-        config2 = FlextTargetOracleConfig(
+        config2 = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -426,7 +426,7 @@ class TestRealOracleConfig:
         assert config2.json_column_name == "json_data"
 
         # Hybrid mode
-        config3 = FlextTargetOracleConfig(
+        config3 = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -440,7 +440,7 @@ class TestRealOracleConfig:
     def test_validation_methods(self) -> None:
         """Test method."""
         """Test config validation methods."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -458,7 +458,7 @@ class TestRealOracleConfig:
     def test_oracle_specific_features(self) -> None:
         """Test method."""
         """Test Oracle-specific feature configurations."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -478,7 +478,7 @@ class TestRealOracleConfig:
     def test_config_serialization(self) -> None:
         """Test method."""
         """Test config can be serialized and deserialized."""
-        config = FlextTargetOracleConfig(
+        config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test",
@@ -497,6 +497,6 @@ class TestRealOracleConfig:
 
         # Can recreate from dict[str, object] (with password)
         config_dict["oracle_password"] = "test"
-        new_config = FlextTargetOracleConfig(**config_dict)
+        new_config = FlextTargetOracleSettings(**config_dict)
         assert new_config.oracle_host == config.oracle_host
         assert new_config.batch_size == config.batch_size

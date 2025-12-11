@@ -139,7 +139,7 @@ make test-docker
 
 - `oracle_container`: Session-scoped Oracle container lifecycle
 - `oracle_engine`: SQLAlchemy engine for direct DB access
-- `oracle_config`: Configured FlextOracleTargetConfig
+- `oracle_config`: Configured FlextOracleTargetSettings
 - `oracle_loader`: Connected OracleLoader instance
 - `clean_database`: Cleans all tables before each test
 

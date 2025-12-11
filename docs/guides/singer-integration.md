@@ -138,7 +138,7 @@ def process_singer_message(self, message: dict) -> FlextResult[None]:
 # ✅ Standard Singer SDK interface
 class FlextOracleTarget(Target):
     name = "target-oracle"
-    config_class = FlextOracleTargetConfig
+    config_class = FlextOracleTargetSettings
 
     def _test_connection(self) -> bool:
         """Test connection - Singer SDK requirement."""
@@ -314,7 +314,7 @@ sequenceDiagram
 
 ```python
 # Configure batch processing for optimal performance
-config = FlextOracleTargetConfig(
+config = FlextOracleTargetSettings(
     # ... connection config
     batch_size=1000,           # Records per batch
     use_bulk_operations=True,  # Enable Oracle bulk operations
@@ -348,7 +348,7 @@ def benchmark_batch_performance():
     results = {}
 
     for batch_size in batch_sizes:
-        config = FlextOracleTargetConfig(batch_size=batch_size)
+        config = FlextOracleTargetSettings(batch_size=batch_size)
         target = FlextOracleTarget(config)
 
         start_time = time.time()
@@ -366,7 +366,7 @@ def benchmark_batch_performance():
 
 ```python
 # Oracle performance configuration
-config = FlextOracleTargetConfig(
+config = FlextOracleTargetSettings(
     # Connection optimization
     connection_timeout=60,
 

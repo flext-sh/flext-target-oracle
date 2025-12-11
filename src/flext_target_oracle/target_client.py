@@ -17,7 +17,7 @@ from typing import ClassVar, override
 from flext_core import FlextResult, FlextService
 from pydantic import Field
 
-from flext_target_oracle.config import FlextTargetOracleConfig
+from flext_target_oracle.config import FlextTargetOracleSettings
 from flext_target_oracle.models import FlextTargetOracleModels
 from flext_target_oracle.target_loader import FlextTargetOracleLoader
 from flext_target_oracle.typings import t
@@ -44,7 +44,7 @@ class FlextTargetOracle(
 
     # Pydantic fields - flext-core SOURCE OF TRUTH patterns
     name: str = Field(default="flext-oracle-target", description="Singer target name")
-    config: FlextTargetOracleConfig = Field(description="Oracle target configuration")
+    config: FlextTargetOracleSettings = Field(description="Oracle target configuration")
     loader: FlextTargetOracleLoader = Field(description="Oracle data loader service")
 
     # Singer protocol state
@@ -60,18 +60,18 @@ class FlextTargetOracle(
     @override
     def __init__(
         self,
-        config: FlextTargetOracleConfig | dict[str, object] | None = None,
+        config: FlextTargetOracleSettings | dict[str, object] | None = None,
         **_data: object,
     ) -> None:
         """Initialize Oracle Singer Target with configuration validation."""
         # Convert config if needed
         if isinstance(config, dict):
-            validated_config = FlextTargetOracleConfig.model_validate(config)
-        elif isinstance(config, FlextTargetOracleConfig):
+            validated_config = FlextTargetOracleSettings.model_validate(config)
+        elif isinstance(config, FlextTargetOracleSettings):
             validated_config = config
         else:
             msg = (
-                "Configuration is required. Provide FlextTargetOracleConfig instance "
+                "Configuration is required. Provide FlextTargetOracleSettings instance "
                 "or dictionary with Oracle connection parameters."
             )
             raise TypeError(msg)

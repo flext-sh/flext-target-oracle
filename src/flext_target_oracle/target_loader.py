@@ -19,7 +19,7 @@ from flext_core import FlextLogger, FlextResult, FlextService
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from pydantic import Field
 
-from flext_target_oracle.config import FlextTargetOracleConfig
+from flext_target_oracle.config import FlextTargetOracleSettings
 
 # Module logger
 from flext_target_oracle.models import FlextTargetOracleModels
@@ -40,7 +40,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
     model_config: ClassVar = {"frozen": "False"}  # Allow field mutations
 
     # Pydantic fields for configuration and state
-    config: FlextTargetOracleConfig = Field(description="Oracle target configuration")
+    config: FlextTargetOracleSettings = Field(description="Oracle target configuration")
     oracle_api: FlextDbOracleApi = Field(description="Oracle API instance")
 
     # Internal state fields (without underscore for Pydantic)
@@ -51,7 +51,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
     total_records: int = Field(default=0, description="Total records processed")
 
     @override
-    def __init__(self, config: FlextTargetOracleConfig, **_data: object) -> None:
+    def __init__(self, config: FlextTargetOracleSettings, **_data: object) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
             # Create Oracle API configuration from target config

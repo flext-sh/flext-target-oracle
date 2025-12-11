@@ -111,7 +111,7 @@ graph TB
     subgraph "FLEXT Target Oracle"
         FTO[FlextOracleTarget]
         FTL[FlextOracleTargetLoader]
-        FTC[FlextOracleTargetConfig]
+        FTC[FlextOracleTargetSettings]
     end
 
     subgraph "External Integration"

@@ -9,12 +9,12 @@ from __future__ import annotations
 
 from flext_core import FlextResult
 from flext_meltano import (
-    FlextMeltanoConfig,
+    FlextMeltanoSettings,
     FlextMeltanoTargetAbstractions,
     FlextMeltanoTypes,
 )
 
-from flext_target_oracle.config import FlextTargetOracleConfig, LoadMethod
+from flext_target_oracle.config import FlextTargetOracleSettings, LoadMethod
 from flext_target_oracle.models import FlextTargetOracleModels, m, m_target_oracle
 from flext_target_oracle.protocols import FlextTargetOracleProtocols
 from flext_target_oracle.target_client import FlextTargetOracle
@@ -67,7 +67,7 @@ __all__ = [
     "BatchProcessingModel",
     "BatchServiceProtocol",
     "ConnectionServiceProtocol",
-    "FlextMeltanoConfig",
+    "FlextMeltanoSettings",
     "FlextMeltanoTargetAbstractions",
     "FlextMeltanoTypes",
     "FlextMeltanoTypes",
@@ -77,7 +77,6 @@ __all__ = [
     "FlextTargetOracle",
     "FlextTargetOracleAuthenticationError",
     "FlextTargetOracleCliService",
-    "FlextTargetOracleConfig",
     "FlextTargetOracleConnectionError",
     "FlextTargetOracleError",
     "FlextTargetOracleLoader",
@@ -85,6 +84,7 @@ __all__ = [
     "FlextTargetOracleProcessingError",
     "FlextTargetOracleProtocols",
     "FlextTargetOracleSchemaError",
+    "FlextTargetOracleSettings",
     "FlextTargetOracleTypes",
     "FlextTargetOracleUtilities",
     "LoadMethod",

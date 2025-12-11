@@ -43,7 +43,7 @@ src/flext_target_oracle/
 
 # FLEXT Core pattern re-exports for convenience
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -64,7 +64,7 @@ from flext_core import t
 from flext_core import u
 
 # Local implementation exports
-from flext_target_oracle.config import FlextOracleTargetConfig, LoadMethod
+from flext_target_oracle.config import FlextOracleTargetSettings, LoadMethod
 from flext_target_oracle.target import FlextOracleTarget
 
 # Exception hierarchy (consolidated from duplicated sources)
@@ -79,7 +79,7 @@ __version__ = "0.9.9"
 __all__: t.StringList = [
     # Primary implementation
     "FlextOracleTarget",
-    "FlextOracleTargetConfig",
+    "FlextOracleTargetSettings",
     "LoadMethod",
     # Error handling
     "FlextOracleTargetError",
@@ -103,7 +103,7 @@ __all__: t.StringList = [
 """FLEXT Target Oracle - Clean public API."""
 
 # Import all from respective modules
-from flext_target_oracle.config import FlextOracleTargetConfig, LoadMethod
+from flext_target_oracle.config import FlextOracleTargetSettings, LoadMethod
 from flext_target_oracle.target import FlextOracleTarget
 from flext_target_oracle.exceptions import (
     FlextOracleTargetError,
@@ -115,7 +115,7 @@ from flext_target_oracle.exceptions import (
 
 # FLEXT core re-exports for convenience
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -146,7 +146,7 @@ __version__ = "0.9.9"
 """Oracle target configuration using FLEXT ValueObject patterns."""
 
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -175,7 +175,7 @@ class LoadMethod(StrEnum):
     BULK_INSERT = "bulk_insert"
     BULK_MERGE = "bulk_merge"
 
-class FlextOracleTargetConfig(FlextModels.Value):
+class FlextOracleTargetSettings(FlextModels.Value):
     """Type-safe Oracle configuration with business rule validation."""
 
     # Required Oracle connection parameters
@@ -216,7 +216,7 @@ class FlextOracleTargetConfig(FlextModels.Value):
 """Singer Target implementation using flext-meltano base patterns."""
 
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -241,7 +241,7 @@ class FlextOracleTarget(Target):
     """Oracle Singer Target implementing FLEXT patterns."""
 
     name = "flext-oracle-target"
-    config_class = FlextOracleTargetConfig
+    config_class = FlextOracleTargetSettings
 
     def process_singer_message(self, message: dict) -> FlextResult[None]:
         """Process Singer messages with railway-oriented error handling."""
@@ -286,7 +286,7 @@ class FlextOracleTarget(Target):
 """Oracle data loading using flext-db-oracle integration."""
 
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -305,12 +305,12 @@ from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
 from flext_core import u
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 
 class FlextOracleTargetLoader:
     """Oracle data loading with batch processing and error handling."""
 
-    def __init__(self, config: FlextOracleTargetConfig) -> None:
+    def __init__(self, config: FlextOracleTargetSettings) -> None:
         """Initialize with flext-db-oracle integration."""
 
     def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[None]:
@@ -376,7 +376,7 @@ src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean public API exports
 ├── config/                  # ⚙️ Configuration module
 │   ├── __init__.py         # Configuration exports
-│   ├── settings.py         # FlextOracleTargetConfig
+│   ├── settings.py         # FlextOracleTargetSettings
 │   ├── validation.py       # Domain validation rules
 │   └── constants.py        # Oracle-specific constants
 ├── domain/                  # 🏛️ Domain layer (if needed for complex targets)
@@ -438,7 +438,7 @@ def process_record_bad(self, stream_name: str, record_data: dict) -> None:
 
 ```python
 # ✅ CORRECT - Comprehensive validation with domain rules
-class FlextOracleTargetConfig(FlextModels.Value):
+class FlextOracleTargetSettings(FlextModels.Value):
     """Type-safe configuration with business validation."""
 
     oracle_host: str = Field(..., description="Oracle host")
@@ -478,7 +478,7 @@ class BadConfig:
 ```python
 # ✅ CORRECT - Structured logging with context
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -582,10 +582,10 @@ def process_batch_bad(self, stream_name: str, records: list):
 └─────────────────────────────┘
 
 # Application layer imports
-from flext_target_oracle.config import FlextOracleTargetConfig
+from flext_target_oracle.config import FlextOracleTargetSettings
 from flext_target_oracle.loader import FlextOracleTargetLoader
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -607,7 +607,7 @@ from flext_core import u
 
 # Infrastructure layer imports
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -637,7 +637,7 @@ from flext_db_oracle import FlextDbOracleApi
 ```python
 # ✅ CORRECT - FLEXT ecosystem integration
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -657,7 +657,7 @@ from flext_core import FlextService
 from flext_core import t
 from flext_core import u
 from flext_meltano import Target  # Singer SDK integration layer
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import Field, field_validator  # Third-party validation
 
 # ✅ CORRECT - Standard library imports
@@ -710,15 +710,15 @@ tests/
 """Unit tests for configuration validation."""
 
 import pytest
-from flext_target_oracle import FlextOracleTargetConfig, LoadMethod
+from flext_target_oracle import FlextOracleTargetSettings, LoadMethod
 from pydantic import ValidationError
 
-class TestFlextOracleTargetConfig:
+class TestFlextOracleTargetSettings:
     """Test configuration validation and domain rules."""
 
     def test_valid_configuration(self):
         """Test creation of valid configuration."""
-        config = FlextOracleTargetConfig(
+        config = FlextOracleTargetSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test_user",
@@ -733,7 +733,7 @@ class TestFlextOracleTargetConfig:
     def test_invalid_host_validation(self):
         """Test host validation rules."""
         with pytest.raises(ValidationError) as exc_info:
-            FlextOracleTargetConfig(
+            FlextOracleTargetSettings(
                 oracle_host="",  # Empty host should fail
                 oracle_service="XE",
                 oracle_user="test_user",
@@ -744,7 +744,7 @@ class TestFlextOracleTargetConfig:
 
     def test_domain_rules_validation(self):
         """Test business rule validation."""
-        config = FlextOracleTargetConfig(
+        config = FlextOracleTargetSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test_user",
@@ -828,7 +828,7 @@ class TestSingerCompliance:
 from typing import Dict, List, Optional, Union
 
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -938,7 +938,7 @@ def ensure_table_exists(
 ```python
 # ✅ STANDARD - Ecosystem imports following established patterns
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -958,7 +958,7 @@ from flext_core import FlextService
 from flext_core import t
 from flext_core import u
 from flext_meltano import Target, Record  # Singer SDK integration layer
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleConfig
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_observability import metrics, tracing  # Future integration
 
 # ✅ CONSISTENT - Error handling across projects
@@ -982,7 +982,7 @@ class OracleTargetResult[T]:  # Creates ecosystem fragmentation
 ```python
 # ✅ CORRECT - Hierarchical configuration following ecosystem patterns
 from flext_core import FlextBus
-from flext_core import FlextConfig
+from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
@@ -1002,7 +1002,7 @@ from flext_core import FlextService
 from flext_core import t
 from flext_core import u
 
-class OracleConnectionSettings(FlextConfig):
+class OracleConnectionSettings(FlextSettings):
     """Oracle connection configuration."""
     host: str = "localhost"
     port: int = 1521
@@ -1011,7 +1011,7 @@ class OracleConnectionSettings(FlextConfig):
     class Config:
         env_prefix = "ORACLE_"
 
-class ObservabilitySettings(FlextConfig):
+class ObservabilitySettings(FlextSettings):
     """Observability configuration."""
     enable_metrics: bool = True
     enable_tracing: bool = False
@@ -1019,7 +1019,7 @@ class ObservabilitySettings(FlextConfig):
     class Config:
         env_prefix = "OBSERVABILITY_"
 
-class FlextOracleTargetConfig(FlextConfig):
+class FlextOracleTargetSettings(FlextSettings):
     """Complete target configuration composing ecosystem settings."""
 
     # Oracle-specific settings

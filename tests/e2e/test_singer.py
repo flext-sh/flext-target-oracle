@@ -18,7 +18,7 @@ from decimal import Decimal
 import pytest
 from sqlalchemy import text
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleConfig, LoadMethod
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
 
 
 @pytest.mark.e2e
@@ -30,7 +30,7 @@ class TestSingerWorkflowE2E:
     @pytest.mark.usefixtures("_clean_database")
     def test_complete_ecommerce_workflow(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         oracle_engine: object,
     ) -> None:
         """Test complete e-commerce data workflow with multiple streams."""
@@ -371,7 +371,7 @@ class TestSingerWorkflowE2E:
     @pytest.mark.usefixtures("_clean_database")
     def test_schema_evolution_workflow(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         oracle_engine: object,
     ) -> None:
         """Test schema evolution with ALTER TABLE support."""
@@ -527,7 +527,7 @@ class TestSingerWorkflowE2E:
     @pytest.mark.usefixtures("_clean_database")
     def test_high_volume_streaming(
         self,
-        oracle_config: FlextTargetOracleConfig,
+        oracle_config: FlextTargetOracleSettings,
         oracle_engine: object,
     ) -> None:
         """Test high-volume data streaming with performance metrics."""
