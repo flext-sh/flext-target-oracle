@@ -14,9 +14,9 @@ from flext_meltano import (
     FlextMeltanoTypes,
 )
 
-from flext_target_oracle.config import FlextTargetOracleSettings, LoadMethod
 from flext_target_oracle.models import FlextTargetOracleModels, m, m_target_oracle
 from flext_target_oracle.protocols import FlextTargetOracleProtocols
+from flext_target_oracle.settings import FlextTargetOracleSettings, LoadMethod
 from flext_target_oracle.target_client import FlextTargetOracle
 from flext_target_oracle.target_commands import OracleTargetCommandFactory
 from flext_target_oracle.target_exceptions import (

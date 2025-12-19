@@ -17,7 +17,7 @@ from flext_core import FlextService, r
 from flext_db_oracle import FlextDbOracleApi
 from pydantic import Field
 
-from flext_target_oracle.config import FlextTargetOracleSettings
+from flext_target_oracle.settings import FlextTargetOracleSettings
 from flext_target_oracle.target_models import (
     LoadMethodModel,
     LoadStatisticsModel,

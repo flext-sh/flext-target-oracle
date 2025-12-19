@@ -12,7 +12,7 @@ from datetime import UTC, datetime
 from typing import ClassVar
 
 from flext_core import FlextConstants, FlextResult
-from flext_core.utilities import FlextUtilities as u_core
+from flext_core.utilities import u_core
 
 
 class FlextTargetOracleUtilities(u_core):

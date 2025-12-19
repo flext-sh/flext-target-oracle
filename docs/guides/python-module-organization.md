@@ -64,7 +64,7 @@ from flext_core import t
 from flext_core import u
 
 # Local implementation exports
-from flext_target_oracle.config import FlextOracleTargetSettings, LoadMethod
+from flext_target_oracle.settings import FlextOracleTargetSettings, LoadMethod
 from flext_target_oracle.target import FlextOracleTarget
 
 # Exception hierarchy (consolidated from duplicated sources)
@@ -103,7 +103,7 @@ __all__: t.StringList = [
 """FLEXT Target Oracle - Clean public API."""
 
 # Import all from respective modules
-from flext_target_oracle.config import FlextOracleTargetSettings, LoadMethod
+from flext_target_oracle.settings import FlextOracleTargetSettings, LoadMethod
 from flext_target_oracle.target import FlextOracleTarget
 from flext_target_oracle.exceptions import (
     FlextOracleTargetError,
@@ -582,7 +582,7 @@ def process_batch_bad(self, stream_name: str, records: list):
 └─────────────────────────────┘
 
 # Application layer imports
-from flext_target_oracle.config import FlextOracleTargetSettings
+from flext_target_oracle.settings import FlextOracleTargetSettings
 from flext_target_oracle.loader import FlextOracleTargetLoader
 from flext_core import FlextBus
 from flext_core import FlextSettings
