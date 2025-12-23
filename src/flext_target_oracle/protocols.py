@@ -11,28 +11,22 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
     Extends both FlextDbOracleProtocols and FlextMeltanoProtocols via multiple inheritance
     to inherit all Oracle protocols, Meltano protocols, and foundation protocols.
-
     Architecture:
     - EXTENDS: FlextDbOracleProtocols (inherits .Database.* protocols)
     - EXTENDS: FlextMeltanoProtocols (inherits .Meltano.* protocols)
     - ADDS: Target Oracle-specific protocols in Target.Oracle namespace
     - PROVIDES: Root-level alias `p` for convenient access
-
     Usage:
     from flext_target_oracle.protocols import p
-
     # Foundation protocols (inherited)
     result: p.Result[str]
     service: p.Service[str]
-
     # Oracle protocols (inherited)
     connection: p.Database.ConnectionProtocol
-
     # Meltano protocols (inherited)
     target: p.Meltano.TargetProtocol
-
     # Target Oracle-specific protocols
-    target_protocol: p.Target.Oracle.TargetProtocol
+    target_protocol: p.Target.Oracle.TargetProtocol.
     """
 
     class Target:
@@ -66,7 +60,6 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
                     """
 
-            @runtime_checkable
             class ConnectionProtocol(p_db_oracle.Service[object], Protocol):
                 """Protocol for Oracle connection management.
 
@@ -86,7 +79,6 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
                     """
 
-            @runtime_checkable
             class SchemaProtocol(p_db_oracle.Service[object], Protocol):
                 """Protocol for Oracle schema management.
 
@@ -95,7 +87,7 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
                 def create_table(
                     self, schema: dict[str, object]
-                ) -> p_meltano.Result[bool]:
+                ) -> p_meltano.Result[object]:
                     """Create Oracle table from schema.
 
                     Args:
@@ -106,7 +98,6 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
                     """
 
-            @runtime_checkable
             class BatchProtocol(p_db_oracle.Service[object], Protocol):
                 """Protocol for Oracle batch operations.
 
@@ -114,9 +105,8 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
                 """
 
                 def execute_batch(
-                    self,
-                    records: list[dict[str, object]],
-                ) -> p_meltano.Result[bool]:
+                    self, records: list[dict[str, object]]
+                ) -> p_meltano.Result[object]:
                     """Execute batch of Oracle operations.
 
                     Args:
@@ -127,7 +117,6 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
                     """
 
-            @runtime_checkable
             class RecordProtocol(p_db_oracle.Service[object], Protocol):
                 """Protocol for Oracle record processing.
 
@@ -135,8 +124,7 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
                 """
 
                 def transform_record(
-                    self,
-                    record: dict[str, object],
+                    self, record: dict[str, object]
                 ) -> p_meltano.Result[dict[str, object]]:
                     """Transform Singer record for Oracle.
 
@@ -148,7 +136,6 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
                     """
 
-            @runtime_checkable
             class SingerProtocol(p_db_oracle.Service[object], Protocol):
                 """Protocol for Singer message handling.
 
@@ -157,7 +144,7 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
                 def process_message(
                     self, message: dict[str, object]
-                ) -> p_meltano.Result[bool]:
+                ) -> p_meltano.Result[object]:
                     """Process Singer message.
 
                     Args:
@@ -168,7 +155,6 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
                     """
 
-            @runtime_checkable
             class PerformanceProtocol(p_db_oracle.Service[object], Protocol):
                 """Protocol for Oracle performance optimization.
 
@@ -186,7 +172,6 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
                     """
 
-            @runtime_checkable
             class SecurityProtocol(p_db_oracle.Service[object], Protocol):
                 """Protocol for Oracle security operations.
 
@@ -194,8 +179,7 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
                 """
 
                 def validate_credentials(
-                    self,
-                    config: dict[str, object],
+                    self, config: dict[str, object]
                 ) -> p_meltano.Result[bool]:
                     """Validate Oracle credentials.
 
@@ -207,7 +191,6 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
                     """
 
-            @runtime_checkable
             class MonitoringProtocol(p_db_oracle.Service[object], Protocol):
                 """Protocol for Oracle loading monitoring.
 
@@ -228,7 +211,6 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
 
 # Runtime alias for simplified usage
 p = FlextTargetOracleProtocols
-
 __all__ = [
     "FlextTargetOracleProtocols",
     "p",
