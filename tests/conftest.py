@@ -15,6 +15,7 @@ from typing import cast
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from flext_core import FlextLogger, FlextResult
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from flext_tests import FlextTestsDocker
 from pydantic import SecretStr
@@ -22,7 +23,6 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.pool import NullPool
 
-from flext import FlextLogger, FlextResult
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,

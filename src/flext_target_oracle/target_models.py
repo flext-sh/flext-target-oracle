@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
+from flext_core import FlextModels, FlextResult
 from pydantic import BaseModel, Field, field_validator
 
-from flext import FlextModels, FlextResult
 from flext_target_oracle.constants import c
 
 # Oracle schema constants

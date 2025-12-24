@@ -14,9 +14,9 @@ from __future__ import annotations
 import time
 from typing import ClassVar, override
 
+from flext_core import FlextResult, FlextService
 from pydantic import Field
 
-from flext import FlextResult, FlextService
 from flext_target_oracle.models import FlextTargetOracleModels
 from flext_target_oracle.settings import FlextTargetOracleSettings
 from flext_target_oracle.target_loader import FlextTargetOracleLoader

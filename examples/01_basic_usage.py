@@ -24,9 +24,9 @@ Usage:
 import logging
 import os
 
+from flext_core import FlextLogger, FlextResult
 from pydantic import SecretStr
 
-from flext import FlextLogger, FlextResult
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
 
 # Configure logging for the example

@@ -5,10 +5,9 @@ This module provides data models for Oracle target operations.
 
 from __future__ import annotations
 
+from flext_core import FlextModels
 from flext_core.utilities import u as flext_u
 from pydantic import Field
-
-from flext import FlextModels
 
 
 class FlextTargetOracleModels(FlextModels):
