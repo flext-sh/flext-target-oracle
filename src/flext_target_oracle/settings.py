@@ -11,21 +11,16 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import warnings
-from enum import StrEnum
 from typing import Self
 
-from flext_core import FlextConstants, FlextResult, FlextSettings
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
+from flext import FlextConstants, FlextResult, FlextSettings
+from flext_target_oracle.constants import c
 
-class LoadMethod(StrEnum):
-    """Oracle data loading strategies with performance characteristics."""
-
-    INSERT = "INSERT"
-    MERGE = "MERGE"
-    BULK_INSERT = "BULK_INSERT"
-    BULK_MERGE = "BULK_MERGE"
+# LoadMethod moved to constants.py as c.LoadMethod (DRY pattern)
+LoadMethod = c.LoadMethod
 
 
 class FlextTargetOracleSettings(FlextSettings):

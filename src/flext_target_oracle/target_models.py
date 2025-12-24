@@ -8,38 +8,21 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from enum import StrEnum
 
-from flext_core import FlextModels, FlextResult
 from pydantic import BaseModel, Field, field_validator
+
+from flext import FlextModels, FlextResult
+from flext_target_oracle.constants import c
 
 # Oracle schema constants
 PUBLIC = "PUBLIC"
 
 
-class LoadMethodModel(StrEnum):
-    """Data loading methods for Oracle target operations.
+# LoadMethodModel moved to constants.py as c.LoadMethod (DRY pattern)
+LoadMethodModel = c.LoadMethod
 
-    Defines the available strategies for loading Singer data into Oracle
-    tables, each optimized for different use cases and performance requirements.
-    """
-
-    INSERT = "INSERT"
-    MERGE = "MERGE"
-    BULK_INSERT = "BULK_INSERT"
-    BULK_MERGE = "BULK_MERGE"
-
-
-class StorageModeModel(StrEnum):
-    """Data storage modes for Oracle target operations.
-
-    Defines how Singer data should be stored in Oracle tables,
-    with different approaches for handling nested JSON data.
-    """
-
-    FLATTENED = "flattened"
-    JSON = "json"
-    HYBRID = "hybrid"
+# StorageModeModel moved to constants.py as c.StorageMode (DRY pattern)
+StorageModeModel = c.StorageMode
 
 
 class OracleConnectionModel(BaseModel):

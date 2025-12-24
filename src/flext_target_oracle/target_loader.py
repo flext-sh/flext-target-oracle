@@ -15,9 +15,10 @@ import json
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
-from flext_core import FlextLogger, FlextResult, FlextService
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from pydantic import Field
+
+from flext import FlextLogger, FlextResult, FlextService
 
 # Module logger
 from flext_target_oracle.models import FlextTargetOracleModels
