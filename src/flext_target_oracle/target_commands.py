@@ -16,10 +16,10 @@ from pathlib import Path
 from typing import override
 
 import yaml
-from flext_core import FlextModels, FlextResult, h
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
 from pydantic import Field
 
+from flext import FlextModels, FlextResult, h
 from flext_target_oracle.settings import FlextTargetOracleSettings
 from flext_target_oracle.target_client import FlextTargetOracle
 from flext_target_oracle.target_services import OracleConnectionService
@@ -54,7 +54,7 @@ class OracleTargetValidateCommand(FlextModels.Command):
                     config_path.read_text(encoding="utf-8"),
                 )
                 config: FlextTargetOracleSettings = FlextTargetOracleSettings(
-                    **config_data
+                    **config_data,
                 )
             else:
                 # Use FlextTargetOracleSettings's built-in environment loading
@@ -131,7 +131,7 @@ class OracleTargetLoadCommand(FlextModels.Command):
                     config_path.read_text(encoding="utf-8"),
                 )
                 config: FlextTargetOracleSettings = FlextTargetOracleSettings(
-                    **config_data
+                    **config_data,
                 )
             else:
                 # Use FlextTargetOracleSettings's built-in environment loading

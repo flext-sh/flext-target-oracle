@@ -7,13 +7,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextResult
 from flext_meltano import (
     FlextMeltanoSettings,
     FlextMeltanoTargetAbstractions,
     FlextMeltanoTypes,
 )
 
+from flext import FlextResult
 from flext_target_oracle.models import FlextTargetOracleModels, m, m_target_oracle
 from flext_target_oracle.protocols import FlextTargetOracleProtocols
 from flext_target_oracle.settings import FlextTargetOracleSettings, LoadMethod

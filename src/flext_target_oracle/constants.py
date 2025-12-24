@@ -11,9 +11,10 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import os
+from enum import StrEnum
 from typing import ClassVar, Final
 
-from flext_core import FlextConstants
+from flext import FlextConstants
 
 # No longer importing from flext_db_oracle
 
@@ -29,6 +30,37 @@ class FlextTargetOracleConstants(FlextConstants):
 
     Composes with 1000 to avoid duplication and ensure consistency.
     """
+
+    class LoadMethod(StrEnum):
+        """Oracle data loading strategies with performance characteristics.
+
+        Defines the available strategies for loading Singer data into Oracle
+        tables, each optimized for different use cases and performance requirements.
+
+        DRY Pattern:
+            StrEnum is the single source of truth. Use LoadMethod.INSERT.value
+            or LoadMethod.INSERT directly - no base strings needed.
+        """
+
+        INSERT = "INSERT"
+        MERGE = "MERGE"
+        BULK_INSERT = "BULK_INSERT"
+        BULK_MERGE = "BULK_MERGE"
+
+    class StorageMode(StrEnum):
+        """Data storage modes for Oracle target operations.
+
+        Defines how Singer data should be stored in Oracle tables,
+        with different approaches for handling nested JSON data.
+
+        DRY Pattern:
+            StrEnum is the single source of truth. Use StorageMode.FLATTENED.value
+            or StorageMode.FLATTENED directly - no base strings needed.
+        """
+
+        FLATTENED = "flattened"
+        JSON = "json"
+        HYBRID = "hybrid"
 
     class Connection:
         """Connection-related constants for Oracle target."""

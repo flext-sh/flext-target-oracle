@@ -13,10 +13,10 @@ from __future__ import annotations
 
 from typing import Protocol, override
 
-from flext_core import FlextService, r
 from flext_db_oracle import FlextDbOracleApi
 from pydantic import Field
 
+from flext import FlextService, r
 from flext_target_oracle.settings import FlextTargetOracleSettings
 from flext_target_oracle.target_models import (
     LoadMethodModel,

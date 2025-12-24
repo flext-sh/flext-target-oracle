@@ -16,9 +16,9 @@ import time
 from datetime import UTC
 from typing import cast
 
-from flext_core import FlextLogger, FlextResult
 from pydantic import SecretStr
 
+from flext import FlextLogger, FlextResult
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
 
 # Configure production-grade logging
@@ -310,7 +310,7 @@ class ProductionTargetManager:
             end_time = stats.get("processing_end_time", 0.0)
             start_time = stats.get("processing_start_time", 0.0)
             if isinstance(end_time, (int, float)) and isinstance(
-                start_time, (int, float)
+                start_time, (int, float),
             ):
                 processing_duration = end_time - start_time
                 stats["processing_duration_seconds"] = processing_duration
