@@ -14,7 +14,7 @@ import os
 from enum import StrEnum
 from typing import ClassVar, Final
 
-from flext import FlextConstants
+from flext_core import FlextConstants
 
 # No longer importing from flext_db_oracle
 

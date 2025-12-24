@@ -14,11 +14,7 @@ from __future__ import annotations
 import sys
 from typing import cast, override
 
-from flext import FlextBus,
-    FlextDispatcher,
-    FlextLogger,
-    FlextResult,
-    FlextService
+from flext_core import FlextBus, FlextDispatcher, FlextLogger, FlextResult, FlextService
 from pydantic import Field, PrivateAttr
 
 from flext_target_oracle.constants import FlextTargetOracleConstants

@@ -9,7 +9,8 @@ from __future__ import annotations
 import time
 import uuid
 
-from flext import FlextLogger
+from flext_core import FlextLogger
+
 from flext_target_oracle.constants import FlextTargetOracleConstants
 from flext_target_oracle.target_exceptions import (
     FlextTargetOracleAuthenticationError,

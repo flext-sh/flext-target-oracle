@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from flext import FlextTypes
+from flext_core import FlextTypes
 
 # =============================================================================
 # TARGET ORACLE-SPECIFIC TYPE VARIABLES - Domain-specific TypeVars for Singer Oracle target operations
@@ -41,7 +41,8 @@ class FlextTargetOracleTypes(FlextTypes):
 
         type TargetConfiguration = dict[str, str | int | bool | dict[str, object]]
         type StreamConfiguration = dict[
-            str, str | bool | dict[str, FlextTypes.JsonValue],
+            str,
+            str | bool | dict[str, FlextTypes.JsonValue],
         ]
         type MessageProcessing = dict[str, str | list[dict[str, FlextTypes.JsonValue]]]
         type RecordHandling = dict[str, str | dict[str, FlextTypes.JsonValue] | bool]
@@ -57,7 +58,8 @@ class FlextTargetOracleTypes(FlextTypes):
 
         type DatabaseConfiguration = dict[str, str | int | bool | dict[str, object]]
         type ConnectionManagement = dict[
-            str, str | int | dict[str, FlextTypes.JsonValue],
+            str,
+            str | int | dict[str, FlextTypes.JsonValue],
         ]
         type SessionSettings = dict[str, str | bool | dict[str, object]]
         type TransactionControl = dict[str, str | bool | dict[str, object]]
@@ -73,7 +75,8 @@ class FlextTargetOracleTypes(FlextTypes):
 
         type TableConfiguration = dict[str, str | bool | dict[str, object]]
         type SchemaDefinition = dict[
-            str, str | list[str] | dict[str, FlextTypes.JsonValue],
+            str,
+            str | list[str] | dict[str, FlextTypes.JsonValue],
         ]
         type ColumnMapping = dict[str, str | dict[str, FlextTypes.JsonValue]]
         type IndexConfiguration = dict[str, str | list[str] | dict[str, object]]
