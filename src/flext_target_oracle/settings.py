@@ -418,43 +418,7 @@ def validate_oracle_configuration(
     config: FlextTargetOracleSettings,
 ) -> FlextResult[None]:
     """Validate Oracle configuration using FlextSettings patterns - ZERO DUPLICATION."""
-    # Required string fields validation using direct validation
-    required_fields = [
-        (config.oracle_host, "Oracle host is required"),
-        (config.oracle_service_name, "Oracle service name is required"),
-        (config.oracle_user, "Oracle username is required"),
-        (config.oracle_password.get_secret_value(), "Oracle password is required"),
-        (config.default_target_schema, "Target schema is required"),
-    ]
-
-    # Validate required string fields using direct validation
-    for field_value, error_message in required_fields:
-        if not (field_value and str(field_value).strip()):
-            return FlextResult[None].fail(error_message)
-
-    # Validate Oracle port range
-    if not (
-        FlextConstants.Network.MIN_PORT
-        <= config.oracle_port
-        <= FlextConstants.Network.MAX_PORT
-    ):
-        return FlextResult[None].fail(
-            f"Oracle port must be between {FlextConstants.Network.MIN_PORT} and {FlextConstants.Network.MAX_PORT}",
-        )
-
-    # Validate batch size constraints
-    if config.batch_size < 1:
-        return FlextResult[None].fail("Batch size must be at least 1")
-
-    # Validate parallel degree
-    if config.parallel_degree < 1:
-        return FlextResult[None].fail("Parallel degree must be at least 1")
-
-    # Validate transaction timeout
-    if config.transaction_timeout < 1:
-        return FlextResult[None].fail("Transaction timeout must be at least 1 second")
-
-    return FlextResult[None].ok(None)
+    return config.validate_business_rules()
 
 
 __all__: list[str] = [
