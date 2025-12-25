@@ -17,7 +17,8 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
-from flext_target_oracle import (
+
+
     FlextTargetOracle,
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
