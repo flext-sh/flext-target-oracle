@@ -253,7 +253,7 @@ class FlextTargetOracleSettings(FlextSettings):
             )
 
         # Validate parallel degree settings
-        if self.parallel_degree > FlextConstants.Performance.MAX_WORKERS_LIMIT:
+        if self.parallel_degree > FlextConstants.Validation.MAX_WORKERS_LIMIT:
             warnings.warn(
                 f"High parallel degree ({self.parallel_degree}) may impact system resources",
                 UserWarning,

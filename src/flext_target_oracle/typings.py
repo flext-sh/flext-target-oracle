@@ -139,6 +139,23 @@ class FlextTargetOracleTypes(FlextTypes):
         type StreamBookmark = dict[str, str | int | dict[str, object]]
         type StreamSchema = dict[str, str | dict[str, FlextTypes.JsonValue] | bool]
 
+    class SingerMessage:
+        """Singer protocol message complex types."""
+
+        type SchemaMessage = dict[
+            str,
+            str | list[str] | dict[str, FlextTypes.JsonValue],
+        ]
+        type RecordMessage = dict[
+            str,
+            str | dict[str, FlextTypes.JsonValue],
+        ]
+        type StateMessage = dict[
+            str,
+            str | dict[str, FlextTypes.JsonValue],
+        ]
+        type ActivateVersionMessage = dict[str, str | int]
+
     # =========================================================================
     # ERROR HANDLING TYPES - Complex error management types
     # =========================================================================

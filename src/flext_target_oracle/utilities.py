@@ -430,14 +430,20 @@ class FlextTargetOracleUtilities(u_core):
 
             # Validate port number
             try:
-                port = int(config["port"])
-                if not (
-                    FlextConstants.Network.MIN_PORT
-                    <= port
-                    <= FlextConstants.Network.MAX_PORT
-                ):
+                port_value = config["port"]
+                if isinstance(port_value, (int, str)):
+                    port = int(port_value)
+                    if not (
+                        FlextConstants.Network.MIN_PORT
+                        <= port
+                        <= FlextConstants.Network.MAX_PORT
+                    ):
+                        return FlextResult[dict[str, object]].fail(
+                            f"Oracle port must be between {FlextConstants.Network.MIN_PORT} and {FlextConstants.Network.MAX_PORT}",
+                        )
+                else:
                     return FlextResult[dict[str, object]].fail(
-                        f"Oracle port must be between {FlextConstants.Network.MIN_PORT} and {FlextConstants.Network.MAX_PORT}",
+                        "Oracle port must be an integer or string",
                     )
             except (ValueError, TypeError):
                 return FlextResult[dict[str, object]].fail(
@@ -464,14 +470,14 @@ class FlextTargetOracleUtilities(u_core):
                 "batch_size",
                 FlextTargetOracleUtilities.DEFAULT_BATCH_SIZE,
             )
-            if batch_size <= 0:
+            if isinstance(batch_size, int) and batch_size <= 0:
                 return FlextResult[dict[str, object]].fail(
                     "Batch size must be positive",
                 )
 
             # Validate connection pool size
             pool_size = config.get("connection_pool_size", 5)
-            if (
+            if isinstance(pool_size, int) and (
                 pool_size <= 0
                 or pool_size > FlextTargetOracleUtilities.MAX_CONNECTION_POOL_SIZE
             ):
@@ -484,7 +490,7 @@ class FlextTargetOracleUtilities(u_core):
                 "commit_interval",
                 FlextTargetOracleUtilities.DEFAULT_COMMIT_INTERVAL,
             )
-            if commit_interval <= 0:
+            if isinstance(commit_interval, int) and commit_interval <= 0:
                 return FlextResult[dict[str, object]].fail(
                     "Commit interval must be positive",
                 )

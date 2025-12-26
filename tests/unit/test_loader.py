@@ -13,8 +13,7 @@ from typing import Protocol
 import pytest
 from sqlalchemy import Engine, MetaData, Table, func, select, text
 
-
-
+from flext_target_oracle import (
     FlextTargetOracleConnectionError,
     FlextTargetOracleLoader,
     FlextTargetOracleSchemaError,
@@ -56,19 +55,20 @@ class TestRealOracleLoader:
     def real_loader(
         self,
         oracle_config: FlextTargetOracleSettings,
-        _oracle_engine: Engine,
-        _clean_database: None,
+        oracle_engine: Engine,
+        clean_database: None,
     ) -> FlextTargetOracleLoader:
         """Create real loader instance connected to Oracle."""
         loader = FlextTargetOracleLoader(oracle_config)
         result = loader.connect()
         assert result.is_success
         return loader
-        # Cleanup is handled by _clean_database fixture
+        # Cleanup is handled by clean_database fixture
 
     def test_real_connect_disconnect(
         self,
         oracle_config: FlextTargetOracleSettings,
+        oracle_engine: Engine,  # Requires Oracle - will skip if not available
     ) -> None:
         """Test real connection and disconnection."""
         loader = FlextTargetOracleLoader(oracle_config)
@@ -81,14 +81,15 @@ class TestRealOracleLoader:
 
         # Test disconnect - loader doesn't have disconnect method, connection cleanup happens automatically
 
-    @pytest.mark.usefixtures("_mock_oracle_loader")
-    def test_real_connect_with_invalid_credentials(self) -> None:
-        """Test method."""
-        """Test connection with invalid credentials."""
+    def test_real_connect_with_invalid_credentials(self, oracle_engine: Engine) -> None:
+        """Test connection with invalid credentials.
+
+        Note: Uses oracle_engine fixture to skip if Oracle is not available.
+        """
         config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
-            oracle_service="XE",
+            oracle_service_name="XE",
             oracle_user="invalid_user",
             oracle_password="invalid_pass",
             default_target_schema="TEST",
@@ -105,13 +106,13 @@ class TestRealOracleLoader:
     def test_real_ensure_table_exists_new_table(
         self,
         real_loader: LoaderProtocol,
-        _simple_schema: dict[str, object],
-        _oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        oracle_engine: Engine,
     ) -> None:
         """Test creating a new table in real Oracle."""
         stream_name = "test_users"
-        schema = _simple_schema["schema"]
-        key_properties = _simple_schema["key_properties"]
+        schema = simple_schema["schema"]
+        key_properties = simple_schema["key_properties"]
 
         result = real_loader.ensure_table_exists(
             stream_name,
@@ -160,14 +161,14 @@ class TestRealOracleLoader:
     def test_real_ensure_table_exists_existing_table(
         self,
         real_loader: LoaderProtocol,
-        _simple_schema: dict[str, object],
-        _oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        oracle_engine: Engine,
     ) -> None:
         """Test handling existing table in real Oracle."""
         stream_name = "existing_table"
 
         # Create table first
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             table_name = safe_table_name(stream_name)
             conn.execute(
                 text(
@@ -176,8 +177,8 @@ class TestRealOracleLoader:
             )
             conn.commit()
 
-        schema = _simple_schema["schema"]
-        key_properties = _simple_schema["key_properties"]
+        schema = simple_schema["schema"]
+        key_properties = simple_schema["key_properties"]
 
         # Should handle existing table
         result = real_loader.ensure_table_exists(
@@ -189,15 +190,15 @@ class TestRealOracleLoader:
 
     def test_real_force_recreate_table(
         self,
-        _oracle_engine: Engine,
-        _simple_schema: dict[str, object],
-        _clean_database: Callable[[], None],
+        oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        clean_database: Callable[[], None],
     ) -> None:
         """Test force recreating table in real Oracle."""
         config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
-            oracle_service="XE",
+            oracle_service_name="XE",
             oracle_user="FLEXT_TEST",
             oracle_password="test_password",
             default_target_schema="FLEXT_TEST",
@@ -210,7 +211,7 @@ class TestRealOracleLoader:
         stream_name = "recreate_table"
 
         # Create table with data first
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             # Use quoted identifier for safety in test environment
             safe_table_name = f'"{stream_name.upper()}"'
             conn.execute(
@@ -226,15 +227,15 @@ class TestRealOracleLoader:
             )
             conn.commit()
 
-        schema = _simple_schema["schema"]
-        key_properties = _simple_schema["key_properties"]
+        schema = simple_schema["schema"]
+        key_properties = simple_schema["key_properties"]
 
         # Force recreate
         result = loader.ensure_table_exists(stream_name, schema, key_properties)
         assert result.is_success
 
         # Verify old data is gone and new structure exists
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             # Check no data
             table = Table(stream_name.upper(), MetaData(), autoload_with=conn)
             count = conn.execute(select(func.count()).select_from(table)).scalar()
@@ -258,15 +259,15 @@ class TestRealOracleLoader:
 
     def test_real_truncate_before_load(
         self,
-        _oracle_engine: Engine,
-        _simple_schema: dict[str, object],
-        _clean_database: Callable[[], None],
+        oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        clean_database: Callable[[], None],
     ) -> None:
         """Test truncating table before load in real Oracle."""
         config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
-            oracle_service="XE",
+            oracle_service_name="XE",
             oracle_user="FLEXT_TEST",
             oracle_password="test_password",
             default_target_schema="FLEXT_TEST",
@@ -279,7 +280,7 @@ class TestRealOracleLoader:
         stream_name = "truncate_table"
 
         # Create table with data first
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             table_name = safe_table_name(stream_name)
             conn.execute(
                 text(
@@ -299,15 +300,15 @@ class TestRealOracleLoader:
             count = conn.execute(select(func.count()).select_from(table)).scalar()
             assert count == 1
 
-        schema = _simple_schema["schema"]
-        key_properties = _simple_schema["key_properties"]
+        schema = simple_schema["schema"]
+        key_properties = simple_schema["key_properties"]
 
         # Ensure table exists with truncate
         result = loader.ensure_table_exists(stream_name, schema, key_properties)
         assert result.is_success
 
         # Verify table is empty
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             table = Table(stream_name.upper(), MetaData(), autoload_with=conn)
             count = conn.execute(select(func.count()).select_from(table)).scalar()
             assert count == 0
@@ -315,13 +316,13 @@ class TestRealOracleLoader:
     def test_real_load_record_single(
         self,
         real_loader: LoaderProtocol,
-        _simple_schema: dict[str, object],
-        _oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        oracle_engine: Engine,
     ) -> None:
         """Test loading a single record into real Oracle."""
         stream_name = "load_single"
-        schema = _simple_schema["schema"]
-        key_properties = _simple_schema["key_properties"]
+        schema = simple_schema["schema"]
+        key_properties = simple_schema["key_properties"]
 
         # Ensure table exists
         real_loader.ensure_table_exists(stream_name, schema, key_properties)
@@ -340,7 +341,7 @@ class TestRealOracleLoader:
         real_loader.finalize_all_streams()
 
         # Verify in database
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             table = Table(stream_name.upper(), MetaData(), autoload_with=conn)
             result = conn.execute(
                 select(table.c.ID, table.c.NAME, table.c.EMAIL).where(table.c.ID == 1),
@@ -354,13 +355,13 @@ class TestRealOracleLoader:
     def test_real_load_record_batch(
         self,
         real_loader: LoaderProtocol,
-        _simple_schema: dict[str, object],
-        _oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        oracle_engine: Engine,
     ) -> None:
         """Test loading batch of records into real Oracle."""
         stream_name = "load_batch"
-        schema = _simple_schema["schema"]
-        key_properties = _simple_schema["key_properties"]
+        schema = simple_schema["schema"]
+        key_properties = simple_schema["key_properties"]
 
         # Ensure table exists
         real_loader.ensure_table_exists(stream_name, schema, key_properties)
@@ -379,7 +380,7 @@ class TestRealOracleLoader:
         real_loader.finalize_all_streams()
 
         # Verify in database
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             table = Table(stream_name.upper(), MetaData(), autoload_with=conn)
             count = conn.execute(select(func.count()).select_from(table)).scalar()
             assert count == 10
@@ -387,15 +388,15 @@ class TestRealOracleLoader:
     @pytest.mark.usefixtures("oracle_engine")
     def test_real_bulk_insert_mode(
         self,
-        _oracle_engine: Engine,
-        _simple_schema: dict[str, object],
-        _clean_database: Callable[[], None],
+        oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        clean_database: Callable[[], None],
     ) -> None:
         """Test bulk insert mode with real Oracle."""
         config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
-            oracle_service="XE",
+            oracle_service_name="XE",
             oracle_user="FLEXT_TEST",
             oracle_password="test_password",
             default_target_schema="FLEXT_TEST",
@@ -407,8 +408,8 @@ class TestRealOracleLoader:
         loader.connect()
 
         stream_name = "bulk_insert"
-        schema = _simple_schema["schema"]
-        key_properties = _simple_schema["key_properties"]
+        schema = simple_schema["schema"]
+        key_properties = simple_schema["key_properties"]
 
         # Ensure table exists
         loader.ensure_table_exists(stream_name, schema, key_properties)
@@ -427,22 +428,22 @@ class TestRealOracleLoader:
         loader.finalize_all_streams()
 
         # Verify all records
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             table = Table(stream_name.upper(), MetaData(), autoload_with=conn)
             count = conn.execute(select(func.count()).select_from(table)).scalar()
             assert count == 12
 
     def test_real_merge_mode(
         self,
-        _oracle_engine: Engine,
-        _simple_schema: dict[str, object],
-        _clean_database: Callable[[], None],
+        oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        clean_database: Callable[[], None],
     ) -> None:
         """Test merge mode (upsert) with real Oracle."""
         config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
-            oracle_service="XE",
+            oracle_service_name="XE",
             oracle_user="FLEXT_TEST",
             oracle_password="test_password",
             default_target_schema="FLEXT_TEST",
@@ -454,8 +455,8 @@ class TestRealOracleLoader:
         loader.connect()
 
         stream_name = "merge_test"
-        schema = _simple_schema["schema"]
-        key_properties = _simple_schema["key_properties"]
+        schema = simple_schema["schema"]
+        key_properties = simple_schema["key_properties"]
 
         # Ensure table exists
         loader.ensure_table_exists(stream_name, schema, key_properties)
@@ -479,7 +480,7 @@ class TestRealOracleLoader:
         loader.finalize_all_streams()
 
         # Verify update
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             table = Table(stream_name.upper(), MetaData(), autoload_with=conn)
             result = conn.execute(
                 select(table.c.NAME, table.c.EMAIL).where(table.c.ID == 1),
@@ -497,7 +498,7 @@ class TestRealOracleLoader:
         self,
         real_loader: LoaderProtocol,
         nested_schema: dict[str, object],
-        _oracle_engine: Engine,
+        oracle_engine: Engine,
     ) -> None:
         """Test flattening nested JSON structures in real Oracle."""
         stream_name = "nested_json"
@@ -532,7 +533,7 @@ class TestRealOracleLoader:
         real_loader.finalize_all_streams()
 
         # Verify flattened columns
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             table = Table(stream_name.upper(), MetaData(), autoload_with=conn)
             result = conn.execute(select(table).where(table.c.ORDER_ID == "ORD-001"))
             row = result.fetchone()
@@ -562,7 +563,7 @@ class TestRealOracleLoader:
     def test_real_type_conversions(
         self,
         real_loader: object,
-        _oracle_engine: Engine,
+        oracle_engine: Engine,
     ) -> None:
         """Test various data type conversions in real Oracle."""
         stream_name = "type_test"
@@ -601,7 +602,7 @@ class TestRealOracleLoader:
         real_loader.finalize_all_streams()
 
         # Verify types in database
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             table = Table(stream_name.upper(), MetaData(), autoload_with=conn)
             result = conn.execute(
                 select(
@@ -638,15 +639,15 @@ class TestRealOracleLoader:
 
     def test_real_column_ordering(
         self,
-        _oracle_engine: Engine,
-        _simple_schema: dict[str, object],
-        _clean_database: Callable[[], None],
+        oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        clean_database: Callable[[], None],
     ) -> None:
         """Test column ordering in real Oracle."""
         config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
-            oracle_service="XE",
+            oracle_service_name="XE",
             oracle_user="FLEXT_TEST",
             oracle_password="test_password",
             default_target_schema="FLEXT_TEST",
@@ -682,7 +683,7 @@ class TestRealOracleLoader:
         loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Check column order
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             result = conn.execute(
                 text(
                     """
@@ -721,15 +722,15 @@ class TestRealOracleLoader:
 
     def test_real_custom_indexes(
         self,
-        _oracle_engine: Engine,
-        _simple_schema: dict[str, object],
-        _clean_database: Callable[[], None],
+        oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        clean_database: Callable[[], None],
     ) -> None:
         """Test custom index creation in real Oracle."""
         config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
-            oracle_service="XE",
+            oracle_service_name="XE",
             oracle_user="FLEXT_TEST",
             oracle_password="test_password",
             default_target_schema="FLEXT_TEST",
@@ -745,13 +746,13 @@ class TestRealOracleLoader:
         loader.connect()
 
         stream_name = "indexed_table"
-        schema = _simple_schema["schema"]
-        key_properties = _simple_schema["key_properties"]
+        schema = simple_schema["schema"]
+        key_properties = simple_schema["key_properties"]
 
         loader.ensure_table_exists(stream_name, schema, key_properties)
 
         # Verify indexes created
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             result = conn.execute(
                 text(
                     """
@@ -775,12 +776,12 @@ class TestRealOracleLoader:
     def test_real_finalize_streams_metrics(
         self,
         real_loader: LoaderProtocol,
-        _simple_schema: dict[str, object],
+        simple_schema: dict[str, object],
     ) -> None:
         """Test finalize streams with metrics in real Oracle."""
         stream_name = "metrics_test"
-        schema = _simple_schema["schema"]
-        key_properties = _simple_schema["key_properties"]
+        schema = simple_schema["schema"]
+        key_properties = simple_schema["key_properties"]
 
         # Ensure table exists
         real_loader.ensure_table_exists(stream_name, schema, key_properties)
@@ -809,9 +810,9 @@ class TestRealOracleLoader:
     def test_real_get_table_name_variants(
         self,
         real_loader: object,
-        _oracle_engine: Engine,
-        _simple_schema: dict[str, object],
-        _clean_database: Callable[[], None],
+        oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        clean_database: Callable[[], None],
     ) -> None:
         """Test method."""
         """Test table name generation with various options."""
@@ -828,15 +829,15 @@ class TestRealOracleLoader:
 
     def test_real_parallel_and_direct_path(
         self,
-        _oracle_engine: Engine,
-        _simple_schema: dict[str, object],
-        _clean_database: Callable[[], None],
+        oracle_engine: Engine,
+        simple_schema: dict[str, object],
+        clean_database: Callable[[], None],
     ) -> None:
         """Test parallel and direct path options in real Oracle."""
         config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_port=1521,
-            oracle_service="XE",
+            oracle_service_name="XE",
             oracle_user="FLEXT_TEST",
             oracle_password="test_password",
             default_target_schema="FLEXT_TEST",
@@ -850,8 +851,8 @@ class TestRealOracleLoader:
         loader.connect()
 
         stream_name = "parallel_test"
-        schema = _simple_schema["schema"]
-        key_properties = _simple_schema["key_properties"]
+        schema = simple_schema["schema"]
+        key_properties = simple_schema["key_properties"]
 
         loader.ensure_table_exists(stream_name, schema, key_properties)
 
@@ -867,7 +868,7 @@ class TestRealOracleLoader:
         loader.finalize_all_streams()
 
         # Verify all records loaded
-        with _oracle_engine.connect() as conn:
+        with oracle_engine.connect() as conn:
             table = Table(stream_name.upper(), MetaData(), autoload_with=conn)
             count = conn.execute(select(func.count()).select_from(table)).scalar()
             assert count == 200

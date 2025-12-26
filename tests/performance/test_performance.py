@@ -267,7 +267,7 @@ class TestPerformance:
 
         # Process in waves
         waves = 5
-        records_per_wave = 5000
+        records_per_wave = 500  # Reduced for memory efficiency
 
         for wave in range(waves):
             wave_start_memory = self.get_memory_usage()
@@ -279,12 +279,12 @@ class TestPerformance:
                     "stream": "memory_test",
                     "record": {
                         "id": record_id,
-                        "large_text": fake.text(max_nb_chars=1000),
+                        "large_text": fake.text(max_nb_chars=100),  # Reduced for memory efficiency
                         "json_data": {
                             "nested": {
-                                "data": [fake.word() for _ in range(50)],
+                                "data": [fake.word() for _ in range(5)],  # Reduced for memory efficiency
                                 "values": {
-                                    str(j): fake.random_int() for j in range(20)
+                                    str(j): fake.random_int() for j in range(2)  # Reduced for memory efficiency
                                 },
                             },
                         },

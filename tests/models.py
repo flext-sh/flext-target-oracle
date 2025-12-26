@@ -1,45 +1,27 @@
-"""Test models for flext-target-oracle tests.
+"""Models for flext-target-oracle tests - uses m.Oracle.Tests.* namespace pattern.
 
-Provides TestsFlextTargetOracleModels, extending FlextTestsModels with
-flext-target-oracle-specific models using COMPOSITION INHERITANCE.
+This module provides test-specific models that extend the main flext-target-oracle models.
+Uses the unified namespace pattern m.Oracle.Tests.* for test-only objects.
+Combines FlextTestsModels functionality with project-specific test models.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
+
 """
 
 from __future__ import annotations
 
-from flext_tests.models import FlextTestsModels
+from flext_tests import FlextTestsModels
 
-from flext_target_oracle.models import FlextTargetOracleModels
+from flext_target_oracle import m as FlextTargetOracleModels
 
 
 class TestsFlextTargetOracleModels(FlextTestsModels, FlextTargetOracleModels):
-    """Models for flext-target-oracle tests using COMPOSITION INHERITANCE.
-
-    MANDATORY: Inherits from BOTH:
-    1. FlextTestsModels - for test infrastructure (.Tests.*)
-    2. FlextTargetOracleModels - for domain models
-
-    Access patterns:
-    - tm.Tests.* (generic test models from FlextTestsModels)
-    - tm.* (Target Oracle domain models)
-    - m.* (production models via alternative alias)
-    """
-
-    class Tests:
-        """Project-specific test fixtures namespace."""
-
-        class TargetOracle:
-            """Target Oracle-specific test fixtures."""
+    class Oracle(FlextTargetOracleModels.Oracle):
+        class Tests:
+            """Internal tests declarations for test-only objects."""
 
 
-# Short aliases per FLEXT convention
-tm = TestsFlextTargetOracleModels
 m = TestsFlextTargetOracleModels
 
-__all__ = [
-    "TestsFlextTargetOracleModels",
-    "m",
-    "tm",
-]
+__all__ = ["TestsFlextTargetOracleModels", "m"]

@@ -14,7 +14,10 @@ from __future__ import annotations
 import time
 from typing import ClassVar, override
 
-from flext_core import FlextResult, FlextService
+from flext_core import (
+    FlextResult as r,
+    FlextService,
+)
 from pydantic import Field
 
 from flext_target_oracle.models import FlextTargetOracleModels
@@ -40,7 +43,7 @@ class FlextTargetOracle(
     - Dependency Inversion: Depends on abstractions (flext-core patterns)
     """
 
-    model_config: ClassVar = {"frozen": "False"}  # Allow field mutations
+    model_config: ClassVar = {"frozen": False}  # Allow field mutations
 
     # Pydantic fields - flext-core SOURCE OF TRUTH patterns
     name: str = Field(default="flext-oracle-target", description="Singer target name")
@@ -99,7 +102,7 @@ class FlextTargetOracle(
     def execute(
         self,
         payload: str | None = None,
-    ) -> FlextResult[t.Core.Dict]:
+    ) -> r[t.Core.Dict]:
         """Execute Oracle Target - implements FlextService abstract method.
 
         Backwards-compat: accept optional string payload (Singer message JSON). If
@@ -113,25 +116,25 @@ class FlextTargetOracle(
                 # Process single message if dict-like
                 if isinstance(msg, dict):
                     proc = self.process_singer_message(msg)
-                    return FlextResult[t.Core.Dict].ok(
+                    return r[t.Core.Dict].ok(
                         {"processed": proc.is_success},
                     )
                 # If payload wasn't a dict, return a success with no-op
-                return FlextResult[t.Core.Dict].ok({
+                return r[t.Core.Dict].ok({
                     "processed": "False",
                 })
             except Exception as e:
-                return FlextResult[t.Core.Dict].fail(
+                return r[t.Core.Dict].fail(
                     f"Failed to process payload: {e}",
                 )
 
-        connection_result: FlextResult[object] = self.test_connection()
+        connection_result: r[object] = self.test_connection()
         if connection_result.is_failure:
-            return FlextResult[t.Core.Dict].fail(
+            return r[t.Core.Dict].fail(
                 f"Oracle target execution failed: {connection_result.error}",
             )
 
-        return FlextResult[t.Core.Dict].ok(
+        return r[t.Core.Dict].ok(
             {
                 "name": self.name,
                 "status": "ready",
@@ -141,23 +144,29 @@ class FlextTargetOracle(
             },
         )
 
-    def initialize(self: object) -> FlextResult[None]:
+    def initialize(self) -> r[bool]:
         """Compatibility shim for older tests: perform a connection test."""
         return self.test_connection()
 
     # === Core Target Operations ===
 
-    def validate_configuration(self: object) -> FlextResult[None]:
+    def validate_configuration(self) -> r[bool]:
         """Validate Oracle target configuration using domain rules."""
-        return self.config.validate_domain_rules()
+        try:
+            return self.config.validate_domain_rules()
+        except Exception as e:
+            return r[bool].fail(f"Configuration validation failed: {e}")
 
-    def test_connection(self: object) -> FlextResult[None]:
+    def test_connection(self) -> r[bool]:
         """Test Oracle database connectivity using loader."""
-        return self.loader.test_connection()
+        try:
+            return self.loader.test_connection()
+        except Exception as e:
+            return r[bool].fail(f"Connection test failed: {e}")
 
     def discover_catalog(
         self: object,
-    ) -> FlextResult[t.Core.Dict]:
+    ) -> r[t.Core.Dict]:
         """Discover available schemas and generate Singer catalog."""
         try:
             catalog: t.Core.Dict = {
@@ -185,10 +194,10 @@ class FlextTargetOracle(
                 if isinstance(streams, list):
                     streams.append(stream_entry)
 
-            return FlextResult[t.Core.Dict].ok(catalog)
+            return r[t.Core.Dict].ok(catalog)
 
         except Exception as e:
-            return FlextResult[t.Core.Dict].fail(
+            return r[t.Core.Dict].fail(
                 f"Failed to discover catalog: {e}",
             )
 
@@ -197,7 +206,7 @@ class FlextTargetOracle(
     def process_singer_messages(
         self,
         messages: list[t.Core.Dict],
-    ) -> FlextResult[t.Core.Dict]:
+    ) -> r[t.Core.Dict]:
         """Process Singer messages with complete statistics using standardized models."""
         try:
             # Initialize processing state using FlextTargetOracleModels
@@ -210,13 +219,13 @@ class FlextTargetOracle(
             start_time = time.time()
 
             for message in messages:
-                result: FlextResult[object] = self._process_single_message(message)
+                result: r[object] = self._process_single_message(message)
                 if result.is_failure:
                     processing_state.error_count += 1
                     processing_state.failed_messages.append(
                         str(message.get("type", "unknown")),
                     )
-                    return FlextResult[t.Core.Dict].fail(
+                    return r[t.Core.Dict].fail(
                         f"Failed to process message: {result.error}",
                     )
 
@@ -231,10 +240,10 @@ class FlextTargetOracle(
                     processing_state.state_messages += 1
 
             # Finalize all streams
-            finalize_result: FlextResult[object] = self.loader.finalize_all_streams()
+            finalize_result: r[object] = self.loader.finalize_all_streams()
             if finalize_result.is_failure:
                 processing_state.error_count += 1
-                return FlextResult[t.Core.Dict].fail(
+                return r[t.Core.Dict].fail(
                     f"Failed to finalize streams: {finalize_result.error}",
                 )
 
@@ -257,24 +266,24 @@ class FlextTargetOracle(
                 "processing_statistics": processing_state.model_dump(),
             }
 
-            return FlextResult[t.Core.Dict].ok(result_data)
+            return r[t.Core.Dict].ok(result_data)
 
         except Exception as e:
-            return FlextResult[t.Core.Dict].fail(
+            return r[t.Core.Dict].fail(
                 f"Message processing failed: {e}",
             )
 
     def process_singer_message(
         self,
         message: t.Core.Dict,
-    ) -> FlextResult[None]:
+    ) -> r[None]:
         """Process individual Singer message - compatible."""
         return self._process_single_message(message)
 
-    def finalize(self: object) -> FlextResult[t.Core.Dict]:
+    def finalize(self: object) -> r[t.Core.Dict]:
         """Finalize target processing and return complete statistics."""
         try:
-            result: FlextResult[object] = self.loader.finalize_all_streams()
+            result: r[object] = self.loader.finalize_all_streams()
             if result.is_success:
                 self.log_info("Oracle target finalization completed successfully")
                 return result
@@ -282,7 +291,7 @@ class FlextTargetOracle(
 
         except Exception as e:
             self.log_error("Failed to finalize target", extra={"error": str(e)})
-            return FlextResult[t.Core.Dict].fail(
+            return r[t.Core.Dict].fail(
                 f"Finalization failed: {e}",
             )
 
@@ -291,7 +300,7 @@ class FlextTargetOracle(
     def _process_single_message(
         self,
         message: t.Core.Dict,
-    ) -> FlextResult[None]:
+    ) -> r[None]:
         """Process a single Singer message with type dispatch."""
         message_type = message.get("type")
 
@@ -301,22 +310,22 @@ class FlextTargetOracle(
             return self._handle_record_message(message)
         if message_type == "STATE":
             return self._handle_state_message(message)
-        return FlextResult[None].fail(f"Unknown message type: {message_type}")
+        return r[None].fail(f"Unknown message type: {message_type}")
 
     def _handle_schema_message(
         self,
         message: t.Core.Dict,
-    ) -> FlextResult[None]:
+    ) -> r[None]:
         """Handle SCHEMA message with table creation."""
         try:
             stream_name = message.get("stream")
             schema = message.get("schema")
 
             if not isinstance(stream_name, str):
-                return FlextResult[None].fail("Invalid stream name in schema message")
+                return r[None].fail("Invalid stream name in schema message")
 
             if not isinstance(schema, dict):
-                return FlextResult[None].fail("Invalid schema in schema message")
+                return r[None].fail("Invalid schema in schema message")
 
             # Store schema
             self.schemas[stream_name] = schema
@@ -332,48 +341,48 @@ class FlextTargetOracle(
                 key_properties,
             )
             if table_result.is_failure:
-                return FlextResult[None].fail(
+                return r[None].fail(
                     f"Failed to ensure table exists: {table_result.error}",
                 )
 
             self.log_info(f"Processed schema for stream {stream_name}")
-            return FlextResult[None].ok(None)
+            return r[None].ok(None)
 
         except Exception as e:
-            return FlextResult[None].fail(f"Schema handling failed: {e}")
+            return r[None].fail(f"Schema handling failed: {e}")
 
     def _handle_record_message(
         self,
         message: t.Core.Dict,
-    ) -> FlextResult[None]:
+    ) -> r[None]:
         """Handle RECORD message with data loading."""
         try:
             stream_name = message.get("stream")
             record_data: dict[str, object] = message.get("record")
 
             if not isinstance(stream_name, str):
-                return FlextResult[None].fail("Invalid stream name in record message")
+                return r[None].fail("Invalid stream name in record message")
 
             if not isinstance(record_data, dict):
-                return FlextResult[None].fail("Invalid record data in record message")
+                return r[None].fail("Invalid record data in record message")
 
             # Load record using loader
-            result: FlextResult[object] = self.loader.load_record(
+            result: r[object] = self.loader.load_record(
                 stream_name,
                 record_data,
             )
             if result.is_failure:
-                return FlextResult[None].fail(f"Failed to load record: {result.error}")
+                return r[None].fail(f"Failed to load record: {result.error}")
 
-            return FlextResult[None].ok(None)
+            return r[None].ok(None)
 
         except Exception as e:
-            return FlextResult[None].fail(f"Record handling failed: {e}")
+            return r[None].fail(f"Record handling failed: {e}")
 
     def _handle_state_message(
         self,
         message: t.Core.Dict,
-    ) -> FlextResult[None]:
+    ) -> r[None]:
         """Handle STATE message with state persistence."""
         try:
             state_value = message.get("value")
@@ -381,16 +390,16 @@ class FlextTargetOracle(
                 self.state.update(state_value)
 
             self.log_debug(f"Updated state: {state_value}")
-            return FlextResult[None].ok(None)
+            return r[None].ok(None)
 
         except Exception as e:
-            return FlextResult[None].fail(f"State handling failed: {e}")
+            return r[None].fail(f"State handling failed: {e}")
 
     # === Singer SDK Compatibility (if needed) ===
 
     def _test_connection(self: object) -> bool:
         """Singer SDK connection test compatibility."""
-        result: FlextResult[object] = self.test_connection()
+        result: r[object] = self.test_connection()
         return result.is_success
 
     def _write_record(
@@ -399,7 +408,7 @@ class FlextTargetOracle(
         record: t.Core.Dict,
     ) -> None:
         """Singer SDK record writing compatibility."""
-        result: FlextResult[object] = self.loader.load_record(stream_name, record)
+        result: r[object] = self.loader.load_record(stream_name, record)
         if result.is_failure:
             msg = f"Failed to write record: {result.error}"
             raise RuntimeError(msg)
@@ -442,9 +451,9 @@ class FlextTargetOracle(
             "current_state": self.state,
         }
 
-    def write_record(self, _record_data: str) -> FlextResult[None]:
+    def write_record(self, _record_data: str) -> r[None]:
         """Write a Singer record (stub - not implemented)."""
-        return FlextResult[None].fail("write_record not implemented in stub")
+        return r[None].fail("write_record not implemented in stub")
 
 
 __all__ = [
