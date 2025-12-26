@@ -8,8 +8,8 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from flext_db_oracle.protocols import p_db_oracle
-from flext_meltano.protocols import p_meltano
+from flext_db_oracle.protocols import p as p_db_oracle
+from flext_meltano.protocols import p as p_meltano
 
 
 class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
@@ -54,7 +54,8 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
                 """
 
                 def process_record(
-                    self, record: dict[str, object],
+                    self,
+                    record: dict[str, object],
                 ) -> p_meltano.Result[bool]:
                     """Process a Singer record for Oracle target.
 
@@ -73,7 +74,8 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
                 """
 
                 def connect(
-                    self, config: dict[str, object],
+                    self,
+                    config: dict[str, object],
                 ) -> p_meltano.Result[object]:
                     """Connect to Oracle database.
 
@@ -92,7 +94,8 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
                 """
 
                 def create_table(
-                    self, schema: dict[str, object],
+                    self,
+                    schema: dict[str, object],
                 ) -> p_meltano.Result[object]:
                     """Create Oracle table from schema.
 
@@ -111,7 +114,8 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
                 """
 
                 def execute_batch(
-                    self, records: list[dict[str, object]],
+                    self,
+                    records: list[dict[str, object]],
                 ) -> p_meltano.Result[object]:
                     """Execute batch of Oracle operations.
 
@@ -130,7 +134,8 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
                 """
 
                 def transform_record(
-                    self, record: dict[str, object],
+                    self,
+                    record: dict[str, object],
                 ) -> p_meltano.Result[dict[str, object]]:
                     """Transform Singer record for Oracle.
 
@@ -149,7 +154,8 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
                 """
 
                 def process_message(
-                    self, message: dict[str, object],
+                    self,
+                    message: dict[str, object],
                 ) -> p_meltano.Result[object]:
                     """Process Singer message.
 
@@ -185,7 +191,8 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
                 """
 
                 def validate_credentials(
-                    self, config: dict[str, object],
+                    self,
+                    config: dict[str, object],
                 ) -> p_meltano.Result[bool]:
                     """Validate Oracle credentials.
 

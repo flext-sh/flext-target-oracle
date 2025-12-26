@@ -14,7 +14,7 @@ from __future__ import annotations
 import sys
 from typing import cast, override
 
-from flext_core import FlextBus, FlextDispatcher, FlextLogger, FlextResult, FlextService
+from flext_core import FlextDispatcher, FlextLogger, FlextResult, FlextService
 from pydantic import Field, PrivateAttr
 
 from flext_target_oracle.constants import FlextTargetOracleConstants
@@ -40,8 +40,8 @@ class FlextTargetOracleCliService(FlextService[str]):
     """
 
     # Pydantic fields - flext-core SOURCE OF TRUTH patterns
-    command_bus: FlextBus = Field(
-        default_factory=FlextBus,
+    command_bus: FlextDispatcher = Field(
+        default_factory=FlextDispatcher,
         description="Command bus for routing commands",
     )
     command_handler: OracleTargetCommandHandler = Field(
