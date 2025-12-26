@@ -60,55 +60,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
 
             super().__init__(
                 message=message,
-                code=code or FlextConstants.Errors.CONNECTION_ERROR,
+                error_code=code or FlextConstants.Errors.CONNECTION_ERROR,
                 context=oracle_context,
-                correlation_id=correlation_id,
+                _correlation_id=correlation_id,
             )
-
-        @property
-        def host(self: object) -> str | None:
-            """Get connection host."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("host")
-                return value if isinstance(value, str) else None
-            return None
-
-        @property
-        def port(self: object) -> int | None:
-            """Get connection port."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("port")
-                return value if isinstance(value, int) else None
-            return None
-
-        @property
-        def service_name(self: object) -> str | None:
-            """Get Oracle service name."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("service_name")
-                return value if isinstance(value, str) else None
-            return None
-
-        @property
-        def user(self: object) -> str | None:
-            """Get connection user."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("user")
-                return value if isinstance(value, str) else None
-            return None
-
-        @property
-        def dsn(self: object) -> str | None:
-            """Get Oracle DSN."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("dsn")
-                return value if isinstance(value, str) else None
-            return None
+            # Oracle-specific attributes beyond parent's host/port/timeout
+            self.service_name = oracle_context.get("service_name")
+            self.user = oracle_context.get("user")
+            self.dsn = oracle_context.get("dsn")
 
     class ValidationError(FlextExceptions.ValidationError):
         """Oracle validation error using flext-core foundation."""
@@ -142,28 +101,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
 
             super().__init__(
                 message=message,
-                code=code or FlextConstants.Errors.AUTHENTICATION_ERROR,
+                error_code=code or FlextConstants.Errors.AUTHENTICATION_ERROR,
                 context=oracle_context,
-                correlation_id=correlation_id,
+                _correlation_id=correlation_id,
             )
-
-        @property
-        def user(self: object) -> str | None:
-            """Get authentication user."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("user")
-                return value if isinstance(value, str) else None
-            return None
-
-        @property
-        def wallet_location(self: object) -> str | None:
-            """Get wallet location."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("wallet_location")
-                return value if isinstance(value, str) else None
-            return None
+            # Oracle-specific attributes
+            self.user = oracle_context.get("user")
+            self.auth_method = oracle_context.get("auth_method")
+            self.wallet_location = oracle_context.get("wallet_location")
 
     class ProcessingError(FlextExceptions.OperationError):
         """Oracle processing error with Oracle-specific context."""
@@ -197,43 +142,15 @@ class FlextTargetOracleExceptions(FlextExceptions):
 
             super().__init__(
                 message=message,
-                code=code or FlextConstants.Errors.PROCESSING_ERROR,
+                error_code=code or FlextConstants.Errors.PROCESSING_ERROR,
                 context=oracle_context,
-                correlation_id=correlation_id,
+                _correlation_id=correlation_id,
             )
-
-        @property
-        def stream_name(self: object) -> str | None:
-            """Get stream name."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("stream_name")
-                return value if isinstance(value, str) else None
-            return None
-
-        @property
-        def record_count(self: object) -> int | None:
-            """Get record count."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("record_count")
-                return value if isinstance(value, int) else None
-            return None
-
-        @property
-        def error_records(self: object) -> list[dict[str, object]] | None:
-            """Get error records."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("error_records")
-                if isinstance(value, list) and all(isinstance(i, dict) for i in value):
-                    # Rebuild to ensure precise element typing
-                    normalized: list[dict[str, object]] = [
-                        {**item}
-                        for item in value  # shallow copy as dict["str", "object"]
-                    ]
-                    return normalized
-            return None
+            # Oracle-specific attributes
+            self.stream_name = oracle_context.get("stream_name")
+            self.record_count = oracle_context.get("record_count")
+            self.error_records = oracle_context.get("error_records")
+            self.operation = oracle_context.get("operation")
 
     class OracleTimeoutError(FlextExceptions.TimeoutError):
         """Oracle timeout error using flext-core foundation."""
@@ -271,47 +188,15 @@ class FlextTargetOracleExceptions(FlextExceptions):
 
             super().__init__(
                 message=message,
-                code=code or FlextConstants.Errors.VALIDATION_ERROR,
+                error_code=code or FlextConstants.Errors.VALIDATION_ERROR,
                 context=oracle_context,
-                correlation_id=correlation_id,
+                _correlation_id=correlation_id,
             )
-
-        @property
-        def stream_name(self: object) -> str | None:
-            """Get stream name."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("stream_name")
-                return value if isinstance(value, str) else None
-            return None
-
-        @property
-        def table_name(self: object) -> str | None:
-            """Get table name."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("table_name")
-                return value if isinstance(value, str) else None
-            return None
-
-        @property
-        def schema_hash(self: object) -> str | None:
-            """Get schema hash."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("schema_hash")
-                return value if isinstance(value, str) else None
-            return None
-
-        @property
-        def validation_errors(self: object) -> list[str] | None:
-            """Get validation errors."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("validation_errors")
-                if isinstance(value, list) and all(isinstance(s, str) for s in value):
-                    return value
-            return None
+            # Oracle-specific attributes
+            self.stream_name = oracle_context.get("stream_name")
+            self.table_name = oracle_context.get("table_name")
+            self.schema_hash = oracle_context.get("schema_hash")
+            self.validation_errors = oracle_context.get("validation_errors")
 
     class LoadError(ProcessingError):
         """Oracle data loading errors."""
@@ -349,15 +234,9 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 context=oracle_context,
                 correlation_id=correlation_id,
             )
-
-        @property
-        def sql_statement(self: object) -> str | None:
-            """Get SQL statement."""
-            ctx = getattr(self, "context", None)
-            if isinstance(ctx, dict):
-                value = ctx.get("sql_statement")
-                return value if isinstance(value, str) else None
-            return None
+            # Oracle-specific attributes
+            self.sql_statement = oracle_context.get("sql_statement")
+            self.table_name = oracle_context.get("table_name")
 
     class RecordError(ProcessingError):
         """Oracle record processing errors."""

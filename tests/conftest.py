@@ -11,12 +11,11 @@ from asyncio import AbstractEventLoop, get_event_loop_policy
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import cast
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from flext_core import FlextLogger, FlextResult
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_tests import FlextTestsDocker
 from pydantic import SecretStr
 from sqlalchemy import create_engine, text
@@ -29,6 +28,7 @@ from flext_target_oracle import (
     FlextTargetOracleSettings,
     LoadMethod,
 )
+from flext_target_oracle.typings import FlextTargetOracleTypes as t
 
 # Constants
 logger = FlextLogger(__name__)
@@ -53,6 +53,22 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line("markers", "e2e: mark test as end-to-end test")
     config.addinivalue_line("markers", "slow: mark test as slow running")
     config.addinivalue_line("markers", "oracle: mark test as requiring Oracle database")
+
+
+@pytest.fixture(autouse=True)
+def reset_settings_singleton() -> Generator[None]:
+    """Reset FlextSettings singleton between tests to ensure isolation.
+
+    FlextSettings uses singleton pattern - tests can pollute each other's state
+    if not reset between runs.
+    """
+    # Clear singleton before test
+    FlextTargetOracleSettings._instances = {}
+
+    yield
+
+    # Clear singleton after test
+    FlextTargetOracleSettings._instances = {}
 
 
 @pytest.fixture(scope="session")
@@ -84,11 +100,21 @@ def shared_oracle_container(docker_control: FlextTestsDocker) -> FlextTestsDocke
 
 @pytest.fixture(scope="session")
 def oracle_engine() -> Engine:
-    """Create SQLAlchemy engine for direct database access."""
-    return create_engine(
+    """Create SQLAlchemy engine for direct database access.
+
+    Skips tests if Oracle is not available.
+    """
+    engine = create_engine(
         f"oracle+oracledb://{TEST_SCHEMA}:test_password@{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SERVICE}",
         poolclass=NullPool,
     )
+    # Test connection - skip if not available
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1 FROM DUAL"))
+    except Exception as e:
+        pytest.skip(f"Oracle not available: {e}")
+    return engine
 
 
 @pytest.fixture
@@ -122,7 +148,7 @@ def oracle_config() -> FlextTargetOracleSettings:
     return FlextTargetOracleSettings(
         oracle_host=ORACLE_HOST,
         oracle_port=ORACLE_PORT,
-        oracle_service=ORACLE_SERVICE,
+        oracle_service_name=ORACLE_SERVICE,
         oracle_user=TEST_SCHEMA,
         oracle_password=SecretStr("test_password"),
         default_target_schema=TEST_SCHEMA,
@@ -139,13 +165,13 @@ def oracle_config() -> FlextTargetOracleSettings:
 
 
 @pytest.fixture
-def oracle_api(oracle_config: FlextTargetOracleSettings) -> FlextDbOracleApi:
-    """Create mocked FlextDbOracleApi instance."""
-    # Create real config for reference
-    db_config = FlextDbOracleModels.OracleConfig(
+def oracle_api(oracle_config: FlextTargetOracleSettings) -> MagicMock:
+    """Create mocked FlextDbOracleApi instance for testing."""
+    # Create config using FlextDbOracleSettings
+    db_config = FlextDbOracleSettings(
         host=oracle_config.oracle_host,
         port=oracle_config.oracle_port,
-        name=oracle_config.oracle_service,
+        service_name=oracle_config.oracle_service,
         username=oracle_config.oracle_user,
         password=oracle_config.oracle_password.get_secret_value()
         if hasattr(oracle_config.oracle_password, "get_secret_value")
@@ -153,7 +179,7 @@ def oracle_api(oracle_config: FlextTargetOracleSettings) -> FlextDbOracleApi:
     )
 
     # Create mock API with common method responses
-    mock_api = MagicMock()
+    mock_api = MagicMock(spec=FlextDbOracleApi)
     mock_api.config = db_config
     mock_api.connect.return_value = FlextResult.ok("Connected successfully")
     mock_api.disconnect.return_value = FlextResult.ok("Disconnected successfully")
@@ -199,7 +225,7 @@ def sample_config() -> FlextTargetOracleSettings:
     return FlextTargetOracleSettings(
         oracle_host="localhost",
         oracle_port=1521,
-        oracle_service="XE",
+        oracle_service_name="XE",
         oracle_user="test_user",
         oracle_password=SecretStr("test_password"),
         default_target_schema="TEST_SCHEMA",
@@ -325,7 +351,7 @@ def record() -> dict[str, object]:
 
 
 @pytest.fixture
-def state() -> dict[str, object]:
+def state() -> t.SingerMessage.StateMessage:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -334,7 +360,7 @@ def state() -> dict[str, object]:
 
 
 @pytest.fixture
-def simple_schema() -> dict[str, object]:
+def simple_schema() -> t.SingerMessage.SchemaMessage:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
@@ -353,7 +379,7 @@ def simple_schema() -> dict[str, object]:
 
 
 @pytest.fixture
-def nested_schema() -> dict[str, object]:
+def nested_schema() -> t.SingerMessage.SchemaMessage:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
@@ -397,7 +423,7 @@ def nested_schema() -> dict[str, object]:
 
 
 @pytest.fixture
-def sample_record() -> dict[str, object]:
+def sample_record() -> t.SingerMessage.RecordMessage:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -547,8 +573,8 @@ def large_dataset() -> list[dict[str, object]]:
         for i in range(10000)  # 10k records
     ]
 
-    result: list[dict[str, object]] = [cast("dict[str, object]", schema)]
-    result.extend(cast("list[dict[str, object]]", records))
+    result: list[dict[str, object]] = [schema]
+    result.extend(records)
     return result
 
 

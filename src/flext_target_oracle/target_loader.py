@@ -16,7 +16,7 @@ from datetime import UTC, datetime
 from typing import ClassVar, override
 
 from flext_core import FlextLogger, FlextResult, FlextService
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import Field
 
 # Module logger
@@ -54,11 +54,11 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
             # Create Oracle API configuration from target config
-            oracle_config = FlextDbOracleModels.OracleConfig(
+            oracle_config = FlextDbOracleSettings(
                 host=config.oracle_host,
                 port=config.oracle_port,
-                name=config.oracle_service,  # Use 'name' instead of 'service_name'
-                username=config.oracle_user,  # Use 'username' instead of 'user'
+                service_name=config.oracle_service_name,
+                username=config.oracle_user,
                 password=config.oracle_password.get_secret_value()
                 if hasattr(config.oracle_password, "get_secret_value")
                 else str(config.oracle_password),
@@ -379,7 +379,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
                 return FlextResult[None].ok(None)
 
         except Exception as e:
-            self.log_error("Failed to flush batch", extra={{"error": str(e)}})
+            self.log_error("Failed to flush batch", extra={"error": str(e)})
             return FlextResult[None].fail(f"Batch flush failed: {e}")
 
 

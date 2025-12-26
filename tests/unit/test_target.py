@@ -8,21 +8,24 @@ SPDX-License-Identifier: MIT
 
 """
 
+from __future__ import annotations
+
 import json
 from datetime import UTC, datetime
 
 import pytest
 from _pytest.capture import CaptureFixture
+from pydantic import SecretStr
 from sqlalchemy import Engine, text
 
-
-
+from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleProcessingError,
     FlextTargetOracleSchemaError,
     FlextTargetOracleSettings,
     LoadMethod,
 )
+from flext_target_oracle.typings import FlextTargetOracleTypes as t
 
 
 @pytest.mark.oracle
@@ -72,7 +75,7 @@ class TestRealOracleTarget:
     def test_real_process_schema_message(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: dict[str, object],
+        simple_schema: t.SingerMessage.SchemaMessage,
     ) -> None:
         """Test processing schema message."""
         real_target.initialize()
@@ -97,7 +100,7 @@ class TestRealOracleTarget:
     def test_real_process_record_message(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: dict[str, object],
+        simple_schema: t.SingerMessage.SchemaMessage,
         oracle_engine: Engine,
     ) -> None:
         """Test processing record message with real database."""
@@ -175,7 +178,7 @@ class TestRealOracleTarget:
     def test_real_batch_processing(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: dict[str, object],
+        simple_schema: t.SingerMessage.SchemaMessage,
         oracle_engine: Engine,
     ) -> None:
         """Test batch processing with real database."""
@@ -217,7 +220,7 @@ class TestRealOracleTarget:
     def test_real_column_mapping(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: dict[str, object],
+        simple_schema: t.SingerMessage.SchemaMessage,
         oracle_engine: Engine,
     ) -> None:
         """Test column mapping with real database."""
@@ -326,7 +329,7 @@ class TestRealOracleTarget:
     def test_real_nested_json_handling(
         self,
         real_target: FlextTargetOracle,
-        nested_schema: dict[str, object],
+        nested_schema: t.SingerMessage.SchemaMessage,
         oracle_engine: Engine,
     ) -> None:
         """Test nested JSON handling with real database."""
@@ -418,7 +421,7 @@ class TestRealOracleTarget:
     def test_real_metrics_collection(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: dict[str, object],
+        simple_schema: t.SingerMessage.SchemaMessage,
     ) -> None:
         """Test metrics collection with real processing."""
         real_target.initialize()
@@ -455,38 +458,39 @@ class TestRealOracleTarget:
         assert "elapsed_time" in metrics
         assert metrics["status"] == "running"
 
-    def test_real_connection_pooling(self) -> None:
-        """Test connection pooling configuration."""
+    def test_config_bulk_and_batch_settings(self) -> None:
+        """Test bulk operations and batch size configuration."""
         config = FlextTargetOracleSettings(
-            host="localhost",
-            port=1521,
-            service_name="test",
-            username="test",
-            password="test",
-            connection_pool_size=10,
-            connection_pool_max_overflow=20,
+            oracle_host="localhost",
+            oracle_port=1521,
+            oracle_service_name="test",
+            oracle_user="test",
+            oracle_password=SecretStr("test"),
+            use_bulk_operations=True,
+            batch_size=5000,
         )
 
-        target = FlextTargetOracle(config)
-        assert target.config.connection_pool_size == 10
-        assert target.config.connection_pool_max_overflow == 20
+        # Verify configuration properties directly (no connection required)
+        assert config.use_bulk_operations is True
+        assert config.batch_size == 5000
+        assert config.oracle_host == "localhost"
+        assert config.oracle_port == 1521
 
-        # Test SSL configuration
+        # Test SSL configuration (use_ssl is a property, always returns True)
         ssl_config = FlextTargetOracleSettings(
-            host="localhost",
-            port=1521,
-            service_name="test",
-            username="test",
-            password="test",
-            use_ssl=True,
+            oracle_host="localhost",
+            oracle_port=1521,
+            oracle_service_name="test",
+            oracle_user="test",
+            oracle_password=SecretStr("test"),
         )
 
-        target = FlextTargetOracle(ssl_config)
-        assert target.config.use_ssl is True
+        assert ssl_config.use_ssl is True
+        assert ssl_config.oracle_service_name == "test"
 
     def test_real_type_mapping_customization(
         self,
-        real_target: object,
+        real_target: FlextTargetOracle,
     ) -> None:
         """Test custom type mapping with real database."""
         # Configure custom type mappings
@@ -581,7 +585,7 @@ class TestRealOracleTarget:
     def test_real_large_batch_processing(
         self,
         real_target: FlextTargetOracle,
-        simple_schema: dict[str, object],
+        simple_schema: t.SingerMessage.SchemaMessage,
         oracle_engine: Engine,
     ) -> None:
         """Test processing large batches with real database."""

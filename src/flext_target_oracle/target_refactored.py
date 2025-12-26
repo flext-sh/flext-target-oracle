@@ -12,9 +12,16 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import sys
-from typing import cast, override
+from typing import override
 
-from flext_core import FlextDispatcher, FlextLogger, FlextResult, FlextService
+from flext_core import (
+    FlextDispatcher,
+    FlextLogger,
+    FlextModels as m,
+    FlextResult,
+    FlextService,
+    FlextTypes as t,
+)
 from pydantic import Field, PrivateAttr
 
 from flext_target_oracle.constants import FlextTargetOracleConstants
@@ -59,24 +66,25 @@ class FlextTargetOracleCliService(FlextService[str]):
         self._use_dispatcher = use_dispatcher
 
         if use_dispatcher:
-            dispatcher_instance = FlextDispatcher(bus=self.command_bus)
-            register_result: FlextResult[object] = dispatcher_instance.register_handler(
-                self.command_handler,
+            # Use the already-initialized command_bus (FlextDispatcher) as the dispatcher
+            register_result: FlextResult[t.GeneralValueType] = (
+                self.command_bus.register_handler(
+                    self.command_handler,
+                )
             )
             if register_result.is_failure:
                 self.log_error(
                     f"Dispatcher registration failed: {register_result.error}",
                 )
-                self.command_bus.register_handler(self.command_handler)
                 self._dispatcher = None
             else:
-                self._dispatcher = dispatcher_instance
+                self._dispatcher = self.command_bus
         else:
             self.command_bus.register_handler(self.command_handler)
             self._dispatcher = None
 
     @override
-    def execute(self: object) -> FlextResult[str]:
+    def execute(self) -> FlextResult[str]:
         """Execute CLI service - implements FlextService abstract method."""
         return FlextResult[str].ok(
             "FLEXT Target Oracle CLI Service initialized successfully",
@@ -110,7 +118,7 @@ class FlextTargetOracleCliService(FlextService[str]):
 
     def _handle_validate_command(self, args: list[str]) -> FlextResult[str]:
         """Handle validate command using Flext CQRS SOURCE OF TRUTH."""
-        config_file = None
+        config_file: str | None = None
 
         i = 0
         while i < len(args):
@@ -124,7 +132,7 @@ class FlextTargetOracleCliService(FlextService[str]):
         command = OracleTargetCommandFactory.create_validate_command(config_file)
 
         # Execute using command bus - Flext CQRS SOURCE OF TRUTH
-        result: FlextResult[object] = self._dispatch(command)
+        result = self._dispatch(command)
 
         if result.is_success:
             self.log_info("Oracle target validation completed successfully")
@@ -134,8 +142,8 @@ class FlextTargetOracleCliService(FlextService[str]):
 
     def _handle_load_command(self, args: list[str]) -> FlextResult[str]:
         """Handle load command using Flext CQRS SOURCE OF TRUTH."""
-        config_file = None
-        state_file = None
+        config_file: str | None = None
+        state_file: str | None = None
 
         i = 0
         while i < len(args):
@@ -155,7 +163,7 @@ class FlextTargetOracleCliService(FlextService[str]):
         )
 
         # Execute using command bus - Flext CQRS SOURCE OF TRUTH
-        result: FlextResult[object] = self._dispatch(command)
+        result = self._dispatch(command)
 
         if result.is_success:
             self.log_info("Oracle target load completed successfully")
@@ -179,7 +187,7 @@ class FlextTargetOracleCliService(FlextService[str]):
         command = OracleTargetCommandFactory.create_about_command(format_type)
 
         # Execute using command bus - Flext CQRS SOURCE OF TRUTH
-        result: FlextResult[object] = self._dispatch(command)
+        result = self._dispatch(command)
 
         if result.is_success:
             # Output directly - no CLI helpers needed
@@ -187,17 +195,14 @@ class FlextTargetOracleCliService(FlextService[str]):
         self.log_error(f"About command failed: {result.error}")
         return FlextResult[str].fail(str(result.error))
 
-    def _dispatch(self, command: object) -> FlextResult[object]:
+    def _dispatch(self, command: m.Command) -> FlextResult[str]:
         """Dispatch commands via dispatcher when enabled."""
         if self._dispatcher is not None:
-            metadata = cast(
-                "dict[str, object]",
-                {
-                    "command": command.__class__.__name__,
-                    "source": self.__class__.__name__,
-                },
-            )
-            dispatch_result = self._dispatcher.dispatch(
+            metadata: dict[str, str] = {
+                "command": command.__class__.__name__,
+                "source": self.__class__.__name__,
+            }
+            dispatch_result: FlextResult[str] = self._dispatcher.dispatch(
                 command,
                 metadata=metadata,
             )
@@ -207,9 +212,10 @@ class FlextTargetOracleCliService(FlextService[str]):
                     extra={"command": command.__class__.__name__},
                 )
             return dispatch_result
-        return self.command_bus.execute(command)
+        # Fallback: use command_bus.dispatch() when _dispatcher is None
+        return self.command_bus.dispatch(command)
 
-    def _get_help_text(self: object) -> str:
+    def _get_help_text(self) -> str:
         """Get help text using pure string formatting - no external dependencies."""
         return """FLEXT Target Oracle - Modern Singer Target for Oracle Database
 
@@ -252,7 +258,7 @@ def main() -> None:
         cli_service = FlextTargetOracleCliService()
 
         # Execute CLI - direct method call, no wrappers
-        result: FlextResult[object] = cli_service.run_cli()
+        result = cli_service.run_cli()
 
         if result.is_failure:
             logger = FlextLogger(__name__)
