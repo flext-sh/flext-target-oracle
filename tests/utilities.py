@@ -17,7 +17,11 @@ from flext_target_oracle import u as FlextTargetOracleUtilities
 
 
 class TestsFlextTargetOracleUtilities(FlextTestsUtilities, FlextTargetOracleUtilities):
+    """Test utilities combining FlextTestsUtilities and project-specific utilities."""
+
     class Oracle(FlextTargetOracleUtilities.Oracle):
+        """Oracle domain utilities extending project utilities."""
+
         class Tests:
             """Internal tests declarations for test-only objects."""
 
