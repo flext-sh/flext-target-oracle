@@ -7,6 +7,8 @@ security considerations, and performance optimization.
 
 """
 
+from __future__ import annotations
+
 import datetime
 import logging
 import os
@@ -14,9 +16,8 @@ import signal
 import sys
 import time
 from datetime import UTC
-from typing import cast
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, FlextTypes as t
 from pydantic import SecretStr
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
@@ -196,8 +197,8 @@ class ProductionTargetManager:
 
     def process_singer_stream(
         self,
-        messages: list[object],
-    ) -> FlextResult[dict[str, object]]:
+        messages: list[t.GeneralValueType],
+    ) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:
@@ -208,11 +209,13 @@ class ProductionTargetManager:
 
         """
         if not self.target:
-            return FlextResult[dict[str, object]].fail("Target not initialized")
+            return FlextResult[dict[str, t.GeneralValueType]].fail(
+                "Target not initialized"
+            )
 
         logger.info("Processing Singer stream with %d messages", len(messages))
 
-        stats: dict[str, object] = {
+        stats: dict[str, t.GeneralValueType] = {
             "messages_processed": 0,
             "schemas_processed": 0,
             "records_processed": 0,
@@ -245,7 +248,9 @@ class ProductionTargetManager:
 
                 # Process message with error handling
                 if not self.target:
-                    return FlextResult[dict[str, object]].fail("Target not initialized")
+                    return FlextResult[dict[str, t.GeneralValueType]].fail(
+                        "Target not initialized"
+                    )
                 # Target is guaranteed to be not None at this point due to check above
                 result = self.target.process_singer_message(
                     message if isinstance(message, dict) else {},
@@ -296,8 +301,8 @@ class ProductionTargetManager:
                 # Merge finalization stats
                 final_stats = finalize_result.data
                 if isinstance(final_stats, dict):
-                    # Cast to ensure type compatibility
-                    final_stats_typed = dict[str, object](final_stats)
+                    # Type narrowing - final_stats is already dict[str, t.GeneralValueType]
+                    final_stats_typed: dict[str, t.GeneralValueType] = final_stats
                     stats.update(final_stats_typed)
                 logger.info("Target finalization completed successfully")
             else:
@@ -320,7 +325,7 @@ class ProductionTargetManager:
                 "Stream processing completed in %.2f seconds",
                 processing_duration,
             )
-            return FlextResult[dict[str, object]].ok(dict(stats))
+            return FlextResult[dict[str, t.GeneralValueType]].ok(dict(stats))
 
         except Exception as e:
             logger.exception("Unexpected error during stream processing")
@@ -328,9 +333,11 @@ class ProductionTargetManager:
             current_errors = stats.get("errors_encountered", 0)
             if isinstance(current_errors, int):
                 stats["errors_encountered"] = current_errors + 1
-            return FlextResult[dict[str, object]].fail(f"Stream processing error: {e}")
+            return FlextResult[dict[str, t.GeneralValueType]].fail(
+                f"Stream processing error: {e}"
+            )
 
-    def health_check(self) -> FlextResult[dict[str, object]]:
+    def health_check(self) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
@@ -339,7 +346,7 @@ class ProductionTargetManager:
         """
         logger.debug("Performing health check")
 
-        health_status: dict[str, object] = {
+        health_status: dict[str, t.GeneralValueType] = {
             "status": "healthy",
             "timestamp": time.time(),
             "checks": {},  # Will be populated with check results
@@ -375,13 +382,15 @@ class ProductionTargetManager:
                     metrics.update(target_metrics)
 
             logger.debug("Health check completed: %s", health_status["status"])
-            return FlextResult[dict[str, object]].ok(dict(health_status))
+            return FlextResult[dict[str, t.GeneralValueType]].ok(dict(health_status))
 
         except Exception as e:
             logger.exception("Health check failed")
             health_status["status"] = "unhealthy"
             health_status["error"] = str(e)
-            return FlextResult[dict[str, object]].fail(f"Health check error: {e}")
+            return FlextResult[dict[str, t.GeneralValueType]].fail(
+                f"Health check error: {e}"
+            )
 
     def shutdown(self) -> FlextResult[None]:
         """Graceful shutdown with resource cleanup.
@@ -495,17 +504,17 @@ def demonstrate_production_setup() -> None:
         raise
 
 
-def create_production_sample_stream() -> list[object]:
+def create_production_sample_stream() -> list[t.GeneralValueType]:
     """Create a realistic production data stream for demonstration.
 
     Returns:
       List of Singer messages representing a production workload
 
     """
-    messages: list[object] = []  # Flexible list for various message types
+    messages: list[t.GeneralValueType] = []  # Flexible list for various message types
 
     # Schema message for customer orders
-    schema_message = {
+    schema_message: dict[str, t.GeneralValueType] = {
         "type": "SCHEMA",
         "stream": "customer_orders",
         "schema": {
@@ -527,13 +536,13 @@ def create_production_sample_stream() -> list[object]:
         },
         "key_properties": ["order_id"],
     }
-    messages.append(cast("object", schema_message))
+    messages.append(schema_message)
 
     # Generate sample records (simulate production volume)
     base_date = datetime.datetime(2025, 1, 1, tzinfo=UTC)
 
     for i in range(1, 101):  # 100 sample orders
-        record_message = {
+        record_message: dict[str, t.GeneralValueType] = {
             "type": "RECORD",
             "stream": "customer_orders",
             "record": {
@@ -557,7 +566,7 @@ def create_production_sample_stream() -> list[object]:
                 + "Z",
             },
         }
-        messages.append(cast("object", record_message))
+        messages.append(record_message)
 
     # State message
     state_message = {

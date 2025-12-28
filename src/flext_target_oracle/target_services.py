@@ -6,14 +6,13 @@ and uses dependency injection via FlextContainer
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
-
 """
 
 from __future__ import annotations
 
 from typing import Protocol, override
 
-from flext_core import FlextService, r
+from flext_core import FlextService, FlextTypes as t, r
 from flext_db_oracle import FlextDbOracleApi
 from pydantic import Field
 
@@ -46,7 +45,7 @@ class SchemaServiceProtocol(Protocol):
     def ensure_table_exists(
         self,
         stream: SingerStreamModel,
-        schema: dict[str, object],
+        schema: dict[str, t.GeneralValueType],
         key_properties: list[str] | None = None,
     ) -> r[None]:
         """Ensure table exists for Singer stream."""
@@ -55,7 +54,7 @@ class SchemaServiceProtocol(Protocol):
         self,
         table_name: str,
         schema_name: str,
-    ) -> r[list[dict[str, object]]]:
+    ) -> r[list[dict[str, t.GeneralValueType]]]:
         """Get table column definitions."""
 
 
@@ -65,7 +64,7 @@ class BatchServiceProtocol(Protocol):
     def add_record(
         self,
         stream_name: str,
-        _record: dict[str, object],
+        _record: dict[str, t.GeneralValueType],
     ) -> r[None]:
         """Add record to batch processing queue."""
 
@@ -81,15 +80,15 @@ class RecordServiceProtocol(Protocol):
 
     def transform_record(
         self,
-        record: dict[str, object],
+        record: dict[str, t.GeneralValueType],
         stream: SingerStreamModel,
-    ) -> r[dict[str, object]]:
+    ) -> r[dict[str, t.GeneralValueType]]:
         """Transform Singer record for Oracle storage."""
 
     def validate_record(
         self,
-        record: dict[str, object],
-        schema: dict[str, object],
+        record: dict[str, t.GeneralValueType],
+        schema: dict[str, t.GeneralValueType],
     ) -> r[None]:
         """Validate record against schema."""
 
@@ -292,7 +291,7 @@ class OracleSchemaService(FlextService[None]):
     def ensure_table_exists(
         self,
         stream: SingerStreamModel,
-        schema: dict[str, object],
+        schema: dict[str, t.GeneralValueType],
         key_properties: list[str] | None = None,
     ) -> r[None]:
         """Ensure Oracle table exists for stream data.
@@ -329,7 +328,7 @@ class OracleSchemaService(FlextService[None]):
         self,
         table_name: str,
         schema_name: str | None = None,
-    ) -> r[list[dict[str, object]]]:
+    ) -> r[list[dict[str, t.GeneralValueType]]]:
         """Get column information for Oracle table.
 
         Args:
@@ -349,24 +348,24 @@ class OracleSchemaService(FlextService[None]):
                 )
 
                 if columns_result.is_failure:
-                    return r[list[dict[str, object]]].fail(
+                    return r[list[dict[str, t.GeneralValueType]]].fail(
                         f"Failed to get columns: {columns_result.error}",
                     )
 
-                return r[list[dict[str, object]]].ok(
-                    columns_result.data or [],
+                return r[list[dict[str, t.GeneralValueType]]].ok(
+                    columns_result.value or [],
                 )
 
         except Exception as e:
             self.log_error(f"Failed to get table columns: {e}")
-            return r[list[dict[str, object]]].fail(
+            return r[list[dict[str, t.GeneralValueType]]].fail(
                 f"Column retrieval failed: {e}",
             )
 
     def _create_table(
         self,
         stream: SingerStreamModel,
-        schema: dict[str, object],
+        schema: dict[str, t.GeneralValueType],
         key_properties: list[str] | None = None,
     ) -> r[None]:
         """Create Oracle table based on stream configuration.
@@ -450,11 +449,11 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
         ...,
         description="Oracle database API instance",
     )
-    batches: dict[str, object] = Field(
+    batches: dict[str, t.GeneralValueType] = Field(
         default_factory=dict,
         description="Batch storage",
     )
-    statistics: dict[str, object] = Field(
+    statistics: dict[str, t.GeneralValueType] = Field(
         default_factory=dict,
         description="Processing statistics",
     )
@@ -516,7 +515,7 @@ class OracleBatchService(FlextService[LoadStatisticsModel]):
     def add_record(
         self,
         stream_name: str,
-        _record: dict[str, object],
+        _record: dict[str, t.GeneralValueType],
     ) -> r[None]:
         """Add record to batch processing queue.
 
@@ -582,9 +581,9 @@ class OracleRecordService(FlextService[None]):
 
     def transform_record(
         self,
-        record: dict[str, object],
+        record: dict[str, t.GeneralValueType],
         stream: SingerStreamModel,
-    ) -> r[dict[str, object]]:
+    ) -> r[dict[str, t.GeneralValueType]]:
         """Transform Singer record for Oracle storage.
 
         Args:
@@ -602,7 +601,7 @@ class OracleRecordService(FlextService[None]):
                 self._utilities.SingerUtilities.validate_record_structure(record)
             )
             if validation_result.is_failure:
-                return r[dict[str, object]].fail(
+                return r[dict[str, t.GeneralValueType]].fail(
                     f"Record validation failed: {validation_result.error}",
                 )
 
@@ -657,18 +656,18 @@ class OracleRecordService(FlextService[None]):
                         f"Metadata addition failed: {metadata_result.error}",
                     )
 
-            return r[dict[str, object]].ok(transformed_record)
+            return r[dict[str, t.GeneralValueType]].ok(transformed_record)
 
         except Exception as e:
             self.log_error(f"Failed to transform record: {e}")
-            return r[dict[str, object]].fail(
+            return r[dict[str, t.GeneralValueType]].fail(
                 f"Record transformation failed: {e}",
             )
 
     def validate_record(
         self,
-        record: dict[str, object],
-        schema: dict[str, object],
+        record: dict[str, t.GeneralValueType],
+        schema: dict[str, t.GeneralValueType],
     ) -> r[None]:
         """Validate record against schema."""
         try:

@@ -21,6 +21,7 @@ class TestsFlextTargetOracleModels(FlextTestsModels, FlextTargetOracleModels):
 
     class Oracle(FlextTargetOracleModels.Oracle):
         """Oracle domain models extending project models."""
+
         class Tests:
             """Internal tests declarations for test-only objects."""
 

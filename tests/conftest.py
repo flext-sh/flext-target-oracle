@@ -319,7 +319,7 @@ def mock_loader() -> Mock:
 
 # Test Data Fixtures
 @pytest.fixture
-def schema() -> dict[str, object]:
+def schema() -> dict[str, t.GeneralValueType]:
     """Simple Singer schema message for unit testing."""
     return {
         "type": "SCHEMA",
@@ -337,7 +337,7 @@ def schema() -> dict[str, object]:
 
 
 @pytest.fixture
-def record() -> dict[str, object]:
+def record() -> dict[str, t.GeneralValueType]:
     """Simple Singer record message for unit testing."""
     return {
         "type": "RECORD",
@@ -440,7 +440,7 @@ def sample_record() -> t.SingerMessage.RecordMessage:
 
 
 @pytest.fixture
-def batch_records() -> list[dict[str, object]]:
+def batch_records() -> list[dict[str, t.GeneralValueType]]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -459,7 +459,7 @@ def batch_records() -> list[dict[str, object]]:
 
 
 @pytest.fixture
-def state_message() -> dict[str, object]:
+def state_message() -> dict[str, t.GeneralValueType]:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -477,10 +477,10 @@ def state_message() -> dict[str, object]:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema: dict[str, object],
-    sample_record: dict[str, object],
-    state_message: dict[str, object],
-) -> list[dict[str, object]]:
+    simple_schema: dict[str, t.GeneralValueType],
+    sample_record: dict[str, t.GeneralValueType],
+    state_message: dict[str, t.GeneralValueType],
+) -> list[dict[str, t.GeneralValueType]]:
     """Complete Singer message stream for testing."""
     return [
         simple_schema,
@@ -542,7 +542,7 @@ def connected_loader(
 
 # Performance Testing Fixtures
 @pytest.fixture
-def large_dataset() -> list[dict[str, object]]:
+def large_dataset() -> list[dict[str, t.GeneralValueType]]:
     """Generate large dataset for performance testing."""
     schema = {
         "type": "SCHEMA",
@@ -573,7 +573,7 @@ def large_dataset() -> list[dict[str, object]]:
         for i in range(10000)  # 10k records
     ]
 
-    result: list[dict[str, object]] = [schema]
+    result: list[dict[str, t.GeneralValueType]] = [schema]
     result.extend(records)
     return result
 

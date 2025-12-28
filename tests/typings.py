@@ -12,12 +12,16 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_tests import FlextTestsTypes
+
 from flext_target_oracle import t as FlextTargetOracleTypes
 
 
 class TestsFlextTargetOracleTypes(FlextTestsTypes, FlextTargetOracleTypes):
+    """Test types combining FlextTestsTypes and project-specific types."""
 
     class Oracle(FlextTargetOracleTypes.Oracle):
+        """Oracle domain types extending project types."""
+
         class Tests:
             """Internal tests declarations for test-only objects."""
 
