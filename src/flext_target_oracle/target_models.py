@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from flext_core import FlextModels, FlextResult
+from flext_core import FlextModels, FlextResult, FlextTypes as t
 from pydantic import BaseModel, Field, field_validator
 
 from flext_target_oracle.constants import c
@@ -223,7 +223,7 @@ class BatchProcessingModel(FlextModels.ArbitraryTypesModel):
         gt=0,
         le=50000,
     )
-    current_batch: list[dict[str, object]] = Field(
+    current_batch: list[dict[str, t.GeneralValueType]] = Field(
         default_factory=list,
         description="Current batch of records",
     )
@@ -257,7 +257,7 @@ class BatchProcessingModel(FlextModels.ArbitraryTypesModel):
         """Current number of records in the batch."""
         return len(self.current_batch)
 
-    def add_record(self, record: dict[str, object]) -> BatchProcessingModel:
+    def add_record(self, record: dict[str, t.GeneralValueType]) -> BatchProcessingModel:
         """Add a record to the current batch (immutable operation)."""
         new_batch = self.current_batch.copy()
         new_batch.append(record)
@@ -454,7 +454,7 @@ class OracleTableMetadataModel(FlextModels.ArbitraryTypesModel):
         min_length=1,
         max_length=128,
     )
-    columns: list[dict[str, object]] = Field(
+    columns: list[dict[str, t.GeneralValueType]] = Field(
         default_factory=list,
         description="List of column definitions",
     )
@@ -462,7 +462,7 @@ class OracleTableMetadataModel(FlextModels.ArbitraryTypesModel):
         default_factory=list,
         description="List of primary key column names",
     )
-    indexes: list[dict[str, object]] = Field(
+    indexes: list[dict[str, t.GeneralValueType]] = Field(
         default_factory=list,
         description="List of index definitions",
     )

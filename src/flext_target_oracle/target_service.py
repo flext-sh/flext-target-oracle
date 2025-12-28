@@ -13,14 +13,14 @@ from __future__ import annotations
 import time
 from typing import ClassVar, override
 
-from flext_core import FlextResult, FlextService, t
+from flext_core import FlextResult, FlextService, FlextTypes as t
 from pydantic import Field
 
 from flext_target_oracle.settings import FlextTargetOracleSettings
 from flext_target_oracle.target_loader import FlextTargetOracleLoader
 
 
-class FlextTargetOracleService(FlextService[dict[str, object]]):
+class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
     """Oracle Singer Target service using FlextService SOURCE OF TRUTH.
 
     ZERO DUPLICATION - Uses FlextMeltanoTarget and FlextTargetOracleLoader.
@@ -39,7 +39,7 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
         default_factory=dict,
         description="Stream schemas",
     )
-    _state: dict[str, object] = Field(
+    _state: dict[str, t.GeneralValueType] = Field(
         default_factory=dict,
         description="Singer state",
     )
@@ -55,21 +55,21 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
 
         # Set Pydantic fields as instance attributes
         self.name = "flext-oracle-target"
-        self.config: dict[str, object] = config
+        self.config: dict[str, t.GeneralValueType] = config
         self.loader = loader
         self._schemas = {}
         self._state = {}
 
     @override
-    def execute(self: object) -> FlextResult[dict[str, object]]:
+    def execute(self: object) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Execute domain service - test connection and return status."""
         connection_result: FlextResult[object] = self.loader.test_connection()
         if connection_result.is_failure:
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[dict[str, t.GeneralValueType]].fail(
                 f"Oracle target service connection failed: {connection_result.error}",
             )
 
-        return FlextResult[dict[str, object]].ok(
+        return FlextResult[dict[str, t.GeneralValueType]].ok(
             {
                 "name": self.name,
                 "status": "ready",
@@ -86,16 +86,16 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
         """Test Oracle database connectivity."""
         return self.loader.test_connection()
 
-    def discover_catalog(self: object) -> FlextResult[dict[str, object]]:
+    def discover_catalog(self: object) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Discover available schemas and generate Singer catalog."""
         try:
-            streams_list: list[dict[str, object]] = []
-            catalog: dict[str, object] = {
+            streams_list: list[dict[str, t.GeneralValueType]] = []
+            catalog: dict[str, t.GeneralValueType] = {
                 "streams": "streams_list",
             }
 
             for stream_name in self._schemas:
-                stream_entry: dict[str, object] = {
+                stream_entry: dict[str, t.GeneralValueType] = {
                     "tap_stream_id": "stream_name",
                     "stream": "stream_name",
                     "schema": "schema",
@@ -113,17 +113,17 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
                 }
                 streams_list.append(stream_entry)
 
-            return FlextResult[dict[str, object]].ok(catalog)
+            return FlextResult[dict[str, t.GeneralValueType]].ok(catalog)
 
         except Exception as e:
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[dict[str, t.GeneralValueType]].fail(
                 f"Failed to discover catalog: {e}",
             )
 
     def process_singer_messages(
         self,
-        messages: list[dict[str, object]],
-    ) -> FlextResult[dict[str, object]]:
+        messages: list[dict[str, t.GeneralValueType]],
+    ) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Process Singer messages (SCHEMA, RECORD, STATE)."""
         try:
             records_processed = 0
@@ -132,7 +132,7 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
             for message in messages:
                 result: FlextResult[object] = self._process_single_message(message)
                 if result.is_failure:
-                    return FlextResult[dict[str, object]].fail(
+                    return FlextResult[dict[str, t.GeneralValueType]].fail(
                         f"Failed to process message: {result.error}",
                     )
 
@@ -142,7 +142,7 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
             # Finalize all streams
             finalize_result: FlextResult[object] = self.loader.finalize_all_streams()
             if finalize_result.is_failure:
-                return FlextResult[dict[str, object]].fail(
+                return FlextResult[dict[str, t.GeneralValueType]].fail(
                     f"Failed to finalize streams: {finalize_result.error}",
                 )
 
@@ -156,16 +156,16 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
                 "state_updates": self._state,
             }
 
-            return FlextResult[dict[str, object]].ok(result_data)
+            return FlextResult[dict[str, t.GeneralValueType]].ok(result_data)
 
         except Exception as e:
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[dict[str, t.GeneralValueType]].fail(
                 f"Message processing failed: {e}",
             )
 
     def _process_single_message(
         self,
-        message: dict[str, object],
+        message: dict[str, t.GeneralValueType],
     ) -> FlextResult[None]:
         """Process a single Singer message."""
         message_type = message.get("type")
@@ -178,7 +178,9 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
             return self._handle_state(message)
         return FlextResult[None].fail(f"Unknown message type: {message_type}")
 
-    def _handle_schema(self, message: dict[str, object]) -> FlextResult[None]:
+    def _handle_schema(
+        self, message: dict[str, t.GeneralValueType]
+    ) -> FlextResult[None]:
         """Handle SCHEMA message."""
         try:
             stream_name = message.get("stream")
@@ -214,11 +216,13 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
         except Exception as e:
             return FlextResult[None].fail(f"Schema handling failed: {e}")
 
-    def _handle_record(self, message: dict[str, object]) -> FlextResult[None]:
+    def _handle_record(
+        self, message: dict[str, t.GeneralValueType]
+    ) -> FlextResult[None]:
         """Handle RECORD message."""
         try:
             stream_name = message.get("stream")
-            record_data: dict[str, object] = message.get("record")
+            record_data: dict[str, t.GeneralValueType] = message.get("record")
 
             if not isinstance(stream_name, str):
                 return FlextResult[None].fail("Invalid stream name in record message")
@@ -239,7 +243,9 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
         except Exception as e:
             return FlextResult[None].fail(f"Record handling failed: {e}")
 
-    def _handle_state(self, message: dict[str, object]) -> FlextResult[None]:
+    def _handle_state(
+        self, message: dict[str, t.GeneralValueType]
+    ) -> FlextResult[None]:
         """Handle STATE message."""
         try:
             state_value = message.get("value")
@@ -252,7 +258,7 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
         except Exception as e:
             return FlextResult[None].fail(f"State handling failed: {e}")
 
-    def finalize(self: object) -> FlextResult[dict[str, object]]:
+    def finalize(self: object) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Finalize target processing and return complete statistics."""
         try:
             result: FlextResult[object] = self.loader.finalize_all_streams()
@@ -263,9 +269,11 @@ class FlextTargetOracleService(FlextService[dict[str, object]]):
 
         except Exception as e:
             self.log_error("Failed to finalize target", extra={"error": str(e)})
-            return FlextResult[dict[str, object]].fail(f"Finalization failed: {e}")
+            return FlextResult[dict[str, t.GeneralValueType]].fail(
+                f"Finalization failed: {e}"
+            )
 
-    def get_implementation_metrics(self: object) -> dict[str, object]:
+    def get_implementation_metrics(self: object) -> dict[str, t.GeneralValueType]:
         """Get Oracle-specific implementation metrics."""
         return {
             "oracle_host": self.config.oracle_host,

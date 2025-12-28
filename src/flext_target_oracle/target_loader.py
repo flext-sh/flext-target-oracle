@@ -15,7 +15,7 @@ import json
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
-from flext_core import FlextLogger, FlextResult, FlextService
+from flext_core import FlextLogger, FlextResult, FlextService, FlextTypes as t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import Field
 
@@ -29,7 +29,7 @@ from flext_target_oracle.target_exceptions import (
 logger = FlextLogger(__name__)
 
 
-class FlextTargetOracleLoader(FlextService[dict[str, object]]):
+class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
     """Oracle data loader using FlextService and flext-db-oracle SOURCE OF TRUTH.
 
     ZERO DUPLICATION - Uses ONLY public flext-db-oracle API.
@@ -43,7 +43,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
     oracle_api: FlextDbOracleApi = Field(description="Oracle API instance")
 
     # Internal state fields (without underscore for Pydantic)
-    record_buffers: dict[str, list[dict[str, object]]] = Field(
+    record_buffers: dict[str, list[dict[str, t.GeneralValueType]]] = Field(
         default_factory=dict,
         description="Record buffers by stream",
     )
@@ -71,7 +71,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
             super().__init__()
 
             # Set Pydantic fields as instance attributes
-            self.config: dict[str, object] = config
+            self.config: dict[str, t.GeneralValueType] = config
             self.oracle_api = oracle_api
             self.record_buffers = {}
             self.total_records = 0
@@ -81,15 +81,15 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
             raise FlextTargetOracleConnectionError(msg) from e
 
     @override
-    def execute(self: object) -> FlextResult[dict[str, object]]:
+    def execute(self: object) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Execute domain service - returns connection test result."""
         connection_result: FlextResult[object] = self.test_connection()
         if connection_result.is_failure:
-            return FlextResult[dict[str, object]].fail(
+            return FlextResult[dict[str, t.GeneralValueType]].fail(
                 f"Oracle connection failed: {connection_result.error}",
             )
 
-        return FlextResult[dict[str, object]].ok(
+        return FlextResult[dict[str, t.GeneralValueType]].ok(
             {
                 "status": "ready",
                 "host": self.config.oracle_host,
@@ -164,7 +164,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
     def insert_records(
         self,
         stream_name: str,
-        records: list[dict[str, object]],
+        records: list[dict[str, t.GeneralValueType]],
     ) -> FlextResult[None]:
         """Insert multiple records - convenience wrapper used by tests.
 
@@ -188,7 +188,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
     def ensure_table_exists(
         self,
         stream_name: str,
-        schema: dict[str, object],
+        schema: dict[str, t.GeneralValueType],
         _key_properties: list[str] | None = None,
     ) -> FlextResult[None]:
         """Ensure table exists using flext-db-oracle API with correct table creation."""
@@ -207,7 +207,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
                     )
 
                 # Handle case where tables_result.data might be None
-                existing_tables_raw: object | None = tables_result.data
+                existing_tables_raw: object | None = tables_result.value
                 if existing_tables_raw is None:
                     existing_tables = []
                 elif isinstance(existing_tables_raw, list):
@@ -241,7 +241,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
     def load_record(
         self,
         stream_name: str,
-        record_data: dict[str, object],
+        record_data: dict[str, t.GeneralValueType],
     ) -> FlextResult[None]:
         """Load record with batching."""
         try:
@@ -261,7 +261,9 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
             self.log_error("Failed to load record", extra={"error": str(e)})
             return FlextResult[None].fail(f"Record loading failed: {e}")
 
-    def finalize_all_streams(self: object) -> FlextResult[dict[str, object]]:
+    def finalize_all_streams(
+        self: object,
+    ) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Finalize all streams and return stats using standardized models."""
         try:
             start_time = str(datetime.now(UTC))
@@ -289,7 +291,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
             loading_operation.end_time = end_time
 
             # Use models to structure complete statistics
-            stats: dict[str, object] = {
+            stats: dict[str, t.GeneralValueType] = {
                 "total_records": self.total_records,
                 "streams_processed": len(self.record_buffers),
                 "status": "completed",
@@ -300,16 +302,18 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
                 },
             }
 
-            return FlextResult[dict[str, object]].ok(stats)
+            return FlextResult[dict[str, t.GeneralValueType]].ok(stats)
 
         except Exception as e:
             self.log_error("Failed to finalize streams", extra={"error": str(e)})
-            return FlextResult[dict[str, object]].fail(f"Finalization failed: {e}")
+            return FlextResult[dict[str, t.GeneralValueType]].fail(
+                f"Finalization failed: {e}"
+            )
 
     def _build_create_table_sql(
         self,
         table_name: str,
-        _schema: dict[str, object],
+        _schema: dict[str, t.GeneralValueType],
     ) -> str:
         """Build CREATE TABLE SQL statement."""
         schema_name = self.config.default_target_schema
@@ -333,7 +337,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, object]]):
     def _flush_batch(self, stream_name: str) -> FlextResult[None]:
         """Flush batch using flext-db-oracle API exclusively - NO direct SQLAlchemy."""
         try:
-            records: list[object] = self.record_buffers.get(stream_name, [])
+            records: list[t.GeneralValueType] = self.record_buffers.get(stream_name, [])
             if not records:
                 return FlextResult[None].ok(None)
 

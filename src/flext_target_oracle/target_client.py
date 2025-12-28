@@ -63,7 +63,7 @@ class FlextTargetOracle(
     @override
     def __init__(
         self,
-        config: FlextTargetOracleSettings | dict[str, object] | None = None,
+        config: FlextTargetOracleSettings | dict[str, t.GeneralValueType] | None = None,
         **_data: object,
     ) -> None:
         """Initialize Oracle Singer Target with configuration validation."""
@@ -358,7 +358,7 @@ class FlextTargetOracle(
         """Handle RECORD message with data loading."""
         try:
             stream_name = message.get("stream")
-            record_data: dict[str, object] = message.get("record")
+            record_data: dict[str, t.GeneralValueType] = message.get("record")
 
             if not isinstance(stream_name, str):
                 return r[None].fail("Invalid stream name in record message")

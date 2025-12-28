@@ -13,7 +13,7 @@ from __future__ import annotations
 import warnings
 from typing import Self
 
-from flext_core import FlextConstants, FlextResult, FlextSettings
+from flext_core import FlextConstants, FlextResult, FlextSettings, FlextTypes as t
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
@@ -290,9 +290,9 @@ class FlextTargetOracleSettings(FlextSettings):
             return FlextResult[None].fail(f"Business rules validation failed: {e}")
 
     # Configuration helper methods that leverage the base model
-    def get_oracle_config(self) -> dict[str, object]:
+    def get_oracle_config(self) -> dict[str, t.GeneralValueType]:
         """Convert to flext-db-oracle configuration format."""
-        oracle_config: dict[str, object] = {
+        oracle_config: dict[str, t.GeneralValueType] = {
             "host": self.oracle_host,
             "port": self.oracle_port,
             "service_name": self.oracle_service_name,
@@ -315,7 +315,7 @@ class FlextTargetOracleSettings(FlextSettings):
 
         return oracle_config
 
-    def get_target_config(self) -> dict[str, object]:
+    def get_target_config(self) -> dict[str, t.GeneralValueType]:
         """Get target-specific configuration dictionary."""
         return {
             "default_target_schema": self.default_target_schema,
@@ -363,7 +363,7 @@ class FlextTargetOracleSettings(FlextSettings):
         **_overrides: object,
     ) -> FlextTargetOracleSettings:
         """Create configuration for specific environment using enhanced singleton pattern."""
-        env_overrides: dict[str, object] = {}
+        env_overrides: dict[str, t.GeneralValueType] = {}
 
         if environment == "production":
             env_overrides.update({

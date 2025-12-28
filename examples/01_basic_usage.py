@@ -24,7 +24,7 @@ Usage:
 import logging
 import os
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, FlextTypes as t
 from pydantic import SecretStr
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
@@ -66,11 +66,11 @@ def create_configuration() -> FlextTargetOracleSettings:
     return config
 
 
-def create_sample_schema_message() -> dict[str, object]:
+def create_sample_schema_message() -> dict[str, t.GeneralValueType]:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
-      dict[str, object]: Singer SCHEMA message for users table
+      dict[str, t.GeneralValueType]: Singer SCHEMA message for users table
 
     """
     return {
@@ -91,11 +91,11 @@ def create_sample_schema_message() -> dict[str, object]:
     }
 
 
-def create_sample_record_messages() -> list[dict[str, object]]:
+def create_sample_record_messages() -> list[dict[str, t.GeneralValueType]]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
-      List[dict[str, object]]: List of Singer RECORD messages
+      List[dict[str, t.GeneralValueType]]: List of Singer RECORD messages
 
     """
     return [
@@ -135,11 +135,11 @@ def create_sample_record_messages() -> list[dict[str, object]]:
     ]
 
 
-def create_sample_state_message() -> dict[str, object]:
+def create_sample_state_message() -> dict[str, t.GeneralValueType]:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
-      dict[str, object]: Singer STATE message with bookmark information
+      dict[str, t.GeneralValueType]: Singer STATE message with bookmark information
 
     """
     return {
@@ -239,7 +239,7 @@ def demonstrate_basic_usage() -> None:
             return
 
         # Display statistics
-        stats = stats_result.data
+        stats = stats_result.value
         logger.info("=== Processing Statistics ===")
         logger.info(f"Total records processed: {stats.get('total_records', 0)}")
         logger.info(f"Successful records: {stats.get('successful_records', 0)}")
@@ -283,7 +283,7 @@ def demonstrate_error_handling() -> None:
     target = FlextTargetOracle(config)
 
     # Invalid message type
-    invalid_message: dict[str, object] = {"type": "INVALID", "data": "test"}
+    invalid_message: dict[str, t.GeneralValueType] = {"type": "INVALID", "data": "test"}
     result = target.process_singer_message(invalid_message)
 
     if result.is_failure:

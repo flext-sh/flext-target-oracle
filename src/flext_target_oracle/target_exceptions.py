@@ -10,9 +10,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import override
+from typing import cast, override
 
-from flext_core import FlextConstants, FlextExceptions
+from flext_core import FlextConstants, FlextExceptions, FlextTypes as t
 
 
 class FlextTargetOracleExceptions(FlextExceptions):
@@ -39,7 +39,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             user: str | None = None,
             dsn: str | None = None,
             code: str | None = None,
-            context: dict[str, object] | None = None,
+            context: dict[str, t.GeneralValueType] | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -56,12 +56,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if dsn is not None:
                 oracle_context["dsn"] = dsn
 
-            oracle_context.update(kwargs)
+                oracle_context.update(cast("dict[str, t.GeneralValueType]", kwargs))
 
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.CONNECTION_ERROR,
-                context=oracle_context,
+                context=cast("dict[str, t.GeneralValueType] | None", oracle_context),
                 _correlation_id=correlation_id,
             )
             # Oracle-specific attributes beyond parent's host/port/timeout
@@ -84,7 +84,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             auth_method: str | None = None,
             wallet_location: str | None = None,
             code: str | None = None,
-            context: dict[str, object] | None = None,
+            context: dict[str, t.GeneralValueType] | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -97,17 +97,17 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if wallet_location is not None:
                 oracle_context["wallet_location"] = wallet_location
 
-            oracle_context.update(kwargs)
+                oracle_context.update(cast("dict[str, t.GeneralValueType]", kwargs))
 
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.AUTHENTICATION_ERROR,
-                context=oracle_context,
+                context=cast("dict[str, t.GeneralValueType] | None", oracle_context),
                 _correlation_id=correlation_id,
             )
             # Oracle-specific attributes
             self.user = oracle_context.get("user")
-            self.auth_method = oracle_context.get("auth_method")
+            self.auth_method = cast("str | None", oracle_context.get("auth_method"))
             self.wallet_location = oracle_context.get("wallet_location")
 
     class ProcessingError(FlextExceptions.OperationError):
@@ -120,10 +120,10 @@ class FlextTargetOracleExceptions(FlextExceptions):
             *,
             stream_name: str | None = None,
             record_count: int | None = None,
-            error_records: list[dict[str, object]] | None = None,
+            error_records: list[dict[str, t.GeneralValueType]] | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: dict[str, object] | None = None,
+            context: dict[str, t.GeneralValueType] | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -138,19 +138,19 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if operation is not None:
                 oracle_context["operation"] = operation
 
-            oracle_context.update(kwargs)
+                oracle_context.update(cast("dict[str, t.GeneralValueType]", kwargs))
 
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.PROCESSING_ERROR,
-                context=oracle_context,
+                context=cast("dict[str, t.GeneralValueType] | None", oracle_context),
                 _correlation_id=correlation_id,
             )
             # Oracle-specific attributes
             self.stream_name = oracle_context.get("stream_name")
             self.record_count = oracle_context.get("record_count")
             self.error_records = oracle_context.get("error_records")
-            self.operation = oracle_context.get("operation")
+            self.operation = cast("str | None", oracle_context.get("operation"))
 
     class OracleTimeoutError(FlextExceptions.TimeoutError):
         """Oracle timeout error using flext-core foundation."""
@@ -169,7 +169,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             schema_hash: str | None = None,
             validation_errors: list[str] | None = None,
             code: str | None = None,
-            context: dict[str, object] | None = None,
+            context: dict[str, t.GeneralValueType] | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -184,12 +184,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if validation_errors is not None:
                 oracle_context["validation_errors"] = validation_errors
 
-            oracle_context.update(kwargs)
+                oracle_context.update(cast("dict[str, t.GeneralValueType]", kwargs))
 
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.VALIDATION_ERROR,
-                context=oracle_context,
+                context=cast("dict[str, t.GeneralValueType] | None", oracle_context),
                 _correlation_id=correlation_id,
             )
             # Oracle-specific attributes
@@ -213,7 +213,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             table_name: str | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: dict[str, object] | None = None,
+            context: dict[str, t.GeneralValueType] | None = None,
             correlation_id: str | None = None,
             **kwargs: object,
         ) -> None:
@@ -226,12 +226,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if operation is not None:
                 oracle_context["operation"] = operation
 
-            oracle_context.update(kwargs)
+                oracle_context.update(cast("dict[str, t.GeneralValueType]", kwargs))
 
             super().__init__(
                 message=message,
                 code=code or FlextConstants.Errors.OPERATION_ERROR,
-                context=oracle_context,
+                context=cast("dict[str, t.GeneralValueType] | None", oracle_context),
                 correlation_id=correlation_id,
             )
             # Oracle-specific attributes
