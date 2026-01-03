@@ -81,7 +81,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             raise FlextTargetOracleConnectionError(msg) from e
 
     @override
-    def execute(self: object) -> FlextResult[dict[str, t.GeneralValueType]]:
+    def execute(self) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Execute domain service - returns connection test result."""
         connection_result: FlextResult[object] = self.test_connection()
         if connection_result.is_failure:
@@ -98,7 +98,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             },
         )
 
-    def test_connection(self: object) -> FlextResult[None]:
+    def test_connection(self) -> FlextResult[None]:
         """Test connection to Oracle database using flext-db-oracle API."""
         try:
             # Use Oracle API context manager correctly
@@ -119,7 +119,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             self.log_error("Failed to connect to Oracle", extra={"error": str(e)})
             return FlextResult[None].fail(f"Connection failed: {e}")
 
-    def connect(self: object) -> FlextResult[None]:
+    def connect(self) -> FlextResult[None]:
         """Establish connection using underlying FlextDbOracleApi.
 
         Exposed for tests and parity with previous loader helpers.
@@ -143,7 +143,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             self.log_error("Failed to connect loader", extra={"error": str(e)})
             return FlextResult[None].fail(f"Connect failed: {e}")
 
-    def disconnect(self: object) -> FlextResult[None]:
+    def disconnect(self) -> FlextResult[None]:
         """Disconnect underlying FlextDbOracleApi (exposed for tests)."""
         try:
             result: FlextResult[object] = self.oracle_api.disconnect()
@@ -262,7 +262,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             return FlextResult[None].fail(f"Record loading failed: {e}")
 
     def finalize_all_streams(
-        self: object,
+        self,
     ) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Finalize all streams and return stats using standardized models."""
         try:

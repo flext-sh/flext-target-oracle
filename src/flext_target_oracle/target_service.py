@@ -61,7 +61,7 @@ class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
         self._state = {}
 
     @override
-    def execute(self: object) -> FlextResult[dict[str, t.GeneralValueType]]:
+    def execute(self) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Execute domain service - test connection and return status."""
         connection_result: FlextResult[object] = self.loader.test_connection()
         if connection_result.is_failure:
@@ -78,15 +78,15 @@ class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
             },
         )
 
-    def validate_configuration(self: object) -> FlextResult[None]:
+    def validate_configuration(self) -> FlextResult[None]:
         """Validate the current configuration."""
         return self.config.validate_domain_rules()
 
-    def test_connection(self: object) -> FlextResult[None]:
+    def test_connection(self) -> FlextResult[None]:
         """Test Oracle database connectivity."""
         return self.loader.test_connection()
 
-    def discover_catalog(self: object) -> FlextResult[dict[str, t.GeneralValueType]]:
+    def discover_catalog(self) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Discover available schemas and generate Singer catalog."""
         try:
             streams_list: list[dict[str, t.GeneralValueType]] = []
@@ -258,7 +258,7 @@ class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
         except Exception as e:
             return FlextResult[None].fail(f"State handling failed: {e}")
 
-    def finalize(self: object) -> FlextResult[dict[str, t.GeneralValueType]]:
+    def finalize(self) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Finalize target processing and return complete statistics."""
         try:
             result: FlextResult[object] = self.loader.finalize_all_streams()
@@ -273,7 +273,7 @@ class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
                 f"Finalization failed: {e}"
             )
 
-    def get_implementation_metrics(self: object) -> dict[str, t.GeneralValueType]:
+    def get_implementation_metrics(self) -> dict[str, t.GeneralValueType]:
         """Get Oracle-specific implementation metrics."""
         return {
             "oracle_host": self.config.oracle_host,

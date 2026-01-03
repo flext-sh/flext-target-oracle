@@ -100,7 +100,7 @@ class OracleConnectionModel(BaseModel):
             return f"{protocol}://{self.username}@{self.host}:{self.port}/{self.service_name}"
         return f"{protocol}://{self.host}:{self.port}/{self.service_name}"
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[None]:
         """Validate Oracle connection business rules."""
         # Validate host is reachable format
         if not self.host or self.host.isspace():
@@ -190,7 +190,7 @@ class SingerStreamModel(FlextModels.ArbitraryTypesModel):
 
         return table_name
 
-    def get_qualified_table_name(self: object) -> str:
+    def get_qualified_table_name(self) -> str:
         """Get fully qualified Oracle table name."""
         return f"{self.schema_name}.{self.table_name}"
 
@@ -243,17 +243,17 @@ class BatchProcessingModel(FlextModels.ArbitraryTypesModel):
     )
 
     @property
-    def has_pending_records(self: object) -> bool:
+    def has_pending_records(self) -> bool:
         """Whether there are records waiting to be flushed."""
         return len(self.current_batch) > 0
 
     @property
-    def is_batch_full(self: object) -> bool:
+    def is_batch_full(self) -> bool:
         """Whether the current batch is full and ready for processing."""
         return len(self.current_batch) >= self.batch_size
 
     @property
-    def current_batch_size(self: object) -> int:
+    def current_batch_size(self) -> int:
         """Current number of records in the batch."""
         return len(self.current_batch)
 
@@ -270,7 +270,7 @@ class BatchProcessingModel(FlextModels.ArbitraryTypesModel):
             },
         )
 
-    def clear_batch(self: object) -> BatchProcessingModel:
+    def clear_batch(self) -> BatchProcessingModel:
         """Clear the current batch after processing (immutable operation)."""
         return self.model_copy(
             update={
@@ -280,7 +280,7 @@ class BatchProcessingModel(FlextModels.ArbitraryTypesModel):
             },
         )
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for batch processing."""
         if not self.stream_name or self.stream_name.isspace():
             return FlextResult[None].fail("Stream name cannot be empty or whitespace")
@@ -353,39 +353,39 @@ class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
     )
 
     @property
-    def is_completed(self: object) -> bool:
+    def is_completed(self) -> bool:
         """Whether processing has completed."""
         return self.processing_end_time is not None
 
     @property
-    def success_rate(self: object) -> float:
+    def success_rate(self) -> float:
         """Calculate success rate as percentage."""
         if self.total_records_processed == 0:
             return 0.0
         return (self.successful_records / self.total_records_processed) * 100.0
 
     @property
-    def processing_duration_seconds(self: object) -> float:
+    def processing_duration_seconds(self) -> float:
         """Calculate processing duration in seconds."""
         end_time = self.processing_end_time or datetime.now(UTC)
         return (end_time - self.processing_start_time).total_seconds()
 
     @property
-    def average_batch_size(self: object) -> float:
+    def average_batch_size(self) -> float:
         """Calculate average batch size."""
         if self.batches_processed == 0:
             return 0.0
         return self.total_records_processed / self.batches_processed
 
     @property
-    def throughput_records_per_second(self: object) -> float:
+    def throughput_records_per_second(self) -> float:
         """Calculate processing throughput in records per second."""
         duration = self.processing_duration_seconds
         if duration == 0:
             return 0.0
         return self.successful_records / duration
 
-    def finalize(self: object) -> LoadStatisticsModel:
+    def finalize(self) -> LoadStatisticsModel:
         """Mark statistics as completed (immutable operation)."""
         return self.model_copy(
             update={
@@ -405,7 +405,7 @@ class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
             },
         )
 
-    def validate_business_rules(self: object) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[None]:
         """Validate business rules for load statistics."""
         if not self.stream_name or self.stream_name.isspace():
             return FlextResult[None].fail("Stream name cannot be empty or whitespace")
@@ -483,7 +483,7 @@ class OracleTableMetadataModel(FlextModels.ArbitraryTypesModel):
         description="Associated Singer stream name",
     )
 
-    def get_qualified_name(self: object) -> str:
+    def get_qualified_name(self) -> str:
         """Get fully qualified table name."""
         return f"{self.schema_name}.{self.table_name}"
 
@@ -492,7 +492,7 @@ class OracleTableMetadataModel(FlextModels.ArbitraryTypesModel):
         column_names = [str(col.get("name", "")).upper() for col in self.columns]
         return column_name.upper() in column_names
 
-    def get_column_names(self: object) -> list[str]:
+    def get_column_names(self) -> list[str]:
         """Get list of all column names."""
         return [str(col.get("name", "")) for col in self.columns if col.get("name")]
 

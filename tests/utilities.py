@@ -13,13 +13,13 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsUtilities
 
-from flext_target_oracle import u as FlextTargetOracleUtilities
+from flext_target_oracle import u
 
 
-class TestsFlextTargetOracleUtilities(FlextTestsUtilities, FlextTargetOracleUtilities):
+class TestsFlextTargetOracleUtilities(FlextTestsUtilities, u):
     """Test utilities combining FlextTestsUtilities and project-specific utilities."""
 
-    class Oracle(FlextTargetOracleUtilities.Oracle):
+    class Oracle(u.Oracle):
         """Oracle domain utilities extending project utilities."""
 
         class Tests:

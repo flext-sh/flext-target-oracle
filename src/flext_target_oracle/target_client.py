@@ -165,7 +165,7 @@ class FlextTargetOracle(
             return r[bool].fail(f"Connection test failed: {e}")
 
     def discover_catalog(
-        self: object,
+        self,
     ) -> r[t.Core.Dict]:
         """Discover available schemas and generate Singer catalog."""
         try:
@@ -280,7 +280,7 @@ class FlextTargetOracle(
         """Process individual Singer message - compatible."""
         return self._process_single_message(message)
 
-    def finalize(self: object) -> r[t.Core.Dict]:
+    def finalize(self) -> r[t.Core.Dict]:
         """Finalize target processing and return complete statistics."""
         try:
             result: r[object] = self.loader.finalize_all_streams()
@@ -397,7 +397,7 @@ class FlextTargetOracle(
 
     # === Singer SDK Compatibility (if needed) ===
 
-    def _test_connection(self: object) -> bool:
+    def _test_connection(self) -> bool:
         """Singer SDK connection test compatibility."""
         result: r[object] = self.test_connection()
         return result.is_success
@@ -415,7 +415,7 @@ class FlextTargetOracle(
 
     # === Metrics and Information ===
 
-    def get_implementation_metrics(self: object) -> t.Core.Dict:
+    def get_implementation_metrics(self) -> t.Core.Dict:
         """Get Oracle-specific implementation metrics using standardized models."""
         # Use FlextTargetOracleModels.OraclePerformanceMetrics for structured metrics
         performance_metrics = FlextTargetOracleModels.OraclePerformanceMetrics(

@@ -24,7 +24,7 @@
         "flext-db-oracle",
         "flext-meltano",
         "pydantic (>=2.12.3)",
-        "rich>=13.0.0",
+        "rich (>=14.2.0,<15.0.0)",
         "pydantic-core (>=2.41.4)",
     ]
     description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
@@ -121,19 +121,19 @@
             develop = true
             path    = "../flext-core"
 
-                        [tool.poetry.dependencies.flext-db-oracle]
+                                                                                                        [tool.poetry.dependencies.flext-db-oracle]
             develop = true
             path    = "../flext-db-oracle"
 
-                                        [tool.poetry.dependencies.flext-meltano]
+                                                                                                                                                                                                        [tool.poetry.dependencies.flext-meltano]
             develop = true
             path    = "../flext-meltano"
 
-                                                        [tool.poetry.dependencies.flext-observability]
+                                                                                                                                                                                                                                                                                                        [tool.poetry.dependencies.flext-observability]
             develop = true
             path    = "../flext-observability"
 
-                                                                        [tool.poetry.dependencies.flext-cli]
+                                                                                                                                                                                                                                                                                                                                                                                                        [tool.poetry.dependencies.flext-cli]
             develop = true
             path    = "../flext-cli"
 
@@ -142,18 +142,22 @@
         detect-secrets   = ">=1.5.0"
         pip-audit        = ">=2.9.0"
         pre-commit       = ">=4.2.0"
-        pyrefly          = "^0.34.0"
-        pytest           = ">=8.0.0"
+        pyrefly          = "^0.46.3"
+        pytest           = "^9.0.2"
         pytest-benchmark = ">=5.1.0"
         pytest-clarity   = ">=1.0.1"
-        pytest-cov = "=7.0.0"
+        pytest-cov = "^7.0.0"
         pytest-mock      = ">=3.14.1"
         pytest-sugar     = ">=1.0.0"
         pytest-timeout   = ">=2.4.0"
         pytest-xdist     = ">=3.8.0"
         radon            = ">=6.0.1"
-        ruff             = ">=0.8.0"
+        ruff             = ">=0.12.3"
         vulture          = ">=2.14"
+    opentelemetry-api = ">=1.39.1"
+    opentelemetry-sdk = ">=1.39.1"
+    prompt-toolkit = ">=3.0.52"
+    sqlparse = ">=0.5.5"
 
         [tool.poetry.group.dev.dependencies.bandit]
             extras = [

@@ -183,7 +183,7 @@ def oracle_api(oracle_config: FlextTargetOracleSettings) -> MagicMock:
     mock_api.config = db_config
     mock_api.connect.return_value = FlextResult.ok("Connected successfully")
     mock_api.disconnect.return_value = FlextResult.ok("Disconnected successfully")
-    mock_api.test_connection.return_value = FlextResult.ok(data=True)
+    mock_api.test_connection.return_value = FlextResult.ok(value=True)
     mock_api.is_connected = True
 
     return mock_api
