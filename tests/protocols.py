@@ -13,13 +13,13 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsProtocols
 
-from flext_target_oracle import p as FlextTargetOracleProtocols
+from flext_target_oracle import p
 
 
-class TestsFlextTargetOracleProtocols(FlextTestsProtocols, FlextTargetOracleProtocols):
+class TestsFlextTargetOracleProtocols(FlextTestsProtocols, p):
     """Test protocols combining FlextTestsProtocols and project-specific protocols."""
 
-    class Oracle(FlextTargetOracleProtocols.Oracle):
+    class Oracle(p.Oracle):
         """Oracle domain protocols extending project protocols."""
 
         class Tests:

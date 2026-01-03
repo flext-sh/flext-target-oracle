@@ -256,7 +256,7 @@ class ProductionTargetManager:
                     message if isinstance(message, dict) else {},
                 )
 
-                if result.success:
+                if result.is_success:
                     # Update counters (values are already int, just increment)
                     messages_processed = stats["messages_processed"]
                     if isinstance(messages_processed, int):
@@ -297,7 +297,7 @@ class ProductionTargetManager:
             logger.info("Finalizing target operations")
             finalize_result = self.target.finalize()
 
-            if finalize_result.success:
+            if finalize_result.is_success:
                 # Merge finalization stats
                 final_stats = finalize_result.data
                 if isinstance(final_stats, dict):
@@ -440,7 +440,7 @@ def demonstrate_production_setup() -> None:
         # Step 3: Perform health check
         logger.info("Step 3: Performing initial health check")
         health_result = manager.health_check()
-        if health_result.success:
+        if health_result.is_success:
             health_data = health_result.data
             if isinstance(health_data, dict):
                 logger.info(
@@ -464,7 +464,7 @@ def demonstrate_production_setup() -> None:
         logger.info("Step 5: Processing production data stream")
         processing_result = manager.process_singer_stream(messages)
 
-        if processing_result.success:
+        if processing_result.is_success:
             stats = processing_result.data
             logger.info("=== Production Processing Statistics ===")
             logger.info("Messages processed: %d", stats.get("messages_processed", 0))
@@ -488,13 +488,13 @@ def demonstrate_production_setup() -> None:
         # Step 6: Final health check
         logger.info("Step 6: Performing final health check")
         final_health = manager.health_check()
-        if final_health.success:
+        if final_health.is_success:
             logger.info("Final health status: %s", final_health.data["status"])
 
         # Step 7: Graceful shutdown
         logger.info("Step 7: Performing graceful shutdown")
         shutdown_result = manager.shutdown()
-        if shutdown_result.success:
+        if shutdown_result.is_success:
             logger.info("Production shutdown completed successfully")
         else:
             logger.error("Shutdown issues: %s", shutdown_result.error)
