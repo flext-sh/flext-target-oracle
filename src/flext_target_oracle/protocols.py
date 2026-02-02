@@ -17,7 +17,7 @@ class FlextTargetOracleProtocols(p_meltano, p_db_oracle):
     """Singer Target Oracle protocols extending Oracle and Meltano protocols."""
 
     # Target Oracle-specific protocols
-    class Target:
+    class TargetOracle:
         """Singer Target domain protocols."""
 
         class Oracle:

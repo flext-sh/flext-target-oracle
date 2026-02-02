@@ -62,7 +62,7 @@ class FlextTargetOracleConstants(FlextConstants):
         JSON = "json"
         HYBRID = "hybrid"
 
-    class Connection:
+    class TargetOracle:
         """Connection-related constants for Oracle target."""
 
         DEFAULT_PORT: Final[int] = 1521
