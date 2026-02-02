@@ -36,7 +36,7 @@ class FlextTargetOracleTypes(FlextTypes):
     # SINGER TARGET TYPES - Complex Singer target protocol types
     # =========================================================================
 
-    class SingerTarget:
+    class TargetOracle:
         """Singer target protocol complex types."""
 
         type TargetConfiguration = dict[
@@ -282,23 +282,6 @@ class FlextTargetOracleTypes(FlextTypes):
             str, bool | str | dict[str, FlextTypes.GeneralValueType]
         ]
         type TargetOraclePipelineConfig = dict[str, FlextTypes.GeneralValueType]
-
-    class TargetOracle:
-        """Target Oracle types namespace for cross-project access.
-
-        Provides organized access to all Target Oracle types for other FLEXT projects.
-        Usage: Other projects can reference `t.TargetOracle.SingerTarget.*`, `t.TargetOracle.Project.*`, etc.
-        This enables consistent namespace patterns for cross-project type access.
-
-        Examples:
-            from flext_target_oracle.typings import t
-            config: t.TargetOracle.Project.SingerTargetOracleProjectConfig = ...
-            message: t.TargetOracle.SingerTarget.TargetConfiguration = ...
-
-        Note: Namespace composition via inheritance - no aliases needed.
-        Access parent namespaces directly through inheritance.
-
-        """
 
 
 # Alias for simplified usage

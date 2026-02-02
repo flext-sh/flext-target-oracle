@@ -48,7 +48,7 @@ class FlextTargetOracleUtilities(u_core):
     ORACLE_MAX_IDENTIFIER_LENGTH: ClassVar[int] = 128
     DEFAULT_TRANSACTION_TIMEOUT: ClassVar[int] = 300
 
-    class SingerUtilities:
+    class TargetOracle:
         """Singer protocol utilities for Oracle target operations."""
 
         @staticmethod

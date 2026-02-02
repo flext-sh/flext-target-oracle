@@ -34,250 +34,253 @@ class FlextTargetOracleModels(FlextModels):
     # Constants
     MAX_PORT_NUMBER = 65535
 
-    class OracleTargetConfig(FlextModels.ArbitraryTypesModel):
-        """Configuration for Oracle target operations."""
+    class TargetOracle:
+        """TargetOracle domain namespace."""
 
-        # Oracle connection settings
-        oracle_host: str = Field(
-            default="localhost",
-            description="Oracle database host",
-        )
-        oracle_port: int = Field(default=1521, description="Oracle database port")
-        oracle_service_name: str = Field(
-            default="XE",
-            description="Oracle service name",
-        )
-        oracle_user: str = Field(description="Oracle database username")
-        oracle_password: str = Field(description="Oracle database password")
+        class OracleTargetConfig(FlextModels.ArbitraryTypesModel):
+            """Configuration for Oracle target operations."""
 
-        # Target configuration
-        default_target_schema: str = Field(
-            default="SINGER_DATA",
-            description="Default schema for loading data",
-        )
-        table_prefix: str = Field(
-            default="",
-            description="Prefix for target table names",
-        )
-        table_suffix: str = Field(
-            default="",
-            description="Suffix for target table names",
-        )
+            # Oracle connection settings
+            oracle_host: str = Field(
+                default="localhost",
+                description="Oracle database host",
+            )
+            oracle_port: int = Field(default=1521, description="Oracle database port")
+            oracle_service_name: str = Field(
+                default="XE",
+                description="Oracle service name",
+            )
+            oracle_user: str = Field(description="Oracle database username")
+            oracle_password: str = Field(description="Oracle database password")
 
-        # Loading configuration
-        batch_size: int = Field(default=5000, description="Number of records per batch")
-        use_bulk_operations: bool = Field(
-            default=True,
-            description="Use Oracle bulk operations for better performance",
-        )
-        parallel_degree: int = Field(
-            default=1,
-            description="Oracle parallel degree for operations",
-        )
+            # Target configuration
+            default_target_schema: str = Field(
+                default="SINGER_DATA",
+                description="Default schema for loading data",
+            )
+            table_prefix: str = Field(
+                default="",
+                description="Prefix for target table names",
+            )
+            table_suffix: str = Field(
+                default="",
+                description="Suffix for target table names",
+            )
 
-        # Transaction settings
-        autocommit: bool = Field(
-            default=False,
-            description="Enable autocommit for operations",
-        )
-        commit_interval: int = Field(
-            default=1000,
-            description="Number of records between commits",
-        )
-        transaction_timeout: int = Field(
-            default=300,
-            description="Transaction timeout in seconds",
-        )
+            # Loading configuration
+            batch_size: int = Field(default=5000, description="Number of records per batch")
+            use_bulk_operations: bool = Field(
+                default=True,
+                description="Use Oracle bulk operations for better performance",
+            )
+            parallel_degree: int = Field(
+                default=1,
+                description="Oracle parallel degree for operations",
+            )
 
-    class SingerMessageProcessing(FlextModels.ArbitraryTypesModel):
-        """Singer message processing configuration and state."""
+            # Transaction settings
+            autocommit: bool = Field(
+                default=False,
+                description="Enable autocommit for operations",
+            )
+            commit_interval: int = Field(
+                default=1000,
+                description="Number of records between commits",
+            )
+            transaction_timeout: int = Field(
+                default=300,
+                description="Transaction timeout in seconds",
+            )
 
-        # Message processing state
-        message_count: int = Field(default=0, description="Total messages processed")
-        schema_messages: int = Field(default=0, description="Schema messages processed")
-        record_messages: int = Field(default=0, description="Record messages processed")
-        state_messages: int = Field(default=0, description="State messages processed")
+        class SingerMessageProcessing(FlextModels.ArbitraryTypesModel):
+            """Singer message processing configuration and state."""
 
-        # Processing performance
-        processing_start_time: str = Field(description="Processing start timestamp")
-        last_processed_time: str | None = Field(
-            default=None,
-            description="Last message processing timestamp",
-        )
-        records_per_second: float = Field(
-            default=0.0,
-            description="Current processing rate",
-        )
+            # Message processing state
+            message_count: int = Field(default=0, description="Total messages processed")
+            schema_messages: int = Field(default=0, description="Schema messages processed")
+            record_messages: int = Field(default=0, description="Record messages processed")
+            state_messages: int = Field(default=0, description="State messages processed")
 
-        # Error tracking
-        error_count: int = Field(default=0, description="Number of processing errors")
-        failed_messages: list[str] = Field(
-            default_factory=list,
-            description="Failed message IDs",
-        )
+            # Processing performance
+            processing_start_time: str = Field(description="Processing start timestamp")
+            last_processed_time: str | None = Field(
+                default=None,
+                description="Last message processing timestamp",
+            )
+            records_per_second: float = Field(
+                default=0.0,
+                description="Current processing rate",
+            )
 
-    class OracleTableMetadata(FlextModels.ArbitraryTypesModel):
-        """Oracle table metadata for target operations."""
+            # Error tracking
+            error_count: int = Field(default=0, description="Number of processing errors")
+            failed_messages: list[str] = Field(
+                default_factory=list,
+                description="Failed message IDs",
+            )
 
-        # Table identification
-        schema_name: str = Field(description="Oracle schema name")
-        table_name: str = Field(description="Oracle table name")
-        full_table_name: str = Field(description="Fully qualified table name")
+        class OracleTableMetadata(FlextModels.ArbitraryTypesModel):
+            """Oracle table metadata for target operations."""
 
-        # Table structure
-        columns: list[dict[str, t.GeneralValueType]] = Field(
-            default_factory=list,
-            description="Table column definitions",
-        )
-        primary_keys: list[str] = Field(
-            default_factory=list,
-            description="Primary key column names",
-        )
-        indexes: list[dict[str, t.GeneralValueType]] = Field(
-            default_factory=list,
-            description="Table index definitions",
-        )
+            # Table identification
+            schema_name: str = Field(description="Oracle schema name")
+            table_name: str = Field(description="Oracle table name")
+            full_table_name: str = Field(description="Fully qualified table name")
 
-        # Table statistics
-        row_count: int | None = Field(
-            default=None,
-            description="Current table row count",
-        )
-        last_analyzed: str | None = Field(
-            default=None,
-            description="Last table statistics analysis time",
-        )
+            # Table structure
+            columns: list[dict[str, t.GeneralValueType]] = Field(
+                default_factory=list,
+                description="Table column definitions",
+            )
+            primary_keys: list[str] = Field(
+                default_factory=list,
+                description="Primary key column names",
+            )
+            indexes: list[dict[str, t.GeneralValueType]] = Field(
+                default_factory=list,
+                description="Table index definitions",
+            )
 
-        # Singer metadata
-        singer_stream_name: str = Field(description="Singer stream name")
-        singer_schema: dict[str, t.GeneralValueType] = Field(
-            description="Singer schema definition"
-        )
-        key_properties: list[str] = Field(
-            default_factory=list,
-            description="Singer key properties",
-        )
+            # Table statistics
+            row_count: int | None = Field(
+                default=None,
+                description="Current table row count",
+            )
+            last_analyzed: str | None = Field(
+                default=None,
+                description="Last table statistics analysis time",
+            )
 
-    class OracleLoadingOperation(FlextModels.ArbitraryTypesModel):
-        """Oracle data loading operation tracking."""
+            # Singer metadata
+            singer_stream_name: str = Field(description="Singer stream name")
+            singer_schema: dict[str, t.GeneralValueType] = Field(
+                description="Singer schema definition"
+            )
+            key_properties: list[str] = Field(
+                default_factory=list,
+                description="Singer key properties",
+            )
 
-        # Operation identification
-        operation_id: str = Field(description="Unique operation identifier")
-        stream_name: str = Field(description="Singer stream name")
-        operation_type: str = Field(description="Type of loading operation")
+        class OracleLoadingOperation(FlextModels.ArbitraryTypesModel):
+            """Oracle data loading operation tracking."""
 
-        # Operation metrics
-        records_loaded: int = Field(
-            default=0,
-            description="Records successfully loaded",
-        )
-        records_failed: int = Field(
-            default=0,
-            description="Records that failed to load",
-        )
-        bytes_processed: int = Field(default=0, description="Total bytes processed")
+            # Operation identification
+            operation_id: str = Field(description="Unique operation identifier")
+            stream_name: str = Field(description="Singer stream name")
+            operation_type: str = Field(description="Type of loading operation")
 
-        # Timing information
-        start_time: str = Field(description="Operation start time")
-        end_time: str | None = Field(default=None, description="Operation end time")
-        duration_seconds: float = Field(default=0.0, description="Operation duration")
+            # Operation metrics
+            records_loaded: int = Field(
+                default=0,
+                description="Records successfully loaded",
+            )
+            records_failed: int = Field(
+                default=0,
+                description="Records that failed to load",
+            )
+            bytes_processed: int = Field(default=0, description="Total bytes processed")
 
-        # Oracle-specific metrics
-        oracle_execution_time: float = Field(
-            default=0.0,
-            description="Oracle query execution time",
-        )
-        oracle_commit_time: float = Field(
-            default=0.0,
-            description="Oracle transaction commit time",
-        )
-        batch_count: int = Field(default=0, description="Number of batches processed")
+            # Timing information
+            start_time: str = Field(description="Operation start time")
+            end_time: str | None = Field(default=None, description="Operation end time")
+            duration_seconds: float = Field(default=0.0, description="Operation duration")
 
-    class OracleErrorRecovery(FlextModels.ArbitraryTypesModel):
-        """Oracle error handling and recovery configuration."""
+            # Oracle-specific metrics
+            oracle_execution_time: float = Field(
+                default=0.0,
+                description="Oracle query execution time",
+            )
+            oracle_commit_time: float = Field(
+                default=0.0,
+                description="Oracle transaction commit time",
+            )
+            batch_count: int = Field(default=0, description="Number of batches processed")
 
-        # Retry configuration
-        max_retries: int = Field(default=3, description="Maximum retry attempts")
-        retry_delay: float = Field(default=1.0, description="Delay between retries")
-        exponential_backoff: bool = Field(
-            default=True,
-            description="Use exponential backoff for retries",
-        )
+        class OracleErrorRecovery(FlextModels.ArbitraryTypesModel):
+            """Oracle error handling and recovery configuration."""
 
-        # Error handling options
-        continue_on_error: bool = Field(
-            default=False,
-            description="Continue processing after non-fatal errors",
-        )
-        rollback_on_error: bool = Field(
-            default=True,
-            description="Rollback transaction on error",
-        )
-        log_failed_records: bool = Field(
-            default=True,
-            description="Log records that fail to load",
-        )
+            # Retry configuration
+            max_retries: int = Field(default=3, description="Maximum retry attempts")
+            retry_delay: float = Field(default=1.0, description="Delay between retries")
+            exponential_backoff: bool = Field(
+                default=True,
+                description="Use exponential backoff for retries",
+            )
 
-        # Oracle-specific error handling
-        ignore_duplicate_key_errors: bool = Field(
-            default=False,
-            description="Ignore Oracle duplicate key constraint errors",
-        )
-        handle_constraint_violations: bool = Field(
-            default=True,
-            description="Handle Oracle constraint violations gracefully",
-        )
+            # Error handling options
+            continue_on_error: bool = Field(
+                default=False,
+                description="Continue processing after non-fatal errors",
+            )
+            rollback_on_error: bool = Field(
+                default=True,
+                description="Rollback transaction on error",
+            )
+            log_failed_records: bool = Field(
+                default=True,
+                description="Log records that fail to load",
+            )
 
-    class OraclePerformanceMetrics(FlextModels.ArbitraryTypesModel):
-        """Performance metrics for Oracle target operations."""
+            # Oracle-specific error handling
+            ignore_duplicate_key_errors: bool = Field(
+                default=False,
+                description="Ignore Oracle duplicate key constraint errors",
+            )
+            handle_constraint_violations: bool = Field(
+                default=True,
+                description="Handle Oracle constraint violations gracefully",
+            )
 
-        # Throughput metrics
-        records_per_second: float = Field(
-            default=0.0,
-            description="Records processed per second",
-        )
-        bytes_per_second: float = Field(
-            default=0.0,
-            description="Bytes processed per second",
-        )
-        batches_per_second: float = Field(
-            default=0.0,
-            description="Batches processed per second",
-        )
+        class OraclePerformanceMetrics(FlextModels.ArbitraryTypesModel):
+            """Performance metrics for Oracle target operations."""
 
-        # Oracle database metrics
-        oracle_connections_used: int = Field(
-            default=0,
-            description="Number of Oracle connections used",
-        )
-        oracle_connection_pool_size: int = Field(
-            default=0,
-            description="Oracle connection pool size",
-        )
-        average_oracle_response_time: float = Field(
-            default=0.0,
-            description="Average Oracle response time in milliseconds",
-        )
+            # Throughput metrics
+            records_per_second: float = Field(
+                default=0.0,
+                description="Records processed per second",
+            )
+            bytes_per_second: float = Field(
+                default=0.0,
+                description="Bytes processed per second",
+            )
+            batches_per_second: float = Field(
+                default=0.0,
+                description="Batches processed per second",
+            )
 
-        # Resource utilization
-        memory_usage_mb: float = Field(
-            default=0.0,
-            description="Memory usage in megabytes",
-        )
-        cpu_usage_percent: float = Field(
-            default=0.0,
-            description="CPU usage percentage",
-        )
+            # Oracle database metrics
+            oracle_connections_used: int = Field(
+                default=0,
+                description="Number of Oracle connections used",
+            )
+            oracle_connection_pool_size: int = Field(
+                default=0,
+                description="Oracle connection pool size",
+            )
+            average_oracle_response_time: float = Field(
+                default=0.0,
+                description="Average Oracle response time in milliseconds",
+            )
 
-        # Quality metrics
-        success_rate: float = Field(
-            default=0.0,
-            description="Operation success rate (0-100)",
-        )
-        error_rate: float = Field(
-            default=0.0,
-            description="Operation error rate (0-100)",
-        )
+            # Resource utilization
+            memory_usage_mb: float = Field(
+                default=0.0,
+                description="Memory usage in megabytes",
+            )
+            cpu_usage_percent: float = Field(
+                default=0.0,
+                description="CPU usage percentage",
+            )
+
+            # Quality metrics
+            success_rate: float = Field(
+                default=0.0,
+                description="Operation success rate (0-100)",
+            )
+            error_rate: float = Field(
+                default=0.0,
+                description="Operation error rate (0-100)",
+            )
 
 
 # Zero Tolerance CONSOLIDATION - FlextTargetOracleUtilities moved to utilities.py
