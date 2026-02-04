@@ -54,10 +54,7 @@ from flext_target_oracle.target_services import (
     SchemaServiceProtocol,
 )
 from flext_target_oracle.typings import FlextTargetOracleTypes
-from flext_target_oracle.utilities import FlextTargetOracleUtilities
-
-# Domain-specific aliases
-u = FlextTargetOracleUtilities  # Utilities (FlextTargetOracleUtilities extends FlextDbOracleUtilities)
+from flext_target_oracle.utilities import FlextTargetOracleUtilities as u
 
 # Version imports removed - not available
 
@@ -69,7 +66,6 @@ __all__ = [
     "ConnectionServiceProtocol",
     "FlextMeltanoSettings",
     "FlextMeltanoTargetAbstractions",
-    "FlextMeltanoTypes",
     "FlextMeltanoTypes",
     "FlextOracleError",
     "FlextOracleObs",

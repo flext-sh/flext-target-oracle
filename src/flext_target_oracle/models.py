@@ -68,7 +68,9 @@ class FlextTargetOracleModels(FlextModels):
             )
 
             # Loading configuration
-            batch_size: int = Field(default=5000, description="Number of records per batch")
+            batch_size: int = Field(
+                default=5000, description="Number of records per batch"
+            )
             use_bulk_operations: bool = Field(
                 default=True,
                 description="Use Oracle bulk operations for better performance",
@@ -96,10 +98,18 @@ class FlextTargetOracleModels(FlextModels):
             """Singer message processing configuration and state."""
 
             # Message processing state
-            message_count: int = Field(default=0, description="Total messages processed")
-            schema_messages: int = Field(default=0, description="Schema messages processed")
-            record_messages: int = Field(default=0, description="Record messages processed")
-            state_messages: int = Field(default=0, description="State messages processed")
+            message_count: int = Field(
+                default=0, description="Total messages processed"
+            )
+            schema_messages: int = Field(
+                default=0, description="Schema messages processed"
+            )
+            record_messages: int = Field(
+                default=0, description="Record messages processed"
+            )
+            state_messages: int = Field(
+                default=0, description="State messages processed"
+            )
 
             # Processing performance
             processing_start_time: str = Field(description="Processing start timestamp")
@@ -113,7 +123,9 @@ class FlextTargetOracleModels(FlextModels):
             )
 
             # Error tracking
-            error_count: int = Field(default=0, description="Number of processing errors")
+            error_count: int = Field(
+                default=0, description="Number of processing errors"
+            )
             failed_messages: list[str] = Field(
                 default_factory=list,
                 description="Failed message IDs",
@@ -183,7 +195,9 @@ class FlextTargetOracleModels(FlextModels):
             # Timing information
             start_time: str = Field(description="Operation start time")
             end_time: str | None = Field(default=None, description="Operation end time")
-            duration_seconds: float = Field(default=0.0, description="Operation duration")
+            duration_seconds: float = Field(
+                default=0.0, description="Operation duration"
+            )
 
             # Oracle-specific metrics
             oracle_execution_time: float = Field(
@@ -194,7 +208,9 @@ class FlextTargetOracleModels(FlextModels):
                 default=0.0,
                 description="Oracle transaction commit time",
             )
-            batch_count: int = Field(default=0, description="Number of batches processed")
+            batch_count: int = Field(
+                default=0, description="Number of batches processed"
+            )
 
         class OracleErrorRecovery(FlextModels.ArbitraryTypesModel):
             """Oracle error handling and recovery configuration."""
