@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import cast, override
+from typing import override
 
 from flext_core import FlextConstants, FlextExceptions, FlextTypes as t
 
@@ -39,12 +39,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
             user: str | None = None,
             dsn: str | None = None,
             code: str | None = None,
-            context: dict[str, t.GeneralValueType] | None = None,
+            context: dict[str, t.MetadataAttributeValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: object,
+            **kwargs: t.MetadataAttributeValue,
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
-            oracle_context = context or {}
+            oracle_context: dict[str, t.MetadataAttributeValue] = (
+                dict(context) if context else {}
+            )
             if host is not None:
                 oracle_context["host"] = host
             if port is not None:
@@ -55,13 +57,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 oracle_context["user"] = user
             if dsn is not None:
                 oracle_context["dsn"] = dsn
-
-                oracle_context.update(cast("dict[str, t.GeneralValueType]", kwargs))
+            oracle_context.update(kwargs)
 
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.CONNECTION_ERROR,
-                context=cast("dict[str, t.GeneralValueType] | None", oracle_context),
+                context=oracle_context or None,
                 _correlation_id=correlation_id,
             )
             # Oracle-specific attributes beyond parent's host/port/timeout
@@ -84,30 +85,34 @@ class FlextTargetOracleExceptions(FlextExceptions):
             auth_method: str | None = None,
             wallet_location: str | None = None,
             code: str | None = None,
-            context: dict[str, t.GeneralValueType] | None = None,
+            context: dict[str, t.MetadataAttributeValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: object,
+            **kwargs: t.MetadataAttributeValue,
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
-            oracle_context = context or {}
+            oracle_context: dict[str, t.MetadataAttributeValue] = (
+                dict(context) if context else {}
+            )
             if user is not None:
                 oracle_context["user"] = user
             if auth_method is not None:
                 oracle_context["auth_method"] = auth_method
             if wallet_location is not None:
                 oracle_context["wallet_location"] = wallet_location
-
-                oracle_context.update(cast("dict[str, t.GeneralValueType]", kwargs))
+            oracle_context.update(kwargs)
 
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.AUTHENTICATION_ERROR,
-                context=cast("dict[str, t.GeneralValueType] | None", oracle_context),
+                context=oracle_context or None,
                 _correlation_id=correlation_id,
             )
             # Oracle-specific attributes
             self.user = oracle_context.get("user")
-            self.auth_method = cast("str | None", oracle_context.get("auth_method"))
+            auth_method_val = oracle_context.get("auth_method")
+            self.auth_method = (
+                str(auth_method_val) if auth_method_val is not None else None
+            )
             self.wallet_location = oracle_context.get("wallet_location")
 
     class ProcessingError(FlextExceptions.OperationError):
@@ -120,37 +125,39 @@ class FlextTargetOracleExceptions(FlextExceptions):
             *,
             stream_name: str | None = None,
             record_count: int | None = None,
-            error_records: list[dict[str, t.GeneralValueType]] | None = None,
+            error_records: list[dict[str, t.MetadataAttributeValue]] | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: dict[str, t.GeneralValueType] | None = None,
+            context: dict[str, t.MetadataAttributeValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: object,
+            **kwargs: t.MetadataAttributeValue,
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
-            oracle_context = context or {}
+            oracle_context: dict[str, t.MetadataAttributeValue] = (
+                dict(context) if context else {}
+            )
             if stream_name is not None:
                 oracle_context["stream_name"] = stream_name
             if record_count is not None:
                 oracle_context["record_count"] = record_count
             if error_records is not None:
-                oracle_context["error_records"] = error_records
+                oracle_context["error_records"] = error_records  # type: ignore[assignment]
             if operation is not None:
                 oracle_context["operation"] = operation
-
-                oracle_context.update(cast("dict[str, t.GeneralValueType]", kwargs))
+            oracle_context.update(kwargs)
 
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.PROCESSING_ERROR,
-                context=cast("dict[str, t.GeneralValueType] | None", oracle_context),
+                context=oracle_context or None,
                 _correlation_id=correlation_id,
             )
             # Oracle-specific attributes
             self.stream_name = oracle_context.get("stream_name")
             self.record_count = oracle_context.get("record_count")
-            self.error_records = oracle_context.get("error_records")
-            self.operation = cast("str | None", oracle_context.get("operation"))
+            self.error_records = error_records
+            operation_val = oracle_context.get("operation")
+            self.operation = str(operation_val) if operation_val is not None else None
 
     class OracleTimeoutError(FlextExceptions.TimeoutError):
         """Oracle timeout error using flext-core foundation."""
@@ -169,12 +176,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
             schema_hash: str | None = None,
             validation_errors: list[str] | None = None,
             code: str | None = None,
-            context: dict[str, t.GeneralValueType] | None = None,
+            context: dict[str, t.MetadataAttributeValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: object,
+            **kwargs: t.MetadataAttributeValue,
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
-            oracle_context = context or {}
+            oracle_context: dict[str, t.MetadataAttributeValue] = (
+                dict(context) if context else {}
+            )
             if stream_name is not None:
                 oracle_context["stream_name"] = stream_name
             if table_name is not None:
@@ -182,21 +191,20 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if schema_hash is not None:
                 oracle_context["schema_hash"] = schema_hash
             if validation_errors is not None:
-                oracle_context["validation_errors"] = validation_errors
-
-                oracle_context.update(cast("dict[str, t.GeneralValueType]", kwargs))
+                oracle_context["validation_errors"] = validation_errors  # type: ignore[assignment]
+            oracle_context.update(kwargs)
 
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.VALIDATION_ERROR,
-                context=cast("dict[str, t.GeneralValueType] | None", oracle_context),
+                context=oracle_context or None,
                 _correlation_id=correlation_id,
             )
             # Oracle-specific attributes
             self.stream_name = oracle_context.get("stream_name")
             self.table_name = oracle_context.get("table_name")
             self.schema_hash = oracle_context.get("schema_hash")
-            self.validation_errors = oracle_context.get("validation_errors")
+            self.validation_errors = validation_errors
 
     class LoadError(ProcessingError):
         """Oracle data loading errors."""
@@ -213,25 +221,26 @@ class FlextTargetOracleExceptions(FlextExceptions):
             table_name: str | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: dict[str, t.GeneralValueType] | None = None,
+            context: dict[str, t.MetadataAttributeValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: object,
+            **kwargs: t.MetadataAttributeValue,
         ) -> None:
             """Initialize SQL error with Oracle-specific context."""
-            oracle_context = context or {}
+            oracle_context: dict[str, t.MetadataAttributeValue] = (
+                dict(context) if context else {}
+            )
             if sql_statement is not None:
                 oracle_context["sql_statement"] = sql_statement
             if table_name is not None:
                 oracle_context["table_name"] = table_name
             if operation is not None:
                 oracle_context["operation"] = operation
-
-                oracle_context.update(cast("dict[str, t.GeneralValueType]", kwargs))
+            oracle_context.update(kwargs)
 
             super().__init__(
                 message=message,
                 code=code or FlextConstants.Errors.OPERATION_ERROR,
-                context=cast("dict[str, t.GeneralValueType] | None", oracle_context),
+                context=oracle_context or None,
                 correlation_id=correlation_id,
             )
             # Oracle-specific attributes
