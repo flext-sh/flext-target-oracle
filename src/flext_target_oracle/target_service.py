@@ -35,7 +35,7 @@ class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
     loader: FlextTargetOracleLoader = Field(description="Oracle data loader")
 
     # Internal state
-    _schemas: t.NestedDict = Field(
+    _schemas: dict[str, t.GeneralValueType] = Field(
         default_factory=dict,
         description="Stream schemas",
     )
