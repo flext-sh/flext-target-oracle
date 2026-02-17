@@ -6,6 +6,8 @@
 
 **FLEXT-Target-Oracle** is a production-grade Singer target for loading data into Oracle Databases (11g through 23c). It is designed for high-performance enterprise data integration, supporting bulk loading, incremental updates, and schema evolution.
 
+Part of the [FLEXT](https://github.com/flext/flext) ecosystem.
+
 ## 🚀 Key Features
 
 - **Broad Version Support**: Tested compatibility from Oracle 11g to 23c.
