@@ -141,7 +141,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if record_count is not None:
                 oracle_context["record_count"] = record_count
             if error_records is not None:
-                oracle_context["error_records"] = error_records  # type: ignore[assignment]
+                oracle_context["error_records"] = error_records
             if operation is not None:
                 oracle_context["operation"] = operation
             oracle_context.update(kwargs)
@@ -191,7 +191,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if schema_hash is not None:
                 oracle_context["schema_hash"] = schema_hash
             if validation_errors is not None:
-                oracle_context["validation_errors"] = validation_errors  # type: ignore[assignment]
+                oracle_context["validation_errors"] = validation_errors
             oracle_context.update(kwargs)
 
             super().__init__(
