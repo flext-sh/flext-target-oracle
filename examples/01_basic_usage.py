@@ -175,7 +175,7 @@ def demonstrate_basic_usage() -> None:
         # Validate domain rules (optional but recommended)
         logger.info("Validating configuration domain rules")
         # Validation is handled during config creation with Pydantic validators
-        validation_result = FlextResult[None].ok(None)
+        validation_result = FlextResult[bool].ok(value=True)
         if validation_result.is_failure:
             logger.error(f"Configuration validation failed: {validation_result.error}")
             return
@@ -271,7 +271,7 @@ def demonstrate_error_handling() -> None:
         )
 
         # Domain validation is handled during config creation with Pydantic validators
-        validation_result = FlextResult[None].ok(None)
+        validation_result = FlextResult[bool].ok(value=True)
         if validation_result.is_failure:
             logger.info(f"Expected validation error: {validation_result.error}")
 

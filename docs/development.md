@@ -162,10 +162,10 @@ def operation() -> FlextResult[Data]:
     """Clear docstring with FlextResult return type."""
     try:
         # Business logic here
-        return FlextResult[None].ok(data)
+        return FlextResult[bool].ok(data)
     except Exception as e:
         logger.exception("Operation failed")
-        return FlextResult[None].fail(f"Operation failed: {e}")
+        return FlextResult[bool].fail(f"Operation failed: {e}")
 
 # ✅ GOOD: Configuration with validation
 class Config(FlextModels.Value):
@@ -194,23 +194,23 @@ class BadConfig:
 
 ```python
 # ✅ All operations return FlextResult
-def process_record(record: dict) -> FlextResult[None]:
+def process_record(record: dict) -> FlextResult[bool]:
     """Process a single record with proper error handling."""
     try:
         # Validate input
         if not record:
-            return FlextResult[None].fail("Record cannot be empty")
+            return FlextResult[bool].fail("Record cannot be empty")
 
         # Process record
         result = some_operation(record)
         if result.is_failure:
             return result  # Propagate failure
 
-        return FlextResult[None].ok(None)
+        return FlextResult[bool].| ok(value=True)
 
     except Exception as e:
         logger.exception("Record processing failed")
-        return FlextResult[None].fail(f"Processing failed: {e}")
+        return FlextResult[bool].fail(f"Processing failed: {e}")
 
 # ✅ Chain FlextResult operations
 def process_batch(records: list[t.Dict]) -> FlextResult[Stats]:
@@ -220,11 +220,11 @@ def process_batch(records: list[t.Dict]) -> FlextResult[Stats]:
     for record in records:
         result = process_record(record)
         if result.is_failure:
-            return FlextResult[None].fail(f"Batch failed on record: {result.error}")
+            return FlextResult[bool].fail(f"Batch failed on record: {result.error}")
 
         stats.increment()
 
-    return FlextResult[None].ok(stats)
+    return FlextResult[bool].ok(stats)
 ```
 
 ### Configuration Patterns
@@ -252,7 +252,7 @@ class FlextOracleTargetSettings(FlextModels.Value):
         return v.strip()
 
     # Domain rule validation
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self) -> FlextResult[bool]:
         """Validate business rules using Chain of Responsibility."""
         validator = ConfigurationValidator()
         return validator.validate(self)

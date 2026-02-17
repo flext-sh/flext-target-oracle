@@ -159,11 +159,11 @@ class ProductionTargetManager:
         logger.info("Received signal %d, initiating graceful shutdown", signum)
         self.shutdown_requested = True
 
-    def initialize(self) -> FlextResult[None]:
+    def initialize(self) -> FlextResult[bool]:
         """Initialize target with comprehensive validation.
 
         Returns:
-            FlextResult[None]: Success if initialization complete, failure with error details
+            FlextResult[bool]: Success if initialization complete, failure with error details
 
         """
         logger.info("Initializing production Oracle target")
@@ -172,9 +172,9 @@ class ProductionTargetManager:
             # Step 1: Validate configuration domain rules
             logger.info("Validating configuration domain rules")
             # Domain validation is handled during config creation with Pydantic validators
-            validation_result = FlextResult[None].ok(None)
+            validation_result = FlextResult[bool].ok(value=True)
             if validation_result.is_failure:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     f"Configuration validation failed: {validation_result.error}",
                 )
 
@@ -186,14 +186,14 @@ class ProductionTargetManager:
             logger.info("Testing Oracle database connectivity")
             connection_result = self.target.test_connection()
             if connection_result.is_failure:
-                return FlextResult[None].fail("Oracle connectivity test failed")
+                return FlextResult[bool].fail("Oracle connectivity test failed")
 
             logger.info("Production target initialized successfully")
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(value=True)
 
         except Exception as e:
             logger.exception("Failed to initialize production target")
-            return FlextResult[None].fail(f"Initialization error: {e}")
+            return FlextResult[bool].fail(f"Initialization error: {e}")
 
     def process_singer_stream(
         self,
@@ -392,11 +392,11 @@ class ProductionTargetManager:
                 f"Health check error: {e}"
             )
 
-    def shutdown(self) -> FlextResult[None]:
+    def shutdown(self) -> FlextResult[bool]:
         """Graceful shutdown with resource cleanup.
 
         Returns:
-            FlextResult[None]: Success if shutdown completed cleanly
+            FlextResult[bool]: Success if shutdown completed cleanly
 
         """
         logger.info("Starting graceful shutdown")
@@ -412,11 +412,11 @@ class ProductionTargetManager:
                 self.target = None
 
             logger.info("Graceful shutdown completed")
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(value=True)
 
         except Exception as e:
             logger.exception("Error during shutdown")
-            return FlextResult[None].fail(f"Shutdown error: {e}")
+            return FlextResult[bool].fail(f"Shutdown error: {e}")
 
 
 def demonstrate_production_setup() -> None:

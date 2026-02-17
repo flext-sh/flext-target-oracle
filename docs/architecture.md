@@ -37,7 +37,7 @@ from flext_core import u
 
 # Configuration with domain validation
 class FlextOracleTargetSettings(FlextModels.Value):
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self) -> FlextResult[bool]:
         # Chain of Responsibility validation pattern
 ```
 
@@ -104,10 +104,10 @@ class FlextOracleTarget(Target):
     """Singer Target implementation with FLEXT patterns."""
 
     # Singer protocol compliance
-    def process_singer_message(self, message: dict) -> FlextResult[None]
-    def _handle_schema(self, message: dict) -> FlextResult[None]
-    def _handle_record(self, message: dict) -> FlextResult[None]
-    def _handle_state(self, message: dict) -> FlextResult[None]
+    def process_singer_message(self, message: dict) -> FlextResult[bool]
+    def _handle_schema(self, message: dict) -> FlextResult[bool]
+    def _handle_record(self, message: dict) -> FlextResult[bool]
+    def _handle_state(self, message: dict) -> FlextResult[bool]
 
     # Lifecycle management
     def finalize(self) -> FlextResult[t.Dict]
@@ -141,7 +141,7 @@ class FlextOracleTargetSettings(FlextModels.Value):
     use_bulk_operations: bool = True
     connection_timeout: int = 30
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self) -> FlextResult[bool]:
         """Chain of Responsibility validation pattern."""
 ```
 
@@ -165,10 +165,10 @@ class FlextOracleTargetLoader:
         self._record_buffers: dict[str, list[t.Dict]] = {}
 
     # Table management
-    def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[None]
+    def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[bool]
 
     # Data loading with batching
-    def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]
+    def load_record(self, stream_name: str, record_data: dict) -> FlextResult[bool]
     def finalize_all_streams(self) -> FlextResult[t.Dict]
 ```
 
@@ -202,10 +202,10 @@ sequenceDiagram
         FL->>API: execute_ddl(CREATE TABLE)
         API->>DB: CREATE TABLE statement
         DB-->>API: Success/Error
-        API-->>FL: FlextResult[None]
+        API-->>FL: FlextResult[bool]
     end
 
-    FL-->>FT: FlextResult[None]
+    FL-->>FT: FlextResult[bool]
     FT-->>ST: Processing result
 
     Note over ST,DB: RECORD Message Processing
@@ -218,11 +218,11 @@ sequenceDiagram
             FL->>API: execute_dml(INSERT batch)
             API->>DB: Batch INSERT
             DB-->>API: Success/Error
-            API-->>FL: FlextResult[None]
+            API-->>FL: FlextResult[bool]
             FL->>FL: Clear buffer
         end
 
-        FL-->>FT: FlextResult[None]
+        FL-->>FT: FlextResult[bool]
         FT-->>ST: Processing result
     end
 
@@ -234,7 +234,7 @@ sequenceDiagram
         FL->>API: execute_dml(Final batch)
         API->>DB: INSERT remaining records
         DB-->>API: Success/Error
-        API-->>FL: FlextResult[None]
+        API-->>FL: FlextResult[bool]
     end
 
     FL-->>FT: FlextResult[Statistics]
@@ -248,7 +248,7 @@ flowchart TD
     A[Operation Start] --> B{FlextResult Pattern}
     B -->|Success| C[Continue Pipeline]
     B -->|Failure| D[Log Error with Context]
-    D --> E[Return FlextResult[None].fail()]
+    D --> E[Return FlextResult[bool].fail()]
     E --> F[Caller Handles Error]
     F --> G{Recoverable?}
     G -->|Yes| H[Retry with Backoff]
@@ -270,7 +270,7 @@ class BatchProcessor:
         self._buffers: dict[str, list[Record]] = {}
         self._batch_size = batch_size
 
-    def add_record(self, stream: str, record: dict) -> FlextResult[None]:
+    def add_record(self, stream: str, record: dict) -> FlextResult[bool]:
         # Add to buffer
         buffer = self._buffers.setdefault(stream, [])
         buffer.append(record)
@@ -279,7 +279,7 @@ class BatchProcessor:
         if len(buffer) >= self._batch_size:
             return self._flush_batch(stream)
 
-        return FlextResult[None].ok(None)
+        return FlextResult[bool].| ok(value=True)
 ```
 
 ### Connection Management

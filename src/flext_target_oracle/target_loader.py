@@ -98,7 +98,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             },
         )
 
-    def test_connection(self) -> FlextResult[None]:
+    def test_connection(self) -> FlextResult[bool]:
         """Test connection to Oracle database using flext-db-oracle API."""
         try:
             # Use Oracle API context manager correctly
@@ -108,18 +108,18 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
                     schema=self.config.default_target_schema,
                 )
                 if tables_result.is_failure:
-                    return FlextResult[None].fail(
+                    return FlextResult[bool].fail(
                         f"Connection test failed: {tables_result.error}",
                     )
 
                 self.log_info("Oracle connection established successfully")
-                return FlextResult[None].ok(None)
+                return FlextResult[bool].ok(value=True)
 
         except Exception as e:
             self.log_error("Failed to connect to Oracle", extra={"error": str(e)})
-            return FlextResult[None].fail(f"Connection failed: {e}")
+            return FlextResult[bool].fail(f"Connection failed: {e}")
 
-    def connect(self) -> FlextResult[None]:
+    def connect(self) -> FlextResult[bool]:
         """Establish connection using underlying FlextDbOracleApi.
 
         Exposed for tests and parity with previous loader helpers.
@@ -129,7 +129,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             result: FlextResult[object] = self.oracle_api.connect()
             # If result looks like a FlextResult check for failure
             if hasattr(result, "is_failure") and result.is_failure:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     f"Connect failed: {getattr(result, 'error', None)}",
                 )
 
@@ -137,35 +137,35 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             with contextlib.suppress(Exception):
                 self.oracle_api.is_connected = True
 
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(value=True)
         except Exception as e:
             logger.exception("Failed to connect loader")
             self.log_error("Failed to connect loader", extra={"error": str(e)})
-            return FlextResult[None].fail(f"Connect failed: {e}")
+            return FlextResult[bool].fail(f"Connect failed: {e}")
 
-    def disconnect(self) -> FlextResult[None]:
+    def disconnect(self) -> FlextResult[bool]:
         """Disconnect underlying FlextDbOracleApi (exposed for tests)."""
         try:
             result: FlextResult[object] = self.oracle_api.disconnect()
             if hasattr(result, "is_failure") and result.is_failure:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     f"Disconnect failed: {getattr(result, 'error', None)}",
                 )
 
             with contextlib.suppress(Exception):
                 self.oracle_api.is_connected = False
 
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(value=True)
         except Exception as e:
             logger.exception("Failed to disconnect loader")
             self.log_error("Failed to disconnect loader", extra={"error": str(e)})
-            return FlextResult[None].fail(f"Disconnect failed: {e}")
+            return FlextResult[bool].fail(f"Disconnect failed: {e}")
 
     def insert_records(
         self,
         stream_name: str,
         records: list[dict[str, t.GeneralValueType]],
-    ) -> FlextResult[None]:
+    ) -> FlextResult[bool]:
         """Insert multiple records - convenience wrapper used by tests.
 
         Appends records to the internal buffer via load_record and flushes the batch.
@@ -175,7 +175,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
                 # Use existing load_record logic which handles buffering and auto-flush
                 load_res = self.load_record(stream_name, record)
                 if load_res.is_failure:
-                    return FlextResult[None].fail(
+                    return FlextResult[bool].fail(
                         f"Failed to load record: {load_res.error}",
                     )
 
@@ -183,14 +183,14 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             return self._flush_batch(stream_name)
         except Exception as e:
             self.log_error("Failed to insert records", extra={"error": str(e)})
-            return FlextResult[None].fail(f"Insert records failed: {e}")
+            return FlextResult[bool].fail(f"Insert records failed: {e}")
 
     def ensure_table_exists(
         self,
         stream_name: str,
         schema: dict[str, t.GeneralValueType],
         _key_properties: list[str] | None = None,
-    ) -> FlextResult[None]:
+    ) -> FlextResult[bool]:
         """Ensure table exists using flext-db-oracle API with correct table creation."""
         try:
             table_name = self.config.get_table_name(stream_name)
@@ -202,7 +202,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
                 )
 
                 if tables_result.is_failure:
-                    return FlextResult[None].fail(
+                    return FlextResult[bool].fail(
                         f"Failed to check tables: {tables_result.error}",
                     )
 
@@ -219,7 +219,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
 
                 if table_exists:
                     self.log_info(f"Table {table_name} already exists")
-                    return FlextResult[None].ok(None)
+                    return FlextResult[bool].ok(value=True)
 
                 # Create table using SQL execution (since create_table_ddl doesn't exist)
                 ddl_sql = self._build_create_table_sql(table_name, schema)
@@ -227,22 +227,22 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
                 # Execute DDL using execute method
                 exec_result: FlextResult[object] = connected_api.execute_sql(ddl_sql)
                 if exec_result.is_failure:
-                    return FlextResult[None].fail(
+                    return FlextResult[bool].fail(
                         f"Failed to create table: {exec_result.error}",
                     )
 
                 self.log_info(f"Created table {table_name}")
-                return FlextResult[None].ok(None)
+                return FlextResult[bool].ok(value=True)
 
         except Exception as e:
             self.log_error("Failed to ensure table exists", extra={"error": str(e)})
-            return FlextResult[None].fail(f"Table creation failed: {e}")
+            return FlextResult[bool].fail(f"Table creation failed: {e}")
 
     def load_record(
         self,
         stream_name: str,
         record_data: dict[str, t.GeneralValueType],
-    ) -> FlextResult[None]:
+    ) -> FlextResult[bool]:
         """Load record with batching."""
         try:
             if stream_name not in self.record_buffers:
@@ -255,11 +255,11 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             if len(self.record_buffers[stream_name]) >= self.config.batch_size:
                 return self._flush_batch(stream_name)
 
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(value=True)
 
         except Exception as e:
             self.log_error("Failed to load record", extra={"error": str(e)})
-            return FlextResult[None].fail(f"Record loading failed: {e}")
+            return FlextResult[bool].fail(f"Record loading failed: {e}")
 
     def finalize_all_streams(
         self,
@@ -334,12 +334,12 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
 
         return sql.strip()
 
-    def _flush_batch(self, stream_name: str) -> FlextResult[None]:
+    def _flush_batch(self, stream_name: str) -> FlextResult[bool]:
         """Flush batch using flext-db-oracle API exclusively - NO direct SQLAlchemy."""
         try:
             records: list[t.GeneralValueType] = self.record_buffers.get(stream_name, [])
             if not records:
-                return FlextResult[None].ok(None)
+                return FlextResult[bool].ok(value=True)
 
             table_name = self.config.get_table_name(stream_name)
             schema_name = self.config.default_target_schema
@@ -372,7 +372,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
                         parameters=params,
                     )
                     if result.is_failure:
-                        return FlextResult[None].fail(
+                        return FlextResult[bool].fail(
                             f"Batch insert failed: {result.error}",
                         )
 
@@ -380,11 +380,11 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
                 self.record_buffers[stream_name] = []
 
                 self.log_info(f"Flushed {len(records)} records to {table_name}")
-                return FlextResult[None].ok(None)
+                return FlextResult[bool].ok(value=True)
 
         except Exception as e:
             self.log_error("Failed to flush batch", extra={"error": str(e)})
-            return FlextResult[None].fail(f"Batch flush failed: {e}")
+            return FlextResult[bool].fail(f"Batch flush failed: {e}")
 
 
 __all__ = [

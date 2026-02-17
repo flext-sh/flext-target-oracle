@@ -31,7 +31,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
 **Implementation**:
 
 ```python
-def _handle_schema(self, message: t.Dict) -> FlextResult[None]:
+def _handle_schema(self, message: t.Dict) -> FlextResult[bool]:
     """Handle SCHEMA message with table creation/evolution."""
     stream_name = message.get("stream")
     schema = message.get("schema", {})
@@ -62,13 +62,13 @@ def _handle_schema(self, message: t.Dict) -> FlextResult[None]:
 **Implementation**:
 
 ```python
-def _handle_record(self, message: t.Dict) -> FlextResult[None]:
+def _handle_record(self, message: t.Dict) -> FlextResult[bool]:
     """Handle RECORD message with batched loading."""
     stream_name = message.get("stream")
     record_data = message.get("record")
 
     if not isinstance(stream_name, str) or not isinstance(record_data, dict):
-        return FlextResult[None].fail("Record message missing stream or data")
+        return FlextResult[bool].fail("Record message missing stream or data")
 
     return self._loader.load_record(stream_name, record_data)
 ```
@@ -91,11 +91,11 @@ def _handle_record(self, message: t.Dict) -> FlextResult[None]:
 **Implementation**:
 
 ```python
-def _handle_state(self, message: t.Dict) -> FlextResult[None]:
+def _handle_state(self, message: t.Dict) -> FlextResult[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
     logger.debug("State message received - forwarding to Meltano")
-    return FlextResult[None].ok(None)
+    return FlextResult[bool].| ok(value=True)
 ```
 
 ## Current Implementation Status
@@ -128,7 +128,7 @@ def _handle_state(self, message: t.Dict) -> FlextResult[None]:
 
 ```python
 # ❌ Custom method - not Singer SDK compliant
-def process_singer_message(self, message: dict) -> FlextResult[None]:
+def process_singer_message(self, message: dict) -> FlextResult[bool]:
     # Custom message processing
 ```
 
@@ -422,7 +422,7 @@ def process_with_error_handling():
 
 ```python
 # Current implementation (needs improvement)
-def _insert_batch(self, table_name: str, records: list) -> FlextResult[None]:
+def _insert_batch(self, table_name: str, records: list) -> FlextResult[bool]:
     """Insert batch with basic error handling."""
     try:
         with self.oracle_api as connected_api:
@@ -430,15 +430,15 @@ def _insert_batch(self, table_name: str, records: list) -> FlextResult[None]:
             for record in records:
                 result = connected_api.execute_ddl(sql)  # Should be execute_dml
                 if not result.success:
-                    return FlextResult[None].fail(f"Insert failed: {result.error}")
+                    return FlextResult[bool].fail(f"Insert failed: {result.error}")
 
-        return FlextResult[None].ok(None)
+        return FlextResult[bool].| ok(value=True)
 
     except Exception as e:
-        return FlextResult[None].fail(f"Batch insert failed: {e}")
+        return FlextResult[bool].fail(f"Batch insert failed: {e}")
 
 # Improved implementation (needed)
-def _insert_batch_improved(self, table_name: str, records: list) -> FlextResult[None]:
+def _insert_batch_improved(self, table_name: str, records: list) -> FlextResult[bool]:
     """Insert batch with proper transaction management."""
     try:
         with self.oracle_api as connected_api:
@@ -447,16 +447,16 @@ def _insert_batch_improved(self, table_name: str, records: list) -> FlextResult[
                 result = connected_api.execute_batch_dml(sql, parameters)
                 if result.is_failure:
                     # Transaction automatically rolled back
-                    return FlextResult[None].fail(f"Batch insert failed: {result.error}")
+                    return FlextResult[bool].fail(f"Batch insert failed: {result.error}")
 
                 # Commit only on success
                 connected_api.commit()
 
-        return FlextResult[None].ok(None)
+        return FlextResult[bool].| ok(value=True)
 
     except Exception as e:
         # Transaction automatically rolled back
-        return FlextResult[None].fail(f"Batch insert failed: {e}")
+        return FlextResult[bool].fail(f"Batch insert failed: {e}")
 ```
 
 ## Testing Singer Integration

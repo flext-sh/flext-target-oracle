@@ -202,7 +202,7 @@ def process_record(
     stream_name: str,
     record: FlextTypes.Dict,
     schema: FlextTypes.Dict,
-) -> FlextResult[None]:
+) -> FlextResult[bool]:
     """Process a single record for insertion.
 
     Args:
