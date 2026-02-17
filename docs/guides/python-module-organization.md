@@ -192,7 +192,7 @@ class FlextOracleTargetSettings(FlextModels.Value):
     use_bulk_operations: bool = Field(default=True, description="Enable bulk operations")
     connection_timeout: int = Field(default=30, gt=0, description="Connection timeout")
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self) -> FlextResult[bool]:
         """Validate business rules using Chain of Responsibility pattern."""
         # Implementation using validator chain pattern
 ```
@@ -243,13 +243,13 @@ class FlextOracleTarget(Target):
     name = "flext-oracle-target"
     config_class = FlextOracleTargetSettings
 
-    def process_singer_message(self, message: dict) -> FlextResult[None]:
+    def process_singer_message(self, message: dict) -> FlextResult[bool]:
         """Process Singer messages with railway-oriented error handling."""
 
-    def _handle_schema(self, message: dict) -> FlextResult[None]:
+    def _handle_schema(self, message: dict) -> FlextResult[bool]:
         """Handle SCHEMA messages with table management."""
 
-    def _handle_record(self, message: dict) -> FlextResult[None]:
+    def _handle_record(self, message: dict) -> FlextResult[bool]:
         """Handle RECORD messages with batched loading."""
 
     def finalize(self) -> FlextResult[t.Dict]:
@@ -313,10 +313,10 @@ class FlextOracleTargetLoader:
     def __init__(self, config: FlextOracleTargetSettings) -> None:
         """Initialize with flext-db-oracle integration."""
 
-    def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[None]:
+    def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[bool]:
         """Ensure target table exists with proper schema."""
 
-    def load_record(self, stream_name: str, record_data: dict) -> FlextResult[None]:
+    def load_record(self, stream_name: str, record_data: dict) -> FlextResult[bool]:
         """Load record with batching and error handling."""
 
     def finalize_all_streams(self) -> FlextResult[t.Dict]:
@@ -417,7 +417,7 @@ src/flext_target_oracle/
 
 ```python
 # ✅ CORRECT - Railway-oriented programming throughout
-def process_record(self, stream_name: str, record_data: dict) -> FlextResult[None]:
+def process_record(self, stream_name: str, record_data: dict) -> FlextResult[bool]:
     """Process single record with proper error handling."""
     return (
         self._validate_record(record_data)
@@ -451,7 +451,7 @@ class FlextOracleTargetSettings(FlextModels.Value):
             raise ValueError("Oracle host cannot be empty")
         return v.strip()
 
-    def validate_domain_rules(self) -> FlextResult[None]:
+    def validate_domain_rules(self) -> FlextResult[bool]:
         """Business rule validation using Chain of Responsibility."""
         validators = [
             HostReachabilityValidator(),
@@ -464,7 +464,7 @@ class FlextOracleTargetSettings(FlextModels.Value):
             if result.is_failure:
                 return result
 
-        return FlextResult[None].ok(None)
+        return FlextResult[bool].| ok(value=True)
 
 # ❌ INCORRECT - Plain dataclass without validation
 @dataclass
@@ -500,7 +500,7 @@ from flext_core import u
 
 logger = FlextLogger(__name__)
 
-def process_batch(self, stream_name: str, records: list) -> FlextResult[None]:
+def process_batch(self, stream_name: str, records: list) -> FlextResult[bool]:
     """Process batch with comprehensive logging."""
 
     logger.info(
@@ -547,7 +547,7 @@ def process_batch(self, stream_name: str, records: list) -> FlextResult[None]:
                 "batch_size": len(records)
             }
         )
-        return FlextResult[None].fail(f"Unexpected error: {e}")
+        return FlextResult[bool].fail(f"Unexpected error: {e}")
 
 # ❌ INCORRECT - Unstructured logging
 def process_batch_bad(self, stream_name: str, records: list):
@@ -851,7 +851,7 @@ from flext_core import u
 def process_singer_message(
     self,
     message: t.Dict
-) -> FlextResult[None]:
+) -> FlextResult[bool]:
     """Process Singer message with complete type safety."""
 
 def load_records(
@@ -873,8 +873,8 @@ def map_result(
 ) -> FlextResult[U]:
     """Generic result mapping with type safety."""
     if result.success:
-        return FlextResult[None].ok(func(result.data))
-    return FlextResult[None].fail(result.error)
+        return FlextResult[bool].ok(func(result.data))
+    return FlextResult[bool].fail(result.error)
 
 # ❌ MISSING type annotations (forbidden)
 def process_message(self, message):  # Missing types
@@ -888,7 +888,7 @@ def ensure_table_exists(
     self,
     stream_name: str,
     schema: t.Dict
-) -> FlextResult[None]:
+) -> FlextResult[bool]:
     """
     Ensure Oracle table exists for Singer stream with proper schema.
 
@@ -904,7 +904,7 @@ def ensure_table_exists(
         schema: JSON Schema definition of the stream structure
 
     Returns:
-        FlextResult[None]: Success indicates table is ready for data loading,
+        FlextResult[bool]: Success indicates table is ready for data loading,
         failure contains specific error about table creation issues
 
     Example:
@@ -1048,19 +1048,19 @@ class FlextOracleTargetSettings(FlextSettings):
 class TargetMigration_0_9_to_1_0:
     """Migration from current structure to production-ready 0.9.9."""
 
-    def migrate_exception_handling(self) -> FlextResult[None]:
+    def migrate_exception_handling(self) -> FlextResult[bool]:
         """Consolidate duplicated exceptions into single hierarchy."""
         # 1. Move all exceptions to exceptions.py
         # 2. Remove exceptions from __init__.py
         # 3. Update all imports across modules
 
-    def migrate_singer_compliance(self) -> FlextResult[None]:
+    def migrate_singer_compliance(self) -> FlextResult[bool]:
         """Add missing Singer SDK methods for full compliance."""
         # 1. Implement _test_connection()
         # 2. Implement _write_record() and _write_records()
         # 3. Add proper Singer SDK dependency
 
-    def migrate_security_fixes(self) -> FlextResult[None]:
+    def migrate_security_fixes(self) -> FlextResult[bool]:
         """Fix SQL injection vulnerabilities."""
         # 1. Replace manual SQL construction with parameterized queries
         # 2. Add input validation and sanitization
@@ -1078,7 +1078,7 @@ from typing import Dict, Optional
 def process_singer_message(
     self,
     message: t.Dict
-) -> FlextResult[None]:
+) -> FlextResult[bool]:
     """
     DEPRECATED: Custom message processing method.
 

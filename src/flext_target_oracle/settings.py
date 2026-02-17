@@ -262,32 +262,32 @@ class FlextTargetOracleSettings(FlextSettings):
 
         return self
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[bool]:
         """Validate Oracle Target specific business rules."""
         try:
             # Validate connection requirements
             if not self.oracle_host or not self.oracle_user:
-                return FlextResult[None].fail("Oracle host and username are required")
+                return FlextResult[bool].fail("Oracle host and username are required")
 
             if not self.oracle_password.get_secret_value():
-                return FlextResult[None].fail("Oracle password is required")
+                return FlextResult[bool].fail("Oracle password is required")
 
             # Validate schema name
             if not self.default_target_schema:
-                return FlextResult[None].fail("Target schema is required")
+                return FlextResult[bool].fail("Target schema is required")
 
             # Validate performance settings
             if self.batch_size < 1:
-                return FlextResult[None].fail("Batch size must be at least 1")
+                return FlextResult[bool].fail("Batch size must be at least 1")
 
             if self.commit_interval > self.batch_size:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     "Commit interval cannot be larger than batch size",
                 )
 
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(value=True)
         except Exception as e:
-            return FlextResult[None].fail(f"Business rules validation failed: {e}")
+            return FlextResult[bool].fail(f"Business rules validation failed: {e}")
 
     # Configuration helper methods that leverage the base model
     def get_oracle_config(self) -> dict[str, t.GeneralValueType]:
@@ -416,7 +416,7 @@ class FlextTargetOracleSettings(FlextSettings):
 
 def validate_oracle_configuration(
     config: FlextTargetOracleSettings,
-) -> FlextResult[None]:
+) -> FlextResult[bool]:
     """Validate Oracle configuration using FlextSettings patterns - ZERO DUPLICATION."""
     return config.validate_business_rules()
 

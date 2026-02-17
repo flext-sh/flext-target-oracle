@@ -78,11 +78,11 @@ class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
             },
         )
 
-    def validate_configuration(self) -> FlextResult[None]:
+    def validate_configuration(self) -> FlextResult[bool]:
         """Validate the current configuration."""
         return self.config.validate_domain_rules()
 
-    def test_connection(self) -> FlextResult[None]:
+    def test_connection(self) -> FlextResult[bool]:
         """Test Oracle database connectivity."""
         return self.loader.test_connection()
 
@@ -166,7 +166,7 @@ class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
     def _process_single_message(
         self,
         message: dict[str, t.GeneralValueType],
-    ) -> FlextResult[None]:
+    ) -> FlextResult[bool]:
         """Process a single Singer message."""
         message_type = message.get("type")
 
@@ -176,21 +176,21 @@ class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
             return self._handle_record(message)
         if message_type == "STATE":
             return self._handle_state(message)
-        return FlextResult[None].fail(f"Unknown message type: {message_type}")
+        return FlextResult[bool].fail(f"Unknown message type: {message_type}")
 
     def _handle_schema(
         self, message: dict[str, t.GeneralValueType]
-    ) -> FlextResult[None]:
+    ) -> FlextResult[bool]:
         """Handle SCHEMA message."""
         try:
             stream_name = message.get("stream")
             schema = message.get("schema")
 
             if not isinstance(stream_name, str):
-                return FlextResult[None].fail("Invalid stream name in schema message")
+                return FlextResult[bool].fail("Invalid stream name in schema message")
 
             if not isinstance(schema, dict):
-                return FlextResult[None].fail("Invalid schema in schema message")
+                return FlextResult[bool].fail("Invalid schema in schema message")
 
             # Store schema
             self._schemas[stream_name] = schema
@@ -206,29 +206,29 @@ class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
                 key_properties_list,
             )
             if table_result.is_failure:
-                return FlextResult[None].fail(
+                return FlextResult[bool].fail(
                     f"Failed to ensure table exists: {table_result.error}",
                 )
 
             self.log_info(f"Processed schema for stream {stream_name}")
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(value=True)
 
         except Exception as e:
-            return FlextResult[None].fail(f"Schema handling failed: {e}")
+            return FlextResult[bool].fail(f"Schema handling failed: {e}")
 
     def _handle_record(
         self, message: dict[str, t.GeneralValueType]
-    ) -> FlextResult[None]:
+    ) -> FlextResult[bool]:
         """Handle RECORD message."""
         try:
             stream_name = message.get("stream")
             record_data: dict[str, t.GeneralValueType] = message.get("record")
 
             if not isinstance(stream_name, str):
-                return FlextResult[None].fail("Invalid stream name in record message")
+                return FlextResult[bool].fail("Invalid stream name in record message")
 
             if not isinstance(record_data, dict):
-                return FlextResult[None].fail("Invalid record data in record message")
+                return FlextResult[bool].fail("Invalid record data in record message")
 
             # Load record using loader
             result: FlextResult[object] = self.loader.load_record(
@@ -236,16 +236,16 @@ class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
                 record_data,
             )
             if result.is_failure:
-                return FlextResult[None].fail(f"Failed to load record: {result.error}")
+                return FlextResult[bool].fail(f"Failed to load record: {result.error}")
 
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(value=True)
 
         except Exception as e:
-            return FlextResult[None].fail(f"Record handling failed: {e}")
+            return FlextResult[bool].fail(f"Record handling failed: {e}")
 
     def _handle_state(
         self, message: dict[str, t.GeneralValueType]
-    ) -> FlextResult[None]:
+    ) -> FlextResult[bool]:
         """Handle STATE message."""
         try:
             state_value = message.get("value")
@@ -253,10 +253,10 @@ class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
                 self._state.update(state_value)
 
             self.log_debug(f"Updated state: {state_value}")
-            return FlextResult[None].ok(None)
+            return FlextResult[bool].ok(value=True)
 
         except Exception as e:
-            return FlextResult[None].fail(f"State handling failed: {e}")
+            return FlextResult[bool].fail(f"State handling failed: {e}")
 
     def finalize(self) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Finalize target processing and return complete statistics."""

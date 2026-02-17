@@ -100,21 +100,21 @@ class OracleConnectionModel(BaseModel):
             return f"{protocol}://{self.username}@{self.host}:{self.port}/{self.service_name}"
         return f"{protocol}://{self.host}:{self.port}/{self.service_name}"
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[bool]:
         """Validate Oracle connection business rules."""
         # Validate host is reachable format
         if not self.host or self.host.isspace():
-            return FlextResult[None].fail("Host cannot be empty or whitespace")
+            return FlextResult[bool].fail("Host cannot be empty or whitespace")
 
         # Validate service name format
         if not self.service_name or self.service_name.isspace():
-            return FlextResult[None].fail("Service name cannot be empty or whitespace")
+            return FlextResult[bool].fail("Service name cannot be empty or whitespace")
 
         # Validate username
         if not self.username or self.username.isspace():
-            return FlextResult[None].fail("Username cannot be empty or whitespace")
+            return FlextResult[bool].fail("Username cannot be empty or whitespace")
 
-        return FlextResult[None].ok(None)
+        return FlextResult[bool].ok(value=True)
 
 
 class SingerStreamModel(FlextModels.ArbitraryTypesModel):
@@ -280,13 +280,13 @@ class BatchProcessingModel(FlextModels.ArbitraryTypesModel):
             },
         )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[bool]:
         """Validate business rules for batch processing."""
         if not self.stream_name or self.stream_name.isspace():
-            return FlextResult[None].fail("Stream name cannot be empty or whitespace")
+            return FlextResult[bool].fail("Stream name cannot be empty or whitespace")
         if self.batch_size <= 0:
-            return FlextResult[None].fail("Batch size must be positive")
-        return FlextResult[None].ok(None)
+            return FlextResult[bool].fail("Batch size must be positive")
+        return FlextResult[bool].ok(value=True)
 
 
 class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
@@ -405,22 +405,22 @@ class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
             },
         )
 
-    def validate_business_rules(self) -> FlextResult[None]:
+    def validate_business_rules(self) -> FlextResult[bool]:
         """Validate business rules for load statistics."""
         if not self.stream_name or self.stream_name.isspace():
-            return FlextResult[None].fail("Stream name cannot be empty or whitespace")
+            return FlextResult[bool].fail("Stream name cannot be empty or whitespace")
         if self.successful_records < 0:
-            return FlextResult[None].fail("Successful records count cannot be negative")
+            return FlextResult[bool].fail("Successful records count cannot be negative")
         if self.failed_records < 0:
-            return FlextResult[None].fail("Failed records count cannot be negative")
+            return FlextResult[bool].fail("Failed records count cannot be negative")
         if (
             self.total_records_processed
             != self.successful_records + self.failed_records
         ):
-            return FlextResult[None].fail(
+            return FlextResult[bool].fail(
                 "Total records must equal successful + failed records",
             )
-        return FlextResult[None].ok(None)
+        return FlextResult[bool].ok(value=True)
 
 
 class OracleTableMetadataModel(FlextModels.ArbitraryTypesModel):
