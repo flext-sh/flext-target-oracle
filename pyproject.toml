@@ -64,6 +64,14 @@
         flext-target-oracle = "flext_target_oracle.target:cli"
         target-oracle       = "flext_target_oracle.target:cli"
 
+    [tool.pyrefly]
+        search-path = [
+            "../typings",
+            "../typings/generated",
+            "src",
+            "tests",
+        ]
+
 [tool.ruff]
     extend = "../ruff-shared.toml"
 
