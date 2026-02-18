@@ -36,7 +36,7 @@ from flext_core import t
 from flext_core import u
 
 # Configuration with domain validation
-class FlextOracleTargetSettings(FlextModels.Value):
+class FlextOracleTargetSettings(m.Value):
     def validate_domain_rules(self) -> FlextResult[bool]:
         # Chain of Responsibility validation pattern
 ```
@@ -124,7 +124,7 @@ class FlextOracleTarget(Target):
 **Responsibility**: Configuration management with domain validation
 
 ```python
-class FlextOracleTargetSettings(FlextModels.Value):
+class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business rule validation."""
 
     # Required Oracle connection parameters

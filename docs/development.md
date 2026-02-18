@@ -168,7 +168,7 @@ def operation() -> FlextResult[Data]:
         return FlextResult[bool].fail(f"Operation failed: {e}")
 
 # ✅ GOOD: Configuration with validation
-class Config(FlextModels.Value):
+class Config(m.Value):
     field: str = Field(..., description="Required field")
 
     @field_validator("field")
@@ -230,8 +230,8 @@ def process_batch(records: list[t.Dict]) -> FlextResult[Stats]:
 ### Configuration Patterns
 
 ```python
-# ✅ FlextModels.Value with domain validation
-class FlextOracleTargetSettings(FlextModels.Value):
+# ✅ m.Value with domain validation
+class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business rule validation."""
 
     # Required fields with clear validation

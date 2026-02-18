@@ -11,7 +11,7 @@ FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for
 ### **Core Design Principles**
 
 1. **Singer Protocol Compliance**: Primary focus on Singer specification implementation
-2. **FLEXT Pattern Integration**: Uses flext-core foundations (FlextResult, FlextModels.Value)
+2. **FLEXT Pattern Integration**: Uses flext-core foundations (FlextResult, m.Value)
 3. **Clean Architecture Simplified**: Streamlined layers for target-specific needs
 4. **Type-Safe Everything**: Comprehensive type hints and strict MyPy compliance
 5. **Railway-Oriented Programming**: FlextResult[T] threading through all operations
@@ -26,7 +26,7 @@ FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for
 ```python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Public API gateway & exports
-├── config.py                # ⚙️ FlextModels.Value configuration patterns
+├── config.py                # ⚙️ m.Value configuration patterns
 ├── target.py                # 🎯 Singer Target implementation
 ├── loader.py                # 🔧 Oracle data loading operations
 └── exceptions.py            # 🚨 Domain-specific error hierarchy
@@ -175,7 +175,7 @@ class LoadMethod(StrEnum):
     BULK_INSERT = "bulk_insert"
     BULK_MERGE = "bulk_merge"
 
-class FlextOracleTargetSettings(FlextModels.Value):
+class FlextOracleTargetSettings(m.Value):
     """Type-safe Oracle configuration with business rule validation."""
 
     # Required Oracle connection parameters
@@ -199,7 +199,7 @@ class FlextOracleTargetSettings(FlextModels.Value):
 
 **Strengths**:
 
-- ✅ **FlextModels.Value Integration**: Proper use of FLEXT core patterns
+- ✅ **m.Value Integration**: Proper use of FLEXT core patterns
 - ✅ **Domain Validation**: Chain of Responsibility validation pattern
 - ✅ **Type Safety**: Comprehensive Pydantic validation
 
@@ -434,11 +434,11 @@ def process_record_bad(self, stream_name: str, record_data: dict) -> None:
     self._flush_if_needed(stream_name)
 ```
 
-### **FlextModels.Value Configuration Pattern**
+### **m.Value Configuration Pattern**
 
 ```python
 # ✅ CORRECT - Comprehensive validation with domain rules
-class FlextOracleTargetSettings(FlextModels.Value):
+class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business validation."""
 
     oracle_host: str = Field(..., description="Oracle host")
@@ -1116,7 +1116,7 @@ def _write_record(self, record: Record) -> None:
 ### **Pre-Development Checklist**
 
 - [ ] **Architecture Review**: Module fits within Clean Architecture layers
-- [ ] **FLEXT Pattern Compliance**: Uses FlextResult, FlextModels.Value patterns
+- [ ] **FLEXT Pattern Compliance**: Uses FlextResult, m.Value patterns
 - [ ] **Dependency Analysis**: Dependencies flow inward (no circular references)
 - [ ] **Singer Compliance**: Follows Singer specification requirements
 - [ ] **Security Review**: No SQL injection or credential exposure risks
