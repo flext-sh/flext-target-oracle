@@ -1,43 +1,44 @@
 # TODO - Status dos Desvios e Melhorias do Projeto
 
-
 <!-- TOC START -->
-- [🚨 DESVIOS CRÍTICOS DE ARQUITETURA](#-desvios-crticos-de-arquitetura)
+
+- [🚨 DESVIOS CRÍTICOS DE ARQUITETURA](#desvios-crticos-de-arquitetura)
   - [1. **DUPLICAÇÃO DE EXCEÇÕES** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE](#1-duplicao-de-excees-documentado-implementao-pendente)
   - [2. **USO INCORRETO DE execute_ddl PARA DML** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE](#2-uso-incorreto-de-executeddl-para-dml-documentado-implementao-pendente)
   - [3. **FALTA DE DEPENDÊNCIA SINGER SDK** - PRIORIDADE ALTA](#3-falta-de-dependncia-singer-sdk-prioridade-alta)
   - [4. **IMPLEMENTAÇÃO INCOMPLETA DE SINGER TARGET** - PRIORIDADE ALTA](#4-implementao-incompleta-de-singer-target-prioridade-alta)
-- [⚠️ PROBLEMAS DE IMPLEMENTAÇÃO](#-problemas-de-implementao)
+- [⚠️ PROBLEMAS DE IMPLEMENTAÇÃO](#problemas-de-implementao)
   - [5. **SQL INJECTION RISK** - 🚨 **CRÍTICO - DOCUMENTADO MAS NÃO RESOLVIDO**](#5-sql-injection-risk-crtico-documentado-mas-no-resolvido)
   - [6. **MANEJO INADEQUADO DE TRANSAÇÕES** - PRIORIDADE MÉDIA](#6-manejo-inadequado-de-transaes-prioridade-mdia)
   - [7. **CONFIGURAÇÃO MAL PROJETADA** - PRIORIDADE MÉDIA](#7-configurao-mal-projetada-prioridade-mdia)
   - [8. **SCHEMA EVOLUTION NÃO IMPLEMENTADO** - PRIORIDADE MÉDIA](#8-schema-evolution-no-implementado-prioridade-mdia)
-- [🔧 MELHORIAS DE ARQUITETURA](#-melhorias-de-arquitetura)
+- [🔧 MELHORIAS DE ARQUITETURA](#melhorias-de-arquitetura)
   - [9. **FALTA DE FACTORY PATTERN** - PRIORIDADE BAIXA](#9-falta-de-factory-pattern-prioridade-baixa)
   - [10. **LOGGING INADEQUADO** - PRIORIDADE BAIXA](#10-logging-inadequado-prioridade-baixa)
-- [📊 PROBLEMAS DE TESTES](#-problemas-de-testes)
+- [📊 PROBLEMAS DE TESTES](#problemas-de-testes)
   - [11. **COBERTURA DE TESTES INCOMPLETA** - PRIORIDADE MÉDIA](#11-cobertura-de-testes-incompleta-prioridade-mdia)
   - [12. **FIXTURES DESATUALIZADAS** - PRIORIDADE BAIXA](#12-fixtures-desatualizadas-prioridade-baixa)
-- [✅ PROGRESSO REAL REALIZADO (2025-08-04)](#-progresso-real-realizado-2025-08-04)
-  - [🎯 **DOCUMENTAÇÃO ENTERPRISE-GRADE COMPLETA**](#-documentao-enterprise-grade-completa)
-  - [🚨 **ISSUES CRÍTICAS - STATUS REAL**](#-issues-crticas-status-real)
-- [📋 PRÓXIMOS PASSOS PRIORITÁRIOS](#-prximos-passos-prioritrios)
+- [✅ PROGRESSO REAL REALIZADO (2025-08-04)](#progresso-real-realizado-2025-08-04)
+  - [🎯 **DOCUMENTAÇÃO ENTERPRISE-GRADE COMPLETA**](#documentao-enterprise-grade-completa)
+  - [🚨 **ISSUES CRÍTICAS - STATUS REAL**](#issues-crticas-status-real)
+- [📋 PRÓXIMOS PASSOS PRIORITÁRIOS](#prximos-passos-prioritrios)
   - [**URGENTE** - Implementação das Correções Críticas](#urgente-implementao-das-correes-crticas)
   - [**IMPORTANTE** - Estabilidade e Qualidade](#importante-estabilidade-e-qualidade)
   - [**OPCIONAL** - Melhorias Arquiteturais](#opcional-melhorias-arquiteturais)
-- [📖 REFERÊNCIAS TÉCNICAS](#-referncias-tcnicas)
+- [📖 REFERÊNCIAS TÉCNICAS](#referncias-tcnicas)
   - [**Singer Specification**](#singer-specification)
   - [**FLEXT Patterns**](#flext-patterns)
   - [**Security Guidelines**](#security-guidelines)
-- [🎯 MÉTRICAS REAIS DE PROGRESSO](#-mtricas-reais-de-progresso)
+- [🎯 MÉTRICAS REAIS DE PROGRESSO](#mtricas-reais-de-progresso)
   - [**Estado Atual (2025-08-04 19:30) - IMPLEMENTAÇÃO INICIADA**](#estado-atual-2025-08-04-1930-implementao-iniciada)
   - [**Métricas de Qualidade Documentação**](#mtricas-de-qualidade-documentao)
   - [**Status de Produção Realista**](#status-de-produo-realista)
   - [**Próxima Fase Necessária**](#prxima-fase-necessria)
+
 <!-- TOC END -->
 
-**Data da Análise**: 2025-08-04  
-**Versão**: 0.9.9  
+**Data da Análise**: 2025-08-04\
+**Versão**: 0.9.9\
 **Status**: Documentação Atualizada - Implementação Pendente · 1.0.0 Release Preparation
 **Última Atualização**: 2025-08-04 18:00
 
@@ -72,7 +73,7 @@
 - `src/flext_target_oracle/__init__.py` - **remover exceções**
 - `src/flext_target_oracle/exceptions.py` - **manter como fonte única**
 
----
+______________________________________________________________________
 
 ### 2. **USO INCORRETO DE execute_ddl PARA DML** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE
 
@@ -105,7 +106,7 @@ result = connected_api.execute_dml(sql, param)  # Usar parameterized query
 
 - `src/flext_target_oracle/loader.py:233` - **CRÍTICO: implementar correção**
 
----
+______________________________________________________________________
 
 ### 3. **FALTA DE DEPENDÊNCIA SINGER SDK** - PRIORIDADE ALTA
 
@@ -136,7 +137,7 @@ dependencies = [
 ]
 ```
 
----
+______________________________________________________________________
 
 ### 4. **IMPLEMENTAÇÃO INCOMPLETA DE SINGER TARGET** - PRIORIDADE ALTA
 
@@ -164,7 +165,7 @@ class FlextOracleTarget(Target):
         # Implementar método Singer padrão
 ```
 
----
+______________________________________________________________________
 
 ## ⚠️ PROBLEMAS DE IMPLEMENTAÇÃO
 
@@ -202,7 +203,7 @@ result = connected_api.execute_dml(sql, param)
 
 **Status de Produção**: 🛑 **BLOQUEADO** - Não deployer em produção até correção
 
----
+______________________________________________________________________
 
 ### 6. **MANEJO INADEQUADO DE TRANSAÇÕES** - PRIORIDADE MÉDIA
 
@@ -222,7 +223,7 @@ with self.oracle_api as connected_api:
         connected_api.commit()
 ```
 
----
+______________________________________________________________________
 
 ### 7. **CONFIGURAÇÃO MAL PROJETADA** - PRIORIDADE MÉDIA
 
@@ -246,7 +247,7 @@ def _create_table(...)        # Não precisa ser
 - Tornar métodos síncronos onde apropriado
 - Manter apenas onde necessário
 
----
+______________________________________________________________________
 
 ### 8. **SCHEMA EVOLUTION NÃO IMPLEMENTADO** - PRIORIDADE MÉDIA
 
@@ -264,7 +265,7 @@ def _evolve_table_schema(self, table_name: str, new_schema: dict):
     # Implementar ALTER TABLE baseado em diff de schema
 ```
 
----
+______________________________________________________________________
 
 ## 🔧 MELHORIAS DE ARQUITETURA
 
@@ -281,7 +282,7 @@ class OracleConnectionFactory:
         # Factory para criação de conexões
 ```
 
----
+______________________________________________________________________
 
 ### 10. **LOGGING INADEQUADO** - PRIORIDADE BAIXA
 
@@ -298,7 +299,7 @@ logger.info("Batch loaded", extra={
 })
 ```
 
----
+______________________________________________________________________
 
 ## 📊 PROBLEMAS DE TESTES
 
@@ -316,7 +317,7 @@ logger.info("Batch loaded", extra={
 - `tests/unit/test_sql_injection.py`
 - `tests/performance/test_batch_performance.py`
 
----
+______________________________________________________________________
 
 ### 12. **FIXTURES DESATUALIZADAS** - PRIORIDADE BAIXA
 
@@ -334,7 +335,7 @@ def malicious_data():
     # Fixture para testar SQL injection
 ```
 
----
+______________________________________________________________________
 
 ## ✅ PROGRESSO REAL REALIZADO (2025-08-04)
 
@@ -392,24 +393,24 @@ def malicious_data():
 ### **URGENTE** - Implementação das Correções Críticas
 
 1. 🚨 **Corrigir SQL Injection** (loader.py:226-232)
-2. 🚨 **Consolidar exceptions** (remover duplicação)
-3. 🚨 **Implementar Singer SDK methods** (target.py)
-4. 🚨 **Corrigir execute_ddl → execute_dml** (loader.py:233)
+1. 🚨 **Consolidar exceptions** (remover duplicação)
+1. 🚨 **Implementar Singer SDK methods** (target.py)
+1. 🚨 **Corrigir execute_ddl → execute_dml** (loader.py:233)
 
 ### **IMPORTANTE** - Estabilidade e Qualidade
 
 5. ⚠️ **Implementar transaction management**
-6. ⚠️ **Completar testes de integração**
-7. ⚠️ **Adicionar schema evolution**
-8. ⚠️ **Melhorar logging estruturado**
+1. ⚠️ **Completar testes de integração**
+1. ⚠️ **Adicionar schema evolution**
+1. ⚠️ **Melhorar logging estruturado**
 
 ### **OPCIONAL** - Melhorias Arquiteturais
 
 9. 🔧 **Factory patterns** para conexões
-10. 🔧 **Performance optimization** para batches
-11. 🔧 **Monitoring integration** avançado
+1. 🔧 **Performance optimization** para batches
+1. 🔧 **Monitoring integration** avançado
 
----
+______________________________________________________________________
 
 ## 📖 REFERÊNCIAS TÉCNICAS
 
@@ -429,7 +430,7 @@ def malicious_data():
 - OWASP SQL Injection Prevention
 - Oracle Secure Coding Practices
 
----
+______________________________________________________________________
 
 ## 🎯 MÉTRICAS REAIS DE PROGRESSO
 
@@ -466,9 +467,9 @@ def malicious_data():
 - 📊 **Testes de integração** (validação das correções)
 - 🚀 **Release v1.0.0** (produção-ready)
 
----
+______________________________________________________________________
 
-**Última Atualização**: 2025-08-04 18:00  
-**Progresso Realizado**: Documentação enterprise-grade completa  
-**Próximo Milestone**: Implementação das correções críticas  
+**Última Atualização**: 2025-08-04 18:00\
+**Progresso Realizado**: Documentação enterprise-grade completa\
+**Próximo Milestone**: Implementação das correções críticas\
 **Próxima Revisão**: 2025-08-11

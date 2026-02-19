@@ -1,48 +1,49 @@
 # Python Module Organization & Semantic Patterns
 
-
 <!-- TOC START -->
-- [🏗️ **Module Architecture Overview**](#-module-architecture-overview)
+
+- [🏗️ **Module Architecture Overview**](#module-architecture-overview)
   - [**Core Design Principles**](#core-design-principles)
-- [📁 **Current Module Structure & Analysis**](#-current-module-structure-analysis)
+- [📁 **Current Module Structure & Analysis**](#current-module-structure-analysis)
   - [**Current Implementation Structure**](#current-implementation-structure)
   - [**Module Responsibilities Analysis**](#module-responsibilities-analysis)
-- [🎯 **Recommended Module Architecture**](#-recommended-module-architecture)
+- [🎯 **Recommended Module Architecture**](#recommended-module-architecture)
   - [**Ideal Structure for Singer Targets**](#ideal-structure-for-singer-targets)
   - [**Simplified Structure (Current Approach)**](#simplified-structure-current-approach)
-- [📋 **FLEXT Pattern Implementation Standards**](#-flext-pattern-implementation-standards)
+- [📋 **FLEXT Pattern Implementation Standards**](#flext-pattern-implementation-standards)
   - [**FlextResult Railway Pattern Usage**](#flextresult-railway-pattern-usage)
   - [**m.Value Configuration Pattern**](#mvalue-configuration-pattern)
   - [**Structured Logging Pattern**](#structured-logging-pattern)
-- [🔧 **Module Dependency Patterns**](#-module-dependency-patterns)
+- [🔧 **Module Dependency Patterns**](#module-dependency-patterns)
   - [**Dependency Direction (Clean Architecture)**](#dependency-direction-clean-architecture)
   - [**External Dependency Integration**](#external-dependency-integration)
-- [🧪 **Testing Module Organization**](#-testing-module-organization)
+- [🧪 **Testing Module Organization**](#testing-module-organization)
   - [**Test Structure Mirroring Source**](#test-structure-mirroring-source)
   - [**Test Pattern Examples**](#test-pattern-examples)
-- [📏 **Code Quality Standards**](#-code-quality-standards)
+- [📏 **Code Quality Standards**](#code-quality-standards)
   - [**Type Annotation Requirements**](#type-annotation-requirements)
   - [**Documentation Standards**](#documentation-standards)
-- [🌐 **FLEXT Ecosystem Integration Patterns**](#-flext-ecosystem-integration-patterns)
+- [🌐 **FLEXT Ecosystem Integration Patterns**](#flext-ecosystem-integration-patterns)
   - [**Cross-Project Import Standards**](#cross-project-import-standards)
   - [**Configuration Ecosystem Integration**](#configuration-ecosystem-integration)
-- [🔄 **Migration & Evolution Patterns**](#-migration-evolution-patterns)
+- [🔄 **Migration & Evolution Patterns**](#migration-evolution-patterns)
   - [**Version Migration Strategy**](#version-migration-strategy)
   - [**Backward Compatibility Strategy**](#backward-compatibility-strategy)
-- [📋 **Module Development Checklist**](#-module-development-checklist)
+- [📋 **Module Development Checklist**](#module-development-checklist)
   - [**Pre-Development Checklist**](#pre-development-checklist)
   - [**Development Standards Checklist**](#development-standards-checklist)
   - [**Quality Gate Checklist**](#quality-gate-checklist)
   - [**Ecosystem Integration Checklist**](#ecosystem-integration-checklist)
-- [🚀 **Future Evolution Roadmap**](#-future-evolution-roadmap)
+- [🚀 **Future Evolution Roadmap**](#future-evolution-roadmap)
   - [**Version 0.9.9 (Production Ready)**](#version-099-production-ready)
   - [**Version 1.1.0 (Enhanced Features)**](#version-110-enhanced-features)
   - [**Version 0.9.9 (Next Generation)**](#version-099-next-generation)
+
 <!-- TOC END -->
 
 **FLEXT Target Oracle - Module Architecture Following FLEXT Ecosystem Standards**
 
----
+______________________________________________________________________
 
 ## 🏗️ **Module Architecture Overview**
 
@@ -51,13 +52,13 @@ FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for
 ### **Core Design Principles**
 
 1. **Singer Protocol Compliance**: Primary focus on Singer specification implementation
-2. **FLEXT Pattern Integration**: Uses flext-core foundations (FlextResult, m.Value)
-3. **Clean Architecture Simplified**: Streamlined layers for target-specific needs
-4. **Type-Safe Everything**: Comprehensive type hints and strict MyPy compliance
-5. **Railway-Oriented Programming**: FlextResult[T] threading through all operations
-6. **Ecosystem Consistency**: Patterns align with broader FLEXT ecosystem
+1. **FLEXT Pattern Integration**: Uses flext-core foundations (FlextResult, m.Value)
+1. **Clean Architecture Simplified**: Streamlined layers for target-specific needs
+1. **Type-Safe Everything**: Comprehensive type hints and strict MyPy compliance
+1. **Railway-Oriented Programming**: FlextResult[T] threading through all operations
+1. **Ecosystem Consistency**: Patterns align with broader FLEXT ecosystem
 
----
+______________________________________________________________________
 
 ## 📁 **Current Module Structure & Analysis**
 
@@ -405,7 +406,7 @@ class FlextOracleTargetProcessingError(FlextOracleTargetError): ...
 
 - ❌ **Duplication**: Same exceptions defined in `__init__.py`
 
----
+______________________________________________________________________
 
 ## 🎯 **Recommended Module Architecture**
 
@@ -449,7 +450,7 @@ src/flext_target_oracle/
 └── exceptions.py            # 🚨 Single source of exceptions (fixed)
 ```
 
----
+______________________________________________________________________
 
 ## 📋 **FLEXT Pattern Implementation Standards**
 
@@ -599,7 +600,7 @@ def process_batch_bad(self, stream_name: str, records: list):
         print(f"Error: {e}")  # No context
 ```
 
----
+______________________________________________________________________
 
 ## 🔧 **Module Dependency Patterns**
 
@@ -713,7 +714,7 @@ from singer_sdk import Target  # Should use flext-meltano instead
 import cx_Oracle  # Should use flext-db-oracle abstraction
 ```
 
----
+______________________________________________________________________
 
 ## 🧪 **Testing Module Organization**
 
@@ -857,7 +858,7 @@ class TestSingerCompliance:
         assert stats_result.data["total_records"] == 5
 ```
 
----
+______________________________________________________________________
 
 ## 📏 **Code Quality Standards**
 
@@ -969,7 +970,7 @@ def ensure_table_exists(
     # Implementation details...
 ```
 
----
+______________________________________________________________________
 
 ## 🌐 **FLEXT Ecosystem Integration Patterns**
 
@@ -1077,7 +1078,7 @@ class FlextOracleTargetSettings(FlextSettings):
         env_nested_delimiter = "__"  # ORACLE__HOST, OBSERVABILITY__ENABLE_METRICS
 ```
 
----
+______________________________________________________________________
 
 ## 🔄 **Migration & Evolution Patterns**
 
@@ -1149,7 +1150,7 @@ def _write_record(self, record: Record) -> None:
         raise RuntimeError(result.error)  # Singer SDK expects exceptions
 ```
 
----
+______________________________________________________________________
 
 ## 📋 **Module Development Checklist**
 
@@ -1186,7 +1187,7 @@ def _write_record(self, record: Record) -> None:
 - [ ] **Error Handling**: Consistent error patterns across ecosystem
 - [ ] **Documentation**: Follows ecosystem documentation standards
 
----
+______________________________________________________________________
 
 ## 🚀 **Future Evolution Roadmap**
 
@@ -1242,7 +1243,7 @@ src/flext_target_oracle/
 - 🔮 **Stream Processing**: Real-time data processing capabilities
 - 🔮 **Cloud-Native**: Kubernetes-native deployment patterns
 
----
+______________________________________________________________________
 
 **Document Version**: 1.0
 **Last Updated**: 2025-08-04

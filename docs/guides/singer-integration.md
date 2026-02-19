@@ -1,13 +1,13 @@
 # Singer SDK Integration Guide
 
-
 <!-- TOC START -->
+
 - [Overview](#overview)
 - [Singer Protocol Implementation](#singer-protocol-implementation)
   - [Message Types Supported](#message-types-supported)
 - [Current Implementation Status](#current-implementation-status)
-  - [✅ Implemented Features](#-implemented-features)
-  - [❌ Missing Singer SDK Compliance](#-missing-singer-sdk-compliance)
+  - [✅ Implemented Features](#implemented-features)
+  - [❌ Missing Singer SDK Compliance](#missing-singer-sdk-compliance)
 - [Meltano Integration](#meltano-integration)
   - [Configuration Schema](#configuration-schema)
   - [Meltano Execution](#meltano-execution)
@@ -28,6 +28,7 @@
   - [Version 0.9.9 Requirements](#version-099-requirements)
   - [Version 1.1.0 Enhancements](#version-110-enhancements)
   - [Version 1.2.0 Advanced Features](#version-120-advanced-features)
+
 <!-- TOC END -->
 
 **FLEXT Target Oracle - Singer Protocol Compliance Documentation**
@@ -622,7 +623,7 @@ def test_singer_tap_integration():
   - [ ] Retry policies
   - [ ] Circuit breaker patterns
 
----
+______________________________________________________________________
 
 **Document Version**: 1.0
 **Last Updated**: 2025-08-04

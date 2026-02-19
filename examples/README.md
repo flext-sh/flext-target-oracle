@@ -1,7 +1,7 @@
 # FLEXT Target Oracle - Practical Examples
 
-
 <!-- TOC START -->
+
 - [Quick Navigation](#quick-navigation)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -20,6 +20,7 @@
 - [Testing Examples](#testing-examples)
 - [Contributing Examples](#contributing-examples)
 - [Security Notes](#security-notes)
+
 <!-- TOC END -->
 
 **Comprehensive examples for Oracle Singer target implementation and usage**
@@ -172,10 +173,10 @@ pytest examples/tests/ -m integration
 ## Contributing Examples
 
 1. **Follow FLEXT Patterns**: Use FlextResult, m.Value, and structured logging
-2. **Document Thoroughly**: Include comprehensive docstrings and comments
-3. **Test Coverage**: Add corresponding tests in examples/tests/
-4. **Security Awareness**: Highlight security considerations and best practices
-5. **Production Ready**: Examples should be suitable for adaptation in production
+1. **Document Thoroughly**: Include comprehensive docstrings and comments
+1. **Test Coverage**: Add corresponding tests in examples/tests/
+1. **Security Awareness**: Highlight security considerations and best practices
+1. **Production Ready**: Examples should be suitable for adaptation in production
 
 ## Security Notes
 
@@ -187,6 +188,6 @@ pytest examples/tests/ -m integration
 - Review security considerations in each example
 - Follow FLEXT security best practices
 
----
+______________________________________________________________________
 
 **Next Steps**: Start with [Basic Usage](basic_usage.py) for a simple introduction to FLEXT Target Oracle.

@@ -1,317 +1,120 @@
-"""Oracle Target Commands using Flext CQRS SOURCE OF TRUTH.
-
-ZERO DUPLICATION - Uses flext-core FlextModels.Command exclusively.
-No local command implementations - everything from SOURCE OF TRUTH.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Command helpers for Oracle target CLI flows."""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import override
 
-import yaml
 from flext_core import FlextModels, FlextResult, h
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleModels
-from pydantic import Field
 
-from flext_target_oracle.settings import FlextTargetOracleSettings
-from flext_target_oracle.target_client import FlextTargetOracle
-from flext_target_oracle.target_services import OracleConnectionService
+from .settings import FlextTargetOracleSettings
+from .target_client import FlextTargetOracle
 
 
 class OracleTargetValidateCommand(FlextModels.Command):
-    """Oracle target validation command using Flext CQRS SOURCE OF TRUTH.
+    """Validate configuration and connectivity for the Oracle target."""
 
-    ZERO DUPLICATION - Inherits from FlextModels.Command directly.
-    """
+    config_file: str | None = None
 
-    # Command-specific data using Pydantic fields
-    config_file: str | None = Field(
-        default=None,
-        description="Path to configuration file",
-    )
-
-    @override
     def execute(self) -> FlextResult[str]:
-        """Execute validation using pure flext-core patterns."""
-        try:
-            # Load configuration using direct instantiation - SOURCE OF TRUTH pattern
-            if self.config_file:
-                # Load configuration from file
-                config_path: Path = Path(self.config_file)
-                if not config_path.exists():
-                    return FlextResult[str].fail(
-                        f"Configuration file not found: {self.config_file}",
-                    )
+        """Validate configuration and Oracle connectivity."""
+        config_result = _load_settings(self.config_file)
+        if config_result.is_failure:
+            return FlextResult[str].fail(config_result.error or "Config load failed")
 
-                config_data = json.loads(
-                    config_path.read_text(encoding="utf-8"),
-                )
-                config = FlextTargetOracleSettings(**config_data)
-            else:
-                # Use FlextTargetOracleSettings's built-in environment loading
-                # This uses Pydantic BaseSettings to automatically load environment variables
-                config = FlextTargetOracleSettings()
+        config = config_result.value
+        if config is None:
+            return FlextResult[str].fail("Configuration could not be loaded")
 
-            # Validate configuration using domain method
-            validation_result = config.validate_domain_rules()
-            if validation_result.is_failure:
-                return FlextResult[str].fail(
-                    f"Configuration validation failed: {validation_result.error}",
-                )
-
-            # Test Oracle connection using domain services
-            # Create Oracle API configuration from our config
-            oracle_api_config = FlextDbOracleModels.OracleConfig(
-                host=config.oracle_host,
-                port=config.oracle_port,
-                name=config.oracle_service,  # Use 'name' instead of 'database'
-                username=config.oracle_user,  # Use 'username' instead of 'user'
-                password=config.oracle_password.get_secret_value()
-                if hasattr(config.oracle_password, "get_secret_value")
-                else str(config.oracle_password),
-            )
-            oracle_api = FlextDbOracleApi(oracle_api_config)
-
-            connection_service = OracleConnectionService(
-                config=config,
-                oracle_api=oracle_api,
+        validation_result = config.validate_domain_rules()
+        if validation_result.is_failure:
+            return FlextResult[str].fail(
+                validation_result.error or "Validation failed",
             )
 
-            test_result = connection_service.execute()
-            if test_result.is_failure:
-                return FlextResult[str].fail(
-                    f"Oracle connection test failed: {test_result.error}",
-                )
+        target = FlextTargetOracle(config)
+        test_result = target.test_connection()
+        if test_result.is_failure:
+            return FlextResult[str].fail(test_result.error or "Connection test failed")
 
-            return FlextResult[str].ok(
-                "Oracle target validation completed successfully",
-            )
-
-        except Exception as e:
-            return FlextResult[str].fail(f"Validation error: {e}")
+        return FlextResult[str].ok("Oracle target validation completed successfully")
 
 
 class OracleTargetLoadCommand(FlextModels.Command):
-    """Oracle target load command using Flext CQRS SOURCE OF TRUTH.
+    """Initialize Oracle target for load operations."""
 
-    ZERO DUPLICATION - Inherits from FlextModels.Command directly.
-    """
+    config_file: str | None = None
+    state_file: str | None = None
 
-    # Command-specific data using Pydantic fields
-    config_file: str | None = Field(
-        default=None,
-        description="Path to configuration file",
-    )
-    state_file: str | None = Field(default=None, description="Path to state file")
-
-    @override
     def execute(self) -> FlextResult[str]:
-        """Execute load using pure flext-core patterns."""
-        try:
-            # Load configuration using direct instantiation - SOURCE OF TRUTH pattern
-            if self.config_file:
-                # Load configuration from file
-                config_path: Path = Path(self.config_file)
-                if not config_path.exists():
-                    return FlextResult[str].fail(
-                        f"Configuration file not found: {self.config_file}",
-                    )
+        """Initialize target and verify it is ready for loads."""
+        config_result = _load_settings(self.config_file)
+        if config_result.is_failure:
+            return FlextResult[str].fail(config_result.error or "Config load failed")
 
-                config_data = json.loads(
-                    config_path.read_text(encoding="utf-8"),
-                )
-                config = FlextTargetOracleSettings(**config_data)
-            else:
-                # Use FlextTargetOracleSettings's built-in environment loading
-                # This uses Pydantic BaseSettings to automatically load environment variables
-                config = FlextTargetOracleSettings()
+        config = config_result.value
+        if config is None:
+            return FlextResult[str].fail("Configuration could not be loaded")
 
-            # Create target instance using SOURCE OF TRUTH factory pattern
-            # Create FlextTargetOracle instance directly - it accepts config in constructor
-            target = FlextTargetOracle(config)
+        target = FlextTargetOracle(config)
+        init_result = target.initialize()
+        if init_result.is_failure:
+            return FlextResult[str].fail(
+                init_result.error or "Target initialization failed",
+            )
 
-            # Singer targets are typically executed by reading stdin
-            # For CLI purposes, we'll validate the target is ready for operation
-            loader_result = target.loader.test_connection()
-            if loader_result.is_failure:
-                return FlextResult[str].fail(
-                    f"Target initialization failed: {loader_result.error}",
-                )
-
-            # For now, we return success indicating target is ready for Singer data
-            success_msg = "Oracle target initialized and ready for data loading"
-            if self.state_file:
-                success_msg += f" (state file: {self.state_file} would be processed by Singer orchestrator)"
-
-            return FlextResult[str].ok(success_msg)
-
-        except Exception as e:
-            return FlextResult[str].fail(f"Load error: {e}")
+        message = "Oracle target initialized and ready for data loading"
+        if self.state_file:
+            message = f"{message} (state file: {self.state_file})"
+        return FlextResult[str].ok(message)
 
 
 class OracleTargetAboutCommand(FlextModels.Command):
-    """Oracle target about command using Flext CQRS SOURCE OF TRUTH.
+    """Return metadata about this target package."""
 
-    ZERO DUPLICATION - Inherits from FlextModels.Command directly.
-    """
+    format: str = "json"
 
-    # Command-specific data using Pydantic fields
-    format: str = Field(default="json", description="Output format (json, text, yaml)")
-
-    @override
     def execute(self) -> FlextResult[str]:
-        """Execute about using pure flext-core patterns."""
-        try:
-            # Get about information using domain methods
-            about_info: dict[str, str | list[str] | dict[str, list[str]]] = {
-                "name": "flext-target-oracle",
-                "version": "__version__",
-                "description": "Modern Oracle Singer Target using FLEXT framework",
-                "capabilities": [
-                    "Singer Protocol 1.5.0",
-                    "Oracle Database connectivity",
-                    "Batch loading with configurable sizes",
-                    "Schema evolution and table creation",
-                    "SSL/TLS connection support",
-                    "Connection pooling",
-                    "Structured logging with observability",
-                ],
-                "configuration": {
-                    "required": [
-                        "oracle_host",
-                        "oracle_port",
-                        "oracle_service",
-                        "oracle_user",
-                        "oracle_password",
-                    ],
-                    "optional": [
-                        "batch_size",
-                        "pool_size",
-                        "ssl_settings",
-                        "load_method",
-                    ],
-                },
-            }
-
-            if self.format == "json":
-                formatted_output = json.dumps(about_info, indent=2)
-            elif self.format == "yaml":
-                formatted_output = yaml.dump(about_info, default_flow_style=False)
-            else:
-                # Text format - extract configuration data safely
-                config_data = about_info.get("configuration", {})
-                required_items: list[str] = (
-                    config_data.get("required", [])
-                    if isinstance(config_data, dict)
-                    else []
-                )
-                optional_items: list[str] = (
-                    config_data.get("optional", [])
-                    if isinstance(config_data, dict)
-                    else []
-                )
-                capabilities = about_info.get("capabilities", [])
-                capabilities_list: list[str] = (
-                    capabilities if isinstance(capabilities, list) else []
-                )
-
-                formatted_output = f"""
-
-FLEXT Target Oracle v{about_info["version"]}
-{about_info["description"]}
-
-Capabilities:
-{chr(10).join("  • " + cap for cap in capabilities_list)}
-
-Required Configuration:
-{chr(10).join("  • " + req for req in required_items)}
-
-Optional Configuration:
-{chr(10).join("  • " + opt for opt in optional_items)}
-"""
-
-            return FlextResult[str].ok(formatted_output)
-
-        except Exception as e:
-            return FlextResult[str].fail(f"About error: {e}")
+        """Return formatted project metadata."""
+        info: dict[str, str | list[str]] = {
+            "name": "flext-target-oracle",
+            "version": "0.9.0",
+            "description": "Singer target for loading records into Oracle",
+            "capabilities": ["discover", "load", "state"],
+        }
+        if self.format == "text":
+            lines = [
+                f"{info['name']} v{info['version']}",
+                str(info["description"]),
+                "Capabilities: " + ", ".join(info["capabilities"]),
+            ]
+            return FlextResult[str].ok("\n".join(lines))
+        return FlextResult[str].ok(json.dumps(info, indent=2))
 
 
 class OracleTargetCommandHandler(h[FlextModels.Command, str]):
-    """Oracle target command handler using Flext CQRS SOURCE OF TRUTH.
+    """Dispatch command objects to their `execute` implementation."""
 
-    ZERO DUPLICATION - Uses h directly.
-    """
-
-    @override
-    def __init__(self) -> None:
-        """Initialize Oracle target command handler."""
-        config = FlextModels.Cqrs.Handler(
-            handler_id="oracle_target_command_handler",
-            handler_name="Oracle Target Command Handler",
-            handler_type="command",
-            handler_mode="command",
-            command_timeout=30000,
-            max_command_retries=3,
-            metadata=FlextModels.Metadata(
-                attributes={"description": "Oracle target Singer command handler"},
-            ),
-        )
-        super().__init__(config=config)
-
-    @override
     def handle(self, message: FlextModels.Command) -> FlextResult[str]:
-        """Handle Oracle target commands using type-based dispatch."""
-        # Dispatch based on command type
-        if isinstance(message, OracleTargetValidateCommand):
-            return self._handle_validate_command(message)
-        if isinstance(message, OracleTargetLoadCommand):
-            return self._handle_load_command(message)
-        if isinstance(message, OracleTargetAboutCommand):
-            return self._handle_about_command(message)
-        return FlextResult[str].fail(f"Unknown command type: {type(message).__name__}")
-
-    def _handle_validate_command(
-        self,
-        command: OracleTargetValidateCommand,
-    ) -> FlextResult[str]:
-        """Handle Oracle target validation command."""
-        return FlextResult[str].ok(
-            f"Validation command handled: {command.command_type}",
-        )
-
-    def _handle_load_command(
-        self,
-        command: OracleTargetLoadCommand,
-    ) -> FlextResult[str]:
-        """Handle Oracle target load command."""
-        return FlextResult[str].ok(f"Load command handled: {command.command_type}")
-
-    def _handle_about_command(
-        self,
-        command: OracleTargetAboutCommand,
-    ) -> FlextResult[str]:
-        """Handle Oracle target about command."""
-        return FlextResult[str].ok(f"About command handled: {command.command_type}")
+        """Invoke command execute methods in a typed-safe way."""
+        if hasattr(message, "execute"):
+            execute_method = getattr(message, "execute")
+            result = execute_method()
+            if isinstance(result, FlextResult):
+                return result
+        return FlextResult[str].fail(f"Unsupported command: {type(message).__name__}")
 
 
 class OracleTargetCommandFactory:
-    """Factory for creating Oracle target commands using SOURCE OF TRUTH patterns."""
+    """Create Oracle target command objects."""
 
     @staticmethod
     def create_validate_command(
         config_file: str | None = None,
     ) -> OracleTargetValidateCommand:
-        """Create validation command using Flext CQRS SOURCE OF TRUTH."""
-        # unique_id is auto-generated by IdentifiableMixin
+        """Create validation command instance."""
         return OracleTargetValidateCommand(
-            command_type="oracle_target_validate",
-            config_file=config_file,
+            command_type="oracle_target_validate", config_file=config_file
         )
 
     @staticmethod
@@ -319,8 +122,7 @@ class OracleTargetCommandFactory:
         config_file: str | None = None,
         state_file: str | None = None,
     ) -> OracleTargetLoadCommand:
-        """Create load command using Flext CQRS SOURCE OF TRUTH."""
-        # unique_id is auto-generated by IdentifiableMixin
+        """Create load command instance."""
         return OracleTargetLoadCommand(
             command_type="oracle_target_load",
             config_file=config_file,
@@ -329,15 +131,41 @@ class OracleTargetCommandFactory:
 
     @staticmethod
     def create_about_command(output_format: str = "json") -> OracleTargetAboutCommand:
-        """Create about command using Flext CQRS SOURCE OF TRUTH."""
-        # unique_id is auto-generated by IdentifiableMixin
+        """Create about command instance."""
         return OracleTargetAboutCommand(
-            command_type="oracle_target_about",
-            format=output_format,
+            command_type="oracle_target_about", format=output_format
         )
 
 
-__all__: list[str] = [
+def _load_settings(config_file: str | None) -> FlextResult[FlextTargetOracleSettings]:
+    """Load settings from JSON file or environment defaults."""
+    if config_file is None:
+        return FlextResult[FlextTargetOracleSettings].ok(FlextTargetOracleSettings())
+
+    config_path = Path(config_file)
+    if not config_path.exists():
+        return FlextResult[FlextTargetOracleSettings].fail(
+            f"Configuration file not found: {config_file}",
+        )
+
+    try:
+        content = config_path.read_text(encoding="utf-8")
+        data = json.loads(content)
+    except Exception as exc:
+        return FlextResult[FlextTargetOracleSettings].fail(
+            f"Invalid configuration file: {exc}",
+        )
+
+    if not isinstance(data, dict):
+        return FlextResult[FlextTargetOracleSettings].fail(
+            "Configuration must be a JSON object"
+        )
+
+    settings = FlextTargetOracleSettings.model_validate(data)
+    return FlextResult[FlextTargetOracleSettings].ok(settings)
+
+
+__all__ = [
     "OracleTargetAboutCommand",
     "OracleTargetCommandFactory",
     "OracleTargetCommandHandler",

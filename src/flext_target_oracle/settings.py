@@ -103,6 +103,11 @@ class FlextTargetOracleSettings(FlextSettings):
         return self.oracle_service_name
 
     @property
+    def oracle_service(self) -> str:
+        """Backward compatibility alias used by legacy target modules."""
+        return self.oracle_service_name
+
+    @property
     def username(self) -> str:
         """Backward compatibility property for oracle_username."""
         return self.oracle_user
@@ -126,6 +131,11 @@ class FlextTargetOracleSettings(FlextSettings):
     def pool_max(self) -> int:
         """Backward compatibility property for maximum pool size."""
         return 10  # Default maximum pool size
+
+    @property
+    def pool_max_size(self) -> int:
+        """Backward compatibility alias for pool max size."""
+        return self.pool_max
 
     @property
     def connection_pool_size(self) -> int:
@@ -160,7 +170,17 @@ class FlextTargetOracleSettings(FlextSettings):
     @property
     def load_method(self) -> str:
         """Backward compatibility property for load method."""
-        return "upsert"  # Default load method
+        return c.LoadMethod.INSERT
+
+    @property
+    def connection_timeout(self) -> int:
+        """Backward compatibility property for connection timeout."""
+        return self.transaction_timeout
+
+    @property
+    def add_metadata_columns(self) -> bool:
+        """Flag for adding Singer metadata columns to records."""
+        return True
 
     @property
     def allow_alter_table(self) -> bool:
@@ -289,6 +309,10 @@ class FlextTargetOracleSettings(FlextSettings):
         except Exception as e:
             return FlextResult[bool].fail(f"Business rules validation failed: {e}")
 
+    def validate_domain_rules(self) -> FlextResult[bool]:
+        """Legacy alias for domain validation entrypoint."""
+        return self.validate_business_rules()
+
     # Configuration helper methods that leverage the base model
     def get_oracle_config(self) -> dict[str, t.GeneralValueType]:
         """Convert to flext-db-oracle configuration format."""
@@ -391,27 +415,27 @@ class FlextTargetOracleSettings(FlextSettings):
     @classmethod
     def get_global_instance(cls) -> Self:
         """Get the global singleton instance using enhanced FlextSettings pattern."""
-        return cls.get_global_instance()
+        return super().get_global_instance()
 
     @classmethod
     def create_for_development(cls, **_overrides: object) -> Self:
         """Create configuration for development environment."""
-        return cls.get_global_instance()
+        return super().get_global_instance()
 
     @classmethod
     def create_for_production(cls, **_overrides: object) -> Self:
         """Create configuration for production environment."""
-        return cls.get_global_instance()
+        return super().get_global_instance()
 
     @classmethod
     def create_for_testing(cls, **_overrides: object) -> Self:
         """Create configuration for testing environment."""
-        return cls.get_global_instance()
+        return super().get_global_instance()
 
     @classmethod
     def reset_global_instance(cls) -> None:
         """Reset the global FlextTargetOracleSettings instance (mainly for testing)."""
-        cls.reset_global_instance()
+        super().reset_global_instance()
 
 
 def validate_oracle_configuration(

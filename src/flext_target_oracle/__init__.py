@@ -54,7 +54,10 @@ from flext_target_oracle.target_services import (
     SchemaServiceProtocol,
 )
 from flext_target_oracle.typings import FlextTargetOracleTypes
-from flext_target_oracle.utilities import FlextTargetOracleUtilities as u
+from flext_target_oracle.utilities import (
+    FlextTargetOracleUtilities,
+    FlextTargetOracleUtilities as u,
+)
 
 # Version imports removed - not available
 

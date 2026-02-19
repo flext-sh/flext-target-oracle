@@ -1,7 +1,7 @@
 # Architecture Guide
 
-
 <!-- TOC START -->
+
 - [Overview](#overview)
 - [Architecture Principles](#architecture-principles)
   - [FLEXT Core Integration](#flext-core-integration)
@@ -33,6 +33,7 @@
   - [Planned Improvements](#planned-improvements)
   - [Scalability Considerations](#scalability-considerations)
 - [Related Documentation](#related-documentation)
+
 <!-- TOC END -->
 
 **FLEXT Target Oracle - Technical Architecture Documentation**
@@ -338,8 +339,8 @@ with self.oracle_api as connected_api:
 ### Current Security Measures
 
 1. **Configuration Validation**: Input validation via Pydantic models
-2. **Connection Security**: SSL support via flext-db-oracle
-3. **Credential Management**: SecretStr for password handling
+1. **Connection Security**: SSL support via flext-db-oracle
+1. **Credential Management**: SecretStr for password handling
 
 ### Security Issues (TO BE ADDRESSED)
 
@@ -500,10 +501,10 @@ metrics.histogram("oracle_target.batch_duration").observe(duration)
 ### Planned Improvements
 
 1. **Singer SDK Compliance**: Implement missing Singer Target methods
-2. **Security Hardening**: Fix SQL injection vulnerabilities
-3. **Schema Evolution**: Dynamic schema modification support
-4. **Performance Optimization**: Advanced Oracle features (partitioning, compression)
-5. **Observability Enhancement**: Distributed tracing integration
+1. **Security Hardening**: Fix SQL injection vulnerabilities
+1. **Schema Evolution**: Dynamic schema modification support
+1. **Performance Optimization**: Advanced Oracle features (partitioning, compression)
+1. **Observability Enhancement**: Distributed tracing integration
 
 ### Scalability Considerations
 
@@ -511,7 +512,7 @@ metrics.histogram("oracle_target.batch_duration").observe(duration)
 - **Vertical Scaling**: Increased batch sizes and connection pools
 - **Oracle Optimization**: Bulk operations, parallel processing, compression
 
----
+______________________________________________________________________
 
 ## Related Documentation
 
@@ -533,8 +534,8 @@ metrics.histogram("oracle_target.batch_duration").observe(duration)
 - [PEP 257 - Docstring Conventions](https://peps.python.org/pep-0257/)
 - [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
 
----
+______________________________________________________________________
 
-**Document Version**: 1.0  
-**Last Updated**: 2025-08-04  
+**Document Version**: 1.0\
+**Last Updated**: 2025-08-04\
 **Next Review**: 2025-08-11
