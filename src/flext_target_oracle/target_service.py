@@ -1,290 +1,52 @@
-"""Oracle Target Service using FlextService and SOURCE OF TRUTH patterns.
-
-ZERO DUPLICATION - Uses flext-core and flext-meltano SOURCE OF TRUTH.
-SOLID COMPLIANCE - Single responsibility: Singer Target operations.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Service facade for Oracle Singer target operations."""
 
 from __future__ import annotations
 
-import time
-from typing import ClassVar, override
+from flext_core import FlextResult, FlextTypes as t
 
-from flext_core import FlextResult, FlextService, FlextTypes as t
-from pydantic import Field
-
-from flext_target_oracle.settings import FlextTargetOracleSettings
-from flext_target_oracle.target_loader import FlextTargetOracleLoader
+from .settings import FlextTargetOracleSettings
+from .target_client import FlextTargetOracle
 
 
-class FlextTargetOracleService(FlextService[dict[str, t.GeneralValueType]]):
-    """Oracle Singer Target service using FlextService SOURCE OF TRUTH.
+class FlextTargetOracleService:
+    """Thin service wrapper around `FlextTargetOracle`."""
 
-    ZERO DUPLICATION - Uses FlextMeltanoTarget and FlextTargetOracleLoader.
-    SOLID COMPLIANCE - Single responsibility: Singer protocol operations.
-    """
-
-    model_config: ClassVar = {"frozen": "False"}  # Allow field mutations
-
-    # Pydantic fields for service configuration
-    name: str = Field(default="flext-oracle-target", description="Target name")
-    config: FlextTargetOracleSettings = Field(description="Oracle target configuration")
-    loader: FlextTargetOracleLoader = Field(description="Oracle data loader")
-
-    # Internal state
-    _schemas: dict[str, t.GeneralValueType] = Field(
-        default_factory=dict,
-        description="Stream schemas",
-    )
-    _state: dict[str, t.GeneralValueType] = Field(
-        default_factory=dict,
-        description="Singer state",
-    )
-
-    @override
-    def __init__(self, config: FlextTargetOracleSettings, **_data: object) -> None:
-        """Initialize Oracle Target service with configuration validation."""
-        # Create loader instance
-        loader = FlextTargetOracleLoader(config)
-
-        # Initialize FlextService
-        super().__init__()
-
-        # Set Pydantic fields as instance attributes
+    def __init__(self, config: FlextTargetOracleSettings) -> None:
+        """Initialize service wrapper with target client dependencies."""
         self.name = "flext-oracle-target"
-        self.config: dict[str, t.GeneralValueType] = config
-        self.loader = loader
-        self._schemas = {}
-        self._state = {}
+        self.config = config
+        self.client = FlextTargetOracle(config)
 
-    @override
     def execute(self) -> FlextResult[dict[str, t.GeneralValueType]]:
-        """Execute domain service - test connection and return status."""
-        connection_result: FlextResult[object] = self.loader.test_connection()
-        if connection_result.is_failure:
-            return FlextResult[dict[str, t.GeneralValueType]].fail(
-                f"Oracle target service connection failed: {connection_result.error}",
-            )
-
-        return FlextResult[dict[str, t.GeneralValueType]].ok(
-            {
-                "name": self.name,
-                "status": "ready",
-                "config_valid": "True",
-                "connection_tested": "True",
-            },
-        )
+        """Execute connectivity readiness checks."""
+        return self.client.execute()
 
     def validate_configuration(self) -> FlextResult[bool]:
-        """Validate the current configuration."""
-        return self.config.validate_domain_rules()
+        """Validate target configuration."""
+        return self.client.validate_configuration()
 
     def test_connection(self) -> FlextResult[bool]:
-        """Test Oracle database connectivity."""
-        return self.loader.test_connection()
+        """Validate Oracle connectivity."""
+        return self.client.test_connection()
 
     def discover_catalog(self) -> FlextResult[dict[str, t.GeneralValueType]]:
-        """Discover available schemas and generate Singer catalog."""
-        try:
-            streams_list: list[dict[str, t.GeneralValueType]] = []
-            catalog: dict[str, t.GeneralValueType] = {
-                "streams": "streams_list",
-            }
-
-            for stream_name in self._schemas:
-                stream_entry: dict[str, t.GeneralValueType] = {
-                    "tap_stream_id": "stream_name",
-                    "stream": "stream_name",
-                    "schema": "schema",
-                    "metadata": [
-                        {
-                            "breadcrumb": [],
-                            "metadata": {
-                                "inclusion": "available",
-                                "table-name": self.config.get_table_name(stream_name),
-                                "schema-name": self.config.default_target_schema,
-                                "forced-replication-method": "FULL_TABLE",
-                            },
-                        },
-                    ],
-                }
-                streams_list.append(stream_entry)
-
-            return FlextResult[dict[str, t.GeneralValueType]].ok(catalog)
-
-        except Exception as e:
-            return FlextResult[dict[str, t.GeneralValueType]].fail(
-                f"Failed to discover catalog: {e}",
-            )
+        """Delegate Singer catalog discovery."""
+        return self.client.discover_catalog()
 
     def process_singer_messages(
         self,
         messages: list[dict[str, t.GeneralValueType]],
     ) -> FlextResult[dict[str, t.GeneralValueType]]:
-        """Process Singer messages (SCHEMA, RECORD, STATE)."""
-        try:
-            records_processed = 0
-            start_time = time.time()
-
-            for message in messages:
-                result: FlextResult[object] = self._process_single_message(message)
-                if result.is_failure:
-                    return FlextResult[dict[str, t.GeneralValueType]].fail(
-                        f"Failed to process message: {result.error}",
-                    )
-
-                if message.get("type") == "RECORD":
-                    records_processed += 1
-
-            # Finalize all streams
-            finalize_result: FlextResult[object] = self.loader.finalize_all_streams()
-            if finalize_result.is_failure:
-                return FlextResult[dict[str, t.GeneralValueType]].fail(
-                    f"Failed to finalize streams: {finalize_result.error}",
-                )
-
-            int((time.time() - start_time) * 1000)
-
-            result_data = {
-                "success": "True",
-                "records_processed": "records_processed",
-                "schemas_discovered": list(self._schemas.keys()),
-                "execution_time_ms": "execution_time_ms",
-                "state_updates": self._state,
-            }
-
-            return FlextResult[dict[str, t.GeneralValueType]].ok(result_data)
-
-        except Exception as e:
-            return FlextResult[dict[str, t.GeneralValueType]].fail(
-                f"Message processing failed: {e}",
-            )
-
-    def _process_single_message(
-        self,
-        message: dict[str, t.GeneralValueType],
-    ) -> FlextResult[bool]:
-        """Process a single Singer message."""
-        message_type = message.get("type")
-
-        if message_type == "SCHEMA":
-            return self._handle_schema(message)
-        if message_type == "RECORD":
-            return self._handle_record(message)
-        if message_type == "STATE":
-            return self._handle_state(message)
-        return FlextResult[bool].fail(f"Unknown message type: {message_type}")
-
-    def _handle_schema(
-        self, message: dict[str, t.GeneralValueType]
-    ) -> FlextResult[bool]:
-        """Handle SCHEMA message."""
-        try:
-            stream_name = message.get("stream")
-            schema = message.get("schema")
-
-            if not isinstance(stream_name, str):
-                return FlextResult[bool].fail("Invalid stream name in schema message")
-
-            if not isinstance(schema, dict):
-                return FlextResult[bool].fail("Invalid schema in schema message")
-
-            # Store schema
-            self._schemas[stream_name] = schema
-
-            # Ensure table exists
-            key_properties = message.get("key_properties")
-            key_properties_list: list[str] | None = (
-                key_properties if isinstance(key_properties, list) else None
-            )
-            table_result = self.loader.ensure_table_exists(
-                stream_name,
-                schema,
-                key_properties_list,
-            )
-            if table_result.is_failure:
-                return FlextResult[bool].fail(
-                    f"Failed to ensure table exists: {table_result.error}",
-                )
-
-            self.log_info(f"Processed schema for stream {stream_name}")
-            return FlextResult[bool].ok(value=True)
-
-        except Exception as e:
-            return FlextResult[bool].fail(f"Schema handling failed: {e}")
-
-    def _handle_record(
-        self, message: dict[str, t.GeneralValueType]
-    ) -> FlextResult[bool]:
-        """Handle RECORD message."""
-        try:
-            stream_name = message.get("stream")
-            record_data: dict[str, t.GeneralValueType] = message.get("record")
-
-            if not isinstance(stream_name, str):
-                return FlextResult[bool].fail("Invalid stream name in record message")
-
-            if not isinstance(record_data, dict):
-                return FlextResult[bool].fail("Invalid record data in record message")
-
-            # Load record using loader
-            result: FlextResult[object] = self.loader.load_record(
-                stream_name,
-                record_data,
-            )
-            if result.is_failure:
-                return FlextResult[bool].fail(f"Failed to load record: {result.error}")
-
-            return FlextResult[bool].ok(value=True)
-
-        except Exception as e:
-            return FlextResult[bool].fail(f"Record handling failed: {e}")
-
-    def _handle_state(
-        self, message: dict[str, t.GeneralValueType]
-    ) -> FlextResult[bool]:
-        """Handle STATE message."""
-        try:
-            state_value = message.get("value")
-            if isinstance(state_value, dict):
-                self._state.update(state_value)
-
-            self.log_debug(f"Updated state: {state_value}")
-            return FlextResult[bool].ok(value=True)
-
-        except Exception as e:
-            return FlextResult[bool].fail(f"State handling failed: {e}")
+        """Delegate processing of Singer message batches."""
+        return self.client.process_singer_messages(messages)
 
     def finalize(self) -> FlextResult[dict[str, t.GeneralValueType]]:
-        """Finalize target processing and return complete statistics."""
-        try:
-            result: FlextResult[object] = self.loader.finalize_all_streams()
-            if result.is_success:
-                self.log_info("Target finalization completed successfully")
-                return result
-            return result
-
-        except Exception as e:
-            self.log_error("Failed to finalize target", extra={"error": str(e)})
-            return FlextResult[dict[str, t.GeneralValueType]].fail(
-                f"Finalization failed: {e}"
-            )
+        """Flush pending loader data."""
+        return self.client.finalize()
 
     def get_implementation_metrics(self) -> dict[str, t.GeneralValueType]:
-        """Get Oracle-specific implementation metrics."""
-        return {
-            "oracle_host": self.config.oracle_host,
-            "oracle_port": self.config.oracle_port,
-            "default_schema": self.config.default_target_schema,
-            "load_method": self.config.load_method.value,
-            "use_bulk_operations": self.config.use_bulk_operations,
-            "batch_size": self.config.batch_size,
-        }
+        """Return implementation metrics."""
+        return self.client.get_implementation_metrics()
 
 
-__all__ = [
-    "FlextTargetOracleService",
-]
+__all__ = ["FlextTargetOracleService"]

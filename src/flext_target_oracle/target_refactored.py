@@ -1,281 +1,63 @@
-"""Oracle Target CLI using FlextService and Flext CQRS SOURCE OF TRUTH.
-
-ZERO DUPLICATION - Uses flext-core patterns exclusively.
-ZERO WRAPPERS - Direct method usage only.
-SOLID COMPLIANCE - Single responsibility, proper domains.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Refactored CLI orchestration for Oracle target."""
 
 from __future__ import annotations
 
 import sys
-from typing import override
 
-from flext_core import (
-    FlextDispatcher,
-    FlextLogger,
-    FlextModels as m,
-    FlextResult,
-    FlextService,
-    FlextTypes as t,
-)
-from pydantic import Field, PrivateAttr
+from flext_core import FlextLogger, FlextResult
 
-from flext_target_oracle.constants import FlextTargetOracleConstants
-from flext_target_oracle.target_commands import (
-    OracleTargetCommandFactory,
-    OracleTargetCommandHandler,
-)
+from .target_commands import OracleTargetCommandFactory
+
+logger = FlextLogger(__name__)
 
 
-class FlextTargetOracleCliService(FlextService[str]):
-    """Oracle Target CLI Service using FlextService and Flext CQRS SOURCE OF TRUTH.
+class FlextTargetOracleCliService:
+    """Simple CLI service that maps args to command executions."""
 
-    ZERO DUPLICATION - Uses FlextService base class directly.
-    ZERO WRAPPERS - No CLI abstractions, direct command execution.
-    SOLID COMPLIANCE - Single responsibility: CLI orchestration only.
-
-    Architecture:
-    - Single Responsibility: CLI argument parsing and command dispatch
-    - Open/Closed: Extensible through command factory
-    - Liskov Substitution: Proper FlextService inheritance
-    - Interface Segregation: Focused CLI interface
-    - Dependency Inversion: Depends on Flext CQRS abstractions
-    """
-
-    # Pydantic fields - flext-core SOURCE OF TRUTH patterns
-    command_bus: FlextDispatcher = Field(
-        default_factory=FlextDispatcher,
-        description="Command bus for routing commands",
-    )
-    command_handler: OracleTargetCommandHandler = Field(
-        default_factory=OracleTargetCommandHandler,
-        description="Oracle target command handler",
-    )
-
-    _use_dispatcher: bool = PrivateAttr(default=False)
-    _dispatcher: FlextDispatcher | None = PrivateAttr(default=None)
-
-    def model_post_init(self, __context: object = None, /) -> None:
-        """Initialize CLI service using Pydantic post-init pattern."""
-        # Register command handler using FlextBus
-        use_dispatcher = FlextTargetOracleConstants.FeatureFlags.ENABLE_DISPATCHER
-        self._use_dispatcher = use_dispatcher
-
-        if use_dispatcher:
-            # Use the already-initialized command_bus (FlextDispatcher) as the dispatcher
-            register_result: FlextResult[t.GeneralValueType] = (
-                self.command_bus.register_handler(
-                    self.command_handler,
-                )
-            )
-            if register_result.is_failure:
-                self.log_error(
-                    f"Dispatcher registration failed: {register_result.error}",
-                )
-                self._dispatcher = None
-            else:
-                self._dispatcher = self.command_bus
-        else:
-            self.command_bus.register_handler(self.command_handler)
-            self._dispatcher = None
-
-    @override
     def execute(self) -> FlextResult[str]:
-        """Execute CLI service - implements FlextService abstract method."""
-        return FlextResult[str].ok(
-            "FLEXT Target Oracle CLI Service initialized successfully",
-        )
+        """Service readiness probe."""
+        return FlextResult[str].ok("CLI ready")
 
     def run_cli(self, args: list[str] | None = None) -> FlextResult[str]:
-        """Run CLI with pure Python argument parsing - NO Click/Rich usage."""
-        if args is None:
-            args = sys.argv[1:]
+        """Dispatch CLI args to the appropriate command."""
+        argv = args if args is not None else sys.argv[1:]
+        if not argv or argv[0] in {"help", "-h", "--help"}:
+            return FlextResult[str].ok(self._get_help_text())
 
-        if not args or args[0] in {"-h", "--help", "help"}:
-            help_text = self._get_help_text()
-            self.log_info(help_text)
-            return FlextResult[str].ok("Help displayed")
-
-        command_name = args[0]
-        command_args = args[1:]
-
-        try:
-            if command_name == "validate":
-                return self._handle_validate_command(command_args)
-            if command_name == "load":
-                return self._handle_load_command(command_args)
-            if command_name == "about":
-                return self._handle_about_command(command_args)
-            return FlextResult[str].fail(f"Unknown command: {command_name}")
-
-        except Exception as e:
-            self.log_error(f"CLI execution error: {e}")
-            return FlextResult[str].fail(f"CLI error: {e}")
-
-    def _handle_validate_command(self, args: list[str]) -> FlextResult[str]:
-        """Handle validate command using Flext CQRS SOURCE OF TRUTH."""
-        config_file: str | None = None
-
-        i = 0
-        while i < len(args):
-            if args[i] in {"--config", "-c"} and i + 1 < len(args):
-                config_file = args[i + 1]
-                i += 2
-            else:
-                i += 1
-
-        # Create command using factory - SOURCE OF TRUTH patterns
-        command = OracleTargetCommandFactory.create_validate_command(config_file)
-
-        # Execute using command bus - Flext CQRS SOURCE OF TRUTH
-        result = self._dispatch(command)
-
-        if result.is_success:
-            self.log_info("Oracle target validation completed successfully")
-            return FlextResult[str].ok(str(result.value))
-        self.log_error(f"Validation failed: {result.error}")
-        return FlextResult[str].fail(str(result.error))
-
-    def _handle_load_command(self, args: list[str]) -> FlextResult[str]:
-        """Handle load command using Flext CQRS SOURCE OF TRUTH."""
-        config_file: str | None = None
-        state_file: str | None = None
-
-        i = 0
-        while i < len(args):
-            if args[i] in {"--config", "-c"} and i + 1 < len(args):
-                config_file = args[i + 1]
-                i += 2
-            elif args[i] in {"--state", "-s"} and i + 1 < len(args):
-                state_file = args[i + 1]
-                i += 2
-            else:
-                i += 1
-
-        # Create command using factory - SOURCE OF TRUTH patterns
-        command = OracleTargetCommandFactory.create_load_command(
-            config_file,
-            state_file,
-        )
-
-        # Execute using command bus - Flext CQRS SOURCE OF TRUTH
-        result = self._dispatch(command)
-
-        if result.is_success:
-            self.log_info("Oracle target load completed successfully")
-            return FlextResult[str].ok(str(result.value))
-        self.log_error(f"Load failed: {result.error}")
-        return FlextResult[str].fail(str(result.error))
-
-    def _handle_about_command(self, args: list[str]) -> FlextResult[str]:
-        """Handle about command using Flext CQRS SOURCE OF TRUTH."""
-        format_type = "json"
-
-        i = 0
-        while i < len(args):
-            if args[i] in {"--format", "-f"} and i + 1 < len(args):
-                format_type = args[i + 1]
-                i += 2
-            else:
-                i += 1
-
-        # Create command using factory - SOURCE OF TRUTH patterns
-        command = OracleTargetCommandFactory.create_about_command(format_type)
-
-        # Execute using command bus - Flext CQRS SOURCE OF TRUTH
-        result = self._dispatch(command)
-
-        if result.is_success:
-            # Output directly - no CLI helpers needed
-            return FlextResult[str].ok("About information displayed")
-        self.log_error(f"About command failed: {result.error}")
-        return FlextResult[str].fail(str(result.error))
-
-    def _dispatch(self, command: m.Command) -> FlextResult[str]:
-        """Dispatch commands via dispatcher when enabled."""
-        if self._dispatcher is not None:
-            metadata: dict[str, str] = {
-                "command": command.__class__.__name__,
-                "source": self.__class__.__name__,
-            }
-            dispatch_result: FlextResult[str] = self._dispatcher.dispatch(
-                command,
-                metadata=metadata,
-            )
-            if dispatch_result.is_failure:
-                self.log_error(
-                    "Dispatcher execution failed",
-                    extra={"command": command.__class__.__name__},
-                )
-            return dispatch_result
-        # Fallback: use command_bus.dispatch() when _dispatcher is None
-        return self.command_bus.dispatch(command)
+        command_name = argv[0]
+        if command_name == "validate":
+            command = OracleTargetCommandFactory.create_validate_command(None)
+            return command.execute()
+        if command_name == "load":
+            command = OracleTargetCommandFactory.create_load_command(None, None)
+            return command.execute()
+        if command_name == "about":
+            command = OracleTargetCommandFactory.create_about_command("json")
+            return command.execute()
+        return FlextResult[str].fail(f"Unknown command: {command_name}")
 
     def _get_help_text(self) -> str:
-        """Get help text using pure string formatting - no external dependencies."""
-        return """FLEXT Target Oracle - Modern Singer Target for Oracle Database
-
-Usage:
-    target-oracle validate [--config CONFIG_FILE]
-    target-oracle load [--config CONFIG_FILE] [--state STATE_FILE]
-    target-oracle about [--format FORMAT]
-    target-oracle --help
-
-Commands:
-    validate    Validate Oracle target configuration and connection
-    load        Load Singer data into Oracle database
-    about       Show information about the target
-
-Options:
-    --config, -c    Path to configuration file
-    --state, -s     Path to state file (load command only)
-    --format, -f    Output format: "json", text, yaml (about command only)
-    --help, -h      Show this help message
-
-Examples:
-    target-oracle validate --config config.json
-    target-oracle load --config config.json --state state.json
-    target-oracle about --format text
-
-Environment Variables:
-    ORACLE_HOST         Oracle database host
-    ORACLE_PORT         Oracle database port (default: 1521)
-    ORACLE_SERVICE      Oracle service name
-    ORACLE_USER         Oracle username
-    ORACLE_PASSWORD     Oracle password
-    DEFAULT_TARGET_SCHEMA Oracle target schema
-"""
+        """Return text help for target CLI usage."""
+        return (
+            "Usage: target-oracle [validate|load|about]\n"
+            "  validate  validate config and connection\n"
+            "  load      initialize target for loading\n"
+            "  about     show project information"
+        )
 
 
 def main() -> None:
-    """Main CLI entry point using FlextService and Flext CQRS SOURCE OF TRUTH."""
-    try:
-        # Create CLI service using Pydantic patterns - SOURCE OF TRUTH
-        cli_service = FlextTargetOracleCliService()
-
-        # Execute CLI - direct method call, no wrappers
-        result = cli_service.run_cli()
-
-        if result.is_failure:
-            logger = FlextLogger(__name__)
-            logger.error(result.error or "CLI execution failed")
-            sys.exit(1)
-
-    except Exception:
-        logger = FlextLogger(__name__)
-        logger.exception("Fatal CLI error")
+    """CLI entrypoint."""
+    result = FlextTargetOracleCliService().run_cli()
+    if result.is_failure:
+        logger.error(result.error or "Command failed")
         sys.exit(1)
+    if result.value is not None:
+        logger.info(result.value)
 
 
 if __name__ == "__main__":
     main()
 
 
-__all__: list[str] = [
-    "FlextTargetOracleCliService",
-    "main",
-]
+__all__ = ["FlextTargetOracleCliService", "main"]

@@ -1,7 +1,7 @@
 # Contributing to FLEXT Target Oracle
 
-
 <!-- TOC START -->
+
 - [🏗️ Development Setup](#-development-setup)
   - [Prerequisites](#prerequisites)
   - [Setting Up Your Development Environment](#setting-up-your-development-environment)
@@ -35,6 +35,7 @@
   - [Getting Help](#getting-help)
   - [Code of Conduct](#code-of-conduct)
 - [📄 License](#-license)
+
 <!-- TOC END -->
 
 Thank you for your interest in contributing to FLEXT Target Oracle! This document provides guidelines and instructions for contributing to the project.
@@ -57,7 +58,7 @@ Thank you for your interest in contributing to FLEXT Target Oracle! This documen
    cd flext-target-oracle
    ```
 
-2. **Install dependencies:**
+1. **Install dependencies:**
 
    ```bash
    make dev-setup
@@ -66,13 +67,13 @@ Thank you for your interest in contributing to FLEXT Target Oracle! This documen
    pip install -r requirements-test.txt
    ```
 
-3. **Start Oracle container:**
+1. **Start Oracle container:**
 
    ```bash
    make oracle-start
    ```
 
-4. **Run tests to verify setup:**
+1. **Run tests to verify setup:**
 
    ```bash
    make test-unit  # Unit tests (no Docker required)
@@ -119,7 +120,7 @@ pytest tests/unit/test_loader.py::TestOracleLoaderConnection::test_connect_succe
        # Test isolated functionality
    ```
 
-2. **Integration Tests**: Use real Oracle database
+1. **Integration Tests**: Use real Oracle database
 
    ```python
    @pytest.mark.integration
@@ -128,7 +129,7 @@ pytest tests/unit/test_loader.py::TestOracleLoaderConnection::test_connect_succe
        # Test with real database
    ```
 
-3. **Use fixtures** from `conftest.py` for common test data and setup
+1. **Use fixtures** from `conftest.py` for common test data and setup
 
 ## 📝 Code Style
 
@@ -168,30 +169,34 @@ pre-commit install
 ### Key Components
 
 1. **Target Class** (`src/flext_target_oracle/target.py`):
+
    - Main Singer target implementation
    - Implements `FlextSingerUnifiedInterface`
    - Handles message routing and state management
 
-2. **Loader Class** (`src/flext_target_oracle/loader.py`):
+1. **Loader Class** (`src/flext_target_oracle/loader.py`):
+
    - Core data loading logic
    - DDL/DML operations via `flext-db-oracle`
    - Schema flattening and type mapping
 
-3. **Configuration** (`src/flext_target_oracle/config.py`):
+1. **Configuration** (`src/flext_target_oracle/config.py`):
+
    - Pydantic models for configuration
    - Validation and defaults
    - Feature flags and customization
 
-4. **Exceptions** (`src/flext_target_oracle/exceptions.py`):
+1. **Exceptions** (`src/flext_target_oracle/exceptions.py`):
+
    - Custom exception hierarchy
    - Specific error scenarios
 
 ### Design Principles
 
 1. **Railway-Oriented Programming**: Use `FlextResult` for error handling
-2. **Dependency Injection**: Configuration-driven behavior
-3. **Clean Architecture**: Separation of concerns
-4. **Type Safety**: Strict typing throughout
+1. **Dependency Injection**: Configuration-driven behavior
+1. **Clean Architecture**: Separation of concerns
+1. **Type Safety**: Strict typing throughout
 
 ## 🚀 Adding Features
 
@@ -210,26 +215,26 @@ class FlextOracleTargetConfig(BaseModel):
 ### 2. New Functionality
 
 1. Add logic to appropriate module
-2. Add tests (unit + integration)
-3. Update documentation
-4. Add example if applicable
+1. Add tests (unit + integration)
+1. Update documentation
+1. Add example if applicable
 
 ### 3. Database Features
 
 For new DDL/DML operations:
 
 1. Implement in `flext-db-oracle` first
-2. Use via `FlextDbOracleApi` in loader
-3. Never generate SQL directly in target
+1. Use via `FlextDbOracleApi` in loader
+1. Never generate SQL directly in target
 
 ## 📚 Documentation
 
 ### Required Documentation
 
 1. **Docstrings**: All public methods and classes
-2. **Type hints**: Complete type annotations
-3. **Examples**: For new features
-4. **Tests**: Demonstrating usage
+1. **Type hints**: Complete type annotations
+1. **Examples**: For new features
+1. **Tests**: Demonstrating usage
 
 ### Documentation Style
 
@@ -269,8 +274,8 @@ export FLEXT_LOG_LEVEL=DEBUG
 ### Common Issues
 
 1. **Import Errors**: Ensure all FLEXT dependencies are installed
-2. **Oracle Connection**: Check Docker container is running
-3. **Type Errors**: Run `mypy` to catch type issues
+1. **Oracle Connection**: Check Docker container is running
+1. **Type Errors**: Run `mypy` to catch type issues
 
 ## 📦 Submitting Changes
 
@@ -295,10 +300,10 @@ test: add performance benchmarks
 ### 3. Pull Request Process
 
 1. **Create PR** with clear description
-2. **Ensure CI passes** (all tests, linting)
-3. **Update documentation** if needed
-4. **Add tests** for new functionality
-5. **Request review** from maintainers
+1. **Ensure CI passes** (all tests, linting)
+1. **Update documentation** if needed
+1. **Add tests** for new functionality
+1. **Request review** from maintainers
 
 ### 4. PR Checklist
 
@@ -326,6 +331,6 @@ test: add performance benchmarks
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
 
----
+______________________________________________________________________
 
 Thank you for contributing to FLEXT Target Oracle! 🎯🐘

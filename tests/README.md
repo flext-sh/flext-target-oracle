@@ -1,7 +1,7 @@
 # FLEXT Target Oracle - Test Suite
 
-
 <!-- TOC START -->
+
 - [📁 Test Structure](#-test-structure)
 - [🚀 Running Tests](#-running-tests)
   - [Quick Start](#quick-start)
@@ -30,6 +30,7 @@
   - [Oracle Container Issues](#oracle-container-issues)
   - [Test Failures](#test-failures)
   - [Performance Issues](#performance-issues)
+
 <!-- TOC END -->
 
 This directory contains the comprehensive test suite for the FLEXT Oracle Target, organized following pytest best practices with automatic Oracle Docker container management.
@@ -197,10 +198,10 @@ make test-docker
 ## 🛠️ Development Workflow
 
 1. **Write tests first** (TDD approach)
-2. **Run unit tests** during development: `make test-unit`
-3. **Run integration tests** before commit: `make test-integration`
-4. **Check coverage**: `make coverage`
-5. **Run all tests** before push: `make test`
+1. **Run unit tests** during development: `make test-unit`
+1. **Run integration tests** before commit: `make test-integration`
+1. **Check coverage**: `make coverage`
+1. **Run all tests** before push: `make test`
 
 ## 🐛 Debugging Tests
 
@@ -260,12 +261,12 @@ def test_real_database_operation(oracle_loader, oracle_engine):
 ## 🎯 Best Practices
 
 1. **Isolation**: Each test should be independent
-2. **Cleanup**: Use `clean_database` fixture for integration tests
-3. **Mocking**: Mock external dependencies in unit tests
-4. **Assertions**: Use specific assertions with clear messages
-5. **Naming**: Descriptive test names that explain the scenario
-6. **Markers**: Use appropriate pytest markers
-7. **Performance**: Keep unit tests fast (< 1 second each)
+1. **Cleanup**: Use `clean_database` fixture for integration tests
+1. **Mocking**: Mock external dependencies in unit tests
+1. **Assertions**: Use specific assertions with clear messages
+1. **Naming**: Descriptive test names that explain the scenario
+1. **Markers**: Use appropriate pytest markers
+1. **Performance**: Keep unit tests fast (< 1 second each)
 
 ## 🚨 Troubleshooting
 
@@ -285,9 +286,9 @@ make oracle-clean && make oracle-start
 ### Test Failures
 
 1. Check Oracle container is running
-2. Verify network connectivity
-3. Check test database permissions
-4. Review test logs in `reports/`
+1. Verify network connectivity
+1. Check test database permissions
+1. Review test logs in `reports/`
 
 ### Performance Issues
 
