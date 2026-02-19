@@ -1,5 +1,35 @@
 # Singer SDK Integration Guide
 
+
+<!-- TOC START -->
+- [Overview](#overview)
+- [Singer Protocol Implementation](#singer-protocol-implementation)
+  - [Message Types Supported](#message-types-supported)
+- [Current Implementation Status](#current-implementation-status)
+  - [✅ Implemented Features](#-implemented-features)
+  - [❌ Missing Singer SDK Compliance](#-missing-singer-sdk-compliance)
+- [Meltano Integration](#meltano-integration)
+  - [Configuration Schema](#configuration-schema)
+  - [Meltano Execution](#meltano-execution)
+- [Data Loading Patterns](#data-loading-patterns)
+  - [Table Creation Strategy](#table-creation-strategy)
+  - [Record Processing Flow](#record-processing-flow)
+  - [Batch Processing Configuration](#batch-processing-configuration)
+- [Performance Optimization](#performance-optimization)
+  - [Batch Size Tuning](#batch-size-tuning)
+  - [Oracle-Specific Optimizations](#oracle-specific-optimizations)
+- [Error Handling and Reliability](#error-handling-and-reliability)
+  - [FlextResult Error Patterns](#flextresult-error-patterns)
+  - [Transaction Management](#transaction-management)
+- [Testing Singer Integration](#testing-singer-integration)
+  - [Unit Testing Singer Messages](#unit-testing-singer-messages)
+  - [Integration Testing with Singer Ecosystem](#integration-testing-with-singer-ecosystem)
+- [Compliance Roadmap](#compliance-roadmap)
+  - [Version 0.9.9 Requirements](#version-099-requirements)
+  - [Version 1.1.0 Enhancements](#version-110-enhancements)
+  - [Version 1.2.0 Advanced Features](#version-120-advanced-features)
+<!-- TOC END -->
+
 **FLEXT Target Oracle - Singer Protocol Compliance Documentation**
 
 ## Overview

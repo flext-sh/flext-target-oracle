@@ -1,5 +1,45 @@
 # Python Module Organization & Semantic Patterns
 
+
+<!-- TOC START -->
+- [🏗️ **Module Architecture Overview**](#-module-architecture-overview)
+  - [**Core Design Principles**](#core-design-principles)
+- [📁 **Current Module Structure & Analysis**](#-current-module-structure-analysis)
+  - [**Current Implementation Structure**](#current-implementation-structure)
+  - [**Module Responsibilities Analysis**](#module-responsibilities-analysis)
+- [🎯 **Recommended Module Architecture**](#-recommended-module-architecture)
+  - [**Ideal Structure for Singer Targets**](#ideal-structure-for-singer-targets)
+  - [**Simplified Structure (Current Approach)**](#simplified-structure-current-approach)
+- [📋 **FLEXT Pattern Implementation Standards**](#-flext-pattern-implementation-standards)
+  - [**FlextResult Railway Pattern Usage**](#flextresult-railway-pattern-usage)
+  - [**m.Value Configuration Pattern**](#mvalue-configuration-pattern)
+  - [**Structured Logging Pattern**](#structured-logging-pattern)
+- [🔧 **Module Dependency Patterns**](#-module-dependency-patterns)
+  - [**Dependency Direction (Clean Architecture)**](#dependency-direction-clean-architecture)
+  - [**External Dependency Integration**](#external-dependency-integration)
+- [🧪 **Testing Module Organization**](#-testing-module-organization)
+  - [**Test Structure Mirroring Source**](#test-structure-mirroring-source)
+  - [**Test Pattern Examples**](#test-pattern-examples)
+- [📏 **Code Quality Standards**](#-code-quality-standards)
+  - [**Type Annotation Requirements**](#type-annotation-requirements)
+  - [**Documentation Standards**](#documentation-standards)
+- [🌐 **FLEXT Ecosystem Integration Patterns**](#-flext-ecosystem-integration-patterns)
+  - [**Cross-Project Import Standards**](#cross-project-import-standards)
+  - [**Configuration Ecosystem Integration**](#configuration-ecosystem-integration)
+- [🔄 **Migration & Evolution Patterns**](#-migration-evolution-patterns)
+  - [**Version Migration Strategy**](#version-migration-strategy)
+  - [**Backward Compatibility Strategy**](#backward-compatibility-strategy)
+- [📋 **Module Development Checklist**](#-module-development-checklist)
+  - [**Pre-Development Checklist**](#pre-development-checklist)
+  - [**Development Standards Checklist**](#development-standards-checklist)
+  - [**Quality Gate Checklist**](#quality-gate-checklist)
+  - [**Ecosystem Integration Checklist**](#ecosystem-integration-checklist)
+- [🚀 **Future Evolution Roadmap**](#-future-evolution-roadmap)
+  - [**Version 0.9.9 (Production Ready)**](#version-099-production-ready)
+  - [**Version 1.1.0 (Enhanced Features)**](#version-110-enhanced-features)
+  - [**Version 0.9.9 (Next Generation)**](#version-099-next-generation)
+<!-- TOC END -->
+
 **FLEXT Target Oracle - Module Architecture Following FLEXT Ecosystem Standards**
 
 ---

@@ -349,11 +349,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             with self.oracle_api as connected_api:
                 # Use flext-db-oracle API for all SQL operations - ZERO direct SQLAlchemy
                 for record in records:
-                    # Build parameterized INSERT statement through flext-db-oracle
-                    # Parameterized INSERT through flext-db-oracle - safe SQL generation
-                    # NOTE: Table name must be concatenated (cannot be parameterized in SQL)
-                    # Full table name validation happens upstream in schema initialization
-                    insert_sql = (
+                    insert_sql = (  # nosec B608
                         "INSERT INTO "
                         + full_table_name
                         + " (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT)\n"

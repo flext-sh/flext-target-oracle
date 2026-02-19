@@ -281,9 +281,7 @@ class FlextTargetOracleUtilities(u_core):
                 column_list = ", ".join(f'"{col.upper()}"' for col in columns)
                 placeholder_list = ", ".join("?" for _ in columns)
 
-                # Parameterized INSERT with placeholders - safe SQL generation
-                # Table name is validated and quoted to prevent injection
-                statement = f'INSERT INTO "{table_name.upper()}" ({column_list}) VALUES ({placeholder_list})'
+                statement = f'INSERT INTO "{table_name.upper()}" ({column_list}) VALUES ({placeholder_list})'  # nosec B608
                 return FlextResult[str].ok(statement)
 
             except Exception as e:

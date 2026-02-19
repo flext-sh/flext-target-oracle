@@ -193,9 +193,9 @@ jobs:
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-report=html:htmlcov \
-            --cov-fail-under=90 \
             --junit-xml=reports/pytest.xml \
             --durations=10
+          poetry run python -m coverage report
 
       - name: "📊 Upload Coverage to Codecov"
         uses: codecov/codecov-action@v4

@@ -1,5 +1,41 @@
 # TODO - Status dos Desvios e Melhorias do Projeto
 
+
+<!-- TOC START -->
+- [🚨 DESVIOS CRÍTICOS DE ARQUITETURA](#-desvios-crticos-de-arquitetura)
+  - [1. **DUPLICAÇÃO DE EXCEÇÕES** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE](#1-duplicao-de-excees-documentado-implementao-pendente)
+  - [2. **USO INCORRETO DE execute_ddl PARA DML** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE](#2-uso-incorreto-de-executeddl-para-dml-documentado-implementao-pendente)
+  - [3. **FALTA DE DEPENDÊNCIA SINGER SDK** - PRIORIDADE ALTA](#3-falta-de-dependncia-singer-sdk-prioridade-alta)
+  - [4. **IMPLEMENTAÇÃO INCOMPLETA DE SINGER TARGET** - PRIORIDADE ALTA](#4-implementao-incompleta-de-singer-target-prioridade-alta)
+- [⚠️ PROBLEMAS DE IMPLEMENTAÇÃO](#-problemas-de-implementao)
+  - [5. **SQL INJECTION RISK** - 🚨 **CRÍTICO - DOCUMENTADO MAS NÃO RESOLVIDO**](#5-sql-injection-risk-crtico-documentado-mas-no-resolvido)
+  - [6. **MANEJO INADEQUADO DE TRANSAÇÕES** - PRIORIDADE MÉDIA](#6-manejo-inadequado-de-transaes-prioridade-mdia)
+  - [7. **CONFIGURAÇÃO MAL PROJETADA** - PRIORIDADE MÉDIA](#7-configurao-mal-projetada-prioridade-mdia)
+  - [8. **SCHEMA EVOLUTION NÃO IMPLEMENTADO** - PRIORIDADE MÉDIA](#8-schema-evolution-no-implementado-prioridade-mdia)
+- [🔧 MELHORIAS DE ARQUITETURA](#-melhorias-de-arquitetura)
+  - [9. **FALTA DE FACTORY PATTERN** - PRIORIDADE BAIXA](#9-falta-de-factory-pattern-prioridade-baixa)
+  - [10. **LOGGING INADEQUADO** - PRIORIDADE BAIXA](#10-logging-inadequado-prioridade-baixa)
+- [📊 PROBLEMAS DE TESTES](#-problemas-de-testes)
+  - [11. **COBERTURA DE TESTES INCOMPLETA** - PRIORIDADE MÉDIA](#11-cobertura-de-testes-incompleta-prioridade-mdia)
+  - [12. **FIXTURES DESATUALIZADAS** - PRIORIDADE BAIXA](#12-fixtures-desatualizadas-prioridade-baixa)
+- [✅ PROGRESSO REAL REALIZADO (2025-08-04)](#-progresso-real-realizado-2025-08-04)
+  - [🎯 **DOCUMENTAÇÃO ENTERPRISE-GRADE COMPLETA**](#-documentao-enterprise-grade-completa)
+  - [🚨 **ISSUES CRÍTICAS - STATUS REAL**](#-issues-crticas-status-real)
+- [📋 PRÓXIMOS PASSOS PRIORITÁRIOS](#-prximos-passos-prioritrios)
+  - [**URGENTE** - Implementação das Correções Críticas](#urgente-implementao-das-correes-crticas)
+  - [**IMPORTANTE** - Estabilidade e Qualidade](#importante-estabilidade-e-qualidade)
+  - [**OPCIONAL** - Melhorias Arquiteturais](#opcional-melhorias-arquiteturais)
+- [📖 REFERÊNCIAS TÉCNICAS](#-referncias-tcnicas)
+  - [**Singer Specification**](#singer-specification)
+  - [**FLEXT Patterns**](#flext-patterns)
+  - [**Security Guidelines**](#security-guidelines)
+- [🎯 MÉTRICAS REAIS DE PROGRESSO](#-mtricas-reais-de-progresso)
+  - [**Estado Atual (2025-08-04 19:30) - IMPLEMENTAÇÃO INICIADA**](#estado-atual-2025-08-04-1930-implementao-iniciada)
+  - [**Métricas de Qualidade Documentação**](#mtricas-de-qualidade-documentao)
+  - [**Status de Produção Realista**](#status-de-produo-realista)
+  - [**Próxima Fase Necessária**](#prxima-fase-necessria)
+<!-- TOC END -->
+
 **Data da Análise**: 2025-08-04  
 **Versão**: 0.9.9  
 **Status**: Documentação Atualizada - Implementação Pendente · 1.0.0 Release Preparation
