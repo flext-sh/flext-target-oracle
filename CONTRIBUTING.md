@@ -1,5 +1,42 @@
 # Contributing to FLEXT Target Oracle
 
+
+<!-- TOC START -->
+- [🏗️ Development Setup](#-development-setup)
+  - [Prerequisites](#prerequisites)
+  - [Setting Up Your Development Environment](#setting-up-your-development-environment)
+- [🧪 Testing](#-testing)
+  - [Test Structure](#test-structure)
+  - [Running Tests](#running-tests)
+  - [Writing Tests](#writing-tests)
+- [📝 Code Style](#-code-style)
+  - [Standards](#standards)
+  - [Automated Checks](#automated-checks)
+  - [Pre-commit Hooks](#pre-commit-hooks)
+- [🏛️ Architecture](#-architecture)
+  - [Key Components](#key-components)
+  - [Design Principles](#design-principles)
+- [🚀 Adding Features](#-adding-features)
+  - [1. Configuration Options](#1-configuration-options)
+  - [2. New Functionality](#2-new-functionality)
+  - [3. Database Features](#3-database-features)
+- [📚 Documentation](#-documentation)
+  - [Required Documentation](#required-documentation)
+  - [Documentation Style](#documentation-style)
+- [🐛 Debugging](#-debugging)
+  - [Debug Mode](#debug-mode)
+  - [Common Issues](#common-issues)
+- [📦 Submitting Changes](#-submitting-changes)
+  - [1. Branch Naming](#1-branch-naming)
+  - [2. Commit Messages](#2-commit-messages)
+  - [3. Pull Request Process](#3-pull-request-process)
+  - [4. PR Checklist](#4-pr-checklist)
+- [🤝 Community](#-community)
+  - [Getting Help](#getting-help)
+  - [Code of Conduct](#code-of-conduct)
+- [📄 License](#-license)
+<!-- TOC END -->
+
 Thank you for your interest in contributing to FLEXT Target Oracle! This document provides guidelines and instructions for contributing to the project.
 
 ## 🏗️ Development Setup

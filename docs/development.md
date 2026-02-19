@@ -1,5 +1,37 @@
 # Development Guide
 
+
+<!-- TOC START -->
+- [Quick Start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Environment Setup](#environment-setup)
+  - [Verify Installation](#verify-installation)
+- [Development Workflow](#development-workflow)
+  - [Daily Development Commands](#daily-development-commands)
+  - [Testing Workflow](#testing-workflow)
+  - [Code Quality Standards](#code-quality-standards)
+- [FLEXT Pattern Implementation](#flext-pattern-implementation)
+  - [FlextResult Railway Pattern](#flextresult-railway-pattern)
+  - [Configuration Patterns](#configuration-patterns)
+  - [Logging Patterns](#logging-patterns)
+- [Oracle Integration Development](#oracle-integration-development)
+  - [Database Connection Testing](#database-connection-testing)
+  - [Table Management Development](#table-management-development)
+- [Debugging and Troubleshooting](#debugging-and-troubleshooting)
+  - [Common Development Issues](#common-development-issues)
+  - [Debugging Tools](#debugging-tools)
+- [Testing Development](#testing-development)
+  - [Writing New Tests](#writing-new-tests)
+  - [Test Data Management](#test-data-management)
+- [Performance Development](#performance-development)
+  - [Batch Size Optimization](#batch-size-optimization)
+  - [Memory Usage Monitoring](#memory-usage-monitoring)
+- [Contributing Guidelines](#contributing-guidelines)
+  - [Pull Request Checklist](#pull-request-checklist)
+  - [Commit Message Format](#commit-message-format)
+  - [Review Process](#review-process)
+<!-- TOC END -->
+
 **FLEXT Target Oracle - Developer Documentation**
 
 ## Quick Start

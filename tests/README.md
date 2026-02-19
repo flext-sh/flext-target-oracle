@@ -1,5 +1,37 @@
 # FLEXT Target Oracle - Test Suite
 
+
+<!-- TOC START -->
+- [📁 Test Structure](#-test-structure)
+- [🚀 Running Tests](#-running-tests)
+  - [Quick Start](#quick-start)
+  - [Using the Test Script](#using-the-test-script)
+- [🐳 Oracle Docker Management](#-oracle-docker-management)
+  - [Manual Container Management](#manual-container-management)
+- [🧪 Test Categories](#-test-categories)
+  - [Unit Tests (`tests/unit/`)](#unit-tests-testsunit)
+  - [Integration Tests (`tests/integration/`)](#integration-tests-testsintegration)
+  - [End-to-End Tests (`tests/e2e/`)](#end-to-end-tests-testse2e)
+- [📊 Test Configuration](#-test-configuration)
+  - [Environment Variables](#environment-variables)
+  - [Keeping Test Database](#keeping-test-database)
+- [🔧 Key Fixtures](#-key-fixtures)
+  - [Database Fixtures](#database-fixtures)
+  - [Data Fixtures](#data-fixtures)
+  - [Mock Fixtures](#mock-fixtures)
+- [📈 Coverage Requirements](#-coverage-requirements)
+- [🛠️ Development Workflow](#-development-workflow)
+- [🐛 Debugging Tests](#-debugging-tests)
+- [📝 Writing New Tests](#-writing-new-tests)
+  - [Unit Test Example](#unit-test-example)
+  - [Integration Test Example](#integration-test-example)
+- [🎯 Best Practices](#-best-practices)
+- [🚨 Troubleshooting](#-troubleshooting)
+  - [Oracle Container Issues](#oracle-container-issues)
+  - [Test Failures](#test-failures)
+  - [Performance Issues](#performance-issues)
+<!-- TOC END -->
+
 This directory contains the comprehensive test suite for the FLEXT Oracle Target, organized following pytest best practices with automatic Oracle Docker container management.
 
 ## 📁 Test Structure

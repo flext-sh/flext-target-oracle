@@ -1,5 +1,27 @@
 # FLEXT Target Oracle - Practical Examples
 
+
+<!-- TOC START -->
+- [Quick Navigation](#quick-navigation)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Environment Setup](#environment-setup)
+- [Examples Overview](#examples-overview)
+  - [1. Basic Usage](#1-basic-usage)
+  - [2. Meltano Integration](#2-meltano-integration)
+  - [3. Production Setup](#3-production-setup)
+  - [4. Performance Tuning](#4-performance-tuning)
+  - [5. Error Handling](#5-error-handling)
+- [Running Examples](#running-examples)
+- [Common Patterns](#common-patterns)
+  - [FlextResult Error Handling](#flextresult-error-handling)
+  - [Configuration Management](#configuration-management)
+  - [FLEXT Ecosystem Integration](#flext-ecosystem-integration)
+- [Testing Examples](#testing-examples)
+- [Contributing Examples](#contributing-examples)
+- [Security Notes](#security-notes)
+<!-- TOC END -->
+
 **Comprehensive examples for Oracle Singer target implementation and usage**
 
 ## Quick Navigation

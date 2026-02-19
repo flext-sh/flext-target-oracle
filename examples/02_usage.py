@@ -8,7 +8,6 @@ import json
 from pathlib import Path
 
 from flext_core import FlextTypes as t
-
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 
