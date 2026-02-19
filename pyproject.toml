@@ -1,5 +1,5 @@
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
@@ -11,7 +11,6 @@ readme = "README.md"
 homepage = "https://github.com/flext/flext-target-oracle"
 repository = "https://github.com/flext/flext-target-oracle"
 documentation = "https://flext-target-oracle.readthedocs.io"
-license = "MIT"
 keywords = ["singer", "oracle", "etl", "database", "target"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -63,22 +62,7 @@ myst-parser = "^4.0.0"
 flext-target-oracle = "flext_target_oracle.cli:main"
 
 [tool.ruff]
-target-version = "py39"
-line-length = 88
-
-[tool.ruff.lint]
-select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
-    "ARG", # flake8-unused-arguments
-    "SIM", # flake8-simplify
-    "TCH", # flake8-type-checking
-]
+extend = "../ruff-shared.toml"
 
 [tool.black]
 line-length = 88
@@ -114,3 +98,5 @@ exclude_lines = [
     "raise AssertionError",
     "raise NotImplementedError",
 ]
+[tool.bandit]
+skips = ["B404", "B603", "B607", "B105", "B608"]
