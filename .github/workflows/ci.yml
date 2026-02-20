@@ -71,7 +71,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout Code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Full history for better analysis
 
@@ -155,7 +155,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout Code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "🐍 Set up Python ${{ matrix.python-version }}"
         uses: actions/setup-python@v5
@@ -226,7 +226,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout Code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "🐍 Set up Python"
         uses: actions/setup-python@v5
@@ -263,7 +263,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout Code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "🔍 Run Trivy Vulnerability Scanner"
         uses: aquasecurity/trivy-action@master
@@ -293,7 +293,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout Code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "🐍 Set up Python"
         uses: actions/setup-python@v5
@@ -333,7 +333,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout Code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "🐍 Set up Python"
         uses: actions/setup-python@v5
@@ -368,7 +368,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout Code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -403,7 +403,7 @@ jobs:
 
     steps:
       - name: "📥 Checkout Code"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: "📥 Download Build Artifacts"
         uses: actions/download-artifact@v4
