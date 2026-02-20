@@ -94,7 +94,7 @@ class OracleConnectionService:
         info = OracleConnectionModel(
             host=self.config.oracle_host,
             port=self.config.oracle_port,
-            service_name=self.config.oracle_service,
+            service_name=self.config.oracle_service_name,
             username=self.config.oracle_user,
             schema=self.config.default_target_schema,
         )

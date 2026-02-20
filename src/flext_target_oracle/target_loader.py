@@ -102,7 +102,7 @@ class FlextTargetOracleLoader(FlextService[dict[str, t.GeneralValueType]]):
             {
                 "status": "ready",
                 "host": self.config.oracle_host,
-                "service": self.config.oracle_service,
+                "service": self.config.oracle_service_name,
                 "schema": self.config.default_target_schema,
             },
         )

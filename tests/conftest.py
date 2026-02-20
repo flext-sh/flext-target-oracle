@@ -45,7 +45,6 @@ from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
-    LoadMethod,
 )
 from flext_target_oracle.typings import FlextTargetOracleTypes as t
 from flext_tests import FlextTestsDocker
@@ -177,14 +176,8 @@ def oracle_config() -> FlextTargetOracleSettings:
         oracle_password=SecretStr("test_password"),
         default_target_schema=TEST_SCHEMA,
         batch_size=1000,
-        load_method=LoadMethod.INSERT,
-        # Enable all features for testing
-        sdc_mode="merge",
-        storage_mode="flattened",
-        column_ordering="alphabetical",
-        allow_alter_table=True,
-        maintain_indexes=True,
-        create_foreign_key_indexes=True,
+        use_bulk_operations=True,
+        parallel_degree=1,
     )
 
 
@@ -195,7 +188,7 @@ def oracle_api(oracle_config: FlextTargetOracleSettings) -> MagicMock:
     db_config = FlextDbOracleSettings(
         host=oracle_config.oracle_host,
         port=oracle_config.oracle_port,
-        service_name=oracle_config.oracle_service,
+        service_name=oracle_config.oracle_service_name,
         username=oracle_config.oracle_user,
         password=oracle_config.oracle_password.get_secret_value()
         if hasattr(oracle_config.oracle_password, "get_secret_value")
@@ -254,7 +247,6 @@ def sample_config() -> FlextTargetOracleSettings:
         oracle_password=SecretStr("test_password"),
         default_target_schema="TEST_SCHEMA",
         batch_size=1000,
-        load_method=LoadMethod.INSERT,
         use_bulk_operations=True,
     )
 
@@ -542,12 +534,12 @@ def temp_config_file(tmp_path: Path) -> Path:
     config_data = {
         "oracle_host": ORACLE_HOST,
         "oracle_port": ORACLE_PORT,
-        "oracle_service": ORACLE_SERVICE,
+        "oracle_service_name": ORACLE_SERVICE,
         "oracle_user": TEST_SCHEMA,
         "oracle_password": "test_password",
         "default_target_schema": TEST_SCHEMA,
         "batch_size": 1000,
-        "load_method": "insert",
+        "use_bulk_operations": True,
     }
 
     config_file = tmp_path / "config.json"

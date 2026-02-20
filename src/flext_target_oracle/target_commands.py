@@ -26,7 +26,7 @@ class OracleTargetValidateCommand(FlextModels.Command):
         if config is None:
             return FlextResult[str].fail("Configuration could not be loaded")
 
-        validation_result = config.validate_domain_rules()
+        validation_result = config.validate_business_rules()
         if validation_result.is_failure:
             return FlextResult[str].fail(
                 validation_result.error or "Validation failed",

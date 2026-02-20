@@ -299,6 +299,30 @@ class FlextTargetOracleModels(FlextModels):
             )
 
 
+class SchemaMessageModel(FlextModels.ArbitraryTypesModel):
+    """Canonical Singer SCHEMA message payload."""
+
+    type: str = Field(default="SCHEMA")
+    stream: str = Field(min_length=1)
+    schema: dict[str, t.GeneralValueType]
+    key_properties: list[str] = Field(default_factory=list)
+
+
+class RecordMessageModel(FlextModels.ArbitraryTypesModel):
+    """Canonical Singer RECORD message payload."""
+
+    type: str = Field(default="RECORD")
+    stream: str = Field(min_length=1)
+    record: dict[str, t.GeneralValueType]
+
+
+class StateMessageModel(FlextModels.ArbitraryTypesModel):
+    """Canonical Singer STATE message payload."""
+
+    type: str = Field(default="STATE")
+    value: dict[str, t.GeneralValueType] = Field(default_factory=dict)
+
+
 # Zero Tolerance CONSOLIDATION - FlextTargetOracleUtilities moved to utilities.py
 #
 # Critical: FlextTargetOracleUtilities was DUPLICATED between models.py and utilities.py.
@@ -314,6 +338,9 @@ m_target_oracle = FlextTargetOracleModels
 
 __all__ = [
     "FlextTargetOracleModels",
+    "RecordMessageModel",
+    "SchemaMessageModel",
+    "StateMessageModel",
     "m",
     "m_target_oracle",
 ]

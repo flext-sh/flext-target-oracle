@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from flext_core import FlextLogger, FlextResult, FlextTypes as t
+from pydantic import ValidationError
 
+from .models import RecordMessageModel, SchemaMessageModel, StateMessageModel
 from .settings import FlextTargetOracleSettings
 from .target_loader import FlextTargetOracleLoader
 
@@ -35,7 +37,7 @@ class FlextTargetOracle:
                 "name": "flext-target-oracle",
                 "status": "ready",
                 "oracle_host": self.config.oracle_host,
-                "oracle_service": self.config.oracle_service,
+                "oracle_service": self.config.oracle_service_name,
             },
         )
 
@@ -45,7 +47,7 @@ class FlextTargetOracle:
 
     def validate_configuration(self) -> FlextResult[bool]:
         """Validate target configuration rules."""
-        return self.config.validate_domain_rules()
+        return self.config.validate_business_rules()
 
     def test_connection(self) -> FlextResult[bool]:
         """Test Oracle connectivity through loader."""
@@ -133,22 +135,14 @@ class FlextTargetOracle:
     def _handle_schema(
         self, message: dict[str, t.GeneralValueType]
     ) -> FlextResult[None]:
-        stream_name = message.get("stream")
-        schema_value = message.get("schema")
-        if not isinstance(stream_name, str):
-            return FlextResult[None].fail("SCHEMA message missing stream")
-        if not isinstance(schema_value, dict):
-            return FlextResult[None].fail("SCHEMA message missing schema")
+        try:
+            schema_message = SchemaMessageModel.model_validate(message)
+        except ValidationError as exc:
+            return FlextResult[None].fail(f"Invalid SCHEMA message: {exc}")
 
-        schema: dict[str, t.GeneralValueType] = {
-            str(key): value for key, value in schema_value.items()
-        }
-        key_properties_value = message.get("key_properties")
-        key_properties: list[str] | None = None
-        if isinstance(key_properties_value, list):
-            key_properties = [
-                item for item in key_properties_value if isinstance(item, str)
-            ]
+        stream_name = schema_message.stream
+        schema = schema_message.schema
+        key_properties = schema_message.key_properties or None
 
         ensure_result = self.loader.ensure_table_exists(
             stream_name, schema, key_properties
@@ -163,16 +157,13 @@ class FlextTargetOracle:
     def _handle_record(
         self, message: dict[str, t.GeneralValueType]
     ) -> FlextResult[None]:
-        stream_name = message.get("stream")
-        record_value = message.get("record")
-        if not isinstance(stream_name, str):
-            return FlextResult[None].fail("RECORD message missing stream")
-        if not isinstance(record_value, dict):
-            return FlextResult[None].fail("RECORD message missing record")
+        try:
+            record_message = RecordMessageModel.model_validate(message)
+        except ValidationError as exc:
+            return FlextResult[None].fail(f"Invalid RECORD message: {exc}")
 
-        record: dict[str, t.GeneralValueType] = {
-            str(key): value for key, value in record_value.items()
-        }
+        stream_name = record_message.stream
+        record = record_message.record
         load_result = self.loader.load_record(stream_name, record)
         if load_result.is_failure:
             return FlextResult[None].fail(load_result.error or "Failed to load record")
@@ -181,10 +172,13 @@ class FlextTargetOracle:
     def _handle_state(
         self, message: dict[str, t.GeneralValueType]
     ) -> FlextResult[None]:
-        state_value = message.get("value")
-        if isinstance(state_value, dict):
-            for key, value in state_value.items():
-                self.state[str(key)] = value
+        try:
+            state_message = StateMessageModel.model_validate(message)
+        except ValidationError as exc:
+            return FlextResult[None].fail(f"Invalid STATE message: {exc}")
+
+        for key, value in state_message.value.items():
+            self.state[str(key)] = value
         logger.debug("State updated for Oracle target")
         return FlextResult[None].ok(None)
 

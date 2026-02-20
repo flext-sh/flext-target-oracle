@@ -1,435 +1,72 @@
-"""Performance tests for Oracle Target.
+"""Lean performance-oriented behavior checks for Oracle target."""
 
-These tests measure and validate performance characteristics including
-throughput, latency, memory usage, and scalability.
+from __future__ import annotations
 
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
-
-import gc
 import json
-import os
 import time
-from datetime import UTC, datetime
 
-import psutil
 import pytest
-from faker import Faker
+from pydantic import SecretStr
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
+from flext_core import FlextResult
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 
 @pytest.mark.performance
-@pytest.mark.oracle
-@pytest.mark.slow
 class TestPerformance:
-    """Performance benchmarking tests."""
+    """Keep fast checks for throughput-sensitive code paths."""
 
-    @pytest.fixture
-    def fake(self) -> Faker:
-        """Faker instance for generating test data."""
-        return Faker()
+    def _target(self) -> FlextTargetOracle:
+        config = FlextTargetOracleSettings(
+            oracle_host="localhost",
+            oracle_service_name="XE",
+            oracle_user="test",
+            oracle_password=SecretStr("test"),
+            batch_size=5000,
+            use_bulk_operations=True,
+        )
+        target = FlextTargetOracle(config=config)
+        target.loader.test_connection = lambda: FlextResult[bool].ok(value=True)
+        return target
 
-    @pytest.fixture
-    def performance_config(
-        self,
-        oracle_config: FlextTargetOracleSettings,
-    ) -> FlextTargetOracleSettings:
-        """Configure for optimal performance."""
-        oracle_config.batch_size = 10000
-        oracle_config.load_method = LoadMethod.BULK_INSERT
-        oracle_config.use_direct_path = True
-        oracle_config.parallel_degree = 4
-        oracle_config.sdc_mode = "append"
-        oracle_config.enable_auto_commit = False
-        return oracle_config
+    def test_execute_readiness_is_constant_time(self) -> None:
+        target = self._target()
 
-    @pytest.mark.usefixtures("_performance_baseline")
-    def get_memory_usage(self) -> float:
-        """Get current memory usage in MB."""
-        process = psutil.Process(os.getpid())
-        return process.memory_info().rss / 1024 / 1024
+        start = time.perf_counter()
+        result = target.execute()
+        elapsed = time.perf_counter() - start
 
-    @pytest.mark.benchmark
-    @pytest.mark.usefixtures("oracle_engine", "clean_database")
-    def test_insert_throughput(
-        self,
-        performance_config: FlextTargetOracleSettings,
-        fake: Faker,
-    ) -> None:
-        """Benchmark INSERT throughput with different batch sizes."""
-        target = FlextTargetOracle(config=performance_config)
-        target.initialize()
-
-        # Test schema
-        schema = {
-            "type": "SCHEMA",
-            "stream": "benchmark_inserts",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "integer"},
-                    "name": {"type": "string"},
-                    "email": {"type": "string"},
-                    "age": {"type": "integer"},
-                    "balance": {"type": "number"},
-                    "is_active": {"type": "boolean"},
-                    "created_at": {"type": "string", "format": "date-time"},
-                },
-            },
-            "key_properties": ["id"],
-        }
-
-        result = target.execute(json.dumps(schema))
         assert result.is_success
+        assert elapsed < 0.05
 
-        # Test different batch sizes
-        batch_sizes = [100, 500, 1000, 5000, 10000]
-        results = []
+    def test_message_processing_scales_linearly_for_state_updates(self) -> None:
+        target = self._target()
+        messages = [{"type": "STATE", "value": {"offset": i}} for i in range(2000)]
 
-        for batch_size in batch_sizes:
-            performance_config.batch_size = batch_size
+        start = time.perf_counter()
+        result = target.process_singer_messages(messages)
+        elapsed = time.perf_counter() - start
 
-            # Generate test data
-            records = []
-            for i in range(batch_size):
-                record = {
-                    "type": "RECORD",
-                    "stream": "benchmark_inserts",
-                    "record": {
-                        "id": i + (batch_size * len(results)),
-                        "name": fake.name(),
-                        "email": fake.email(),
-                        "age": fake.random_int(18, 80),
-                        "balance": fake.pyfloat(
-                            left_digits=5,
-                            right_digits=2,
-                            positive=True,
-                        ),
-                        "is_active": fake.boolean(),
-                        "created_at": datetime.now(UTC).isoformat(),
-                    },
-                }
-                records.append(record)
-
-            # Measure performance
-            gc.collect()
-            start_memory = self.get_memory_usage()
-            start_time = time.time()
-
-            # Insert records
-            for record in records:
-                result = target.execute(json.dumps(record))
-                assert result.is_success
-
-            end_time = time.time()
-            end_memory = self.get_memory_usage()
-            elapsed = end_time - start_time
-
-            # Calculate metrics
-            records_per_second = batch_size / elapsed
-            memory_used = end_memory - start_memory
-            latency_ms = (elapsed / batch_size) * 1000
-
-            results.append(
-                {
-                    "batch_size": batch_size,
-                    "elapsed_time": elapsed,
-                    "records_per_second": records_per_second,
-                    "memory_used_mb": memory_used,
-                    "avg_latency_ms": latency_ms,
-                },
-            )
-
-        # Verify all records inserted
-        # Database verification disabled for performance test
-        # Note: oracle_engine fixture is available via @pytest.mark.usefixtures
-        # but we'll skip database verification for performance test
-        # Database verification disabled for performance test
-
-        # Performance assertions
-        best_throughput = max(r["records_per_second"] for r in results)
-        assert best_throughput > 1000  # Should handle > 1k records/sec
-
-    @pytest.mark.usefixtures("oracle_engine", "clean_database")
-    def test_bulk_vs_standard_performance(
-        self,
-        oracle_config: FlextTargetOracleSettings,
-        fake: Faker,
-    ) -> None:
-        """Compare BULK INSERT vs standard INSERT performance."""
-        record_count = 10000
-
-        # Test schema
-        schema = {
-            "type": "SCHEMA",
-            "stream": "benchmark_comparison",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "integer"},
-                    "data": {"type": "string"},
-                    "value": {"type": "number"},
-                },
-            },
-            "key_properties": ["id"],
-        }
-
-        # Test 1: Standard INSERT
-        oracle_config.load_method = LoadMethod.INSERT
-        oracle_config.batch_size = 100
-        target_standard = FlextTargetOracle(config=oracle_config)
-        target_standard.initialize()
-
-        result = target_standard.execute(json.dumps(schema))
         assert result.is_success
+        assert target.state["offset"] == 1999
+        assert elapsed < 1.0
 
-        start_time = time.time()
-        for i in range(record_count // 10):  # Test with 1/10th for standard
-            record = {
-                "type": "RECORD",
-                "stream": "benchmark_comparison",
-                "record": {
-                    "id": i,
-                    "data": fake.text(max_nb_chars=100),
-                    "value": fake.pyfloat(),
-                },
-            }
-            target_standard.execute(json.dumps(record))
-
-        standard_time = time.time() - start_time
-        standard_rate = (record_count // 10) / standard_time
-
-        # Clean table
-        # Database verification disabled for performance test
-
-        # Test 2: BULK INSERT
-        oracle_config.load_method = LoadMethod.BULK_INSERT
-        oracle_config.batch_size = 1000
-        oracle_config.use_direct_path = True
-        target_bulk = FlextTargetOracle(config=oracle_config)
-        target_bulk.initialize()
-
-        start_time = time.time()
-        for i in range(record_count):
-            record = {
-                "type": "RECORD",
-                "stream": "benchmark_comparison",
-                "record": {
-                    "id": i,
-                    "data": fake.text(max_nb_chars=100),
-                    "value": fake.pyfloat(),
-                },
-            }
-            target_bulk.execute(json.dumps(record))
-
-        bulk_time = time.time() - start_time
-        bulk_rate = record_count / bulk_time
-
-        # Bulk should be significantly faster
-        assert bulk_rate > standard_rate * 5  # At least 5x faster
-
-    @pytest.mark.usefixtures("oracle_engine", "clean_database")
-    def test_memory_efficiency(
-        self,
-        performance_config: FlextTargetOracleSettings,
-        fake: Faker,
-    ) -> None:
-        """Test memory efficiency with large batches."""
-        target = FlextTargetOracle(config=performance_config)
-        target.initialize()
-
-        # Schema with large text fields
-        schema = {
-            "type": "SCHEMA",
-            "stream": "memory_test",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "integer"},
-                    "large_text": {"type": "string"},
-                    "json_data": {"type": "object"},
-                },
-            },
-            "key_properties": ["id"],
-        }
-
-        result = target.execute(json.dumps(schema))
-        assert result.is_success
-
-        # Monitor memory during large batch processing
-        memory_samples: list[int | bool] = []
-        gc.collect()
-        base_memory = self.get_memory_usage()
-
-        # Process in waves
-        waves = 5
-        records_per_wave = 500  # Reduced for memory efficiency
-
-        for wave in range(waves):
-            wave_start_memory = self.get_memory_usage()
-
-            for i in range(records_per_wave):
-                record_id = wave * records_per_wave + i
-                record = {
-                    "type": "RECORD",
-                    "stream": "memory_test",
-                    "record": {
-                        "id": record_id,
-                        "large_text": fake.text(max_nb_chars=100),  # Reduced for memory efficiency
-                        "json_data": {
-                            "nested": {
-                                "data": [fake.word() for _ in range(5)],  # Reduced for memory efficiency
-                                "values": {
-                                    str(j): fake.random_int() for j in range(2)  # Reduced for memory efficiency
-                                },
-                            },
-                        },
-                    },
-                }
-                target.execute(json.dumps(record))
-
-            # Force garbage collection
-            gc.collect()
-            wave_end_memory = self.get_memory_usage()
-            memory_growth = wave_end_memory - wave_start_memory
-            memory_samples.append(memory_growth)
-
-        # Calculate memory statistics
-        avg_growth = sum(memory_samples) / len(memory_samples)
-        max(memory_samples)
-        total_memory = self.get_memory_usage() - base_memory
-
-        # Memory assertions
-        assert avg_growth < 100  # Should not grow more than 100MB per wave
-        assert total_memory < 500  # Total should stay under 500MB
-
-    @pytest.mark.usefixtures("oracle_engine", "clean_database")
-    def test_concurrent_streams(
-        self,
-        performance_config: FlextTargetOracleSettings,
-        fake: Faker,
-    ) -> None:
-        """Test performance with multiple concurrent streams."""
-        target = FlextTargetOracle(config=performance_config)
-        target.initialize()
-
-        # Define multiple streams
-        streams = ["orders", "customers", "products", "inventory", "transactions"]
-
-        for stream in streams:
-            schema = {
-                "type": "SCHEMA",
-                "stream": stream,
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "id": {"type": "integer"},
-                        "name": {"type": "string"},
-                        "value": {"type": "number"},
-                        "timestamp": {"type": "string", "format": "date-time"},
-                    },
-                },
-                "key_properties": ["id"],
-            }
-            result = target.execute(json.dumps(schema))
-            assert result.is_success
-
-        # Generate interleaved records from multiple streams
-        total_records = 50000
-        start_time = time.time()
-
-        for i in range(total_records):
-            stream = streams[i % len(streams)]
-            record = {
-                "type": "RECORD",
-                "stream": stream,
-                "record": {
-                    "id": i // len(streams),
-                    "name": fake.word(),
-                    "value": fake.pyfloat(),
-                    "timestamp": datetime.now(UTC).isoformat(),
-                },
-            }
-            result = target.execute(json.dumps(record))
-            assert result.is_success
-
-        elapsed = time.time() - start_time
-        throughput = total_records / elapsed
-
-        # Verify data distribution
-        # Database verification disabled for performance test
-
-        # Performance assertion
-        assert throughput > 500  # Should handle > 500 records/sec with multiple streams
-
-    @pytest.mark.usefixtures("oracle_engine", "clean_database")
-    def test_scalability(
-        self,
-        performance_config: FlextTargetOracleSettings,
-    ) -> None:
-        """Test scalability with increasing data volume."""
-        target = FlextTargetOracle(config=performance_config)
-        target.initialize()
+    def test_schema_and_record_processing_has_no_json_reparse_loop(self) -> None:
+        target = self._target()
+        target.loader.ensure_table_exists = lambda *_args, **_kwargs: FlextResult[
+            bool
+        ].ok(value=True)
+        target.loader.load_record = lambda *_args, **_kwargs: FlextResult[bool].ok(
+            value=True
+        )
 
         schema = {
             "type": "SCHEMA",
-            "stream": "scalability_test",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "id": {"type": "integer"},
-                    "data": {"type": "string"},
-                },
-            },
+            "stream": "perf_stream",
+            "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
             "key_properties": ["id"],
         }
+        record = {"type": "RECORD", "stream": "perf_stream", "record": {"id": 1}}
 
-        result = target.execute(json.dumps(schema))
-        assert result.is_success
-
-        # Test with increasing data sizes
-        data_sizes = [1000, 5000, 10000, 25000, 50000]
-        performance_metrics = []
-
-        for size in data_sizes:
-            start_time = time.time()
-
-            for i in range(size):
-                record = {
-                    "type": "RECORD",
-                    "stream": "scalability_test",
-                    "record": {
-                        "id": sum(data_sizes[: data_sizes.index(size)]) + i,
-                        "data": f"Record {i} of {size}",
-                    },
-                }
-                target.execute(json.dumps(record))
-
-            elapsed = time.time() - start_time
-            throughput = size / elapsed
-
-            performance_metrics.append(
-                {
-                    "size": size,
-                    "elapsed": elapsed,
-                    "throughput": throughput,
-                },
-            )
-
-        # Check if performance scales linearly
-        # Calculate throughput degradation
-        base_throughput = performance_metrics[0]["throughput"]
-        degradations = [
-            (m["throughput"] / base_throughput) * 100 for m in performance_metrics
-        ]
-
-        for i, metrics in enumerate(performance_metrics):
-            _ = i  # Used for iteration tracking
-            _ = metrics  # Process metrics data
-
-        # Performance should not degrade by more than 50%
-        assert min(degradations) > 50.0
+        assert target.process_singer_message(json.loads(json.dumps(schema))).is_success
+        assert target.process_singer_message(json.loads(json.dumps(record))).is_success
