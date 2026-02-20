@@ -1,101 +1,27 @@
-# FLEXT-Target-Oracle
+# FLEXT Target Oracle
 
-<!-- TOC START -->
+Singer Target para carga de dados em banco Oracle como destino final de pipeline.
 
-- [🚀 Key Features](#-key-features)
-- [📦 Installation](#-installation)
-- [🛠️ Usage](#-usage)
-  - [Using with Meltano](#using-with-meltano)
-  - [CLI Execution](#cli-execution)
-  - [Configuration Options](#configuration-options)
-- [🏗️ Architecture](#-architecture)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+Descricao oficial atual: "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading".
 
-<!-- TOC END -->
+## O que este projeto entrega
 
-[![Singer SDK](https://img.shields.io/badge/singer--sdk-compliant-brightgreen.svg)](https://sdk.meltano.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+- Recebe stream Singer e persiste dados em Oracle.
+- Padroniza escrita para cargas recorrentes.
+- Apoia publicacao de datasets para consumo analitico e operacional.
 
-**FLEXT-Target-Oracle** is a production-grade Singer target for loading data into Oracle Databases (11g through 23c). It is designed for high-performance enterprise data integration, supporting bulk loading, incremental updates, and schema evolution.
+## Contexto operacional
 
-Part of the [FLEXT](https://github.com/flext-sh/flext) ecosystem.
+- Entrada: registros Singer de taps/orquestrador.
+- Saida: dados gravados em tabelas Oracle.
+- Dependencias: flext-db-oracle e conectividade com banco.
 
-## 🚀 Key Features
+## Estado atual e risco de adocao
 
-- **Broad Version Support**: Tested compatibility from Oracle 11g to 23c.
-- **High Performance**: Leverages bulk inserts, array DML, and direct path loading where possible.
-- **Flexible Loading Strategies**: Configurable for INSERT, MERGE (UPSERT), and BULK operations.
-- **Schema Evolution**: Automatically creates and alters tables to match incoming Singer schema messages.
-- **FLEXT Integration**: Seamlessly works with `flext-core` patterns and `flext-meltano` orchestration.
+- Qualidade: **Alpha**
+- Uso recomendado: **Nao produtivo**
+- Nivel de estabilidade: em maturacao funcional e tecnica, sujeito a mudancas de contrato sem garantia de retrocompatibilidade.
 
-## 📦 Installation
+## Diretriz para uso nesta fase
 
-Install via Poetry:
-
-```bash
-poetry add flext-target-oracle
-```
-
-## 🛠️ Usage
-
-### Using with Meltano
-
-Add the target to your `meltano.yml` for orchestrated loading:
-
-```yaml
-loaders:
-  - name: target-oracle
-    namespace: flext_target_oracle
-    pip_url: flext-target-oracle
-    settings:
-      - name: oracle_host
-      - name: oracle_service
-      - name: oracle_user
-      - name: oracle_password
-        kind: password
-      - name: load_method
-        value: "BULK_MERGE"
-```
-
-### CLI Execution
-
-Pipe data directly into your Oracle warehouse:
-
-```bash
-tap-mysql | target-oracle --config oracle_config.json
-```
-
-### Configuration Options
-
-Fine-tune your loading process:
-
-```json
-{
-  "oracle_host": "db.example.com",
-  "oracle_port": 1521,
-  "oracle_service": "ORCL",
-  "oracle_user": "LOADER_USER",
-  "default_target_schema": "STAGING",
-  "load_method": "BULK_insert",
-  "batch_size": 5000,
-  "connection_timeout": 60
-}
-```
-
-## 🏗️ Architecture
-
-Built on the Singer SDK, ensuring standard compliance:
-
-- **Loader Engine**: Optimized for Oracle-specific SQL dialects and performance tuning.
-- **Connection Pool**: Manages database connections efficiently for high-throughput scenarios.
-- **Transaction Management**: Ensures data consistency with robust commit/rollback logic.
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](docs/development.md) for details on setting up a local Oracle test container.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Aplicar este projeto somente em desenvolvimento, prova de conceito e homologacao controlada, com expectativa de ajustes frequentes ate maturidade de release.
