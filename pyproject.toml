@@ -4,7 +4,7 @@ requires = [ "poetry-core>=2.0", "poetry-core>=2" ]
 
 [project]
 name = "flext-target-oracle"
-version = "0.11.0"
+version = "0.12.0-dev"
 description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
 readme = "README.md"
 keywords = [
