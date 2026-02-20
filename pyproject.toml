@@ -1,12 +1,10 @@
 [build-system]
 build-backend = "poetry.core.masonry.api"
-requires = [
-  "poetry-core>=2",
-]
+requires = [ "poetry-core>=2.0", "poetry-core>=2" ]
 
 [project]
 name = "flext-target-oracle"
-version = "0.10.0-dev"
+version = "0.10.0"
 description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
 readme = "README.md"
 keywords = [
@@ -20,19 +18,20 @@ keywords = [
   "typed",
 ]
 license = "MIT"
-maintainers = [ { email = "team@flext.sh", name = "FLEXT Team" } ]
-authors = [ { email = "team@flext.sh", name = "FLEXT Team" } ]
+maintainers = [ {email = "team@flext.sh", name = "FLEXT Team"} ]
+authors = [ {email = "team@flext.sh", name = "FLEXT Team"} ]
 requires-python = ">=3.13,<3.14"
 classifiers = [
-  "Development Status :: 5 - Production/Stable",
+  "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.13",
-  "Topic :: Database",
   "Topic :: Software Development :: Libraries :: Python Modules",
-  "Topic :: System :: Archiving",
   "Typing :: Typed",
+  "Development Status :: 5 - Production/Stable",
+  "Topic :: Database",
+  "Topic :: System :: Archiving",
 ]
 dependencies = [
   "click>=8",
@@ -90,7 +89,7 @@ group.dev.dependencies.bandit.extras = [
   "toml",
 ]
 group.dev.dependencies.bandit.version = ">=1.8.0"
-packages = [ { from = "src", include = "flext_target_oracle" } ]
+packages = [ {from = "src", include = "flext_target_oracle"} ]
 
 [tool.ruff]
 extend = "../ruff-shared.toml"
@@ -104,13 +103,13 @@ known_first_party = [
   "flext_observability",
   "flext_cli",
 ]
+package_module_name_map.PyYAML = "yaml"
 pep621_dev_dependency_groups = [
   "dev",
   "test",
   "typings",
   "security",
 ]
-package_module_name_map.PyYAML = "yaml"
 per_rule_ignores.DEP002 = [
   # CLI tools (invoked from command line, not imported)
   "bandit",
@@ -152,7 +151,7 @@ ini_options.addopts = [
   "-ra",
   "--timeout=30",
   "--timeout-method=signal",
-  "--durations=0"
+  "--durations=0",
 ]
 ini_options.markers = [
   "e2e: End-to-end tests",
@@ -167,17 +166,13 @@ ini_options.testpaths = [
 ]
 
 [tool.coverage]
-run.source = [ "src/flext_target_oracle" ]
 report.fail_under = 100
 report.precision = 2
+run.source = [ "src/flext_target_oracle" ]
 
 [tool.pyrefly]
-search-path = [
-  "../typings",
-  "../typings/generated",
-  "src",
-  "tests",
-]
+project-excludes = [ "**/*_pb2*.py", "**/*_pb2_grpc*.py" ]
+search-path = [ "../typings", "../typings/generated", "src", "tests", "examples", "scripts" ]
 
 [tool.bandit]
 exclude_dirs = [
@@ -185,12 +180,4 @@ exclude_dirs = [
   "dist",
   "tests",
 ]
-skips = [
-  "B101",
-  "B601",
-  "B404",
-  "B603",
-  "B607",
-  "B105",
-  "B608",
-]
+skips = [ "B404", "B603", "B607", "B105", "B608", "B101", "B601" ]
