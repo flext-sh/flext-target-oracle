@@ -195,38 +195,4 @@ class FlextTargetOracleModels(FlextModels):
 
 m = FlextTargetOracleModels
 
-ExecuteResult = FlextTargetOracleModels.TargetOracle.ExecuteResult
-ImplementationMetrics = FlextTargetOracleModels.TargetOracle.ImplementationMetrics
-LoaderFinalizeResult = FlextTargetOracleModels.TargetOracle.LoaderFinalizeResult
-LoaderReadyResult = FlextTargetOracleModels.TargetOracle.LoaderReadyResult
-OracleConnectionConfig = FlextTargetOracleModels.TargetOracle.OracleConnectionConfig
-ProcessingSummary = FlextTargetOracleModels.TargetOracle.ProcessingSummary
-SingerActivateVersionMessage = (
-    FlextTargetOracleModels.TargetOracle.SingerActivateVersionMessage
-)
-SingerCatalog = FlextTargetOracleModels.TargetOracle.SingerCatalog
-SingerCatalogEntry = FlextTargetOracleModels.TargetOracle.SingerCatalogEntry
-SingerCatalogMetadata = FlextTargetOracleModels.TargetOracle.SingerCatalogMetadata
-SingerRecordMessage = FlextTargetOracleModels.TargetOracle.SingerRecordMessage
-SingerSchemaMessage = FlextTargetOracleModels.TargetOracle.SingerSchemaMessage
-SingerStateMessage = FlextTargetOracleModels.TargetOracle.SingerStateMessage
-TargetConfig = FlextTargetOracleModels.TargetOracle.TargetConfig
-
-__all__ = [
-    "ExecuteResult",
-    "FlextTargetOracleModels",
-    "ImplementationMetrics",
-    "LoaderFinalizeResult",
-    "LoaderReadyResult",
-    "OracleConnectionConfig",
-    "ProcessingSummary",
-    "SingerActivateVersionMessage",
-    "SingerCatalog",
-    "SingerCatalogEntry",
-    "SingerCatalogMetadata",
-    "SingerRecordMessage",
-    "SingerSchemaMessage",
-    "SingerStateMessage",
-    "TargetConfig",
-    "m",
-]
+__all__ = ["FlextTargetOracleModels", "m"]
