@@ -15,7 +15,7 @@ import json
 import time
 
 import pytest
-from flext_core import FlextTypes as t
+from flext_target_oracle import t
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 

@@ -11,7 +11,7 @@ from decimal import Decimal
 from typing import Protocol
 
 import pytest
-from flext_core import FlextTypes as t
+from flext_target_oracle import t
 from sqlalchemy import Engine, MetaData, Table, func, select, text
 
 from flext_target_oracle import (

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Literal
 
-from flext_core import FlextModels, FlextTypes as t
-from flext_core.utilities import u as flext_u
+from flext_core import FlextModels, t
+from flext_core.utilities import u
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field
 
@@ -19,7 +19,7 @@ class FlextTargetOracleModels(FlextModels):
     def __init_subclass__(cls, **kwargs: object) -> None:
         """Warn when FlextTargetOracleModels is subclassed directly."""
         super().__init_subclass__(**kwargs)
-        flext_u.Deprecation.warn_once(
+        u.Deprecation.warn_once(
             f"subclass:{cls.__name__}",
             "Subclassing FlextTargetOracleModels is deprecated. Use FlextModels directly with composition instead.",
         )

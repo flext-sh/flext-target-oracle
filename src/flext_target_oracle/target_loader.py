@@ -15,7 +15,7 @@ import re
 from datetime import UTC, datetime
 from typing import ClassVar
 
-from flext_core import FlextLogger, FlextResult, FlextService, FlextTypes as t
+from flext_core import FlextLogger, FlextResult, FlextService, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import Field
 

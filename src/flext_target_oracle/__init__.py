@@ -68,7 +68,7 @@ from flext_target_oracle.target_services import (
     RecordServiceProtocol,
     SchemaServiceProtocol,
 )
-from flext_target_oracle.typings import FlextTargetOracleTypes
+from flext_target_oracle.typings import FlextTargetOracleTypes, t
 from flext_target_oracle.utilities import (
     FlextTargetOracleUtilities,
     FlextTargetOracleUtilities as u,
@@ -130,5 +130,6 @@ __all__ = [
     "TargetConfig",
     "configure_oracle_observability",
     "m",
+    "t",
     "u",
 ]

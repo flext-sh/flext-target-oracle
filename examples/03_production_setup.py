@@ -17,7 +17,7 @@ import sys
 import time
 from datetime import UTC
 
-from flext_core import FlextLogger, FlextResult, FlextTypes as t
+from flext_core import FlextLogger, FlextResult, t
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
 from pydantic import SecretStr
 

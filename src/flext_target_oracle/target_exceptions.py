@@ -12,7 +12,9 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_core import FlextConstants, FlextExceptions, FlextTypes as t
+from flext_core import FlextConstants, FlextExceptions
+
+from flext_target_oracle.typings import t
 
 
 class FlextTargetOracleExceptions(FlextExceptions):

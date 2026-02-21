@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from flext_core import FlextResult, FlextTypes as t
+from flext_core import FlextResult, t
 
 
 class FlextTargetOracleUtilities:

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from flext_core import FlextResult, FlextTypes as t
+from flext_core import FlextResult, t
 from flext_db_oracle import FlextDbOracleApi
 
 from .models import m
