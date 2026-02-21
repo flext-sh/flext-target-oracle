@@ -1003,3 +1003,6 @@ reports_*/
 temp_test_*/
 >>>>>>> a4d23e4152fa8e8fb9f2bfe047d2de57af9dd682
 .github/*.rej
+
+# --- workspace-sync: required ignores (auto-managed) ---
+.reports/
