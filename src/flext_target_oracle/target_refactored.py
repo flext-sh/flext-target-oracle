@@ -26,14 +26,11 @@ class FlextTargetOracleCliService:
 
         command_name = argv[0]
         if command_name == "validate":
-            command = OracleTargetCommandFactory.create_validate_command(None)
-            return command.execute()
+            return OracleTargetCommandFactory.create_validate_command(None).execute()
         if command_name == "load":
-            command = OracleTargetCommandFactory.create_load_command(None, None)
-            return command.execute()
+            return OracleTargetCommandFactory.create_load_command(None, None).execute()
         if command_name == "about":
-            command = OracleTargetCommandFactory.create_about_command("json")
-            return command.execute()
+            return OracleTargetCommandFactory.create_about_command("json").execute()
         return FlextResult[str].fail(f"Unknown command: {command_name}")
 
     def _get_help_text(self) -> str:

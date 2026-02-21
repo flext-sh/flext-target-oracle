@@ -45,16 +45,16 @@ class TestOracleSettings:
 
         oracle_config = config.get_oracle_config()
 
-        assert oracle_config["host"] == "localhost"
-        assert oracle_config["port"] == 1521
-        assert oracle_config["service_name"] == "XE"
-        assert oracle_config["username"] == "test"
-        assert oracle_config["password"] == "test"
-        assert oracle_config["ssl_enabled"] is False
-        assert oracle_config["autocommit"] is True
-        assert oracle_config["timeout"] == 120
-        assert oracle_config["parallel_degree"] == 4
-        assert oracle_config["use_bulk_operations"] is True
+        assert oracle_config.host == "localhost"
+        assert oracle_config.port == 1521
+        assert oracle_config.service_name == "XE"
+        assert oracle_config.username == "test"
+        assert oracle_config.password == "test"
+        assert oracle_config.ssl_enabled is False
+        assert oracle_config.autocommit is True
+        assert oracle_config.timeout == 120
+        assert oracle_config.parallel_degree == 4
+        assert oracle_config.use_bulk_operations is True
 
     def test_get_table_name_with_prefix_suffix_and_cleanup(self) -> None:
         config = FlextTargetOracleSettings(

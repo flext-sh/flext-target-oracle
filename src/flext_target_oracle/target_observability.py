@@ -125,12 +125,13 @@ class FlextOracleObs:
             connection_pool_size: int, active_connections: int, **context: object
         ) -> None:
             """Log Oracle connection pool health snapshots."""
+            context_keys = list(context.keys())
             logger.info(
                 "Oracle connection pool health",
                 extra={
                     "connection_pool_size": connection_pool_size,
                     "active_connections": active_connections,
-                    "context": context,
+                    "context_keys": context_keys,
                 },
             )
 

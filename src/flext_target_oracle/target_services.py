@@ -7,8 +7,9 @@ from typing import Protocol
 from flext_core import FlextResult, FlextTypes as t
 from flext_db_oracle import FlextDbOracleApi
 
+from .models import m
 from .settings import FlextTargetOracleSettings
-from .target_models import LoadStatisticsModel, OracleConnectionModel, SingerStreamModel
+from .target_models import LoadStatisticsModel, SingerStreamModel
 
 
 class ConnectionServiceProtocol(Protocol):
@@ -18,7 +19,7 @@ class ConnectionServiceProtocol(Protocol):
         """Validate Oracle connectivity."""
         ...
 
-    def get_connection_info(self) -> FlextResult[OracleConnectionModel]:
+    def get_connection_info(self) -> FlextResult[m.TargetOracle.OracleConnectionConfig]:
         """Return effective Oracle connection information."""
         ...
 
@@ -29,8 +30,7 @@ class SchemaServiceProtocol(Protocol):
     def ensure_table_exists(
         self,
         stream: SingerStreamModel,
-        schema: dict[str, t.GeneralValueType],
-        key_properties: list[str] | None = None,
+        schema_message: m.Meltano.SingerSchemaMessage,
     ) -> FlextResult[None]:
         """Ensure destination table exists for a stream."""
         ...
@@ -42,7 +42,7 @@ class BatchServiceProtocol(Protocol):
     def add_record(
         self,
         stream_name: str,
-        record: dict[str, t.GeneralValueType],
+        record_message: m.Meltano.SingerRecordMessage,
     ) -> FlextResult[None]:
         """Queue one record for batch processing."""
         ...
@@ -57,9 +57,9 @@ class RecordServiceProtocol(Protocol):
 
     def transform_record(
         self,
-        record: dict[str, t.GeneralValueType],
+        record_message: m.Meltano.SingerRecordMessage,
         stream: SingerStreamModel,
-    ) -> FlextResult[dict[str, t.GeneralValueType]]:
+    ) -> FlextResult[m.Meltano.SingerRecordMessage]:
         """Transform one Singer record into Oracle-ready payload."""
         ...
 
@@ -89,16 +89,11 @@ class OracleConnectionService:
             )
         return FlextResult[None].ok(None)
 
-    def get_connection_info(self) -> FlextResult[OracleConnectionModel]:
+    def get_connection_info(self) -> FlextResult[m.TargetOracle.OracleConnectionConfig]:
         """Return normalized connection model."""
-        info = OracleConnectionModel(
-            host=self.config.oracle_host,
-            port=self.config.oracle_port,
-            service_name=self.config.oracle_service_name,
-            username=self.config.oracle_user,
-            schema=self.config.default_target_schema,
+        return FlextResult[m.TargetOracle.OracleConnectionConfig].ok(
+            self.config.get_oracle_config()
         )
-        return FlextResult[OracleConnectionModel].ok(info)
 
 
 class OracleSchemaService:
@@ -118,12 +113,10 @@ class OracleSchemaService:
     def ensure_table_exists(
         self,
         stream: SingerStreamModel,
-        schema: dict[str, t.GeneralValueType],
-        key_properties: list[str] | None = None,
+        schema_message: m.Meltano.SingerSchemaMessage,
     ) -> FlextResult[None]:
         """Validate table identity before external DDL orchestration."""
-        _ = schema
-        _ = key_properties
+        _ = schema_message
         table_name = stream.table_name
         if not table_name:
             return FlextResult[None].fail("Invalid table name")
@@ -139,7 +132,7 @@ class OracleBatchService:
         """Initialize batch storage and required dependencies."""
         self.config = config
         self.oracle_api = oracle_api
-        self._batches: dict[str, list[dict[str, t.GeneralValueType]]] = {}
+        self._batches: dict[str, list[m.Meltano.SingerRecordMessage]] = {}
 
     def execute(self) -> FlextResult[LoadStatisticsModel]:
         """Run default batch flush operation."""
@@ -148,10 +141,10 @@ class OracleBatchService:
     def add_record(
         self,
         stream_name: str,
-        record: dict[str, t.GeneralValueType],
+        record_message: m.Meltano.SingerRecordMessage,
     ) -> FlextResult[None]:
         """Append a record to a stream buffer."""
-        self._batches.setdefault(stream_name, []).append(record)
+        self._batches.setdefault(stream_name, []).append(record_message)
         return FlextResult[None].ok(None)
 
     def flush_batch(self, stream_name: str) -> FlextResult[None]:
@@ -185,26 +178,31 @@ class OracleRecordService:
 
     def transform_record(
         self,
-        record: dict[str, t.GeneralValueType],
+        record_message: m.Meltano.SingerRecordMessage,
         stream: SingerStreamModel,
-    ) -> FlextResult[dict[str, t.GeneralValueType]]:
+    ) -> FlextResult[m.Meltano.SingerRecordMessage]:
         """Apply stream-level mappings and ignored-column filtering."""
-        transformed: dict[str, t.GeneralValueType] = {}
-        for key, value in record.items():
+        transformed: dict[str, t.JsonValue] = {}
+        for key, value in record_message.record.items():
             if key in stream.ignored_columns:
                 continue
-            mapped_key = stream.column_mappings.get(key, key)
+            mapped_key = stream.column_mappings.get(key) or key
             transformed[mapped_key] = value
-        return FlextResult[dict[str, t.GeneralValueType]].ok(transformed)
+        return FlextResult[m.Meltano.SingerRecordMessage].ok(
+            m.Meltano.SingerRecordMessage(
+                stream=record_message.stream,
+                record=transformed,
+            )
+        )
 
     def validate_record(
         self,
-        record: dict[str, t.GeneralValueType],
-        schema: dict[str, t.GeneralValueType],
+        record_message: m.Meltano.SingerRecordMessage,
+        schema_message: m.Meltano.SingerSchemaMessage,
     ) -> FlextResult[None]:
         """Validate record payload placeholder for future rules."""
-        _ = record
-        _ = schema
+        _ = record_message
+        _ = schema_message
         return FlextResult[None].ok(None)
 
 

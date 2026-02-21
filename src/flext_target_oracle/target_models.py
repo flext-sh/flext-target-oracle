@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from flext_core import FlextModels, FlextResult, FlextTypes as t
+from flext_core import FlextModels, FlextResult
 from pydantic import BaseModel, Field, field_validator
 
 from flext_target_oracle.constants import c
@@ -195,100 +195,6 @@ class SingerStreamModel(FlextModels.ArbitraryTypesModel):
         return f"{self.schema_name}.{self.table_name}"
 
 
-class BatchProcessingModel(FlextModels.ArbitraryTypesModel):
-    """Batch processing configuration and state.
-
-    Immutable value object representing batch processing configuration
-    and current state for Oracle data loading operations.
-
-    Attributes:
-    stream_name: Singer stream being processed
-    batch_size: Number of records per batch
-    current_batch: Current batch of records
-    total_records: Total records processed so far
-    batch_count: Number of batches processed
-    last_processed_at: Timestamp of last record processing
-    has_pending_records: Whether there are records waiting to be flushed
-
-    """
-
-    stream_name: str = Field(
-        ...,
-        description="Singer stream being processed",
-        min_length=1,
-    )
-    batch_size: int = Field(
-        ...,
-        description="Number of records per batch",
-        gt=0,
-        le=50000,
-    )
-    current_batch: list[dict[str, t.GeneralValueType]] = Field(
-        default_factory=list,
-        description="Current batch of records",
-    )
-    total_records: int = Field(
-        default=0,
-        description="Total records processed so far",
-        ge=0,
-    )
-    batch_count: int = Field(
-        default=0,
-        description="Number of batches processed",
-        ge=0,
-    )
-    last_processed_at: datetime = Field(
-        default_factory=lambda: datetime.now(UTC),
-        description="Timestamp of last record processing",
-    )
-
-    @property
-    def has_pending_records(self) -> bool:
-        """Whether there are records waiting to be flushed."""
-        return len(self.current_batch) > 0
-
-    @property
-    def is_batch_full(self) -> bool:
-        """Whether the current batch is full and ready for processing."""
-        return len(self.current_batch) >= self.batch_size
-
-    @property
-    def current_batch_size(self) -> int:
-        """Current number of records in the batch."""
-        return len(self.current_batch)
-
-    def add_record(self, record: dict[str, t.GeneralValueType]) -> BatchProcessingModel:
-        """Add a record to the current batch (immutable operation)."""
-        new_batch = self.current_batch.copy()
-        new_batch.append(record)
-
-        return self.model_copy(
-            update={
-                "current_batch": "new_batch",
-                "total_records": self.total_records + 1,
-                "last_processed_at": datetime.now(UTC),
-            },
-        )
-
-    def clear_batch(self) -> BatchProcessingModel:
-        """Clear the current batch after processing (immutable operation)."""
-        return self.model_copy(
-            update={
-                "current_batch": [],
-                "batch_count": self.batch_count + 1,
-                "last_processed_at": datetime.now(UTC),
-            },
-        )
-
-    def validate_business_rules(self) -> FlextResult[bool]:
-        """Validate business rules for batch processing."""
-        if not self.stream_name or self.stream_name.isspace():
-            return FlextResult[bool].fail("Stream name cannot be empty or whitespace")
-        if self.batch_size <= 0:
-            return FlextResult[bool].fail("Batch size must be positive")
-        return FlextResult[bool].ok(value=True)
-
-
 class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
     """Data loading statistics and metrics.
 
@@ -423,88 +329,12 @@ class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
         return FlextResult[bool].ok(value=True)
 
 
-class OracleTableMetadataModel(FlextModels.ArbitraryTypesModel):
-    """Oracle table metadata and schema information.
-
-    Immutable value object representing Oracle table structure
-    and metadata for Singer stream processing.
-
-    Attributes:
-    table_name: Oracle table name
-    schema_name: Oracle schema name
-    columns: List of column definitions
-    primary_key_columns: List of primary key column names
-    indexes: List of index definitions
-    table_exists: Whether the table exists in Oracle
-    created_at: When the table was created
-    last_modified: When the table was last modified
-    singer_stream_name: Associated Singer stream name
-
-    """
-
-    table_name: str = Field(
-        ...,
-        description="Oracle table name",
-        min_length=1,
-        max_length=30,
-    )
-    schema_name: str = Field(
-        ...,
-        description="Oracle schema name",
-        min_length=1,
-        max_length=128,
-    )
-    columns: list[dict[str, t.GeneralValueType]] = Field(
-        default_factory=list,
-        description="List of column definitions",
-    )
-    primary_key_columns: list[str] = Field(
-        default_factory=list,
-        description="List of primary key column names",
-    )
-    indexes: list[dict[str, t.GeneralValueType]] = Field(
-        default_factory=list,
-        description="List of index definitions",
-    )
-    table_exists: bool = Field(
-        default=False,
-        description="Whether the table exists in Oracle",
-    )
-    created_at: datetime | None = Field(
-        default=None,
-        description="When the table was created",
-    )
-    last_modified: datetime | None = Field(
-        default=None,
-        description="When the table was last modified",
-    )
-    singer_stream_name: str | None = Field(
-        default=None,
-        description="Associated Singer stream name",
-    )
-
-    def get_qualified_name(self) -> str:
-        """Get fully qualified table name."""
-        return f"{self.schema_name}.{self.table_name}"
-
-    def has_column(self, column_name: str) -> bool:
-        """Check if table has a specific column."""
-        column_names = [str(col.get("name", "")).upper() for col in self.columns]
-        return column_name.upper() in column_names
-
-    def get_column_names(self) -> list[str]:
-        """Get list of all column names."""
-        return [str(col.get("name", "")) for col in self.columns if col.get("name")]
-
-
 __all__ = [
-    "BatchProcessingModel",
     # Enums
     "LoadMethodModel",
     "LoadStatisticsModel",
     # Value Objects
     "OracleConnectionModel",
-    "OracleTableMetadataModel",
     "SingerStreamModel",
     "StorageModeModel",
 ]

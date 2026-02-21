@@ -26,10 +26,14 @@ from flext_target_oracle import (
 class LoaderProtocol(Protocol):
     """Protocol for loader objects in tests."""
 
-    def load_record(self, stream_name: str, record: dict[str, t.GeneralValueType]) -> None:
+    def load_record(
+        self, stream_name: str, record: dict[str, t.GeneralValueType]
+    ) -> None:
         """Load a single record into Oracle."""
 
-    def load_batch(self, stream_name: str, records: list[dict[str, t.GeneralValueType]]) -> None:
+    def load_batch(
+        self, stream_name: str, records: list[dict[str, t.GeneralValueType]]
+    ) -> None:
         """Load a batch of records into Oracle."""
 
     def ensure_table_exists(
@@ -801,12 +805,11 @@ class TestRealOracleLoader:
         assert result.is_success
 
         metrics = result.value
-        assert metrics["total_records"] == 5
-        assert metrics["successful_records"] == 5
-        assert metrics["failed_records"] == 0
-        assert len(metrics["streams"]) == 1
-        assert stream_name in metrics["streams"]
-        assert metrics["streams"][stream_name]["count"] == 5
+        assert metrics.total_records == 5
+        assert metrics.streams_processed == 1
+        assert metrics.loading_operation.records_loaded == 5
+        assert metrics.loading_operation.records_failed == 0
+        assert metrics.status == "completed"
 
     def test_real_get_table_name_variants(
         self,

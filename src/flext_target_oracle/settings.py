@@ -18,6 +18,7 @@ from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
 from flext_target_oracle.constants import c
+from flext_target_oracle.models import m
 
 # LoadMethod moved to constants.py as c.LoadMethod (DRY pattern)
 LoadMethod = c.LoadMethod
@@ -209,40 +210,34 @@ class FlextTargetOracleSettings(FlextSettings):
             return FlextResult[bool].fail(f"Business rules validation failed: {e}")
 
     # Configuration helper methods that leverage the base model
-    def get_oracle_config(self) -> dict[str, t.GeneralValueType]:
+    def get_oracle_config(self) -> m.TargetOracle.OracleConnectionConfig:
         """Convert to flext-db-oracle configuration format."""
-        oracle_config: dict[str, t.GeneralValueType] = {
-            "host": self.oracle_host,
-            "port": self.oracle_port,
-            "service_name": self.oracle_service_name,
-            "username": self.oracle_user,
-            "password": self.oracle_password.get_secret_value(),
-            "timeout": self.transaction_timeout,
-            "pool_min": FlextConstants.Performance.MIN_DB_POOL_SIZE,
-            "pool_max": FlextConstants.Performance.DEFAULT_DB_POOL_SIZE * 5,
-            "pool_increment": FlextConstants.Performance.MIN_DB_POOL_SIZE,
-            "encoding": "UTF-8",
-            "ssl_enabled": False,
-            "autocommit": self.autocommit,
-        }
+        return m.TargetOracle.OracleConnectionConfig(
+            host=self.oracle_host,
+            port=self.oracle_port,
+            service_name=self.oracle_service_name,
+            username=self.oracle_user,
+            password=self.oracle_password.get_secret_value(),
+            timeout=self.transaction_timeout,
+            pool_min=FlextConstants.Performance.MIN_DB_POOL_SIZE,
+            pool_max=FlextConstants.Performance.DEFAULT_DB_POOL_SIZE * 5,
+            pool_increment=FlextConstants.Performance.MIN_DB_POOL_SIZE,
+            encoding="UTF-8",
+            ssl_enabled=False,
+            autocommit=self.autocommit,
+            use_bulk_operations=self.use_bulk_operations,
+            parallel_degree=self.parallel_degree,
+        )
 
-        # Add advanced Oracle features if enabled
-        if self.use_bulk_operations:
-            oracle_config["use_bulk_operations"] = True
-        if self.parallel_degree and self.parallel_degree > 1:
-            oracle_config["parallel_degree"] = self.parallel_degree
-
-        return oracle_config
-
-    def get_target_config(self) -> dict[str, t.GeneralValueType]:
+    def get_target_config(self) -> m.TargetOracle.TargetConfig:
         """Get target-specific configuration dictionary."""
-        return {
-            "default_target_schema": self.default_target_schema,
-            "use_bulk_operations": self.use_bulk_operations,
-            "batch_size": self.batch_size,
-            "table_prefix": self.table_prefix,
-            "table_suffix": self.table_suffix,
-        }
+        return m.TargetOracle.TargetConfig(
+            default_target_schema=self.default_target_schema,
+            use_bulk_operations=self.use_bulk_operations,
+            batch_size=self.batch_size,
+            table_prefix=self.table_prefix,
+            table_suffix=self.table_suffix,
+        )
 
     def get_table_name(self, stream_name: str) -> str:
         """Generate Oracle table name from Singer stream name."""

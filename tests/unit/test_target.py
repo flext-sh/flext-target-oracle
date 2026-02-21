@@ -49,8 +49,8 @@ class TestOracleTarget:
     def test_execute_returns_ready_status(self, target: FlextTargetOracle) -> None:
         result = target.execute()
         assert result.is_success
-        assert result.value["status"] == "ready"
-        assert result.value["oracle_host"] == "localhost"
+        assert result.value.status == "ready"
+        assert result.value.oracle_host == "localhost"
 
     def test_validate_configuration(self, target: FlextTargetOracle) -> None:
         result = target.validate_configuration()
@@ -69,7 +69,7 @@ class TestOracleTarget:
 
         catalog_result = target.discover_catalog()
         assert catalog_result.is_success
-        assert catalog_result.value["streams"][0]["stream"] == "users"
+        assert catalog_result.value.streams[0].stream == "users"
 
     def test_process_record_and_state_messages(self, target: FlextTargetOracle) -> None:
         schema_message = {
@@ -100,7 +100,7 @@ class TestOracleTarget:
 
         result = target.process_singer_messages(messages)
         assert result.is_success
-        assert result.value["messages_processed"] == 3
+        assert result.value.messages_processed == 3
 
     def test_unsupported_message_type_fails(self, target: FlextTargetOracle) -> None:
         result = target.process_singer_message({"type": "UNKNOWN"})
@@ -128,8 +128,8 @@ class TestOracleTarget:
 
     def test_metrics_and_write_record_contract(self, target: FlextTargetOracle) -> None:
         metrics = target.get_implementation_metrics()
-        assert metrics["batch_size"] > 0
-        assert metrics["use_bulk_operations"] in {True, False}
+        assert metrics.batch_size > 0
+        assert metrics.use_bulk_operations in {True, False}
 
         result = target.write_record(json.dumps({"id": 1}))
         assert result.is_failure

@@ -14,7 +14,24 @@ from flext_meltano import (
     FlextMeltanoTypes,
 )
 
-from flext_target_oracle.models import FlextTargetOracleModels, m, m_target_oracle
+from flext_target_oracle.models import (
+    ExecuteResult,
+    FlextTargetOracleModels,
+    ImplementationMetrics,
+    LoaderFinalizeResult,
+    LoaderReadyResult,
+    OracleConnectionConfig,
+    ProcessingSummary,
+    SingerActivateVersionMessage,
+    SingerCatalog,
+    SingerCatalogEntry,
+    SingerCatalogMetadata,
+    SingerRecordMessage,
+    SingerSchemaMessage,
+    SingerStateMessage,
+    TargetConfig,
+    m,
+)
 from flext_target_oracle.protocols import FlextTargetOracleProtocols
 from flext_target_oracle.settings import FlextTargetOracleSettings, LoadMethod
 from flext_target_oracle.target_client import FlextTargetOracle
@@ -28,11 +45,9 @@ from flext_target_oracle.target_exceptions import (
 )
 from flext_target_oracle.target_loader import FlextTargetOracleLoader
 from flext_target_oracle.target_models import (
-    BatchProcessingModel,
     LoadMethodModel,
     LoadStatisticsModel,
     OracleConnectionModel,
-    OracleTableMetadataModel,
     SingerStreamModel,
     StorageModeModel,
 )
@@ -64,9 +79,9 @@ from flext_target_oracle.utilities import (
 # Version constants removed - not available
 
 __all__ = [
-    "BatchProcessingModel",
     "BatchServiceProtocol",
     "ConnectionServiceProtocol",
+    "ExecuteResult",
     "FlextMeltanoSettings",
     "FlextMeltanoTargetAbstractions",
     "FlextMeltanoTypes",
@@ -86,24 +101,34 @@ __all__ = [
     "FlextTargetOracleSettings",
     "FlextTargetOracleTypes",
     "FlextTargetOracleUtilities",
+    "ImplementationMetrics",
     "LoadMethod",
     "LoadMethodModel",
     "LoadStatisticsModel",
+    "LoaderFinalizeResult",
+    "LoaderReadyResult",
     "OracleBatchService",
+    "OracleConnectionConfig",
     "OracleConnectionModel",
     "OracleConnectionService",
     "OracleRecordService",
     "OracleSchemaService",
-    "OracleTableMetadataModel",
     "OracleTargetCommandFactory",
     "OracleTargetServiceFactory",
+    "ProcessingSummary",
     "RecordServiceProtocol",
     "SchemaServiceProtocol",
+    "SingerActivateVersionMessage",
+    "SingerCatalog",
+    "SingerCatalogEntry",
+    "SingerCatalogMetadata",
+    "SingerRecordMessage",
+    "SingerSchemaMessage",
+    "SingerStateMessage",
     "SingerStreamModel",
     "StorageModeModel",
+    "TargetConfig",
     "configure_oracle_observability",
     "m",
-    "m_target_oracle",
-    # Domain-specific aliases
     "u",
 ]
