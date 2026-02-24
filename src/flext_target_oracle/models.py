@@ -72,8 +72,8 @@ class FlextTargetOracleModels(FlextModels):
                 default_factory=list,
                 description="Singer stream names seen during processing",
             )
-            state: dict[str, t.GeneralValueType] = Field(
-                default_factory=dict,
+            state: FlextMeltanoModels.Meltano.SingerStateMessage = Field(
+                default_factory=FlextMeltanoModels.Meltano.SingerStateMessage,
                 description="Accumulated Singer STATE payload",
             )
 

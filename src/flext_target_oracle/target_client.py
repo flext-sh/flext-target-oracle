@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from flext_core import FlextLogger, FlextResult, t
-from pydantic import ValidationError
+from flext_core import FlextLogger, FlextResult
 
 from .models import m
 from .settings import FlextTargetOracleSettings
@@ -20,7 +19,9 @@ class FlextTargetOracle:
         self.config = config
         self.loader = FlextTargetOracleLoader(config)
         self.schemas: dict[str, m.TargetOracle.SingerSchemaMessage] = {}
-        self.state: dict[str, t.GeneralValueType] = {}
+        self.state_message: m.TargetOracle.SingerStateMessage = (
+            m.TargetOracle.SingerStateMessage()
+        )
 
     def execute(
         self, payload: str | None = None
@@ -78,7 +79,12 @@ class FlextTargetOracle:
 
     def process_singer_messages(
         self,
-        messages: list[dict[str, t.GeneralValueType]],
+        messages: list[
+            m.TargetOracle.SingerSchemaMessage
+            | m.TargetOracle.SingerRecordMessage
+            | m.TargetOracle.SingerStateMessage
+            | m.TargetOracle.SingerActivateVersionMessage
+        ],
     ) -> FlextResult[m.TargetOracle.ProcessingSummary]:
         """Process SCHEMA/RECORD/STATE Singer messages."""
         processed = 0
@@ -100,40 +106,31 @@ class FlextTargetOracle:
             m.TargetOracle.ProcessingSummary(
                 messages_processed=processed,
                 streams=list(self.schemas.keys()),
-                state=self.state,
+                state=self.state_message,
             )
         )
 
     def process_singer_message(
         self,
-        message: dict[str, t.GeneralValueType],
+        message: (
+            m.TargetOracle.SingerSchemaMessage
+            | m.TargetOracle.SingerRecordMessage
+            | m.TargetOracle.SingerStateMessage
+            | m.TargetOracle.SingerActivateVersionMessage
+        ),
     ) -> FlextResult[None]:
         """Process a single Singer message."""
-        try:
-            schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(message)
-            return self._handle_schema(schema_message)
-        except ValidationError:
-            pass
-
-        try:
-            record_message = m.TargetOracle.SingerRecordMessage.model_validate(message)
-            return self._handle_record(record_message)
-        except ValidationError:
-            pass
-
-        try:
-            state_message = m.TargetOracle.SingerStateMessage.model_validate(message)
-            return self._handle_state(state_message)
-        except ValidationError:
-            pass
-
-        try:
-            activate_message = (
-                m.TargetOracle.SingerActivateVersionMessage.model_validate(message)
-            )
-            return self._handle_activate_version(activate_message)
-        except ValidationError as exc:
-            return FlextResult[None].fail(f"Unsupported Singer message: {exc}")
+        match message:
+            case m.TargetOracle.SingerSchemaMessage() as schema_message:
+                return self._handle_schema(schema_message)
+            case m.TargetOracle.SingerRecordMessage() as record_message:
+                return self._handle_record(record_message)
+            case m.TargetOracle.SingerStateMessage() as state_message:
+                return self._handle_state(state_message)
+            case m.TargetOracle.SingerActivateVersionMessage() as activate_message:
+                return self._handle_activate_version(activate_message)
+            case _:
+                return FlextResult[None].fail("Unsupported Singer message type")
 
     def finalize(self) -> FlextResult[m.TargetOracle.LoaderFinalizeResult]:
         """Flush remaining batches and return loader statistics."""
@@ -186,8 +183,7 @@ class FlextTargetOracle:
         self,
         state_message: m.TargetOracle.SingerStateMessage,
     ) -> FlextResult[None]:
-        for key, value in state_message.value.items():
-            self.state[str(key)] = value
+        self.state_message = state_message
         logger.debug("State updated for Oracle target")
         return FlextResult[None].ok(None)
 

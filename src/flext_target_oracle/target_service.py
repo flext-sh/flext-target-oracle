@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_core import FlextResult, t
+from flext_core import FlextResult
 
 from .models import m
 from .settings import FlextTargetOracleSettings
@@ -36,7 +36,12 @@ class FlextTargetOracleService:
 
     def process_singer_messages(
         self,
-        messages: list[dict[str, t.GeneralValueType]],
+        messages: list[
+            m.TargetOracle.SingerSchemaMessage
+            | m.TargetOracle.SingerRecordMessage
+            | m.TargetOracle.SingerStateMessage
+            | m.TargetOracle.SingerActivateVersionMessage
+        ],
     ) -> FlextResult[m.TargetOracle.ProcessingSummary]:
         """Delegate processing of Singer message batches."""
         return self.client.process_singer_messages(messages)
