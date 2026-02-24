@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import ClassVar
 
@@ -60,7 +61,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         self,
         message: str,
         *,
-        extra: dict[str, t.GeneralValueType] | None = None,
+        extra: Mapping[str, str] | None = None,
     ) -> None:
         """Log loader errors with optional metadata."""
         if extra is None:
@@ -170,7 +171,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def insert_records(
         self,
         stream_name: str,
-        records: list[dict[str, t.JsonValue]],
+        records: list[Mapping[str, t.JsonValue]],
     ) -> FlextResult[bool]:
         """Insert multiple records - convenience wrapper used by tests.
 
@@ -194,7 +195,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def ensure_table_exists(
         self,
         stream_name: str,
-        schema: dict[str, t.JsonValue],
+        schema: Mapping[str, t.JsonValue],
         _key_properties: list[str] | None = None,
     ) -> FlextResult[bool]:
         """Ensure table exists using flext-db-oracle API with correct table creation."""
@@ -241,14 +242,14 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def load_record(
         self,
         stream_name: str,
-        record_data: dict[str, t.JsonValue],
+        record_data: Mapping[str, t.JsonValue],
     ) -> FlextResult[bool]:
         """Load record with batching."""
         try:
             if stream_name not in self.record_buffers:
                 self.record_buffers[stream_name] = []
 
-            self.record_buffers[stream_name].append(record_data)
+            self.record_buffers[stream_name].append(dict(record_data))
             self.total_records += 1
 
             # Auto-flush if batch is full
@@ -304,7 +305,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def _build_create_table_sql(
         self,
         table_name: str,
-        _schema: dict[str, t.JsonValue],
+        _schema: Mapping[str, t.JsonValue],
     ) -> str:
         """Build CREATE TABLE SQL statement."""
         schema_name = self.target_config.default_target_schema

@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import override
 
 from flext_core import FlextConstants, FlextExceptions
@@ -41,7 +42,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             user: str | None = None,
             dsn: str | None = None,
             code: str | None = None,
-            context: dict[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataAttributeValue] | None = None,
             correlation_id: str | None = None,
             **kwargs: t.MetadataAttributeValue,
         ) -> None:
@@ -87,7 +88,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             auth_method: str | None = None,
             wallet_location: str | None = None,
             code: str | None = None,
-            context: dict[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataAttributeValue] | None = None,
             correlation_id: str | None = None,
             **kwargs: t.MetadataAttributeValue,
         ) -> None:
@@ -127,10 +128,10 @@ class FlextTargetOracleExceptions(FlextExceptions):
             *,
             stream_name: str | None = None,
             record_count: int | None = None,
-            error_records: list[dict[str, t.MetadataAttributeValue]] | None = None,
+            error_records: list[Mapping[str, t.MetadataAttributeValue]] | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: dict[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataAttributeValue] | None = None,
             correlation_id: str | None = None,
             **kwargs: t.MetadataAttributeValue,
         ) -> None:
@@ -178,7 +179,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             schema_hash: str | None = None,
             validation_errors: list[str] | None = None,
             code: str | None = None,
-            context: dict[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataAttributeValue] | None = None,
             correlation_id: str | None = None,
             **kwargs: t.MetadataAttributeValue,
         ) -> None:
@@ -223,7 +224,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             table_name: str | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: dict[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataAttributeValue] | None = None,
             correlation_id: str | None = None,
             **kwargs: t.MetadataAttributeValue,
         ) -> None:

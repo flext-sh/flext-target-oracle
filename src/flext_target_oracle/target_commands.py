@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from flext_core import FlextModels, FlextResult, h
+from flext_core import FlextModels, FlextResult, h, u
 
 from .settings import FlextTargetOracleSettings
 from .target_client import FlextTargetOracle
@@ -97,12 +97,17 @@ class OracleTargetCommandHandler(h[FlextModels.Command, str]):
 
     def handle(self, message: FlextModels.Command) -> FlextResult[str]:
         """Invoke command execute methods in a typed-safe way."""
-        if hasattr(message, "execute"):
-            execute_method = getattr(message, "execute")
-            result = execute_method()
-            if isinstance(result, FlextResult):
-                return result
-        return FlextResult[str].fail(f"Unsupported command: {type(message).__name__}")
+        execute_method = getattr(message, "execute", None)
+        if execute_method is None:
+            return FlextResult[str].fail(
+                f"Unsupported command: {type(message).__name__}"
+            )
+        result = execute_method()
+        if result.__class__ is not FlextResult:
+            return FlextResult[str].fail(
+                f"Invalid result type: {type(result).__name__}"
+            )
+        return result
 
 
 class OracleTargetCommandFactory:
@@ -156,7 +161,7 @@ def _load_settings(config_file: str | None) -> FlextResult[FlextTargetOracleSett
             f"Invalid configuration file: {exc}",
         )
 
-    if not isinstance(data, dict):
+    if not u.is_dict_like(data):
         return FlextResult[FlextTargetOracleSettings].fail(
             "Configuration must be a JSON object"
         )

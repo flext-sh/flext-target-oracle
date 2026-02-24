@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from flext_core import FlextModels, t
+from flext_core import FlextModels
 from flext_core.utilities import u
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field
