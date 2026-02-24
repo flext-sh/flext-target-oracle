@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 
 from flext_core import FlextResult, t
 
@@ -18,18 +19,20 @@ class FlextTargetOracleUtilities:
 
         @staticmethod
         def transform_record_for_oracle(
-            record: dict[str, t.GeneralValueType],
-        ) -> FlextResult[dict[str, t.GeneralValueType]]:
+            record: Mapping[str, t.GeneralValueType],
+        ) -> FlextResult[Mapping[str, t.GeneralValueType]]:
             """Normalize record values for Oracle persistence."""
             transformed: dict[str, t.GeneralValueType] = {}
             for key, value in record.items():
-                if isinstance(value, (dict, list)):
+                if u.is_dict_like(value) or u.is_list_like(value):
                     transformed[key.upper()] = json.dumps(value)
-                elif isinstance(value, bool):
-                    transformed[key.upper()] = 1 if value else 0
-                else:
-                    transformed[key.upper()] = value
-            return FlextResult[dict[str, t.GeneralValueType]].ok(transformed)
+                    continue
+                match value:
+                    case bool() as bool_value:
+                        transformed[key.upper()] = 1 if bool_value else 0
+                    case _:
+                        transformed[key.upper()] = value
+            return FlextResult[Mapping[str, t.GeneralValueType]].ok(transformed)
 
 
 u = FlextTargetOracleUtilities
