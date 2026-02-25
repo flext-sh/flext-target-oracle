@@ -203,7 +203,7 @@ class FlextTargetOracle:
                 insert_sql = self._build_insert_sql(stream_name)
                 for record in batch:
                     extracted_at = cast(
-                        str,
+                        "str",
                         record.get("_sdc_extracted_at", datetime.now(UTC).isoformat()),
                     )
                     cursor.execute(

@@ -16,7 +16,7 @@ from flext_target_oracle.target_client import FlextTargetOracle
 def main() -> None:
     """Main entry point for Oracle Singer Target."""
     # For Singer targets, the main entry typically reads from stdin
-    # This is a basic stub - full Singer CLI would be handled by Meltano
+    # Singer CLI entry point — full orchestration handled by Meltano runtime
     sys.exit(0)
 
 

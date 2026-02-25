@@ -94,7 +94,15 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             self.record_buffers = {}
             self.total_records = 0
 
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             msg = f"Failed to create Oracle API: {e}"
             raise FlextTargetOracleConnectionError(msg) from e
 
@@ -131,7 +139,15 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 self.log_info("Oracle connection established successfully")
                 return FlextResult[bool].ok(value=True)
 
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             self.log_error("Failed to connect to Oracle", extra={"error": str(e)})
             return FlextResult[bool].fail(f"Connection failed: {e}")
 
@@ -148,7 +164,15 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 )
 
             return FlextResult[bool].ok(value=True)
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             logger.exception("Failed to connect loader")
             self.log_error("Failed to connect loader", extra={"error": str(e)})
             return FlextResult[bool].fail(f"Connect failed: {e}")
@@ -163,7 +187,15 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 )
 
             return FlextResult[bool].ok(value=True)
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             logger.exception("Failed to disconnect loader")
             self.log_error("Failed to disconnect loader", extra={"error": str(e)})
             return FlextResult[bool].fail(f"Disconnect failed: {e}")
@@ -188,7 +220,15 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
 
             # Ensure remaining records are flushed
             return self._flush_batch(stream_name)
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             self.log_error("Failed to insert records", extra={"error": str(e)})
             return FlextResult[bool].fail(f"Insert records failed: {e}")
 
@@ -235,7 +275,15 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 self.log_info(f"Created table {table_name}")
                 return FlextResult[bool].ok(value=True)
 
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             self.log_error("Failed to ensure table exists", extra={"error": str(e)})
             return FlextResult[bool].fail(f"Table creation failed: {e}")
 
@@ -258,7 +306,15 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
 
             return FlextResult[bool].ok(value=True)
 
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             self.log_error("Failed to load record", extra={"error": str(e)})
             return FlextResult[bool].fail(f"Record loading failed: {e}")
 
@@ -296,7 +352,15 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 )
             )
 
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             self.log_error("Failed to finalize streams", extra={"error": str(e)})
             return FlextResult[m.TargetOracle.LoaderFinalizeResult].fail(
                 f"Finalization failed: {e}"
@@ -367,7 +431,15 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 self.log_info(f"Flushed {len(records)} records to {table_name}")
                 return FlextResult[bool].ok(value=True)
 
-        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
             self.log_error("Failed to flush batch", extra={"error": str(e)})
             return FlextResult[bool].fail(f"Batch flush failed: {e}")
 

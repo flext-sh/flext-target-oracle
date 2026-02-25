@@ -156,7 +156,15 @@ def _load_settings(config_file: str | None) -> FlextResult[FlextTargetOracleSett
     try:
         content = config_path.read_text(encoding="utf-8")
         data = json.loads(content)
-    except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as exc:
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        OSError,
+        RuntimeError,
+        ImportError,
+    ) as exc:
         return FlextResult[FlextTargetOracleSettings].fail(
             f"Invalid configuration file: {exc}",
         )

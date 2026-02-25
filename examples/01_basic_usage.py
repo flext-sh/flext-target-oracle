@@ -247,7 +247,15 @@ def demonstrate_basic_usage() -> None:
 
         logger.info("Basic usage demonstration completed successfully!")
 
-    except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        OSError,
+        RuntimeError,
+        ImportError,
+    ):
         logger.exception("Unexpected error during demonstration")
         raise
 
@@ -274,7 +282,15 @@ def demonstrate_error_handling() -> None:
         if validation_result.is_failure:
             logger.info(f"Expected validation error: {validation_result.error}")
 
-    except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        OSError,
+        RuntimeError,
+        ImportError,
+    ) as e:
         logger.info("Configuration creation failed as expected: %s", e)
 
     # Demonstrate processing invalid messages
