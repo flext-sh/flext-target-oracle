@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Literal
 
 from flext_core import FlextModels
-from flext_core.utilities import u
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field
 
@@ -15,14 +14,6 @@ class FlextTargetOracleModels(FlextModels):
 
     class Meltano(FlextMeltanoModels.Meltano):
         """Namespaced Meltano runtime model references (inherits all Singer types)."""
-
-    def __init_subclass__(cls, **kwargs: object) -> None:
-        """Warn when FlextTargetOracleModels is subclassed directly."""
-        super().__init_subclass__(**kwargs)
-        u.Deprecation.warn_once(
-            f"subclass:{cls.__name__}",
-            "Subclassing FlextTargetOracleModels is deprecated. Use FlextModels directly with composition instead.",
-        )
 
     class TargetOracle:
         """TargetOracle domain namespace."""

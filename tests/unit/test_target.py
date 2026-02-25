@@ -133,3 +133,22 @@ class TestOracleTarget:
 
         result = target.write_record(json.dumps({"id": 1}))
         assert result.is_failure
+
+    def test_write_record_inserts_oracle_record(
+        self, target: FlextTargetOracle
+    ) -> None:
+        target.loader.insert_records = lambda *_args, **_kwargs: FlextResult[bool].ok(
+            value=True,
+        )
+
+        result = target.write_record(
+            json.dumps(
+                {
+                    "type": "RECORD",
+                    "stream": "users",
+                    "record": {"id": 1},
+                },
+            ),
+        )
+
+        assert result.is_success

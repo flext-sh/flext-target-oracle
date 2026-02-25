@@ -190,7 +190,7 @@ class ProductionTargetManager:
             logger.info("Production target initialized successfully")
             return FlextResult[bool].ok(value=True)
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
             logger.exception("Failed to initialize production target")
             return FlextResult[bool].fail(f"Initialization error: {e}")
 
@@ -326,7 +326,7 @@ class ProductionTargetManager:
             )
             return FlextResult[dict[str, t.GeneralValueType]].ok(dict(stats))
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
             logger.exception("Unexpected error during stream processing")
             stats["processing_end_time"] = time.time()
             current_errors = stats.get("errors_encountered", 0)
@@ -368,7 +368,7 @@ class ProductionTargetManager:
                     checks["oracle_connectivity"] = connectivity_result
                     if not connectivity_result:
                         health_status["status"] = "degraded"
-                except Exception as e:
+                except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
                     checks["oracle_connectivity"] = False
                     checks["oracle_error"] = str(e)
                     health_status["status"] = "unhealthy"
@@ -383,7 +383,7 @@ class ProductionTargetManager:
             logger.debug("Health check completed: %s", health_status["status"])
             return FlextResult[dict[str, t.GeneralValueType]].ok(dict(health_status))
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
             logger.exception("Health check failed")
             health_status["status"] = "unhealthy"
             health_status["error"] = str(e)
@@ -413,7 +413,7 @@ class ProductionTargetManager:
             logger.info("Graceful shutdown completed")
             return FlextResult[bool].ok(value=True)
 
-        except Exception as e:
+        except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
             logger.exception("Error during shutdown")
             return FlextResult[bool].fail(f"Shutdown error: {e}")
 
@@ -498,7 +498,7 @@ def demonstrate_production_setup() -> None:
         else:
             logger.error("Shutdown issues: %s", shutdown_result.error)
 
-    except Exception:
+    except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
         logger.exception("Production demonstration failed")
         raise
 
@@ -621,7 +621,7 @@ def main() -> None:
 
     except KeyboardInterrupt:
         logger.info("Example interrupted by user")
-    except Exception:
+    except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError):
         logger.exception("Production setup example failed")
         sys.exit(1)
 

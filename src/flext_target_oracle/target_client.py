@@ -2,7 +2,13 @@
 
 from __future__ import annotations
 
+import json
+import re
+from datetime import UTC, datetime
+from typing import cast
+
 from flext_core import FlextLogger, FlextResult
+from pydantic import ValidationError
 
 from .models import m
 from .settings import FlextTargetOracleSettings
@@ -22,6 +28,7 @@ class FlextTargetOracle:
         self.state_message: m.TargetOracle.SingerStateMessage = (
             m.TargetOracle.SingerStateMessage()
         )
+        self._record_batches: dict[str, list[dict[str, object]]] = {}
 
     def execute(
         self, payload: str | None = None
@@ -96,6 +103,13 @@ class FlextTargetOracle:
                 )
             processed += 1
 
+        for stream_name in list(self._record_batches):
+            flush_result = self._flush_record_batch(stream_name)
+            if flush_result.is_failure:
+                return FlextResult[m.TargetOracle.ProcessingSummary].fail(
+                    flush_result.error or "Failed to flush Oracle records",
+                )
+
         finalize_result = self.loader.finalize_all_streams()
         if finalize_result.is_failure:
             return FlextResult[m.TargetOracle.ProcessingSummary].fail(
@@ -134,6 +148,12 @@ class FlextTargetOracle:
 
     def finalize(self) -> FlextResult[m.TargetOracle.LoaderFinalizeResult]:
         """Flush remaining batches and return loader statistics."""
+        for stream_name in list(self._record_batches):
+            flush_result = self._flush_record_batch(stream_name)
+            if flush_result.is_failure:
+                return FlextResult[m.TargetOracle.LoaderFinalizeResult].fail(
+                    flush_result.error or "Failed to flush Oracle records",
+                )
         return self.loader.finalize_all_streams()
 
     def get_implementation_metrics(self) -> m.TargetOracle.ImplementationMetrics:
@@ -144,9 +164,92 @@ class FlextTargetOracle:
             use_bulk_operations=self.config.use_bulk_operations,
         )
 
-    def write_record(self, _record_data: str) -> FlextResult[None]:
-        """Backwards-compatibility write_record stub."""
-        return FlextResult[None].fail("write_record is not implemented")
+    def write_record(self, record_data: str) -> FlextResult[None]:
+        """Write one Singer record payload to Oracle."""
+        try:
+            try:
+                payload = m.TargetOracle.SingerRecordMessage.model_validate_json(
+                    record_data
+                )
+            except ValidationError:
+                raw_payload = json.loads(record_data)
+                payload = m.TargetOracle.SingerRecordMessage.model_validate(raw_payload)
+
+            stream_batch = self._record_batches.setdefault(payload.stream, [])
+            stream_batch.append(dict(payload.record))
+
+            should_flush = (
+                not self.config.use_bulk_operations
+                or len(stream_batch) >= self.config.batch_size
+            )
+            if should_flush:
+                flush_result = self._flush_record_batch(payload.stream)
+                if flush_result.is_failure:
+                    return flush_result
+
+            return FlextResult[None].ok(None)
+        except (ValueError, TypeError, ValidationError, json.JSONDecodeError) as exc:
+            return FlextResult[None].fail(f"Invalid record payload: {exc}")
+
+    def _flush_record_batch(self, stream_name: str) -> FlextResult[None]:
+        batch = self._record_batches.get(stream_name, [])
+        if not batch:
+            return FlextResult[None].ok(None)
+
+        connection = None
+        try:
+            connection = self._connect_oracle()
+            with connection.cursor() as cursor:
+                insert_sql = self._build_insert_sql(stream_name)
+                for record in batch:
+                    extracted_at = cast(
+                        str,
+                        record.get("_sdc_extracted_at", datetime.now(UTC).isoformat()),
+                    )
+                    cursor.execute(
+                        insert_sql,
+                        {
+                            "data": json.dumps(record),
+                            "extracted_at": extracted_at,
+                            "loaded_at": datetime.now(UTC).isoformat(),
+                        },
+                    )
+
+            if not self.config.autocommit:
+                connection.commit()
+            self._record_batches[stream_name] = []
+            return FlextResult[None].ok(None)
+        except (ValueError, TypeError, RuntimeError, AttributeError, OSError) as exc:
+            return FlextResult[None].fail(f"Failed to insert Oracle records: {exc}")
+        finally:
+            if connection is not None:
+                connection.close()
+
+    def _build_insert_sql(self, stream_name: str) -> str:
+        table_name = self.config.get_table_name(stream_name)
+        full_table_name = f"{self.config.default_target_schema}.{table_name}"
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_$.]*", full_table_name):
+            msg = "Invalid Oracle table identifier"
+            raise ValueError(msg)
+        return (
+            f"INSERT INTO {full_table_name} "
+            "(DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) "
+            "VALUES (:data, :extracted_at, :loaded_at)"
+        )
+
+    def _connect_oracle(self):
+        import oracledb
+
+        dsn = oracledb.makedsn(
+            self.config.oracle_host,
+            self.config.oracle_port,
+            service_name=self.config.oracle_service_name,
+        )
+        return oracledb.connect(
+            user=self.config.oracle_user,
+            password=self.config.oracle_password.get_secret_value(),
+            dsn=dsn,
+        )
 
     def _handle_schema(
         self,

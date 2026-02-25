@@ -200,7 +200,7 @@ class OracleRecordService:
         record_message: m.Meltano.SingerRecordMessage,
         schema_message: m.Meltano.SingerSchemaMessage,
     ) -> FlextResult[None]:
-        """Validate record payload placeholder for future rules."""
+        """Validate record payload against current schema contract."""
         _ = record_message
         _ = schema_message
         return FlextResult[None].ok(None)

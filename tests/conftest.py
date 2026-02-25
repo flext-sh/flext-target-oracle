@@ -110,7 +110,7 @@ def oracle_engine() -> Engine:
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1 FROM DUAL"))
-    except Exception as e:
+    except (ValueError, TypeError, KeyError, AttributeError, OSError, RuntimeError, ImportError) as e:
         pytest.skip(f"Oracle not available: {e}")
     return engine
 
