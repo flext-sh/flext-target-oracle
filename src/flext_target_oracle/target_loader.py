@@ -158,9 +158,9 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         """
         try:
             result = self.oracle_api.connect()
-            if bool(getattr(result, "is_failure", False)):
+            if bool(result.is_failure if hasattr(result, "is_failure") else False):
                 return FlextResult[bool].fail(
-                    f"Connect failed: {getattr(result, 'error', None)}",
+                    f"Connect failed: {result.error if hasattr(result, 'error') else None}",
                 )
 
             return FlextResult[bool].ok(value=True)
@@ -181,9 +181,9 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         """Disconnect underlying FlextDbOracleApi (exposed for tests)."""
         try:
             result = self.oracle_api.disconnect()
-            if bool(getattr(result, "is_failure", False)):
+            if bool(result.is_failure if hasattr(result, "is_failure") else False):
                 return FlextResult[bool].fail(
-                    f"Disconnect failed: {getattr(result, 'error', None)}",
+                    f"Disconnect failed: {result.error if hasattr(result, 'error') else None}",
                 )
 
             return FlextResult[bool].ok(value=True)

@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import re
 from datetime import UTC, datetime
-from typing import cast
+
 
 from flext_core import FlextLogger, FlextResult
 from pydantic import ValidationError
@@ -202,9 +202,8 @@ class FlextTargetOracle:
             with connection.cursor() as cursor:
                 insert_sql = self._build_insert_sql(stream_name)
                 for record in batch:
-                    extracted_at = cast(
-                        "str",
-                        record.get("_sdc_extracted_at", datetime.now(UTC).isoformat()),
+                    extracted_at = record.get(
+                        "_sdc_extracted_at", datetime.now(UTC).isoformat()
                     )
                     cursor.execute(
                         insert_sql,

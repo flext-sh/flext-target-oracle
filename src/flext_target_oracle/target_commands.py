@@ -103,7 +103,7 @@ class OracleTargetCommandHandler(h[FlextModels.Command, str]):
                 f"Unsupported command: {type(message).__name__}"
             )
         result = execute_method()
-        if result.__class__ is not FlextResult:
+        if not isinstance(result, FlextResult):
             return FlextResult[str].fail(
                 f"Invalid result type: {type(result).__name__}"
             )
