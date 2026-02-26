@@ -7,10 +7,9 @@ import time
 from collections.abc import Mapping
 
 import pytest
-from pydantic import SecretStr
-
 from flext_core import FlextResult
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
+from pydantic import SecretStr
 
 
 @pytest.mark.performance

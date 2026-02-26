@@ -5,10 +5,9 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 import pytest
-from pydantic import SecretStr
-
 from flext_core.typings import t
 from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings
+from pydantic import SecretStr
 
 
 @pytest.fixture

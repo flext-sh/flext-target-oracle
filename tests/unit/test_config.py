@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from pydantic import SecretStr
-
 from flext_target_oracle import FlextTargetOracleSettings, LoadMethod
+from pydantic import SecretStr
 
 
 class TestOracleSettings:

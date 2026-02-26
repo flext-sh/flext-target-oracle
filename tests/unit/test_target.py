@@ -6,8 +6,6 @@ import json
 from collections.abc import Mapping
 
 import pytest
-from pydantic import SecretStr
-
 from flext_core import FlextResult
 from flext_target_oracle import (
     FlextTargetOracle,
@@ -16,6 +14,7 @@ from flext_target_oracle import (
     FlextTargetOracleSettings,
     m,
 )
+from pydantic import SecretStr
 
 
 @pytest.fixture

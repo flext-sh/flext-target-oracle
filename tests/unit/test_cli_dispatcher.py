@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
 from collections.abc import Generator
+from contextlib import contextmanager
 from unittest.mock import patch
 
 import pytest
@@ -12,12 +12,12 @@ pytest.importorskip(
     "flext_meltano",
     reason="Dispatcher pilot test requires flext-meltano optional dependency",
 )
-from flext_target_oracle import FlextTargetOracleCliService, OracleTargetCommandFactory
+from flext_target_oracle import FlextTargetOracleCliService
 from flext_target_oracle.constants import FlextTargetOracleConstants
 
 
 @contextmanager
-def _enable_dispatcher(enabled: bool) -> Generator[None, None, None]:
+def _enable_dispatcher(enabled: bool) -> Generator[None]:
     """Patch the ENABLE_DISPATCHER flag at runtime."""
     with patch.object(
         FlextTargetOracleConstants.FeatureFlags,

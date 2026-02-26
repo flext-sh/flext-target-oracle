@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 import json
-
-import pytest
-from pydantic import SecretStr
-
 from collections.abc import Mapping
 
+import pytest
 from flext_core import FlextResult
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
+from pydantic import SecretStr
 
 
 @pytest.mark.e2e
