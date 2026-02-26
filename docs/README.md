@@ -207,7 +207,7 @@ graph TB
 - **Security Issues**: Private report to <security@flext.sh>
 - **General Questions**: GitHub Discussions in `general` category
 
----
+______________________________________________________________________
 
 **Documentation Version**: 1.0\
 **Last Updated**: 2025-08-04\

@@ -188,6 +188,6 @@ pytest examples/tests/ -m integration
 - Review security considerations in each example
 - Follow FLEXT security best practices
 
----
+______________________________________________________________________
 
 **Next Steps**: Start with [Basic Usage](basic_usage.py) for a simple introduction to FLEXT Target Oracle.

@@ -43,7 +43,7 @@
 
 **FLEXT Target Oracle - Module Architecture Following FLEXT Ecosystem Standards**
 
----
+______________________________________________________________________
 
 ## 🏗️ **Module Architecture Overview**
 
@@ -58,7 +58,7 @@ FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for
 1. **Railway-Oriented Programming**: FlextResult[T] threading through all operations
 1. **Ecosystem Consistency**: Patterns align with broader FLEXT ecosystem
 
----
+______________________________________________________________________
 
 ## 📁 **Current Module Structure & Analysis**
 
@@ -406,7 +406,7 @@ class FlextOracleTargetProcessingError(FlextOracleTargetError): ...
 
 - ❌ **Duplication**: Same exceptions defined in `__init__.py`
 
----
+______________________________________________________________________
 
 ## 🎯 **Recommended Module Architecture**
 
@@ -450,7 +450,7 @@ src/flext_target_oracle/
 └── exceptions.py            # 🚨 Single source of exceptions (fixed)
 ```
 
----
+______________________________________________________________________
 
 ## 📋 **FLEXT Pattern Implementation Standards**
 
@@ -600,7 +600,7 @@ def process_batch_bad(self, stream_name: str, records: list):
         print(f"Error: {e}")  # No context
 ```
 
----
+______________________________________________________________________
 
 ## 🔧 **Module Dependency Patterns**
 
@@ -714,7 +714,7 @@ from singer_sdk import Target  # Should use flext-meltano instead
 import cx_Oracle  # Should use flext-db-oracle abstraction
 ```
 
----
+______________________________________________________________________
 
 ## 🧪 **Testing Module Organization**
 
@@ -858,7 +858,7 @@ class TestSingerCompliance:
         assert stats_result.data["total_records"] == 5
 ```
 
----
+______________________________________________________________________
 
 ## 📏 **Code Quality Standards**
 
@@ -970,7 +970,7 @@ def ensure_table_exists(
     # Implementation details...
 ```
 
----
+______________________________________________________________________
 
 ## 🌐 **FLEXT Ecosystem Integration Patterns**
 
@@ -1078,7 +1078,7 @@ class FlextOracleTargetSettings(FlextSettings):
         env_nested_delimiter = "__"  # ORACLE__HOST, OBSERVABILITY__ENABLE_METRICS
 ```
 
----
+______________________________________________________________________
 
 ## 🔄 **Migration & Evolution Patterns**
 
@@ -1150,7 +1150,7 @@ def _write_record(self, record: Record) -> None:
         raise RuntimeError(result.error)  # Singer SDK expects exceptions
 ```
 
----
+______________________________________________________________________
 
 ## 📋 **Module Development Checklist**
 
@@ -1187,7 +1187,7 @@ def _write_record(self, record: Record) -> None:
 - [ ] **Error Handling**: Consistent error patterns across ecosystem
 - [ ] **Documentation**: Follows ecosystem documentation standards
 
----
+______________________________________________________________________
 
 ## 🚀 **Future Evolution Roadmap**
 
@@ -1243,7 +1243,7 @@ src/flext_target_oracle/
 - 🔮 **Stream Processing**: Real-time data processing capabilities
 - 🔮 **Cloud-Native**: Kubernetes-native deployment patterns
 
----
+______________________________________________________________________
 
 **Document Version**: 1.0
 **Last Updated**: 2025-08-04
