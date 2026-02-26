@@ -18,8 +18,8 @@ from flext_tests import FlextTestsProtocols
 class TestsFlextTargetOracleProtocols(FlextTestsProtocols, p):
     """Test protocols combining FlextTestsProtocols and project-specific protocols."""
 
-    class Oracle(p.Oracle):
-        """Oracle domain protocols extending project protocols."""
+    class TargetOracle(p.TargetOracle):
+        """TargetOracle domain protocols extending project protocols."""
 
         class Tests:
             """Internal tests declarations for test-only objects."""

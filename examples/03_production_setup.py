@@ -19,7 +19,8 @@ from datetime import UTC
 
 from flext_core import FlextLogger, FlextResult, t
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
-from pydantic import SecretStr
+from flext_target_oracle.models import m
+from pydantic import BaseModel, Field, SecretStr
 
 # Configure production-grade logging
 logging.basicConfig(
@@ -29,6 +30,37 @@ logging.basicConfig(
 )
 
 logger = FlextLogger(__name__)
+
+
+type SingerMessage = (
+    m.TargetOracle.SingerSchemaMessage
+    | m.TargetOracle.SingerRecordMessage
+    | m.TargetOracle.SingerStateMessage
+    | m.TargetOracle.SingerActivateVersionMessage
+)
+
+
+class ProcessingStats(BaseModel):
+    """Typed processing statistics for stream execution."""
+
+    messages_processed: int = Field(default=0, ge=0)
+    schemas_processed: int = Field(default=0, ge=0)
+    records_processed: int = Field(default=0, ge=0)
+    states_processed: int = Field(default=0, ge=0)
+    errors_encountered: int = Field(default=0, ge=0)
+    processing_start_time: float = Field(default=0.0)
+    processing_end_time: float = Field(default=0.0)
+    processing_duration_seconds: float = Field(default=0.0)
+
+
+class HealthStatus(BaseModel):
+    """Typed health-check payload."""
+
+    status: str = Field(default="healthy")
+    timestamp: float = Field(default=0.0)
+    checks: dict[str, bool | str] = Field(default_factory=dict)
+    metrics: dict[str, t.GeneralValueType] = Field(default_factory=dict)
+    error: str = Field(default="")
 
 
 class ProductionConfig:
@@ -204,7 +236,7 @@ class ProductionTargetManager:
 
     def process_singer_stream(
         self,
-        messages: list[t.GeneralValueType],
+        messages: list[SingerMessage],
     ) -> FlextResult[dict[str, t.GeneralValueType]]:
         """Process complete Singer message stream with comprehensive error handling.
 
@@ -222,17 +254,7 @@ class ProductionTargetManager:
 
         logger.info("Processing Singer stream with %d messages", len(messages))
 
-        stats: dict[str, t.GeneralValueType] = {
-            "messages_processed": 0,
-            "schemas_processed": 0,
-            "records_processed": 0,
-            "states_processed": 0,
-            "errors_encountered": 0,
-            "processing_start_time": 0.0,
-            "processing_end_time": 0.0,
-        }
-
-        stats["processing_start_time"] = time.time()
+        stats = ProcessingStats(processing_start_time=time.time())
 
         try:
             for i, message in enumerate(messages):
@@ -241,11 +263,13 @@ class ProductionTargetManager:
                     logger.info("Shutdown requested, stopping message processing")
                     break
 
-                message_type = (
-                    message.get("type", "UNKNOWN")
-                    if isinstance(message, dict)
-                    else "UNKNOWN"
-                )
+                message_type = "UNKNOWN"
+                if isinstance(message, m.TargetOracle.SingerSchemaMessage):
+                    message_type = "SCHEMA"
+                elif isinstance(message, m.TargetOracle.SingerRecordMessage):
+                    message_type = "RECORD"
+                elif isinstance(message, m.TargetOracle.SingerStateMessage):
+                    message_type = "STATE"
                 logger.debug(
                     "Processing message %d/%d: %s",
                     i + 1,
@@ -259,34 +283,22 @@ class ProductionTargetManager:
                         "Target not initialized"
                     )
                 # Target is guaranteed to be not None at this point due to check above
-                result = self.target.process_singer_message(
-                    message if isinstance(message, dict) else {},
-                )
+                result = self.target.process_singer_message(message)
 
                 if result.is_success:
                     # Update counters (values are already int, just increment)
-                    messages_processed = stats["messages_processed"]
-                    if isinstance(messages_processed, int):
-                        stats["messages_processed"] = messages_processed + 1
+                    stats.messages_processed += 1
 
                     # Update type-specific counters
                     if message_type == "SCHEMA":
-                        schemas_processed = stats["schemas_processed"]
-                        if isinstance(schemas_processed, int):
-                            stats["schemas_processed"] = schemas_processed + 1
+                        stats.schemas_processed += 1
                     elif message_type == "RECORD":
-                        records_processed = stats["records_processed"]
-                        if isinstance(records_processed, int):
-                            stats["records_processed"] = records_processed + 1
+                        stats.records_processed += 1
                     elif message_type == "STATE":
-                        states_processed = stats["states_processed"]
-                        if isinstance(states_processed, int):
-                            stats["states_processed"] = states_processed + 1
+                        stats.states_processed += 1
 
                 else:
-                    errors_encountered = stats["errors_encountered"]
-                    if isinstance(errors_encountered, int):
-                        stats["errors_encountered"] = errors_encountered + 1
+                    stats.errors_encountered += 1
                     logger.error(
                         "Message %d processing failed: %s",
                         i + 1,
@@ -306,33 +318,25 @@ class ProductionTargetManager:
 
             if finalize_result.is_success:
                 # Merge finalization stats
-                final_stats = finalize_result.data
-                if isinstance(final_stats, dict):
-                    # Type narrowing - final_stats is already dict[str, t.GeneralValueType]
-                    final_stats_typed: dict[str, t.GeneralValueType] = final_stats
-                    stats.update(final_stats_typed)
+                final_stats = finalize_result.value
+                if final_stats is not None:
+                    stats.messages_processed += final_stats.total_records
                 logger.info("Target finalization completed successfully")
             else:
                 logger.error("Target finalization failed: %s", finalize_result.error)
-                current_errors = stats.get("errors_encountered", 0)
-                if isinstance(current_errors, int):
-                    stats["errors_encountered"] = current_errors + 1
+                stats.errors_encountered += 1
 
-            stats["processing_end_time"] = time.time()
-            end_time = stats.get("processing_end_time", 0.0)
-            start_time = stats.get("processing_start_time", 0.0)
-            if isinstance(end_time, (int, float)) and isinstance(
-                start_time,
-                (int, float),
-            ):
-                processing_duration = end_time - start_time
-                stats["processing_duration_seconds"] = processing_duration
+            stats.processing_end_time = time.time()
+            processing_duration = (
+                stats.processing_end_time - stats.processing_start_time
+            )
+            stats.processing_duration_seconds = processing_duration
 
             logger.info(
                 "Stream processing completed in %.2f seconds",
                 processing_duration,
             )
-            return FlextResult[dict[str, t.GeneralValueType]].ok(dict(stats))
+            return FlextResult[dict[str, t.GeneralValueType]].ok(stats.model_dump())
 
         except (
             ValueError,
@@ -344,10 +348,8 @@ class ProductionTargetManager:
             ImportError,
         ) as e:
             logger.exception("Unexpected error during stream processing")
-            stats["processing_end_time"] = time.time()
-            current_errors = stats.get("errors_encountered", 0)
-            if isinstance(current_errors, int):
-                stats["errors_encountered"] = current_errors + 1
+            stats.processing_end_time = time.time()
+            stats.errors_encountered += 1
             return FlextResult[dict[str, t.GeneralValueType]].fail(
                 f"Stream processing error: {e}"
             )
@@ -361,18 +363,13 @@ class ProductionTargetManager:
         """
         logger.debug("Performing health check")
 
-        health_status: dict[str, t.GeneralValueType] = {
-            "status": "healthy",
-            "timestamp": time.time(),
-            "checks": {},  # Will be populated with check results
-            "metrics": {},  # Will be populated with metrics
-        }
+        health_status = HealthStatus(timestamp=time.time())
 
         try:
             # Check 1: Target initialization
-            checks = health_status["checks"]
+            checks = health_status.checks
             if not self.target:
-                health_status["status"] = "unhealthy"
+                health_status.status = "unhealthy"
                 checks["target_initialized"] = False
             else:
                 checks["target_initialized"] = True
@@ -381,9 +378,9 @@ class ProductionTargetManager:
             if self.target:
                 try:
                     connectivity_result = self.target.test_connection()
-                    checks["oracle_connectivity"] = connectivity_result
-                    if not connectivity_result:
-                        health_status["status"] = "degraded"
+                    checks["oracle_connectivity"] = connectivity_result.is_success
+                    if not connectivity_result.is_success:
+                        health_status.status = "degraded"
                 except (
                     ValueError,
                     TypeError,
@@ -395,17 +392,18 @@ class ProductionTargetManager:
                 ) as e:
                     checks["oracle_connectivity"] = False
                     checks["oracle_error"] = str(e)
-                    health_status["status"] = "unhealthy"
+                    health_status.status = "unhealthy"
 
             # Add configuration metrics
-            metrics = health_status["metrics"]
+            metrics = health_status.metrics
             if self.target:
                 target_metrics = self.target.get_implementation_metrics()
-                if isinstance(target_metrics, dict):
-                    metrics.update(target_metrics)
+                metrics.update(target_metrics.model_dump())
 
-            logger.debug("Health check completed: %s", health_status["status"])
-            return FlextResult[dict[str, t.GeneralValueType]].ok(dict(health_status))
+            logger.debug("Health check completed: %s", health_status.status)
+            return FlextResult[dict[str, t.GeneralValueType]].ok(
+                health_status.model_dump(),
+            )
 
         except (
             ValueError,
@@ -417,8 +415,8 @@ class ProductionTargetManager:
             ImportError,
         ) as e:
             logger.exception("Health check failed")
-            health_status["status"] = "unhealthy"
-            health_status["error"] = str(e)
+            health_status.status = "unhealthy"
+            health_status.error = str(e)
             return FlextResult[dict[str, t.GeneralValueType]].fail(
                 f"Health check error: {e}"
             )
@@ -480,7 +478,7 @@ def demonstrate_production_setup() -> None:
         logger.info("Step 3: Performing initial health check")
         health_result = manager.health_check()
         if health_result.is_success:
-            health_data = health_result.data
+            health_data = health_result.value
             if isinstance(health_data, dict):
                 logger.info(
                     "Health check status: %s",
@@ -504,7 +502,10 @@ def demonstrate_production_setup() -> None:
         processing_result = manager.process_singer_stream(messages)
 
         if processing_result.is_success:
-            stats = processing_result.data
+            stats = processing_result.value
+            if stats is None:
+                logger.error("Processing returned no stats")
+                return
             logger.info("=== Production Processing Statistics ===")
             logger.info("Messages processed: %d", stats.get("messages_processed", 0))
             logger.info("Records processed: %d", stats.get("records_processed", 0))
@@ -551,17 +552,17 @@ def demonstrate_production_setup() -> None:
         raise
 
 
-def create_production_sample_stream() -> list[t.GeneralValueType]:
+def create_production_sample_stream() -> list[SingerMessage]:
     """Create a realistic production data stream for demonstration.
 
     Returns:
       List of Singer messages representing a production workload
 
     """
-    messages: list[t.GeneralValueType] = []  # Flexible list for various message types
+    messages: list[SingerMessage] = []
 
     # Schema message for customer orders
-    schema_message: dict[str, t.GeneralValueType] = {
+    schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
         "type": "SCHEMA",
         "stream": "customer_orders",
         "schema": {
@@ -582,14 +583,14 @@ def create_production_sample_stream() -> list[t.GeneralValueType]:
             "required": ["order_id", "customer_id", "order_date"],
         },
         "key_properties": ["order_id"],
-    }
+    })
     messages.append(schema_message)
 
     # Generate sample records (simulate production volume)
     base_date = datetime.datetime(2025, 1, 1, tzinfo=UTC)
 
     for i in range(1, 101):  # 100 sample orders
-        record_message: dict[str, t.GeneralValueType] = {
+        record_message = m.TargetOracle.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "customer_orders",
             "record": {
@@ -612,11 +613,11 @@ def create_production_sample_stream() -> list[t.GeneralValueType]:
                 ).isoformat()
                 + "Z",
             },
-        }
+        })
         messages.append(record_message)
 
     # State message
-    state_message = {
+    state_message = m.TargetOracle.SingerStateMessage.model_validate({
         "type": "STATE",
         "value": {
             "bookmarks": {
@@ -629,7 +630,7 @@ def create_production_sample_stream() -> list[t.GeneralValueType]:
                 },
             },
         },
-    }
+    })
     messages.append(state_message)
 
     return messages

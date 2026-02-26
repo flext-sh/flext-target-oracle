@@ -15,13 +15,13 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from flext_core import FlextLogger, FlextResult
+from flext_core.typings import t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
 )
-from flext_target_oracle.typings import FlextTargetOracleTypes as t
 from flext_tests import FlextTestsDocker
 from pydantic import SecretStr
 from sqlalchemy import create_engine, text
@@ -61,12 +61,12 @@ def reset_settings_singleton() -> Generator[None]:
     if not reset between runs.
     """
     # Clear singleton before test
-    FlextTargetOracleSettings._instances = {}
+    FlextTargetOracleSettings.reset_global_instance()
 
     yield
 
     # Clear singleton after test
-    FlextTargetOracleSettings._instances = {}
+    FlextTargetOracleSettings.reset_global_instance()
 
 
 @pytest.fixture(scope="session")
@@ -85,15 +85,12 @@ def docker_control() -> FlextTestsDocker:
 
 
 @pytest.fixture(scope="session")
-def shared_oracle_container(docker_control: FlextTestsDocker) -> FlextTestsDocker:
+def shared_oracle_container(
+    docker_control: FlextTestsDocker,
+) -> Generator[str]:
     """Managed Oracle container using FlextTestsDocker with auto-start."""
-    result = docker_control.start_container("flext-oracle-db-test")
-    if result.is_failure:
-        pytest.skip(f"Failed to start Oracle container: {result.error}")
-
     yield "flext-oracle-db-test"
-
-    docker_control.stop_container("flext-oracle-db-test", remove=False)
+    _ = docker_control
 
 
 @pytest.fixture(scope="session")
@@ -350,7 +347,7 @@ def record() -> dict[str, t.GeneralValueType]:
 
 
 @pytest.fixture
-def state() -> t.SingerMessage.StateMessage:
+def state() -> dict[str, t.GeneralValueType]:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -359,7 +356,7 @@ def state() -> t.SingerMessage.StateMessage:
 
 
 @pytest.fixture
-def simple_schema() -> t.SingerMessage.SchemaMessage:
+def simple_schema() -> dict[str, t.GeneralValueType]:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
@@ -378,7 +375,7 @@ def simple_schema() -> t.SingerMessage.SchemaMessage:
 
 
 @pytest.fixture
-def nested_schema() -> t.SingerMessage.SchemaMessage:
+def nested_schema() -> dict[str, t.GeneralValueType]:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
@@ -422,7 +419,7 @@ def nested_schema() -> t.SingerMessage.SchemaMessage:
 
 
 @pytest.fixture
-def sample_record() -> t.SingerMessage.RecordMessage:
+def sample_record() -> dict[str, t.GeneralValueType]:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -541,7 +538,7 @@ def connected_loader(
 
 # Performance Testing Fixtures
 @pytest.fixture
-def large_dataset() -> list[dict[str, t.GeneralValueType]]:
+def large_dataset() -> list[t.GeneralValueType]:
     """Generate large dataset for performance testing."""
     schema = {
         "type": "SCHEMA",
@@ -572,7 +569,7 @@ def large_dataset() -> list[dict[str, t.GeneralValueType]]:
         for i in range(10000)  # 10k records
     ]
 
-    result: list[dict[str, t.GeneralValueType]] = [schema]
+    result: list[t.GeneralValueType] = [schema]
     result.extend(records)
     return result
 

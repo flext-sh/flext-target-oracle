@@ -7,8 +7,10 @@ import json
 import pytest
 from pydantic import SecretStr
 
+from collections.abc import Mapping
+
 from flext_core import FlextResult
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
 
 
 @pytest.mark.e2e
@@ -30,9 +32,21 @@ class TestSingerWorkflowE2E:
         target.loader.load_record = lambda *_args, **_kwargs: FlextResult[bool].ok(
             value=True
         )
-        target.loader.finalize_all_streams = lambda: FlextResult[dict[str, object]].ok({
-            "status": "completed"
-        })
+        target.loader.finalize_all_streams = lambda: FlextResult[
+            m.TargetOracle.LoaderFinalizeResult
+        ].ok(
+            m.TargetOracle.LoaderFinalizeResult(
+                total_records=0,
+                streams_processed=0,
+                loading_operation=m.TargetOracle.LoaderOperation(
+                    stream_name="orders",
+                    started_at="",
+                    completed_at="",
+                    records_loaded=0,
+                    records_failed=0,
+                ),
+            )
+        )
         return target
 
     def test_complete_singer_flow(self) -> None:
@@ -58,11 +72,29 @@ class TestSingerWorkflowE2E:
         state = {"type": "STATE", "value": {"bookmarks": {"orders": {"version": 1}}}}
 
         assert target.execute().is_success
-        assert target.process_singer_message(json.loads(json.dumps(schema))).is_success
-        assert target.process_singer_message(json.loads(json.dumps(record))).is_success
-        assert target.process_singer_message(json.loads(json.dumps(state))).is_success
+        assert target.process_singer_message(
+            m.TargetOracle.SingerSchemaMessage.model_validate(
+                json.loads(json.dumps(schema))
+            ),
+        ).is_success
+        assert target.process_singer_message(
+            m.TargetOracle.SingerRecordMessage.model_validate(
+                json.loads(json.dumps(record))
+            ),
+        ).is_success
+        assert target.process_singer_message(
+            m.TargetOracle.SingerStateMessage.model_validate(
+                json.loads(json.dumps(state))
+            ),
+        ).is_success
 
         finalize_result = target.finalize()
         assert finalize_result.is_success
         assert "orders" in target.schemas
-        assert target.state["bookmarks"]["orders"]["version"] == 1
+        state_value = target.state_message.value
+        assert isinstance(state_value, Mapping)
+        bookmarks_value = state_value.get("bookmarks")
+        assert isinstance(bookmarks_value, Mapping)
+        orders_value = bookmarks_value.get("orders")
+        assert isinstance(orders_value, Mapping)
+        assert orders_value.get("version") == 1

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Mapping
 
 import pytest
 from flext_target_oracle import t
@@ -24,7 +25,15 @@ from flext_target_oracle import (
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
     LoadMethod,
+    m,
 )
+
+
+def _schema_parts(
+    message: Mapping[str, t.GeneralValueType],
+) -> tuple[Mapping[str, t.JsonValue], list[str] | None]:
+    schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(message)
+    return schema_message.schema_definition, schema_message.key_properties
 
 
 @pytest.mark.integration
@@ -41,16 +50,7 @@ class TestOracleIntegration:
     ) -> None:
         """Test creating a simple table with basic data types."""
         stream_name = "test_users"
-        schema_value = simple_schema["schema"]
-        key_properties_value = simple_schema["key_properties"]
-
-        # Ensure table is created (synchronous API returning FlextResult)
-        # Type narrowing: schema is always dict, key_properties is list or None
-        assert isinstance(schema_value, dict)
-        schema_dict: dict[str, t.GeneralValueType] = schema_value
-        key_props: list[str] | None = (
-            list(key_properties_value) if isinstance(key_properties_value, list) else None
-        )
+        schema_dict, key_props = _schema_parts(simple_schema)
 
         table_res = connected_loader.ensure_table_exists(
             stream_name,
@@ -103,15 +103,7 @@ class TestOracleIntegration:
     ) -> None:
         """Test inserting data and retrieving it."""
         stream_name = "test_insert"
-        schema_value = simple_schema["schema"]
-        key_properties_value = simple_schema["key_properties"]
-
-        # Type narrowing
-        assert isinstance(schema_value, dict)
-        schema_dict: dict[str, t.GeneralValueType] = schema_value
-        key_props: list[str] | None = (
-            list(key_properties_value) if isinstance(key_properties_value, list) else None
-        )
+        schema_dict, key_props = _schema_parts(simple_schema)
 
         # Create table
         create_res = connected_loader.ensure_table_exists(
@@ -122,7 +114,7 @@ class TestOracleIntegration:
         assert create_res.is_success
 
         # Insert records
-        records = [
+        records: list[Mapping[str, t.JsonValue]] = [
             {"id": 1, "name": "John Doe", "email": "john@example.com"},
             {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
         ]
@@ -158,28 +150,20 @@ class TestOracleIntegration:
         assert connect_result.is_success
 
         stream_name = "test_merge"
-        schema_value = simple_schema["schema"]
-        key_properties_value = simple_schema["key_properties"]
-
-        # Type narrowing
-        assert isinstance(schema_value, dict)
-        schema_dict: dict[str, t.GeneralValueType] = schema_value
-        key_props: list[str] | None = (
-            list(key_properties_value) if isinstance(key_properties_value, list) else None
-        )
+        schema_dict, key_props = _schema_parts(simple_schema)
 
         # Create table and insert initial data
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.is_success
 
-        initial_records = [
+        initial_records: list[Mapping[str, t.JsonValue]] = [
             {"id": 1, "name": "Original Name", "email": "original@example.com"},
         ]
         insert_result = loader.insert_records(stream_name, initial_records)
         assert insert_result.is_success
 
         # Update the record
-        updated_records = [
+        updated_records: list[Mapping[str, t.JsonValue]] = [
             {"id": 1, "name": "Updated Name", "email": "updated@example.com"},
         ]
         result = loader.insert_records(stream_name, updated_records)
@@ -213,7 +197,7 @@ class TestOracleIntegration:
         assert loader.connect().is_success
 
         stream_name = "test_bulk"
-        schema = {
+        schema: dict[str, t.JsonValue] = {
             "type": "object",
             "properties": {
                 "id": {"type": "integer"},
@@ -224,13 +208,13 @@ class TestOracleIntegration:
         key_properties_list = ["id"]
 
         # Create table - schema is already dict type
-        schema_dict: dict[str, t.GeneralValueType] = schema
+        schema_dict: Mapping[str, t.JsonValue] = schema
         key_props: list[str] | None = key_properties_list
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.is_success
 
         # Generate large dataset
-        records = [
+        records: list[Mapping[str, t.JsonValue]] = [
             {
                 "id": i,
                 "data": f"Bulk test data {i}",
@@ -272,15 +256,7 @@ class TestOracleIntegration:
         assert loader.connect().is_success
 
         stream_name = "test_json"
-        schema_value = nested_schema["schema"]
-        key_properties_value = nested_schema["key_properties"]
-
-        # Type narrowing
-        assert isinstance(schema_value, dict)
-        schema_dict: dict[str, t.GeneralValueType] = schema_value
-        key_props: list[str] | None = (
-            list(key_properties_value) if isinstance(key_properties_value, list) else None
-        )
+        schema_dict, key_props = _schema_parts(nested_schema)
 
         # Create table
         create_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
@@ -343,7 +319,7 @@ class TestOracleIntegration:
         assert loader.connect().is_success
 
         stream_name = "test_ordering"
-        schema = {
+        schema: dict[str, t.JsonValue] = {
             "type": "object",
             "properties": {
                 "id": {"type": "integer"},
@@ -356,7 +332,7 @@ class TestOracleIntegration:
         key_properties_list = ["id"]
 
         # Ensure types match expected signatures - schema is already dict type
-        schema_dict: dict[str, t.GeneralValueType] = schema
+        schema_dict: Mapping[str, t.JsonValue] = schema
         key_props: list[str] | None = key_properties_list
 
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
@@ -410,15 +386,7 @@ class TestOracleIntegration:
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
         stream_name = "test_truncate"
-        schema_value = simple_schema["schema"]
-        key_properties_value = simple_schema["key_properties"]
-
-        # Type narrowing
-        assert isinstance(schema_value, dict)
-        schema_dict: dict[str, t.GeneralValueType] = schema_value
-        key_props: list[str] | None = (
-            list(key_properties_value) if isinstance(key_properties_value, list) else None
-        )
+        schema_dict, key_props = _schema_parts(simple_schema)
 
         # Create table and insert initial data
         create_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
@@ -470,15 +438,7 @@ class TestOracleIntegration:
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
         stream_name = "test_indexes"
-        schema_value = simple_schema["schema"]
-        key_properties_value = simple_schema["key_properties"]
-
-        # Type narrowing
-        assert isinstance(schema_value, dict)
-        schema_dict: dict[str, t.GeneralValueType] = schema_value
-        key_props: list[str] | None = (
-            list(key_properties_value) if isinstance(key_properties_value, list) else None
-        )
+        schema_dict, key_props = _schema_parts(simple_schema)
 
         loader.ensure_table_exists(stream_name, schema_dict, key_props)
 

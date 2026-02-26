@@ -18,8 +18,8 @@ from flext_tests import FlextTestsTypes
 class TestsFlextTargetOracleTypes(FlextTestsTypes, t):
     """Test types combining FlextTestsTypes and project-specific types."""
 
-    class Oracle(t.Oracle):
-        """Oracle domain types extending project types."""
+    class TargetOracle(t.TargetOracle):
+        """TargetOracle domain types extending project types."""
 
         class Tests:
             """Internal tests declarations for test-only objects."""

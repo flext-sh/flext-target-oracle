@@ -24,8 +24,9 @@ Usage:
 import logging
 import os
 
-from flext_core import FlextLogger, FlextResult, t
+from flext_core import FlextLogger, FlextResult
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
+from flext_target_oracle.models import m
 from pydantic import SecretStr
 
 # Configure logging for the example
@@ -65,14 +66,14 @@ def create_configuration() -> FlextTargetOracleSettings:
     return config
 
 
-def create_sample_schema_message() -> dict[str, t.GeneralValueType]:
+def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
       dict[str, t.GeneralValueType]: Singer SCHEMA message for users table
 
     """
-    return {
+    return m.TargetOracle.SingerSchemaMessage.model_validate({
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
@@ -87,10 +88,10 @@ def create_sample_schema_message() -> dict[str, t.GeneralValueType]:
             "required": ["id", "name", "email"],
         },
         "key_properties": ["id"],
-    }
+    })
 
 
-def create_sample_record_messages() -> list[dict[str, t.GeneralValueType]]:
+def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
@@ -98,7 +99,7 @@ def create_sample_record_messages() -> list[dict[str, t.GeneralValueType]]:
 
     """
     return [
-        {
+        m.TargetOracle.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -108,8 +109,8 @@ def create_sample_record_messages() -> list[dict[str, t.GeneralValueType]]:
                 "created_at": "2025-01-01T10:00:00Z",
                 "active": True,
             },
-        },
-        {
+        }),
+        m.TargetOracle.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -119,8 +120,8 @@ def create_sample_record_messages() -> list[dict[str, t.GeneralValueType]]:
                 "created_at": "2025-01-01T11:00:00Z",
                 "active": True,
             },
-        },
-        {
+        }),
+        m.TargetOracle.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -130,18 +131,18 @@ def create_sample_record_messages() -> list[dict[str, t.GeneralValueType]]:
                 "created_at": "2025-01-01T12:00:00Z",
                 "active": False,
             },
-        },
+        }),
     ]
 
 
-def create_sample_state_message() -> dict[str, t.GeneralValueType]:
+def create_sample_state_message() -> m.TargetOracle.SingerStateMessage:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
       dict[str, t.GeneralValueType]: Singer STATE message with bookmark information
 
     """
-    return {
+    return m.TargetOracle.SingerStateMessage.model_validate({
         "type": "STATE",
         "value": {
             "bookmarks": {
@@ -151,7 +152,7 @@ def create_sample_state_message() -> dict[str, t.GeneralValueType]:
                 },
             },
         },
-    }
+    })
 
 
 def demonstrate_basic_usage() -> None:
@@ -240,10 +241,12 @@ def demonstrate_basic_usage() -> None:
         # Display statistics
         stats = stats_result.value
         logger.info("=== Processing Statistics ===")
-        logger.info(f"Total records processed: {stats.get('total_records', 0)}")
-        logger.info(f"Successful records: {stats.get('successful_records', 0)}")
-        logger.info(f"Failed records: {stats.get('failed_records', 0)}")
-        logger.info(f"Total batches: {stats.get('total_batches', 0)}")
+        logger.info(f"Total records processed: {stats.total_records}")
+        logger.info(
+            f"Successful records: {stats.loading_operation.records_loaded}",
+        )
+        logger.info(f"Failed records: {stats.loading_operation.records_failed}")
+        logger.info(f"Total batches: {stats.streams_processed}")
 
         logger.info("Basic usage demonstration completed successfully!")
 
@@ -291,15 +294,15 @@ def demonstrate_error_handling() -> None:
         RuntimeError,
         ImportError,
     ) as e:
-        logger.info("Configuration creation failed as expected: %s", e)
+        logger.info(f"Configuration creation failed as expected: {e}")
 
     # Demonstrate processing invalid messages
     config = create_configuration()
     target = FlextTargetOracle(config)
 
     # Invalid message type
-    invalid_message: dict[str, t.GeneralValueType] = {"type": "INVALID", "data": "test"}
-    result = target.process_singer_message(invalid_message)
+    invalid_message = '{"type": "INVALID", "data": "test"}'
+    result = target.write_record(invalid_message)
 
     if result.is_failure:
         logger.info(f"Invalid message handled gracefully: {result.error}")

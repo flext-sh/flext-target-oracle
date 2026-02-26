@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 
 import pytest
 from pydantic import SecretStr
@@ -13,6 +14,7 @@ from flext_target_oracle import (
     FlextTargetOracleProcessingError,
     FlextTargetOracleSchemaError,
     FlextTargetOracleSettings,
+    m,
 )
 
 
@@ -33,9 +35,21 @@ def target() -> FlextTargetOracle:
     client.loader.load_record = lambda *_args, **_kwargs: FlextResult[bool].ok(
         value=True
     )
-    client.loader.finalize_all_streams = lambda: FlextResult[dict[str, object]].ok({
-        "status": "completed"
-    })
+    client.loader.finalize_all_streams = lambda: FlextResult[
+        m.TargetOracle.LoaderFinalizeResult
+    ].ok(
+        m.TargetOracle.LoaderFinalizeResult(
+            total_records=0,
+            streams_processed=0,
+            loading_operation=m.TargetOracle.LoaderOperation(
+                stream_name="users",
+                started_at="",
+                completed_at="",
+                records_loaded=0,
+                records_failed=0,
+            ),
+        ),
+    )
     return client
 
 
@@ -59,12 +73,14 @@ class TestOracleTarget:
     def test_discover_catalog_uses_registered_schemas(
         self, target: FlextTargetOracle
     ) -> None:
-        schema_message = {
-            "type": "SCHEMA",
-            "stream": "users",
-            "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
-            "key_properties": ["id"],
-        }
+        schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(
+            {
+                "type": "SCHEMA",
+                "stream": "users",
+                "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
+                "key_properties": ["id"],
+            },
+        )
         assert target.process_singer_message(schema_message).is_success
 
         catalog_result = target.discover_catalog()
@@ -72,30 +88,54 @@ class TestOracleTarget:
         assert catalog_result.value.streams[0].stream == "users"
 
     def test_process_record_and_state_messages(self, target: FlextTargetOracle) -> None:
-        schema_message = {
-            "type": "SCHEMA",
-            "stream": "users",
-            "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
-        }
-        record_message = {"type": "RECORD", "stream": "users", "record": {"id": 1}}
-        state_message = {"type": "STATE", "value": {"bookmarks": {"users": 1}}}
-
-        assert target.process_singer_message(schema_message).is_success
-        assert target.process_singer_message(record_message).is_success
-        assert target.process_singer_message(state_message).is_success
-        assert target.state["bookmarks"]["users"] == 1
-
-    def test_process_singer_messages_flushes_loader(
-        self, target: FlextTargetOracle
-    ) -> None:
-        messages = [
+        schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(
             {
                 "type": "SCHEMA",
                 "stream": "users",
                 "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
             },
+        )
+        record_message = m.TargetOracle.SingerRecordMessage.model_validate(
             {"type": "RECORD", "stream": "users", "record": {"id": 1}},
-            {"type": "STATE", "value": {"offset": 1}},
+        )
+        state_message = m.TargetOracle.SingerStateMessage.model_validate(
+            {"type": "STATE", "value": {"bookmarks": {"users": 1}}},
+        )
+
+        assert target.process_singer_message(schema_message).is_success
+        assert target.process_singer_message(record_message).is_success
+        assert target.process_singer_message(state_message).is_success
+        state_value = target.state_message.value
+        assert isinstance(state_value, Mapping)
+        bookmarks_value = state_value.get("bookmarks")
+        assert isinstance(bookmarks_value, Mapping)
+        assert bookmarks_value.get("users") == 1
+
+    def test_process_singer_messages_flushes_loader(
+        self, target: FlextTargetOracle
+    ) -> None:
+        messages: list[
+            m.TargetOracle.SingerSchemaMessage
+            | m.TargetOracle.SingerRecordMessage
+            | m.TargetOracle.SingerStateMessage
+            | m.TargetOracle.SingerActivateVersionMessage
+        ] = [
+            m.TargetOracle.SingerSchemaMessage.model_validate(
+                {
+                    "type": "SCHEMA",
+                    "stream": "users",
+                    "schema": {
+                        "type": "object",
+                        "properties": {"id": {"type": "integer"}},
+                    },
+                },
+            ),
+            m.TargetOracle.SingerRecordMessage.model_validate(
+                {"type": "RECORD", "stream": "users", "record": {"id": 1}},
+            ),
+            m.TargetOracle.SingerStateMessage.model_validate(
+                {"type": "STATE", "value": {"offset": 1}},
+            ),
         ]
 
         result = target.process_singer_messages(messages)
@@ -103,7 +143,7 @@ class TestOracleTarget:
         assert result.value.messages_processed == 3
 
     def test_unsupported_message_type_fails(self, target: FlextTargetOracle) -> None:
-        result = target.process_singer_message({"type": "UNKNOWN"})
+        result = target.write_record('{"type": "UNKNOWN"}')
         assert result.is_failure
 
     def test_invalid_json_payload_maps_to_processing_failure(
@@ -111,11 +151,9 @@ class TestOracleTarget:
     ) -> None:
         result = target.execute("{ invalid }")
         assert result.is_success
-        parse_result = target.process_singer_message({
-            "type": "RECORD",
-            "stream": "users",
-            "record": "bad",
-        })
+        parse_result = target.write_record(
+            '{"type": "RECORD", "stream": "users", "record": "bad"}',
+        )
         assert parse_result.is_failure
         assert isinstance(
             FlextTargetOracleProcessingError("invalid", details={}),

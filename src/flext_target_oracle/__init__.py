@@ -15,7 +15,7 @@ from flext_meltano import (
 )
 
 from flext_target_oracle.models import FlextTargetOracleModels, m
-from flext_target_oracle.protocols import FlextTargetOracleProtocols
+from flext_target_oracle.protocols import FlextTargetOracleProtocols, p
 from flext_target_oracle.settings import FlextTargetOracleSettings, LoadMethod
 from flext_target_oracle.target_client import FlextTargetOracle
 from flext_target_oracle.target_commands import OracleTargetCommandFactory
@@ -99,6 +99,7 @@ __all__ = [
     "StorageModeModel",
     "configure_oracle_observability",
     "m",
+    "p",
     "t",
     "u",
 ]

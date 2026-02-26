@@ -6,6 +6,7 @@ import json
 import re
 from datetime import UTC, datetime
 
+import oracledb
 from flext_core import FlextLogger, FlextResult
 from pydantic import ValidationError
 
@@ -236,8 +237,6 @@ class FlextTargetOracle:
         )
 
     def _connect_oracle(self):
-        import oracledb
-
         dsn = oracledb.makedsn(
             self.config.oracle_host,
             self.config.oracle_port,

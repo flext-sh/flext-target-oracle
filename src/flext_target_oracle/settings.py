@@ -17,9 +17,9 @@ from flext_core import FlextConstants, FlextResult, FlextSettings
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import SettingsConfigDict
 
-from flext_target_oracle.constants import c
-from flext_target_oracle.models import m
-from flext_target_oracle.typings import t
+from .constants import c
+from .models import m
+from .typings import t
 
 # LoadMethod moved to constants.py as c.LoadMethod (DRY pattern)
 LoadMethod = c.LoadMethod

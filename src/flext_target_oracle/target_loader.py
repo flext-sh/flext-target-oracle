@@ -20,11 +20,11 @@ from flext_core import FlextLogger, FlextResult, FlextService, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import Field
 
-from flext_target_oracle.models import m
+from .models import m
 
 # Module logger
-from flext_target_oracle.settings import FlextTargetOracleSettings
-from flext_target_oracle.target_exceptions import (
+from .settings import FlextTargetOracleSettings
+from .target_exceptions import (
     FlextTargetOracleConnectionError,
 )
 

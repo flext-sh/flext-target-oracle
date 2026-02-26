@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 
 from flext_core import FlextResult, t
 
@@ -24,7 +24,12 @@ class FlextTargetOracleUtilities:
             """Normalize record values for Oracle persistence."""
             transformed: dict[str, t.GeneralValueType] = {}
             for key, value in record.items():
-                if u.is_dict_like(value) or u.is_list_like(value):
+                is_mapping = isinstance(value, Mapping)
+                is_sequence = isinstance(value, Sequence) and not isinstance(
+                    value,
+                    str | bytes,
+                )
+                if is_mapping or is_sequence:
                     transformed[key.upper()] = json.dumps(value)
                     continue
                 match value:
