@@ -533,7 +533,7 @@ def connected_loader(
     oracle_loader: FlextTargetOracleLoader,
 ) -> Generator[FlextTargetOracleLoader]:
     """Provide a connected FlextTargetOracleLoader instance."""
-    return oracle_loader
+    yield oracle_loader
 
 
 # Performance Testing Fixtures
