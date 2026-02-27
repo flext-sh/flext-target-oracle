@@ -141,11 +141,15 @@ markers = [
 
 # [CUSTOM] poetry dev extensions
 # [MANAGED] pyrefly
+enable_assertion_pass_hook = true
 [tool.pyrefly]
+
 ignore-errors-in-generated-code = true
 project-excludes = [
-  "**/_pb2.py",
-  "**/_pb2_grpc.py",
+    "**/*_pb2*.py",
+    "**/*_pb2_grpc*.py",
+    "**/_pb2.py",
+    "**/_pb2_grpc.py",
 ]
 python-version = "3.13"
 search-path = [
@@ -166,3 +170,5 @@ redundant-cast = true
 unannotated-attribute = true
 unannotated-parameter = true
 unannotated-return = true
+
+[tool.poetry]
