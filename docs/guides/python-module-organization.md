@@ -103,8 +103,6 @@ from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
 from flext_core import u
-
-# Local implementation exports
 from flext_target_oracle.settings import FlextOracleTargetSettings, LoadMethod
 from flext_target_oracle.target import FlextOracleTarget
 
@@ -645,8 +643,6 @@ from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
 from flext_core import u
-
-# Infrastructure layer imports
 from flext_core import FlextBus
 from flext_core import FlextSettings
 from flext_core import FlextConstants
