@@ -14,7 +14,8 @@ import os
 from enum import StrEnum
 from typing import ClassVar, Final
 
-from flext_core import FlextConstants
+from flext_db_oracle import FlextDbOracleConstants
+from flext_meltano import FlextMeltanoConstants
 
 # No longer importing from flext_db_oracle
 
@@ -25,7 +26,7 @@ def _env_enabled(flag_name: str, default: str = "1") -> bool:
     return value.lower() not in {"0", "false", "no"}
 
 
-class FlextTargetOracleConstants(FlextConstants):
+class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
     """Target Oracle constants extending FlextConstants.
 
     Composes with 1000 to avoid duplication and ensure consistency.

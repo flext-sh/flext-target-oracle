@@ -14,6 +14,7 @@ from flext_meltano import (
     FlextMeltanoTypes,
 )
 
+from flext_target_oracle.constants import FlextTargetOracleConstants, c
 from flext_target_oracle.models import FlextTargetOracleModels, m
 from flext_target_oracle.protocols import FlextTargetOracleProtocols, p
 from flext_target_oracle.settings import FlextTargetOracleSettings, LoadMethod
@@ -74,6 +75,7 @@ __all__ = [
     "FlextTargetOracleAuthenticationError",
     "FlextTargetOracleCliService",
     "FlextTargetOracleConnectionError",
+    "FlextTargetOracleConstants",
     "FlextTargetOracleError",
     "FlextTargetOracleLoader",
     "FlextTargetOracleModels",
@@ -97,6 +99,7 @@ __all__ = [
     "SchemaServiceProtocol",
     "SingerStreamModel",
     "StorageModeModel",
+    "c",
     "configure_oracle_observability",
     "m",
     "p",
