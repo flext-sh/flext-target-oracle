@@ -10,6 +10,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import override
+
 import warnings
 from typing import Self
 
@@ -312,6 +314,8 @@ class FlextTargetOracleSettings(FlextSettings):
         return cls.get_global_instance()
 
     @classmethod
+    @override
+
     def get_global_instance(cls) -> Self:
         """Get the global singleton instance using enhanced FlextSettings pattern."""
         return super().get_global_instance()
@@ -332,6 +336,8 @@ class FlextTargetOracleSettings(FlextSettings):
         return super().get_global_instance()
 
     @classmethod
+    @override
+
     def reset_global_instance(cls) -> None:
         """Reset the global FlextTargetOracleSettings instance (mainly for testing)."""
         super().reset_global_instance()

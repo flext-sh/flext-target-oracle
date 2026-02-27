@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 import json
 from pathlib import Path
 
@@ -94,6 +96,8 @@ class OracleTargetAboutCommand(FlextModels.Command):
 
 class OracleTargetCommandHandler(h[FlextModels.Command, str]):
     """Dispatch command objects to their `execute` implementation."""
+
+    @override
 
     def handle(self, message: FlextModels.Command) -> FlextResult[str]:
         """Invoke command execute methods in a typed-safe way."""

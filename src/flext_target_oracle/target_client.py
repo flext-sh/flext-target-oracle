@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import override
+
 import json
 import re
 from datetime import UTC, datetime
@@ -236,7 +238,7 @@ class FlextTargetOracle:
             "VALUES (:data, :extracted_at, :loaded_at)"
         )
 
-    def _connect_oracle(self):
+    def _connect_oracle(self) -> oracledb.Connection:
         dsn = oracledb.makedsn(
             self.config.oracle_host,
             self.config.oracle_port,
