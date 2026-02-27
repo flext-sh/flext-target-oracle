@@ -184,7 +184,7 @@ __version__ = "0.9.9"
 ##### **`config.py` - Configuration with Domain Validation**
 
 ```python
-"""Oracle target configuration using FLEXT ValueObject patterns."""
+"""Oracle target configuration using FLEXT Value patterns."""
 
 from flext_core import FlextBus
 from flext_core import FlextSettings
