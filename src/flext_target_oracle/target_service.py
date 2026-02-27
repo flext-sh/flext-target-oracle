@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import override
-
 from flext_core import FlextResult
 
 from .models import m

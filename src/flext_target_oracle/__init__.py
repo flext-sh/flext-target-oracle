@@ -55,7 +55,7 @@ from flext_target_oracle.target_services import (
 from flext_target_oracle.typings import FlextTargetOracleTypes, t
 from flext_target_oracle.utilities import (
     FlextTargetOracleUtilities,
-    FlextTargetOracleUtilities as u,
+    u,
 )
 
 # Version imports removed - not available

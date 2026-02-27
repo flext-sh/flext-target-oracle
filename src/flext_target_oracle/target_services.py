@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import override
-
 from typing import Protocol
 
 from flext_core import FlextResult, t

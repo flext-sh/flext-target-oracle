@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import override
-
 import json
 import re
 from datetime import UTC, datetime
