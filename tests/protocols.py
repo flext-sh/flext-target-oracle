@@ -11,14 +11,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_oracle import p
-from flext_tests import FlextTestsProtocols
+from flext_target_oracle.protocols import FlextTargetOracleProtocols
+from flext_tests.protocols import FlextTestsProtocols
 
 
-class TestsFlextTargetOracleProtocols(FlextTestsProtocols, p):
+class TestsFlextTargetOracleProtocols(FlextTestsProtocols, FlextTargetOracleProtocols):
     """Test protocols combining FlextTestsProtocols and project-specific protocols."""
 
-    class TargetOracle(p.TargetOracle):
+    class TargetOracle(FlextTargetOracleProtocols.TargetOracle):
         """TargetOracle domain protocols extending project protocols."""
 
         class Tests:
