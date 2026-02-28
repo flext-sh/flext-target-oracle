@@ -18,7 +18,7 @@ from typing import ClassVar, override
 
 from flext_core import FlextLogger, FlextResult, FlextService, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from pydantic import Field, PrivateAttr
+from pydantic import PrivateAttr
 
 from .models import m
 from .settings import FlextTargetOracleSettings
@@ -44,7 +44,9 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     )
     _total_records: int = PrivateAttr(default=0)
 
-    def __init__(self, config: FlextTargetOracleSettings, **_data: t.GeneralValueType) -> None:
+    def __init__(
+        self, config: FlextTargetOracleSettings, **_data: t.GeneralValueType
+    ) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
             # Create Oracle API configuration from target config

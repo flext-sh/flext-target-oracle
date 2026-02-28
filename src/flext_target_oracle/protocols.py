@@ -8,9 +8,9 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from flext_core.protocols import FlextProtocols
+from flext_core import FlextProtocols
 from flext_db_oracle.protocols import FlextDbOracleProtocols
-from flext_meltano.protocols import FlextMeltanoProtocols
+from flext_meltano import FlextMeltanoProtocols
 
 from .models import m
 

@@ -118,7 +118,9 @@ class FlextOracleObs:
 
         @staticmethod
         def connection_health(
-            connection_pool_size: int, active_connections: int, **context: t.GeneralValueType
+            connection_pool_size: int,
+            active_connections: int,
+            **context: t.GeneralValueType,
         ) -> None:
             """Log Oracle connection pool health snapshots."""
             context_keys = list(context.keys())
