@@ -5,11 +5,12 @@ from __future__ import annotations
 from typing import Literal
 
 from flext_core import FlextModels
+from flext_db_oracle.models import FlextDbOracleModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field
 
 
-class FlextTargetOracleModels(FlextModels):
+class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
     """Complete models for Oracle target operations extending FlextModels."""
 
     class Meltano(FlextMeltanoModels.Meltano):
@@ -166,22 +167,6 @@ class FlextTargetOracleModels(FlextModels):
             use_bulk_operations: bool = Field(
                 description="Whether bulk operations are enabled",
             )
-
-    SingerSchemaMessage = TargetOracle.SingerSchemaMessage
-    SingerRecordMessage = TargetOracle.SingerRecordMessage
-    SingerStateMessage = TargetOracle.SingerStateMessage
-    SingerActivateVersionMessage = TargetOracle.SingerActivateVersionMessage
-    SingerCatalogMetadata = TargetOracle.SingerCatalogMetadata
-    SingerCatalogEntry = TargetOracle.SingerCatalogEntry
-    SingerCatalog = TargetOracle.SingerCatalog
-    ExecuteResult = TargetOracle.ExecuteResult
-    ProcessingSummary = TargetOracle.ProcessingSummary
-    LoaderReadyResult = TargetOracle.LoaderReadyResult
-    LoaderOperation = TargetOracle.LoaderOperation
-    LoaderFinalizeResult = TargetOracle.LoaderFinalizeResult
-    OracleConnectionConfig = TargetOracle.OracleConnectionConfig
-    TargetConfig = TargetOracle.TargetConfig
-    ImplementationMetrics = TargetOracle.ImplementationMetrics
 
 
 m = FlextTargetOracleModels
