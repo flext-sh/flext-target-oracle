@@ -17,6 +17,8 @@ from __future__ import annotations
 from typing import Literal
 
 from flext_core import FlextTypes
+from flext_db_oracle import FlextDbOracleTypes
+from flext_meltano import FlextMeltanoTypes
 
 # =============================================================================
 # TARGET ORACLE-SPECIFIC TYPE VARIABLES - Domain-specific TypeVars for Singer Oracle target operations
@@ -24,7 +26,7 @@ from flext_core import FlextTypes
 
 
 # Singer Oracle target domain TypeVars
-class FlextTargetOracleTypes(FlextTypes):
+class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
     """Singer Oracle target-specific type definitions extending t.
 
     Domain-specific type system for Singer Oracle target operations.

@@ -26,7 +26,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
             """Singer Target Oracle domain protocols for Oracle database loading."""
 
             @runtime_checkable
-            class TargetProtocol(Protocol):
+            class Target(Protocol):
                 """Protocol for Oracle target operations."""
 
                 def process_record(

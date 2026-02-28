@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from flext_core import FlextResult
     from flext_meltano import (
         FlextMeltanoSettings,
-        FlextMeltanoTargetAbstractions,
         FlextMeltanoTypes,
     )
 
@@ -74,7 +73,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "BatchServiceProtocol": ("flext_target_oracle.target_services", "BatchServiceProtocol"),
     "ConnectionServiceProtocol": ("flext_target_oracle.target_services", "ConnectionServiceProtocol"),
     "FlextMeltanoSettings": ("flext_meltano", "FlextMeltanoSettings"),
-    "FlextMeltanoTargetAbstractions": ("flext_meltano", "FlextMeltanoTargetAbstractions"),
     "FlextMeltanoTypes": ("flext_meltano", "FlextMeltanoTypes"),
     "FlextOracleError": ("flext_target_oracle.target_observability", "FlextOracleError"),
     "FlextOracleObs": ("flext_target_oracle.target_observability", "FlextOracleObs"),
@@ -115,7 +113,6 @@ __all__ = [
     "BatchServiceProtocol",
     "ConnectionServiceProtocol",
     "FlextMeltanoSettings",
-    "FlextMeltanoTargetAbstractions",
     "FlextMeltanoTypes",
     "FlextOracleError",
     "FlextOracleObs",
