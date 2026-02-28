@@ -6,9 +6,11 @@ import json
 from collections.abc import Mapping, Sequence
 
 from flext_core import FlextResult, t
+from flext_db_oracle import FlextDbOracleUtilities
+from flext_meltano import FlextMeltanoUtilities
 
 
-class FlextTargetOracleUtilities:
+class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
     """Focused utility namespace used by Oracle target modules."""
 
     class TargetOracle:
