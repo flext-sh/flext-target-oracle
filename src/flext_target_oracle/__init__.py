@@ -9,14 +9,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from flext_core import cleanup_submodule_namespace, lazy_getattr
+from flext_core._utilities.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_core import FlextResult
-    from flext_meltano import (
-        FlextMeltanoSettings,
-        FlextMeltanoTypes,
-    )
+    from flext_meltano import FlextMeltanoSettings, FlextMeltanoTypes
 
     from flext_target_oracle.constants import (
         FlextTargetOracleConstants,
