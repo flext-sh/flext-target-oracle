@@ -18,13 +18,11 @@ from typing import ClassVar, override
 
 from flext_core import FlextLogger, FlextResult, FlextService, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from pydantic import Field
+from pydantic import Field, PrivateAttr
 
 from .models import m
 from .settings import FlextTargetOracleSettings
-from .target_exceptions import (
-    FlextTargetOracleConnectionError,
-)
+from .target_exceptions import FlextTargetOracleExceptions
 
 logger = FlextLogger(__name__)
 
@@ -38,34 +36,13 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
 
     model_config: ClassVar = {"frozen": False}
 
-    # Pydantic fields for configuration and state
-    target_config: FlextTargetOracleSettings = Field(
-        description="Oracle target configuration"
+    # Private attributes for configuration and state (Pydantic v2 pattern)
+    _target_config: FlextTargetOracleSettings = PrivateAttr()
+    _oracle_api: FlextDbOracleApi = PrivateAttr()
+    _record_buffers: dict[str, list[dict[str, t.JsonValue]]] = PrivateAttr(
+        default_factory=dict
     )
-    oracle_api: FlextDbOracleApi = Field(description="Oracle API instance")
-
-    # Internal state fields (without underscore for Pydantic)
-    record_buffers: dict[str, list[dict[str, t.JsonValue]]] = Field(
-        default_factory=dict,
-        description="Record buffers by stream",
-    )
-    total_records: int = Field(default=0, description="Total records processed")
-
-    def log_info(self, message: str) -> None:
-        """Log informational loader events."""
-        logger.info(message)
-
-    def log_error(
-        self,
-        message: str,
-        *,
-        extra: Mapping[str, str] | None = None,
-    ) -> None:
-        """Log loader errors with optional metadata."""
-        if extra is None:
-            logger.error(message)
-            return
-        logger.error(message, extra=extra)
+    _total_records: int = PrivateAttr(default=0)
 
     def __init__(self, config: FlextTargetOracleSettings, **_data: t.GeneralValueType) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
@@ -86,11 +63,11 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             # Initialize FlextService
             super().__init__()
 
-            # Set Pydantic fields as instance attributes
-            self.target_config = config
-            self.oracle_api = oracle_api
-            self.record_buffers = {}
-            self.total_records = 0
+            # Set private attributes directly (bypassing Pydantic validation)
+            self._target_config = config
+            self._oracle_api = oracle_api
+            self._record_buffers = {}
+            self._total_records = 0
 
         except (
             ValueError,
@@ -102,7 +79,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             ImportError,
         ) as e:
             msg = f"Failed to create Oracle API: {e}"
-            raise FlextTargetOracleConnectionError(msg) from e
+            raise FlextTargetOracleExceptions.OracleConnectionError(msg) from e
 
     @override
     def execute(self) -> FlextResult[m.TargetOracle.LoaderReadyResult]:

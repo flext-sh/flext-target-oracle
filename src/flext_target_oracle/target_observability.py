@@ -8,12 +8,7 @@ from contextlib import contextmanager
 from flext_core import FlextLogger
 
 from . import t
-from .target_exceptions import (
-    FlextTargetOracleAuthenticationError,
-    FlextTargetOracleConnectionError,
-    FlextTargetOracleProcessingError,
-    FlextTargetOracleSchemaError,
-)
+from .target_exceptions import FlextTargetOracleExceptions
 
 logger = FlextLogger(__name__)
 
@@ -30,7 +25,7 @@ class FlextOracleError:
             connection_string: str,
             error_code: str | None = None,
             recovery_strategy: str = "retry_with_backoff",
-        ) -> FlextTargetOracleConnectionError:
+        ) -> FlextTargetOracleExceptions.OracleConnectionError:
             """Build a connection error for unavailable Oracle endpoints."""
             logger.error(
                 "Oracle database unavailable",
@@ -40,14 +35,14 @@ class FlextOracleError:
                     "recovery_strategy": recovery_strategy,
                 },
             )
-            return FlextTargetOracleConnectionError(
+            return FlextTargetOracleExceptions.OracleConnectionError(
                 f"Oracle database unavailable: {connection_string}",
             )
 
         @staticmethod
         def authentication_failed(
             *, username: str, oracle_service: str, error_code: str | None = None
-        ) -> FlextTargetOracleAuthenticationError:
+        ) -> FlextTargetOracleExceptions.AuthenticationError:
             """Build an authentication failure error with service context."""
             logger.error(
                 "Oracle authentication failure",
@@ -57,7 +52,7 @@ class FlextOracleError:
                     "error_code": error_code,
                 },
             )
-            return FlextTargetOracleAuthenticationError(
+            return FlextTargetOracleExceptions.AuthenticationError(
                 f"Oracle authentication failed for {username} on {oracle_service}",
             )
 
@@ -70,7 +65,7 @@ class FlextOracleError:
             stream_name: str,
             schema_errors: list[str],
             singer_specification: str = "1.5.0",
-        ) -> FlextTargetOracleSchemaError:
+        ) -> FlextTargetOracleExceptions.SchemaError:
             """Build a Singer schema validation failure."""
             logger.error(
                 "Singer schema validation failed",
@@ -80,14 +75,14 @@ class FlextOracleError:
                     "singer_specification": singer_specification,
                 },
             )
-            return FlextTargetOracleSchemaError(
+            return FlextTargetOracleExceptions.SchemaError(
                 f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
             )
 
         @staticmethod
         def record_processing_failed(
             *, stream_name: str, record_count: int, failed_records: int
-        ) -> FlextTargetOracleProcessingError:
+        ) -> FlextTargetOracleExceptions.ProcessingError:
             """Build a Singer record processing failure."""
             logger.error(
                 "Singer record processing failed",
@@ -97,7 +92,7 @@ class FlextOracleError:
                     "failed_records": failed_records,
                 },
             )
-            return FlextTargetOracleProcessingError(
+            return FlextTargetOracleExceptions.ProcessingError(
                 f"Record processing failed for {stream_name}: {failed_records}/{record_count}",
             )
 

@@ -9,9 +9,8 @@ import pytest
 from flext_core import FlextResult
 from flext_target_oracle import (
     FlextTargetOracle,
-    FlextTargetOracleProcessingError,
-    FlextTargetOracleSchemaError,
     FlextTargetOracleSettings,
+    FlextTargetOracleExceptions,
     m,
 )
 from pydantic import SecretStr
@@ -155,14 +154,13 @@ class TestOracleTarget:
         )
         assert parse_result.is_failure
         assert isinstance(
-            FlextTargetOracleProcessingError("invalid", details={}),
-            FlextTargetOracleProcessingError,
+            FlextTargetOracleExceptions.ProcessingError("invalid", operation="write_record"),
+            FlextTargetOracleExceptions.ProcessingError,
         )
 
     def test_missing_schema_path_uses_schema_error_type(self) -> None:
-        err = FlextTargetOracleSchemaError("schema missing")
-        assert isinstance(err, FlextTargetOracleSchemaError)
-
+        err = FlextTargetOracleExceptions.SchemaError("schema missing")
+        assert isinstance(err, FlextTargetOracleExceptions.SchemaError)
     def test_metrics_and_write_record_contract(self, target: FlextTargetOracle) -> None:
         metrics = target.get_implementation_metrics()
         assert metrics.batch_size > 0

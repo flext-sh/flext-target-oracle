@@ -34,13 +34,7 @@ if TYPE_CHECKING:
     from flext_target_oracle.settings import FlextTargetOracleSettings, LoadMethod
     from flext_target_oracle.target_client import FlextTargetOracle
     from flext_target_oracle.target_commands import OracleTargetCommandFactory
-    from flext_target_oracle.target_exceptions import (
-        FlextTargetOracleAuthenticationError,
-        FlextTargetOracleConnectionError,
-        FlextTargetOracleError,
-        FlextTargetOracleProcessingError,
-        FlextTargetOracleSchemaError,
-    )
+    from flext_target_oracle.target_exceptions import FlextTargetOracleExceptions
     from flext_target_oracle.target_loader import FlextTargetOracleLoader
     from flext_target_oracle.target_models import (
         LoadMethodModel,
@@ -114,6 +108,10 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_oracle.models",
         "FlextTargetOracleModels",
     ),
+    "FlextTargetOracleExceptions": (
+        "flext_target_oracle.target_exceptions",
+        "FlextTargetOracleExceptions",
+    ),
     "FlextTargetOracleProtocols": (
         "flext_target_oracle.protocols",
         "FlextTargetOracleProtocols",
@@ -186,16 +184,7 @@ __all__ = [
     "FlextOracleObs",
     "FlextResult",
     "FlextTargetOracle",
-    "FlextTargetOracleAuthenticationError",
-    "FlextTargetOracleCliService",
-    "FlextTargetOracleConnectionError",
-    "FlextTargetOracleConstants",
-    "FlextTargetOracleError",
-    "FlextTargetOracleLoader",
-    "FlextTargetOracleModels",
-    "FlextTargetOracleProcessingError",
-    "FlextTargetOracleProtocols",
-    "FlextTargetOracleSchemaError",
+    "FlextTargetOracleExceptions",
     "FlextTargetOracleSettings",
     "FlextTargetOracleTypes",
     "FlextTargetOracleUtilities",
@@ -222,7 +211,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> object:
+def __getattr__(name: str) -> t.GeneralValueType:
     """Lazy-load module attributes on first access (PEP 562)."""
     return lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
 

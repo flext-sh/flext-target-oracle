@@ -20,6 +20,7 @@ from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
+    FlextTargetOracleExceptions,
 )
 from flext_tests import FlextTestsDocker
 from pydantic import SecretStr
