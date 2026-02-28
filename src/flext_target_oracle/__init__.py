@@ -98,25 +98,13 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "FlextOracleObs": ("flext_target_oracle.target_observability", "FlextOracleObs"),
     "FlextResult": ("flext_core", "FlextResult"),
     "FlextTargetOracle": ("flext_target_oracle.target_client", "FlextTargetOracle"),
-    "FlextTargetOracleAuthenticationError": (
-        "flext_target_oracle.target_exceptions",
-        "FlextTargetOracleAuthenticationError",
-    ),
     "FlextTargetOracleCliService": (
         "flext_target_oracle.target_refactored",
         "FlextTargetOracleCliService",
     ),
-    "FlextTargetOracleConnectionError": (
-        "flext_target_oracle.target_exceptions",
-        "FlextTargetOracleConnectionError",
-    ),
     "FlextTargetOracleConstants": (
         "flext_target_oracle.constants",
         "FlextTargetOracleConstants",
-    ),
-    "FlextTargetOracleError": (
-        "flext_target_oracle.target_exceptions",
-        "FlextTargetOracleError",
     ),
     "FlextTargetOracleLoader": (
         "flext_target_oracle.target_loader",
@@ -126,17 +114,9 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_oracle.models",
         "FlextTargetOracleModels",
     ),
-    "FlextTargetOracleProcessingError": (
-        "flext_target_oracle.target_exceptions",
-        "FlextTargetOracleProcessingError",
-    ),
     "FlextTargetOracleProtocols": (
         "flext_target_oracle.protocols",
         "FlextTargetOracleProtocols",
-    ),
-    "FlextTargetOracleSchemaError": (
-        "flext_target_oracle.target_exceptions",
-        "FlextTargetOracleSchemaError",
     ),
     "FlextTargetOracleSettings": (
         "flext_target_oracle.settings",

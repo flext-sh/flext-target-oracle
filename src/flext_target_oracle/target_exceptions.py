@@ -254,68 +254,6 @@ class FlextTargetOracleExceptions(FlextExceptions):
         """Oracle record processing errors."""
 
 
-# Module-level classes with real inheritance for backward compatibility
-class FlextTargetOracleError(FlextTargetOracleExceptions.Error):
-    """FlextTargetOracleError - real inheritance from Error."""
-
-
-class FlextTargetOracleSettingsurationError(
-    FlextTargetOracleExceptions.ConfigurationError,
-):
-    """FlextTargetOracleSettingsurationError - real inheritance from ConfigurationError."""
-
-
-class FlextTargetOracleConnectionError(
-    FlextTargetOracleExceptions.OracleConnectionError,
-):
-    """FlextTargetOracleConnectionError - real inheritance from OracleConnectionError."""
-
-
-class FlextTargetOracleValidationError(FlextTargetOracleExceptions.ValidationError):
-    """FlextTargetOracleValidationError - real inheritance from ValidationError."""
-
-
-class FlextTargetOracleAuthenticationError(
-    FlextTargetOracleExceptions.AuthenticationError,
-):
-    """FlextTargetOracleAuthenticationError - real inheritance from AuthenticationError."""
-
-
-class FlextTargetOracleProcessingError(FlextTargetOracleExceptions.ProcessingError):
-    """FlextTargetOracleProcessingError - real inheritance from ProcessingError."""
-
-
-class FlextTargetOracleTimeoutError(FlextTargetOracleExceptions.OracleTimeoutError):
-    """FlextTargetOracleTimeoutError - real inheritance from OracleTimeoutError."""
-
-
-class FlextTargetOracleSchemaError(FlextTargetOracleExceptions.SchemaError):
-    """FlextTargetOracleSchemaError - real inheritance from SchemaError."""
-
-
-class FlextTargetOracleLoadError(FlextTargetOracleExceptions.LoadError):
-    """FlextTargetOracleLoadError - real inheritance from LoadError."""
-
-
-class FlextTargetOracleSQLError(FlextTargetOracleExceptions.SQLError):
-    """FlextTargetOracleSQLError - real inheritance from SQLError."""
-
-
-class FlextTargetOracleRecordError(FlextTargetOracleExceptions.RecordError):
-    """FlextTargetOracleRecordError - real inheritance from RecordError."""
-
-
 __all__: list[str] = [
-    "FlextTargetOracleAuthenticationError",
-    "FlextTargetOracleConnectionError",
-    "FlextTargetOracleError",
     "FlextTargetOracleExceptions",
-    "FlextTargetOracleLoadError",
-    "FlextTargetOracleProcessingError",
-    "FlextTargetOracleRecordError",
-    "FlextTargetOracleSQLError",
-    "FlextTargetOracleSchemaError",
-    "FlextTargetOracleSettingsurationError",
-    "FlextTargetOracleTimeoutError",
-    "FlextTargetOracleValidationError",
 ]
