@@ -283,7 +283,7 @@ class FlextTargetOracleSettings(FlextSettings):
     def create_for_environment(
         cls,
         environment: str,
-        **_overrides: object,
+        **_overrides: t.GeneralValueType,
     ) -> FlextTargetOracleSettings:
         """Create configuration for specific environment using enhanced singleton pattern."""
         env_overrides: dict[str, t.GeneralValueType] = {}
@@ -318,17 +318,17 @@ class FlextTargetOracleSettings(FlextSettings):
         return super().get_global_instance()
 
     @classmethod
-    def create_for_development(cls, **_overrides: object) -> Self:
+    def create_for_development(cls, **_overrides: t.GeneralValueType) -> Self:
         """Create configuration for development environment."""
         return super().get_global_instance()
 
     @classmethod
-    def create_for_production(cls, **_overrides: object) -> Self:
+    def create_for_production(cls, **_overrides: t.GeneralValueType) -> Self:
         """Create configuration for production environment."""
         return super().get_global_instance()
 
     @classmethod
-    def create_for_testing(cls, **_overrides: object) -> Self:
+    def create_for_testing(cls, **_overrides: t.GeneralValueType) -> Self:
         """Create configuration for testing environment."""
         return super().get_global_instance()
 

@@ -67,7 +67,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             return
         logger.error(message, extra=extra)
 
-    def __init__(self, config: FlextTargetOracleSettings, **_data: object) -> None:
+    def __init__(self, config: FlextTargetOracleSettings, **_data: t.GeneralValueType) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
             # Create Oracle API configuration from target config
