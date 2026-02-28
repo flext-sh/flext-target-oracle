@@ -14,7 +14,7 @@ import json
 import re
 from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import ClassVar
+from typing import ClassVar, override
 
 from flext_core import FlextLogger, FlextResult, FlextService, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
@@ -104,6 +104,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             msg = f"Failed to create Oracle API: {e}"
             raise FlextTargetOracleConnectionError(msg) from e
 
+    @override
     def execute(self) -> FlextResult[m.TargetOracle.LoaderReadyResult]:
         """Execute domain service - returns connection test result."""
         connection_result = self.test_connection()
