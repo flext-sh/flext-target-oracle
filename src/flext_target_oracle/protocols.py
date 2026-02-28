@@ -8,12 +8,14 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from flext_meltano.protocols import p as p_meltano
+from flext_core.protocols import FlextProtocols
+from flext_db_oracle.protocols import FlextDbOracleProtocols
+from flext_meltano.protocols import FlextMeltanoProtocols
 
 from .models import m
 
 
-class FlextTargetOracleProtocols(p_meltano):
+class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
     """Singer Target Oracle protocols extending Oracle and Meltano protocols."""
 
     # Target Oracle-specific protocols
@@ -29,7 +31,7 @@ class FlextTargetOracleProtocols(p_meltano):
 
                 def process_record(
                     self, record: m.Meltano.SingerRecordMessage
-                ) -> p_meltano.Result[bool]:
+                ) -> FlextProtocols.Result[bool]:
                     """Process a Singer record for Oracle target."""
                     ...
 
@@ -39,7 +41,7 @@ class FlextTargetOracleProtocols(p_meltano):
 
                 def connect_target(
                     self, config: m.TargetOracle.OracleConnectionConfig
-                ) -> p_meltano.Result[bool]:
+                ) -> FlextProtocols.Result[bool]:
                     """Connect to Oracle database."""
                     ...
 
@@ -51,7 +53,7 @@ class FlextTargetOracleProtocols(p_meltano):
                     self,
                     table_name: str,
                     schema_message: m.Meltano.SingerSchemaMessage,
-                ) -> p_meltano.Result[bool]:
+                ) -> FlextProtocols.Result[bool]:
                     """Create Oracle table from schema."""
                     ...
 
@@ -62,7 +64,7 @@ class FlextTargetOracleProtocols(p_meltano):
                 def execute_batch_target(
                     self,
                     operations: list[m.Meltano.SingerRecordMessage],
-                ) -> p_meltano.Result[list[bool]]:
+                ) -> FlextProtocols.Result[list[bool]]:
                     """Execute batch of Oracle operations."""
                     ...
 
@@ -72,7 +74,7 @@ class FlextTargetOracleProtocols(p_meltano):
 
                 def transform_record_target(
                     self, record: m.Meltano.SingerRecordMessage
-                ) -> p_meltano.Result[m.Meltano.SingerRecordMessage]:
+                ) -> FlextProtocols.Result[m.Meltano.SingerRecordMessage]:
                     """Transform Singer record for Oracle."""
                     ...
 
@@ -82,7 +84,7 @@ class FlextTargetOracleProtocols(p_meltano):
 
                 def process_message_target(
                     self, message: m.Meltano.SingerRecordMessage
-                ) -> p_meltano.Result[bool]:
+                ) -> FlextProtocols.Result[bool]:
                     """Process Singer message."""
                     ...
 
@@ -92,7 +94,7 @@ class FlextTargetOracleProtocols(p_meltano):
 
                 def optimize_batch_size_target(
                     self, record_count: int
-                ) -> p_meltano.Result[int]:
+                ) -> FlextProtocols.Result[int]:
                     """Optimize batch size for Oracle operations."""
                     ...
 
@@ -102,14 +104,15 @@ class FlextTargetOracleProtocols(p_meltano):
 
                 def validate_target_credentials(
                     self, config: m.TargetOracle.OracleConnectionConfig
-                ) -> p_meltano.Result[bool]:
+                ) -> FlextProtocols.Result[bool]:
                     """Validate Oracle credentials."""
                     ...
 
+            @runtime_checkable
             class MonitoringProtocol(Protocol):
                 """Protocol for Oracle loading monitoring."""
 
-                def track_progress(self, records: int) -> p_meltano.Result[bool]:
+                def track_progress(self, records: int) -> FlextProtocols.Result[bool]:
                     """Track progress of Oracle loading operations."""
                     ...
 
