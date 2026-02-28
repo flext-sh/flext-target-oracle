@@ -8,7 +8,6 @@ from contextlib import contextmanager
 from flext_core import FlextLogger
 
 from . import t
-
 from .target_exceptions import (
     FlextTargetOracleAuthenticationError,
     FlextTargetOracleConnectionError,
