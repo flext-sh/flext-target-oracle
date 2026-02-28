@@ -29,7 +29,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             """Singer STATE message specialized for Oracle target domain."""
 
         class SingerActivateVersionMessage(
-            FlextMeltanoModels.Meltano.SingerActivateVersionMessage
+            FlextMeltanoModels.Meltano.SingerActivateVersionMessage,
         ):
             """Singer ACTIVATE_VERSION message specialized for Oracle target domain."""
 
@@ -99,7 +99,8 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
             total_records: int = Field(ge=0, description="Total records processed")
             streams_processed: int = Field(
-                ge=0, description="Number of processed streams"
+                ge=0,
+                description="Number of processed streams",
             )
             status: Literal["completed"] = Field(
                 default="completed",
@@ -147,7 +148,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             """Target runtime configuration payload."""
 
             default_target_schema: str = Field(
-                description="Default Oracle target schema"
+                description="Default Oracle target schema",
             )
             use_bulk_operations: bool = Field(
                 description="Whether bulk loading is enabled",

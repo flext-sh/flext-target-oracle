@@ -103,12 +103,12 @@ class OracleTargetCommandHandler(h[FlextModels.Command, str]):
         execute_method = getattr(message, "execute", None)
         if execute_method is None:
             return FlextResult[str].fail(
-                f"Unsupported command: {type(message).__name__}"
+                f"Unsupported command: {type(message).__name__}",
             )
         result = execute_method()
         if not isinstance(result, FlextResult):
             return FlextResult[str].fail(
-                f"Invalid result type: {type(result).__name__}"
+                f"Invalid result type: {type(result).__name__}",
             )
         return result
 
@@ -144,7 +144,8 @@ class OracleTargetCommandFactory:
     ) -> OracleTargetAboutCommand:
         """Create about command instance."""
         return OracleTargetAboutCommand(
-            command_type=c.TargetOracle.CommandTypes.ABOUT.value, format=output_format
+            command_type=c.TargetOracle.CommandTypes.ABOUT.value,
+            format=output_format,
         )
 
 
@@ -177,7 +178,7 @@ def _load_settings(config_file: str | None) -> FlextResult[FlextTargetOracleSett
 
     if not u.is_dict_like(data):
         return FlextResult[FlextTargetOracleSettings].fail(
-            "Configuration must be a JSON object"
+            "Configuration must be a JSON object",
         )
 
     settings = FlextTargetOracleSettings.model_validate(data)

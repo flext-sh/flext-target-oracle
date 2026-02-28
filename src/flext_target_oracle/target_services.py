@@ -68,7 +68,9 @@ class OracleConnectionService:
     """Minimal Oracle connection service."""
 
     def __init__(
-        self, config: FlextTargetOracleSettings, oracle_api: FlextDbOracleApi
+        self,
+        config: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
     ) -> None:
         """Store configuration and Oracle API dependency."""
         self.config = config
@@ -81,18 +83,18 @@ class OracleConnectionService:
     def test_connection(self) -> FlextResult[None]:
         """Check Oracle access by listing schema tables."""
         tables_result = self.oracle_api.get_tables(
-            schema=self.config.default_target_schema
+            schema=self.config.default_target_schema,
         )
         if tables_result.is_failure:
             return FlextResult[None].fail(
-                tables_result.error or "Connection test failed"
+                tables_result.error or "Connection test failed",
             )
         return FlextResult[None].ok(None)
 
     def get_connection_info(self) -> FlextResult[m.TargetOracle.OracleConnectionConfig]:
         """Return normalized connection model."""
         return FlextResult[m.TargetOracle.OracleConnectionConfig].ok(
-            self.config.get_oracle_config()
+            self.config.get_oracle_config(),
         )
 
 
@@ -100,7 +102,9 @@ class OracleSchemaService:
     """Minimal schema management service."""
 
     def __init__(
-        self, config: FlextTargetOracleSettings, oracle_api: FlextDbOracleApi
+        self,
+        config: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
     ) -> None:
         """Store schema service dependencies."""
         self.config = config
@@ -127,7 +131,9 @@ class OracleBatchService:
     """Minimal batching service used by CLI and target orchestrators."""
 
     def __init__(
-        self, config: FlextTargetOracleSettings, oracle_api: FlextDbOracleApi
+        self,
+        config: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
     ) -> None:
         """Initialize batch storage and required dependencies."""
         self.config = config
@@ -192,7 +198,7 @@ class OracleRecordService:
             m.Meltano.SingerRecordMessage(
                 stream=record_message.stream,
                 record=transformed,
-            )
+            ),
         )
 
     def validate_record(
@@ -210,7 +216,9 @@ class OracleTargetServiceFactory:
     """Factory for constructing all Oracle target services."""
 
     def __init__(
-        self, config: FlextTargetOracleSettings, oracle_api: FlextDbOracleApi
+        self,
+        config: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
     ) -> None:
         """Store dependencies shared by service instances."""
         self._config = config

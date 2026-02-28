@@ -249,7 +249,7 @@ class ProductionTargetManager:
         """
         if not self.target:
             return FlextResult[dict[str, t.GeneralValueType]].fail(
-                "Target not initialized"
+                "Target not initialized",
             )
 
         logger.info("Processing Singer stream with %d messages", len(messages))
@@ -280,7 +280,7 @@ class ProductionTargetManager:
                 # Process message with error handling
                 if not self.target:
                     return FlextResult[dict[str, t.GeneralValueType]].fail(
-                        "Target not initialized"
+                        "Target not initialized",
                     )
                 # Target is guaranteed to be not None at this point due to check above
                 result = self.target.process_singer_message(message)
@@ -351,7 +351,7 @@ class ProductionTargetManager:
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
             return FlextResult[dict[str, t.GeneralValueType]].fail(
-                f"Stream processing error: {e}"
+                f"Stream processing error: {e}",
             )
 
     def health_check(self) -> FlextResult[dict[str, t.GeneralValueType]]:
@@ -418,7 +418,7 @@ class ProductionTargetManager:
             health_status.status = "unhealthy"
             health_status.error = str(e)
             return FlextResult[dict[str, t.GeneralValueType]].fail(
-                f"Health check error: {e}"
+                f"Health check error: {e}",
             )
 
     def shutdown(self) -> FlextResult[bool]:

@@ -294,7 +294,7 @@ def demonstrate_error_handling() -> None:
         RuntimeError,
         ImportError,
     ) as e:
-        logger.info(f"Configuration creation failed as expected: {e}")
+        logger.info("Configuration creation failed as expected: %s", e)
 
     # Demonstrate processing invalid messages
     config = create_configuration()

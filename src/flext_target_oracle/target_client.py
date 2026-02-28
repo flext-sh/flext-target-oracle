@@ -31,7 +31,8 @@ class FlextTargetOracle:
         self._record_batches: dict[str, list[dict[str, object]]] = {}
 
     def execute(
-        self, payload: str | None = None
+        self,
+        payload: str | None = None,
     ) -> FlextResult[m.TargetOracle.ExecuteResult]:
         """Execute target readiness check."""
         _ = payload
@@ -45,7 +46,7 @@ class FlextTargetOracle:
                 name="flext-target-oracle",
                 oracle_host=self.config.oracle_host,
                 oracle_service=self.config.oracle_service_name,
-            )
+            ),
         )
 
     def initialize(self) -> FlextResult[bool]:
@@ -75,13 +76,13 @@ class FlextTargetOracle:
                             "table-name": self.config.get_table_name(stream_name),
                             "schema-name": self.config.default_target_schema,
                         },
-                    )
+                    ),
                 ],
             )
             for stream_name, schema_message in self.schemas.items()
         ]
         return FlextResult[m.Meltano.SingerCatalog].ok(
-            m.Meltano.SingerCatalog(streams=catalog_entries)
+            m.Meltano.SingerCatalog(streams=catalog_entries),
         )
 
     def process_singer_messages(
@@ -121,7 +122,7 @@ class FlextTargetOracle:
                 messages_processed=processed,
                 streams=list(self.schemas.keys()),
                 state=self.state_message,
-            )
+            ),
         )
 
     def process_singer_message(
@@ -169,7 +170,7 @@ class FlextTargetOracle:
         try:
             try:
                 payload = m.TargetOracle.SingerRecordMessage.model_validate_json(
-                    record_data
+                    record_data,
                 )
             except ValidationError:
                 raw_payload = json.loads(record_data)
@@ -203,7 +204,8 @@ class FlextTargetOracle:
                 insert_sql = self._build_insert_sql(stream_name)
                 for record in batch:
                     extracted_at = record.get(
-                        "_sdc_extracted_at", datetime.now(UTC).isoformat()
+                        "_sdc_extracted_at",
+                        datetime.now(UTC).isoformat(),
                     )
                     cursor.execute(
                         insert_sql,

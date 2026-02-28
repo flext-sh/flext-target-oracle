@@ -41,7 +41,10 @@ class FlextOracleError:
 
         @staticmethod
         def authentication_failed(
-            *, username: str, oracle_service: str, error_code: str | None = None
+            *,
+            username: str,
+            oracle_service: str,
+            error_code: str | None = None,
         ) -> FlextTargetOracleExceptions.AuthenticationError:
             """Build an authentication failure error with service context."""
             logger.error(
@@ -81,7 +84,10 @@ class FlextOracleError:
 
         @staticmethod
         def record_processing_failed(
-            *, stream_name: str, record_count: int, failed_records: int
+            *,
+            stream_name: str,
+            record_count: int,
+            failed_records: int,
         ) -> FlextTargetOracleExceptions.ProcessingError:
             """Build a Singer record processing failure."""
             logger.error(
@@ -106,7 +112,8 @@ class FlextOracleObs:
         @staticmethod
         @contextmanager
         def query_performance(
-            table_name: str, operation: str = "SELECT"
+            table_name: str,
+            operation: str = "SELECT",
         ) -> Generator[Mapping[str, str]]:
             """Yield a mutable context while timing a query operation."""
             logger.debug("Starting query performance monitor")

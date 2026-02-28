@@ -40,12 +40,14 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     _target_config: FlextTargetOracleSettings = PrivateAttr()
     _oracle_api: FlextDbOracleApi = PrivateAttr()
     _record_buffers: dict[str, list[dict[str, t.JsonValue]]] = PrivateAttr(
-        default_factory=dict
+        default_factory=dict,
     )
     _total_records: int = PrivateAttr(default=0)
 
     def __init__(
-        self, config: FlextTargetOracleSettings, **_data: t.GeneralValueType
+        self,
+        config: FlextTargetOracleSettings,
+        **_data: t.GeneralValueType,
     ) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
@@ -97,7 +99,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 host=self.target_config.oracle_host,
                 service=self.target_config.oracle_service_name,
                 schema=self.target_config.default_target_schema,
-            )
+            ),
         )
 
     def test_connection(self) -> FlextResult[bool]:
@@ -327,7 +329,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                         stream: len(records)
                         for stream, records in self.record_buffers.items()
                     },
-                )
+                ),
             )
 
         except (
@@ -341,7 +343,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         ) as e:
             self.log_error("Failed to finalize streams", extra={"error": str(e)})
             return FlextResult[m.TargetOracle.LoaderFinalizeResult].fail(
-                f"Finalization failed: {e}"
+                f"Finalization failed: {e}",
             )
 
     def _build_create_table_sql(
