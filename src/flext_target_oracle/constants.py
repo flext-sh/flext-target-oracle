@@ -10,20 +10,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import os
 from enum import StrEnum
-from typing import ClassVar, Final
+from typing import Final
 
 from flext_db_oracle import FlextDbOracleConstants
 from flext_meltano import FlextMeltanoConstants
 
 # No longer importing from flext_db_oracle
-
-
-def _env_enabled(flag_name: str, default: str = "1") -> bool:
-    """Helper function to check if environment flag is enabled."""
-    value = os.environ.get(flag_name, default)
-    return value.lower() not in {"0", "false", "no"}
 
 
 class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
@@ -65,6 +58,19 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
 
     class TargetOracle:
         """Connection-related constants for Oracle target."""
+
+        class CommandTypes(StrEnum):
+            """Command type identifiers for Oracle target operations."""
+
+            VALIDATE = "oracle_target_validate"
+            LOAD = "oracle_target_load"
+            ABOUT = "oracle_target_about"
+
+        class OutputFormats(StrEnum):
+            """Output format options for command responses."""
+
+            JSON = "json"
+            TEXT = "text"
 
         DEFAULT_PORT: Final[int] = 1521
         MIN_PORT: Final[int] = 1024
@@ -110,9 +116,7 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
     class FeatureFlags:
         """Feature toggles for progressive dispatcher rollout."""
 
-        ENABLE_DISPATCHER: ClassVar[bool] = _env_enabled(
-            "FLEXT_TARGET_ORACLE_ENABLE_DISPATCHER",
-        )
+        ENABLE_DISPATCHER: Final[bool] = False
 
     class Observability:
         """Observability and monitoring constants."""

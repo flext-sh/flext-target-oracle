@@ -8,6 +8,7 @@ from typing import override
 
 from flext_core import FlextModels, FlextResult, h, u
 
+from .constants import c
 from .settings import FlextTargetOracleSettings
 from .target_client import FlextTargetOracle
 
@@ -73,7 +74,7 @@ class OracleTargetLoadCommand(FlextModels.Command):
 class OracleTargetAboutCommand(FlextModels.Command):
     """Return metadata about this target package."""
 
-    format: str = "json"
+    format: str = c.TargetOracle.OutputFormats.JSON
 
     def execute(self) -> FlextResult[str]:
         """Return formatted project metadata."""
@@ -83,7 +84,7 @@ class OracleTargetAboutCommand(FlextModels.Command):
             "description": "Singer target for loading records into Oracle",
             "capabilities": ["discover", "load", "state"],
         }
-        if self.format == "text":
+        if self.format == c.TargetOracle.OutputFormats.TEXT:
             lines = [
                 f"{info['name']} v{info['version']}",
                 str(info["description"]),
@@ -121,7 +122,7 @@ class OracleTargetCommandFactory:
     ) -> OracleTargetValidateCommand:
         """Create validation command instance."""
         return OracleTargetValidateCommand(
-            command_type="oracle_target_validate", config_file=config_file
+            command_type=c.TargetOracle.CommandTypes.VALIDATE.value, config_file=config_file
         )
 
     @staticmethod
@@ -131,16 +132,16 @@ class OracleTargetCommandFactory:
     ) -> OracleTargetLoadCommand:
         """Create load command instance."""
         return OracleTargetLoadCommand(
-            command_type="oracle_target_load",
+            command_type=c.TargetOracle.CommandTypes.LOAD.value,
             config_file=config_file,
             state_file=state_file,
         )
 
     @staticmethod
-    def create_about_command(output_format: str = "json") -> OracleTargetAboutCommand:
+    def create_about_command(output_format: str = c.TargetOracle.OutputFormats.JSON) -> OracleTargetAboutCommand:
         """Create about command instance."""
         return OracleTargetAboutCommand(
-            command_type="oracle_target_about", format=output_format
+            command_type=c.TargetOracle.CommandTypes.ABOUT.value, format=output_format
         )
 
 
