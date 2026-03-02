@@ -44,6 +44,39 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     )
     _total_records: int = PrivateAttr(default=0)
 
+    @property
+    def target_config(self) -> FlextTargetOracleSettings:
+        """Access target configuration."""
+        return self._target_config
+
+    @property
+    def oracle_api(self) -> FlextDbOracleApi:
+        """Access Oracle API instance."""
+        return self._oracle_api
+
+    @property
+    def record_buffers(self) -> dict[str, list[dict[str, t.JsonValue]]]:
+        """Access record buffers."""
+        return self._record_buffers
+
+    @property
+    def total_records(self) -> int:
+        """Access total records count."""
+        return self._total_records
+
+    @total_records.setter
+    def total_records(self, value: int) -> None:
+        """Set total records count."""
+        self._total_records = value
+
+    def log_info(self, message: str, **kwargs: t.GeneralValueType) -> None:
+        """Log info message."""
+        logger.info(message, **kwargs)
+
+    def log_error(self, message: str, **kwargs: t.GeneralValueType) -> None:
+        """Log error message."""
+        logger.error(message, **kwargs)
+
     def __init__(
         self,
         config: FlextTargetOracleSettings,

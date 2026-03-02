@@ -25,6 +25,6 @@ class TestsFlextTargetOracleUtilities(FlextTestsUtilities, u):
             """Internal tests declarations for test-only objects."""
 
 
-u = TestsFlextTargetOracleUtilities
+_utilities = TestsFlextTargetOracleUtilities
 
-__all__ = ["TestsFlextTargetOracleUtilities", "u"]
+__all__ = ["TestsFlextTargetOracleUtilities", "_utilities"]

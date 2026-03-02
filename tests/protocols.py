@@ -25,6 +25,6 @@ class TestsFlextTargetOracleProtocols(FlextTestsProtocols, FlextTargetOracleProt
             """Internal tests declarations for test-only objects."""
 
 
-p = TestsFlextTargetOracleProtocols
+_protocols = TestsFlextTargetOracleProtocols
 
-__all__ = ["TestsFlextTargetOracleProtocols", "p"]
+__all__ = ["TestsFlextTargetOracleProtocols", "_protocols"]

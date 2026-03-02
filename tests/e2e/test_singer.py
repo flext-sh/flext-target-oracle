@@ -8,40 +8,36 @@ from collections.abc import Mapping
 import pytest
 from flext_core import FlextResult
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
-from pydantic import SecretStr
-
 
 @pytest.mark.e2e
 class TestSingerWorkflowE2E:
     """Validate SCHEMA -> RECORD -> STATE happy path."""
 
     def _target(self) -> FlextTargetOracle:
+        from unittest.mock import Mock
+
         config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service_name="XE",
             oracle_user="test",
-            oracle_password=SecretStr("test"),
+            oracle_password="test",
         )
         target = FlextTargetOracle(config=config)
-        target.loader.test_connection = lambda: FlextResult[bool].ok(value=True)
-        target.loader.ensure_table_exists = lambda *_args, **_kwargs: FlextResult[
-            bool
-        ].ok(value=True)
-        target.loader.load_record = lambda *_args, **_kwargs: FlextResult[bool].ok(
-            value=True
-        )
-        target.loader.finalize_all_streams = lambda: FlextResult[
-            m.TargetOracle.LoaderFinalizeResult
-        ].ok(
-            m.TargetOracle.LoaderFinalizeResult(
-                total_records=0,
-                streams_processed=0,
-                loading_operation=m.TargetOracle.LoaderOperation(
-                    stream_name="orders",
-                    started_at="",
-                    completed_at="",
-                    records_loaded=0,
-                    records_failed=0,
+        target.loader.test_connection = Mock(return_value=FlextResult[bool].ok(value=True))
+        target.loader.ensure_table_exists = Mock(return_value=FlextResult[bool].ok(value=True))
+        target.loader.load_record = Mock(return_value=FlextResult[bool].ok(value=True))
+        target.loader.finalize_all_streams = Mock(
+            return_value=FlextResult[m.TargetOracle.LoaderFinalizeResult].ok(
+                m.TargetOracle.LoaderFinalizeResult(
+                    total_records=0,
+                    streams_processed=0,
+                    loading_operation=m.TargetOracle.LoaderOperation(
+                        stream_name="orders",
+                        started_at="",
+                        completed_at="",
+                        records_loaded=0,
+                        records_failed=0,
+                    ),
                 ),
             )
         )

@@ -22,7 +22,6 @@ from flext_target_oracle import (
     FlextTargetOracleSettings,
 )
 from flext_tests import FlextTestsDocker
-from pydantic import SecretStr
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.pool import NullPool
@@ -152,7 +151,7 @@ def oracle_config() -> FlextTargetOracleSettings:
         oracle_port=ORACLE_PORT,
         oracle_service_name=ORACLE_SERVICE,
         oracle_user=TEST_SCHEMA,
-        oracle_password=SecretStr("test_password"),
+        oracle_password="test_password",
         default_target_schema=TEST_SCHEMA,
         batch_size=1000,
         use_bulk_operations=True,
@@ -223,7 +222,7 @@ def sample_config() -> FlextTargetOracleSettings:
         oracle_port=1521,
         oracle_service_name="XE",
         oracle_user="test_user",
-        oracle_password=SecretStr("test_password"),
+        oracle_password="test_password",
         default_target_schema="TEST_SCHEMA",
         batch_size=1000,
         use_bulk_operations=True,
@@ -537,9 +536,9 @@ def connected_loader(
 
 # Performance Testing Fixtures
 @pytest.fixture
-def large_dataset() -> list[t.GeneralValueType]:
+def large_dataset() -> list[dict[str, t.JsonValue]]:
     """Generate large dataset for performance testing."""
-    schema = {
+    schema: dict[str, t.JsonValue] = {
         "type": "SCHEMA",
         "stream": "performance_test",
         "schema": {
@@ -554,21 +553,22 @@ def large_dataset() -> list[t.GeneralValueType]:
         "key_properties": ["id"],
     }
 
-    records = [
+    records: list[dict[str, t.JsonValue]] = [
         {
             "type": "RECORD",
             "stream": "performance_test",
             "record": {
                 "id": i,
-                "data": f"Performance test data {i}" * 10,  # Make it larger
+                "data": f"Performance test data {i}" * 10,
                 "value": i * 1.5,
                 "timestamp": f"2025-01-20T12:{i % 60:02d}:00Z",
             },
         }
-        for i in range(10000)  # 10k records
+        for i in range(10000)
     ]
 
-    result: list[t.GeneralValueType] = [schema]
+    result: list[dict[str, t.JsonValue]] = []
+    result.append(schema)
     result.extend(records)
     return result
 

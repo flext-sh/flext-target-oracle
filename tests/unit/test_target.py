@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
+from unittest.mock import Mock
 
 import pytest
 from flext_core import FlextResult
@@ -13,40 +14,39 @@ from flext_target_oracle import (
     FlextTargetOracleExceptions,
     m,
 )
-from pydantic import SecretStr
-
 
 @pytest.fixture
-def target() -> FlextTargetOracle:
+def target(mock_oracle_api: Mock) -> FlextTargetOracle:
+    """Create target with mocked loader."""
+    from unittest.mock import Mock
+
     config = FlextTargetOracleSettings(
         oracle_host="localhost",
         oracle_service_name="XE",
         oracle_user="test",
-        oracle_password=SecretStr("test"),
+        oracle_password="test",
         default_target_schema="TEST_SCHEMA",
     )
     client = FlextTargetOracle(config=config)
-    client.loader.test_connection = lambda: FlextResult[bool].ok(value=True)
-    client.loader.ensure_table_exists = lambda *_args, **_kwargs: FlextResult[bool].ok(
-        value=True
-    )
-    client.loader.load_record = lambda *_args, **_kwargs: FlextResult[bool].ok(
-        value=True
-    )
-    client.loader.finalize_all_streams = lambda: FlextResult[
-        m.TargetOracle.LoaderFinalizeResult
-    ].ok(
-        m.TargetOracle.LoaderFinalizeResult(
-            total_records=0,
-            streams_processed=0,
-            loading_operation=m.TargetOracle.LoaderOperation(
-                stream_name="users",
-                started_at="",
-                completed_at="",
-                records_loaded=0,
-                records_failed=0,
+    
+    # Mock loader methods
+    client.loader.test_connection = Mock(return_value=FlextResult[bool].ok(value=True))
+    client.loader.ensure_table_exists = Mock(return_value=FlextResult[bool].ok(value=True))
+    client.loader.load_record = Mock(return_value=FlextResult[bool].ok(value=True))
+    client.loader.finalize_all_streams = Mock(
+        return_value=FlextResult[m.TargetOracle.LoaderFinalizeResult].ok(
+            m.TargetOracle.LoaderFinalizeResult(
+                total_records=0,
+                streams_processed=0,
+                loading_operation=m.TargetOracle.LoaderOperation(
+                    stream_name="users",
+                    started_at="",
+                    completed_at="",
+                    records_loaded=0,
+                    records_failed=0,
+                ),
             ),
-        ),
+        )
     )
     return client
 

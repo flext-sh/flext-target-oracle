@@ -14,8 +14,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Literal
-
 from flext_core import FlextTypes
 from flext_db_oracle import FlextDbOracleTypes
 from flext_meltano import FlextMeltanoTypes
@@ -268,48 +266,6 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
     # =========================================================================
     # SINGER TARGET ORACLE PROJECT TYPES - Domain-specific project types extending t
     # =========================================================================
-
-    class Project:
-        """Singer Target Oracle-specific project types extending t.
-
-        Adds Singer target Oracle-specific project types while inheriting
-        generic types from t. Follows domain separation principle:
-        Singer target Oracle domain owns Oracle loading and Singer protocol-specific types.
-        """
-
-        # Singer target Oracle-specific project types extending the generic ones
-        type ProjectType = Literal[
-            # Generic types inherited from t
-            "library",
-            "application",
-            "service",
-            # Singer target Oracle-specific types
-            "singer-target",
-            "oracle-loader",
-            "database-loader",
-            "singer-target-oracle",
-            "target-oracle",
-            "oracle-connector",
-            "database-connector",
-            "singer-protocol",
-            "oracle-integration",
-            "database-service",
-            "oracle-target",
-            "singer-stream",
-            "etl-target",
-            "data-pipeline",
-            "oracle-sink",
-            "singer-integration",
-        ]
-
-        # Singer target Oracle-specific project configurations
-        type SingerTargetOracleProjectConfig = dict[str, FlextTypes.GeneralValueType]
-        type OracleLoaderConfig = dict[str, str | int | bool | list[str]]
-        type SingerProtocolConfig = dict[
-            str,
-            bool | str | dict[str, FlextTypes.GeneralValueType],
-        ]
-        type TargetOraclePipelineConfig = dict[str, FlextTypes.GeneralValueType]
 
 
 # Alias for simplified usage

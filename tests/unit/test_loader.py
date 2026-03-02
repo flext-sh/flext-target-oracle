@@ -5,9 +5,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 import pytest
-from flext_core.typings import t
+from flext_core import t
 from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings
-from pydantic import SecretStr
 
 
 @pytest.fixture
@@ -18,7 +17,7 @@ def loader_config() -> FlextTargetOracleSettings:
         oracle_port=1521,
         oracle_service_name="XE",
         oracle_user="test_user",
-        oracle_password=SecretStr("test_password"),
+        oracle_password="test_password",
         default_target_schema="TEST_SCHEMA",
         batch_size=2,
         use_bulk_operations=True,

@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from flext_target_oracle import FlextTargetOracleSettings, LoadMethod
-from pydantic import SecretStr
-
 
 class TestOracleSettings:
     """Validate canonical Oracle settings behavior."""
@@ -14,7 +12,7 @@ class TestOracleSettings:
             oracle_host="localhost",
             oracle_service_name="XE",
             oracle_user="test_user",
-            oracle_password=SecretStr("test_pass"),
+            oracle_password="test_pass",
         )
 
         assert config.oracle_port == 1521
@@ -34,7 +32,7 @@ class TestOracleSettings:
             oracle_port=1521,
             oracle_service_name="XE",
             oracle_user="test",
-            oracle_password=SecretStr("test"),
+            oracle_password="test",
             default_target_schema="TEST_SCHEMA",
             autocommit=True,
             transaction_timeout=120,
@@ -60,7 +58,7 @@ class TestOracleSettings:
             oracle_host="localhost",
             oracle_service_name="XE",
             oracle_user="test",
-            oracle_password=SecretStr("test"),
+            oracle_password="test",
             table_prefix="stg_",
             table_suffix="_tbl",
         )
@@ -72,7 +70,7 @@ class TestOracleSettings:
             oracle_host="localhost",
             oracle_service_name="XE",
             oracle_user="test",
-            oracle_password=SecretStr("test"),
+            oracle_password="test",
             batch_size=100,
             commit_interval=200,
         )
