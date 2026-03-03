@@ -25,9 +25,10 @@ import logging
 import os
 
 from flext_core import FlextLogger, FlextResult
+from pydantic import SecretStr
+
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
 from flext_target_oracle.models import m
-from pydantic import SecretStr
 
 # Configure logging for the example
 logging.basicConfig(level=logging.INFO)

@@ -11,8 +11,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_oracle import t
 from flext_tests import FlextTestsTypes
+
+from flext_target_oracle import t
 
 
 class TestsFlextTargetOracleTypes(FlextTestsTypes, t):
