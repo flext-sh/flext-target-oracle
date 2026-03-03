@@ -249,7 +249,7 @@ class ProductionTargetManager:
 
         """
         if not self.target:
-            return FlextResult[dict[str, t.ContainerValue]].fail(
+            return FlextResult[t.ConfigurationMapping].fail(
                 "Target not initialized",
             )
 
@@ -280,7 +280,7 @@ class ProductionTargetManager:
 
                 # Process message with error handling
                 if not self.target:
-                    return FlextResult[dict[str, t.ContainerValue]].fail(
+                    return FlextResult[t.ConfigurationMapping].fail(
                         "Target not initialized",
                     )
                 # Target is guaranteed to be not None at this point due to check above
@@ -337,7 +337,7 @@ class ProductionTargetManager:
                 "Stream processing completed in %.2f seconds",
                 processing_duration,
             )
-            return FlextResult[dict[str, t.ContainerValue]].ok(stats.model_dump())
+            return FlextResult[t.ConfigurationMapping].ok(stats.model_dump())
 
         except (
             ValueError,
@@ -351,7 +351,7 @@ class ProductionTargetManager:
             logger.exception("Unexpected error during stream processing")
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
-            return FlextResult[dict[str, t.ContainerValue]].fail(
+            return FlextResult[t.ConfigurationMapping].fail(
                 f"Stream processing error: {e}",
             )
 
@@ -402,7 +402,7 @@ class ProductionTargetManager:
                 metrics.update(target_metrics.model_dump())
 
             logger.debug("Health check completed: %s", health_status.status)
-            return FlextResult[dict[str, t.ContainerValue]].ok(
+            return FlextResult[t.ConfigurationMapping].ok(
                 health_status.model_dump(),
             )
 
@@ -418,7 +418,7 @@ class ProductionTargetManager:
             logger.exception("Health check failed")
             health_status.status = "unhealthy"
             health_status.error = str(e)
-            return FlextResult[dict[str, t.ContainerValue]].fail(
+            return FlextResult[t.ConfigurationMapping].fail(
                 f"Health check error: {e}",
             )
 
