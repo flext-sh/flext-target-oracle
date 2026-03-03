@@ -21,10 +21,10 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
 
         @staticmethod
         def transform_record_for_oracle(
-            record: Mapping[str, t.GeneralValueType],
-        ) -> FlextResult[Mapping[str, t.GeneralValueType]]:
+            record: Mapping[str, t.ContainerValue],
+        ) -> FlextResult[Mapping[str, t.ContainerValue]]:
             """Normalize record values for Oracle persistence."""
-            transformed: dict[str, t.GeneralValueType] = {}
+            transformed: dict[str, t.ContainerValue] = {}
             for key, value in record.items():
                 is_mapping = isinstance(value, Mapping)
                 is_sequence = isinstance(value, Sequence) and not isinstance(
@@ -39,7 +39,7 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
                         transformed[key.upper()] = 1 if bool_value else 0
                     case _:
                         transformed[key.upper()] = value
-            return FlextResult[Mapping[str, t.GeneralValueType]].ok(transformed)
+            return FlextResult[t.ConfigurationMapping].ok(transformed)
 
 
 u = FlextTargetOracleUtilities

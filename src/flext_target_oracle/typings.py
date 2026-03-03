@@ -41,7 +41,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type TargetConfiguration = dict[
             str,
-            str | int | bool | dict[str, FlextTypes.GeneralValueType],
+            str | int | bool | dict[str, FlextTypes.ContainerValue],
         ]
         type StreamConfiguration = dict[
             str,
@@ -61,7 +61,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type DatabaseConfiguration = dict[
             str,
-            str | int | bool | dict[str, FlextTypes.GeneralValueType],
+            str | int | bool | dict[str, FlextTypes.ContainerValue],
         ]
         type ConnectionManagement = dict[
             str,
@@ -69,16 +69,16 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         ]
         type SessionSettings = dict[
             str,
-            str | bool | dict[str, FlextTypes.GeneralValueType],
+            str | bool | dict[str, FlextTypes.ContainerValue],
         ]
         type TransactionControl = dict[
             str,
-            str | bool | dict[str, FlextTypes.GeneralValueType],
+            str | bool | dict[str, FlextTypes.ContainerValue],
         ]
         type DatabaseMetadata = dict[str, str | dict[str, FlextTypes.JsonValue]]
         type PerformanceSettings = dict[
             str,
-            int | float | dict[str, FlextTypes.GeneralValueType],
+            int | float | dict[str, FlextTypes.ContainerValue],
         ]
 
     # =========================================================================
@@ -90,7 +90,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type TableConfiguration = dict[
             str,
-            str | bool | dict[str, FlextTypes.GeneralValueType],
+            str | bool | dict[str, FlextTypes.ContainerValue],
         ]
         type SchemaDefinition = dict[
             str,
@@ -99,12 +99,12 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         type ColumnMapping = dict[str, str | dict[str, FlextTypes.JsonValue]]
         type IndexConfiguration = dict[
             str,
-            str | list[str] | dict[str, FlextTypes.GeneralValueType],
+            str | list[str] | dict[str, FlextTypes.ContainerValue],
         ]
         type ConstraintDefinition = dict[str, str | dict[str, FlextTypes.JsonValue]]
         type TablespaceSettings = dict[
             str,
-            str | int | dict[str, FlextTypes.GeneralValueType],
+            str | int | dict[str, FlextTypes.ContainerValue],
         ]
 
     # =========================================================================
@@ -116,21 +116,21 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type SqlConfiguration = dict[
             str,
-            str | bool | int | dict[str, FlextTypes.GeneralValueType],
+            str | bool | int | dict[str, FlextTypes.ContainerValue],
         ]
         type QueryExecution = dict[str, str | dict[str, FlextTypes.JsonValue]]
         type BulkOperations = dict[
             str,
-            str | int | list[str] | dict[str, FlextTypes.GeneralValueType],
+            str | int | list[str] | dict[str, FlextTypes.ContainerValue],
         ]
         type PreparedStatements = dict[str, str | dict[str, FlextTypes.JsonValue]]
         type SqlOptimization = dict[
             str,
-            bool | str | dict[str, FlextTypes.GeneralValueType],
+            bool | str | dict[str, FlextTypes.ContainerValue],
         ]
         type ResultSetHandling = dict[
             str,
-            str | int | dict[str, FlextTypes.GeneralValueType],
+            str | int | dict[str, FlextTypes.ContainerValue],
         ]
 
     # =========================================================================
@@ -142,21 +142,21 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type PerformanceConfiguration = dict[
             str,
-            str | int | dict[str, FlextTypes.GeneralValueType],
+            str | int | dict[str, FlextTypes.ContainerValue],
         ]
         type ConnectionPooling = dict[str, int | bool | dict[str, FlextTypes.JsonValue]]
         type BulkLoadOptimization = dict[
             str,
-            str | int | dict[str, FlextTypes.GeneralValueType],
+            str | int | dict[str, FlextTypes.ContainerValue],
         ]
         type QueryOptimization = dict[str, str | dict[str, FlextTypes.JsonValue]]
         type CachingStrategy = dict[
             str,
-            bool | str | dict[str, FlextTypes.GeneralValueType],
+            bool | str | dict[str, FlextTypes.ContainerValue],
         ]
         type ParallelProcessing = dict[
             str,
-            int | str | dict[str, FlextTypes.GeneralValueType],
+            int | str | dict[str, FlextTypes.ContainerValue],
         ]
 
     # =========================================================================
@@ -168,16 +168,16 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type TransformationConfiguration = dict[
             str,
-            str | bool | dict[str, FlextTypes.GeneralValueType],
+            str | bool | dict[str, FlextTypes.ContainerValue],
         ]
         type FieldMapping = dict[
             str,
-            str | list[str] | dict[str, FlextTypes.GeneralValueType],
+            str | list[str] | dict[str, FlextTypes.ContainerValue],
         ]
         type DataValidation = dict[str, str | dict[str, FlextTypes.JsonValue]]
         type TypeConversion = dict[
             str,
-            bool | str | dict[str, FlextTypes.GeneralValueType],
+            bool | str | dict[str, FlextTypes.ContainerValue],
         ]
         type FilteringRules = dict[str, str | dict[str, FlextTypes.JsonValue]]
         type TransformationResult = dict[str, dict[str, FlextTypes.JsonValue]]
@@ -191,17 +191,17 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type StreamConfiguration = dict[
             str,
-            str | bool | int | dict[str, FlextTypes.GeneralValueType],
+            str | bool | int | dict[str, FlextTypes.ContainerValue],
         ]
         type StreamMetadata = dict[str, str | dict[str, FlextTypes.JsonValue]]
         type StreamRecord = dict[
             str,
-            FlextTypes.JsonValue | dict[str, FlextTypes.GeneralValueType],
+            FlextTypes.JsonValue | dict[str, FlextTypes.ContainerValue],
         ]
         type StreamState = dict[str, str | int | dict[str, FlextTypes.JsonValue]]
         type StreamBookmark = dict[
             str,
-            str | int | dict[str, FlextTypes.GeneralValueType],
+            str | int | dict[str, FlextTypes.ContainerValue],
         ]
         type StreamSchema = dict[str, str | dict[str, FlextTypes.JsonValue] | bool]
 
@@ -231,16 +231,16 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type ErrorConfiguration = dict[
             str,
-            bool | str | int | dict[str, FlextTypes.GeneralValueType],
+            bool | str | int | dict[str, FlextTypes.ContainerValue],
         ]
         type ErrorRecovery = dict[
             str,
-            str | bool | dict[str, FlextTypes.GeneralValueType],
+            str | bool | dict[str, FlextTypes.ContainerValue],
         ]
         type ErrorReporting = dict[str, str | int | dict[str, FlextTypes.JsonValue]]
         type ErrorClassification = dict[
             str,
-            str | int | dict[str, FlextTypes.GeneralValueType],
+            str | int | dict[str, FlextTypes.ContainerValue],
         ]
         type ErrorMetrics = dict[str, int | float | dict[str, FlextTypes.JsonValue]]
         type ErrorTracking = list[
@@ -260,7 +260,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         """
 
         # Common dictionary types
-        type Dict = dict[str, FlextTypes.GeneralValueType]
+        type Dict = dict[str, FlextTypes.ContainerValue]
         """Type alias for generic dictionary (attribute name to value mapping)."""
 
     # =========================================================================

@@ -12,14 +12,14 @@ from flext_core import t
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 
-def load_config() -> dict[str, t.GeneralValueType]:
+def load_config() -> dict[str, t.ContainerValue]:
     """Load configuration from file."""
     config_path = Path("config.json")
     with config_path.open(encoding="utf-8") as f:
         return json.load(f)
 
 
-def load_singer_messages() -> list[dict[str, t.GeneralValueType]]:
+def load_singer_messages() -> list[dict[str, t.ContainerValue]]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
     with data_path.open(encoding="utf-8") as f:

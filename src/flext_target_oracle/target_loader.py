@@ -69,18 +69,18 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         """Set total records count."""
         self._total_records = value
 
-    def log_info(self, message: str, **kwargs: t.GeneralValueType) -> None:
+    def log_info(self, message: str, **kwargs: t.ContainerValue) -> None:
         """Log info message."""
         logger.info(message, **kwargs)
 
-    def log_error(self, message: str, **kwargs: t.GeneralValueType) -> None:
+    def log_error(self, message: str, **kwargs: t.ContainerValue) -> None:
         """Log error message."""
         logger.error(message, **kwargs)
 
     def __init__(
         self,
         config: FlextTargetOracleSettings,
-        **_data: t.GeneralValueType,
+        **_data: t.ContainerValue,
     ) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:

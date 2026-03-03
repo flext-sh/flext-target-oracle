@@ -42,12 +42,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
             user: str | None = None,
             dsn: str | None = None,
             code: str | None = None,
-            context: Mapping[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: t.MetadataAttributeValue,
+            **kwargs: t.MetadataValue,
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
-            oracle_context: dict[str, t.MetadataAttributeValue] = (
+            oracle_context: dict[str, t.MetadataValue] = (
                 dict(context) if context else {}
             )
             if host is not None:
@@ -88,12 +88,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
             auth_method: str | None = None,
             wallet_location: str | None = None,
             code: str | None = None,
-            context: Mapping[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: t.MetadataAttributeValue,
+            **kwargs: t.MetadataValue,
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
-            oracle_context: dict[str, t.MetadataAttributeValue] = (
+            oracle_context: dict[str, t.MetadataValue] = (
                 dict(context) if context else {}
             )
             if user is not None:
@@ -128,15 +128,15 @@ class FlextTargetOracleExceptions(FlextExceptions):
             *,
             stream_name: str | None = None,
             record_count: int | None = None,
-            error_records: list[Mapping[str, t.MetadataAttributeValue]] | None = None,
+            error_records: list[Mapping[str, t.MetadataValue]] | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: Mapping[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: t.MetadataAttributeValue,
+            **kwargs: t.MetadataValue,
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
-            oracle_context: dict[str, t.MetadataAttributeValue] = (
+            oracle_context: dict[str, t.MetadataValue] = (
                 dict(context) if context else {}
             )
             if stream_name is not None:
@@ -179,12 +179,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
             schema_hash: str | None = None,
             validation_errors: list[str] | None = None,
             code: str | None = None,
-            context: Mapping[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: t.MetadataAttributeValue,
+            **kwargs: t.MetadataValue,
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
-            oracle_context: dict[str, t.MetadataAttributeValue] = (
+            oracle_context: dict[str, t.MetadataValue] = (
                 dict(context) if context else {}
             )
             if stream_name is not None:
@@ -224,12 +224,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
             table_name: str | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: Mapping[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: t.MetadataAttributeValue,
+            **kwargs: t.MetadataValue,
         ) -> None:
             """Initialize SQL error with Oracle-specific context."""
-            oracle_context: dict[str, t.MetadataAttributeValue] = (
+            oracle_context: dict[str, t.MetadataValue] = (
                 dict(context) if context else {}
             )
             if sql_statement is not None:

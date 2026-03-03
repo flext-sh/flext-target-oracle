@@ -60,7 +60,7 @@ class HealthStatus(BaseModel):
     status: str = Field(default="healthy")
     timestamp: float = Field(default=0.0)
     checks: dict[str, bool | str] = Field(default_factory=dict)
-    metrics: dict[str, t.GeneralValueType] = Field(default_factory=dict)
+    metrics: dict[str, t.ContainerValue] = Field(default_factory=dict)
     error: str = Field(default="")
 
 
@@ -238,7 +238,7 @@ class ProductionTargetManager:
     def process_singer_stream(
         self,
         messages: list[SingerMessage],
-    ) -> FlextResult[dict[str, t.GeneralValueType]]:
+    ) -> FlextResult[dict[str, t.ContainerValue]]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:
@@ -249,7 +249,7 @@ class ProductionTargetManager:
 
         """
         if not self.target:
-            return FlextResult[dict[str, t.GeneralValueType]].fail(
+            return FlextResult[dict[str, t.ContainerValue]].fail(
                 "Target not initialized",
             )
 
@@ -280,7 +280,7 @@ class ProductionTargetManager:
 
                 # Process message with error handling
                 if not self.target:
-                    return FlextResult[dict[str, t.GeneralValueType]].fail(
+                    return FlextResult[dict[str, t.ContainerValue]].fail(
                         "Target not initialized",
                     )
                 # Target is guaranteed to be not None at this point due to check above
@@ -337,7 +337,7 @@ class ProductionTargetManager:
                 "Stream processing completed in %.2f seconds",
                 processing_duration,
             )
-            return FlextResult[dict[str, t.GeneralValueType]].ok(stats.model_dump())
+            return FlextResult[dict[str, t.ContainerValue]].ok(stats.model_dump())
 
         except (
             ValueError,
@@ -351,11 +351,11 @@ class ProductionTargetManager:
             logger.exception("Unexpected error during stream processing")
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
-            return FlextResult[dict[str, t.GeneralValueType]].fail(
+            return FlextResult[dict[str, t.ContainerValue]].fail(
                 f"Stream processing error: {e}",
             )
 
-    def health_check(self) -> FlextResult[dict[str, t.GeneralValueType]]:
+    def health_check(self) -> FlextResult[dict[str, t.ContainerValue]]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
@@ -402,7 +402,7 @@ class ProductionTargetManager:
                 metrics.update(target_metrics.model_dump())
 
             logger.debug("Health check completed: %s", health_status.status)
-            return FlextResult[dict[str, t.GeneralValueType]].ok(
+            return FlextResult[dict[str, t.ContainerValue]].ok(
                 health_status.model_dump(),
             )
 
@@ -418,7 +418,7 @@ class ProductionTargetManager:
             logger.exception("Health check failed")
             health_status.status = "unhealthy"
             health_status.error = str(e)
-            return FlextResult[dict[str, t.GeneralValueType]].fail(
+            return FlextResult[dict[str, t.ContainerValue]].fail(
                 f"Health check error: {e}",
             )
 

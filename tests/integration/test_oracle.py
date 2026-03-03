@@ -29,7 +29,7 @@ from sqlalchemy.engine import Engine
 
 
 def _schema_parts(
-    message: Mapping[str, t.GeneralValueType],
+    message: Mapping[str, t.ContainerValue],
 ) -> tuple[Mapping[str, t.JsonValue], list[str] | None]:
     schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(message)
     return schema_message.schema_definition, schema_message.key_properties
@@ -45,7 +45,7 @@ class TestOracleIntegration:
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: Engine,
-        simple_schema: dict[str, t.GeneralValueType],
+        simple_schema: dict[str, t.ContainerValue],
     ) -> None:
         """Test creating a simple table with basic data types."""
         stream_name = "test_users"
@@ -98,7 +98,7 @@ class TestOracleIntegration:
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: Engine,
-        simple_schema: dict[str, t.GeneralValueType],
+        simple_schema: dict[str, t.ContainerValue],
     ) -> None:
         """Test inserting data and retrieving it."""
         stream_name = "test_insert"
@@ -137,7 +137,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        simple_schema: dict[str, t.GeneralValueType],
+        simple_schema: dict[str, t.ContainerValue],
     ) -> None:
         """Test merge mode for updating existing records."""
         # Pydantic models are value objects; use model_copy to produce a mutable copy
@@ -243,7 +243,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        nested_schema: dict[str, t.GeneralValueType],
+        nested_schema: dict[str, t.ContainerValue],
     ) -> None:
         """Test JSON storage mode with nested data."""
         oracle_config = oracle_config.model_copy(update={})
@@ -378,7 +378,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        simple_schema: dict[str, t.GeneralValueType],
+        simple_schema: dict[str, t.ContainerValue],
     ) -> None:
         """Test truncate table before loading data."""
         oracle_config = oracle_config.model_copy(update={"truncate_before_load": True})
@@ -416,7 +416,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        simple_schema: dict[str, t.GeneralValueType],
+        simple_schema: dict[str, t.ContainerValue],
     ) -> None:
         """Test creation of custom indexes."""
         oracle_config = oracle_config.model_copy(
@@ -477,7 +477,7 @@ class TestOracleTargetE2E:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        singer_messages: list[dict[str, t.GeneralValueType]],
+        singer_messages: list[dict[str, t.ContainerValue]],
     ) -> None:
         """Test complete Singer workflow: schema -> records -> state."""
         target = FlextTargetOracle(config=oracle_config)
