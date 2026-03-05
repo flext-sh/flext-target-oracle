@@ -4,6 +4,8 @@ This example demonstrates how to use the Oracle target to load
 Singer-formatted data into an Oracle database.
 """
 
+from __future__ import annotations
+
 import json
 from pathlib import Path
 

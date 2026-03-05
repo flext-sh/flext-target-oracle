@@ -21,6 +21,8 @@ Usage:
     python examples/basic_usage.py
 """
 
+from __future__ import annotations
+
 import logging
 import os
 
