@@ -25,8 +25,6 @@ class OracleTargetValidateCommand(FlextModels.Command):
             return FlextResult[str].fail(config_result.error or "Config load failed")
 
         config = config_result.value
-        if config is None:
-            return FlextResult[str].fail("Configuration could not be loaded")
 
         validation_result = config.validate_business_rules()
         if validation_result.is_failure:
@@ -55,8 +53,6 @@ class OracleTargetLoadCommand(FlextModels.Command):
             return FlextResult[str].fail(config_result.error or "Config load failed")
 
         config = config_result.value
-        if config is None:
-            return FlextResult[str].fail("Configuration could not be loaded")
 
         target = FlextTargetOracle(config)
         init_result = target.initialize()
@@ -100,17 +96,15 @@ class OracleTargetCommandHandler(h[FlextModels.Command, str]):
     @override
     def handle(self, message: FlextModels.Command) -> FlextResult[str]:
         """Invoke command execute methods in a typed-safe way."""
-        execute_method = getattr(message, "execute", None)
-        if execute_method is None:
-            return FlextResult[str].fail(
-                f"Unsupported command: {type(message).__name__}",
-            )
-        result = execute_method()
-        if not isinstance(result, FlextResult):
-            return FlextResult[str].fail(
-                f"Invalid result type: {type(result).__name__}",
-            )
-        return result
+        if isinstance(message, OracleTargetValidateCommand):
+            return message.execute()
+        if isinstance(message, OracleTargetLoadCommand):
+            return message.execute()
+        if isinstance(message, OracleTargetAboutCommand):
+            return message.execute()
+        return FlextResult[str].fail(
+            f"Unsupported command: {type(message).__name__}",
+        )
 
 
 class OracleTargetCommandFactory:

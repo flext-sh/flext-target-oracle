@@ -144,8 +144,6 @@ class FlextTargetOracle:
                 return self._handle_state(state_message)
             case m.TargetOracle.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
-            case _:
-                return FlextResult[bool].fail("Unsupported Singer message type")
 
     def finalize(self) -> FlextResult[m.TargetOracle.LoaderFinalizeResult]:
         """Flush remaining batches and return loader statistics."""
@@ -202,12 +200,15 @@ class FlextTargetOracle:
             connection = self._connect_oracle()
             with connection.cursor() as cursor:
                 insert_sql = self._build_insert_sql(stream_name)
+                execute_method = getattr(cursor, "execute", None)
+                if not callable(execute_method):
+                    return FlextResult[bool].fail("Cursor does not support execute")
                 for record in batch:
                     extracted_at = record.get(
                         "_sdc_extracted_at",
                         datetime.now(UTC).isoformat(),
                     )
-                    cursor.execute(
+                    execute_method(
                         insert_sql,
                         {
                             "data": json.dumps(record),

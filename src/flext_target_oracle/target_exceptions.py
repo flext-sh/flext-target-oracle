@@ -153,7 +153,6 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 message=message,
                 error_code=code or FlextConstants.Errors.PROCESSING_ERROR,
                 context=oracle_context or None,
-                _correlation_id=correlation_id,
             )
             # Oracle-specific attributes
             self.stream_name = oracle_context.get("stream_name")

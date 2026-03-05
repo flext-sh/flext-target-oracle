@@ -5,18 +5,18 @@ from __future__ import annotations
 import json
 import time
 from collections.abc import Mapping
+from unittest.mock import Mock
 
 import pytest
 from flext_core import FlextResult
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
+
 
 @pytest.mark.performance
 class TestPerformance:
     """Keep fast checks for throughput-sensitive code paths."""
 
     def _target(self) -> FlextTargetOracle:
-        from unittest.mock import Mock
-
         config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service_name="XE",
@@ -26,22 +26,12 @@ class TestPerformance:
             use_bulk_operations=True,
         )
         target = FlextTargetOracle(config=config)
-        target.loader.test_connection = Mock(return_value=FlextResult[bool].ok(value=True))
-        target.loader.finalize_all_streams = Mock(
-            return_value=FlextResult[m.TargetOracle.LoaderFinalizeResult].ok(
-                m.TargetOracle.LoaderFinalizeResult(
-                    total_records=0,
-                    streams_processed=0,
-                    loading_operation=m.TargetOracle.LoaderOperation(
-                        stream_name="perf_stream",
-                        started_at="",
-                        completed_at="",
-                        records_loaded=0,
-                        records_failed=0,
-                    ),
-                ),
-            )
-        )
+        mock_oracle_api = Mock()
+        mock_oracle_api.__enter__ = Mock(return_value=mock_oracle_api)
+        mock_oracle_api.__exit__ = Mock(return_value=None)
+        mock_oracle_api.get_tables.return_value = FlextResult[list[str]].ok([])
+        mock_oracle_api.execute_sql.return_value = FlextResult[bool].ok(value=True)
+        object.__setattr__(target.loader, "_oracle_api", mock_oracle_api)
         return target
 
     def test_execute_readiness_is_constant_time(self) -> None:
@@ -79,11 +69,7 @@ class TestPerformance:
         assert elapsed < 1.0
 
     def test_schema_and_record_processing_has_no_json_reparse_loop(self) -> None:
-        from unittest.mock import Mock
-
         target = self._target()
-        target.loader.ensure_table_exists = Mock(return_value=FlextResult[bool].ok(value=True))
-        target.loader.load_record = Mock(return_value=FlextResult[bool].ok(value=True))
 
         schema = {
             "type": "SCHEMA",

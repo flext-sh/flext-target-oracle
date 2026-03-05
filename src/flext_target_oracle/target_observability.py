@@ -29,11 +29,9 @@ class FlextOracleError:
             """Build a connection error for unavailable Oracle endpoints."""
             logger.error(
                 "Oracle database unavailable",
-                extra={
-                    "connection_string": connection_string,
-                    "error_code": error_code,
-                    "recovery_strategy": recovery_strategy,
-                },
+                connection_string=connection_string,
+                error_code=error_code or "",
+                recovery_strategy=recovery_strategy,
             )
             return FlextTargetOracleExceptions.OracleConnectionError(
                 f"Oracle database unavailable: {connection_string}",
@@ -49,11 +47,9 @@ class FlextOracleError:
             """Build an authentication failure error with service context."""
             logger.error(
                 "Oracle authentication failure",
-                extra={
-                    "username": username,
-                    "oracle_service": oracle_service,
-                    "error_code": error_code,
-                },
+                username=username,
+                oracle_service=oracle_service,
+                error_code=error_code or "",
             )
             return FlextTargetOracleExceptions.AuthenticationError(
                 f"Oracle authentication failed for {username} on {oracle_service}",
@@ -72,11 +68,9 @@ class FlextOracleError:
             """Build a Singer schema validation failure."""
             logger.error(
                 "Singer schema validation failed",
-                extra={
-                    "stream_name": stream_name,
-                    "schema_errors": "; ".join(schema_errors),
-                    "singer_specification": singer_specification,
-                },
+                stream_name=stream_name,
+                schema_errors="; ".join(schema_errors),
+                singer_specification=singer_specification,
             )
             return FlextTargetOracleExceptions.SchemaError(
                 f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
@@ -92,11 +86,9 @@ class FlextOracleError:
             """Build a Singer record processing failure."""
             logger.error(
                 "Singer record processing failed",
-                extra={
-                    "stream_name": stream_name,
-                    "record_count": record_count,
-                    "failed_records": failed_records,
-                },
+                stream_name=stream_name,
+                record_count=record_count,
+                failed_records=failed_records,
             )
             return FlextTargetOracleExceptions.ProcessingError(
                 f"Record processing failed for {stream_name}: {failed_records}/{record_count}",
@@ -133,11 +125,9 @@ class FlextOracleObs:
             context_keys = list(context.keys())
             logger.info(
                 "Oracle connection pool health",
-                extra={
-                    "connection_pool_size": connection_pool_size,
-                    "active_connections": active_connections,
-                    "context_keys": ",".join(context_keys),
-                },
+                connection_pool_size=connection_pool_size,
+                active_connections=active_connections,
+                context_keys=",".join(context_keys),
             )
 
 
@@ -151,12 +141,10 @@ def configure_oracle_observability(
     """Configure runtime observability logging context."""
     logger.info(
         "Oracle observability configured",
-        extra={
-            "oracle_host": oracle_host,
-            "oracle_service": oracle_service,
-            "enable_performance_monitoring": enable_performance_monitoring,
-            "enable_connection_monitoring": enable_connection_monitoring,
-        },
+        oracle_host=oracle_host,
+        oracle_service=oracle_service,
+        enable_performance_monitoring=enable_performance_monitoring,
+        enable_connection_monitoring=enable_connection_monitoring,
     )
 
 

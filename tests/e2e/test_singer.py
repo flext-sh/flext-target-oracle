@@ -4,18 +4,18 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
+from unittest.mock import Mock
 
 import pytest
 from flext_core import FlextResult
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
+
 
 @pytest.mark.e2e
 class TestSingerWorkflowE2E:
     """Validate SCHEMA -> RECORD -> STATE happy path."""
 
     def _target(self) -> FlextTargetOracle:
-        from unittest.mock import Mock
-
         config = FlextTargetOracleSettings(
             oracle_host="localhost",
             oracle_service_name="XE",
@@ -23,24 +23,12 @@ class TestSingerWorkflowE2E:
             oracle_password="test",
         )
         target = FlextTargetOracle(config=config)
-        target.loader.test_connection = Mock(return_value=FlextResult[bool].ok(value=True))
-        target.loader.ensure_table_exists = Mock(return_value=FlextResult[bool].ok(value=True))
-        target.loader.load_record = Mock(return_value=FlextResult[bool].ok(value=True))
-        target.loader.finalize_all_streams = Mock(
-            return_value=FlextResult[m.TargetOracle.LoaderFinalizeResult].ok(
-                m.TargetOracle.LoaderFinalizeResult(
-                    total_records=0,
-                    streams_processed=0,
-                    loading_operation=m.TargetOracle.LoaderOperation(
-                        stream_name="orders",
-                        started_at="",
-                        completed_at="",
-                        records_loaded=0,
-                        records_failed=0,
-                    ),
-                ),
-            )
-        )
+        mock_oracle_api = Mock()
+        mock_oracle_api.__enter__ = Mock(return_value=mock_oracle_api)
+        mock_oracle_api.__exit__ = Mock(return_value=None)
+        mock_oracle_api.get_tables.return_value = FlextResult[list[str]].ok([])
+        mock_oracle_api.execute_sql.return_value = FlextResult[bool].ok(value=True)
+        object.__setattr__(target.loader, "_oracle_api", mock_oracle_api)
         return target
 
     def test_complete_singer_flow(self) -> None:

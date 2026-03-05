@@ -49,8 +49,7 @@ def main() -> None:
     if result.is_failure:
         logger.error(result.error or "Command failed")
         sys.exit(1)
-    if result.value is not None:
-        logger.info(result.value)
+    logger.info(result.value)
 
 
 if __name__ == "__main__":

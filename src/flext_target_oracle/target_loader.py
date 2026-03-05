@@ -27,6 +27,12 @@ from .target_exceptions import FlextTargetOracleExceptions
 logger = FlextLogger(__name__)
 
 
+def _normalize_log_value(value: t.ContainerValue) -> t.Container:
+    if isinstance(value, str | int | float | bool | datetime):
+        return value
+    return str(value)
+
+
 class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     """Oracle data loader using FlextService and flext-db-oracle SOURCE OF TRUTH.
 
@@ -40,7 +46,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     _target_config: FlextTargetOracleSettings = PrivateAttr()
     _oracle_api: FlextDbOracleApi = PrivateAttr()
     _record_buffers: dict[str, list[dict[str, t.JsonValue]]] = PrivateAttr(
-        default_factory=dict,
+        default_factory=lambda: dict[str, list[dict[str, t.JsonValue]]](),
     )
     _total_records: int = PrivateAttr(default=0)
 
@@ -71,11 +77,23 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
 
     def log_info(self, message: str, **kwargs: t.ContainerValue) -> None:
         """Log info message."""
-        logger.info(message, **kwargs)
+        if not kwargs:
+            logger.info(message)
+            return
+        log_kwargs: dict[str, t.Container] = {
+            key: _normalize_log_value(value) for key, value in kwargs.items()
+        }
+        logger.info(message, **log_kwargs)
 
     def log_error(self, message: str, **kwargs: t.ContainerValue) -> None:
         """Log error message."""
-        logger.error(message, **kwargs)
+        if not kwargs:
+            logger.error(message)
+            return
+        log_kwargs: dict[str, t.Container] = {
+            key: _normalize_log_value(value) for key, value in kwargs.items()
+        }
+        logger.error(message, **log_kwargs)
 
     def __init__(
         self,
@@ -103,7 +121,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             # Set private attributes directly (bypassing Pydantic validation)
             self._target_config = config
             self._oracle_api = oracle_api
-            self._record_buffers = {}
+            self._record_buffers = dict[str, list[dict[str, t.JsonValue]]]()
             self._total_records = 0
 
         except (

@@ -19,6 +19,7 @@ from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_tests import FlextTestsDocker
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import NullPool
 
 from flext_target_oracle import (
@@ -114,6 +115,7 @@ def oracle_engine() -> Engine:
         OSError,
         RuntimeError,
         ImportError,
+        SQLAlchemyError,
     ) as e:
         pytest.skip(f"Oracle not available: {e}")
     return engine
@@ -489,7 +491,7 @@ def singer_messages(
 @contextmanager
 def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
     """Temporarily set environment variables."""
-    old_values = {}
+    old_values: dict[str, str | None] = {}
     for key, value in kwargs.items():
         old_values[key] = os.environ.get(key)
         if value is None:
@@ -530,7 +532,7 @@ def temp_config_file(tmp_path: Path) -> Path:
 @pytest.fixture
 def connected_loader(
     oracle_loader: FlextTargetOracleLoader,
-) -> Generator[FlextTargetOracleLoader]:
+) -> FlextTargetOracleLoader:
     """Provide a connected FlextTargetOracleLoader instance."""
     return oracle_loader
 
