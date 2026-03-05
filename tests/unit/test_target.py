@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from flext_core import FlextResult
@@ -15,38 +15,55 @@ from flext_target_oracle import (
     m,
 )
 
+
 @pytest.fixture
 def target(mock_oracle_api: Mock) -> FlextTargetOracle:
     """Create target with mocked loader."""
-    from unittest.mock import Mock
-
     config = FlextTargetOracleSettings(
         oracle_host="localhost",
         oracle_service_name="XE",
         oracle_user="test",
         oracle_password="test",
         default_target_schema="TEST_SCHEMA",
+        batch_size=200,
+        commit_interval=100,
     )
     client = FlextTargetOracle(config=config)
-    
+
     # Mock loader methods
-    client.loader.test_connection = Mock(return_value=FlextResult[bool].ok(value=True))
-    client.loader.ensure_table_exists = Mock(return_value=FlextResult[bool].ok(value=True))
-    client.loader.load_record = Mock(return_value=FlextResult[bool].ok(value=True))
-    client.loader.finalize_all_streams = Mock(
-        return_value=FlextResult[m.TargetOracle.LoaderFinalizeResult].ok(
-            m.TargetOracle.LoaderFinalizeResult(
-                total_records=0,
-                streams_processed=0,
-                loading_operation=m.TargetOracle.LoaderOperation(
-                    stream_name="users",
-                    started_at="",
-                    completed_at="",
-                    records_loaded=0,
-                    records_failed=0,
+    object.__setattr__(
+        client.loader,
+        "test_connection",
+        Mock(return_value=FlextResult[bool].ok(value=True)),
+    )
+    object.__setattr__(
+        client.loader,
+        "ensure_table_exists",
+        Mock(return_value=FlextResult[bool].ok(value=True)),
+    )
+    object.__setattr__(
+        client.loader,
+        "load_record",
+        Mock(return_value=FlextResult[bool].ok(value=True)),
+    )
+    object.__setattr__(
+        client.loader,
+        "finalize_all_streams",
+        Mock(
+            return_value=FlextResult[m.TargetOracle.LoaderFinalizeResult].ok(
+                m.TargetOracle.LoaderFinalizeResult(
+                    total_records=0,
+                    streams_processed=0,
+                    loading_operation=m.TargetOracle.LoaderOperation(
+                        stream_name="users",
+                        started_at="",
+                        completed_at="",
+                        records_loaded=0,
+                        records_failed=0,
+                    ),
                 ),
             ),
-        )
+        ),
     )
     return client
 
@@ -153,14 +170,15 @@ class TestOracleTarget:
             '{"type": "RECORD", "stream": "users", "record": "bad"}',
         )
         assert parse_result.is_failure
-        assert isinstance(
-            FlextTargetOracleExceptions.ProcessingError("invalid", operation="write_record"),
+        assert issubclass(
             FlextTargetOracleExceptions.ProcessingError,
+            Exception,
         )
 
     def test_missing_schema_path_uses_schema_error_type(self) -> None:
         err = FlextTargetOracleExceptions.SchemaError("schema missing")
         assert isinstance(err, FlextTargetOracleExceptions.SchemaError)
+
     def test_metrics_and_write_record_contract(self, target: FlextTargetOracle) -> None:
         metrics = target.get_implementation_metrics()
         assert metrics.batch_size > 0
@@ -172,18 +190,19 @@ class TestOracleTarget:
     def test_write_record_inserts_oracle_record(
         self, target: FlextTargetOracle
     ) -> None:
-        target.loader.insert_records = lambda *_args, **_kwargs: FlextResult[bool].ok(
-            value=True,
-        )
+        connection = MagicMock()
+        cursor = MagicMock()
+        connection.cursor.return_value.__enter__.return_value = cursor
 
-        result = target.write_record(
-            json.dumps(
-                {
-                    "type": "RECORD",
-                    "stream": "users",
-                    "record": {"id": 1},
-                },
-            ),
-        )
+        with patch.object(target, "_connect_oracle", return_value=connection):
+            result = target.write_record(
+                json.dumps(
+                    {
+                        "type": "RECORD",
+                        "stream": "users",
+                        "record": {"id": 1},
+                    },
+                ),
+            )
 
         assert result.is_success

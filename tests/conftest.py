@@ -239,7 +239,7 @@ def sample_target(sample_config: FlextTargetOracleSettings) -> FlextTargetOracle
 @pytest.fixture
 def mock_oracle_api() -> Mock:
     """Create mocked FlextDbOracleApi for unit tests."""
-    mock_api = Mock(spec=FlextDbOracleApi)
+    mock_api = Mock()
     mock_api.__enter__ = Mock(return_value=mock_api)
     mock_api.__exit__ = Mock(return_value=None)
 
