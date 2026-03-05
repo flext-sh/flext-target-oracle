@@ -15,7 +15,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_core import FlextTypes
-from flext_db_oracle import FlextDbOracleTypes
+from flext_db_oracle.typings import FlextDbOracleTypes
 from flext_meltano import FlextMeltanoTypes
 
 # =============================================================================

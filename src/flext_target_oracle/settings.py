@@ -25,6 +25,7 @@ from .typings import t
 LoadMethod = c.LoadMethod
 
 
+@FlextSettings.auto_register("target_oracle")
 class FlextTargetOracleSettings(FlextSettings):
     """Oracle Target Configuration using enhanced FlextSettings patterns.
 
