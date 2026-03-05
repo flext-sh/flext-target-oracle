@@ -186,10 +186,72 @@ class ProductionTargetManager:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
-    def _signal_handler(self, signum: int, _frame: object) -> None:
-        """Handle shutdown signals gracefully."""
-        logger.info("Received signal %d, initiating graceful shutdown", signum)
-        self.shutdown_requested = True
+    def health_check(self) -> FlextResult[dict[str, t.ContainerValue]]:
+        """Perform comprehensive health check for monitoring systems.
+
+        Returns:
+            FlextResult with health status and metrics
+
+        """
+        logger.debug("Performing health check")
+
+        health_status = HealthStatus(timestamp=time.time())
+
+        try:
+            # Check 1: Target initialization
+            checks = health_status.checks
+            if not self.target:
+                health_status.status = "unhealthy"
+                checks["target_initialized"] = False
+            else:
+                checks["target_initialized"] = True
+
+            # Check 2: Oracle connectivity
+            if self.target:
+                try:
+                    connectivity_result = self.target.test_connection()
+                    checks["oracle_connectivity"] = connectivity_result.is_success
+                    if not connectivity_result.is_success:
+                        health_status.status = "degraded"
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
+                    checks["oracle_connectivity"] = False
+                    checks["oracle_error"] = str(e)
+                    health_status.status = "unhealthy"
+
+            # Add configuration metrics
+            metrics = health_status.metrics
+            if self.target:
+                target_metrics = self.target.get_implementation_metrics()
+                metrics.update(target_metrics.model_dump())
+
+            logger.debug("Health check completed: %s", health_status.status)
+            return FlextResult[t.ConfigurationMapping].ok(
+                health_status.model_dump(),
+            )
+
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
+            logger.exception("Health check failed")
+            health_status.status = "unhealthy"
+            health_status.error = str(e)
+            return FlextResult[t.ConfigurationMapping].fail(
+                f"Health check error: {e}",
+            )
 
     def initialize(self) -> FlextResult[bool]:
         """Initialize target with comprehensive validation.
@@ -355,73 +417,6 @@ class ProductionTargetManager:
                 f"Stream processing error: {e}",
             )
 
-    def health_check(self) -> FlextResult[dict[str, t.ContainerValue]]:
-        """Perform comprehensive health check for monitoring systems.
-
-        Returns:
-            FlextResult with health status and metrics
-
-        """
-        logger.debug("Performing health check")
-
-        health_status = HealthStatus(timestamp=time.time())
-
-        try:
-            # Check 1: Target initialization
-            checks = health_status.checks
-            if not self.target:
-                health_status.status = "unhealthy"
-                checks["target_initialized"] = False
-            else:
-                checks["target_initialized"] = True
-
-            # Check 2: Oracle connectivity
-            if self.target:
-                try:
-                    connectivity_result = self.target.test_connection()
-                    checks["oracle_connectivity"] = connectivity_result.is_success
-                    if not connectivity_result.is_success:
-                        health_status.status = "degraded"
-                except (
-                    ValueError,
-                    TypeError,
-                    KeyError,
-                    AttributeError,
-                    OSError,
-                    RuntimeError,
-                    ImportError,
-                ) as e:
-                    checks["oracle_connectivity"] = False
-                    checks["oracle_error"] = str(e)
-                    health_status.status = "unhealthy"
-
-            # Add configuration metrics
-            metrics = health_status.metrics
-            if self.target:
-                target_metrics = self.target.get_implementation_metrics()
-                metrics.update(target_metrics.model_dump())
-
-            logger.debug("Health check completed: %s", health_status.status)
-            return FlextResult[t.ConfigurationMapping].ok(
-                health_status.model_dump(),
-            )
-
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
-            logger.exception("Health check failed")
-            health_status.status = "unhealthy"
-            health_status.error = str(e)
-            return FlextResult[t.ConfigurationMapping].fail(
-                f"Health check error: {e}",
-            )
-
     def shutdown(self) -> FlextResult[bool]:
         """Graceful shutdown with resource cleanup.
 
@@ -455,6 +450,11 @@ class ProductionTargetManager:
         ) as e:
             logger.exception("Error during shutdown")
             return FlextResult[bool].fail(f"Shutdown error: {e}")
+
+    def _signal_handler(self, signum: int, _frame: object) -> None:
+        """Handle shutdown signals gracefully."""
+        logger.info("Received signal %d, initiating graceful shutdown", signum)
+        self.shutdown_requested = True
 
 
 def demonstrate_production_setup() -> None:

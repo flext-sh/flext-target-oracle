@@ -18,21 +18,21 @@ class FlextTargetOracleService:
         self.config = config
         self.client = FlextTargetOracle(config)
 
+    def discover_catalog(self) -> FlextResult[m.Meltano.SingerCatalog]:
+        """Delegate Singer catalog discovery."""
+        return self.client.discover_catalog()
+
     def execute(self) -> FlextResult[m.TargetOracle.ExecuteResult]:
         """Execute connectivity readiness checks."""
         return self.client.execute()
 
-    def validate_configuration(self) -> FlextResult[bool]:
-        """Validate target configuration."""
-        return self.client.validate_configuration()
+    def finalize(self) -> FlextResult[m.TargetOracle.LoaderFinalizeResult]:
+        """Flush pending loader data."""
+        return self.client.finalize()
 
-    def test_connection(self) -> FlextResult[bool]:
-        """Validate Oracle connectivity."""
-        return self.client.test_connection()
-
-    def discover_catalog(self) -> FlextResult[m.Meltano.SingerCatalog]:
-        """Delegate Singer catalog discovery."""
-        return self.client.discover_catalog()
+    def get_implementation_metrics(self) -> m.TargetOracle.ImplementationMetrics:
+        """Return implementation metrics."""
+        return self.client.get_implementation_metrics()
 
     def process_singer_messages(
         self,
@@ -46,13 +46,13 @@ class FlextTargetOracleService:
         """Delegate processing of Singer message batches."""
         return self.client.process_singer_messages(messages)
 
-    def finalize(self) -> FlextResult[m.TargetOracle.LoaderFinalizeResult]:
-        """Flush pending loader data."""
-        return self.client.finalize()
+    def test_connection(self) -> FlextResult[bool]:
+        """Validate Oracle connectivity."""
+        return self.client.test_connection()
 
-    def get_implementation_metrics(self) -> m.TargetOracle.ImplementationMetrics:
-        """Return implementation metrics."""
-        return self.client.get_implementation_metrics()
+    def validate_configuration(self) -> FlextResult[bool]:
+        """Validate target configuration."""
+        return self.client.validate_configuration()
 
 
 __all__ = ["FlextTargetOracleService"]

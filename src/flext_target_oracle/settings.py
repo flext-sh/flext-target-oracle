@@ -156,6 +156,65 @@ class FlextTargetOracleSettings(FlextSettings):
         description="Project version",
     )
 
+    @classmethod
+    def create_for_development(cls, **_overrides: t.ContainerValue) -> Self:
+        """Create configuration for development environment."""
+        return super().get_global_instance()
+
+    @classmethod
+    def create_for_environment(
+        cls,
+        environment: str,
+        **_overrides: t.ContainerValue,
+    ) -> FlextTargetOracleSettings:
+        """Create configuration for specific environment using enhanced singleton pattern."""
+        env_overrides: dict[str, t.ContainerValue] = {}
+
+        if environment == "production":
+            env_overrides.update({
+                "batch_size": FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 2,
+                "use_bulk_operations": True,
+                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT
+                * 10,  # 5 minutes for production
+            })
+        elif environment == "development":
+            env_overrides.update({
+                "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
+                "use_bulk_operations": False,
+                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 2,
+            })
+        elif environment == "staging":
+            env_overrides.update({
+                "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
+                * 2.5,
+                "use_bulk_operations": True,
+                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 6,
+            })
+
+        return cls.get_global_instance()
+
+    @classmethod
+    def create_for_production(cls, **_overrides: t.ContainerValue) -> Self:
+        """Create configuration for production environment."""
+        return super().get_global_instance()
+
+    @classmethod
+    def create_for_testing(cls, **_overrides: t.ContainerValue) -> Self:
+        """Create configuration for testing environment."""
+        return super().get_global_instance()
+
+    @classmethod
+    @override
+    def get_global_instance(cls) -> Self:
+        """Get the global singleton instance using enhanced FlextSettings pattern."""
+        return super().get_global_instance()
+
+    @classmethod
+    @override
+    def reset_global_instance(cls) -> None:
+        """Reset the global FlextTargetOracleSettings instance (mainly for testing)."""
+        super().reset_global_instance()
+
     # Pydantic 2.11+ field validators
     @field_validator("default_target_schema")
     @classmethod
@@ -163,26 +222,66 @@ class FlextTargetOracleSettings(FlextSettings):
         """Transform Oracle schema name to uppercase."""
         return v.strip().upper()
 
-    @model_validator(mode="after")
-    def validate_oracle_configuration_consistency(self) -> Self:
-        """Validate Oracle configuration consistency (performance warnings only)."""
-        # Validate batch size reasonable for performance
-        if self.batch_size > FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 5:
-            warnings.warn(
-                f"Large batch size ({self.batch_size}) may impact performance",
-                UserWarning,
-                stacklevel=2,
-            )
+    # Configuration helper methods that leverage the base model
+    def get_oracle_config(self) -> m.TargetOracle.OracleConnectionConfig:
+        """Convert to flext-db-oracle configuration format."""
+        return m.TargetOracle.OracleConnectionConfig(
+            host=self.oracle_host,
+            port=self.oracle_port,
+            service_name=self.oracle_service_name,
+            username=self.oracle_user,
+            password=self.oracle_password.get_secret_value(),
+            timeout=self.transaction_timeout,
+            pool_min=FlextConstants.Performance.MIN_DB_POOL_SIZE,
+            pool_max=FlextConstants.Performance.DEFAULT_DB_POOL_SIZE * 5,
+            pool_increment=FlextConstants.Performance.MIN_DB_POOL_SIZE,
+            encoding="UTF-8",
+            ssl_enabled=False,
+            autocommit=self.autocommit,
+            use_bulk_operations=self.use_bulk_operations,
+            parallel_degree=self.parallel_degree,
+        )
 
-        # Validate parallel degree settings
-        if self.parallel_degree > FlextConstants.Validation.MAX_WORKERS_LIMIT:
-            warnings.warn(
-                f"High parallel degree ({self.parallel_degree}) may impact system resources",
-                UserWarning,
-                stacklevel=2,
-            )
+    def get_table_name(self, stream_name: str) -> str:
+        """Generate Oracle table name from Singer stream name."""
+        # Standard transformation
+        base_name = stream_name.replace("-", "_").replace(".", "_")
 
-        return self
+        # Apply prefix and suffix
+        if self.table_prefix:
+            base_name = f"{self.table_prefix}{base_name}"
+        if self.table_suffix:
+            base_name = f"{base_name}{self.table_suffix}"
+
+        # Convert to uppercase and ensure Oracle naming limit (30 characters)
+        table_name = base_name.upper()
+        oracle_table_name_limit = 30  # Oracle table name limit
+
+        if len(table_name) > oracle_table_name_limit:
+            # Truncate intelligently - keep prefix/suffix if possible
+            if self.table_prefix and self.table_suffix:
+                prefix_len = len(self.table_prefix)
+                suffix_len = len(self.table_suffix)
+                remaining = oracle_table_name_limit - prefix_len - suffix_len
+                if remaining > 0:
+                    core = table_name[prefix_len:-suffix_len][:remaining]
+                    table_name = f"{self.table_prefix}{core}{self.table_suffix}".upper()
+                else:
+                    table_name = table_name[:oracle_table_name_limit]
+            else:
+                table_name = table_name[:oracle_table_name_limit]
+
+        return table_name
+
+    def get_target_config(self) -> m.TargetOracle.TargetConfig:
+        """Get target-specific configuration dictionary."""
+        return m.TargetOracle.TargetConfig(
+            default_target_schema=self.default_target_schema,
+            use_bulk_operations=self.use_bulk_operations,
+            batch_size=self.batch_size,
+            table_prefix=self.table_prefix,
+            table_suffix=self.table_suffix,
+        )
 
     def validate_business_rules(self) -> FlextResult[bool]:
         """Validate Oracle Target specific business rules."""
@@ -219,125 +318,26 @@ class FlextTargetOracleSettings(FlextSettings):
         ) as e:
             return FlextResult[bool].fail(f"Business rules validation failed: {e}")
 
-    # Configuration helper methods that leverage the base model
-    def get_oracle_config(self) -> m.TargetOracle.OracleConnectionConfig:
-        """Convert to flext-db-oracle configuration format."""
-        return m.TargetOracle.OracleConnectionConfig(
-            host=self.oracle_host,
-            port=self.oracle_port,
-            service_name=self.oracle_service_name,
-            username=self.oracle_user,
-            password=self.oracle_password.get_secret_value(),
-            timeout=self.transaction_timeout,
-            pool_min=FlextConstants.Performance.MIN_DB_POOL_SIZE,
-            pool_max=FlextConstants.Performance.DEFAULT_DB_POOL_SIZE * 5,
-            pool_increment=FlextConstants.Performance.MIN_DB_POOL_SIZE,
-            encoding="UTF-8",
-            ssl_enabled=False,
-            autocommit=self.autocommit,
-            use_bulk_operations=self.use_bulk_operations,
-            parallel_degree=self.parallel_degree,
-        )
+    @model_validator(mode="after")
+    def validate_oracle_configuration_consistency(self) -> Self:
+        """Validate Oracle configuration consistency (performance warnings only)."""
+        # Validate batch size reasonable for performance
+        if self.batch_size > FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 5:
+            warnings.warn(
+                f"Large batch size ({self.batch_size}) may impact performance",
+                UserWarning,
+                stacklevel=2,
+            )
 
-    def get_target_config(self) -> m.TargetOracle.TargetConfig:
-        """Get target-specific configuration dictionary."""
-        return m.TargetOracle.TargetConfig(
-            default_target_schema=self.default_target_schema,
-            use_bulk_operations=self.use_bulk_operations,
-            batch_size=self.batch_size,
-            table_prefix=self.table_prefix,
-            table_suffix=self.table_suffix,
-        )
+        # Validate parallel degree settings
+        if self.parallel_degree > FlextConstants.Validation.MAX_WORKERS_LIMIT:
+            warnings.warn(
+                f"High parallel degree ({self.parallel_degree}) may impact system resources",
+                UserWarning,
+                stacklevel=2,
+            )
 
-    def get_table_name(self, stream_name: str) -> str:
-        """Generate Oracle table name from Singer stream name."""
-        # Standard transformation
-        base_name = stream_name.replace("-", "_").replace(".", "_")
-
-        # Apply prefix and suffix
-        if self.table_prefix:
-            base_name = f"{self.table_prefix}{base_name}"
-        if self.table_suffix:
-            base_name = f"{base_name}{self.table_suffix}"
-
-        # Convert to uppercase and ensure Oracle naming limit (30 characters)
-        table_name = base_name.upper()
-        oracle_table_name_limit = 30  # Oracle table name limit
-
-        if len(table_name) > oracle_table_name_limit:
-            # Truncate intelligently - keep prefix/suffix if possible
-            if self.table_prefix and self.table_suffix:
-                prefix_len = len(self.table_prefix)
-                suffix_len = len(self.table_suffix)
-                remaining = oracle_table_name_limit - prefix_len - suffix_len
-                if remaining > 0:
-                    core = table_name[prefix_len:-suffix_len][:remaining]
-                    table_name = f"{self.table_prefix}{core}{self.table_suffix}".upper()
-                else:
-                    table_name = table_name[:oracle_table_name_limit]
-            else:
-                table_name = table_name[:oracle_table_name_limit]
-
-        return table_name
-
-    @classmethod
-    def create_for_environment(
-        cls,
-        environment: str,
-        **_overrides: t.ContainerValue,
-    ) -> FlextTargetOracleSettings:
-        """Create configuration for specific environment using enhanced singleton pattern."""
-        env_overrides: dict[str, t.ContainerValue] = {}
-
-        if environment == "production":
-            env_overrides.update({
-                "batch_size": FlextConstants.Performance.BatchProcessing.MAX_ITEMS // 2,
-                "use_bulk_operations": True,
-                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT
-                * 10,  # 5 minutes for production
-            })
-        elif environment == "development":
-            env_overrides.update({
-                "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE,  # Smaller batches for development
-                "use_bulk_operations": False,
-                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 2,
-            })
-        elif environment == "staging":
-            env_overrides.update({
-                "batch_size": FlextConstants.Performance.BatchProcessing.DEFAULT_SIZE
-                * 2.5,
-                "use_bulk_operations": True,
-                "transaction_timeout": FlextConstants.Network.DEFAULT_TIMEOUT * 6,
-            })
-
-        return cls.get_global_instance()
-
-    @classmethod
-    @override
-    def get_global_instance(cls) -> Self:
-        """Get the global singleton instance using enhanced FlextSettings pattern."""
-        return super().get_global_instance()
-
-    @classmethod
-    def create_for_development(cls, **_overrides: t.ContainerValue) -> Self:
-        """Create configuration for development environment."""
-        return super().get_global_instance()
-
-    @classmethod
-    def create_for_production(cls, **_overrides: t.ContainerValue) -> Self:
-        """Create configuration for production environment."""
-        return super().get_global_instance()
-
-    @classmethod
-    def create_for_testing(cls, **_overrides: t.ContainerValue) -> Self:
-        """Create configuration for testing environment."""
-        return super().get_global_instance()
-
-    @classmethod
-    @override
-    def reset_global_instance(cls) -> None:
-        """Reset the global FlextTargetOracleSettings instance (mainly for testing)."""
-        super().reset_global_instance()
+        return self
 
 
 def validate_oracle_configuration(

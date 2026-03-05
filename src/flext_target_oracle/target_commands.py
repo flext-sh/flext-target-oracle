@@ -111,13 +111,13 @@ class OracleTargetCommandFactory:
     """Create Oracle target command objects."""
 
     @staticmethod
-    def create_validate_command(
-        config_file: str | None = None,
-    ) -> OracleTargetValidateCommand:
-        """Create validation command instance."""
-        return OracleTargetValidateCommand(
-            command_type=c.TargetOracle.CommandTypes.VALIDATE.value,
-            config_file=config_file,
+    def create_about_command(
+        output_format: str = c.TargetOracle.OutputFormats.JSON,
+    ) -> OracleTargetAboutCommand:
+        """Create about command instance."""
+        return OracleTargetAboutCommand(
+            command_type=c.TargetOracle.CommandTypes.ABOUT.value,
+            format=output_format,
         )
 
     @staticmethod
@@ -133,13 +133,13 @@ class OracleTargetCommandFactory:
         )
 
     @staticmethod
-    def create_about_command(
-        output_format: str = c.TargetOracle.OutputFormats.JSON,
-    ) -> OracleTargetAboutCommand:
-        """Create about command instance."""
-        return OracleTargetAboutCommand(
-            command_type=c.TargetOracle.CommandTypes.ABOUT.value,
-            format=output_format,
+    def create_validate_command(
+        config_file: str | None = None,
+    ) -> OracleTargetValidateCommand:
+        """Create validation command instance."""
+        return OracleTargetValidateCommand(
+            command_type=c.TargetOracle.CommandTypes.VALIDATE.value,
+            config_file=config_file,
         )
 
 

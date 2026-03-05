@@ -259,9 +259,22 @@ class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
     )
 
     @property
+    def average_batch_size(self) -> float:
+        """Calculate average batch size."""
+        if self.batches_processed == 0:
+            return 0.0
+        return self.total_records_processed / self.batches_processed
+
+    @property
     def is_completed(self) -> bool:
         """Whether processing has completed."""
         return self.processing_end_time is not None
+
+    @property
+    def processing_duration_seconds(self) -> float:
+        """Calculate processing duration in seconds."""
+        end_time = self.processing_end_time or datetime.now(UTC)
+        return (end_time - self.processing_start_time).total_seconds()
 
     @property
     def success_rate(self) -> float:
@@ -271,33 +284,12 @@ class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
         return (self.successful_records / self.total_records_processed) * 100.0
 
     @property
-    def processing_duration_seconds(self) -> float:
-        """Calculate processing duration in seconds."""
-        end_time = self.processing_end_time or datetime.now(UTC)
-        return (end_time - self.processing_start_time).total_seconds()
-
-    @property
-    def average_batch_size(self) -> float:
-        """Calculate average batch size."""
-        if self.batches_processed == 0:
-            return 0.0
-        return self.total_records_processed / self.batches_processed
-
-    @property
     def throughput_records_per_second(self) -> float:
         """Calculate processing throughput in records per second."""
         duration = self.processing_duration_seconds
         if duration == 0:
             return 0.0
         return self.successful_records / duration
-
-    def finalize(self) -> LoadStatisticsModel:
-        """Mark statistics as completed (immutable operation)."""
-        return self.model_copy(
-            update={
-                "processing_end_time": datetime.now(UTC),
-            },
-        )
 
     def add_error(self, error_message: str) -> LoadStatisticsModel:
         """Add an error message (immutable operation)."""
@@ -308,6 +300,14 @@ class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
             update={
                 "error_details": "new_errors",
                 "failed_records": self.failed_records + 1,
+            },
+        )
+
+    def finalize(self) -> LoadStatisticsModel:
+        """Mark statistics as completed (immutable operation)."""
+        return self.model_copy(
+            update={
+                "processing_end_time": datetime.now(UTC),
             },
         )
 

@@ -15,12 +15,12 @@ from .target_models import LoadStatisticsModel, SingerStreamModel
 class ConnectionServiceProtocol(Protocol):
     """Contract for Oracle connection services."""
 
-    def test_connection(self) -> FlextResult[None]:
-        """Validate Oracle connectivity."""
-        ...
-
     def get_connection_info(self) -> FlextResult[m.TargetOracle.OracleConnectionConfig]:
         """Return effective Oracle connection information."""
+        ...
+
+    def test_connection(self) -> FlextResult[None]:
+        """Validate Oracle connectivity."""
         ...
 
 
@@ -80,6 +80,12 @@ class OracleConnectionService:
         """Run default connection validation operation."""
         return self.test_connection()
 
+    def get_connection_info(self) -> FlextResult[m.TargetOracle.OracleConnectionConfig]:
+        """Return normalized connection model."""
+        return FlextResult[m.TargetOracle.OracleConnectionConfig].ok(
+            self.config.get_oracle_config(),
+        )
+
     def test_connection(self) -> FlextResult[None]:
         """Check Oracle access by listing schema tables."""
         tables_result = self.oracle_api.get_tables(
@@ -90,12 +96,6 @@ class OracleConnectionService:
                 tables_result.error or "Connection test failed",
             )
         return FlextResult[None].ok(None)
-
-    def get_connection_info(self) -> FlextResult[m.TargetOracle.OracleConnectionConfig]:
-        """Return normalized connection model."""
-        return FlextResult[m.TargetOracle.OracleConnectionConfig].ok(
-            self.config.get_oracle_config(),
-        )
 
 
 class OracleSchemaService:
@@ -110,10 +110,6 @@ class OracleSchemaService:
         self.config = config
         self.oracle_api = oracle_api
 
-    def execute(self) -> FlextResult[None]:
-        """Run service health operation."""
-        return FlextResult[None].ok(None)
-
     def ensure_table_exists(
         self,
         stream: SingerStreamModel,
@@ -124,6 +120,10 @@ class OracleSchemaService:
         table_name = stream.table_name
         if not table_name:
             return FlextResult[None].fail("Invalid table name")
+        return FlextResult[None].ok(None)
+
+    def execute(self) -> FlextResult[None]:
+        """Run service health operation."""
         return FlextResult[None].ok(None)
 
 
@@ -140,10 +140,6 @@ class OracleBatchService:
         self.oracle_api = oracle_api
         self._batches: dict[str, list[m.Meltano.SingerRecordMessage]] = {}
 
-    def execute(self) -> FlextResult[LoadStatisticsModel]:
-        """Run default batch flush operation."""
-        return self.flush_all_batches()
-
     def add_record(
         self,
         stream_name: str,
@@ -153,10 +149,9 @@ class OracleBatchService:
         self._batches.setdefault(stream_name, []).append(record_message)
         return FlextResult[None].ok(None)
 
-    def flush_batch(self, stream_name: str) -> FlextResult[None]:
-        """Clear buffered records for a specific stream."""
-        self._batches[stream_name] = []
-        return FlextResult[None].ok(None)
+    def execute(self) -> FlextResult[LoadStatisticsModel]:
+        """Run default batch flush operation."""
+        return self.flush_all_batches()
 
     def flush_all_batches(self) -> FlextResult[LoadStatisticsModel]:
         """Summarize and clear all in-memory batch buffers."""
@@ -169,6 +164,11 @@ class OracleBatchService:
             batches_processed=len(self._batches),
         ).finalize()
         return FlextResult[LoadStatisticsModel].ok(stats)
+
+    def flush_batch(self, stream_name: str) -> FlextResult[None]:
+        """Clear buffered records for a specific stream."""
+        self._batches[stream_name] = []
+        return FlextResult[None].ok(None)
 
 
 class OracleRecordService:
@@ -224,21 +224,21 @@ class OracleTargetServiceFactory:
         self._config = config
         self._oracle_api = oracle_api
 
-    def create_connection_service(self) -> OracleConnectionService:
-        """Create Oracle connection service."""
-        return OracleConnectionService(self._config, self._oracle_api)
-
-    def create_schema_service(self) -> OracleSchemaService:
-        """Create Oracle schema service."""
-        return OracleSchemaService(self._config, self._oracle_api)
-
     def create_batch_service(self) -> OracleBatchService:
         """Create Oracle batch service."""
         return OracleBatchService(self._config, self._oracle_api)
 
+    def create_connection_service(self) -> OracleConnectionService:
+        """Create Oracle connection service."""
+        return OracleConnectionService(self._config, self._oracle_api)
+
     def create_record_service(self) -> OracleRecordService:
         """Create Oracle record service."""
         return OracleRecordService(self._config)
+
+    def create_schema_service(self) -> OracleSchemaService:
+        """Create Oracle schema service."""
+        return OracleSchemaService(self._config, self._oracle_api)
 
 
 __all__ = [
