@@ -29,7 +29,7 @@
 !poetry.lock
 !Makefile
 !README.md
-!CLAUDE.md
+!AGENTS.md
 !LICENSE
 !.python-version
 !.tool-versions
@@ -86,7 +86,7 @@ secrets.yml
 # ============================================================================
 
 coverage.json
-CLAUDE.md
+AGENTS.md
 *.py[cod]
 *$py.class
 *.pyd
