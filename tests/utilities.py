@@ -27,5 +27,4 @@ class TestsFlextTargetOracleUtilities(FlextTestsUtilities, u):
 
 
 _utilities = TestsFlextTargetOracleUtilities
-
 __all__ = ["TestsFlextTargetOracleUtilities", "_utilities"]

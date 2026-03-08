@@ -23,7 +23,6 @@ class FlextTargetOracleCliService:
         argv = args if args is not None else sys.argv[1:]
         if not argv or argv[0] in {"help", "-h", "--help"}:
             return FlextResult[str].ok(self._get_help_text())
-
         command_name = argv[0]
         if command_name == "validate":
             return OracleTargetCommandFactory.create_validate_command(None).execute()
@@ -35,12 +34,7 @@ class FlextTargetOracleCliService:
 
     def _get_help_text(self) -> str:
         """Return text help for target CLI usage."""
-        return (
-            "Usage: target-oracle [validate|load|about]\n"
-            "  validate  validate config and connection\n"
-            "  load      initialize target for loading\n"
-            "  about     show project information"
-        )
+        return "Usage: target-oracle [validate|load|about]\n  validate  validate config and connection\n  load      initialize target for loading\n  about     show project information"
 
 
 def main() -> None:
@@ -54,6 +48,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
 __all__ = ["FlextTargetOracleCliService", "main"]

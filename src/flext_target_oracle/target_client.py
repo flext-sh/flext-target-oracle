@@ -45,32 +45,31 @@ class FlextTargetOracle:
                             "table-name": self.config.get_table_name(stream_name),
                             "schema-name": self.config.default_target_schema,
                         },
-                    ),
+                    )
                 ],
             )
             for stream_name, schema_message in self.schemas.items()
         ]
         return FlextResult[m.Meltano.SingerCatalog].ok(
-            m.Meltano.SingerCatalog(streams=catalog_entries),
+            m.Meltano.SingerCatalog(streams=catalog_entries)
         )
 
     def execute(
-        self,
-        payload: str | None = None,
+        self, payload: str | None = None
     ) -> FlextResult[m.TargetOracle.ExecuteResult]:
         """Execute target readiness check."""
         _ = payload
         connection_result = self.loader.test_connection()
         if connection_result.is_failure:
             return FlextResult[m.TargetOracle.ExecuteResult].fail(
-                connection_result.error or "Connection test failed",
+                connection_result.error or "Connection test failed"
             )
         return FlextResult[m.TargetOracle.ExecuteResult].ok(
             m.TargetOracle.ExecuteResult(
                 name="flext-target-oracle",
                 oracle_host=self.config.oracle_host,
                 oracle_service=self.config.oracle_service_name,
-            ),
+            )
         )
 
     def finalize(self) -> FlextResult[m.TargetOracle.LoaderFinalizeResult]:
@@ -79,7 +78,7 @@ class FlextTargetOracle:
             flush_result = self._flush_record_batch(stream_name)
             if flush_result.is_failure:
                 return FlextResult[m.TargetOracle.LoaderFinalizeResult].fail(
-                    flush_result.error or "Failed to flush Oracle records",
+                    flush_result.error or "Failed to flush Oracle records"
                 )
         return self.loader.finalize_all_streams()
 
@@ -97,12 +96,10 @@ class FlextTargetOracle:
 
     def process_singer_message(
         self,
-        message: (
-            m.TargetOracle.SingerSchemaMessage
-            | m.TargetOracle.SingerRecordMessage
-            | m.TargetOracle.SingerStateMessage
-            | m.TargetOracle.SingerActivateVersionMessage
-        ),
+        message: m.TargetOracle.SingerSchemaMessage
+        | m.TargetOracle.SingerRecordMessage
+        | m.TargetOracle.SingerStateMessage
+        | m.TargetOracle.SingerActivateVersionMessage,
     ) -> FlextResult[bool]:
         """Process a single Singer message."""
         match message:
@@ -130,29 +127,26 @@ class FlextTargetOracle:
             result = self.process_singer_message(message)
             if result.is_failure:
                 return FlextResult[m.TargetOracle.ProcessingSummary].fail(
-                    result.error or "Message processing failed",
+                    result.error or "Message processing failed"
                 )
             processed += 1
-
         for stream_name in list(self._record_batches):
             flush_result = self._flush_record_batch(stream_name)
             if flush_result.is_failure:
                 return FlextResult[m.TargetOracle.ProcessingSummary].fail(
-                    flush_result.error or "Failed to flush Oracle records",
+                    flush_result.error or "Failed to flush Oracle records"
                 )
-
         finalize_result = self.loader.finalize_all_streams()
         if finalize_result.is_failure:
             return FlextResult[m.TargetOracle.ProcessingSummary].fail(
-                finalize_result.error or "Finalize failed",
+                finalize_result.error or "Finalize failed"
             )
-
         return FlextResult[m.TargetOracle.ProcessingSummary].ok(
             m.TargetOracle.ProcessingSummary(
                 messages_processed=processed,
                 streams=list(self.schemas.keys()),
                 state=self.state_message,
-            ),
+            )
         )
 
     def test_connection(self) -> FlextResult[bool]:
@@ -168,15 +162,13 @@ class FlextTargetOracle:
         try:
             try:
                 payload = m.TargetOracle.SingerRecordMessage.model_validate_json(
-                    record_data,
+                    record_data
                 )
             except ValidationError:
                 raw_payload = json.loads(record_data)
                 payload = m.TargetOracle.SingerRecordMessage.model_validate(raw_payload)
-
             stream_batch = self._record_batches.setdefault(payload.stream, [])
             stream_batch.append(dict(payload.record))
-
             should_flush = (
                 not self.config.use_bulk_operations
                 or len(stream_batch) >= self.config.batch_size
@@ -185,7 +177,6 @@ class FlextTargetOracle:
                 flush_result = self._flush_record_batch(payload.stream)
                 if flush_result.is_failure:
                     return flush_result
-
             return FlextResult[bool].ok(True)
         except (ValueError, TypeError, ValidationError, json.JSONDecodeError) as exc:
             return FlextResult[bool].fail(f"Invalid record payload: {exc}")
@@ -196,11 +187,7 @@ class FlextTargetOracle:
         if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_$.]*", full_table_name):
             msg = "Invalid Oracle table identifier"
             raise ValueError(msg)
-        return (
-            f"INSERT INTO {full_table_name} "
-            "(DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) "
-            "VALUES (:data, :extracted_at, :loaded_at)"
-        )
+        return f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"
 
     def _connect_oracle(self) -> oracledb.Connection:
         dsn = oracledb.makedsn(
@@ -218,7 +205,6 @@ class FlextTargetOracle:
         batch = self._record_batches.get(stream_name, [])
         if not batch:
             return FlextResult[bool].ok(True)
-
         connection = None
         try:
             connection = self._connect_oracle()
@@ -229,8 +215,7 @@ class FlextTargetOracle:
                     return FlextResult[bool].fail("Cursor does not support execute")
                 for record in batch:
                     extracted_at = record.get(
-                        "_sdc_extracted_at",
-                        datetime.now(UTC).isoformat(),
+                        "_sdc_extracted_at", datetime.now(UTC).isoformat()
                     )
                     execute_method(
                         insert_sql,
@@ -240,7 +225,6 @@ class FlextTargetOracle:
                             "loaded_at": datetime.now(UTC).isoformat(),
                         },
                     )
-
             if not self.config.autocommit:
                 connection.commit()
             self._record_batches[stream_name] = []
@@ -252,8 +236,7 @@ class FlextTargetOracle:
                 connection.close()
 
     def _handle_activate_version(
-        self,
-        activate_message: m.TargetOracle.SingerActivateVersionMessage,
+        self, activate_message: m.TargetOracle.SingerActivateVersionMessage
     ) -> FlextResult[bool]:
         logger.info(
             "ACTIVATE_VERSION received for Oracle target",
@@ -263,39 +246,32 @@ class FlextTargetOracle:
         return FlextResult[bool].ok(True)
 
     def _handle_record(
-        self,
-        record_message: m.TargetOracle.SingerRecordMessage,
+        self, record_message: m.TargetOracle.SingerRecordMessage
     ) -> FlextResult[bool]:
         load_result = self.loader.load_record(
-            record_message.stream,
-            record_message.record,
+            record_message.stream, record_message.record
         )
         if load_result.is_failure:
             return FlextResult[bool].fail(load_result.error or "Failed to load record")
         return FlextResult[bool].ok(True)
 
     def _handle_schema(
-        self,
-        schema_message: m.TargetOracle.SingerSchemaMessage,
+        self, schema_message: m.TargetOracle.SingerSchemaMessage
     ) -> FlextResult[bool]:
         stream_name = schema_message.stream
         schema = schema_message.schema_definition
-
         ensure_result = self.loader.ensure_table_exists(
-            stream_name,
-            schema,
-            schema_message.key_properties,
+            stream_name, schema, schema_message.key_properties
         )
         if ensure_result.is_failure:
             return FlextResult[bool].fail(
-                ensure_result.error or "Failed to ensure table",
+                ensure_result.error or "Failed to ensure table"
             )
         self.schemas[stream_name] = schema_message
         return FlextResult[bool].ok(True)
 
     def _handle_state(
-        self,
-        state_message: m.TargetOracle.SingerStateMessage,
+        self, state_message: m.TargetOracle.SingerStateMessage
     ) -> FlextResult[bool]:
         self.state_message = state_message
         logger.debug("State updated for Oracle target")

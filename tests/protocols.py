@@ -27,5 +27,4 @@ class TestsFlextTargetOracleProtocols(FlextTestsProtocols, FlextTargetOracleProt
 
 
 _protocols = TestsFlextTargetOracleProtocols
-
 __all__ = ["TestsFlextTargetOracleProtocols", "_protocols"]

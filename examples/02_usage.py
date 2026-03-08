@@ -30,25 +30,15 @@ def load_singer_messages() -> list[dict[str, t.ContainerValue]]:
 
 def main() -> None:
     """Run the example."""
-    # Load configuration
     config_dict = load_config()
-
     config = FlextTargetOracleSettings.model_validate(config_dict)
-
-    # Create target instance
     target = FlextTargetOracle(config=config)
-
-    # Test connection to ensure target is ready
     connection_result = target.test_connection()
     if connection_result.is_failure:
         return
-
-    # Process Singer messages
     messages = load_singer_messages()
-
     for message in messages:
         msg_type = message.get("type", "UNKNOWN")
-
         if msg_type == "SCHEMA":
             message.get("stream", "unknown")
         elif msg_type == "RECORD":
@@ -58,15 +48,9 @@ def main() -> None:
                 record.get("id", "?")
         elif msg_type == "STATE":
             pass
-
-        # Execute the target (no message processing in this API)
         result = target.execute()
         if result.is_failure:
             return
-
-    # Show summary
-
-    # Example queries
 
 
 if __name__ == "__main__":

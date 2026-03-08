@@ -16,8 +16,6 @@ from typing import Final
 from flext_db_oracle import FlextDbOracleConstants
 from flext_meltano import FlextMeltanoConstants
 
-# No longer importing from flext_db_oracle
-
 
 class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
     """Target Oracle constants extending FlextConstants.
@@ -76,8 +74,6 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
         MIN_PORT: Final[int] = 1024
         MAX_PORT: Final[int] = 65535
         DEFAULT_CONNECTION_TIMEOUT: Final[int] = 30
-
-        # Oracle-specific connection settings
         DEFAULT_HOST: Final[str] = "localhost"
         DEFAULT_SERVICE_NAME: Final[str] = "XE"
         DEFAULT_USERNAME: Final[str] = "system"
@@ -91,10 +87,7 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
         DEFAULT_BATCH_SIZE: Final[int] = 1000
         DEFAULT_COMMIT_SIZE: Final[int] = 1000
         DEFAULT_QUERY_TIMEOUT: Final[int] = 30
-
-        DEFAULT_MAX_PARALLEL_STREAMS: Final[int] = (
-            4  # Singer-specific parallel streams setting
-        )
+        DEFAULT_MAX_PARALLEL_STREAMS: Final[int] = 4
 
     class Loading:
         """Target-specific loading configuration."""
@@ -121,22 +114,11 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
     class Observability:
         """Observability and monitoring constants."""
 
-        # Security audit constants
         DATABASE_LOGIN: Final[str] = "database_login"
         FAILURE: Final[str] = "failure"
-
-        # Performance monitoring thresholds
-        SLOW_QUERY_THRESHOLD_SECONDS: Final[float] = (
-            30.0  # 30 second threshold for slow queries
-        )
-        HIGH_UTILIZATION_THRESHOLD: Final[float] = (
-            0.8  # 80% threshold for high resource utilization
-        )
+        SLOW_QUERY_THRESHOLD_SECONDS: Final[float] = 30.0
+        HIGH_UTILIZATION_THRESHOLD: Final[float] = 0.8
 
 
 c = FlextTargetOracleConstants
-
-__all__ = [
-    "FlextTargetOracleConstants",
-    "c",
-]
+__all__ = ["FlextTargetOracleConstants", "c"]

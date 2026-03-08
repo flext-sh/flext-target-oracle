@@ -20,23 +20,16 @@ if TYPE_CHECKING:
     from .protocols import _protocols as p
     from .typings import _types as t
     from .utilities import _utilities as u
-# Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "m": ("models", "m"),
     "p": ("protocols", "p"),
     "t": ("typings", "t"),
     "u": ("utilities", "u"),
 }
-
-__all__ = [
-    "m",
-    "p",
-    "t",
-    "u",
-]
+__all__ = ["m", "p", "t", "u"]
 
 
-def __getattr__(name: str) -> Any:  # noqa: ANN401
+def __getattr__(name: str) -> Any:
     """Lazy-load module attributes on first access (PEP 562)."""
     return lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
 

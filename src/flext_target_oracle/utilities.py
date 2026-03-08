@@ -27,9 +27,8 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
             transformed: dict[str, t.ContainerValue] = {}
             for key, value in record.items():
                 is_mapping = isinstance(value, Mapping)
-                is_sequence = isinstance(value, Sequence) and not isinstance(
-                    value,
-                    str | bytes,
+                is_sequence = isinstance(value, Sequence) and (
+                    not isinstance(value, str | bytes)
                 )
                 if is_mapping or is_sequence:
                     transformed[key.upper()] = json.dumps(value)
@@ -43,5 +42,4 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
 
 
 u = FlextTargetOracleUtilities
-
 __all__ = ["FlextTargetOracleUtilities", "u"]

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Production Setup Example - Enterprise-Grade Oracle Target Configuration.
 
 This example demonstrates production-ready configuration and deployment patterns
@@ -23,16 +22,12 @@ from pydantic import SecretStr
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
 from flext_target_oracle.models import m
 
-# Configure production-grade logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(), logging.FileHandler("flext_target_oracle.log")],
 )
-
 logger = FlextLogger(__name__)
-
-
 type SingerMessage = (
     m.TargetOracle.SingerSchemaMessage
     | m.TargetOracle.SingerRecordMessage
@@ -67,13 +62,10 @@ class ProductionConfig:
 
         """
         logger.info("Creating production configuration from environment")
-
-        # Required parameters
         oracle_host = os.getenv("ORACLE_HOST")
         oracle_service = os.getenv("ORACLE_SERVICE")
         oracle_user = os.getenv("ORACLE_USER")
         oracle_password = os.getenv("ORACLE_PASSWORD")
-
         if not all([oracle_host, oracle_service, oracle_user, oracle_password]):
             missing = [
                 var
@@ -87,8 +79,6 @@ class ProductionConfig:
             ]
             msg = f"Missing required environment variables: {', '.join(missing)}"
             raise ValueError(msg)
-
-        # Type guards to help MyPy understand these are non-None after validation
         if oracle_host is None:
             msg = "ORACLE_HOST environment variable is required"
             raise ValueError(msg)
@@ -101,17 +91,12 @@ class ProductionConfig:
         if oracle_password is None:
             msg = "ORACLE_PASSWORD environment variable is required"
             raise ValueError(msg)
-
-        # Optional parameters with production defaults
         oracle_port = int(os.getenv("ORACLE_PORT", "1521"))
         default_target_schema = os.getenv("DEFAULT_TARGET_SCHEMA", "ENTERPRISE_DW")
         batch_size = int(os.getenv("BATCH_SIZE", "5000"))
         connection_timeout = int(os.getenv("CONNECTION_TIMEOUT", "60"))
-
-        # Parse load method
         load_method_str = os.getenv("LOAD_METHOD", "BULK_INSERT").upper()
         load_method = getattr(LoadMethod, load_method_str, LoadMethod.BULK_INSERT)
-
         config = FlextTargetOracleSettings(
             oracle_host=oracle_host,
             oracle_port=oracle_port,
@@ -124,7 +109,6 @@ class ProductionConfig:
             use_bulk_operations=True,
             connection_timeout=connection_timeout,
         )
-
         logger.info(
             "Production configuration created: %s:%s/%s",
             oracle_host,
@@ -132,16 +116,11 @@ class ProductionConfig:
             oracle_service,
         )
         logger.info(
-            "Target schema: %s, Batch size: %s",
-            default_target_schema,
-            batch_size,
+            "Target schema: %s, Batch size: %s", default_target_schema, batch_size
         )
         logger.info(
-            "Load method: %s, Connection timeout: %ss",
-            load_method,
-            connection_timeout,
+            "Load method: %s, Connection timeout: %ss", load_method, connection_timeout
         )
-
         return config
 
 
@@ -158,8 +137,6 @@ class ProductionTargetManager:
         self.config = config
         self.target: FlextTargetOracle | None = None
         self.shutdown_requested = False
-
-        # Setup signal handlers for graceful shutdown
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
@@ -171,19 +148,14 @@ class ProductionTargetManager:
 
         """
         logger.debug("Performing health check")
-
         health_status = HealthStatus(timestamp=time.time())
-
         try:
-            # Check 1: Target initialization
             checks = health_status.checks
             if not self.target:
                 health_status.status = "unhealthy"
                 checks["target_initialized"] = False
             else:
                 checks["target_initialized"] = True
-
-            # Check 2: Oracle connectivity
             if self.target:
                 try:
                     connectivity_result = self.target.test_connection()
@@ -202,18 +174,12 @@ class ProductionTargetManager:
                     checks["oracle_connectivity"] = False
                     checks["oracle_error"] = str(e)
                     health_status.status = "unhealthy"
-
-            # Add configuration metrics
             metrics = health_status.metrics
             if self.target:
                 target_metrics = self.target.get_implementation_metrics()
                 metrics.update(target_metrics.model_dump())
-
             logger.debug("Health check completed: %s", health_status.status)
-            return FlextResult[t.ConfigurationMapping].ok(
-                health_status.model_dump(),
-            )
-
+            return FlextResult[t.ConfigurationMapping].ok(health_status.model_dump())
         except (
             ValueError,
             TypeError,
@@ -226,9 +192,7 @@ class ProductionTargetManager:
             logger.exception("Health check failed")
             health_status.status = "unhealthy"
             health_status.error = str(e)
-            return FlextResult[t.ConfigurationMapping].fail(
-                f"Health check error: {e}",
-            )
+            return FlextResult[t.ConfigurationMapping].fail(f"Health check error: {e}")
 
     def initialize(self) -> FlextResult[bool]:
         """Initialize target with comprehensive validation.
@@ -238,30 +202,21 @@ class ProductionTargetManager:
 
         """
         logger.info("Initializing production Oracle target")
-
         try:
-            # Step 1: Validate configuration domain rules
             logger.info("Validating configuration domain rules")
-            # Domain validation is handled during config creation with Pydantic validators
             validation_result = FlextResult[bool].ok(value=True)
             if validation_result.is_failure:
                 return FlextResult[bool].fail(
-                    f"Configuration validation failed: {validation_result.error}",
+                    f"Configuration validation failed: {validation_result.error}"
                 )
-
-            # Step 2: Initialize target
             logger.info("Creating Oracle target instance")
             self.target = FlextTargetOracle(self.config)
-
-            # Step 3: Test connectivity
             logger.info("Testing Oracle database connectivity")
             connection_result = self.target.test_connection()
             if connection_result.is_failure:
                 return FlextResult[bool].fail("Oracle connectivity test failed")
-
             logger.info("Production target initialized successfully")
             return FlextResult[bool].ok(value=True)
-
         except (
             ValueError,
             TypeError,
@@ -275,8 +230,7 @@ class ProductionTargetManager:
             return FlextResult[bool].fail(f"Initialization error: {e}")
 
     def process_singer_stream(
-        self,
-        messages: list[SingerMessage],
+        self, messages: list[SingerMessage]
     ) -> FlextResult[dict[str, t.ContainerValue]]:
         """Process complete Singer message stream with comprehensive error handling.
 
@@ -288,21 +242,14 @@ class ProductionTargetManager:
 
         """
         if not self.target:
-            return FlextResult[t.ConfigurationMapping].fail(
-                "Target not initialized",
-            )
-
+            return FlextResult[t.ConfigurationMapping].fail("Target not initialized")
         logger.info("Processing Singer stream with %d messages", len(messages))
-
         stats = ProcessingStats(processing_start_time=time.time())
-
         try:
             for i, message in enumerate(messages):
-                # Check for shutdown signal
                 if self.shutdown_requested:
                     logger.info("Shutdown requested, stopping message processing")
                     break
-
                 message_type = "UNKNOWN"
                 if isinstance(message, m.TargetOracle.SingerSchemaMessage):
                     message_type = "SCHEMA"
@@ -311,53 +258,31 @@ class ProductionTargetManager:
                 elif isinstance(message, m.TargetOracle.SingerStateMessage):
                     message_type = "STATE"
                 logger.debug(
-                    "Processing message %d/%d: %s",
-                    i + 1,
-                    len(messages),
-                    message_type,
+                    "Processing message %d/%d: %s", i + 1, len(messages), message_type
                 )
-
-                # Process message with error handling
                 if not self.target:
                     return FlextResult[t.ConfigurationMapping].fail(
-                        "Target not initialized",
+                        "Target not initialized"
                     )
-                # Target is guaranteed to be not None at this point due to check above
                 result = self.target.process_singer_message(message)
-
                 if result.is_success:
-                    # Update counters (values are already int, just increment)
                     stats.messages_processed += 1
-
-                    # Update type-specific counters
                     if message_type == "SCHEMA":
                         stats.schemas_processed += 1
                     elif message_type == "RECORD":
                         stats.records_processed += 1
                     elif message_type == "STATE":
                         stats.states_processed += 1
-
                 else:
                     stats.errors_encountered += 1
                     logger.error(
-                        "Message %d processing failed: %s",
-                        i + 1,
-                        result.error,
+                        "Message %d processing failed: %s", i + 1, result.error
                     )
-
-                    # In production, you might want to decide whether to continue or stop
-                    # For this example, we continue processing
-
-                # Progress logging for long streams
                 if (i + 1) % 1000 == 0:
                     logger.info("Processed %d/%d messages", i + 1, len(messages))
-
-            # Finalize target
             logger.info("Finalizing target operations")
             finalize_result = self.target.finalize()
-
             if finalize_result.is_success:
-                # Merge finalization stats
                 final_stats = finalize_result.value
                 if final_stats is not None:
                     stats.messages_processed += final_stats.total_records
@@ -365,19 +290,15 @@ class ProductionTargetManager:
             else:
                 logger.error("Target finalization failed: %s", finalize_result.error)
                 stats.errors_encountered += 1
-
             stats.processing_end_time = time.time()
             processing_duration = (
                 stats.processing_end_time - stats.processing_start_time
             )
             stats.processing_duration_seconds = processing_duration
-
             logger.info(
-                "Stream processing completed in %.2f seconds",
-                processing_duration,
+                "Stream processing completed in %.2f seconds", processing_duration
             )
             return FlextResult[t.ConfigurationMapping].ok(stats.model_dump())
-
         except (
             ValueError,
             TypeError,
@@ -391,7 +312,7 @@ class ProductionTargetManager:
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
             return FlextResult[t.ConfigurationMapping].fail(
-                f"Stream processing error: {e}",
+                f"Stream processing error: {e}"
             )
 
     def shutdown(self) -> FlextResult[bool]:
@@ -402,20 +323,14 @@ class ProductionTargetManager:
 
         """
         logger.info("Starting graceful shutdown")
-
         try:
             if self.target:
-                # Finalize any pending operations
                 logger.info("Finalizing pending operations")
                 self.target.finalize()
-
-                # Clean up resources (if needed)
                 logger.info("Cleaning up target resources")
                 self.target = None
-
             logger.info("Graceful shutdown completed")
             return FlextResult[bool].ok(value=True)
-
         except (
             ValueError,
             TypeError,
@@ -437,30 +352,22 @@ class ProductionTargetManager:
 def demonstrate_production_setup() -> None:
     """Demonstrate production setup and processing patterns."""
     logger.info("Starting production setup demonstration")
-
     try:
-        # Step 1: Create production configuration
         logger.info("Step 1: Creating production configuration")
         config = ProductionConfig.create_from_environment()
-
-        # Step 2: Initialize production target manager
         logger.info("Step 2: Initializing production target manager")
         manager = ProductionTargetManager(config)
-
         init_result = manager.initialize()
         if init_result.is_failure:
             logger.error("Production initialization failed: %s", init_result.error)
             return
-
-        # Step 3: Perform health check
         logger.info("Step 3: Performing initial health check")
         health_result = manager.health_check()
         if health_result.is_success:
             health_data = health_result.value
             if isinstance(health_data, dict):
                 logger.info(
-                    "Health check status: %s",
-                    health_data.get("status", "unknown"),
+                    "Health check status: %s", health_data.get("status", "unknown")
                 )
                 checks = health_data.get("checks")
                 if isinstance(checks, dict):
@@ -470,15 +377,10 @@ def demonstrate_production_setup() -> None:
                     )
         else:
             logger.warning("Health check failed: %s", health_result.error)
-
-        # Step 4: Create sample production data stream
         logger.info("Step 4: Creating sample production data stream")
         messages = create_production_sample_stream()
-
-        # Step 5: Process the stream
         logger.info("Step 5: Processing production data stream")
         processing_result = manager.process_singer_stream(messages)
-
         if processing_result.is_success:
             stats = processing_result.value
             if stats is None:
@@ -492,31 +394,24 @@ def demonstrate_production_setup() -> None:
                 stats.get("processing_duration_seconds", 0),
             )
             logger.info("Errors encountered: %d", stats.get("errors_encountered", 0))
-
             if stats.get("total_records"):
                 logger.info("Total records loaded: %s", stats["total_records"])
                 logger.info(
-                    "Successful records: %d",
-                    stats.get("successful_records", 0),
+                    "Successful records: %d", stats.get("successful_records", 0)
                 )
                 logger.info("Failed records: %d", stats.get("failed_records", 0))
         else:
             logger.error("Production processing failed: %s", processing_result.error)
-
-        # Step 6: Final health check
         logger.info("Step 6: Performing final health check")
         final_health = manager.health_check()
         if final_health.is_success:
             logger.info("Final health status: %s", final_health.data["status"])
-
-        # Step 7: Graceful shutdown
         logger.info("Step 7: Performing graceful shutdown")
         shutdown_result = manager.shutdown()
         if shutdown_result.is_success:
             logger.info("Production shutdown completed successfully")
         else:
             logger.error("Shutdown issues: %s", shutdown_result.error)
-
     except (
         ValueError,
         TypeError,
@@ -538,8 +433,6 @@ def create_production_sample_stream() -> list[SingerMessage]:
 
     """
     messages: list[SingerMessage] = []
-
-    # Schema message for customer orders
     schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
         "type": "SCHEMA",
         "stream": "customer_orders",
@@ -563,23 +456,20 @@ def create_production_sample_stream() -> list[SingerMessage]:
         "key_properties": ["order_id"],
     })
     messages.append(schema_message)
-
-    # Generate sample records (simulate production volume)
     base_date = datetime.datetime(2025, 1, 1, tzinfo=UTC)
-
-    for i in range(1, 101):  # 100 sample orders
+    for i in range(1, 101):
         record_message = m.TargetOracle.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "customer_orders",
             "record": {
                 "order_id": i,
-                "customer_id": (i % 20) + 1,  # 20 customers
+                "customer_id": i % 20 + 1,
                 "order_date": (base_date + datetime.timedelta(hours=i)).isoformat()
                 + "Z",
-                "product_sku": f"SKU-{(i % 10) + 1:03d}",
-                "quantity": (i % 5) + 1,
-                "unit_price": round(19.99 + (i % 100), 2),
-                "total_amount": round((19.99 + (i % 100)) * ((i % 5) + 1), 2),
+                "product_sku": f"SKU-{i % 10 + 1:03d}",
+                "quantity": i % 5 + 1,
+                "unit_price": round(19.99 + i % 100, 2),
+                "total_amount": round((19.99 + i % 100) * (i % 5 + 1), 2),
                 "order_status": ["pending", "processing", "shipped", "delivered"][
                     i % 4
                 ],
@@ -593,8 +483,6 @@ def create_production_sample_stream() -> list[SingerMessage]:
             },
         })
         messages.append(record_message)
-
-    # State message
     state_message = m.TargetOracle.SingerStateMessage.model_validate({
         "type": "STATE",
         "value": {
@@ -605,12 +493,11 @@ def create_production_sample_stream() -> list[SingerMessage]:
                         base_date + datetime.timedelta(hours=100)
                     ).isoformat()
                     + "Z",
-                },
-            },
+                }
+            }
         },
     })
     messages.append(state_message)
-
     return messages
 
 
@@ -618,25 +505,18 @@ def main() -> None:
     """Main entry point for production setup example."""
     logger.info("FLEXT Target Oracle - Production Setup Example")
     logger.info("=" * 60)
-
-    # Check for required environment variables
     required_vars = ["ORACLE_HOST", "ORACLE_SERVICE", "ORACLE_USER", "ORACLE_PASSWORD"]
     missing_vars = [var for var in required_vars if not os.getenv(var)]
-
     if missing_vars:
         logger.error(
-            "Missing required environment variables: %s",
-            ", ".join(missing_vars),
+            "Missing required environment variables: %s", ", ".join(missing_vars)
         )
         logger.error("Please set the following environment variables:")
         for var in required_vars:
             logger.error("  export %s=<value>", var)
         sys.exit(1)
-
     try:
-        # Run production demonstration
         demonstrate_production_setup()
-
         logger.info("\n%s", "=" * 60)
         logger.info("Production setup example completed successfully!")
         logger.info("\nProduction Checklist:")
@@ -645,7 +525,6 @@ def main() -> None:
         logger.info("✓ Health checks and monitoring integration")
         logger.info("✓ Graceful shutdown and resource cleanup")
         logger.info("✓ Production-grade logging and statistics")
-
     except KeyboardInterrupt:
         logger.info("Example interrupted by user")
     except (

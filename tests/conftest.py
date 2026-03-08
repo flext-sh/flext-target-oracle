@@ -28,7 +28,6 @@ from flext_target_oracle import (
     FlextTargetOracleSettings,
 )
 
-# Constants
 logger = FlextLogger(__name__)
 ORACLE_CONTAINER_NAME = "flext-oracle-test"
 ORACLE_IMAGE = "gvenzl/oracle-xe:21-slim"
@@ -60,12 +59,8 @@ def reset_settings_singleton() -> Generator[None]:
     FlextSettings uses singleton pattern - tests can pollute each other's state
     if not reset between runs.
     """
-    # Clear singleton before test
     FlextTargetOracleSettings.reset_global_instance()
-
     yield
-
-    # Clear singleton after test
     FlextTargetOracleSettings.reset_global_instance()
 
 
@@ -77,7 +72,6 @@ def event_loop() -> Generator[AbstractEventLoop]:
     loop.close()
 
 
-# Docker container management with FlextTestsDocker
 @pytest.fixture(scope="session")
 def docker_control() -> FlextTestsDocker:
     """Provide Docker control instance for tests."""
@@ -85,9 +79,7 @@ def docker_control() -> FlextTestsDocker:
 
 
 @pytest.fixture(scope="session")
-def shared_oracle_container(
-    docker_control: FlextTestsDocker,
-) -> Generator[str]:
+def shared_oracle_container(docker_control: FlextTestsDocker) -> Generator[str]:
     """Managed Oracle container using FlextTestsDocker with auto-start."""
     yield "flext-oracle-db-test"
     _ = docker_control
@@ -103,7 +95,6 @@ def oracle_engine() -> Engine:
         f"oracle+oracledb://{TEST_SCHEMA}:test_password@{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SERVICE}",
         poolclass=NullPool,
     )
-    # Test connection - skip if not available
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1 FROM DUAL"))
@@ -125,25 +116,16 @@ def oracle_engine() -> Engine:
 def clean_database(oracle_engine: Engine) -> None:
     """Clean database before each test."""
     with oracle_engine.connect() as conn:
-        # Drop all tables in test schema
         result = conn.execute(
             text(
-                """
-
-              SELECT table_name
-              FROM all_tables
-              WHERE owner = :schema
-              """,
+                "\n\n              SELECT table_name\n              FROM all_tables\n              WHERE owner = :schema\n              "
             ),
             {"schema": TEST_SCHEMA},
         )
         tables = [row[0] for row in result]
-
         for table in tables:
             conn.execute(text(f"DROP TABLE {TEST_SCHEMA}.{table} CASCADE CONSTRAINTS"))
         conn.commit()
-
-    # Cleanup after test (optional)
 
 
 @pytest.fixture
@@ -165,7 +147,6 @@ def oracle_config() -> FlextTargetOracleSettings:
 @pytest.fixture
 def oracle_api(oracle_config: FlextTargetOracleSettings) -> MagicMock:
     """Create mocked FlextDbOracleApi instance for testing."""
-    # Create config using FlextDbOracleSettings
     db_config = FlextDbOracleSettings(
         host=oracle_config.oracle_host,
         port=oracle_config.oracle_port,
@@ -175,15 +156,12 @@ def oracle_api(oracle_config: FlextTargetOracleSettings) -> MagicMock:
         if hasattr(oracle_config.oracle_password, "get_secret_value")
         else str(oracle_config.oracle_password),
     )
-
-    # Create mock API with common method responses
     mock_api = MagicMock(spec=FlextDbOracleApi)
     mock_api.config = db_config
     mock_api.connect.return_value = FlextResult.ok("Connected successfully")
     mock_api.disconnect.return_value = FlextResult.ok("Disconnected successfully")
     mock_api.test_connection.return_value = FlextResult.ok(value=True)
     mock_api.is_connected = True
-
     return mock_api
 
 
@@ -193,21 +171,13 @@ def oracle_loader(
 ) -> Generator[FlextTargetOracleLoader]:
     """Create FlextTargetOracleLoader instance with mocked connection."""
     with patch("flext_target_oracle.target_client.FlextDbOracleApi") as mock_api_class:
-        # Mock the API instance
         mock_api = MagicMock()
         mock_api_class.return_value = mock_api
-
-        # Mock successful connection
         mock_api.connect.return_value = FlextResult.ok("Connected successfully")
         mock_api.disconnect.return_value = FlextResult.ok("Disconnected successfully")
         mock_api.is_connected = True
-
-        # Create loader with mocked API
         loader = FlextTargetOracleLoader(oracle_config)
-
-        # Mock the connect result to avoid real database connection
         FlextResult.ok("Mocked connection successful")
-
         yield loader
 
 
@@ -244,62 +214,37 @@ def mock_oracle_api() -> Mock:
     mock_api = Mock()
     mock_api.__enter__ = Mock(return_value=mock_api)
     mock_api.__exit__ = Mock(return_value=None)
-
-    # Setup common return values
     mock_api.connect.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
-        value=None,
+        is_success=True, is_failure=False, value=None
     )
     mock_api.disconnect.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
-        value=None,
+        is_success=True, is_failure=False, value=None
     )
     mock_api.get_tables.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
-        value=[],
+        is_success=True, is_failure=False, value=[]
     )
     mock_api.create_table_ddl.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
-        value="CREATE TABLE...",
+        is_success=True, is_failure=False, value="CREATE TABLE..."
     )
     mock_api.execute_ddl.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
-        value=None,
+        is_success=True, is_failure=False, value=None
     )
     mock_api.build_insert_statement.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
-        value="INSERT INTO...",
+        is_success=True, is_failure=False, value="INSERT INTO..."
     )
     mock_api.build_merge_statement.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
-        value="MERGE INTO...",
+        is_success=True, is_failure=False, value="MERGE INTO..."
     )
     mock_api.query.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
-        value=None,
+        is_success=True, is_failure=False, value=None
     )
     mock_api.execute_batch.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
-        value=None,
+        is_success=True, is_failure=False, value=None
     )
     mock_api.get_columns.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
-        value=[],
+        is_success=True, is_failure=False, value=[]
     )
-
-    # Mock connection property
     mock_api.connection = MagicMock()
-
     return mock_api
 
 
@@ -314,7 +259,6 @@ def mock_loader() -> Mock:
     return mock
 
 
-# Test Data Fixtures
 @pytest.fixture
 def schema() -> dict[str, t.ContainerValue]:
     """Simple Singer schema message for unit testing."""
@@ -339,11 +283,7 @@ def record() -> dict[str, t.ContainerValue]:
     return {
         "type": "RECORD",
         "stream": "users",
-        "record": {
-            "id": 1,
-            "name": "John Doe",
-            "email": "john@example.com",
-        },
+        "record": {"id": 1, "name": "John Doe", "email": "john@example.com"},
     }
 
 
@@ -451,7 +391,7 @@ def batch_records() -> list[dict[str, t.ContainerValue]]:
             },
             "time_extracted": "2025-01-20T12:00:00Z",
         }
-        for i in range(1, 101)  # 100 records
+        for i in range(1, 101)
     ]
 
 
@@ -466,8 +406,8 @@ def state_message() -> dict[str, t.ContainerValue]:
                     "replication_key": "created_at",
                     "replication_key_value": "2025-01-20T12:00:00Z",
                     "version": 1,
-                },
-            },
+                }
+            }
         },
     }
 
@@ -479,15 +419,9 @@ def singer_messages(
     state_message: dict[str, t.ContainerValue],
 ) -> list[dict[str, t.ContainerValue]]:
     """Complete Singer message stream for testing."""
-    return [
-        simple_schema,
-        sample_record,
-        sample_record,  # Duplicate for testing updates
-        state_message,
-    ]
+    return [simple_schema, sample_record, sample_record, state_message]
 
 
-# Utility Functions
 @contextmanager
 def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
     """Temporarily set environment variables."""
@@ -498,7 +432,6 @@ def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
             os.environ.pop(key, None)
         else:
             os.environ[key] = str(value)
-
     try:
         yield
     finally:
@@ -522,22 +455,17 @@ def temp_config_file(tmp_path: Path) -> Path:
         "batch_size": 1000,
         "use_bulk_operations": True,
     }
-
     config_file = tmp_path / "config.json"
     config_file.write_text(json.dumps(config_data))
     return config_file
 
 
-# Fixtures
 @pytest.fixture
-def connected_loader(
-    oracle_loader: FlextTargetOracleLoader,
-) -> FlextTargetOracleLoader:
+def connected_loader(oracle_loader: FlextTargetOracleLoader) -> FlextTargetOracleLoader:
     """Provide a connected FlextTargetOracleLoader instance."""
     return oracle_loader
 
 
-# Performance Testing Fixtures
 @pytest.fixture
 def large_dataset() -> list[dict[str, t.JsonValue]]:
     """Generate large dataset for performance testing."""
@@ -555,7 +483,6 @@ def large_dataset() -> list[dict[str, t.JsonValue]]:
         },
         "key_properties": ["id"],
     }
-
     records: list[dict[str, t.JsonValue]] = [
         {
             "type": "RECORD",
@@ -569,18 +496,15 @@ def large_dataset() -> list[dict[str, t.JsonValue]]:
         }
         for i in range(10000)
     ]
-
     result: list[dict[str, t.JsonValue]] = []
     result.append(schema)
     result.extend(records)
     return result
 
 
-# Markers for different test categories
 def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
     """Add markers to test items based on their location."""
     for item in items:
-        # Add markers based on test file location
         if "unit" in str(item.fspath):
             item.add_marker(pytest.mark.unit)
         elif "integration" in str(item.fspath):

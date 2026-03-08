@@ -18,7 +18,6 @@ from .models import m
 class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
     """Singer Target Oracle protocols extending Oracle and Meltano protocols."""
 
-    # Target Oracle-specific protocols
     class TargetOracle:
         """Singer Target domain protocols."""
 
@@ -30,8 +29,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 """Protocol for Oracle target operations."""
 
                 def process_record(
-                    self,
-                    record: m.Meltano.SingerRecordMessage,
+                    self, record: m.Meltano.SingerRecordMessage
                 ) -> FlextProtocols.Result[bool]:
                     """Process a Singer record for Oracle target."""
                     ...
@@ -41,8 +39,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 """Protocol for Oracle connection management."""
 
                 def connect_target(
-                    self,
-                    config: m.TargetOracle.OracleConnectionConfig,
+                    self, config: m.TargetOracle.OracleConnectionConfig
                 ) -> FlextProtocols.Result[bool]:
                     """Connect to Oracle database."""
                     ...
@@ -52,9 +49,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 """Protocol for Oracle schema management."""
 
                 def create_table_from_schema(
-                    self,
-                    table_name: str,
-                    schema_message: m.Meltano.SingerSchemaMessage,
+                    self, table_name: str, schema_message: m.Meltano.SingerSchemaMessage
                 ) -> FlextProtocols.Result[bool]:
                     """Create Oracle table from schema."""
                     ...
@@ -64,8 +59,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 """Protocol for Oracle batch operations."""
 
                 def execute_batch_target(
-                    self,
-                    operations: list[m.Meltano.SingerRecordMessage],
+                    self, operations: list[m.Meltano.SingerRecordMessage]
                 ) -> FlextProtocols.Result[list[bool]]:
                     """Execute batch of Oracle operations."""
                     ...
@@ -75,8 +69,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 """Protocol for Oracle record processing."""
 
                 def transform_record_target(
-                    self,
-                    record: m.Meltano.SingerRecordMessage,
+                    self, record: m.Meltano.SingerRecordMessage
                 ) -> FlextProtocols.Result[m.Meltano.SingerRecordMessage]:
                     """Transform Singer record for Oracle."""
                     ...
@@ -86,8 +79,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 """Protocol for Singer message handling."""
 
                 def process_message_target(
-                    self,
-                    message: m.Meltano.SingerRecordMessage,
+                    self, message: m.Meltano.SingerRecordMessage
                 ) -> FlextProtocols.Result[bool]:
                     """Process Singer message."""
                     ...
@@ -97,8 +89,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 """Protocol for Oracle performance optimization."""
 
                 def optimize_batch_size_target(
-                    self,
-                    record_count: int,
+                    self, record_count: int
                 ) -> FlextProtocols.Result[int]:
                     """Optimize batch size for Oracle operations."""
                     ...
@@ -108,8 +99,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 """Protocol for Oracle security operations."""
 
                 def validate_target_credentials(
-                    self,
-                    config: m.TargetOracle.OracleConnectionConfig,
+                    self, config: m.TargetOracle.OracleConnectionConfig
                 ) -> FlextProtocols.Result[bool]:
                     """Validate Oracle credentials."""
                     ...
@@ -123,9 +113,5 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                     ...
 
 
-# Runtime alias for simplified usage
 p = FlextTargetOracleProtocols
-__all__ = [
-    "FlextTargetOracleProtocols",
-    "p",
-]
+__all__ = ["FlextTargetOracleProtocols", "p"]

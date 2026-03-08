@@ -27,5 +27,4 @@ class TestsFlextTargetOracleTypes(FlextTestsTypes, t):
 
 
 _types = TestsFlextTargetOracleTypes
-
 __all__ = ["TestsFlextTargetOracleTypes", "_types"]

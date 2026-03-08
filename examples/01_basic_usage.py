@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Basic Usage Example - FLEXT Target Oracle Simple Setup and Processing.
 
 This example demonstrates the fundamental usage patterns for FLEXT Target Oracle,
@@ -32,7 +31,6 @@ from pydantic import SecretStr
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
 from flext_target_oracle.models import m
 
-# Configure logging for the example
 logging.basicConfig(level=logging.INFO)
 logger = FlextLogger(__name__)
 
@@ -49,7 +47,6 @@ def create_configuration() -> FlextTargetOracleSettings:
 
     """
     logger.info("Creating Oracle target configuration")
-
     config = FlextTargetOracleSettings(
         oracle_host="localhost",
         oracle_port=1521,
@@ -58,13 +55,12 @@ def create_configuration() -> FlextTargetOracleSettings:
         oracle_password=SecretStr(os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", "")),
         default_target_schema="FLEXT_EXAMPLES",
         load_method=LoadMethod.INSERT,
-        batch_size=100,  # Small batch size for demo
+        batch_size=100,
         use_bulk_operations=True,
         connection_timeout=30,
     )
-
     logger.info(
-        f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service_name}",
+        f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service_name}"
     )
     return config
 
@@ -149,11 +145,8 @@ def create_sample_state_message() -> m.TargetOracle.SingerStateMessage:
         "type": "STATE",
         "value": {
             "bookmarks": {
-                "users": {
-                    "last_id": 3,
-                    "last_updated": "2025-01-01T12:00:00Z",
-                },
-            },
+                "users": {"last_id": 3, "last_updated": "2025-01-01T12:00:00Z"}
+            }
         },
     })
 
@@ -169,90 +162,58 @@ def demonstrate_basic_usage() -> None:
     5. Statistics collection and reporting
     """
     logger.info("Starting FLEXT Target Oracle basic usage demonstration")
-
     try:
-        # Step 1: Create and validate configuration
         logger.info("Step 1: Creating configuration")
         config = create_configuration()
-
-        # Validate domain rules (optional but recommended)
         logger.info("Validating configuration domain rules")
-        # Validation is handled during config creation with Pydantic validators
         validation_result = FlextResult[bool].ok(value=True)
         if validation_result.is_failure:
             logger.error(f"Configuration validation failed: {validation_result.error}")
             return
-
         logger.info("Configuration validation successful")
-
-        # Step 2: Initialize target
         logger.info("Step 2: Initializing Oracle target")
         target = FlextTargetOracle(config)
-
-        # Optional: Test connection
         logger.info("Testing Oracle connection")
         connection_result = target.test_connection()
         if connection_result.is_failure:
             logger.error(f"Oracle connection test failed: {connection_result.error}")
             return
-
         logger.info("Oracle connection test successful")
-
-        # Step 3: Process SCHEMA message
         logger.info("Step 3: Processing SCHEMA message")
         schema_message = create_sample_schema_message()
-
         schema_result = target.process_singer_message(schema_message)
         if schema_result.is_failure:
             logger.error(f"Schema processing failed: {schema_result.error}")
             return
-
         logger.info("Schema processed successfully - table created/verified")
-
-        # Step 4: Process RECORD messages
         logger.info("Step 4: Processing RECORD messages")
         record_messages = create_sample_record_messages()
-
         for i, record_message in enumerate(record_messages, 1):
             logger.info(f"Processing record {i}/{len(record_messages)}")
-
             record_result = target.process_singer_message(record_message)
             if record_result.is_failure:
                 logger.error(f"Record {i} processing failed: {record_result.error}")
                 return
-
         logger.info(f"All {len(record_messages)} records processed successfully")
-
-        # Step 5: Process STATE message
         logger.info("Step 5: Processing STATE message")
         state_message = create_sample_state_message()
-
         state_result = target.process_singer_message(state_message)
         if state_result.is_failure:
             logger.error(f"State processing failed: {state_result.error}")
             return
-
         logger.info("State processed successfully")
-
-        # Step 6: Finalize and get statistics
         logger.info("Step 6: Finalizing target and collecting statistics")
         stats_result = target.finalize()
         if stats_result.is_failure:
             logger.error(f"Target finalization failed: {stats_result.error}")
             return
-
-        # Display statistics
         stats = stats_result.value
         logger.info("=== Processing Statistics ===")
         logger.info(f"Total records processed: {stats.total_records}")
-        logger.info(
-            f"Successful records: {stats.loading_operation.records_loaded}",
-        )
+        logger.info(f"Successful records: {stats.loading_operation.records_loaded}")
         logger.info(f"Failed records: {stats.loading_operation.records_failed}")
         logger.info(f"Total batches: {stats.streams_processed}")
-
         logger.info("Basic usage demonstration completed successfully!")
-
     except (
         ValueError,
         TypeError,
@@ -273,21 +234,16 @@ def demonstrate_error_handling() -> None:
     FLEXT error handling patterns.
     """
     logger.info("Demonstrating error handling patterns")
-
-    # Create invalid configuration to show validation errors
     try:
         FlextTargetOracleSettings(
-            oracle_host="",  # Invalid empty host
+            oracle_host="",
             oracle_service="XE",
             oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
             oracle_password=SecretStr(os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", "")),
         )
-
-        # Domain validation is handled during config creation with Pydantic validators
         validation_result = FlextResult[bool].ok(value=True)
         if validation_result.is_failure:
             logger.info(f"Expected validation error: {validation_result.error}")
-
     except (
         ValueError,
         TypeError,
@@ -298,18 +254,12 @@ def demonstrate_error_handling() -> None:
         ImportError,
     ) as e:
         logger.info("Configuration creation failed as expected: %s", e)
-
-    # Demonstrate processing invalid messages
     config = create_configuration()
     target = FlextTargetOracle(config)
-
-    # Invalid message type
     invalid_message = '{"type": "INVALID", "data": "test"}'
     result = target.write_record(invalid_message)
-
     if result.is_failure:
         logger.info(f"Invalid message handled gracefully: {result.error}")
-
     logger.info("Error handling demonstration completed")
 
 
@@ -317,16 +267,10 @@ def main() -> None:
     """Main entry point for basic usage example."""
     logger.info("FLEXT Target Oracle - Basic Usage Example")
     logger.info("=" * 50)
-
-    # Run the main demonstration
     demonstrate_basic_usage()
-
     logger.info("\n%s", "=" * 50)
     logger.info("Running error handling demonstration")
-
-    # Run error handling demonstration
     demonstrate_error_handling()
-
     logger.info("\n%s", "=" * 50)
     logger.info("Example completed successfully!")
     logger.info("Next steps:")

@@ -21,10 +21,7 @@ class FlextOracleError:
 
         @staticmethod
         def authentication_failed(
-            *,
-            username: str,
-            oracle_service: str,
-            error_code: str | None = None,
+            *, username: str, oracle_service: str, error_code: str | None = None
         ) -> FlextTargetOracleExceptions.AuthenticationError:
             """Build an authentication failure error with service context."""
             logger.error(
@@ -34,7 +31,7 @@ class FlextOracleError:
                 error_code=error_code or "",
             )
             return FlextTargetOracleExceptions.AuthenticationError(
-                f"Oracle authentication failed for {username} on {oracle_service}",
+                f"Oracle authentication failed for {username} on {oracle_service}"
             )
 
         @staticmethod
@@ -52,7 +49,7 @@ class FlextOracleError:
                 recovery_strategy=recovery_strategy,
             )
             return FlextTargetOracleExceptions.OracleConnectionError(
-                f"Oracle database unavailable: {connection_string}",
+                f"Oracle database unavailable: {connection_string}"
             )
 
     class Singer:
@@ -60,10 +57,7 @@ class FlextOracleError:
 
         @staticmethod
         def record_processing_failed(
-            *,
-            stream_name: str,
-            record_count: int,
-            failed_records: int,
+            *, stream_name: str, record_count: int, failed_records: int
         ) -> FlextTargetOracleExceptions.ProcessingError:
             """Build a Singer record processing failure."""
             logger.error(
@@ -73,7 +67,7 @@ class FlextOracleError:
                 failed_records=failed_records,
             )
             return FlextTargetOracleExceptions.ProcessingError(
-                f"Record processing failed for {stream_name}: {failed_records}/{record_count}",
+                f"Record processing failed for {stream_name}: {failed_records}/{record_count}"
             )
 
         @staticmethod
@@ -91,7 +85,7 @@ class FlextOracleError:
                 singer_specification=singer_specification,
             )
             return FlextTargetOracleExceptions.SchemaError(
-                f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
+                f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}"
             )
 
 
@@ -119,8 +113,7 @@ class FlextOracleObs:
         @staticmethod
         @contextmanager
         def query_performance(
-            table_name: str,
-            operation: str = "SELECT",
+            table_name: str, operation: str = "SELECT"
         ) -> Generator[Mapping[str, str]]:
             """Yield a mutable context while timing a query operation."""
             logger.debug("Starting query performance monitor")

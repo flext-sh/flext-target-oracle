@@ -14,7 +14,6 @@ from flext_core import FlextResult
 
 from .constants import c
 
-# LoadMethod moved to constants.py as c.LoadMethod (DRY pattern)
 LoadMethod = c.LoadMethod
 
 
