@@ -106,9 +106,11 @@ from flext_core import u
 from flext_target_oracle.settings import FlextOracleTargetSettings, LoadMethod
 from flext_target_oracle.target import FlextOracleTarget
 
+
 # Exception hierarchy (consolidated from duplicated sources)
 class FlextOracleTargetError(FlextExceptions.Error):
     """Base exception for Oracle target operations."""
+
 
 # Alias exports for backward compatibility
 FlextTargetOracle = FlextOracleTarget
@@ -207,12 +209,15 @@ from flext_core import u
 from pydantic import Field, field_validator
 from enum import StrEnum
 
+
 class LoadMethod(StrEnum):
     """Oracle data loading strategies."""
+
     INSERT = "insert"
     MERGE = "merge"
     BULK_INSERT = "bulk_insert"
     BULK_MERGE = "bulk_merge"
+
 
 class FlextOracleTargetSettings(m.Value):
     """Type-safe Oracle configuration with business rule validation."""
@@ -226,9 +231,13 @@ class FlextOracleTargetSettings(m.Value):
 
     # Business configuration
     default_target_schema: str = Field(default="target", description="Target schema")
-    load_method: LoadMethod = Field(default=LoadMethod.INSERT, description="Load strategy")
+    load_method: LoadMethod = Field(
+        default=LoadMethod.INSERT, description="Load strategy"
+    )
     batch_size: int = Field(default=1000, gt=0, description="Records per batch")
-    use_bulk_operations: bool = Field(default=True, description="Enable bulk operations")
+    use_bulk_operations: bool = Field(
+        default=True, description="Enable bulk operations"
+    )
     connection_timeout: int = Field(default=30, gt=0, description="Connection timeout")
 
     def validate_domain_rules(self) -> FlextResult[bool]:
@@ -275,6 +284,7 @@ from flext_core import FlextService
 from flext_core import t
 from flext_core import u
 from flext_meltano import Target
+
 
 class FlextOracleTarget(Target):
     """Oracle Singer Target implementing FLEXT patterns."""
@@ -346,6 +356,7 @@ from flext_core import t
 from flext_core import u
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 
+
 class FlextOracleTargetLoader:
     """Oracle data loading with batch processing and error handling."""
 
@@ -386,17 +397,30 @@ result = connected_api.execute_dml(sql, param)
 
 from flext_core import FlextTargetError
 
+
 class FlextOracleTargetError(FlextTargetError):
     """Base Oracle target exception with context."""
 
     def __init__(self, message: str, stream_name: str | None = None, **kwargs):
-        super().__init__(message, component_type="target",
-                        stream_name=stream_name, destination_system="oracle", **kwargs)
+        super().__init__(
+            message,
+            component_type="target",
+            stream_name=stream_name,
+            destination_system="oracle",
+            **kwargs,
+        )
+
 
 # Specific error types with proper context
 class FlextOracleTargetConnectionError(FlextOracleTargetError): ...
+
+
 class FlextOracleTargetAuthenticationError(FlextOracleTargetError): ...
+
+
 class FlextOracleTargetSchemaError(FlextOracleTargetError): ...
+
+
 class FlextOracleTargetProcessingError(FlextOracleTargetError): ...
 ```
 
@@ -459,10 +483,12 @@ ______________________________________________________________________
 def process_record(self, stream_name: str, record_data: dict) -> FlextResult[bool]:
     """Process single record with proper error handling."""
     return (
-        self._validate_record(record_data)
+        self
+        ._validate_record(record_data)
         .flat_map(lambda valid_data: self._add_to_batch(stream_name, valid_data))
         .flat_map(lambda _: self._flush_if_needed(stream_name))
     )
+
 
 # ❌ INCORRECT - Exception-based error handling
 def process_record_bad(self, stream_name: str, record_data: dict) -> None:
@@ -539,6 +565,7 @@ from flext_core import u
 
 logger = FlextLogger(__name__)
 
+
 def process_batch(self, stream_name: str, records: list) -> FlextResult[bool]:
     """Process batch with comprehensive logging."""
 
@@ -548,8 +575,8 @@ def process_batch(self, stream_name: str, records: list) -> FlextResult[bool]:
             "stream_name": stream_name,
             "batch_size": len(records),
             "operation": "batch_processing",
-            "target": "oracle"
-        }
+            "target": "oracle",
+        },
     )
 
     try:
@@ -562,8 +589,8 @@ def process_batch(self, stream_name: str, records: list) -> FlextResult[bool]:
                     "stream_name": stream_name,
                     "records_processed": len(records),
                     "duration_ms": result.data.get("duration_ms"),
-                    "rows_affected": result.data.get("rows_affected")
-                }
+                    "rows_affected": result.data.get("rows_affected"),
+                },
             )
         else:
             logger.error(
@@ -571,8 +598,8 @@ def process_batch(self, stream_name: str, records: list) -> FlextResult[bool]:
                 extra={
                     "stream_name": stream_name,
                     "error": result.error,
-                    "error_type": "batch_processing_failure"
-                }
+                    "error_type": "batch_processing_failure",
+                },
             )
 
         return result
@@ -583,10 +610,11 @@ def process_batch(self, stream_name: str, records: list) -> FlextResult[bool]:
             extra={
                 "stream_name": stream_name,
                 "error_type": type(e).__name__,
-                "batch_size": len(records)
-            }
+                "batch_size": len(records),
+            },
         )
         return FlextResult[bool].fail(f"Unexpected error: {e}")
+
 
 # ❌ INCORRECT - Unstructured logging
 def process_batch_bad(self, stream_name: str, records: list):
@@ -700,7 +728,7 @@ from pydantic import Field, field_validator  # Third-party validation
 # ✅ CORRECT - Standard library imports
 import json
 from datetime import UTC, datetime
-from typing import  Dict, List
+from typing import Dict, List
 
 
 # ❌ INCORRECT - Direct Singer SDK import when flext-meltano available
@@ -750,6 +778,7 @@ import pytest
 from flext_target_oracle import FlextOracleTargetSettings, LoadMethod
 from pydantic import ValidationError
 
+
 class TestFlextOracleTargetSettings:
     """Test configuration validation and domain rules."""
 
@@ -759,12 +788,12 @@ class TestFlextOracleTargetSettings:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test_user",
-            oracle_password="test_pass"
+            oracle_password="test_pass",
         )
 
         assert config.oracle_host == "localhost"
         assert config.oracle_port == 1521  # Default value
-        assert config.batch_size == 1000   # Default value
+        assert config.batch_size == 1000  # Default value
         assert config.load_method == LoadMethod.INSERT  # Default
 
     def test_invalid_host_validation(self):
@@ -774,7 +803,7 @@ class TestFlextOracleTargetSettings:
                 oracle_host="",  # Empty host should fail
                 oracle_service="XE",
                 oracle_user="test_user",
-                oracle_password="test_pass"
+                oracle_password="test_pass",
             )
 
         assert "Oracle host cannot be empty" in str(exc_info.value)
@@ -785,7 +814,7 @@ class TestFlextOracleTargetSettings:
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test_user",
-            oracle_password="test_pass"
+            oracle_password="test_pass",
         )
 
         result = config.validate_domain_rules()
@@ -799,6 +828,7 @@ class TestFlextOracleTargetSettings:
 
 import pytest
 from flext_target_oracle import FlextOracleTarget
+
 
 @pytest.mark.integration
 class TestSingerCompliance:
@@ -816,9 +846,9 @@ class TestSingerCompliance:
                 "properties": {
                     "id": {"type": "integer"},
                     "name": {"type": "string"},
-                    "email": {"type": "string"}
-                }
-            }
+                    "email": {"type": "string"},
+                },
+            },
         }
 
         result = oracle_target.process_singer_message(schema_msg)
@@ -832,8 +862,8 @@ class TestSingerCompliance:
                 "record": {
                     "id": i,
                     "name": f"User {i}",
-                    "email": f"user{i}@example.com"
-                }
+                    "email": f"user{i}@example.com",
+                },
             }
 
             result = oracle_target.process_singer_message(record_msg)
@@ -842,7 +872,7 @@ class TestSingerCompliance:
         # STATE message
         state_msg = {
             "type": "STATE",
-            "value": {"bookmarks": {"test_users": {"last_id": 4}}}
+            "value": {"bookmarks": {"test_users": {"last_id": 4}}},
         }
 
         result = oracle_target.process_singer_message(state_msg)
@@ -885,33 +915,30 @@ from flext_core import FlextService
 from flext_core import t
 from flext_core import u
 
-def process_singer_message(
-    self,
-    message: t.Dict
-) -> FlextResult[bool]:
+
+def process_singer_message(self, message: t.Dict) -> FlextResult[bool]:
     """Process Singer message with complete type safety."""
 
+
 def load_records(
-    self,
-    stream_name: str,
-    records: List[t.Dict]
+    self, stream_name: str, records: List[t.Dict]
 ) -> FlextResult[Dict[str, Union[int, str]]]:
     """Load records with specific return type."""
+
 
 # ✅ Generic type usage for reusable patterns
 from typing import TypeVar, Generic
 
-T = TypeVar('T')
-U = TypeVar('U')
+T = TypeVar("T")
+U = TypeVar("U")
 
-def map_result(
-    result: FlextResult[T],
-    func: Callable[[T], U]
-) -> FlextResult[U]:
+
+def map_result(result: FlextResult[T], func: Callable[[T], U]) -> FlextResult[U]:
     """Generic result mapping with type safety."""
     if result.success:
         return FlextResult[bool].ok(func(result.data))
     return FlextResult[bool].fail(result.error)
+
 
 # ❌ MISSING type annotations (forbidden)
 def process_message(self, message):  # Missing types
@@ -921,11 +948,7 @@ def process_message(self, message):  # Missing types
 ### **Documentation Standards**
 
 ```python
-def ensure_table_exists(
-    self,
-    stream_name: str,
-    schema: t.Dict
-) -> FlextResult[bool]:
+def ensure_table_exists(self, stream_name: str, schema: t.Dict) -> FlextResult[bool]:
     """
     Ensure Oracle table exists for Singer stream with proper schema.
 
@@ -947,10 +970,7 @@ def ensure_table_exists(
     Example:
         >>> schema = {
         ...     "type": "object",
-        ...     "properties": {
-        ...         "id": {"type": "integer"},
-        ...         "name": {"type": "string"}
-        ...     }
+        ...     "properties": {"id": {"type": "integer"}, "name": {"type": "string"}},
         ... }
         >>> result = loader.ensure_table_exists("users", schema)
         >>> if result.success:
@@ -998,6 +1018,7 @@ from flext_meltano import Target, Record  # Singer SDK integration layer
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_observability import metrics, tracing  # Future integration
 
+
 # ✅ CONSISTENT - Error handling across projects
 def sync_data_cross_system() -> FlextResult[SyncStats]:
     """Example of cross-system operation with consistent patterns."""
@@ -1008,9 +1029,11 @@ def sync_data_cross_system() -> FlextResult[SyncStats]:
         .map(lambda stats: log_sync_completion(stats))
     )
 
+
 # ❌ INCORRECT - Custom result types break ecosystem consistency
 class OracleTargetResult[T]:  # Creates ecosystem fragmentation
     """Custom result type - avoid this pattern."""
+
     pass
 ```
 
@@ -1039,8 +1062,10 @@ from flext_core import FlextService
 from flext_core import t
 from flext_core import u
 
+
 class OracleConnectionSettings(FlextSettings):
     """Oracle connection configuration."""
+
     host: str = "localhost"
     port: int = 1521
     service_name: str = "XE"
@@ -1048,13 +1073,16 @@ class OracleConnectionSettings(FlextSettings):
     class Config:
         env_prefix = "ORACLE_"
 
+
 class ObservabilitySettings(FlextSettings):
     """Observability configuration."""
+
     enable_metrics: bool = True
     enable_tracing: bool = False
 
     class Config:
         env_prefix = "OBSERVABILITY_"
+
 
 class FlextOracleTargetSettings(FlextSettings):
     """Complete target configuration composing ecosystem settings."""
@@ -1112,10 +1140,7 @@ from warnings import warn
 from typing import Dict, Optional
 
 
-def process_singer_message(
-    self,
-    message: t.Dict
-) -> FlextResult[bool]:
+def process_singer_message(self, message: t.Dict) -> FlextResult[bool]:
     """
     DEPRECATED: Custom message processing method.
 
@@ -1126,21 +1151,18 @@ def process_singer_message(
         "process_singer_message is deprecated and will be removed in v1.0.0. "
         "Use standard Singer SDK methods instead.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
 
     # Route to new implementation while maintaining compatibility
     return self._handle_message_legacy(message)
 
+
 # New Singer-compliant methods
 def _write_record(self, record: Record) -> None:
     """Standard Singer SDK record writing method."""
     # Convert to old format for backward compatibility
-    message = {
-        "type": "RECORD",
-        "stream": record.stream,
-        "record": record.data
-    }
+    message = {"type": "RECORD", "stream": record.stream, "record": record.data}
     result = self._handle_message_legacy(message)
     if result.is_failure:
         raise RuntimeError(result.error)  # Singer SDK expects exceptions

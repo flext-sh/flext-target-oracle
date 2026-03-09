@@ -191,6 +191,7 @@ from flext_core import FlextService
 from flext_core import t
 from flext_core import u
 
+
 def operation() -> FlextResult[Data]:
     """Clear docstring with FlextResult return type."""
     try:
@@ -199,6 +200,7 @@ def operation() -> FlextResult[Data]:
     except Exception as e:
         logger.exception("Operation failed")
         return FlextResult[bool].fail(f"Operation failed: {e}")
+
 
 # ✅ GOOD: Configuration with validation
 class Config(m.Value):
@@ -211,9 +213,11 @@ class Config(m.Value):
             raise ValueError("Field cannot be empty")
         return v
 
+
 # ❌ AVOID: Exceptions without context
 def bad_operation():
     raise Exception("Something went wrong")  # No context!
+
 
 # ❌ AVOID: Unvalidated configuration
 class BadConfig:
@@ -269,12 +273,7 @@ class FlextOracleTargetSettings(m.Value):
 
     # Required fields with clear validation
     oracle_host: str = Field(..., description="Oracle host")
-    oracle_port: int = Field(
-        default=1521,
-        ge=1,
-        le=65535,
-        description="Oracle port"
-    )
+    oracle_port: int = Field(default=1521, ge=1, le=65535, description="Oracle port")
 
     # Custom validation
     @field_validator("oracle_host")
@@ -318,6 +317,7 @@ from flext_core import u
 
 logger = FlextLogger(__name__)
 
+
 def process_with_logging(stream_name: str, batch_size: int):
     """Example of proper logging with context."""
 
@@ -327,8 +327,8 @@ def process_with_logging(stream_name: str, batch_size: int):
         extra={
             "stream_name": stream_name,
             "batch_size": batch_size,
-            "operation": "batch_processing"
-        }
+            "operation": "batch_processing",
+        },
     )
 
     try:
@@ -340,17 +340,14 @@ def process_with_logging(stream_name: str, batch_size: int):
             extra={
                 "stream_name": stream_name,
                 "records_processed": result.count,
-                "duration_ms": result.duration
-            }
+                "duration_ms": result.duration,
+            },
         )
 
     except Exception as e:
         logger.exception(
             "Batch processing failed",
-            extra={
-                "stream_name": stream_name,
-                "error_type": type(e).__name__
-            }
+            extra={"stream_name": stream_name, "error_type": type(e).__name__},
         )
         raise
 ```
@@ -370,7 +367,7 @@ config = FlextOracleTargetSettings(
     oracle_service="XE",
     oracle_user="system",
     oracle_password="oracle",
-    default_target_schema="TEST_SCHEMA"
+    default_target_schema="TEST_SCHEMA",
 )
 
 # Test connection
@@ -398,8 +395,8 @@ def test_table_management():
         "properties": {
             "id": {"type": "integer"},
             "name": {"type": "string"},
-            "created_at": {"type": "string", "format": "date-time"}
-        }
+            "created_at": {"type": "string", "format": "date-time"},
+        },
     }
 
     # Ensure table exists
@@ -409,11 +406,7 @@ def test_table_management():
         return
 
     # Test record insertion
-    test_record = {
-        "id": 1,
-        "name": "Test Record",
-        "created_at": "2025-08-04T10:00:00Z"
-    }
+    test_record = {"id": 1, "name": "Test Record", "created_at": "2025-08-04T10:00:00Z"}
 
     result = loader.load_record("test_stream", test_record)
     if result.success:
@@ -478,7 +471,7 @@ python -c "from flext_target_oracle import *; print(dir())"
 config = FlextOracleTargetSettings(
     oracle_host="",  # Empty host will fail validation
     oracle_port=70000,  # Port too high
-    batch_size=-1  # Negative batch size
+    batch_size=-1,  # Negative batch size
 )
 
 # ✅ Valid configuration with proper validation
@@ -488,7 +481,7 @@ try:
         oracle_port=1521,
         oracle_service="XE",
         oracle_user="system",
-        oracle_password="oracle"
+        oracle_password="oracle",
     )
 
     # Test domain rules
@@ -507,8 +500,7 @@ except ValidationError as e:
 ```python
 # Enable debug logging for development
 logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
 # FLEXT modules will automatically use debug logging
@@ -533,6 +525,7 @@ make shell
 import cProfile
 import pstats
 
+
 def profile_batch_processing():
     """Profile batch processing for performance optimization."""
 
@@ -545,7 +538,7 @@ def profile_batch_processing():
     pr.disable()
 
     stats = pstats.Stats(pr)
-    stats.sort_stats('cumulative')
+    stats.sort_stats("cumulative")
     stats.print_stats(20)  # Top 20 functions by time
 ```
 
@@ -557,8 +550,10 @@ def profile_batch_processing():
 
 ```python
 """Test template for new functionality."""
+
 import pytest
 from flext_target_oracle import FlextOracleTargetSettings, FlextResult
+
 
 class TestNewFeature:
     """Test suite for new feature."""
@@ -587,10 +582,13 @@ class TestNewFeature:
         assert result.is_failure
         assert "expected error message" in result.error
 
-    @pytest.mark.parametrize("input_value,expected", [
-        ("valid_input", "expected_output"),
-        ("another_input", "another_output"),
-    ])
+    @pytest.mark.parametrize(
+        "input_value,expected",
+        [
+            ("valid_input", "expected_output"),
+            ("another_input", "another_output"),
+        ],
+    )
     def test_parametrized(self, input_value, expected):
         """Test multiple input scenarios."""
         result = operation(input_value)
@@ -601,8 +599,10 @@ class TestNewFeature:
 
 ```python
 """Integration test template."""
+
 import pytest
 from flext_target_oracle import FlextOracleTarget
+
 
 @pytest.mark.integration
 class TestOracleIntegration:
@@ -643,9 +643,10 @@ def sample_schema():
         "properties": {
             "id": {"type": "integer"},
             "name": {"type": "string"},
-            "email": {"type": "string", "format": "email"}
-        }
+            "email": {"type": "string", "format": "email"},
+        },
     }
+
 
 @pytest.fixture
 def sample_records():
@@ -664,6 +665,7 @@ def sample_records():
 # Test different batch sizes for optimal performance
 import time
 from typing import List
+
 
 def benchmark_batch_sizes(records: List[t.Dict]):
     """Benchmark different batch sizes."""
@@ -686,7 +688,7 @@ def benchmark_batch_sizes(records: List[t.Dict]):
             target.process_singer_message({
                 "type": "RECORD",
                 "stream": "test_stream",
-                "record": record
+                "record": record,
             })
 
         target.finalize()
@@ -694,13 +696,12 @@ def benchmark_batch_sizes(records: List[t.Dict]):
         duration = time.time() - start_time
         results[batch_size] = {
             "duration": duration,
-            "records_per_second": len(records) / duration
+            "records_per_second": len(records) / duration,
         }
 
     # Print results
     for batch_size, stats in results.items():
-        print(f"Batch size {batch_size}: "
-              f"{stats['records_per_second']:.1f} records/sec")
+        print(f"Batch size {batch_size}: {stats['records_per_second']:.1f} records/sec")
 ```
 
 ### Memory Usage Monitoring
@@ -708,6 +709,7 @@ def benchmark_batch_sizes(records: List[t.Dict]):
 ```python
 import psutil
 import os
+
 
 def monitor_memory_usage():
     """Monitor memory usage during processing."""

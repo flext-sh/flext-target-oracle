@@ -122,7 +122,7 @@ config = FlextOracleTargetSettings(
     oracle_host="localhost",
     oracle_service="XE",
     oracle_user="target_user",
-    oracle_password="secure_password"
+    oracle_password="secure_password",
 )
 
 validation_result = config.validate_domain_rules()

@@ -389,6 +389,7 @@ def test_operation_success():
     assert result.success
     assert result.data == expected_value
 
+
 def test_operation_failure():
     result = operation_with_error()
     assert result.is_failure
@@ -485,11 +486,14 @@ networks:
 ```python
 # Structured logging with correlation IDs
 logger = FlextLogger(__name__)
-logger.info("Batch processing started", extra={
-    "stream_name": stream_name,
-    "batch_size": len(records),
-    "correlation_id": correlation_id
-})
+logger.info(
+    "Batch processing started",
+    extra={
+        "stream_name": stream_name,
+        "batch_size": len(records),
+        "correlation_id": correlation_id,
+    },
+)
 
 # Metrics integration
 metrics.counter("oracle_target.records_processed").inc(count)

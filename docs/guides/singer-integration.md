@@ -347,9 +347,9 @@ sequenceDiagram
 # Configure batch processing for optimal performance
 config = FlextOracleTargetSettings(
     # ... connection config
-    batch_size=1000,           # Records per batch
+    batch_size=1000,  # Records per batch
     use_bulk_operations=True,  # Enable Oracle bulk operations
-    connection_timeout=60      # Connection timeout in seconds
+    connection_timeout=60,  # Connection timeout in seconds
 )
 
 # Batch processing automatically handles:
@@ -372,6 +372,7 @@ config = FlextOracleTargetSettings(
 ```python
 # Performance testing different batch sizes
 import time
+
 
 def benchmark_batch_performance():
     """Benchmark different batch sizes."""
@@ -400,13 +401,11 @@ def benchmark_batch_performance():
 config = FlextOracleTargetSettings(
     # Connection optimization
     connection_timeout=60,
-
     # Batch optimization
     batch_size=2000,
     use_bulk_operations=True,
-
     # Load method optimization
-    load_method=LoadMethod.BULK_INSERT  # Fastest for append-only
+    load_method=LoadMethod.BULK_INSERT,  # Fastest for append-only
 )
 
 # Additional Oracle features (future implementation)
@@ -498,6 +497,7 @@ def _insert_batch_improved(self, table_name: str, records: list) -> FlextResult[
 import pytest
 from flext_target_oracle import FlextOracleTarget
 
+
 class TestSingerIntegration:
     """Test Singer protocol compliance."""
 
@@ -510,10 +510,7 @@ class TestSingerIntegration:
         schema_msg = {
             "type": "SCHEMA",
             "stream": "test_stream",
-            "schema": {
-                "type": "object",
-                "properties": {"id": {"type": "integer"}}
-            }
+            "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
         }
 
         result = target.process_singer_message(schema_msg)
@@ -524,7 +521,7 @@ class TestSingerIntegration:
         record_msg = {
             "type": "RECORD",
             "stream": "test_stream",
-            "record": {"id": 1, "name": "Test"}
+            "record": {"id": 1, "name": "Test"},
         }
 
         result = target.process_singer_message(record_msg)
@@ -534,7 +531,7 @@ class TestSingerIntegration:
         """Test STATE message handling."""
         state_msg = {
             "type": "STATE",
-            "value": {"bookmarks": {"test_stream": {"last_id": 100}}}
+            "value": {"bookmarks": {"test_stream": {"last_id": 100}}},
         }
 
         result = target.process_singer_message(state_msg)
@@ -555,12 +552,15 @@ class TestSingerIntegration:
 # Test with actual Singer tap output ()
 import json
 
+
 def test_singer_tap_integration():
     """Test integration with actual Singer tap."""
 
     # Run Singer tap to generate messages
     process = create_subprocess_exec(
-        "tap-csv", "--config", "tap_config.json",
+        "tap-csv",
+        "--config",
+        "tap_config.json",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
