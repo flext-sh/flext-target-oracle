@@ -59,9 +59,9 @@ def reset_settings_singleton() -> Generator[None]:
     FlextSettings uses singleton pattern - tests can pollute each other's state
     if not reset between runs.
     """
-    FlextTargetOracleSettings.reset_global_instance()
+    FlextTargetOracleSettings.reset_for_testing()
     yield
-    FlextTargetOracleSettings.reset_global_instance()
+    FlextTargetOracleSettings.reset_for_testing()
 
 
 @pytest.fixture(scope="session")
