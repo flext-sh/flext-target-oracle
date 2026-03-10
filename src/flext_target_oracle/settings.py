@@ -56,6 +56,7 @@ class FlextTargetOracleSettings(FlextSettings):
         return FlextResult[bool].ok(True)
 
     def get_oracle_config(self) -> OracleConnectionModel:
+        """Get Oracle database connection configuration."""
         return OracleConnectionModel(
             host=self.oracle_host,
             port=self.oracle_port,

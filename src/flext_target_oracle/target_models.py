@@ -17,10 +17,14 @@ PUBLIC = "PUBLIC"
 
 
 class OracleConnectionModel(m.TargetOracle.OracleConnectionConfig):
+    """Oracle database connection configuration model."""
+
     pass
 
 
 class SingerStreamModel(m.ArbitraryTypesModel):
+    """Singer stream mapping to Oracle table with column configuration."""
+
     stream_name: str = Field(description="Singer stream name")
     table_name: str = Field(description="Oracle destination table name")
     ignored_columns: list[str] = Field(
@@ -34,6 +38,8 @@ class SingerStreamModel(m.ArbitraryTypesModel):
 
 
 class LoadStatisticsModel(m.ArbitraryTypesModel):
+    """Statistics for data load operation."""
+
     stream_name: str = Field(description="Stream identifier")
     total_records_processed: int = Field(
         ge=0,
@@ -44,6 +50,7 @@ class LoadStatisticsModel(m.ArbitraryTypesModel):
     batches_processed: int = Field(ge=0, description="Processed batch count")
 
     def finalize(self) -> LoadStatisticsModel:
+        """Finalize statistics and return self."""
         return self
 
 

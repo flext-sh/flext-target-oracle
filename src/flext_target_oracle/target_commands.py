@@ -13,9 +13,12 @@ from .settings import FlextTargetOracleSettings
 
 
 class OracleTargetAboutCommand(FlextModels.Command):
+    """Command to return target metadata and capabilities."""
+
     format: str = c.TargetOracle.OutputFormats.JSON
 
     def execute(self) -> FlextResult[str]:
+        """Execute about command returning target information."""
         payload = {
             "name": "flext-target-oracle",
             "description": "Singer target for Oracle loading",
@@ -27,10 +30,13 @@ class OracleTargetAboutCommand(FlextModels.Command):
 
 
 class OracleTargetLoadCommand(FlextModels.Command):
+    """Command to prepare target for data loading."""
+
     config_file: str | None = None
     state_file: str | None = None
 
     def execute(self) -> FlextResult[str]:
+        """Execute load command to initialize target."""
         settings_result = _load_settings(self.config_file)
         if settings_result.is_failure:
             return FlextResult[str].fail(settings_result.error or "Invalid settings")
@@ -39,9 +45,12 @@ class OracleTargetLoadCommand(FlextModels.Command):
 
 
 class OracleTargetValidateCommand(FlextModels.Command):
+    """Command to validate target configuration."""
+
     config_file: str | None = None
 
     def execute(self) -> FlextResult[str]:
+        """Execute validation of target configuration."""
         settings_result = _load_settings(self.config_file)
         if settings_result.is_failure:
             return FlextResult[str].fail(
