@@ -1,0 +1,27 @@
+src/flext_target_oracle/target_commands.py
+  f91df66d8ea308cb 16-17,21,33-34,39,48-49,53
+src/flext_target_oracle/target_models.py
+  f91df66d8ea308cb 20-21,26-27,41-42,53
+src/flext_target_oracle/settings.py
+  f91df66d8ea308cb 59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.10",
+  "base_commit_sha": "e99e5a1579bd217615ea02287499bb0a321db4cb",
+  "prompts": {
+    "f91df66d8ea308cb": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_3269919a0ffeakXKu8ivurqawO",
+        "model": "anthropic/claude-haiku-4-5"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>",
+      "messages": [],
+      "total_additions": 17,
+      "total_deletions": 0,
+      "accepted_lines": 17,
+      "overriden_lines": 0
+    }
+  }
+}
