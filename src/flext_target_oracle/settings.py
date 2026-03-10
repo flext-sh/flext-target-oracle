@@ -13,6 +13,7 @@ from __future__ import annotations
 from flext_core import FlextResult
 
 from .constants import c
+from flext_target_oracle.target_loader import FlextTargetOracleSettings
 
 LoadMethod = c.LoadMethod
 
