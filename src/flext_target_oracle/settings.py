@@ -14,6 +14,7 @@ from flext_core import FlextLogger, FlextResult, FlextSettings
 from pydantic import Field, SecretStr
 
 from .constants import c
+from .target_models import OracleConnectionModel
 
 logger = FlextLogger(__name__)
 LoadMethod = c.LoadMethod
@@ -53,6 +54,24 @@ class FlextTargetOracleSettings(FlextSettings):
         if not self.default_target_schema:
             return FlextResult[bool].fail("Default target schema is required")
         return FlextResult[bool].ok(True)
+
+    def get_oracle_config(self) -> OracleConnectionModel:
+        return OracleConnectionModel(
+            host=self.oracle_host,
+            port=self.oracle_port,
+            service_name=self.oracle_service_name,
+            username=self.oracle_user.get_secret_value(),
+            password=self.oracle_password.get_secret_value(),
+            timeout=c.TargetOracle.DEFAULT_CONNECTION_TIMEOUT,
+            pool_min=c.Loading.DEFAULT_POOL_MIN,
+            pool_max=c.Loading.DEFAULT_POOL_MAX,
+            pool_increment=1,
+            encoding="UTF-8",
+            ssl_enabled=False,
+            autocommit=self.autocommit,
+            use_bulk_operations=self.use_bulk_operations,
+            parallel_degree=1,
+        )
 
 
 def validate_oracle_configuration(
