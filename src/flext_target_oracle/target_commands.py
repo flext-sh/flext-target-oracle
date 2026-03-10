@@ -18,11 +18,11 @@ class OracleTargetCommandHandler(h[FlextModels.Command, str]):
     @override
     def handle(self, message: FlextModels.Command) -> FlextResult[str]:
         """Invoke command execute methods in a typed-safe way."""
-        if isinstance(message, OracleTargetValidateCommand):
+        if isinstance(message, OracleTargetValidateCommand):  # noqa: F821
             return message.execute()
-        if isinstance(message, OracleTargetLoadCommand):
+        if isinstance(message, OracleTargetLoadCommand):  # noqa: F821
             return message.execute()
-        if isinstance(message, OracleTargetAboutCommand):
+        if isinstance(message, OracleTargetAboutCommand):  # noqa: F821
             return message.execute()
         return FlextResult[str].fail(f"Unsupported command: {type(message).__name__}")
 
@@ -33,18 +33,18 @@ class OracleTargetCommandFactory:
     @staticmethod
     def create_about_command(
         output_format: str = c.TargetOracle.OutputFormats.JSON,
-    ) -> OracleTargetAboutCommand:
+    ) -> OracleTargetAboutCommand:  # noqa: F821
         """Create about command instance."""
-        return OracleTargetAboutCommand(
+        return OracleTargetAboutCommand(  # noqa: F821
             command_type=c.TargetOracle.CommandTypes.ABOUT.value, format=output_format
         )
 
     @staticmethod
     def create_load_command(
         config_file: str | None = None, state_file: str | None = None
-    ) -> OracleTargetLoadCommand:
+    ) -> OracleTargetLoadCommand:  # noqa: F821
         """Create load command instance."""
-        return OracleTargetLoadCommand(
+        return OracleTargetLoadCommand(  # noqa: F821
             command_type=c.TargetOracle.CommandTypes.LOAD.value,
             config_file=config_file,
             state_file=state_file,
@@ -53,9 +53,9 @@ class OracleTargetCommandFactory:
     @staticmethod
     def create_validate_command(
         config_file: str | None = None,
-    ) -> OracleTargetValidateCommand:
+    ) -> OracleTargetValidateCommand:  # noqa: F821
         """Create validation command instance."""
-        return OracleTargetValidateCommand(
+        return OracleTargetValidateCommand(  # noqa: F821
             command_type=c.TargetOracle.CommandTypes.VALIDATE.value,
             config_file=config_file,
         )
@@ -94,9 +94,9 @@ def _load_settings(config_file: str | None) -> FlextResult[FlextTargetOracleSett
 
 
 __all__ = [
-    "OracleTargetAboutCommand",
+    "OracleTargetAboutCommand",  # noqa: F822
     "OracleTargetCommandFactory",
     "OracleTargetCommandHandler",
-    "OracleTargetLoadCommand",
-    "OracleTargetValidateCommand",
+    "OracleTargetLoadCommand",  # noqa: F822
+    "OracleTargetValidateCommand",  # noqa: F822
 ]

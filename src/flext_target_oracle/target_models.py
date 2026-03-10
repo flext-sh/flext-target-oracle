@@ -14,8 +14,8 @@ LoadMethodModel = c.LoadMethod
 StorageModeModel = c.StorageMode
 __all__ = [
     "LoadMethodModel",
-    "LoadStatisticsModel",
-    "OracleConnectionModel",
-    "SingerStreamModel",
+    "LoadStatisticsModel",  # noqa: F822
+    "OracleConnectionModel",  # noqa: F822
+    "SingerStreamModel",  # noqa: F822
     "StorageModeModel",
 ]
