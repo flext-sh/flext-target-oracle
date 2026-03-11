@@ -14,7 +14,7 @@
   - [5. Error Handling](#5-error-handling)
 - [Running Examples](#running-examples)
 - [Common Patterns](#common-patterns)
-  - [FlextResult Error Handling](#flextresult-error-handling)
+  - [r Error Handling](#flextresult-error-handling)
   - [Configuration Management](#configuration-management)
   - [FLEXT Ecosystem Integration](#flext-ecosystem-integration)
 - [Testing Examples](#testing-examples)
@@ -102,9 +102,9 @@ python examples/performance_tuning.py
 
 ## Common Patterns
 
-### FlextResult Error Handling
+### r Error Handling
 
-All examples demonstrate railway-oriented programming with FlextResult patterns:
+All examples demonstrate railway-oriented programming with r patterns:
 
 ```python
 result = target.process_singer_message(message)
@@ -150,7 +150,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -172,7 +172,7 @@ pytest examples/tests/ -m integration
 
 ## Contributing Examples
 
-1. **Follow FLEXT Patterns**: Use FlextResult, m.Value, and structured logging
+1. **Follow FLEXT Patterns**: Use r, m.Value, and structured logging
 1. **Document Thoroughly**: Include comprehensive docstrings and comments
 1. **Test Coverage**: Add corresponding tests in examples/tests/
 1. **Security Awareness**: Highlight security considerations and best practices

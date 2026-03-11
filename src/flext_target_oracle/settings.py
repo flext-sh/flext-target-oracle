@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import FlextLogger, FlextResult, FlextSettings
+from flext_core import FlextLogger, FlextSettings, r
 from pydantic import Field, SecretStr
 
 from .constants import c
@@ -66,19 +66,19 @@ class FlextTargetOracleSettings(FlextSettings):
         )
         return full_table_name.upper()
 
-    def validate_business_rules(self) -> FlextResult[bool]:
+    def validate_business_rules(self) -> r[bool]:
         """Validate Oracle target configuration business rules."""
         if not self.oracle_host:
-            return FlextResult[bool].fail("Oracle host is required")
+            return r[bool].fail("Oracle host is required")
         if not self.oracle_service_name:
-            return FlextResult[bool].fail("Oracle service name is required")
+            return r[bool].fail("Oracle service name is required")
         if not self.default_target_schema:
-            return FlextResult[bool].fail("Default target schema is required")
+            return r[bool].fail("Default target schema is required")
         if self.commit_interval > self.batch_size:
-            return FlextResult[bool].fail(
+            return r[bool].fail(
                 "Commit interval must be less than or equal to batch size"
             )
-        return FlextResult[bool].ok(True)
+        return r[bool].ok(True)
 
     def get_oracle_config(self) -> OracleConnectionModel:
         """Get Oracle database connection configuration."""

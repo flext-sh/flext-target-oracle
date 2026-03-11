@@ -8,7 +8,7 @@ Key Concepts Demonstrated:
     - FlextTargetOracleSettings creation and validation
     - FlextTargetOracle initialization and setup
     - Singer message processing (SCHEMA, RECORD, STATE)
-    - FlextResult railway-oriented error handling
+    - r railway-oriented error handling
     - Basic logging and error management
 
 Prerequisites:
@@ -25,7 +25,7 @@ from __future__ import annotations
 import logging
 import os
 
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, r
 from pydantic import SecretStr
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
@@ -158,7 +158,7 @@ def demonstrate_basic_usage() -> None:
     1. Configuration creation and validation
     2. Target initialization
     3. Singer message processing (SCHEMA, RECORD, STATE)
-    4. Error handling with FlextResult patterns
+    4. Error handling with r patterns
     5. Statistics collection and reporting
     """
     logger.info("Starting FLEXT Target Oracle basic usage demonstration")
@@ -166,7 +166,7 @@ def demonstrate_basic_usage() -> None:
         logger.info("Step 1: Creating configuration")
         config = create_configuration()
         logger.info("Validating configuration domain rules")
-        validation_result = FlextResult[bool].ok(value=True)
+        validation_result = r[bool].ok(value=True)
         if validation_result.is_failure:
             logger.error(f"Configuration validation failed: {validation_result.error}")
             return
@@ -228,7 +228,7 @@ def demonstrate_basic_usage() -> None:
 
 
 def demonstrate_error_handling() -> None:
-    """Demonstrate error handling patterns with FlextResult.
+    """Demonstrate error handling patterns with r.
 
     Shows how to handle various error scenarios gracefully using
     FLEXT error handling patterns.
@@ -241,7 +241,7 @@ def demonstrate_error_handling() -> None:
             oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
             oracle_password=SecretStr(os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", "")),
         )
-        validation_result = FlextResult[bool].ok(value=True)
+        validation_result = r[bool].ok(value=True)
         if validation_result.is_failure:
             logger.info(f"Expected validation error: {validation_result.error}")
     except (

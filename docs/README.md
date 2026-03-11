@@ -54,7 +54,7 @@
 > **Technical architecture, design patterns, and FLEXT ecosystem integration**
 
 - **Clean Architecture Implementation**: Layered architecture with clear separation of concerns
-- **FLEXT Pattern Integration**: FlextResult, m.Value, and logging patterns
+- **FLEXT Pattern Integration**: r, m.Value, and logging patterns
 - **Component Architecture**: Detailed component responsibilities and interactions
 - **Data Flow Architecture**: Singer message processing and Oracle integration
 - **Performance Architecture**: Batch processing, connection management, and optimization
@@ -84,7 +84,7 @@
 - **Meltano Integration**: Configuration schema and execution patterns
 - **Data Loading Patterns**: Table creation, record processing, and batch handling
 - **Performance Optimization**: Batch size tuning and Oracle-specific optimizations
-- **Error Handling and Reliability**: FlextResult patterns and transaction management
+- **Error Handling and Reliability**: r patterns and transaction management
 - **Testing Singer Integration**: Unit and integration testing approaches
 - **Compliance Roadmap**: Version-based improvement plan
 
@@ -162,7 +162,7 @@ graph TB
 
 ### Core Dependencies
 
-- **[flext-core](https://github.com/organization/flext/tree/main/flext-core/)**: Foundational patterns (FlextResult, m.Value, logging)
+- **[flext-core](https://github.com/organization/flext/tree/main/flext-core/)**: Foundational patterns (r, m.Value, logging)
 - **[flext-meltano](https://github.com/organization/flext/tree/main/flext-meltano/)**: Singer SDK integration and Target base classes
 - **[flext-db-oracle](https://github.com/organization/flext/tree/main/flext-db-oracle/)**: Oracle database operations and connectivity
 - **[flext-observability](https://github.com/organization/flext/tree/main/flext-observability/)**: Monitoring and metrics (planned integration)

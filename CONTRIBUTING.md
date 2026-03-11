@@ -193,7 +193,7 @@ pre-commit install
 
 ### Design Principles
 
-1. **Railway-Oriented Programming**: Use `FlextResult` for error handling
+1. **Railway-Oriented Programming**: Use `r` for error handling
 1. **Dependency Injection**: Configuration-driven behavior
 1. **Clean Architecture**: Separation of concerns
 1. **Type Safety**: Strict typing throughout
@@ -244,7 +244,7 @@ def process_record(
     stream_name: str,
     record: FlextTypes.Dict,
     schema: FlextTypes.Dict,
-) -> FlextResult[bool]:
+) -> r[bool]:
     """Process a single record for insertion.
 
     Args:
@@ -253,7 +253,7 @@ def process_record(
         schema: Singer schema for validation
 
     Returns:
-        FlextResult indicating success/failure
+        r indicating success/failure
 
     Raises:
         FlextOracleTargetProcessingError: If processing fails

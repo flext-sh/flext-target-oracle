@@ -546,6 +546,21 @@ extraPaths = [
 pythonPlatform = "Linux"
 pythonVersion = "3.13"
 typeCheckingMode = "strict"
+reportMissingImports = "error"
+reportMissingModuleSource = "none"
+reportMissingTypeStubs = "none"
+reportUnusedImport = "error"
+reportUnusedVariable = "error"
+reportUnusedClass = "error"
+reportUnusedFunction = "error"
+reportConstantRedefinition = "error"
+reportIncompatibleMethodOverride = "error"
+reportIncompatibleVariableOverride = "error"
+reportInconsistentConstructor = "error"
+reportUnnecessaryIsInstance = "warning"
+reportUnnecessaryCast = "error"
+reportUnnecessaryComparison = "warning"
+reportPrivateUsage = "warning"
 
 [[tool.pyright.executionEnvironments]]
 reportPrivateUsage = "error"
@@ -596,3 +611,9 @@ python_files = [ "*_test.py", "*_tests.py", "test_*.py" ]
 # [CUSTOM] poetry dev extensions
 # [MANAGED] pyrefly
 enable_assertion_pass_hook = true
+
+[tool.coverage.report]
+fail_under = 20
+show_missing = true
+skip_covered = false
+precision = 2

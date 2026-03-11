@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_core import FlextResult
+from flext_core import r
 
 from .models import m
 from .settings import FlextTargetOracleSettings
@@ -18,15 +18,15 @@ class FlextTargetOracleService:
         self.config = config
         self.client = FlextTargetOracle(config)
 
-    def discover_catalog(self) -> FlextResult[m.Meltano.SingerCatalog]:
+    def discover_catalog(self) -> r[m.Meltano.SingerCatalog]:
         """Delegate Singer catalog discovery."""
         return self.client.discover_catalog()
 
-    def execute(self) -> FlextResult[m.TargetOracle.ExecuteResult]:
+    def execute(self) -> r[m.TargetOracle.ExecuteResult]:
         """Execute connectivity readiness checks."""
         return self.client.execute()
 
-    def finalize(self) -> FlextResult[m.TargetOracle.LoaderFinalizeResult]:
+    def finalize(self) -> r[m.TargetOracle.LoaderFinalizeResult]:
         """Flush pending loader data."""
         return self.client.finalize()
 
@@ -42,15 +42,15 @@ class FlextTargetOracleService:
             | m.TargetOracle.SingerStateMessage
             | m.TargetOracle.SingerActivateVersionMessage
         ],
-    ) -> FlextResult[m.TargetOracle.ProcessingSummary]:
+    ) -> r[m.TargetOracle.ProcessingSummary]:
         """Delegate processing of Singer message batches."""
         return self.client.process_singer_messages(messages)
 
-    def test_connection(self) -> FlextResult[bool]:
+    def test_connection(self) -> r[bool]:
         """Validate Oracle connectivity."""
         return self.client.test_connection()
 
-    def validate_configuration(self) -> FlextResult[bool]:
+    def validate_configuration(self) -> r[bool]:
         """Validate target configuration."""
         return self.client.validate_configuration()
 

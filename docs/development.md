@@ -11,7 +11,7 @@
   - [Testing Workflow](#testing-workflow)
   - [Code Quality Standards](#code-quality-standards)
 - [FLEXT Pattern Implementation](#flext-pattern-implementation)
-  - [FlextResult Railway Pattern](#flextresult-railway-pattern)
+  - [r Railway Pattern](#flextresult-railway-pattern)
   - [Configuration Patterns](#configuration-patterns)
   - [Logging Patterns](#logging-patterns)
 - [Oracle Integration Development](#oracle-integration-development)
@@ -185,21 +185,21 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
 from flext_core import u
 
 
-def operation() -> FlextResult[Data]:
-    """Clear docstring with FlextResult return type."""
+def operation() -> r[Data]:
+    """Clear docstring with r return type."""
     try:
         # Business logic here
-        return FlextResult[bool].ok(data)
+        return r[bool].ok(data)
     except Exception as e:
         logger.exception("Operation failed")
-        return FlextResult[bool].fail(f"Operation failed: {e}")
+        return r[bool].fail(f"Operation failed: {e}")
 
 
 # ✅ GOOD: Configuration with validation
@@ -227,41 +227,41 @@ class BadConfig:
 
 ## FLEXT Pattern Implementation
 
-### FlextResult Railway Pattern
+### r Railway Pattern
 
 ```python
-# ✅ All operations return FlextResult
-def process_record(record: dict) -> FlextResult[bool]:
+# ✅ All operations return r
+def process_record(record: dict) -> r[bool]:
     """Process a single record with proper error handling."""
     try:
         # Validate input
         if not record:
-            return FlextResult[bool].fail("Record cannot be empty")
+            return r[bool].fail("Record cannot be empty")
 
         # Process record
         result = some_operation(record)
         if result.is_failure:
             return result  # Propagate failure
 
-        return FlextResult[bool].| ok(value=True)
+        return r[bool].| ok(value=True)
 
     except Exception as e:
         logger.exception("Record processing failed")
-        return FlextResult[bool].fail(f"Processing failed: {e}")
+        return r[bool].fail(f"Processing failed: {e}")
 
-# ✅ Chain FlextResult operations
-def process_batch(records: list[t.Dict]) -> FlextResult[Stats]:
+# ✅ Chain r operations
+def process_batch(records: list[t.Dict]) -> r[Stats]:
     """Process batch of records with early termination on failure."""
     stats = Stats()
 
     for record in records:
         result = process_record(record)
         if result.is_failure:
-            return FlextResult[bool].fail(f"Batch failed on record: {result.error}")
+            return r[bool].fail(f"Batch failed on record: {result.error}")
 
         stats.increment()
 
-    return FlextResult[bool].ok(stats)
+    return r[bool].ok(stats)
 ```
 
 ### Configuration Patterns
@@ -284,7 +284,7 @@ class FlextOracleTargetSettings(m.Value):
         return v.strip()
 
     # Domain rule validation
-    def validate_domain_rules(self) -> FlextResult[bool]:
+    def validate_domain_rules(self) -> r[bool]:
         """Validate business rules using Chain of Responsibility."""
         validator = ConfigurationValidator()
         return validator.validate(self)
@@ -309,7 +309,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -457,7 +457,7 @@ from flext_target_oracle import (
     FlextOracleTarget,
     FlextOracleTargetSettings,
     LoadMethod,
-    FlextResult  # Re-exported from flext-core
+    r  # Re-exported from flext-core
 )
 
 # ✅ Debug imports
@@ -552,7 +552,7 @@ def profile_batch_processing():
 """Test template for new functionality."""
 
 import pytest
-from flext_target_oracle import FlextOracleTargetSettings, FlextResult
+from flext_target_oracle import FlextOracleTargetSettings, r
 
 
 class TestNewFeature:

@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, Any
 from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
-    from flext_core import FlextResult
+    from flext_core import r
     from flext_meltano import FlextMeltanoSettings, FlextMeltanoTypes
 
     from flext_target_oracle.constants import (
@@ -82,7 +82,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "FlextOracleError",
     ),
     "FlextOracleObs": ("flext_target_oracle.target_observability", "FlextOracleObs"),
-    "FlextResult": ("flext_core", "FlextResult"),
+    "r": ("flext_core", "r"),
     "FlextTargetOracle": ("flext_target_oracle.target_client", "FlextTargetOracle"),
     "FlextTargetOracleCliService": (
         "flext_target_oracle.target_refactored",
@@ -173,7 +173,6 @@ __all__ = [
     "FlextMeltanoTypes",
     "FlextOracleError",
     "FlextOracleObs",
-    "FlextResult",
     "FlextTargetOracle",
     "FlextTargetOracleCliService",
     "FlextTargetOracleConstants",
@@ -202,6 +201,7 @@ __all__ = [
     "configure_oracle_observability",
     "m",
     "p",
+    "r",
     "t",
     "u",
 ]

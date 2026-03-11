@@ -14,7 +14,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from flext_core import FlextLogger, FlextResult, t
+from flext_core import FlextLogger, r, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_tests import FlextTestsDocker
 from sqlalchemy import create_engine, text
@@ -158,9 +158,9 @@ def oracle_api(oracle_config: FlextTargetOracleSettings) -> MagicMock:
     )
     mock_api = MagicMock(spec=FlextDbOracleApi)
     mock_api.config = db_config
-    mock_api.connect.return_value = FlextResult.ok("Connected successfully")
-    mock_api.disconnect.return_value = FlextResult.ok("Disconnected successfully")
-    mock_api.test_connection.return_value = FlextResult.ok(value=True)
+    mock_api.connect.return_value = r.ok("Connected successfully")
+    mock_api.disconnect.return_value = r.ok("Disconnected successfully")
+    mock_api.test_connection.return_value = r.ok(value=True)
     mock_api.is_connected = True
     return mock_api
 
@@ -173,11 +173,11 @@ def oracle_loader(
     with patch("flext_target_oracle.target_client.FlextDbOracleApi") as mock_api_class:
         mock_api = MagicMock()
         mock_api_class.return_value = mock_api
-        mock_api.connect.return_value = FlextResult.ok("Connected successfully")
-        mock_api.disconnect.return_value = FlextResult.ok("Disconnected successfully")
+        mock_api.connect.return_value = r.ok("Connected successfully")
+        mock_api.disconnect.return_value = r.ok("Disconnected successfully")
         mock_api.is_connected = True
         loader = FlextTargetOracleLoader(oracle_config)
-        FlextResult.ok("Mocked connection successful")
+        r.ok("Mocked connection successful")
         yield loader
 
 

@@ -19,7 +19,7 @@
   - [Batch Size Tuning](#batch-size-tuning)
   - [Oracle-Specific Optimizations](#oracle-specific-optimizations)
 - [Error Handling and Reliability](#error-handling-and-reliability)
-  - [FlextResult Error Patterns](#flextresult-error-patterns)
+  - [r Error Patterns](#flextresult-error-patterns)
   - [Transaction Management](#transaction-management)
 - [Testing Singer Integration](#testing-singer-integration)
   - [Unit Testing Singer Messages](#unit-testing-singer-messages)
@@ -62,7 +62,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
 **Implementation**:
 
 ```python
-def _handle_schema(self, message: t.Dict) -> FlextResult[bool]:
+def _handle_schema(self, message: t.Dict) -> r[bool]:
     """Handle SCHEMA message with table creation/evolution."""
     stream_name = message.get("stream")
     schema = message.get("schema", {})
@@ -93,13 +93,13 @@ def _handle_schema(self, message: t.Dict) -> FlextResult[bool]:
 **Implementation**:
 
 ```python
-def _handle_record(self, message: t.Dict) -> FlextResult[bool]:
+def _handle_record(self, message: t.Dict) -> r[bool]:
     """Handle RECORD message with batched loading."""
     stream_name = message.get("stream")
     record_data = message.get("record")
 
     if not isinstance(stream_name, str) or not isinstance(record_data, dict):
-        return FlextResult[bool].fail("Record message missing stream or data")
+        return r[bool].fail("Record message missing stream or data")
 
     return self._loader.load_record(stream_name, record_data)
 ```
@@ -122,11 +122,11 @@ def _handle_record(self, message: t.Dict) -> FlextResult[bool]:
 **Implementation**:
 
 ```python
-def _handle_state(self, message: t.Dict) -> FlextResult[bool]:
+def _handle_state(self, message: t.Dict) -> r[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
     logger.debug("State message received - forwarding to Meltano")
-    return FlextResult[bool].| ok(value=True)
+    return r[bool].| ok(value=True)
 ```
 
 ## Current Implementation Status
@@ -139,7 +139,7 @@ def _handle_state(self, message: t.Dict) -> FlextResult[bool]:
 | RECORD message handling  | ✅ Complete | `_handle_record()`          |
 | STATE message handling   | ✅ Complete | `_handle_state()`           |
 | Batch processing         | ✅ Complete | Configurable batch sizes    |
-| Error handling           | ✅ Complete | FlextResult pattern         |
+| Error handling           | ✅ Complete | r pattern         |
 | JSON storage             | ✅ Complete | CLOB-based flexible storage |
 | Configuration validation | ✅ Complete | Pydantic + domain rules     |
 
@@ -159,7 +159,7 @@ def _handle_state(self, message: t.Dict) -> FlextResult[bool]:
 
 ```python
 # ❌ Custom method - not Singer SDK compliant
-def process_singer_message(self, message: dict) -> FlextResult[bool]:
+def process_singer_message(self, message: dict) -> r[bool]:
     # Custom message processing
 ```
 
@@ -417,10 +417,10 @@ config = FlextOracleTargetSettings(
 
 ## Error Handling and Reliability
 
-### FlextResult Error Patterns
+### r Error Patterns
 
 ```python
-# Consistent error handling with FlextResult
+# Consistent error handling with r
 def process_with_error_handling():
     """Example of proper error handling in Singer context."""
 
@@ -452,7 +452,7 @@ def process_with_error_handling():
 
 ```python
 # Current implementation (needs improvement)
-def _insert_batch(self, table_name: str, records: list) -> FlextResult[bool]:
+def _insert_batch(self, table_name: str, records: list) -> r[bool]:
     """Insert batch with basic error handling."""
     try:
         with self.oracle_api as connected_api:
@@ -460,15 +460,15 @@ def _insert_batch(self, table_name: str, records: list) -> FlextResult[bool]:
             for record in records:
                 result = connected_api.execute_ddl(sql)  # Should be execute_dml
                 if not result.success:
-                    return FlextResult[bool].fail(f"Insert failed: {result.error}")
+                    return r[bool].fail(f"Insert failed: {result.error}")
 
-        return FlextResult[bool].| ok(value=True)
+        return r[bool].| ok(value=True)
 
     except Exception as e:
-        return FlextResult[bool].fail(f"Batch insert failed: {e}")
+        return r[bool].fail(f"Batch insert failed: {e}")
 
 # Improved implementation (needed)
-def _insert_batch_improved(self, table_name: str, records: list) -> FlextResult[bool]:
+def _insert_batch_improved(self, table_name: str, records: list) -> r[bool]:
     """Insert batch with proper transaction management."""
     try:
         with self.oracle_api as connected_api:
@@ -477,16 +477,16 @@ def _insert_batch_improved(self, table_name: str, records: list) -> FlextResult[
                 result = connected_api.execute_batch_dml(sql, parameters)
                 if result.is_failure:
                     # Transaction automatically rolled back
-                    return FlextResult[bool].fail(f"Batch insert failed: {result.error}")
+                    return r[bool].fail(f"Batch insert failed: {result.error}")
 
                 # Commit only on success
                 connected_api.commit()
 
-        return FlextResult[bool].| ok(value=True)
+        return r[bool].| ok(value=True)
 
     except Exception as e:
         # Transaction automatically rolled back
-        return FlextResult[bool].fail(f"Batch insert failed: {e}")
+        return r[bool].fail(f"Batch insert failed: {e}")
 ```
 
 ## Testing Singer Integration

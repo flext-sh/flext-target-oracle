@@ -11,7 +11,7 @@
   - [**Ideal Structure for Singer Targets**](#ideal-structure-for-singer-targets)
   - [**Simplified Structure (Current Approach)**](#simplified-structure-current-approach)
 - [📋 **FLEXT Pattern Implementation Standards**](#flext-pattern-implementation-standards)
-  - [**FlextResult Railway Pattern Usage**](#flextresult-railway-pattern-usage)
+  - [**r Railway Pattern Usage**](#flextresult-railway-pattern-usage)
   - [**m.Value Configuration Pattern**](#mvalue-configuration-pattern)
   - [**Structured Logging Pattern**](#structured-logging-pattern)
 - [🔧 **Module Dependency Patterns**](#module-dependency-patterns)
@@ -52,10 +52,10 @@ FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for
 ### **Core Design Principles**
 
 1. **Singer Protocol Compliance**: Primary focus on Singer specification implementation
-1. **FLEXT Pattern Integration**: Uses flext-core foundations (FlextResult, m.Value)
+1. **FLEXT Pattern Integration**: Uses flext-core foundations (r, m.Value)
 1. **Clean Architecture Simplified**: Streamlined layers for target-specific needs
 1. **Type-Safe Everything**: Comprehensive type hints and strict MyPy compliance
-1. **Railway-Oriented Programming**: FlextResult[T] threading through all operations
+1. **Railway-Oriented Programming**: r[T] threading through all operations
 1. **Ecosystem Consistency**: Patterns align with broader FLEXT ecosystem
 
 ______________________________________________________________________
@@ -98,7 +98,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -125,7 +125,7 @@ __all__: t.StringList = [
     # Error handling
     "FlextOracleTargetError",
     # FLEXT core re-exports
-    "FlextResult",
+    "r",
     # Compatibility aliases
     "FlextTargetOracle",
     "TargetOracle",
@@ -170,7 +170,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -201,7 +201,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -240,7 +240,7 @@ class FlextOracleTargetSettings(m.Value):
     )
     connection_timeout: int = Field(default=30, gt=0, description="Connection timeout")
 
-    def validate_domain_rules(self) -> FlextResult[bool]:
+    def validate_domain_rules(self) -> r[bool]:
         """Validate business rules using Chain of Responsibility pattern."""
         # Implementation using validator chain pattern
 ```
@@ -278,7 +278,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -292,16 +292,16 @@ class FlextOracleTarget(Target):
     name = "flext-oracle-target"
     config_class = FlextOracleTargetSettings
 
-    def process_singer_message(self, message: dict) -> FlextResult[bool]:
+    def process_singer_message(self, message: dict) -> r[bool]:
         """Process Singer messages with railway-oriented error handling."""
 
-    def _handle_schema(self, message: dict) -> FlextResult[bool]:
+    def _handle_schema(self, message: dict) -> r[bool]:
         """Handle SCHEMA messages with table management."""
 
-    def _handle_record(self, message: dict) -> FlextResult[bool]:
+    def _handle_record(self, message: dict) -> r[bool]:
         """Handle RECORD messages with batched loading."""
 
-    def finalize(self) -> FlextResult[t.Dict]:
+    def finalize(self) -> r[t.Dict]:
         """Finalize streams and return statistics."""
 ```
 
@@ -349,7 +349,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -363,13 +363,13 @@ class FlextOracleTargetLoader:
     def __init__(self, config: FlextOracleTargetSettings) -> None:
         """Initialize with flext-db-oracle integration."""
 
-    def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[bool]:
+    def ensure_table_exists(self, stream_name: str, schema: dict) -> r[bool]:
         """Ensure target table exists with proper schema."""
 
-    def load_record(self, stream_name: str, record_data: dict) -> FlextResult[bool]:
+    def load_record(self, stream_name: str, record_data: dict) -> r[bool]:
         """Load record with batching and error handling."""
 
-    def finalize_all_streams(self) -> FlextResult[t.Dict]:
+    def finalize_all_streams(self) -> r[t.Dict]:
         """Finalize all streams and return statistics."""
 ```
 
@@ -476,11 +476,11 @@ ______________________________________________________________________
 
 ## 📋 **FLEXT Pattern Implementation Standards**
 
-### **FlextResult Railway Pattern Usage**
+### **r Railway Pattern Usage**
 
 ```python
 # ✅ CORRECT - Railway-oriented programming throughout
-def process_record(self, stream_name: str, record_data: dict) -> FlextResult[bool]:
+def process_record(self, stream_name: str, record_data: dict) -> r[bool]:
     """Process single record with proper error handling."""
     return (
         self
@@ -516,7 +516,7 @@ class FlextOracleTargetSettings(m.Value):
             raise ValueError("Oracle host cannot be empty")
         return v.strip()
 
-    def validate_domain_rules(self) -> FlextResult[bool]:
+    def validate_domain_rules(self) -> r[bool]:
         """Business rule validation using Chain of Responsibility."""
         validators = [
             HostReachabilityValidator(),
@@ -529,7 +529,7 @@ class FlextOracleTargetSettings(m.Value):
             if result.is_failure:
                 return result
 
-        return FlextResult[bool].| ok(value=True)
+        return r[bool].| ok(value=True)
 
 # ❌ INCORRECT - Plain dataclass without validation
 @dataclass
@@ -557,7 +557,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -566,7 +566,7 @@ from flext_core import u
 logger = FlextLogger(__name__)
 
 
-def process_batch(self, stream_name: str, records: list) -> FlextResult[bool]:
+def process_batch(self, stream_name: str, records: list) -> r[bool]:
     """Process batch with comprehensive logging."""
 
     logger.info(
@@ -613,7 +613,7 @@ def process_batch(self, stream_name: str, records: list) -> FlextResult[bool]:
                 "batch_size": len(records),
             },
         )
-        return FlextResult[bool].fail(f"Unexpected error: {e}")
+        return r[bool].fail(f"Unexpected error: {e}")
 
 
 # ❌ INCORRECT - Unstructured logging
@@ -645,7 +645,7 @@ ______________________________________________________________________
 │  (Oracle Data Operations)   │
 ├─────────────────────────────┤  ↓ depends on
 │   FLEXT Core Dependencies   │  # Foundation Layer
-│ (FlextResult, FlextValueObj)│
+│ (r, FlextValueObj)│
 └─────────────────────────────┘
 
 # Application layer imports
@@ -666,7 +666,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -686,7 +686,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -716,7 +716,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -909,20 +909,20 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
 from flext_core import u
 
 
-def process_singer_message(self, message: t.Dict) -> FlextResult[bool]:
+def process_singer_message(self, message: t.Dict) -> r[bool]:
     """Process Singer message with complete type safety."""
 
 
 def load_records(
     self, stream_name: str, records: List[t.Dict]
-) -> FlextResult[Dict[str, Union[int, str]]]:
+) -> r[Dict[str, Union[int, str]]]:
     """Load records with specific return type."""
 
 
@@ -933,11 +933,11 @@ T = TypeVar("T")
 U = TypeVar("U")
 
 
-def map_result(result: FlextResult[T], func: Callable[[T], U]) -> FlextResult[U]:
+def map_result(result: r[T], func: Callable[[T], U]) -> r[U]:
     """Generic result mapping with type safety."""
     if result.success:
-        return FlextResult[bool].ok(func(result.data))
-    return FlextResult[bool].fail(result.error)
+        return r[bool].ok(func(result.data))
+    return r[bool].fail(result.error)
 
 
 # ❌ MISSING type annotations (forbidden)
@@ -948,7 +948,7 @@ def process_message(self, message):  # Missing types
 ### **Documentation Standards**
 
 ```python
-def ensure_table_exists(self, stream_name: str, schema: t.Dict) -> FlextResult[bool]:
+def ensure_table_exists(self, stream_name: str, schema: t.Dict) -> r[bool]:
     """
     Ensure Oracle table exists for Singer stream with proper schema.
 
@@ -964,7 +964,7 @@ def ensure_table_exists(self, stream_name: str, schema: t.Dict) -> FlextResult[b
         schema: JSON Schema definition of the stream structure
 
     Returns:
-        FlextResult[bool]: Success indicates table is ready for data loading,
+        r[bool]: Success indicates table is ready for data loading,
         failure contains specific error about table creation issues
 
     Example:
@@ -1009,7 +1009,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -1020,7 +1020,7 @@ from flext_observability import metrics, tracing  # Future integration
 
 
 # ✅ CONSISTENT - Error handling across projects
-def sync_data_cross_system() -> FlextResult[SyncStats]:
+def sync_data_cross_system() -> r[SyncStats]:
     """Example of cross-system operation with consistent patterns."""
     return (
         get_oracle_connection()
@@ -1056,7 +1056,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -1113,19 +1113,19 @@ ______________________________________________________________________
 class TargetMigration_0_9_to_1_0:
     """Migration from current structure to production-ready 0.9.9."""
 
-    def migrate_exception_handling(self) -> FlextResult[bool]:
+    def migrate_exception_handling(self) -> r[bool]:
         """Consolidate duplicated exceptions into single hierarchy."""
         # 1. Move all exceptions to exceptions.py
         # 2. Remove exceptions from __init__.py
         # 3. Update all imports across modules
 
-    def migrate_singer_compliance(self) -> FlextResult[bool]:
+    def migrate_singer_compliance(self) -> r[bool]:
         """Add missing Singer SDK methods for full compliance."""
         # 1. Implement _test_connection()
         # 2. Implement _write_record() and _write_records()
         # 3. Add proper Singer SDK dependency
 
-    def migrate_security_fixes(self) -> FlextResult[bool]:
+    def migrate_security_fixes(self) -> r[bool]:
         """Fix SQL injection vulnerabilities."""
         # 1. Replace manual SQL construction with parameterized queries
         # 2. Add input validation and sanitization
@@ -1140,7 +1140,7 @@ from warnings import warn
 from typing import Dict, Optional
 
 
-def process_singer_message(self, message: t.Dict) -> FlextResult[bool]:
+def process_singer_message(self, message: t.Dict) -> r[bool]:
     """
     DEPRECATED: Custom message processing method.
 
@@ -1175,7 +1175,7 @@ ______________________________________________________________________
 ### **Pre-Development Checklist**
 
 - [ ] **Architecture Review**: Module fits within Clean Architecture layers
-- [ ] **FLEXT Pattern Compliance**: Uses FlextResult, m.Value patterns
+- [ ] **FLEXT Pattern Compliance**: Uses r, m.Value patterns
 - [ ] **Dependency Analysis**: Dependencies flow inward (no circular references)
 - [ ] **Singer Compliance**: Follows Singer specification requirements
 - [ ] **Security Review**: No SQL injection or credential exposure risks
@@ -1183,7 +1183,7 @@ ______________________________________________________________________
 ### **Development Standards Checklist**
 
 - [ ] **Type Annotations**: 100% type coverage with strict MyPy compliance
-- [ ] **Error Handling**: All operations return FlextResult for railway-oriented programming
+- [ ] **Error Handling**: All operations return r for railway-oriented programming
 - [ ] **Logging**: Structured logging with appropriate context and correlation IDs
 - [ ] **Documentation**: Comprehensive docstrings with examples and business context
 - [ ] **Testing**: 90%+ coverage with unit, integration, and security tests

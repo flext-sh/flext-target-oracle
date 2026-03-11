@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextModels, FlextResult, h, u
+from flext_core import FlextModels, h, r, u
 
 from .constants import c
 from .settings import FlextTargetOracleSettings
@@ -17,7 +17,7 @@ class OracleTargetAboutCommand(FlextModels.Command):
 
     format: str = c.TargetOracle.OutputFormats.JSON
 
-    def execute(self) -> FlextResult[str]:
+    def execute(self) -> r[str]:
         """Execute about command returning target information."""
         payload = {
             "name": "flext-target-oracle",
@@ -25,8 +25,8 @@ class OracleTargetAboutCommand(FlextModels.Command):
             "format": self.format,
         }
         if self.format == c.TargetOracle.OutputFormats.TEXT:
-            return FlextResult[str].ok("flext-target-oracle")
-        return FlextResult[str].ok(json.dumps(payload))
+            return r[str].ok("flext-target-oracle")
+        return r[str].ok(json.dumps(payload))
 
 
 class OracleTargetLoadCommand(FlextModels.Command):
@@ -35,13 +35,13 @@ class OracleTargetLoadCommand(FlextModels.Command):
     config_file: str | None = None
     state_file: str | None = None
 
-    def execute(self) -> FlextResult[str]:
+    def execute(self) -> r[str]:
         """Execute load command to initialize target."""
         settings_result = _load_settings(self.config_file)
         if settings_result.is_failure:
-            return FlextResult[str].fail(settings_result.error or "Invalid settings")
+            return r[str].fail(settings_result.error or "Invalid settings")
         _ = self.state_file
-        return FlextResult[str].ok("load_ready")
+        return r[str].ok("load_ready")
 
 
 class OracleTargetValidateCommand(FlextModels.Command):
@@ -49,19 +49,19 @@ class OracleTargetValidateCommand(FlextModels.Command):
 
     config_file: str | None = None
 
-    def execute(self) -> FlextResult[str]:
+    def execute(self) -> r[str]:
         """Execute validation of target configuration."""
         settings_result = _load_settings(self.config_file)
         if settings_result.is_failure:
-            return FlextResult[str].fail(
+            return r[str].fail(
                 settings_result.error or "Configuration validation failed"
             )
         validation_result = settings_result.value.validate_business_rules()
         if validation_result.is_failure:
-            return FlextResult[str].fail(
+            return r[str].fail(
                 validation_result.error or "Configuration validation failed"
             )
-        return FlextResult[str].ok("validation_ok")
+        return r[str].ok("validation_ok")
 
 
 class OracleTargetCommandHandler(h[FlextModels.Command, str]):
@@ -71,7 +71,7 @@ class OracleTargetCommandHandler(h[FlextModels.Command, str]):
     def handle(
         self,
         message: FlextModels.Command,
-    ) -> FlextResult[str]:
+    ) -> r[str]:
         """Invoke command execute methods in a typed-safe way."""
         if isinstance(
             message,
@@ -80,7 +80,7 @@ class OracleTargetCommandHandler(h[FlextModels.Command, str]):
             | OracleTargetValidateCommand,
         ):
             return message.execute()
-        return FlextResult[str].fail(f"Unsupported command: {type(message).__name__}")
+        return r[str].fail(f"Unsupported command: {type(message).__name__}")
 
 
 class OracleTargetCommandFactory:
@@ -117,13 +117,13 @@ class OracleTargetCommandFactory:
         )
 
 
-def _load_settings(config_file: str | None) -> FlextResult[FlextTargetOracleSettings]:
+def _load_settings(config_file: str | None) -> r[FlextTargetOracleSettings]:
     """Load settings from JSON file or environment defaults."""
     if config_file is None:
-        return FlextResult[FlextTargetOracleSettings].ok(FlextTargetOracleSettings())
+        return r[FlextTargetOracleSettings].ok(FlextTargetOracleSettings())
     config_path = Path(config_file)
     if not config_path.exists():
-        return FlextResult[FlextTargetOracleSettings].fail(
+        return r[FlextTargetOracleSettings].fail(
             f"Configuration file not found: {config_file}"
         )
     try:
@@ -138,15 +138,11 @@ def _load_settings(config_file: str | None) -> FlextResult[FlextTargetOracleSett
         RuntimeError,
         ImportError,
     ) as exc:
-        return FlextResult[FlextTargetOracleSettings].fail(
-            f"Invalid configuration file: {exc}"
-        )
+        return r[FlextTargetOracleSettings].fail(f"Invalid configuration file: {exc}")
     if not u.is_dict_like(data):
-        return FlextResult[FlextTargetOracleSettings].fail(
-            "Configuration must be a JSON object"
-        )
+        return r[FlextTargetOracleSettings].fail("Configuration must be a JSON object")
     settings = FlextTargetOracleSettings.model_validate(data)
-    return FlextResult[FlextTargetOracleSettings].ok(settings)
+    return r[FlextTargetOracleSettings].ok(settings)
 
 
 __all__ = [

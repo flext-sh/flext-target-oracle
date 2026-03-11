@@ -16,7 +16,7 @@ import sys
 import time
 from datetime import UTC
 
-from flext_core import FlextLogger, FlextResult, t
+from flext_core import FlextLogger, r, t
 from pydantic import SecretStr
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
@@ -140,11 +140,11 @@ class ProductionTargetManager:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
-    def health_check(self) -> FlextResult[dict[str, t.ContainerValue]]:
+    def health_check(self) -> r[dict[str, t.ContainerValue]]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
-            FlextResult with health status and metrics
+            r with health status and metrics
 
         """
         logger.debug("Performing health check")
@@ -179,7 +179,7 @@ class ProductionTargetManager:
                 target_metrics = self.target.get_implementation_metrics()
                 metrics.update(target_metrics.model_dump())
             logger.debug("Health check completed: %s", health_status.status)
-            return FlextResult[t.ConfigurationMapping].ok(health_status.model_dump())
+            return r[t.ConfigurationMapping].ok(health_status.model_dump())
         except (
             ValueError,
             TypeError,
@@ -192,21 +192,21 @@ class ProductionTargetManager:
             logger.exception("Health check failed")
             health_status.status = "unhealthy"
             health_status.error = str(e)
-            return FlextResult[t.ConfigurationMapping].fail(f"Health check error: {e}")
+            return r[t.ConfigurationMapping].fail(f"Health check error: {e}")
 
-    def initialize(self) -> FlextResult[bool]:
+    def initialize(self) -> r[bool]:
         """Initialize target with comprehensive validation.
 
         Returns:
-            FlextResult[bool]: Success if initialization complete, failure with error details
+            r[bool]: Success if initialization complete, failure with error details
 
         """
         logger.info("Initializing production Oracle target")
         try:
             logger.info("Validating configuration domain rules")
-            validation_result = FlextResult[bool].ok(value=True)
+            validation_result = r[bool].ok(value=True)
             if validation_result.is_failure:
-                return FlextResult[bool].fail(
+                return r[bool].fail(
                     f"Configuration validation failed: {validation_result.error}"
                 )
             logger.info("Creating Oracle target instance")
@@ -214,9 +214,9 @@ class ProductionTargetManager:
             logger.info("Testing Oracle database connectivity")
             connection_result = self.target.test_connection()
             if connection_result.is_failure:
-                return FlextResult[bool].fail("Oracle connectivity test failed")
+                return r[bool].fail("Oracle connectivity test failed")
             logger.info("Production target initialized successfully")
-            return FlextResult[bool].ok(value=True)
+            return r[bool].ok(value=True)
         except (
             ValueError,
             TypeError,
@@ -227,22 +227,22 @@ class ProductionTargetManager:
             ImportError,
         ) as e:
             logger.exception("Failed to initialize production target")
-            return FlextResult[bool].fail(f"Initialization error: {e}")
+            return r[bool].fail(f"Initialization error: {e}")
 
     def process_singer_stream(
         self, messages: list[SingerMessage]
-    ) -> FlextResult[dict[str, t.ContainerValue]]:
+    ) -> r[dict[str, t.ContainerValue]]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:
             messages: List of Singer messages (SCHEMA, RECORD, STATE)
 
         Returns:
-            FlextResult with processing statistics and status
+            r with processing statistics and status
 
         """
         if not self.target:
-            return FlextResult[t.ConfigurationMapping].fail("Target not initialized")
+            return r[t.ConfigurationMapping].fail("Target not initialized")
         logger.info("Processing Singer stream with %d messages", len(messages))
         stats = ProcessingStats(processing_start_time=time.time())  # noqa: F821
         try:
@@ -261,9 +261,7 @@ class ProductionTargetManager:
                     "Processing message %d/%d: %s", i + 1, len(messages), message_type
                 )
                 if not self.target:
-                    return FlextResult[t.ConfigurationMapping].fail(
-                        "Target not initialized"
-                    )
+                    return r[t.ConfigurationMapping].fail("Target not initialized")
                 result = self.target.process_singer_message(message)
                 if result.is_success:
                     stats.messages_processed += 1
@@ -298,7 +296,7 @@ class ProductionTargetManager:
             logger.info(
                 "Stream processing completed in %.2f seconds", processing_duration
             )
-            return FlextResult[t.ConfigurationMapping].ok(stats.model_dump())
+            return r[t.ConfigurationMapping].ok(stats.model_dump())
         except (
             ValueError,
             TypeError,
@@ -311,15 +309,13 @@ class ProductionTargetManager:
             logger.exception("Unexpected error during stream processing")
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
-            return FlextResult[t.ConfigurationMapping].fail(
-                f"Stream processing error: {e}"
-            )
+            return r[t.ConfigurationMapping].fail(f"Stream processing error: {e}")
 
-    def shutdown(self) -> FlextResult[bool]:
+    def shutdown(self) -> r[bool]:
         """Graceful shutdown with resource cleanup.
 
         Returns:
-            FlextResult[bool]: Success if shutdown completed cleanly
+            r[bool]: Success if shutdown completed cleanly
 
         """
         logger.info("Starting graceful shutdown")
@@ -330,7 +326,7 @@ class ProductionTargetManager:
                 logger.info("Cleaning up target resources")
                 self.target = None
             logger.info("Graceful shutdown completed")
-            return FlextResult[bool].ok(value=True)
+            return r[bool].ok(value=True)
         except (
             ValueError,
             TypeError,
@@ -341,7 +337,7 @@ class ProductionTargetManager:
             ImportError,
         ) as e:
             logger.exception("Error during shutdown")
-            return FlextResult[bool].fail(f"Shutdown error: {e}")
+            return r[bool].fail(f"Shutdown error: {e}")
 
     def _signal_handler(self, signum: int, _frame: object) -> None:
         """Handle shutdown signals gracefully."""

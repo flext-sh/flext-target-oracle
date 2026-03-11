@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping, Sequence
 
-from flext_core import FlextResult, t
+from flext_core import r, t
 from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import FlextMeltanoUtilities
 
@@ -22,7 +22,7 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
         @staticmethod
         def transform_record_for_oracle(
             record: Mapping[str, t.ContainerValue],
-        ) -> FlextResult[Mapping[str, t.ContainerValue]]:
+        ) -> r[Mapping[str, t.ContainerValue]]:
             """Normalize record values for Oracle persistence."""
             transformed: dict[str, t.ContainerValue] = {}
             for key, value in record.items():
@@ -38,7 +38,7 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
                         transformed[key.upper()] = 1 if bool_value else 0
                     case _:
                         transformed[key.upper()] = value
-            return FlextResult[t.ConfigurationMapping].ok(transformed)
+            return r[t.ConfigurationMapping].ok(transformed)
 
 
 u = FlextTargetOracleUtilities
