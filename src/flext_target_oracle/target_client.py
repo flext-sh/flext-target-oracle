@@ -7,7 +7,7 @@ import re
 from datetime import UTC, datetime
 
 import oracledb
-from flext_core import FlextLogger, FlextResult
+from flext_core import FlextLogger, FlextResult, r
 from pydantic import ValidationError
 
 from .models import m
@@ -111,6 +111,8 @@ class FlextTargetOracle:
                 return self._handle_state(state_message)
             case m.TargetOracle.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
+            case _:
+                return r[bool].fail(f"Unknown message type: {type(message)}")
 
     def process_singer_messages(
         self,

@@ -54,13 +54,13 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
             oracle_connection = config.get_oracle_config()
-            oracle_config = FlextDbOracleSettings(
-                host=oracle_connection.host,
-                port=oracle_connection.port,
-                service_name=oracle_connection.service_name,
-                username=oracle_connection.username,
-                password=oracle_connection.password,
-            )
+            oracle_config = FlextDbOracleSettings.model_validate({
+                "host": oracle_connection.host,
+                "port": oracle_connection.port,
+                "service_name": oracle_connection.service_name,
+                "username": oracle_connection.username,
+                "password": oracle_connection.password,
+            })
             oracle_api = FlextDbOracleApi(oracle_config)
             super().__init__()
             self._target_config = config
@@ -282,7 +282,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             if stream_name not in self.record_buffers:
                 self.record_buffers[stream_name] = []
             self.record_buffers[stream_name].append(dict(record_data))
-            self.total_records += 1
+            self._total_records += 1
             if len(self.record_buffers[stream_name]) >= self.target_config.batch_size:
                 return self._flush_batch(stream_name)
             return FlextResult[bool].ok(value=True)
@@ -342,11 +342,6 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         ) as e:
             self.log_error("Failed to connect to Oracle", extra={"error": str(e)})
             return FlextResult[bool].fail(f"Connection failed: {e}")
-
-    @total_records.setter
-    def total_records(self, value: int) -> None:
-        """Set total records count."""
-        self._total_records = value
 
     def _build_create_table_sql(
         self, table_name: str, _schema: Mapping[str, t.JsonValue]
