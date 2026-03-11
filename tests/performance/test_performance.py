@@ -5,7 +5,7 @@ import time
 from collections.abc import Mapping
 from unittest.mock import Mock
 import pytest
-from flext_core import FlextResult
+from flext_core import r
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
 
 @pytest.mark.performance
@@ -18,8 +18,8 @@ class TestPerformance:
         mock_oracle_api = Mock()
         mock_oracle_api.__enter__ = Mock(return_value=mock_oracle_api)
         mock_oracle_api.__exit__ = Mock(return_value=None)
-        mock_oracle_api.get_tables.return_value = FlextResult[list[str]].ok([])
-        mock_oracle_api.execute_sql.return_value = FlextResult[bool].ok(value=True)
+        mock_oracle_api.get_tables.return_value = r[list[str]].ok([])
+        mock_oracle_api.execute_sql.return_value = r[bool].ok(value=True)
         object.__setattr__(target.loader, '_oracle_api', mock_oracle_api)
         return target
 

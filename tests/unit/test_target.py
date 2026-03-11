@@ -4,7 +4,7 @@ import json
 from collections.abc import Mapping
 from unittest.mock import MagicMock, Mock, patch
 import pytest
-from flext_core import FlextResult
+from flext_core import r
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, FlextTargetOracleExceptions, m
 
 @pytest.fixture
@@ -12,10 +12,10 @@ def target(mock_oracle_api: Mock) -> FlextTargetOracle:
     """Create target with mocked loader."""
     config = FlextTargetOracleSettings(oracle_host='localhost', oracle_service_name='XE', oracle_user='test', oracle_password='test', default_target_schema='TEST_SCHEMA', batch_size=200, commit_interval=100)
     client = FlextTargetOracle(config=config)
-    object.__setattr__(client.loader, 'test_connection', Mock(return_value=FlextResult[bool].ok(value=True)))
-    object.__setattr__(client.loader, 'ensure_table_exists', Mock(return_value=FlextResult[bool].ok(value=True)))
-    object.__setattr__(client.loader, 'load_record', Mock(return_value=FlextResult[bool].ok(value=True)))
-    object.__setattr__(client.loader, 'finalize_all_streams', Mock(return_value=FlextResult[m.TargetOracle.LoaderFinalizeResult].ok(m.TargetOracle.LoaderFinalizeResult(total_records=0, streams_processed=0, loading_operation=m.TargetOracle.LoaderOperation(stream_name='users', started_at='', completed_at='', records_loaded=0, records_failed=0)))))
+    object.__setattr__(client.loader, 'test_connection', Mock(return_value=r[bool].ok(value=True)))
+    object.__setattr__(client.loader, 'ensure_table_exists', Mock(return_value=r[bool].ok(value=True)))
+    object.__setattr__(client.loader, 'load_record', Mock(return_value=r[bool].ok(value=True)))
+    object.__setattr__(client.loader, 'finalize_all_streams', Mock(return_value=r[m.TargetOracle.LoaderFinalizeResult].ok(m.TargetOracle.LoaderFinalizeResult(total_records=0, streams_processed=0, loading_operation=m.TargetOracle.LoaderOperation(stream_name='users', started_at='', completed_at='', records_loaded=0, records_failed=0)))))
     return client
 
 class TestOracleTarget:

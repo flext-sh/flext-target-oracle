@@ -102,7 +102,7 @@ class FlextTargetOracleSettings(FlextSettings):
 
 def validate_oracle_configuration(
     config: FlextTargetOracleSettings,
-) -> FlextResult[bool]:
+) -> r[bool]:
     """Validate Oracle configuration using FlextSettings patterns - ZERO DUPLICATION."""
     return config.validate_business_rules()
 

@@ -545,22 +545,22 @@ extraPaths = [
 ]
 pythonPlatform = "Linux"
 pythonVersion = "3.13"
-typeCheckingMode = "strict"
-reportMissingImports = "error"
-reportMissingModuleSource = "none"
-reportMissingTypeStubs = "none"
-reportUnusedImport = "error"
-reportUnusedVariable = "error"
-reportUnusedClass = "error"
-reportUnusedFunction = "error"
 reportConstantRedefinition = "error"
 reportIncompatibleMethodOverride = "error"
 reportIncompatibleVariableOverride = "error"
 reportInconsistentConstructor = "error"
-reportUnnecessaryIsInstance = "warning"
+reportMissingImports = "error"
+reportMissingModuleSource = "none"
+reportMissingTypeStubs = "none"
+reportPrivateUsage = "warning"
 reportUnnecessaryCast = "error"
 reportUnnecessaryComparison = "warning"
-reportPrivateUsage = "warning"
+reportUnnecessaryIsInstance = "warning"
+reportUnusedClass = "error"
+reportUnusedFunction = "error"
+reportUnusedImport = "error"
+reportUnusedVariable = "error"
+typeCheckingMode = "strict"
 
 [[tool.pyright.executionEnvironments]]
 reportPrivateUsage = "error"
@@ -614,6 +614,6 @@ enable_assertion_pass_hook = true
 
 [tool.coverage.report]
 fail_under = 20
+precision = 2
 show_missing = true
 skip_covered = false
-precision = 2
