@@ -28,22 +28,43 @@ class FlextTargetOracleSettings(FlextSettings):
     oracle_service_name: str = Field(
         default="ORCL", description="Oracle service name or SID"
     )
-    oracle_user: SecretStr = Field(description="Oracle database username")
-    oracle_password: SecretStr = Field(description="Oracle database password")
+    oracle_user: SecretStr = Field(
+        default_factory=lambda: SecretStr(""),
+        description="Oracle database username",
+    )
+    oracle_password: SecretStr = Field(
+        default_factory=lambda: SecretStr(""),
+        description="Oracle database password",
+    )
     default_target_schema: str = Field(
-        default="public", description="Default target schema for data loading"
+        default="SINGER_DATA", description="Default target schema for data loading"
     )
     batch_size: int = Field(
         default=1000, ge=1, description="Batch size for data loading"
     )
-    use_bulk_operations: bool = Field(
-        default=False, description="Use bulk operations for faster loading"
+    commit_interval: int = Field(
+        default=1000, ge=1, description="Commit interval for transactions"
     )
-    autocommit: bool = Field(default=True, description="Auto-commit transactions")
+    transaction_timeout: int = Field(
+        default=30, ge=1, description="Transaction timeout in seconds"
+    )
+    parallel_degree: int = Field(
+        default=1, ge=1, description="Oracle parallel execution degree"
+    )
+    table_prefix: str = Field(default="", description="Prefix applied to table names")
+    table_suffix: str = Field(default="", description="Suffix applied to table names")
+    use_bulk_operations: bool = Field(
+        default=True, description="Use bulk operations for faster loading"
+    )
+    autocommit: bool = Field(default=False, description="Auto-commit transactions")
 
     def get_table_name(self, stream_name: str) -> str:
         """Get table name from stream name."""
-        return stream_name.replace("-", "_").lower()
+        normalized_stream_name = stream_name.replace("-", "_").replace(".", "_")
+        full_table_name = (
+            f"{self.table_prefix}{normalized_stream_name}{self.table_suffix}"
+        )
+        return full_table_name.upper()
 
     def validate_business_rules(self) -> FlextResult[bool]:
         """Validate Oracle target configuration business rules."""
@@ -53,6 +74,10 @@ class FlextTargetOracleSettings(FlextSettings):
             return FlextResult[bool].fail("Oracle service name is required")
         if not self.default_target_schema:
             return FlextResult[bool].fail("Default target schema is required")
+        if self.commit_interval > self.batch_size:
+            return FlextResult[bool].fail(
+                "Commit interval must be less than or equal to batch size"
+            )
         return FlextResult[bool].ok(True)
 
     def get_oracle_config(self) -> OracleConnectionModel:
@@ -63,7 +88,7 @@ class FlextTargetOracleSettings(FlextSettings):
             service_name=self.oracle_service_name,
             username=self.oracle_user.get_secret_value(),
             password=self.oracle_password.get_secret_value(),
-            timeout=c.TargetOracle.DEFAULT_CONNECTION_TIMEOUT,
+            timeout=self.transaction_timeout,
             pool_min=c.Loading.DEFAULT_POOL_MIN,
             pool_max=c.Loading.DEFAULT_POOL_MAX,
             pool_increment=1,
@@ -71,7 +96,7 @@ class FlextTargetOracleSettings(FlextSettings):
             ssl_enabled=False,
             autocommit=self.autocommit,
             use_bulk_operations=self.use_bulk_operations,
-            parallel_degree=1,
+            parallel_degree=self.parallel_degree,
         )
 
 
