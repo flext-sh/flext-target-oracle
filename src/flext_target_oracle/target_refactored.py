@@ -37,15 +37,16 @@ class FlextTargetOracleCliService:
         return "Usage: target-oracle [validate|load|about]\n  validate  validate config and connection\n  load      initialize target for loading\n  about     show project information"
 
 
-def main() -> None:
+def main() -> int:
     """CLI entrypoint."""
     result = FlextTargetOracleCliService().run_cli()
     if result.is_failure:
         logger.error(result.error or "Command failed")
-        sys.exit(1)
+        return 1
     logger.info(result.value)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
 __all__ = ["FlextTargetOracleCliService", "main"]
