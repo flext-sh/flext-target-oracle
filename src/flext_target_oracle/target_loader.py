@@ -43,8 +43,8 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     model_config: ClassVar = {"frozen": False}
     _target_config: FlextTargetOracleSettings = PrivateAttr()
     _oracle_api: FlextDbOracleApi = PrivateAttr()
-    _record_buffers: dict[str, list[dict[str, t.JsonValue]]] = PrivateAttr(
-        default_factory=lambda: dict[str, list[dict[str, t.JsonValue]]]()
+    _record_buffers: dict[str, list[dict[str, object PrivateAttr(
+        default_factory=lambda: dict[str, list[dict[str, object
     )
     _total_records: int = PrivateAttr(default=0)
 
@@ -63,7 +63,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             super().__init__()
             self._target_config = config
             self._oracle_api = oracle_api
-            self._record_buffers = dict[str, list[dict[str, t.JsonValue]]]()
+            self._record_buffers = dict[str, list[dict[str, object
             self._total_records = 0
         except (
             ValueError,
@@ -83,7 +83,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         return self._oracle_api
 
     @property
-    def record_buffers(self) -> dict[str, list[dict[str, t.JsonValue]]]:
+    def record_buffers(self) -> dict[str, list[dict[str, object
         """Access record buffers."""
         return self._record_buffers
 
@@ -147,7 +147,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def ensure_table_exists(
         self,
         stream_name: str,
-        schema: Mapping[str, t.JsonValue],
+        schema: Mapping[str, object
         _key_properties: list[str] | None = None,
     ) -> r[bool]:
         """Ensure table exists using flext-db-oracle API with correct table creation."""
@@ -244,7 +244,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             )
 
     def insert_records(
-        self, stream_name: str, records: list[Mapping[str, t.JsonValue]]
+        self, stream_name: str, records: list[Mapping[str, object
     ) -> r[bool]:
         """Insert multiple records - convenience wrapper used by tests.
 
@@ -269,7 +269,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             return r[bool].fail(f"Insert records failed: {e}")
 
     def load_record(
-        self, stream_name: str, record_data: Mapping[str, t.JsonValue]
+        self, stream_name: str, record_data: Mapping[str, object
     ) -> r[bool]:
         """Load record with batching."""
         try:
@@ -338,7 +338,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             return r[bool].fail(f"Connection failed: {e}")
 
     def _build_create_table_sql(
-        self, table_name: str, _schema: Mapping[str, t.JsonValue]
+        self, table_name: str, _schema: Mapping[str, object
     ) -> str:
         """Build CREATE TABLE SQL statement."""
         schema_name = self.target_config.default_target_schema
@@ -365,7 +365,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             with self.oracle_api as connected_api:
                 for record in records:
                     insert_sql = f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"
-                    params: dict[str, t.JsonValue] = {
+                    params: dict[str, object
                         "data": json.dumps(record),
                         "extracted_at": str(record.get("_sdc_extracted_at", loaded_at)),
                         "loaded_at": loaded_at,

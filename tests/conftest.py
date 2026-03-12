@@ -467,9 +467,9 @@ def connected_loader(oracle_loader: FlextTargetOracleLoader) -> FlextTargetOracl
 
 
 @pytest.fixture
-def large_dataset() -> list[dict[str, t.JsonValue]]:
+def large_dataset() -> list[dict[str, object
     """Generate large dataset for performance testing."""
-    schema: dict[str, t.JsonValue] = {
+    schema: dict[str, object
         "type": "SCHEMA",
         "stream": "performance_test",
         "schema": {
@@ -483,7 +483,7 @@ def large_dataset() -> list[dict[str, t.JsonValue]]:
         },
         "key_properties": ["id"],
     }
-    records: list[dict[str, t.JsonValue]] = [
+    records: list[dict[str, object[
         {
             "type": "RECORD",
             "stream": "performance_test",
@@ -496,7 +496,7 @@ def large_dataset() -> list[dict[str, t.JsonValue]]:
         }
         for i in range(10000)
     ]
-    result: list[dict[str, t.JsonValue]] = []
+    result: list[dict[str, object[]
     result.append(schema)
     result.extend(records)
     return result
