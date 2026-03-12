@@ -151,7 +151,9 @@ def oracle_api(oracle_config: FlextTargetOracleSettings) -> MagicMock:
         host=oracle_config.oracle_host,
         port=oracle_config.oracle_port,
         service_name=oracle_config.oracle_service_name,
-        username=oracle_config.oracle_user,
+        username=oracle_config.oracle_user.get_secret_value()
+        if hasattr(oracle_config.oracle_user, "get_secret_value")
+        else str(oracle_config.oracle_user),
         password=oracle_config.oracle_password.get_secret_value()
         if hasattr(oracle_config.oracle_password, "get_secret_value")
         else str(oracle_config.oracle_password),
@@ -467,9 +469,9 @@ def connected_loader(oracle_loader: FlextTargetOracleLoader) -> FlextTargetOracl
 
 
 @pytest.fixture
-def large_dataset() -> list[dict[str, object
+def large_dataset() -> list[t.Dict]:
     """Generate large dataset for performance testing."""
-    schema: dict[str, object
+    schema = {
         "type": "SCHEMA",
         "stream": "performance_test",
         "schema": {
@@ -483,7 +485,7 @@ def large_dataset() -> list[dict[str, object
         },
         "key_properties": ["id"],
     }
-    records: list[dict[str, object[
+    records = [
         {
             "type": "RECORD",
             "stream": "performance_test",
@@ -496,7 +498,7 @@ def large_dataset() -> list[dict[str, object
         }
         for i in range(10000)
     ]
-    result: list[dict[str, object[]
+    result: list[t.Dict] = []
     result.append(schema)
     result.extend(records)
     return result
