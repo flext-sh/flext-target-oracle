@@ -140,7 +140,7 @@ class ProductionTargetManager:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
-    def health_check(self) -> r[dict[str, t.ContainerValue]]:
+    def health_check(self) -> r[dict[str, object]]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
@@ -231,7 +231,7 @@ class ProductionTargetManager:
 
     def process_singer_stream(
         self, messages: list[SingerMessage]
-    ) -> r[dict[str, t.ContainerValue]]:
+    ) -> r[dict[str, object]]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:

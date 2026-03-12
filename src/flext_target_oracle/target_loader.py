@@ -27,7 +27,7 @@ from .target_exceptions import FlextTargetOracleExceptions
 logger = FlextLogger(__name__)
 
 
-def _normalize_log_value(value: t.ContainerValue) -> t.Container:
+def _normalize_log_value(value: object) -> t.Container:
     if isinstance(value, str | int | float | bool | datetime):
         return value
     return str(value)
@@ -48,9 +48,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     )
     _total_records: int = PrivateAttr(default=0)
 
-    def __init__(
-        self, config: FlextTargetOracleSettings, **_data: t.ContainerValue
-    ) -> None:
+    def __init__(self, config: FlextTargetOracleSettings, **_data: object) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
             oracle_connection = config.get_oracle_config()
@@ -294,7 +292,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             self.log_error("Failed to load record", extra={"error": str(e)})
             return r[bool].fail(f"Record loading failed: {e}")
 
-    def log_error(self, message: str, **kwargs: t.ContainerValue) -> None:
+    def log_error(self, message: str, **kwargs: object) -> None:
         """Log error message."""
         if not kwargs:
             logger.error(message)
@@ -304,7 +302,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         }
         logger.error(message, **log_kwargs)
 
-    def log_info(self, message: str, **kwargs: t.ContainerValue) -> None:
+    def log_info(self, message: str, **kwargs: object) -> None:
         """Log info message."""
         if not kwargs:
             logger.info(message)

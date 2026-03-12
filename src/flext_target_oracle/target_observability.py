@@ -7,7 +7,6 @@ from contextlib import contextmanager
 
 from flext_core import FlextLogger
 
-from . import t
 from .target_exceptions import FlextTargetOracleExceptions
 
 logger = FlextLogger(__name__)
@@ -99,7 +98,7 @@ class FlextOracleObs:
         def connection_health(
             connection_pool_size: int,
             active_connections: int,
-            **context: t.ContainerValue,
+            **context: object,
         ) -> None:
             """Log Oracle connection pool health snapshots."""
             context_keys = list(context.keys())

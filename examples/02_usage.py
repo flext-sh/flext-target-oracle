@@ -9,19 +9,17 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from flext_core import t
-
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 
-def load_config() -> dict[str, t.ContainerValue]:
+def load_config() -> dict[str, object]:
     """Load configuration from file."""
     config_path = Path("config.json")
     with config_path.open(encoding="utf-8") as f:
         return json.load(f)
 
 
-def load_singer_messages() -> list[dict[str, t.ContainerValue]]:
+def load_singer_messages() -> list[dict[str, object]]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
     with data_path.open(encoding="utf-8") as f:

@@ -260,7 +260,7 @@ def mock_loader() -> Mock:
 
 
 @pytest.fixture
-def schema() -> dict[str, t.ContainerValue]:
+def schema() -> dict[str, object]:
     """Simple Singer schema message for unit testing."""
     return {
         "type": "SCHEMA",
@@ -278,7 +278,7 @@ def schema() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture
-def record() -> dict[str, t.ContainerValue]:
+def record() -> dict[str, object]:
     """Simple Singer record message for unit testing."""
     return {
         "type": "RECORD",
@@ -288,7 +288,7 @@ def record() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture
-def state() -> dict[str, t.ContainerValue]:
+def state() -> dict[str, object]:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -297,7 +297,7 @@ def state() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture
-def simple_schema() -> dict[str, t.ContainerValue]:
+def simple_schema() -> dict[str, object]:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
@@ -316,7 +316,7 @@ def simple_schema() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture
-def nested_schema() -> dict[str, t.ContainerValue]:
+def nested_schema() -> dict[str, object]:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
@@ -360,7 +360,7 @@ def nested_schema() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture
-def sample_record() -> dict[str, t.ContainerValue]:
+def sample_record() -> dict[str, object]:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -377,7 +377,7 @@ def sample_record() -> dict[str, t.ContainerValue]:
 
 
 @pytest.fixture
-def batch_records() -> list[dict[str, t.ContainerValue]]:
+def batch_records() -> list[dict[str, object]]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -396,7 +396,7 @@ def batch_records() -> list[dict[str, t.ContainerValue]]:
 
 
 @pytest.fixture
-def state_message() -> dict[str, t.ContainerValue]:
+def state_message() -> dict[str, object]:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -414,10 +414,10 @@ def state_message() -> dict[str, t.ContainerValue]:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema: dict[str, t.ContainerValue],
-    sample_record: dict[str, t.ContainerValue],
-    state_message: dict[str, t.ContainerValue],
-) -> list[dict[str, t.ContainerValue]]:
+    simple_schema: dict[str, object],
+    sample_record: dict[str, object],
+    state_message: dict[str, object],
+) -> list[dict[str, object]]:
     """Complete Singer message stream for testing."""
     return [simple_schema, sample_record, sample_record, state_message]
 
