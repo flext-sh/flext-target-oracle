@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 
-from flext_core import FlextLogger
+from flext_core import FlextLogger, t
 
 from .target_exceptions import FlextTargetOracleExceptions
 
@@ -98,7 +98,7 @@ class FlextOracleObs:
         def connection_health(
             connection_pool_size: int,
             active_connections: int,
-            **context: object,
+            **context: t.Scalar,
         ) -> None:
             """Log Oracle connection pool health snapshots."""
             context_keys = list(context.keys())

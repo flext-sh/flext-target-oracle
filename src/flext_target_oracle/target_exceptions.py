@@ -13,7 +13,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import override
 
-from flext_core import FlextConstants, FlextExceptions
+from flext_core import FlextConstants, FlextExceptions, t
 
 
 class FlextTargetOracleExceptions(FlextExceptions):
@@ -41,7 +41,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             code: str | None = None,
             context: Mapping[str, object] | None = None,
             correlation_id: str | None = None,
-            **kwargs: object,
+            **kwargs: t.Scalar,
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
             oracle_context: dict[str, object] = dict(context) if context else {}
@@ -83,7 +83,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             code: str | None = None,
             context: Mapping[str, object] | None = None,
             correlation_id: str | None = None,
-            **kwargs: object,
+            **kwargs: t.Scalar,
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
             oracle_context: dict[str, object] = dict(context) if context else {}
@@ -122,7 +122,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             code: str | None = None,
             context: Mapping[str, object] | None = None,
             correlation_id: str | None = None,
-            **kwargs: object,
+            **kwargs: t.Scalar,
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
             oracle_context: dict[str, object] = dict(context) if context else {}
@@ -164,7 +164,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             code: str | None = None,
             context: Mapping[str, object] | None = None,
             correlation_id: str | None = None,
-            **kwargs: object,
+            **kwargs: t.Scalar,
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
             oracle_context: dict[str, object] = dict(context) if context else {}
@@ -205,7 +205,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             code: str | None = None,
             context: Mapping[str, object] | None = None,
             correlation_id: str | None = None,
-            **kwargs: object,
+            **kwargs: t.Scalar,
         ) -> None:
             """Initialize SQL error with Oracle-specific context."""
             oracle_context: dict[str, object] = dict(context) if context else {}
