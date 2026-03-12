@@ -160,13 +160,9 @@ class FlextTargetOracle:
     def write_record(self, record_data: str) -> r[bool]:
         """Write one Singer record payload to Oracle."""
         try:
-            try:
-                payload = m.TargetOracle.SingerRecordMessage.model_validate_json(
-                    record_data
-                )
-            except ValidationError:
-                raw_payload = json.loads(record_data)
-                payload = m.TargetOracle.SingerRecordMessage.model_validate(raw_payload)
+            payload = m.TargetOracle.SingerRecordMessage.model_validate_json(
+                record_data
+            )
             stream_batch = self._record_batches.setdefault(payload.stream, [])
             stream_batch.append(dict(payload.record))
             should_flush = (
