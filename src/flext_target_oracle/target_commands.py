@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import override
 
-from flext_core import FlextModels, h, r, u
+from flext_core import FlextModels, h, r
 
 from .constants import c
 from .settings import FlextTargetOracleSettings
@@ -128,7 +128,7 @@ def _load_settings(config_file: str | None) -> r[FlextTargetOracleSettings]:
         )
     try:
         content = config_path.read_text(encoding="utf-8")
-        data = json.loads(content)
+        settings = FlextTargetOracleSettings.model_validate_json(content)
     except (
         ValueError,
         TypeError,
@@ -139,9 +139,6 @@ def _load_settings(config_file: str | None) -> r[FlextTargetOracleSettings]:
         ImportError,
     ) as exc:
         return r[FlextTargetOracleSettings].fail(f"Invalid configuration file: {exc}")
-    if not u.is_dict_like(data):
-        return r[FlextTargetOracleSettings].fail("Configuration must be a JSON object")
-    settings = FlextTargetOracleSettings.model_validate(data)
     return r[FlextTargetOracleSettings].ok(settings)
 
 
