@@ -148,7 +148,7 @@ class ProductionTargetManager:
 
         """
         logger.debug("Performing health check")
-        health_status = HealthStatus(timestamp=time.time())  # noqa: F821
+        health_status = HealthStatus(timestamp=time.time())
         try:
             checks = health_status.checks
             if not self.target:
@@ -244,7 +244,7 @@ class ProductionTargetManager:
         if not self.target:
             return r[object].fail("Target not initialized")
         logger.info("Processing Singer stream with %d messages", len(messages))
-        stats = ProcessingStats(processing_start_time=time.time())  # noqa: F821
+        stats = ProcessingStats(processing_start_time=time.time())
         try:
             for i, message in enumerate(messages):
                 if self.shutdown_requested:
