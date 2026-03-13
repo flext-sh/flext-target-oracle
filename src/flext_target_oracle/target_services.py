@@ -168,7 +168,7 @@ class OracleRecordService:
         self, record_message: m.Meltano.SingerRecordMessage, stream: SingerStreamModel
     ) -> r[m.Meltano.SingerRecordMessage]:
         """Apply stream-level mappings and ignored-column filtering."""
-        transformed: dict[str, t.Scalar] = {}
+        transformed: dict[str, t.Container] = {}
         for key, value in record_message.record.items():
             if key in stream.ignored_columns:
                 continue
