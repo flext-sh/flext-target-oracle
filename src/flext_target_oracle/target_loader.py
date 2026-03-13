@@ -10,7 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 import re
 from collections.abc import Mapping
 from datetime import UTC, datetime
@@ -18,7 +17,7 @@ from typing import ClassVar, override
 
 from flext_core import FlextLogger, FlextService, r, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from pydantic import PrivateAttr
+from pydantic import PrivateAttr, TypeAdapter
 
 from .models import m
 from .settings import FlextTargetOracleSettings
@@ -369,8 +368,11 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             with self.oracle_api as connected_api:
                 for record in records:
                     insert_sql = f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"
+                    record_adapter: TypeAdapter[dict[str, t.Scalar]] = TypeAdapter(
+                        dict[str, t.Scalar]
+                    )
                     params: dict[str, t.Scalar] = {
-                        "data": json.dumps(record),
+                        "data": record_adapter.dump_json(record).decode("utf-8"),
                         "extracted_at": str(record.get("_sdc_extracted_at", loaded_at)),
                         "loaded_at": loaded_at,
                     }

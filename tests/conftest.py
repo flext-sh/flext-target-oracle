@@ -5,13 +5,14 @@ SPDX-License-Identifier: MIT
 
 """
 
-import json
 import os
 from asyncio import AbstractEventLoop, get_event_loop_policy
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
+
+from pydantic import TypeAdapter
 
 import pytest
 from flext_core import FlextLogger, r, t
@@ -458,7 +459,7 @@ def temp_config_file(tmp_path: Path) -> Path:
         "use_bulk_operations": True,
     }
     config_file = tmp_path / "config.json"
-    config_file.write_text(json.dumps(config_data))
+    config_file.write_text(TypeAdapter(object).dump_json(config_data).decode("utf-8"))
     return config_file
 
 

@@ -6,8 +6,9 @@ Singer-formatted data into an Oracle database.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
+
+from pydantic import TypeAdapter
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
@@ -15,15 +16,16 @@ from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 def load_config() -> dict[str, object]:
     """Load configuration from file."""
     config_path = Path("config.json")
-    with config_path.open(encoding="utf-8") as f:
-        return json.load(f)
+    content = config_path.read_text(encoding="utf-8")
+    return TypeAdapter(dict[str, object]).validate_json(content)
 
 
 def load_singer_messages() -> list[dict[str, object]]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
+    adapter = TypeAdapter(dict[str, object])
     with data_path.open(encoding="utf-8") as f:
-        return [json.loads(line) for line in f if line.strip()]
+        return [adapter.validate_json(line) for line in f if line.strip()]
 
 
 def main() -> None:

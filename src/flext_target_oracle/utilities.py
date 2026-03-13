@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping, Sequence
 
 from flext_core import r
 from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import FlextMeltanoUtilities
+from pydantic import TypeAdapter
 
 
 class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
@@ -31,7 +31,9 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
                     not isinstance(value, str | bytes)
                 )
                 if is_mapping or is_sequence:
-                    transformed[key.upper()] = json.dumps(value)
+                    transformed[key.upper()] = (
+                        TypeAdapter(object).dump_json(value).decode("utf-8")
+                    )
                     continue
                 match value:
                     case bool() as bool_value:

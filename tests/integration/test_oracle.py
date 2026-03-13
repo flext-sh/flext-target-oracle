@@ -11,11 +11,11 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 import time
 from collections.abc import Mapping
 
 import pytest
+from pydantic import TypeAdapter
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
@@ -219,7 +219,7 @@ class TestOracleIntegration:
             result = conn.execute(text("SELECT json_data FROM test_json WHERE id = 1"))
             json_str = result.scalar()
             assert json_str is not None
-            stored_data = json.loads(json_str)
+            stored_data = TypeAdapter(dict[str, object]).validate_json(json_str)
             assert stored_data["customer"]["name"] == "Acme Corp"
             assert stored_data["customer"]["address"]["city"] == "objecttown"
             assert len(stored_data["items"]) == 2
@@ -366,7 +366,9 @@ class TestOracleTargetE2E:
         init_result = target.initialize()
         assert init_result.is_success
         for message in singer_messages:
-            result = target.execute(json.dumps(message))
+            result = target.execute(
+                TypeAdapter(object).dump_json(message).decode("utf-8")
+            )
             assert result.is_success
         with oracle_engine.connect() as conn:
             table_count = conn.execute(
@@ -409,7 +411,7 @@ class TestOracleTargetE2E:
             },
             "key_properties": ["id"],
         }
-        target.execute(json.dumps(schema_msg))
+        target.execute(TypeAdapter(object).dump_json(schema_msg).decode("utf-8"))
         record_msg = {
             "type": "RECORD",
             "stream": "users",
@@ -421,7 +423,7 @@ class TestOracleTargetE2E:
                 "internal_id": "INT-001",
             },
         }
-        target.execute(json.dumps(record_msg))
+        target.execute(TypeAdapter(object).dump_json(record_msg).decode("utf-8"))
         with oracle_engine.connect() as conn:
             result = conn.execute(
                 text(

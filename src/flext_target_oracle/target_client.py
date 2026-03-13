@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import json
 import re
 from datetime import UTC, datetime
 
 import oracledb
 from flext_core import FlextLogger, r
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
 from .models import m
 from .settings import FlextTargetOracleSettings
@@ -174,7 +173,7 @@ class FlextTargetOracle:
                 if flush_result.is_failure:
                     return flush_result
             return r[bool].ok(True)
-        except (ValueError, TypeError, ValidationError, json.JSONDecodeError) as exc:
+        except (ValueError, TypeError, ValidationError) as exc:
             return r[bool].fail(f"Invalid record payload: {exc}")
 
     def _build_insert_sql(self, stream_name: str) -> str:
@@ -209,6 +208,9 @@ class FlextTargetOracle:
                 execute_method = getattr(cursor, "execute", None)
                 if not callable(execute_method):
                     return r[bool].fail("Cursor does not support execute")
+                record_adapter: TypeAdapter[dict[str, object]] = TypeAdapter(
+                    dict[str, object]
+                )
                 for record in batch:
                     extracted_at = record.get(
                         "_sdc_extracted_at", datetime.now(UTC).isoformat()
@@ -216,7 +218,7 @@ class FlextTargetOracle:
                     execute_method(
                         insert_sql,
                         {
-                            "data": json.dumps(record),
+                            "data": record_adapter.dump_json(record).decode("utf-8"),
                             "extracted_at": extracted_at,
                             "loaded_at": datetime.now(UTC).isoformat(),
                         },

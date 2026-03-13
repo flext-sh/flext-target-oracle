@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import override
 
 from flext_core import FlextModels, h, r
+from pydantic import TypeAdapter
 
 from .constants import c
 from .settings import FlextTargetOracleSettings
@@ -26,7 +26,7 @@ class OracleTargetAboutCommand(FlextModels.Command):
         }
         if self.format == c.TargetOracle.OutputFormats.TEXT:
             return r[str].ok("flext-target-oracle")
-        return r[str].ok(json.dumps(payload))
+        return r[str].ok(TypeAdapter(dict[str, str]).dump_json(payload).decode("utf-8"))
 
 
 class OracleTargetLoadCommand(FlextModels.Command):
