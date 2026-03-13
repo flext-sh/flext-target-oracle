@@ -11,9 +11,18 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
+from datetime import datetime
 from typing import override
 
 from flext_core import FlextConstants, FlextExceptions, t
+
+
+def _to_metadata_value(value: t.Scalar | None) -> t.MetadataValue:
+    if isinstance(value, str | int | float | bool | datetime):
+        return value
+    if value is None:
+        return ""
+    return str(value)
 
 
 class FlextTargetOracleExceptions(FlextExceptions):
@@ -39,12 +48,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
             user: str | None = None,
             dsn: str | None = None,
             code: str | None = None,
-            context: Mapping[str, object] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
             **kwargs: t.Scalar,
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
-            oracle_context: dict[str, object] = dict(context) if context else {}
+            oracle_context: dict[str, t.MetadataValue] = (
+                dict(context) if context else {}
+            )
             if host is not None:
                 oracle_context["host"] = host
             if port is not None:
@@ -55,7 +66,8 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 oracle_context["user"] = user
             if dsn is not None:
                 oracle_context["dsn"] = dsn
-            oracle_context.update(kwargs)
+            for key, value in kwargs.items():
+                oracle_context[key] = _to_metadata_value(value)
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.CONNECTION_ERROR,
@@ -81,19 +93,22 @@ class FlextTargetOracleExceptions(FlextExceptions):
             auth_method: str | None = None,
             wallet_location: str | None = None,
             code: str | None = None,
-            context: Mapping[str, object] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
             **kwargs: t.Scalar,
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
-            oracle_context: dict[str, object] = dict(context) if context else {}
+            oracle_context: dict[str, t.MetadataValue] = (
+                dict(context) if context else {}
+            )
             if user is not None:
                 oracle_context["user"] = user
             if auth_method is not None:
                 oracle_context["auth_method"] = auth_method
             if wallet_location is not None:
                 oracle_context["wallet_location"] = wallet_location
-            oracle_context.update(kwargs)
+            for key, value in kwargs.items():
+                oracle_context[key] = _to_metadata_value(value)
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.AUTHENTICATION_ERROR,
@@ -120,12 +135,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
             error_records: list[Mapping[str, object]] | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: Mapping[str, object] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
             **kwargs: t.Scalar,
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
-            oracle_context: dict[str, object] = dict(context) if context else {}
+            oracle_context: dict[str, t.MetadataValue] = (
+                dict(context) if context else {}
+            )
             if stream_name is not None:
                 oracle_context["stream_name"] = stream_name
             if record_count is not None:
@@ -134,7 +151,8 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 oracle_context["error_records"] = str(error_records)
             if operation is not None:
                 oracle_context["operation"] = operation
-            oracle_context.update(kwargs)
+            for key, value in kwargs.items():
+                oracle_context[key] = _to_metadata_value(value)
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.PROCESSING_ERROR,
@@ -162,12 +180,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
             schema_hash: str | None = None,
             validation_errors: list[str] | None = None,
             code: str | None = None,
-            context: Mapping[str, object] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
             **kwargs: t.Scalar,
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
-            oracle_context: dict[str, object] = dict(context) if context else {}
+            oracle_context: dict[str, t.MetadataValue] = (
+                dict(context) if context else {}
+            )
             if stream_name is not None:
                 oracle_context["stream_name"] = stream_name
             if table_name is not None:
@@ -176,7 +196,8 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 oracle_context["schema_hash"] = schema_hash
             if validation_errors is not None:
                 oracle_context["validation_errors"] = ", ".join(validation_errors)
-            oracle_context.update(kwargs)
+            for key, value in kwargs.items():
+                oracle_context[key] = _to_metadata_value(value)
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.VALIDATION_ERROR,
@@ -203,19 +224,22 @@ class FlextTargetOracleExceptions(FlextExceptions):
             table_name: str | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: Mapping[str, object] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
             **kwargs: t.Scalar,
         ) -> None:
             """Initialize SQL error with Oracle-specific context."""
-            oracle_context: dict[str, object] = dict(context) if context else {}
+            oracle_context: dict[str, t.MetadataValue] = (
+                dict(context) if context else {}
+            )
             if sql_statement is not None:
                 oracle_context["sql_statement"] = sql_statement
             if table_name is not None:
                 oracle_context["table_name"] = table_name
             if operation is not None:
                 oracle_context["operation"] = operation
-            oracle_context.update(kwargs)
+            for key, value in kwargs.items():
+                oracle_context[key] = _to_metadata_value(value)
             super().__init__(
                 message=message,
                 code=code or FlextConstants.Errors.OPERATION_ERROR,

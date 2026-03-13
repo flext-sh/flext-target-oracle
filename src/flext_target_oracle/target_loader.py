@@ -55,7 +55,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
             oracle_connection = config.get_oracle_config()
-            oracle_config = FlextDbOracleSettings({
+            oracle_config = FlextDbOracleSettings.model_validate({
                 "host": oracle_connection.host,
                 "port": oracle_connection.port,
                 "service_name": oracle_connection.service_name,
