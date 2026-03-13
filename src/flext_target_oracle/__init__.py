@@ -46,15 +46,15 @@ if TYPE_CHECKING:
     )
     from flext_target_oracle.target_refactored import FlextTargetOracleCliService
     from flext_target_oracle.target_services import (
-        BatchServiceProtocol,
-        ConnectionServiceProtocol,
+        BatchService,
+        ConnectionService,
         OracleBatchService,
         OracleConnectionService,
         OracleRecordService,
         OracleSchemaService,
         OracleTargetServiceFactory,
-        RecordServiceProtocol,
-        SchemaServiceProtocol,
+        RecordService,
+        SchemaService,
     )
     from flext_target_oracle.typings import (
         FlextTargetOracleTypes,
@@ -67,13 +67,13 @@ if TYPE_CHECKING:
 
 # Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "BatchServiceProtocol": (
+    "BatchService": (
         "flext_target_oracle.target_services",
-        "BatchServiceProtocol",
+        "BatchService",
     ),
-    "ConnectionServiceProtocol": (
+    "ConnectionService": (
         "flext_target_oracle.target_services",
-        "ConnectionServiceProtocol",
+        "ConnectionService",
     ),
     "FlextMeltanoSettings": ("flext_meltano", "FlextMeltanoSettings"),
     "FlextMeltanoTypes": ("flext_meltano", "FlextMeltanoTypes"),
@@ -145,13 +145,13 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_oracle.target_services",
         "OracleTargetServiceFactory",
     ),
-    "RecordServiceProtocol": (
+    "RecordService": (
         "flext_target_oracle.target_services",
-        "RecordServiceProtocol",
+        "RecordService",
     ),
-    "SchemaServiceProtocol": (
+    "SchemaService": (
         "flext_target_oracle.target_services",
-        "SchemaServiceProtocol",
+        "SchemaService",
     ),
     "SingerStreamModel": ("flext_target_oracle.target_models", "SingerStreamModel"),
     "StorageModeModel": ("flext_target_oracle.target_models", "StorageModeModel"),
@@ -167,8 +167,8 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
 }
 
 __all__ = [
-    "BatchServiceProtocol",
-    "ConnectionServiceProtocol",
+    "BatchService",
+    "ConnectionService",
     "FlextMeltanoSettings",
     "FlextMeltanoTypes",
     "FlextOracleError",
@@ -193,8 +193,8 @@ __all__ = [
     "OracleSchemaService",
     "OracleTargetCommandFactory",
     "OracleTargetServiceFactory",
-    "RecordServiceProtocol",
-    "SchemaServiceProtocol",
+    "RecordService",
+    "SchemaService",
     "SingerStreamModel",
     "StorageModeModel",
     "c",

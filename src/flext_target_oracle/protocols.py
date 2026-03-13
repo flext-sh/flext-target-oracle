@@ -35,7 +35,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                     ...
 
             @runtime_checkable
-            class ConnectionProtocol(Protocol):
+            class Connection(Protocol):
                 """Protocol for Oracle connection management."""
 
                 def connect_target(
@@ -45,7 +45,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                     ...
 
             @runtime_checkable
-            class SchemaProtocol(Protocol):
+            class Schema(Protocol):
                 """Protocol for Oracle schema management."""
 
                 def create_table_from_schema(
@@ -55,7 +55,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                     ...
 
             @runtime_checkable
-            class BatchProtocol(Protocol):
+            class Batch(Protocol):
                 """Protocol for Oracle batch operations."""
 
                 def execute_batch_target(
@@ -65,7 +65,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                     ...
 
             @runtime_checkable
-            class RecordProtocol(Protocol):
+            class Record(Protocol):
                 """Protocol for Oracle record processing."""
 
                 def transform_record_target(
@@ -75,7 +75,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                     ...
 
             @runtime_checkable
-            class MessageProtocol(Protocol):
+            class Message(Protocol):
                 """Protocol for Singer message handling."""
 
                 def process_message_target(
@@ -85,7 +85,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                     ...
 
             @runtime_checkable
-            class OptimizationProtocol(Protocol):
+            class Optimization(Protocol):
                 """Protocol for Oracle performance optimization."""
 
                 def optimize_batch_size_target(
@@ -95,7 +95,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                     ...
 
             @runtime_checkable
-            class SecurityProtocol(Protocol):
+            class Security(Protocol):
                 """Protocol for Oracle security operations."""
 
                 def validate_target_credentials(
@@ -105,7 +105,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                     ...
 
             @runtime_checkable
-            class MonitoringProtocol(Protocol):
+            class Monitoring(Protocol):
                 """Protocol for Oracle loading monitoring."""
 
                 def track_progress(self, records: int) -> FlextProtocols.Result[bool]:

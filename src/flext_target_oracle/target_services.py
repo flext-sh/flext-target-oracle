@@ -12,7 +12,7 @@ from .settings import FlextTargetOracleSettings
 from .target_models import LoadStatisticsModel, SingerStreamModel
 
 
-class ConnectionServiceProtocol(Protocol):
+class ConnectionService(Protocol):
     """Contract for Oracle connection services."""
 
     def get_connection_info(self) -> r[m.TargetOracle.OracleConnectionConfig]:
@@ -24,7 +24,7 @@ class ConnectionServiceProtocol(Protocol):
         ...
 
 
-class SchemaServiceProtocol(Protocol):
+class SchemaService(Protocol):
     """Contract for Oracle schema services."""
 
     def ensure_table_exists(
@@ -34,7 +34,7 @@ class SchemaServiceProtocol(Protocol):
         ...
 
 
-class BatchServiceProtocol(Protocol):
+class BatchService(Protocol):
     """Contract for Oracle batch services."""
 
     def add_record(
@@ -48,7 +48,7 @@ class BatchServiceProtocol(Protocol):
         ...
 
 
-class RecordServiceProtocol(Protocol):
+class RecordService(Protocol):
     """Contract for record transformation services."""
 
     def transform_record(
@@ -219,13 +219,13 @@ class OracleTargetServiceFactory:
 
 
 __all__ = [
-    "BatchServiceProtocol",
-    "ConnectionServiceProtocol",
+    "BatchService",
+    "ConnectionService",
     "OracleBatchService",
     "OracleConnectionService",
     "OracleRecordService",
     "OracleSchemaService",
     "OracleTargetServiceFactory",
-    "RecordServiceProtocol",
-    "SchemaServiceProtocol",
+    "RecordService",
+    "SchemaService",
 ]
