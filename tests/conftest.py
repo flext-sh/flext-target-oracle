@@ -12,12 +12,11 @@ from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
-from pydantic import TypeAdapter
-
 import pytest
 from flext_core import FlextLogger, r, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_tests import FlextTestsDocker
+from pydantic import TypeAdapter
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
