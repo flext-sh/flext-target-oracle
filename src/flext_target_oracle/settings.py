@@ -10,6 +10,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import Annotated
+
 from flext_core import FlextLogger, FlextSettings, r
 from pydantic import Field, SecretStr
 
@@ -23,40 +25,57 @@ LoadMethod = c.LoadMethod
 class FlextTargetOracleSettings(FlextSettings):
     """Runtime settings for Oracle Singer target operations."""
 
-    oracle_host: str = Field(default="localhost", description="Oracle database host")
-    oracle_port: int = Field(default=1521, description="Oracle database port")
-    oracle_service_name: str = Field(
-        default="ORCL", description="Oracle service name or SID"
-    )
-    oracle_user: SecretStr = Field(
-        default_factory=lambda: SecretStr(""),
-        description="Oracle database username",
-    )
-    oracle_password: SecretStr = Field(
-        default_factory=lambda: SecretStr(""),
-        description="Oracle database password",
-    )
-    default_target_schema: str = Field(
-        default="SINGER_DATA", description="Default target schema for data loading"
-    )
-    batch_size: int = Field(
-        default=1000, ge=1, description="Batch size for data loading"
-    )
-    commit_interval: int = Field(
-        default=1000, ge=1, description="Commit interval for transactions"
-    )
-    transaction_timeout: int = Field(
-        default=30, ge=1, description="Transaction timeout in seconds"
-    )
-    parallel_degree: int = Field(
-        default=1, ge=1, description="Oracle parallel execution degree"
-    )
-    table_prefix: str = Field(default="", description="Prefix applied to table names")
-    table_suffix: str = Field(default="", description="Suffix applied to table names")
-    use_bulk_operations: bool = Field(
-        default=True, description="Use bulk operations for faster loading"
-    )
-    autocommit: bool = Field(default=False, description="Auto-commit transactions")
+    oracle_host: Annotated[
+        str, Field(default="localhost", description="Oracle database host")
+    ]
+    oracle_port: Annotated[int, Field(default=1521, description="Oracle database port")]
+    oracle_service_name: Annotated[
+        str, Field(default="ORCL", description="Oracle service name or SID")
+    ]
+    oracle_user: Annotated[
+        SecretStr,
+        Field(
+            default_factory=lambda: SecretStr(""),
+            description="Oracle database username",
+        ),
+    ]
+    oracle_password: Annotated[
+        SecretStr,
+        Field(
+            default_factory=lambda: SecretStr(""),
+            description="Oracle database password",
+        ),
+    ]
+    default_target_schema: Annotated[
+        str,
+        Field(
+            default="SINGER_DATA", description="Default target schema for data loading"
+        ),
+    ]
+    batch_size: Annotated[
+        int, Field(default=1000, ge=1, description="Batch size for data loading")
+    ]
+    commit_interval: Annotated[
+        int, Field(default=1000, ge=1, description="Commit interval for transactions")
+    ]
+    transaction_timeout: Annotated[
+        int, Field(default=30, ge=1, description="Transaction timeout in seconds")
+    ]
+    parallel_degree: Annotated[
+        int, Field(default=1, ge=1, description="Oracle parallel execution degree")
+    ]
+    table_prefix: Annotated[
+        str, Field(default="", description="Prefix applied to table names")
+    ]
+    table_suffix: Annotated[
+        str, Field(default="", description="Suffix applied to table names")
+    ]
+    use_bulk_operations: Annotated[
+        bool, Field(default=True, description="Use bulk operations for faster loading")
+    ]
+    autocommit: Annotated[
+        bool, Field(default=False, description="Auto-commit transactions")
+    ]
 
     def get_table_name(self, stream_name: str) -> str:
         """Get table name from stream name."""
