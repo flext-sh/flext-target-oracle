@@ -72,7 +72,7 @@ def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
       dict[str, object]: Singer SCHEMA message for users table
 
     """
-    return m.TargetOracle.SingerSchemaMessage.model_validate({
+    return m.TargetOracle.SingerSchemaMessage({
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
@@ -98,7 +98,7 @@ def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
 
     """
     return [
-        m.TargetOracle.SingerRecordMessage.model_validate({
+        m.TargetOracle.SingerRecordMessage({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -109,7 +109,7 @@ def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
                 "active": True,
             },
         }),
-        m.TargetOracle.SingerRecordMessage.model_validate({
+        m.TargetOracle.SingerRecordMessage({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -120,7 +120,7 @@ def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
                 "active": True,
             },
         }),
-        m.TargetOracle.SingerRecordMessage.model_validate({
+        m.TargetOracle.SingerRecordMessage({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -141,7 +141,7 @@ def create_sample_state_message() -> m.TargetOracle.SingerStateMessage:
       dict[str, object]: Singer STATE message with bookmark information
 
     """
-    return m.TargetOracle.SingerStateMessage.model_validate({
+    return m.TargetOracle.SingerStateMessage({
         "type": "STATE",
         "value": {
             "bookmarks": {

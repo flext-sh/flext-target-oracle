@@ -429,7 +429,7 @@ def create_production_sample_stream() -> list[SingerMessage]:
 
     """
     messages: list[SingerMessage] = []
-    schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
+    schema_message = m.TargetOracle.SingerSchemaMessage({
         "type": "SCHEMA",
         "stream": "customer_orders",
         "schema": {
@@ -454,7 +454,7 @@ def create_production_sample_stream() -> list[SingerMessage]:
     messages.append(schema_message)
     base_date = datetime.datetime(2025, 1, 1, tzinfo=UTC)
     for i in range(1, 101):
-        record_message = m.TargetOracle.SingerRecordMessage.model_validate({
+        record_message = m.TargetOracle.SingerRecordMessage({
             "type": "RECORD",
             "stream": "customer_orders",
             "record": {
@@ -479,7 +479,7 @@ def create_production_sample_stream() -> list[SingerMessage]:
             },
         })
         messages.append(record_message)
-    state_message = m.TargetOracle.SingerStateMessage.model_validate({
+    state_message = m.TargetOracle.SingerStateMessage({
         "type": "STATE",
         "value": {
             "bookmarks": {

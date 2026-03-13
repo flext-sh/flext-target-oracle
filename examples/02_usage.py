@@ -31,7 +31,7 @@ def load_singer_messages() -> list[dict[str, object]]:
 def main() -> None:
     """Run the example."""
     config_dict = load_config()
-    config = FlextTargetOracleSettings.model_validate(config_dict)
+    config = FlextTargetOracleSettings(config_dict)
     target = FlextTargetOracle(config=config)
     connection_result = target.test_connection()
     if connection_result.is_failure:
