@@ -10,6 +10,8 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
+    from flext_core.typings import FlextTypes
+
     from tests.unit.test_cli_dispatcher import (
         test_cli_service_falls_back_to_bus_when_flag_disabled,
         test_cli_service_uses_dispatcher_when_flag_enabled,
@@ -72,7 +74,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str) -> t.ModuleExport:
+def __getattr__(name: str) -> FlextTypes.ModuleExport:
     """Lazy-load module attributes on first access (PEP 562)."""
     return lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
 
