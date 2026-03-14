@@ -1,3 +1,6 @@
+# AUTO-GENERATED FILE — DO NOT EDIT MANUALLY.
+# Regenerate with: make codegen
+#
 """Production-Grade Singer Target for Oracle Database data loading.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
@@ -12,25 +15,38 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
-    from flext_core import r
-    from flext_meltano import FlextMeltanoSettings, FlextMeltanoTypes
-
-    from flext_target_oracle.constants import (
-        FlextTargetOracleConstants,
-        FlextTargetOracleConstants as c,
+    from flext_target_oracle.__version__ import (
+        __all__,
+        __author__,
+        __author_email__,
+        __description__,
+        __license__,
+        __title__,
+        __url__,
+        __version__,
+        __version_info__,
     )
-    from flext_target_oracle.models import (
-        FlextTargetOracleModels,
-        FlextTargetOracleModels as m,
+    from flext_target_oracle.constants import FlextTargetOracleConstants, c
+    from flext_target_oracle.models import FlextTargetOracleModels, m
+    from flext_target_oracle.protocols import FlextTargetOracleProtocols, p
+    from flext_target_oracle.settings import (
+        FlextTargetOracleSettings,
+        LoadMethod,
+        logger,
+        validate_oracle_configuration,
     )
-    from flext_target_oracle.protocols import (
-        FlextTargetOracleProtocols,
-        FlextTargetOracleProtocols as p,
-    )
-    from flext_target_oracle.settings import FlextTargetOracleSettings, LoadMethod
     from flext_target_oracle.target_client import FlextTargetOracle
-    from flext_target_oracle.target_commands import OracleTargetCommandFactory
-    from flext_target_oracle.target_exceptions import FlextTargetOracleExceptions
+    from flext_target_oracle.target_commands import (
+        OracleTargetAboutCommand,
+        OracleTargetCommandFactory,
+        OracleTargetCommandHandler,
+        OracleTargetLoadCommand,
+        OracleTargetValidateCommand,
+    )
+    from flext_target_oracle.target_exceptions import (
+        FlextTargetOracleExceptions,
+        FlextTargetOracleExceptions as e,
+    )
     from flext_target_oracle.target_loader import FlextTargetOracleLoader
     from flext_target_oracle.target_models import (
         LoadMethodModel,
@@ -44,7 +60,12 @@ if TYPE_CHECKING:
         FlextOracleObs,
         configure_oracle_observability,
     )
-    from flext_target_oracle.target_refactored import FlextTargetOracleCliService
+    from flext_target_oracle.target_refactored import (
+        FlextTargetOracleCliService,
+        FlextTargetOracleCliService as s,
+        main,
+    )
+    from flext_target_oracle.target_service import FlextTargetOracleService
     from flext_target_oracle.target_services import (
         BatchService,
         ConnectionService,
@@ -56,33 +77,18 @@ if TYPE_CHECKING:
         RecordService,
         SchemaService,
     )
-    from flext_target_oracle.typings import (
-        FlextTargetOracleTypes,
-        FlextTargetOracleTypes as t,
-    )
-    from flext_target_oracle.utilities import (
-        FlextTargetOracleUtilities,
-        FlextTargetOracleUtilities as u,
-    )
+    from flext_target_oracle.typings import FlextTargetOracleTypes, t
+    from flext_target_oracle.utilities import FlextTargetOracleUtilities, u
 
 # Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "BatchService": (
-        "flext_target_oracle.target_services",
-        "BatchService",
-    ),
-    "ConnectionService": (
-        "flext_target_oracle.target_services",
-        "ConnectionService",
-    ),
-    "FlextMeltanoSettings": ("flext_meltano", "FlextMeltanoSettings"),
-    "FlextMeltanoTypes": ("flext_meltano", "FlextMeltanoTypes"),
+    "BatchService": ("flext_target_oracle.target_services", "BatchService"),
+    "ConnectionService": ("flext_target_oracle.target_services", "ConnectionService"),
     "FlextOracleError": (
         "flext_target_oracle.target_observability",
         "FlextOracleError",
     ),
     "FlextOracleObs": ("flext_target_oracle.target_observability", "FlextOracleObs"),
-    "r": ("flext_core", "r"),
     "FlextTargetOracle": ("flext_target_oracle.target_client", "FlextTargetOracle"),
     "FlextTargetOracleCliService": (
         "flext_target_oracle.target_refactored",
@@ -107,6 +113,10 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "FlextTargetOracleProtocols": (
         "flext_target_oracle.protocols",
         "FlextTargetOracleProtocols",
+    ),
+    "FlextTargetOracleService": (
+        "flext_target_oracle.target_service",
+        "FlextTargetOracleService",
     ),
     "FlextTargetOracleSettings": (
         "flext_target_oracle.settings",
@@ -137,40 +147,65 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_oracle.target_services",
         "OracleSchemaService",
     ),
+    "OracleTargetAboutCommand": (
+        "flext_target_oracle.target_commands",
+        "OracleTargetAboutCommand",
+    ),
     "OracleTargetCommandFactory": (
         "flext_target_oracle.target_commands",
         "OracleTargetCommandFactory",
+    ),
+    "OracleTargetCommandHandler": (
+        "flext_target_oracle.target_commands",
+        "OracleTargetCommandHandler",
+    ),
+    "OracleTargetLoadCommand": (
+        "flext_target_oracle.target_commands",
+        "OracleTargetLoadCommand",
     ),
     "OracleTargetServiceFactory": (
         "flext_target_oracle.target_services",
         "OracleTargetServiceFactory",
     ),
-    "RecordService": (
-        "flext_target_oracle.target_services",
-        "RecordService",
+    "OracleTargetValidateCommand": (
+        "flext_target_oracle.target_commands",
+        "OracleTargetValidateCommand",
     ),
-    "SchemaService": (
-        "flext_target_oracle.target_services",
-        "SchemaService",
-    ),
+    "RecordService": ("flext_target_oracle.target_services", "RecordService"),
+    "SchemaService": ("flext_target_oracle.target_services", "SchemaService"),
     "SingerStreamModel": ("flext_target_oracle.target_models", "SingerStreamModel"),
     "StorageModeModel": ("flext_target_oracle.target_models", "StorageModeModel"),
-    "c": ("flext_target_oracle.constants", "FlextTargetOracleConstants"),
+    "__all__": ("flext_target_oracle.__version__", "__all__"),
+    "__author__": ("flext_target_oracle.__version__", "__author__"),
+    "__author_email__": ("flext_target_oracle.__version__", "__author_email__"),
+    "__description__": ("flext_target_oracle.__version__", "__description__"),
+    "__license__": ("flext_target_oracle.__version__", "__license__"),
+    "__title__": ("flext_target_oracle.__version__", "__title__"),
+    "__url__": ("flext_target_oracle.__version__", "__url__"),
+    "__version__": ("flext_target_oracle.__version__", "__version__"),
+    "__version_info__": ("flext_target_oracle.__version__", "__version_info__"),
+    "c": ("flext_target_oracle.constants", "c"),
     "configure_oracle_observability": (
         "flext_target_oracle.target_observability",
         "configure_oracle_observability",
     ),
-    "m": ("flext_target_oracle.models", "FlextTargetOracleModels"),
-    "p": ("flext_target_oracle.protocols", "FlextTargetOracleProtocols"),
-    "t": ("flext_target_oracle.typings", "FlextTargetOracleTypes"),
-    "u": ("flext_target_oracle.utilities", "FlextTargetOracleUtilities"),
+    "e": ("flext_target_oracle.target_exceptions", "FlextTargetOracleExceptions"),
+    "logger": ("flext_target_oracle.settings", "logger"),
+    "m": ("flext_target_oracle.models", "m"),
+    "main": ("flext_target_oracle.target_refactored", "main"),
+    "p": ("flext_target_oracle.protocols", "p"),
+    "s": ("flext_target_oracle.target_refactored", "FlextTargetOracleCliService"),
+    "t": ("flext_target_oracle.typings", "t"),
+    "u": ("flext_target_oracle.utilities", "u"),
+    "validate_oracle_configuration": (
+        "flext_target_oracle.settings",
+        "validate_oracle_configuration",
+    ),
 }
 
 __all__ = [
     "BatchService",
     "ConnectionService",
-    "FlextMeltanoSettings",
-    "FlextMeltanoTypes",
     "FlextOracleError",
     "FlextOracleObs",
     "FlextTargetOracle",
@@ -180,6 +215,7 @@ __all__ = [
     "FlextTargetOracleLoader",
     "FlextTargetOracleModels",
     "FlextTargetOracleProtocols",
+    "FlextTargetOracleService",
     "FlextTargetOracleSettings",
     "FlextTargetOracleTypes",
     "FlextTargetOracleUtilities",
@@ -191,25 +227,40 @@ __all__ = [
     "OracleConnectionService",
     "OracleRecordService",
     "OracleSchemaService",
+    "OracleTargetAboutCommand",
     "OracleTargetCommandFactory",
+    "OracleTargetCommandHandler",
+    "OracleTargetLoadCommand",
     "OracleTargetServiceFactory",
+    "OracleTargetValidateCommand",
     "RecordService",
     "SchemaService",
     "SingerStreamModel",
     "StorageModeModel",
+    "__all__",
+    "__author__",
+    "__author_email__",
+    "__description__",
+    "__license__",
+    "__title__",
+    "__url__",
+    "__version__",
+    "__version_info__",
     "c",
     "configure_oracle_observability",
+    "e",
+    "logger",
     "m",
+    "main",
     "p",
-    "r",
+    "s",
     "t",
     "u",
+    "validate_oracle_configuration",
 ]
 
 
-def __getattr__(
-    name: str,
-):  # JUSTIFIED: Ruff (any-type) with PEP 562 dynamic module exports — https://docs.astral.sh/ruff/rules/any-type/
+def __getattr__(name: str) -> t.ModuleExport:
     """Lazy-load module attributes on first access (PEP 562)."""
     return lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
 
