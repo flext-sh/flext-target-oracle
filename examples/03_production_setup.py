@@ -17,7 +17,7 @@ import time
 from datetime import UTC
 
 from flext_core import FlextLogger, r
-from pydantic import SecretStr
+from pydantic import BaseModel, Field, SecretStr
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
 from flext_target_oracle.models import m
@@ -34,6 +34,29 @@ type SingerMessage = (
     | m.TargetOracle.SingerStateMessage
     | m.TargetOracle.SingerActivateVersionMessage
 )
+
+
+class HealthStatus(BaseModel):
+    """Runtime health snapshot used by health checks."""
+
+    timestamp: float
+    status: str = "healthy"
+    checks: dict[str, object] = Field(default_factory=dict)
+    metrics: dict[str, object] = Field(default_factory=dict)
+    error: str | None = None
+
+
+class ProcessingStats(BaseModel):
+    """In-memory counters for Singer stream processing."""
+
+    processing_start_time: float
+    processing_end_time: float | None = None
+    processing_duration_seconds: float = 0.0
+    messages_processed: int = 0
+    schemas_processed: int = 0
+    records_processed: int = 0
+    states_processed: int = 0
+    errors_encountered: int = 0
 
 
 class ProductionConfig:
