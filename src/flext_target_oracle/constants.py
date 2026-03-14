@@ -10,22 +10,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import os
 from enum import StrEnum
-from typing import ClassVar, Final
+from typing import Final
 
-from flext_core import FlextConstants
-
-# No longer importing from flext_db_oracle
-
-
-def _env_enabled(flag_name: str, default: str = "1") -> bool:
-    """Helper function to check if environment flag is enabled."""
-    value = os.environ.get(flag_name, default)
-    return value.lower() not in {"0", "false", "no"}
+from flext_db_oracle import FlextDbOracleConstants
+from flext_meltano import FlextMeltanoConstants
 
 
-class FlextTargetOracleConstants(FlextConstants):
+class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
     """Target Oracle constants extending FlextConstants.
 
     Composes with 1000 to avoid duplication and ensure consistency.
@@ -65,12 +57,23 @@ class FlextTargetOracleConstants(FlextConstants):
     class TargetOracle:
         """Connection-related constants for Oracle target."""
 
+        class CommandTypes(StrEnum):
+            """Command type identifiers for Oracle target operations."""
+
+            VALIDATE = "oracle_target_validate"
+            LOAD = "oracle_target_load"
+            ABOUT = "oracle_target_about"
+
+        class OutputFormats(StrEnum):
+            """Output format options for command responses."""
+
+            JSON = "json"
+            TEXT = "text"
+
         DEFAULT_PORT: Final[int] = 1521
         MIN_PORT: Final[int] = 1024
         MAX_PORT: Final[int] = 65535
         DEFAULT_CONNECTION_TIMEOUT: Final[int] = 30
-
-        # Oracle-specific connection settings
         DEFAULT_HOST: Final[str] = "localhost"
         DEFAULT_SERVICE_NAME: Final[str] = "XE"
         DEFAULT_USERNAME: Final[str] = "system"
@@ -84,10 +87,7 @@ class FlextTargetOracleConstants(FlextConstants):
         DEFAULT_BATCH_SIZE: Final[int] = 1000
         DEFAULT_COMMIT_SIZE: Final[int] = 1000
         DEFAULT_QUERY_TIMEOUT: Final[int] = 30
-
-        DEFAULT_MAX_PARALLEL_STREAMS: Final[int] = (
-            4  # Singer-specific parallel streams setting
-        )
+        DEFAULT_MAX_PARALLEL_STREAMS: Final[int] = 4
 
     class Loading:
         """Target-specific loading configuration."""
@@ -109,29 +109,16 @@ class FlextTargetOracleConstants(FlextConstants):
     class FeatureFlags:
         """Feature toggles for progressive dispatcher rollout."""
 
-        ENABLE_DISPATCHER: ClassVar[bool] = _env_enabled(
-            "FLEXT_TARGET_ORACLE_ENABLE_DISPATCHER",
-        )
+        ENABLE_DISPATCHER: Final[bool] = False
 
     class Observability:
         """Observability and monitoring constants."""
 
-        # Security audit constants
         DATABASE_LOGIN: Final[str] = "database_login"
         FAILURE: Final[str] = "failure"
-
-        # Performance monitoring thresholds
-        SLOW_QUERY_THRESHOLD_SECONDS: Final[float] = (
-            30.0  # 30 second threshold for slow queries
-        )
-        HIGH_UTILIZATION_THRESHOLD: Final[float] = (
-            0.8  # 80% threshold for high resource utilization
-        )
+        SLOW_QUERY_THRESHOLD_SECONDS: Final[float] = 30.0
+        HIGH_UTILIZATION_THRESHOLD: Final[float] = 0.8
 
 
 c = FlextTargetOracleConstants
-
-__all__ = [
-    "FlextTargetOracleConstants",
-    "c",
-]
+__all__ = ["FlextTargetOracleConstants", "c"]

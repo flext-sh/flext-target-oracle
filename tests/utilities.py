@@ -11,20 +11,20 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_oracle import u
 from flext_tests import FlextTestsUtilities
+
+from flext_target_oracle import u
 
 
 class TestsFlextTargetOracleUtilities(FlextTestsUtilities, u):
     """Test utilities combining FlextTestsUtilities and project-specific utilities."""
 
-    class Oracle(u.Oracle):
-        """Oracle domain utilities extending project utilities."""
+    class TargetOracle(u.TargetOracle):
+        """TargetOracle domain utilities extending project utilities."""
 
         class Tests:
             """Internal tests declarations for test-only objects."""
 
 
-u = TestsFlextTargetOracleUtilities
-
-__all__ = ["TestsFlextTargetOracleUtilities", "u"]
+_utilities = TestsFlextTargetOracleUtilities
+__all__ = ["TestsFlextTargetOracleUtilities", "_utilities"]

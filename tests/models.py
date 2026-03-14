@@ -11,20 +11,21 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_oracle import m
 from flext_tests import FlextTestsModels
+
+from flext_target_oracle import m
 
 
 class TestsFlextTargetOracleModels(FlextTestsModels, m):
     """Test models combining FlextTestsModels and project-specific models."""
 
-    class Oracle(m.Oracle):
-        """Oracle domain models extending project models."""
+    class TargetOracle(m.TargetOracle):
+        """TargetOracle domain models extending project models."""
 
         class Tests:
             """Internal tests declarations for test-only objects."""
 
 
-m = TestsFlextTargetOracleModels
+_models = TestsFlextTargetOracleModels
 
-__all__ = ["TestsFlextTargetOracleModels", "m"]
+__all__ = ["TestsFlextTargetOracleModels", "_models"]

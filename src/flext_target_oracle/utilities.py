@@ -2,101 +2,46 @@
 
 from __future__ import annotations
 
-import json
+from collections.abc import Mapping, Sequence
 
-from flext_core import FlextResult, FlextTypes as t
+from flext_core import r
+from flext_db_oracle import FlextDbOracleUtilities
+from flext_meltano import FlextMeltanoUtilities
+from pydantic import TypeAdapter
 
 
-class FlextTargetOracleUtilities:
+class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
     """Focused utility namespace used by Oracle target modules."""
 
     class TargetOracle:
-        """Singer message creation and validation helpers."""
-
-        @staticmethod
-        def create_schema_message(
-            stream_name: str,
-            schema: dict[str, t.GeneralValueType],
-            key_properties: list[str] | None = None,
-        ) -> dict[str, t.GeneralValueType]:
-            """Create a Singer SCHEMA message."""
-            return {
-                "type": "SCHEMA",
-                "stream": stream_name,
-                "schema": schema,
-                "key_properties": key_properties or [],
-            }
-
-        @staticmethod
-        def create_record_message(
-            stream_name: str,
-            record: dict[str, t.GeneralValueType],
-            time_extracted: str | None = None,
-        ) -> dict[str, t.GeneralValueType]:
-            """Create a Singer RECORD message."""
-            message: dict[str, t.GeneralValueType] = {
-                "type": "RECORD",
-                "stream": stream_name,
-                "record": record,
-            }
-            if time_extracted is not None:
-                message["time_extracted"] = time_extracted
-            return message
-
-        @staticmethod
-        def create_state_message(
-            state: dict[str, t.GeneralValueType],
-        ) -> dict[str, t.GeneralValueType]:
-            """Create a Singer STATE message."""
-            return {"type": "STATE", "value": state}
-
-        @staticmethod
-        def validate_singer_message(
-            message: dict[str, t.GeneralValueType],
-        ) -> FlextResult[dict[str, t.GeneralValueType]]:
-            """Validate supported Singer message types."""
-            msg_type = message.get("type")
-            if msg_type not in {"SCHEMA", "RECORD", "STATE"}:
-                return FlextResult[dict[str, t.GeneralValueType]].fail(
-                    f"Unsupported Singer message type: {msg_type}",
-                )
-            return FlextResult[dict[str, t.GeneralValueType]].ok(message)
+        """Singer message operations are handled by Pydantic model constructors."""
 
     class OracleDataProcessing:
         """Data conversion helpers for Oracle storage."""
 
         @staticmethod
         def transform_record_for_oracle(
-            record: dict[str, t.GeneralValueType],
-        ) -> FlextResult[dict[str, t.GeneralValueType]]:
+            record: Mapping[str, object],
+        ) -> r[Mapping[str, object]]:
             """Normalize record values for Oracle persistence."""
-            transformed: dict[str, t.GeneralValueType] = {}
+            transformed: dict[str, object] = {}
             for key, value in record.items():
-                if isinstance(value, (dict, list)):
-                    transformed[key.upper()] = json.dumps(value)
-                elif isinstance(value, bool):
-                    transformed[key.upper()] = 1 if value else 0
-                else:
-                    transformed[key.upper()] = value
-            return FlextResult[dict[str, t.GeneralValueType]].ok(transformed)
-
-    class ConfigValidation:
-        """Configuration validation helpers."""
-
-        @staticmethod
-        def validate_oracle_connection_config(
-            config: dict[str, t.GeneralValueType],
-        ) -> FlextResult[dict[str, t.GeneralValueType]]:
-            """Ensure mandatory Oracle connection keys are present."""
-            required = ["host", "port", "service_name", "username", "password"]
-            for key in required:
-                if key not in config:
-                    return FlextResult[dict[str, t.GeneralValueType]].fail(
-                        f"Missing required Oracle config field: {key}",
+                is_mapping = isinstance(value, Mapping)
+                is_sequence = isinstance(value, Sequence) and (
+                    not isinstance(value, str | bytes)
+                )
+                if is_mapping or is_sequence:
+                    transformed[key.upper()] = (
+                        TypeAdapter(object).dump_json(value).decode("utf-8")
                     )
-            return FlextResult[dict[str, t.GeneralValueType]].ok(config)
+                    continue
+                match value:
+                    case bool() as bool_value:
+                        transformed[key.upper()] = 1 if bool_value else 0
+                    case _:
+                        transformed[key.upper()] = value
+            return r[object].ok(transformed)
 
 
 u = FlextTargetOracleUtilities
-
 __all__ = ["FlextTargetOracleUtilities", "u"]

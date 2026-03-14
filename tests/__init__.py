@@ -9,12 +9,34 @@ SPDX-License-Identifier: MIT
 
 """
 
-# Import test module aliases for unified test access
-from flext_target_oracle.tests import m, p, t, u
+from __future__ import annotations
 
-__all__ = [
-    "m",
-    "p",
-    "t",
-    "u",
-]
+from typing import TYPE_CHECKING, Any
+
+from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
+
+if TYPE_CHECKING:
+    from .models import _models as m
+    from .protocols import _protocols as p
+    from .typings import _types as t
+    from .utilities import _utilities as u
+_LAZY_IMPORTS: dict[str, tuple[str, str]] = {
+    "m": ("models", "m"),
+    "p": ("protocols", "p"),
+    "t": ("typings", "t"),
+    "u": ("utilities", "u"),
+}
+__all__ = ["m", "p", "t", "u"]
+
+
+def __getattr__(name: str) -> Any:
+    """Lazy-load module attributes on first access (PEP 562)."""
+    return lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
+
+
+def __dir__() -> list[str]:
+    """Return list of available attributes for dir() and autocomplete."""
+    return sorted(__all__)
+
+
+cleanup_submodule_namespace(__name__, _LAZY_IMPORTS)

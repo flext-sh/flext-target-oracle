@@ -10,15 +10,24 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from datetime import datetime
 from typing import override
 
-from flext_core import FlextConstants, FlextExceptions, FlextTypes as t
+from flext_core import FlextConstants, FlextExceptions, t
+
+
+def _to_metadata_value(value: t.Scalar | None) -> t.MetadataValue:
+    if isinstance(value, str | int | float | bool | datetime):
+        return value
+    if value is None:
+        return ""
+    return str(value)
 
 
 class FlextTargetOracleExceptions(FlextExceptions):
     """Oracle Target exceptions using flext-core SOURCE OF TRUTH."""
 
-    # Main Oracle error - inherits from base error
     class Error(FlextExceptions.BaseError):
         """Oracle Target main error - inherits from base error."""
 
@@ -39,12 +48,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
             user: str | None = None,
             dsn: str | None = None,
             code: str | None = None,
-            context: dict[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: t.MetadataAttributeValue,
+            **kwargs: t.Scalar,
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
-            oracle_context: dict[str, t.MetadataAttributeValue] = (
+            oracle_context: dict[str, t.MetadataValue] = (
                 dict(context) if context else {}
             )
             if host is not None:
@@ -57,15 +66,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 oracle_context["user"] = user
             if dsn is not None:
                 oracle_context["dsn"] = dsn
-            oracle_context.update(kwargs)
-
+            for key, value in kwargs.items():
+                oracle_context[key] = _to_metadata_value(value)
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.CONNECTION_ERROR,
                 context=oracle_context or None,
                 _correlation_id=correlation_id,
             )
-            # Oracle-specific attributes beyond parent's host/port/timeout
             self.service_name = oracle_context.get("service_name")
             self.user = oracle_context.get("user")
             self.dsn = oracle_context.get("dsn")
@@ -85,12 +93,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
             auth_method: str | None = None,
             wallet_location: str | None = None,
             code: str | None = None,
-            context: dict[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: t.MetadataAttributeValue,
+            **kwargs: t.Scalar,
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
-            oracle_context: dict[str, t.MetadataAttributeValue] = (
+            oracle_context: dict[str, t.MetadataValue] = (
                 dict(context) if context else {}
             )
             if user is not None:
@@ -99,15 +107,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 oracle_context["auth_method"] = auth_method
             if wallet_location is not None:
                 oracle_context["wallet_location"] = wallet_location
-            oracle_context.update(kwargs)
-
+            for key, value in kwargs.items():
+                oracle_context[key] = _to_metadata_value(value)
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.AUTHENTICATION_ERROR,
                 context=oracle_context or None,
                 _correlation_id=correlation_id,
             )
-            # Oracle-specific attributes
             self.user = oracle_context.get("user")
             auth_method_val = oracle_context.get("auth_method")
             self.auth_method = (
@@ -125,15 +132,15 @@ class FlextTargetOracleExceptions(FlextExceptions):
             *,
             stream_name: str | None = None,
             record_count: int | None = None,
-            error_records: list[dict[str, t.MetadataAttributeValue]] | None = None,
+            error_records: list[Mapping[str, object]] | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: dict[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: t.MetadataAttributeValue,
+            **kwargs: t.Scalar,
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
-            oracle_context: dict[str, t.MetadataAttributeValue] = (
+            oracle_context: dict[str, t.MetadataValue] = (
                 dict(context) if context else {}
             )
             if stream_name is not None:
@@ -144,15 +151,13 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 oracle_context["error_records"] = str(error_records)
             if operation is not None:
                 oracle_context["operation"] = operation
-            oracle_context.update(kwargs)
-
+            for key, value in kwargs.items():
+                oracle_context[key] = _to_metadata_value(value)
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.PROCESSING_ERROR,
                 context=oracle_context or None,
-                _correlation_id=correlation_id,
             )
-            # Oracle-specific attributes
             self.stream_name = oracle_context.get("stream_name")
             self.record_count = oracle_context.get("record_count")
             self.error_records = error_records
@@ -162,7 +167,6 @@ class FlextTargetOracleExceptions(FlextExceptions):
     class OracleTimeoutError(FlextExceptions.TimeoutError):
         """Oracle timeout error using flext-core foundation."""
 
-    # Domain-specific Oracle exceptions extending flext-core patterns
     class SchemaError(ValidationError):
         """Oracle schema-specific validation errors."""
 
@@ -176,12 +180,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
             schema_hash: str | None = None,
             validation_errors: list[str] | None = None,
             code: str | None = None,
-            context: dict[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: t.MetadataAttributeValue,
+            **kwargs: t.Scalar,
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
-            oracle_context: dict[str, t.MetadataAttributeValue] = (
+            oracle_context: dict[str, t.MetadataValue] = (
                 dict(context) if context else {}
             )
             if stream_name is not None:
@@ -192,15 +196,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 oracle_context["schema_hash"] = schema_hash
             if validation_errors is not None:
                 oracle_context["validation_errors"] = ", ".join(validation_errors)
-            oracle_context.update(kwargs)
-
+            for key, value in kwargs.items():
+                oracle_context[key] = _to_metadata_value(value)
             super().__init__(
                 message=message,
                 error_code=code or FlextConstants.Errors.VALIDATION_ERROR,
                 context=oracle_context or None,
                 _correlation_id=correlation_id,
             )
-            # Oracle-specific attributes
             self.stream_name = oracle_context.get("stream_name")
             self.table_name = oracle_context.get("table_name")
             self.schema_hash = oracle_context.get("schema_hash")
@@ -221,12 +224,12 @@ class FlextTargetOracleExceptions(FlextExceptions):
             table_name: str | None = None,
             operation: str | None = None,
             code: str | None = None,
-            context: dict[str, t.MetadataAttributeValue] | None = None,
+            context: Mapping[str, t.MetadataValue] | None = None,
             correlation_id: str | None = None,
-            **kwargs: t.MetadataAttributeValue,
+            **kwargs: t.Scalar,
         ) -> None:
             """Initialize SQL error with Oracle-specific context."""
-            oracle_context: dict[str, t.MetadataAttributeValue] = (
+            oracle_context: dict[str, t.MetadataValue] = (
                 dict(context) if context else {}
             )
             if sql_statement is not None:
@@ -235,15 +238,14 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 oracle_context["table_name"] = table_name
             if operation is not None:
                 oracle_context["operation"] = operation
-            oracle_context.update(kwargs)
-
+            for key, value in kwargs.items():
+                oracle_context[key] = _to_metadata_value(value)
             super().__init__(
                 message=message,
                 code=code or FlextConstants.Errors.OPERATION_ERROR,
                 context=oracle_context or None,
                 correlation_id=correlation_id,
             )
-            # Oracle-specific attributes
             self.sql_statement = oracle_context.get("sql_statement")
             self.table_name = oracle_context.get("table_name")
 
@@ -251,68 +253,4 @@ class FlextTargetOracleExceptions(FlextExceptions):
         """Oracle record processing errors."""
 
 
-# Module-level classes with real inheritance for backward compatibility
-class FlextTargetOracleError(FlextTargetOracleExceptions.Error):
-    """FlextTargetOracleError - real inheritance from Error."""
-
-
-class FlextTargetOracleSettingsurationError(
-    FlextTargetOracleExceptions.ConfigurationError,
-):
-    """FlextTargetOracleSettingsurationError - real inheritance from ConfigurationError."""
-
-
-class FlextTargetOracleConnectionError(
-    FlextTargetOracleExceptions.OracleConnectionError,
-):
-    """FlextTargetOracleConnectionError - real inheritance from OracleConnectionError."""
-
-
-class FlextTargetOracleValidationError(FlextTargetOracleExceptions.ValidationError):
-    """FlextTargetOracleValidationError - real inheritance from ValidationError."""
-
-
-class FlextTargetOracleAuthenticationError(
-    FlextTargetOracleExceptions.AuthenticationError,
-):
-    """FlextTargetOracleAuthenticationError - real inheritance from AuthenticationError."""
-
-
-class FlextTargetOracleProcessingError(FlextTargetOracleExceptions.ProcessingError):
-    """FlextTargetOracleProcessingError - real inheritance from ProcessingError."""
-
-
-class FlextTargetOracleTimeoutError(FlextTargetOracleExceptions.OracleTimeoutError):
-    """FlextTargetOracleTimeoutError - real inheritance from OracleTimeoutError."""
-
-
-class FlextTargetOracleSchemaError(FlextTargetOracleExceptions.SchemaError):
-    """FlextTargetOracleSchemaError - real inheritance from SchemaError."""
-
-
-class FlextTargetOracleLoadError(FlextTargetOracleExceptions.LoadError):
-    """FlextTargetOracleLoadError - real inheritance from LoadError."""
-
-
-class FlextTargetOracleSQLError(FlextTargetOracleExceptions.SQLError):
-    """FlextTargetOracleSQLError - real inheritance from SQLError."""
-
-
-class FlextTargetOracleRecordError(FlextTargetOracleExceptions.RecordError):
-    """FlextTargetOracleRecordError - real inheritance from RecordError."""
-
-
-__all__: list[str] = [
-    "FlextTargetOracleAuthenticationError",
-    "FlextTargetOracleConnectionError",
-    "FlextTargetOracleError",
-    "FlextTargetOracleExceptions",
-    "FlextTargetOracleLoadError",
-    "FlextTargetOracleProcessingError",
-    "FlextTargetOracleRecordError",
-    "FlextTargetOracleSQLError",
-    "FlextTargetOracleSchemaError",
-    "FlextTargetOracleSettingsurationError",
-    "FlextTargetOracleTimeoutError",
-    "FlextTargetOracleValidationError",
-]
+__all__: list[str] = ["FlextTargetOracleExceptions"]

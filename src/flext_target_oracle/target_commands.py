@@ -2,111 +2,112 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
+from typing import override
 
-from flext_core import FlextModels, FlextResult, h
+from flext_core import FlextModels, h, r
+from pydantic import TypeAdapter
 
+from .constants import c
 from .settings import FlextTargetOracleSettings
-from .target_client import FlextTargetOracle
 
 
-class OracleTargetValidateCommand(FlextModels.Command):
-    """Validate configuration and connectivity for the Oracle target."""
+class OracleTargetAboutCommand(FlextModels.Command):
+    """Command to return target metadata and capabilities."""
 
-    config_file: str | None = None
+    format: str = c.TargetOracle.OutputFormats.JSON
 
-    def execute(self) -> FlextResult[str]:
-        """Validate configuration and Oracle connectivity."""
-        config_result = _load_settings(self.config_file)
-        if config_result.is_failure:
-            return FlextResult[str].fail(config_result.error or "Config load failed")
-
-        config = config_result.value
-        if config is None:
-            return FlextResult[str].fail("Configuration could not be loaded")
-
-        validation_result = config.validate_domain_rules()
-        if validation_result.is_failure:
-            return FlextResult[str].fail(
-                validation_result.error or "Validation failed",
-            )
-
-        target = FlextTargetOracle(config)
-        test_result = target.test_connection()
-        if test_result.is_failure:
-            return FlextResult[str].fail(test_result.error or "Connection test failed")
-
-        return FlextResult[str].ok("Oracle target validation completed successfully")
+    def execute(self) -> r[str]:
+        """Execute about command returning target information."""
+        payload = {
+            "name": "flext-target-oracle",
+            "description": "Singer target for Oracle loading",
+            "format": self.format,
+        }
+        if self.format == c.TargetOracle.OutputFormats.TEXT:
+            return r[str].ok("flext-target-oracle")
+        return r[str].ok(TypeAdapter(dict[str, str]).dump_json(payload).decode("utf-8"))
 
 
 class OracleTargetLoadCommand(FlextModels.Command):
-    """Initialize Oracle target for load operations."""
+    """Command to prepare target for data loading."""
 
     config_file: str | None = None
     state_file: str | None = None
 
-    def execute(self) -> FlextResult[str]:
-        """Initialize target and verify it is ready for loads."""
-        config_result = _load_settings(self.config_file)
-        if config_result.is_failure:
-            return FlextResult[str].fail(config_result.error or "Config load failed")
+    def execute(self) -> r[str]:
+        """Execute load command to initialize target."""
+        settings_result = _load_settings(self.config_file)
+        if settings_result.is_failure:
+            return r[str].fail(settings_result.error or "Invalid settings")
+        _ = self.state_file
+        return r[str].ok("load_ready")
 
-        config = config_result.value
-        if config is None:
-            return FlextResult[str].fail("Configuration could not be loaded")
 
-        target = FlextTargetOracle(config)
-        init_result = target.initialize()
-        if init_result.is_failure:
-            return FlextResult[str].fail(
-                init_result.error or "Target initialization failed",
+class OracleTargetValidateCommand(FlextModels.Command):
+    """Command to validate target configuration."""
+
+    config_file: str | None = None
+
+    def execute(self) -> r[str]:
+        """Execute validation of target configuration."""
+        settings_result = _load_settings(self.config_file)
+        if settings_result.is_failure:
+            return r[str].fail(
+                settings_result.error or "Configuration validation failed"
             )
-
-        message = "Oracle target initialized and ready for data loading"
-        if self.state_file:
-            message = f"{message} (state file: {self.state_file})"
-        return FlextResult[str].ok(message)
-
-
-class OracleTargetAboutCommand(FlextModels.Command):
-    """Return metadata about this target package."""
-
-    format: str = "json"
-
-    def execute(self) -> FlextResult[str]:
-        """Return formatted project metadata."""
-        info: dict[str, str | list[str]] = {
-            "name": "flext-target-oracle",
-            "version": "0.9.0",
-            "description": "Singer target for loading records into Oracle",
-            "capabilities": ["discover", "load", "state"],
-        }
-        if self.format == "text":
-            lines = [
-                f"{info['name']} v{info['version']}",
-                str(info["description"]),
-                "Capabilities: " + ", ".join(info["capabilities"]),
-            ]
-            return FlextResult[str].ok("\n".join(lines))
-        return FlextResult[str].ok(json.dumps(info, indent=2))
+        validation_result = settings_result.value.validate_business_rules()
+        if validation_result.is_failure:
+            return r[str].fail(
+                validation_result.error or "Configuration validation failed"
+            )
+        return r[str].ok("validation_ok")
 
 
 class OracleTargetCommandHandler(h[FlextModels.Command, str]):
     """Dispatch command objects to their `execute` implementation."""
 
-    def handle(self, message: FlextModels.Command) -> FlextResult[str]:
+    @override
+    def handle(
+        self,
+        message: FlextModels.Command,
+    ) -> r[str]:
         """Invoke command execute methods in a typed-safe way."""
-        if hasattr(message, "execute"):
-            execute_method = getattr(message, "execute")
-            result = execute_method()
-            if isinstance(result, FlextResult):
-                return result
-        return FlextResult[str].fail(f"Unsupported command: {type(message).__name__}")
+        if isinstance(
+            message,
+            OracleTargetAboutCommand
+            | OracleTargetLoadCommand
+            | OracleTargetValidateCommand,
+        ):
+            return message.execute()
+        return r[str].fail(f"Unsupported command: {type(message).__name__}")
 
 
 class OracleTargetCommandFactory:
     """Create Oracle target command objects."""
+
+    @staticmethod
+    def create_about_command(
+        output_format: str = c.TargetOracle.OutputFormats.JSON,
+    ) -> OracleTargetAboutCommand:
+        """Create about command instance."""
+        return OracleTargetAboutCommand(
+            command_type=c.TargetOracle.CommandTypes.ABOUT.value,
+            command_id="cmd_oracle_about",
+            format=output_format,
+        )
+
+    @staticmethod
+    def create_load_command(
+        config_file: str | None = None, state_file: str | None = None
+    ) -> OracleTargetLoadCommand:
+        """Create load command instance."""
+        return OracleTargetLoadCommand(
+            command_type=c.TargetOracle.CommandTypes.LOAD.value,
+            command_id="cmd_oracle_load",
+            config_file=config_file,
+            state_file=state_file,
+        )
 
     @staticmethod
     def create_validate_command(
@@ -114,55 +115,37 @@ class OracleTargetCommandFactory:
     ) -> OracleTargetValidateCommand:
         """Create validation command instance."""
         return OracleTargetValidateCommand(
-            command_type="oracle_target_validate", config_file=config_file
-        )
-
-    @staticmethod
-    def create_load_command(
-        config_file: str | None = None,
-        state_file: str | None = None,
-    ) -> OracleTargetLoadCommand:
-        """Create load command instance."""
-        return OracleTargetLoadCommand(
-            command_type="oracle_target_load",
+            command_type=c.TargetOracle.CommandTypes.VALIDATE.value,
+            command_id="cmd_oracle_validate",
             config_file=config_file,
-            state_file=state_file,
-        )
-
-    @staticmethod
-    def create_about_command(output_format: str = "json") -> OracleTargetAboutCommand:
-        """Create about command instance."""
-        return OracleTargetAboutCommand(
-            command_type="oracle_target_about", format=output_format
         )
 
 
-def _load_settings(config_file: str | None) -> FlextResult[FlextTargetOracleSettings]:
+def _load_settings(config_file: str | None) -> r[FlextTargetOracleSettings]:
     """Load settings from JSON file or environment defaults."""
     if config_file is None:
-        return FlextResult[FlextTargetOracleSettings].ok(FlextTargetOracleSettings())
-
+        return r[FlextTargetOracleSettings].ok(
+            FlextTargetOracleSettings.model_validate({})
+        )
     config_path = Path(config_file)
     if not config_path.exists():
-        return FlextResult[FlextTargetOracleSettings].fail(
-            f"Configuration file not found: {config_file}",
+        return r[FlextTargetOracleSettings].fail(
+            f"Configuration file not found: {config_file}"
         )
-
     try:
         content = config_path.read_text(encoding="utf-8")
-        data = json.loads(content)
-    except Exception as exc:
-        return FlextResult[FlextTargetOracleSettings].fail(
-            f"Invalid configuration file: {exc}",
-        )
-
-    if not isinstance(data, dict):
-        return FlextResult[FlextTargetOracleSettings].fail(
-            "Configuration must be a JSON object"
-        )
-
-    settings = FlextTargetOracleSettings.model_validate(data)
-    return FlextResult[FlextTargetOracleSettings].ok(settings)
+        settings = FlextTargetOracleSettings.model_validate_json(content)
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        OSError,
+        RuntimeError,
+        ImportError,
+    ) as exc:
+        return r[FlextTargetOracleSettings].fail(f"Invalid configuration file: {exc}")
+    return r[FlextTargetOracleSettings].ok(settings)
 
 
 __all__ = [

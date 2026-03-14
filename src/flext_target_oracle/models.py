@@ -1,319 +1,245 @@
-"""Models for Oracle target operations.
-
-This module provides data models for Oracle target operations.
-"""
+"""Models for Oracle target operations."""
 
 from __future__ import annotations
 
-from flext_core import FlextModels, FlextTypes as t
-from flext_core.utilities import u as flext_u
+from typing import Annotated, Literal
+
+from flext_core import FlextModels
+from flext_db_oracle.models import FlextDbOracleModels
+from flext_meltano import FlextMeltanoModels
 from pydantic import Field
 
 
-class FlextTargetOracleModels(FlextModels):
-    """Complete models for Oracle target operations extending FlextModels.
+class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
+    """Complete models for Oracle target operations extending FlextModels."""
 
-    Provides standardized models for all Oracle target domain entities including:
-    - Singer message processing and validation
-    - Oracle table management and schema operations
-    - Data loading and transformation operations
-    - Performance monitoring and metrics collection
-    - Error handling and recovery operations
-
-    All nested classes inherit FlextModels validation and patterns.
-    """
-
-    def __init_subclass__(cls, **kwargs: object) -> None:
-        """Warn when FlextTargetOracleModels is subclassed directly."""
-        super().__init_subclass__(**kwargs)
-        flext_u.Deprecation.warn_once(
-            f"subclass:{cls.__name__}",
-            "Subclassing FlextTargetOracleModels is deprecated. Use FlextModels directly with composition instead.",
-        )
-
-    # Constants
-    MAX_PORT_NUMBER = 65535
+    class Meltano(FlextMeltanoModels.Meltano):
+        """Namespaced Meltano runtime model references (inherits all Singer types)."""
 
     class TargetOracle:
         """TargetOracle domain namespace."""
 
-        class OracleTargetConfig(FlextModels.ArbitraryTypesModel):
-            """Configuration for Oracle target operations."""
+        class SingerSchemaMessage(FlextMeltanoModels.Meltano.SingerSchemaMessage):
+            """Singer SCHEMA message specialized for Oracle target domain."""
 
-            # Oracle connection settings
-            oracle_host: str = Field(
-                default="localhost",
-                description="Oracle database host",
-            )
-            oracle_port: int = Field(default=1521, description="Oracle database port")
-            oracle_service_name: str = Field(
-                default="XE",
-                description="Oracle service name",
-            )
-            oracle_user: str = Field(description="Oracle database username")
-            oracle_password: str = Field(description="Oracle database password")
+        class SingerRecordMessage(FlextMeltanoModels.Meltano.SingerRecordMessage):
+            """Singer RECORD message specialized for Oracle target domain."""
 
-            # Target configuration
-            default_target_schema: str = Field(
-                default="SINGER_DATA",
-                description="Default schema for loading data",
-            )
-            table_prefix: str = Field(
-                default="",
-                description="Prefix for target table names",
-            )
-            table_suffix: str = Field(
-                default="",
-                description="Suffix for target table names",
-            )
+        class SingerStateMessage(FlextMeltanoModels.Meltano.SingerStateMessage):
+            """Singer STATE message specialized for Oracle target domain."""
 
-            # Loading configuration
-            batch_size: int = Field(
-                default=5000, description="Number of records per batch"
-            )
-            use_bulk_operations: bool = Field(
-                default=True,
-                description="Use Oracle bulk operations for better performance",
-            )
-            parallel_degree: int = Field(
-                default=1,
-                description="Oracle parallel degree for operations",
-            )
+        class SingerActivateVersionMessage(
+            FlextMeltanoModels.Meltano.SingerActivateVersionMessage,
+        ):
+            """Singer ACTIVATE_VERSION message specialized for Oracle target domain."""
 
-            # Transaction settings
-            autocommit: bool = Field(
-                default=False,
-                description="Enable autocommit for operations",
-            )
-            commit_interval: int = Field(
-                default=1000,
-                description="Number of records between commits",
-            )
-            transaction_timeout: int = Field(
-                default=300,
-                description="Transaction timeout in seconds",
-            )
+        class SingerCatalogMetadata(FlextMeltanoModels.Meltano.SingerCatalogMetadata):
+            """Singer catalog metadata specialized for Oracle target domain."""
 
-        class SingerMessageProcessing(FlextModels.ArbitraryTypesModel):
-            """Singer message processing configuration and state."""
+        class SingerCatalogEntry(FlextMeltanoModels.Meltano.SingerCatalogEntry):
+            """Singer catalog entry specialized for Oracle target domain."""
 
-            # Message processing state
-            message_count: int = Field(
-                default=0, description="Total messages processed"
-            )
-            schema_messages: int = Field(
-                default=0, description="Schema messages processed"
-            )
-            record_messages: int = Field(
-                default=0, description="Record messages processed"
-            )
-            state_messages: int = Field(
-                default=0, description="State messages processed"
-            )
+        class SingerCatalog(FlextMeltanoModels.Meltano.SingerCatalog):
+            """Singer catalog specialized for Oracle target domain."""
 
-            # Processing performance
-            processing_start_time: str = Field(description="Processing start timestamp")
-            last_processed_time: str | None = Field(
-                default=None,
-                description="Last message processing timestamp",
-            )
-            records_per_second: float = Field(
-                default=0.0,
-                description="Current processing rate",
-            )
+        class ExecuteResult(FlextModels.ArbitraryTypesModel):
+            """Target execute readiness payload."""
 
-            # Error tracking
-            error_count: int = Field(
-                default=0, description="Number of processing errors"
-            )
-            failed_messages: list[str] = Field(
-                default_factory=list,
-                description="Failed message IDs",
-            )
+            name: Annotated[str, Field(description="Target package name")]
+            status: Annotated[
+                Literal["ready"],
+                Field(
+                    default="ready",
+                    description="Target readiness status",
+                ),
+            ]
+            oracle_host: Annotated[str, Field(description="Configured Oracle host")]
+            oracle_service: Annotated[
+                str, Field(description="Configured Oracle service name")
+            ]
 
-        class OracleTableMetadata(FlextModels.ArbitraryTypesModel):
-            """Oracle table metadata for target operations."""
+        class ProcessingSummary(FlextModels.ArbitraryTypesModel):
+            """Singer batch processing summary payload."""
 
-            # Table identification
-            schema_name: str = Field(description="Oracle schema name")
-            table_name: str = Field(description="Oracle table name")
-            full_table_name: str = Field(description="Fully qualified table name")
+            messages_processed: Annotated[
+                int,
+                Field(
+                    ge=0,
+                    description="Total Singer messages processed",
+                ),
+            ]
+            streams: Annotated[
+                list[str],
+                Field(
+                    default_factory=list,
+                    description="Singer stream names seen during processing",
+                ),
+            ]
+            state: Annotated[
+                FlextMeltanoModels.Meltano.SingerStateMessage,
+                Field(
+                    default_factory=FlextMeltanoModels.Meltano.SingerStateMessage,
+                    description="Accumulated Singer STATE payload",
+                ),
+            ]
 
-            # Table structure
-            columns: list[dict[str, t.GeneralValueType]] = Field(
-                default_factory=list,
-                description="Table column definitions",
-            )
-            primary_keys: list[str] = Field(
-                default_factory=list,
-                description="Primary key column names",
-            )
-            indexes: list[dict[str, t.GeneralValueType]] = Field(
-                default_factory=list,
-                description="Table index definitions",
-            )
+        class LoaderReadyResult(FlextModels.ArbitraryTypesModel):
+            """Loader readiness payload after Oracle connectivity checks."""
 
-            # Table statistics
-            row_count: int | None = Field(
-                default=None,
-                description="Current table row count",
-            )
-            last_analyzed: str | None = Field(
-                default=None,
-                description="Last table statistics analysis time",
-            )
+            status: Annotated[
+                Literal["ready"],
+                Field(
+                    default="ready",
+                    description="Loader readiness status",
+                ),
+            ]
+            host: Annotated[str, Field(description="Configured Oracle host")]
+            service: Annotated[str, Field(description="Configured Oracle service name")]
+            target_schema: Annotated[
+                str,
+                Field(
+                    alias="schema",
+                    serialization_alias="schema",
+                    validation_alias="schema",
+                    description="Configured Oracle target schema",
+                ),
+            ]
 
-            # Singer metadata
-            singer_stream_name: str = Field(description="Singer stream name")
-            singer_schema: dict[str, t.GeneralValueType] = Field(
-                description="Singer schema definition"
-            )
-            key_properties: list[str] = Field(
-                default_factory=list,
-                description="Singer key properties",
-            )
+        class LoaderOperation(FlextModels.ArbitraryTypesModel):
+            """Detailed load operation summary for all streams."""
 
-        class OracleLoadingOperation(FlextModels.ArbitraryTypesModel):
-            """Oracle data loading operation tracking."""
+            stream_name: Annotated[str, Field(description="Logical stream identifier")]
+            started_at: Annotated[
+                str, Field(description="Load operation start timestamp")
+            ]
+            completed_at: Annotated[
+                str, Field(description="Load operation completion timestamp")
+            ]
+            records_loaded: Annotated[
+                int, Field(ge=0, description="Number of loaded records")
+            ]
+            records_failed: Annotated[
+                int, Field(ge=0, description="Number of failed records")
+            ]
 
-            # Operation identification
-            operation_id: str = Field(description="Unique operation identifier")
-            stream_name: str = Field(description="Singer stream name")
-            operation_type: str = Field(description="Type of loading operation")
+        class LoaderFinalizeResult(FlextModels.ArbitraryTypesModel):
+            """Loader finalization payload for flush operations."""
 
-            # Operation metrics
-            records_loaded: int = Field(
-                default=0,
-                description="Records successfully loaded",
+            total_records: Annotated[
+                int, Field(ge=0, description="Total records processed")
+            ]
+            streams_processed: Annotated[
+                int,
+                Field(
+                    ge=0,
+                    description="Number of processed streams",
+                ),
+            ]
+            status: Annotated[
+                Literal["completed"],
+                Field(
+                    default="completed",
+                    description="Finalization status",
+                ),
+            ]
+            loading_operation: FlextTargetOracleModels.TargetOracle.LoaderOperation = (
+                Field(
+                    description="Aggregated loading operation details",
+                )
             )
-            records_failed: int = Field(
-                default=0,
-                description="Records that failed to load",
-            )
-            bytes_processed: int = Field(default=0, description="Total bytes processed")
+            buffer_status: Annotated[
+                dict[str, int],
+                Field(
+                    default_factory=dict,
+                    description="Remaining buffered records by stream",
+                ),
+            ]
 
-            # Timing information
-            start_time: str = Field(description="Operation start time")
-            end_time: str | None = Field(default=None, description="Operation end time")
-            duration_seconds: float = Field(
-                default=0.0, description="Operation duration"
-            )
+        class OracleConnectionConfig(FlextModels.ArbitraryTypesModel):
+            """Oracle connection configuration payload."""
 
-            # Oracle-specific metrics
-            oracle_execution_time: float = Field(
-                default=0.0,
-                description="Oracle query execution time",
-            )
-            oracle_commit_time: float = Field(
-                default=0.0,
-                description="Oracle transaction commit time",
-            )
-            batch_count: int = Field(
-                default=0, description="Number of batches processed"
-            )
+            host: Annotated[str, Field(description="Oracle database host")]
+            port: Annotated[
+                int, Field(ge=1, le=65535, description="Oracle database port")
+            ]
+            service_name: Annotated[str, Field(description="Oracle service name")]
+            username: Annotated[str, Field(description="Oracle database username")]
+            password: Annotated[str, Field(description="Oracle database password")]
+            timeout: Annotated[
+                int, Field(ge=1, description="Connection timeout in seconds")
+            ]
+            pool_min: Annotated[
+                int, Field(ge=1, description="Oracle connection pool minimum")
+            ]
+            pool_max: Annotated[
+                int, Field(ge=1, description="Oracle connection pool maximum")
+            ]
+            pool_increment: Annotated[
+                int,
+                Field(
+                    ge=1,
+                    description="Oracle connection pool increment",
+                ),
+            ]
+            encoding: Annotated[str, Field(description="Oracle connection encoding")]
+            ssl_enabled: Annotated[bool, Field(description="Whether SSL is enabled")]
+            autocommit: Annotated[
+                bool, Field(description="Whether autocommit is enabled")
+            ]
+            use_bulk_operations: Annotated[
+                bool,
+                Field(
+                    default=False,
+                    description="Whether bulk operations are enabled",
+                ),
+            ]
+            parallel_degree: Annotated[
+                int,
+                Field(
+                    default=1,
+                    ge=1,
+                    description="Oracle parallel execution degree",
+                ),
+            ]
 
-        class OracleErrorRecovery(FlextModels.ArbitraryTypesModel):
-            """Oracle error handling and recovery configuration."""
+        class TargetConfig(FlextModels.ArbitraryTypesModel):
+            """Target runtime configuration payload."""
 
-            # Retry configuration
-            max_retries: int = Field(default=3, description="Maximum retry attempts")
-            retry_delay: float = Field(default=1.0, description="Delay between retries")
-            exponential_backoff: bool = Field(
-                default=True,
-                description="Use exponential backoff for retries",
-            )
+            default_target_schema: Annotated[
+                str,
+                Field(
+                    description="Default Oracle target schema",
+                ),
+            ]
+            use_bulk_operations: Annotated[
+                bool,
+                Field(
+                    description="Whether bulk loading is enabled",
+                ),
+            ]
+            batch_size: Annotated[int, Field(ge=1, description="Target batch size")]
+            table_prefix: Annotated[str, Field(description="Target table name prefix")]
+            table_suffix: Annotated[str, Field(description="Target table name suffix")]
 
-            # Error handling options
-            continue_on_error: bool = Field(
-                default=False,
-                description="Continue processing after non-fatal errors",
-            )
-            rollback_on_error: bool = Field(
-                default=True,
-                description="Rollback transaction on error",
-            )
-            log_failed_records: bool = Field(
-                default=True,
-                description="Log records that fail to load",
-            )
+        class ImplementationMetrics(FlextModels.ArbitraryTypesModel):
+            """Oracle target implementation metrics."""
 
-            # Oracle-specific error handling
-            ignore_duplicate_key_errors: bool = Field(
-                default=False,
-                description="Ignore Oracle duplicate key constraint errors",
-            )
-            handle_constraint_violations: bool = Field(
-                default=True,
-                description="Handle Oracle constraint violations gracefully",
-            )
+            streams_configured: Annotated[
+                int,
+                Field(
+                    ge=0,
+                    description="Number of configured streams",
+                ),
+            ]
+            batch_size: Annotated[int, Field(ge=1, description="Configured batch size")]
+            use_bulk_operations: Annotated[
+                bool,
+                Field(
+                    description="Whether bulk operations are enabled",
+                ),
+            ]
 
-        class OraclePerformanceMetrics(FlextModels.ArbitraryTypesModel):
-            """Performance metrics for Oracle target operations."""
-
-            # Throughput metrics
-            records_per_second: float = Field(
-                default=0.0,
-                description="Records processed per second",
-            )
-            bytes_per_second: float = Field(
-                default=0.0,
-                description="Bytes processed per second",
-            )
-            batches_per_second: float = Field(
-                default=0.0,
-                description="Batches processed per second",
-            )
-
-            # Oracle database metrics
-            oracle_connections_used: int = Field(
-                default=0,
-                description="Number of Oracle connections used",
-            )
-            oracle_connection_pool_size: int = Field(
-                default=0,
-                description="Oracle connection pool size",
-            )
-            average_oracle_response_time: float = Field(
-                default=0.0,
-                description="Average Oracle response time in milliseconds",
-            )
-
-            # Resource utilization
-            memory_usage_mb: float = Field(
-                default=0.0,
-                description="Memory usage in megabytes",
-            )
-            cpu_usage_percent: float = Field(
-                default=0.0,
-                description="CPU usage percentage",
-            )
-
-            # Quality metrics
-            success_rate: float = Field(
-                default=0.0,
-                description="Operation success rate (0-100)",
-            )
-            error_rate: float = Field(
-                default=0.0,
-                description="Operation error rate (0-100)",
-            )
-
-
-# Zero Tolerance CONSOLIDATION - FlextTargetOracleUtilities moved to utilities.py
-#
-# Critical: FlextTargetOracleUtilities was DUPLICATED between models.py and utilities.py.
-# This was a Zero Tolerance violation of the user's explicit requirements.
-#
-# RESOLUTION: Import from utilities.py to eliminate duplication completely.
-
-
-# Note: This import ensures backward compatibility while eliminating duplication
 
 m = FlextTargetOracleModels
-m_target_oracle = FlextTargetOracleModels
 
-__all__ = [
-    "FlextTargetOracleModels",
-    "m",
-    "m_target_oracle",
-]
+__all__ = ["FlextTargetOracleModels", "m"]

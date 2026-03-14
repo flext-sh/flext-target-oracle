@@ -49,7 +49,7 @@ FLEXT Target Oracle implements a layered architecture following Clean Architectu
 The target is built on foundational FLEXT patterns:
 
 ```python
-# FlextResult Railway Pattern - Consistent error handling
+# r Railway Pattern - Consistent error handling
 from flext_core import FlextBus
 from flext_core import FlextSettings
 from flext_core import FlextConstants
@@ -65,7 +65,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import FlextResult
+from flext_core import r
 from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
@@ -73,7 +73,7 @@ from flext_core import u
 
 # Configuration with domain validation
 class FlextOracleTargetSettings(m.Value):
-    def validate_domain_rules(self) -> FlextResult[bool]:
+    def validate_domain_rules(self) -> r[bool]:
         # Chain of Responsibility validation pattern
 ```
 
@@ -140,18 +140,18 @@ class FlextOracleTarget(Target):
     """Singer Target implementation with FLEXT patterns."""
 
     # Singer protocol compliance
-    def process_singer_message(self, message: dict) -> FlextResult[bool]
-    def _handle_schema(self, message: dict) -> FlextResult[bool]
-    def _handle_record(self, message: dict) -> FlextResult[bool]
-    def _handle_state(self, message: dict) -> FlextResult[bool]
+    def process_singer_message(self, message: dict) -> r[bool]
+    def _handle_schema(self, message: dict) -> r[bool]
+    def _handle_record(self, message: dict) -> r[bool]
+    def _handle_state(self, message: dict) -> r[bool]
 
     # Lifecycle management
-    def finalize(self) -> FlextResult[t.Dict]
+    def finalize(self) -> r[t.Dict]
 ```
 
 **Key Patterns**:
 
-- **FlextResult Railway Pattern**: All operations return `FlextResult<T>`
+- **r Railway Pattern**: All operations return `r<T>`
 - **Message Type Routing**: Dispatch based on Singer message type
 - **Dependency Injection**: Uses `FlextOracleTargetLoader` for data operations
 
@@ -177,7 +177,7 @@ class FlextOracleTargetSettings(m.Value):
     use_bulk_operations: bool = True
     connection_timeout: int = 30
 
-    def validate_domain_rules(self) -> FlextResult[bool]:
+    def validate_domain_rules(self) -> r[bool]:
         """Chain of Responsibility validation pattern."""
 ```
 
@@ -201,11 +201,11 @@ class FlextOracleTargetLoader:
         self._record_buffers: dict[str, list[t.Dict]] = {}
 
     # Table management
-    def ensure_table_exists(self, stream_name: str, schema: dict) -> FlextResult[bool]
+    def ensure_table_exists(self, stream_name: str, schema: dict) -> r[bool]
 
     # Data loading with batching
-    def load_record(self, stream_name: str, record_data: dict) -> FlextResult[bool]
-    def finalize_all_streams(self) -> FlextResult[t.Dict]
+    def load_record(self, stream_name: str, record_data: dict) -> r[bool]
+    def finalize_all_streams(self) -> r[t.Dict]
 ```
 
 **Key Patterns**:
@@ -232,16 +232,16 @@ sequenceDiagram
     FL->>API: get_tables(schema_name)
     API->>DB: SELECT table_name FROM all_tables
     DB-->>API: Table list
-    API-->>FL: FlextResult[t.StringList]
+    API-->>FL: r[t.StringList]
 
     alt Table doesn't exist
         FL->>API: execute_ddl(CREATE TABLE)
         API->>DB: CREATE TABLE statement
         DB-->>API: Success/Error
-        API-->>FL: FlextResult[bool]
+        API-->>FL: r[bool]
     end
 
-    FL-->>FT: FlextResult[bool]
+    FL-->>FT: r[bool]
     FT-->>ST: Processing result
 
     Note over ST,DB: RECORD Message Processing
@@ -254,11 +254,11 @@ sequenceDiagram
             FL->>API: execute_dml(INSERT batch)
             API->>DB: Batch INSERT
             DB-->>API: Success/Error
-            API-->>FL: FlextResult[bool]
+            API-->>FL: r[bool]
             FL->>FL: Clear buffer
         end
 
-        FL-->>FT: FlextResult[bool]
+        FL-->>FT: r[bool]
         FT-->>ST: Processing result
     end
 
@@ -270,10 +270,10 @@ sequenceDiagram
         FL->>API: execute_dml(Final batch)
         API->>DB: INSERT remaining records
         DB-->>API: Success/Error
-        API-->>FL: FlextResult[bool]
+        API-->>FL: r[bool]
     end
 
-    FL-->>FT: FlextResult[Statistics]
+    FL-->>FT: r[Statistics]
     FT-->>ST: Final statistics
 ```
 
@@ -281,10 +281,10 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    A[Operation Start] --> B{FlextResult Pattern}
+    A[Operation Start] --> B{r Pattern}
     B -->|Success| C[Continue Pipeline]
     B -->|Failure| D[Log Error with Context]
-    D --> E[Return FlextResult[bool].fail()]
+    D --> E[Return r[bool].fail()]
     E --> F[Caller Handles Error]
     F --> G{Recoverable?}
     G -->|Yes| H[Retry with Backoff]
@@ -306,7 +306,7 @@ class BatchProcessor:
         self._buffers: dict[str, list[Record]] = {}
         self._batch_size = batch_size
 
-    def add_record(self, stream: str, record: dict) -> FlextResult[bool]:
+    def add_record(self, stream: str, record: dict) -> r[bool]:
         # Add to buffer
         buffer = self._buffers.setdefault(stream, [])
         buffer.append(record)
@@ -315,7 +315,7 @@ class BatchProcessor:
         if len(buffer) >= self._batch_size:
             return self._flush_batch(stream)
 
-        return FlextResult[bool].| ok(value=True)
+        return r[bool].| ok(value=True)
 ```
 
 ### Connection Management
@@ -383,11 +383,12 @@ tests/
 ### Test Patterns
 
 ```python
-# FlextResult testing pattern
+# r testing pattern
 def test_operation_success():
     result = operation()
     assert result.success
     assert result.data == expected_value
+
 
 def test_operation_failure():
     result = operation_with_error()
@@ -485,11 +486,14 @@ networks:
 ```python
 # Structured logging with correlation IDs
 logger = FlextLogger(__name__)
-logger.info("Batch processing started", extra={
-    "stream_name": stream_name,
-    "batch_size": len(records),
-    "correlation_id": correlation_id
-})
+logger.info(
+    "Batch processing started",
+    extra={
+        "stream_name": stream_name,
+        "batch_size": len(records),
+        "correlation_id": correlation_id,
+    },
+)
 
 # Metrics integration
 metrics.counter("oracle_target.records_processed").inc(count)
@@ -526,8 +530,8 @@ ______________________________________________________________________
 
 - [flext-core Foundation](https://github.com/organization/flext/tree/main/flext-core/docs/architecture/overview.md) - Clean architecture and CQRS patterns
 - [flext-core Service Patterns](https://github.com/organization/flext/tree/main/flext-core/docs/guides/service-patterns.md) - Service patterns and dependency injection
-- [flext-db-oracle Integration](https://github.com/organization/flext/tree/main/flext-db-oracle/CLAUDE.md) - Oracle database integration
-- [flext-meltano Pipelines](https://github.com/organization/flext/tree/main/flext-meltano/CLAUDE.md) - Data integration and ELT orchestration
+- [flext-db-oracle Integration](https://github.com/organization/flext/tree/main/flext-db-oracle/AGENTS.md) - Oracle database integration
+- [flext-meltano Pipelines](https://github.com/organization/flext/tree/main/flext-meltano/AGENTS.md) - Data integration and ELT orchestration
 
 **External Resources**:
 
