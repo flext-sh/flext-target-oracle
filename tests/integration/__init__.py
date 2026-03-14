@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 
     from tests.integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
 
-# Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestOracleIntegration": ("tests.integration.test_oracle", "TestOracleIntegration"),
     "TestOracleTargetE2E": ("tests.integration.test_oracle", "TestOracleTargetE2E"),

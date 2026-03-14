@@ -28,18 +28,35 @@ if TYPE_CHECKING:
         test_write_record_flushes_batch_with_oracle_cursor_execute,
     )
 
-# Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestOracleSettings": ("tests.unit.test_config", "TestOracleSettings"),
     "TestOracleTarget": ("tests.unit.test_target", "TestOracleTarget"),
     "loader_config": ("tests.unit.test_loader", "loader_config"),
     "target": ("tests.unit.test_target", "target"),
-    "test_cli_service_falls_back_to_bus_when_flag_disabled": ("tests.unit.test_cli_dispatcher", "test_cli_service_falls_back_to_bus_when_flag_disabled"),
-    "test_cli_service_uses_dispatcher_when_flag_enabled": ("tests.unit.test_cli_dispatcher", "test_cli_service_uses_dispatcher_when_flag_enabled"),
-    "test_ensure_table_exists_returns_result": ("tests.unit.test_loader", "test_ensure_table_exists_returns_result"),
-    "test_load_record_buffers_and_finalize": ("tests.unit.test_loader", "test_load_record_buffers_and_finalize"),
-    "test_loader_execute_returns_ready_payload": ("tests.unit.test_loader", "test_loader_execute_returns_ready_payload"),
-    "test_write_record_flushes_batch_with_oracle_cursor_execute": ("tests.unit.test_target_record_writing", "test_write_record_flushes_batch_with_oracle_cursor_execute"),
+    "test_cli_service_falls_back_to_bus_when_flag_disabled": (
+        "tests.unit.test_cli_dispatcher",
+        "test_cli_service_falls_back_to_bus_when_flag_disabled",
+    ),
+    "test_cli_service_uses_dispatcher_when_flag_enabled": (
+        "tests.unit.test_cli_dispatcher",
+        "test_cli_service_uses_dispatcher_when_flag_enabled",
+    ),
+    "test_ensure_table_exists_returns_result": (
+        "tests.unit.test_loader",
+        "test_ensure_table_exists_returns_result",
+    ),
+    "test_load_record_buffers_and_finalize": (
+        "tests.unit.test_loader",
+        "test_load_record_buffers_and_finalize",
+    ),
+    "test_loader_execute_returns_ready_payload": (
+        "tests.unit.test_loader",
+        "test_loader_execute_returns_ready_payload",
+    ),
+    "test_write_record_flushes_batch_with_oracle_cursor_execute": (
+        "tests.unit.test_target_record_writing",
+        "test_write_record_flushes_batch_with_oracle_cursor_execute",
+    ),
 }
 
 __all__ = [

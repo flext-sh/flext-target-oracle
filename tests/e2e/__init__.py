@@ -19,7 +19,6 @@ if TYPE_CHECKING:
 
     from tests.e2e.test_singer import TestSingerWorkflowE2E
 
-# Lazy import mapping: export_name -> (module_path, attr_name)
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestSingerWorkflowE2E": ("tests.e2e.test_singer", "TestSingerWorkflowE2E"),
 }
