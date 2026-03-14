@@ -9,6 +9,8 @@ from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import FlextMeltanoUtilities
 from pydantic import TypeAdapter
 
+from flext_target_oracle.typings import t
+
 
 class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
     """Focused utility namespace used by Oracle target modules."""
@@ -21,10 +23,10 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
 
         @staticmethod
         def transform_record_for_oracle(
-            record: Mapping[str, object],
-        ) -> r[Mapping[str, object]]:
+            record: Mapping[str, t.ContainerValue],
+        ) -> r[Mapping[str, t.ContainerValue]]:
             """Normalize record values for Oracle persistence."""
-            transformed: dict[str, object] = {}
+            transformed: dict[str, t.ContainerValue] = {}
             for key, value in record.items():
                 is_mapping = isinstance(value, Mapping)
                 is_sequence = isinstance(value, Sequence) and (
@@ -32,7 +34,7 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
                 )
                 if is_mapping or is_sequence:
                     transformed[key.upper()] = (
-                        TypeAdapter(object).dump_json(value).decode("utf-8")
+                        TypeAdapter(t.ContainerValue).dump_json(value).decode("utf-8")
                     )
                     continue
                 match value:
@@ -40,7 +42,7 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
                         transformed[key.upper()] = 1 if bool_value else 0
                     case _:
                         transformed[key.upper()] = value
-            return r[object].ok(transformed)
+            return r[Mapping[str, t.ContainerValue]].ok(transformed)
 
 
 u = FlextTargetOracleUtilities

@@ -98,7 +98,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         type DataValidation = dict[str, str | dict[str, t.ContainerValue]]
         type TypeConversion = dict[str, bool | str | dict[str, t.ContainerValue]]
         type FilteringRules = dict[str, str | dict[str, t.ContainerValue]]
-        type TransformationResult = dict[str, dict[str, object]]
+        type TransformationResult = dict[str, dict[str, t.ContainerValue]]
 
     class StreamProcessing:
         """Stream processing complex types."""
@@ -107,7 +107,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
             str, str | bool | int | dict[str, t.ContainerValue]
         ]
         type StreamMetadata = dict[str, str | dict[str, t.ContainerValue]]
-        type StreamRecord = dict[str, object | dict[str, t.ContainerValue]]
+        type StreamRecord = dict[str, t.ContainerValue]
         type StreamState = dict[str, str | int | dict[str, t.ContainerValue]]
         type StreamBookmark = dict[str, str | int | dict[str, t.ContainerValue]]
         type StreamSchema = dict[str, str | dict[str, t.ContainerValue] | bool]
@@ -140,7 +140,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         Access parent core types via inheritance from FlextTargetOracleTypes.
         """
 
-        type Dict = dict[str, object]
+        type Dict = dict[str, t.ContainerValue]
         "Type alias for generic dictionary (attribute name to value mapping)."
 
 

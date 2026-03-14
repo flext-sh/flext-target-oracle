@@ -132,7 +132,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             *,
             stream_name: str | None = None,
             record_count: int | None = None,
-            error_records: list[Mapping[str, object]] | None = None,
+            error_records: list[Mapping[str, t.ContainerValue]] | None = None,
             operation: str | None = None,
             code: str | None = None,
             context: Mapping[str, t.MetadataValue] | None = None,
