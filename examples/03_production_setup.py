@@ -202,7 +202,7 @@ class ProductionTargetManager:
                 target_metrics = self.target.get_implementation_metrics()
                 metrics.update(target_metrics.model_dump())
             logger.debug("Health check completed: %s", health_status.status)
-            return r[object].ok(health_status.model_dump())
+            return r.ok(health_status.model_dump())
         except (
             ValueError,
             TypeError,
@@ -215,7 +215,7 @@ class ProductionTargetManager:
             logger.exception("Health check failed")
             health_status.status = "unhealthy"
             health_status.error = str(e)
-            return r[object].fail(f"Health check error: {e}")
+            return r.fail(f"Health check error: {e}")
 
     def initialize(self) -> r[bool]:
         """Initialize target with comprehensive validation.
@@ -265,7 +265,7 @@ class ProductionTargetManager:
 
         """
         if not self.target:
-            return r[object].fail("Target not initialized")
+            return r.fail("Target not initialized")
         logger.info("Processing Singer stream with %d messages", len(messages))
         stats = ProcessingStats(processing_start_time=time.time())
         try:
@@ -284,7 +284,7 @@ class ProductionTargetManager:
                     "Processing message %d/%d: %s", i + 1, len(messages), message_type
                 )
                 if not self.target:
-                    return r[object].fail("Target not initialized")
+                    return r.fail("Target not initialized")
                 result = self.target.process_singer_message(message)
                 if result.is_success:
                     stats.messages_processed += 1
@@ -319,7 +319,7 @@ class ProductionTargetManager:
             logger.info(
                 "Stream processing completed in %.2f seconds", processing_duration
             )
-            return r[object].ok(stats.model_dump())
+            return r.ok(stats.model_dump())
         except (
             ValueError,
             TypeError,
@@ -332,7 +332,7 @@ class ProductionTargetManager:
             logger.exception("Unexpected error during stream processing")
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
-            return r[object].fail(f"Stream processing error: {e}")
+            return r.fail(f"Stream processing error: {e}")
 
     def shutdown(self) -> r[bool]:
         """Graceful shutdown with resource cleanup.
@@ -362,7 +362,7 @@ class ProductionTargetManager:
             logger.exception("Error during shutdown")
             return r[bool].fail(f"Shutdown error: {e}")
 
-    def _signal_handler(self, signum: int, _frame: object) -> None:
+    def _signal_handler(self, signum: int, _frame) -> None:
         """Handle shutdown signals gracefully."""
         logger.info("Received signal %d, initiating graceful shutdown", signum)
         self.shutdown_requested = True
