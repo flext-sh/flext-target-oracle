@@ -176,7 +176,11 @@ class OracleRecordService:
             transformed[mapped_key] = value
         return r[m.Meltano.SingerRecordMessage].ok(
             m.Meltano.SingerRecordMessage(
-                stream=record_message.stream, record=transformed
+                type="RECORD",
+                stream=record_message.stream,
+                record=transformed,
+                time_extracted=record_message.time_extracted,
+                version=record_message.version,
             )
         )
 

@@ -92,7 +92,9 @@ class OracleTargetCommandFactory:
     ) -> OracleTargetAboutCommand:
         """Create about command instance."""
         return OracleTargetAboutCommand(
-            command_type=c.TargetOracle.CommandTypes.ABOUT.value, format=output_format
+            command_type=c.TargetOracle.CommandTypes.ABOUT.value,
+            command_id="cmd_oracle_about",
+            format=output_format,
         )
 
     @staticmethod
@@ -102,6 +104,7 @@ class OracleTargetCommandFactory:
         """Create load command instance."""
         return OracleTargetLoadCommand(
             command_type=c.TargetOracle.CommandTypes.LOAD.value,
+            command_id="cmd_oracle_load",
             config_file=config_file,
             state_file=state_file,
         )
@@ -113,6 +116,7 @@ class OracleTargetCommandFactory:
         """Create validation command instance."""
         return OracleTargetValidateCommand(
             command_type=c.TargetOracle.CommandTypes.VALIDATE.value,
+            command_id="cmd_oracle_validate",
             config_file=config_file,
         )
 
@@ -120,7 +124,9 @@ class OracleTargetCommandFactory:
 def _load_settings(config_file: str | None) -> r[FlextTargetOracleSettings]:
     """Load settings from JSON file or environment defaults."""
     if config_file is None:
-        return r[FlextTargetOracleSettings].ok(FlextTargetOracleSettings())
+        return r[FlextTargetOracleSettings].ok(
+            FlextTargetOracleSettings.model_validate({})
+        )
     config_path = Path(config_file)
     if not config_path.exists():
         return r[FlextTargetOracleSettings].fail(

@@ -6,7 +6,7 @@ import re
 from datetime import UTC, datetime
 
 import oracledb
-from flext_core import FlextLogger, r
+from flext_core import FlextLogger, r, t
 from pydantic import TypeAdapter, ValidationError
 
 from .models import m
@@ -25,9 +25,9 @@ class FlextTargetOracle:
         self.loader = FlextTargetOracleLoader(config)
         self.schemas: dict[str, m.TargetOracle.SingerSchemaMessage] = {}
         self.state_message: m.TargetOracle.SingerStateMessage = (
-            m.TargetOracle.SingerStateMessage()
+            m.TargetOracle.SingerStateMessage(type="STATE", value={})
         )
-        self._record_batches: dict[str, list[dict[str, object]]] = {}
+        self._record_batches: dict[str, list[dict[str, t.Container]]] = {}
 
     def discover_catalog(self) -> r[m.Meltano.SingerCatalog]:
         """Return Singer-style catalog for known schemas."""
@@ -35,7 +35,7 @@ class FlextTargetOracle:
             m.Meltano.SingerCatalogEntry(
                 tap_stream_id=stream_name,
                 stream=stream_name,
-                schema=schema_message.schema_definition,
+                schema_definition=schema_message.schema_definition,
                 metadata=[
                     m.Meltano.SingerCatalogMetadata(
                         breadcrumb=[],
@@ -46,11 +46,18 @@ class FlextTargetOracle:
                         },
                     )
                 ],
+                key_properties=[],
+                replication_key=None,
+                replication_method=None,
+                is_view=None,
+                table_name=None,
+                database_name=None,
+                row_count=None,
             )
             for stream_name, schema_message in self.schemas.items()
         ]
         return r[m.Meltano.SingerCatalog].ok(
-            m.Meltano.SingerCatalog(streams=catalog_entries)
+            m.Meltano.SingerCatalog(type="CATALOG", streams=catalog_entries)
         )
 
     def execute(self, payload: str | None = None) -> r[m.TargetOracle.ExecuteResult]:
@@ -64,6 +71,7 @@ class FlextTargetOracle:
         return r[m.TargetOracle.ExecuteResult].ok(
             m.TargetOracle.ExecuteResult(
                 name="flext-target-oracle",
+                status="ready",
                 oracle_host=self.config.oracle_host,
                 oracle_service=self.config.oracle_service_name,
             )
@@ -108,8 +116,6 @@ class FlextTargetOracle:
                 return self._handle_state(state_message)
             case m.TargetOracle.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
-            case _:
-                return r[bool].fail(f"Unknown message type: {type(message)}")
 
     def process_singer_messages(
         self,
@@ -208,8 +214,8 @@ class FlextTargetOracle:
                 execute_method = getattr(cursor, "execute", None)
                 if not callable(execute_method):
                     return r[bool].fail("Cursor does not support execute")
-                record_adapter: TypeAdapter[dict[str, object]] = TypeAdapter(
-                    dict[str, object]
+                record_adapter: TypeAdapter[dict[str, t.Container]] = TypeAdapter(
+                    dict[str, t.Container]
                 )
                 for record in batch:
                     extracted_at = record.get(

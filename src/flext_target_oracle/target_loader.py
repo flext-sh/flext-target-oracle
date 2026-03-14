@@ -30,7 +30,7 @@ def _default_record_buffers() -> dict[str, list[dict[str, t.Container]]]:
     return {}
 
 
-def _normalize_log_value(value: object) -> t.Container:
+def _normalize_log_value(value: t.ContainerValue) -> t.Container:
     if isinstance(value, str | int | float | bool | datetime):
         return value
     return str(value)
@@ -63,7 +63,11 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 "password": oracle_connection.password,
             })
             oracle_api = FlextDbOracleApi(oracle_config)
-            super().__init__()
+            super().__init__(
+                config_type=FlextTargetOracleSettings,
+                config_overrides=None,
+                initial_context=None,
+            )
             self._target_config = config
             self._oracle_api = oracle_api
             self._record_buffers = {}
@@ -198,9 +202,10 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             )
         return r[m.TargetOracle.LoaderReadyResult].ok(
             m.TargetOracle.LoaderReadyResult(
+                status="ready",
                 host=self.target_config.oracle_host,
                 service=self.target_config.oracle_service_name,
-                schema=self.target_config.default_target_schema,
+                target_schema=self.target_config.default_target_schema,
             )
         )
 
@@ -219,6 +224,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 m.TargetOracle.LoaderFinalizeResult(
                     total_records=self.total_records,
                     streams_processed=len(self.record_buffers),
+                    status="completed",
                     loading_operation=m.TargetOracle.LoaderOperation(
                         stream_name="all_streams",
                         started_at=started_at,
