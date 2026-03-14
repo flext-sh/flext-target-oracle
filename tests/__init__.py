@@ -122,20 +122,11 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestOracleTargetE2E": ("tests.integration.test_oracle", "TestOracleTargetE2E"),
     "TestPerformance": ("tests.performance.test_performance", "TestPerformance"),
     "TestSingerWorkflowE2E": ("tests.e2e.test_singer", "TestSingerWorkflowE2E"),
-    "TestsFlextTargetOracleConstants": (
-        "tests.constants",
-        "TestsFlextTargetOracleConstants",
-    ),
+    "TestsFlextTargetOracleConstants": ("tests.constants", "TestsFlextTargetOracleConstants"),
     "TestsFlextTargetOracleModels": ("tests.models", "TestsFlextTargetOracleModels"),
-    "TestsFlextTargetOracleProtocols": (
-        "tests.protocols",
-        "TestsFlextTargetOracleProtocols",
-    ),
+    "TestsFlextTargetOracleProtocols": ("tests.protocols", "TestsFlextTargetOracleProtocols"),
     "TestsFlextTargetOracleTypes": ("tests.typings", "TestsFlextTargetOracleTypes"),
-    "TestsFlextTargetOracleUtilities": (
-        "tests.utilities",
-        "TestsFlextTargetOracleUtilities",
-    ),
+    "TestsFlextTargetOracleUtilities": ("tests.utilities", "TestsFlextTargetOracleUtilities"),
     "_models": ("tests.models", "_models"),
     "_protocols": ("tests.protocols", "_protocols"),
     "_types": ("tests.typings", "_types"),
@@ -159,10 +150,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "oracle_loader": ("tests.conftest", "oracle_loader"),
     "oracle_target": ("tests.conftest", "oracle_target"),
     "p": ("tests.protocols", "TestsFlextTargetOracleProtocols"),
-    "pytest_collection_modifyitems": (
-        "tests.conftest",
-        "pytest_collection_modifyitems",
-    ),
+    "pytest_collection_modifyitems": ("tests.conftest", "pytest_collection_modifyitems"),
     "pytest_configure": ("tests.conftest", "pytest_configure"),
     "record": ("tests.conftest", "record"),
     "reset_settings_singleton": ("tests.conftest", "reset_settings_singleton"),
@@ -179,30 +167,12 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "target": ("tests.unit.test_target", "target"),
     "temp_config_file": ("tests.conftest", "temp_config_file"),
     "temporary_env_vars": ("tests.conftest", "temporary_env_vars"),
-    "test_cli_service_falls_back_to_bus_when_flag_disabled": (
-        "tests.unit.test_cli_dispatcher",
-        "test_cli_service_falls_back_to_bus_when_flag_disabled",
-    ),
-    "test_cli_service_uses_dispatcher_when_flag_enabled": (
-        "tests.unit.test_cli_dispatcher",
-        "test_cli_service_uses_dispatcher_when_flag_enabled",
-    ),
-    "test_ensure_table_exists_returns_result": (
-        "tests.unit.test_loader",
-        "test_ensure_table_exists_returns_result",
-    ),
-    "test_load_record_buffers_and_finalize": (
-        "tests.unit.test_loader",
-        "test_load_record_buffers_and_finalize",
-    ),
-    "test_loader_execute_returns_ready_payload": (
-        "tests.unit.test_loader",
-        "test_loader_execute_returns_ready_payload",
-    ),
-    "test_write_record_flushes_batch_with_oracle_cursor_execute": (
-        "tests.unit.test_target_record_writing",
-        "test_write_record_flushes_batch_with_oracle_cursor_execute",
-    ),
+    "test_cli_service_falls_back_to_bus_when_flag_disabled": ("tests.unit.test_cli_dispatcher", "test_cli_service_falls_back_to_bus_when_flag_disabled"),
+    "test_cli_service_uses_dispatcher_when_flag_enabled": ("tests.unit.test_cli_dispatcher", "test_cli_service_uses_dispatcher_when_flag_enabled"),
+    "test_ensure_table_exists_returns_result": ("tests.unit.test_loader", "test_ensure_table_exists_returns_result"),
+    "test_load_record_buffers_and_finalize": ("tests.unit.test_loader", "test_load_record_buffers_and_finalize"),
+    "test_loader_execute_returns_ready_payload": ("tests.unit.test_loader", "test_loader_execute_returns_ready_payload"),
+    "test_write_record_flushes_batch_with_oracle_cursor_execute": ("tests.unit.test_target_record_writing", "test_write_record_flushes_batch_with_oracle_cursor_execute"),
     "u": ("tests.utilities", "TestsFlextTargetOracleUtilities"),
 }
 
