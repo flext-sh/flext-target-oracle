@@ -180,9 +180,11 @@ ______________________________________________________________________
 ```python
 # src/flext_target_oracle/loader.py linhas ~226-232
 parameterized_sql = sql.replace(
-    ":data", f"'{param['data']}'",
+    ":data",
+    f"'{param['data']}'",
 ).replace(
-    ":extracted_at", f"'{param['extracted_at']}'",
+    ":extracted_at",
+    f"'{param['extracted_at']}'",
 )
 ```
 
@@ -291,12 +293,15 @@ ______________________________________________________________________
 **Solução**:
 
 ```python
-logger.info("Batch loaded", extra={
-    "stream_name": stream_name,
-    "record_count": record_count,
-    "table_name": table_name,
-    "batch_id": batch_id
-})
+logger.info(
+    "Batch loaded",
+    extra={
+        "stream_name": stream_name,
+        "record_count": record_count,
+        "table_name": table_name,
+        "batch_id": batch_id,
+    },
+)
 ```
 
 ______________________________________________________________________
