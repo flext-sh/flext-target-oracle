@@ -1,16 +1,7 @@
 # AUTO-GENERATED FILE — DO NOT EDIT MANUALLY.
 # Regenerate with: make codegen
 #
-"""Test module for flext-target-oracle.
-
-This module provides test infrastructure for flext-target-oracle using unified namespace patterns.
-Test objects are accessed via m.Oracle.Tests.*, u.Oracle.*, etc.
-Combines FlextTests* with project-specific functionality.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Tests package."""
 
 from __future__ import annotations
 
@@ -21,6 +12,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
+    from tests import e2e, integration, performance, unit
     from tests.conftest import (
         DOCKER_COMPOSE_PATH,
         ORACLE_CONTAINER_NAME,
@@ -144,7 +136,9 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "clean_database": ("tests.conftest", "clean_database"),
     "connected_loader": ("tests.conftest", "connected_loader"),
     "docker_control": ("tests.conftest", "docker_control"),
+    "e2e": ("tests.e2e", ""),
     "event_loop": ("tests.conftest", "event_loop"),
+    "integration": ("tests.integration", ""),
     "large_dataset": ("tests.conftest", "large_dataset"),
     "loader_config": ("tests.unit.test_loader", "loader_config"),
     "logger": ("tests.conftest", "logger"),
@@ -158,6 +152,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "oracle_loader": ("tests.conftest", "oracle_loader"),
     "oracle_target": ("tests.conftest", "oracle_target"),
     "p": ("tests.protocols", "TestsFlextTargetOracleProtocols"),
+    "performance": ("tests.performance", ""),
     "pytest_collection_modifyitems": (
         "tests.conftest",
         "pytest_collection_modifyitems",
@@ -203,6 +198,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "test_write_record_flushes_batch_with_oracle_cursor_execute",
     ),
     "u": ("tests.utilities", "TestsFlextTargetOracleUtilities"),
+    "unit": ("tests.unit", ""),
 }
 
 __all__ = [
@@ -235,7 +231,9 @@ __all__ = [
     "clean_database",
     "connected_loader",
     "docker_control",
+    "e2e",
     "event_loop",
+    "integration",
     "large_dataset",
     "loader_config",
     "logger",
@@ -249,6 +247,7 @@ __all__ = [
     "oracle_loader",
     "oracle_target",
     "p",
+    "performance",
     "pytest_collection_modifyitems",
     "pytest_configure",
     "record",
@@ -273,6 +272,7 @@ __all__ = [
     "test_loader_execute_returns_ready_payload",
     "test_write_record_flushes_batch_with_oracle_cursor_execute",
     "u",
+    "unit",
 ]
 
 
