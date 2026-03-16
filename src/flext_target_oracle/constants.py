@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import StrEnum, unique
 from typing import Final
 
 from flext_db_oracle import FlextDbOracleConstants
@@ -23,6 +23,7 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
     Composes with 1000 to avoid duplication and ensure consistency.
     """
 
+    @unique
     class LoadMethod(StrEnum):
         """Oracle data loading strategies with performance characteristics.
 
@@ -39,6 +40,7 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
         BULK_INSERT = "BULK_INSERT"
         BULK_MERGE = "BULK_MERGE"
 
+    @unique
     class StorageMode(StrEnum):
         """Data storage modes for Oracle target operations.
 
@@ -57,6 +59,7 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
     class TargetOracle:
         """Connection-related constants for Oracle target."""
 
+        @unique
         class CommandTypes(StrEnum):
             """Command type identifiers for Oracle target operations."""
 
@@ -64,6 +67,7 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
             LOAD = "oracle_target_load"
             ABOUT = "oracle_target_about"
 
+        @unique
         class OutputFormats(StrEnum):
             """Output format options for command responses."""
 

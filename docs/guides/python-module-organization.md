@@ -207,7 +207,7 @@ from flext_core import FlextService
 from flext_core import t
 from flext_core import u
 from pydantic import Field, field_validator
-from enum import StrEnum
+from enum import StrEnum, unique
 
 
 class LoadMethod(StrEnum):
