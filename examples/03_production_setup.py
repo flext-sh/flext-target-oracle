@@ -15,6 +15,7 @@ import signal
 import sys
 import time
 from datetime import UTC
+from types import FrameType
 
 from flext_core import FlextLogger, r
 from pydantic import BaseModel, Field, SecretStr
@@ -362,7 +363,7 @@ class ProductionTargetManager:
             logger.exception("Error during shutdown")
             return r[bool].fail(f"Shutdown error: {e}")
 
-    def _signal_handler(self, signum: int, _frame) -> None:
+    def _signal_handler(self, signum: int, _frame: FrameType | None) -> None:
         """Handle shutdown signals gracefully."""
         logger.info("Received signal %d, initiating graceful shutdown", signum)
         self.shutdown_requested = True
