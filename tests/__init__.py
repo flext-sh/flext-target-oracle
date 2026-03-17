@@ -60,11 +60,7 @@ if TYPE_CHECKING:
     )
     from tests.e2e.test_singer import TestSingerWorkflowE2E
     from tests.integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
-    from tests.models import (
-        TestsFlextTargetOracleModels,
-        TestsFlextTargetOracleModels as m,
-        _models,
-    )
+    from tests.models import TestsFlextTargetOracleModels, m
     from tests.performance.test_performance import TestPerformance
     from tests.protocols import (
         TestsFlextTargetOracleProtocols,
@@ -127,7 +123,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "tests.utilities",
         "TestsFlextTargetOracleUtilities",
     ),
-    "_models": ("tests.models", "_models"),
     "_protocols": ("tests.protocols", "_protocols"),
     "_types": ("tests.typings", "_types"),
     "_utilities": ("tests.utilities", "_utilities"),
@@ -142,7 +137,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "large_dataset": ("tests.conftest", "large_dataset"),
     "loader_config": ("tests.unit.test_loader", "loader_config"),
     "logger": ("tests.conftest", "logger"),
-    "m": ("tests.models", "TestsFlextTargetOracleModels"),
+    "m": ("tests.models", "m"),
     "mock_loader": ("tests.conftest", "mock_loader"),
     "mock_oracle_api": ("tests.conftest", "mock_oracle_api"),
     "nested_schema": ("tests.conftest", "nested_schema"),
@@ -222,7 +217,6 @@ __all__ = [
     "TestsFlextTargetOracleProtocols",
     "TestsFlextTargetOracleTypes",
     "TestsFlextTargetOracleUtilities",
-    "_models",
     "_protocols",
     "_types",
     "_utilities",

@@ -26,6 +26,6 @@ class TestsFlextTargetOracleModels(FlextTestsModels, FlextTargetOracleModels):
             """Internal tests declarations for test-only objects."""
 
 
-_models = TestsFlextTargetOracleModels
+m = TestsFlextTargetOracleModels
 
-__all__ = ["TestsFlextTargetOracleModels", "_models"]
+__all__ = ["TestsFlextTargetOracleModels", "m"]
