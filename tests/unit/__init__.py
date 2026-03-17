@@ -12,19 +12,19 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
 
-    from tests.unit.test_cli_dispatcher import (
+    from .test_cli_dispatcher import (
         test_cli_service_falls_back_to_bus_when_flag_disabled,
         test_cli_service_uses_dispatcher_when_flag_enabled,
     )
-    from tests.unit.test_config import TestOracleSettings
-    from tests.unit.test_loader import (
+    from .test_config import TestOracleSettings
+    from .test_loader import (
         loader_config,
         test_ensure_table_exists_returns_result,
         test_load_record_buffers_and_finalize,
         test_loader_execute_returns_ready_payload,
     )
-    from tests.unit.test_target import TestOracleTarget, target
-    from tests.unit.test_target_record_writing import (
+    from .test_target import TestOracleTarget, target
+    from .test_target_record_writing import (
         test_write_record_flushes_batch_with_oracle_cursor_execute,
     )
 
