@@ -13,13 +13,13 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsModels
 
-from flext_target_oracle import m
+from flext_target_oracle import FlextTargetOracleModels
 
 
-class TestsFlextTargetOracleModels(FlextTestsModels, m):
+class TestsFlextTargetOracleModels(FlextTestsModels, FlextTargetOracleModels):
     """Test models combining FlextTestsModels and project-specific models."""
 
-    class TargetOracle(m.TargetOracle):
+    class TargetOracle(FlextTargetOracleModels.TargetOracle):
         """TargetOracle domain models extending project models."""
 
         class Tests:
