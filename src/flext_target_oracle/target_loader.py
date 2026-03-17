@@ -31,7 +31,7 @@ def _default_record_buffers() -> dict[str, list[dict[str, t.Container]]]:
 
 
 def _normalize_log_value(value: t.ContainerValue) -> t.Container:
-    if isinstance(value, str | int | float | bool | datetime):
+    if isinstance(value, t.Scalar):
         return value
     return str(value)
 

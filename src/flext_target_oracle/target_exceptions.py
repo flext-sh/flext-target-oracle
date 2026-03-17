@@ -11,14 +11,13 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
-from datetime import datetime
 from typing import override
 
 from flext_core import FlextConstants, FlextExceptions, t
 
 
 def _to_metadata_value(value: t.Scalar | None) -> t.MetadataValue:
-    if isinstance(value, str | int | float | bool | datetime):
+    if isinstance(value, t.Scalar):
         return value
     if value is None:
         return ""
