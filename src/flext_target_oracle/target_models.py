@@ -21,8 +21,6 @@ PUBLIC = "PUBLIC"
 class OracleConnectionModel(m.TargetOracle.OracleConnectionConfig):
     """Oracle database connection configuration model."""
 
-    pass
-
 
 class SingerStreamModel(m.ArbitraryTypesModel):
     """Singer stream mapping to Oracle table with column configuration."""

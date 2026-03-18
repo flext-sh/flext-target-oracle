@@ -54,12 +54,12 @@ class OracleTargetValidateCommand(FlextModels.Command):
         settings_result = _load_settings(self.config_file)
         if settings_result.is_failure:
             return r[str].fail(
-                settings_result.error or "Configuration validation failed"
+                settings_result.error or "Configuration validation failed",
             )
         validation_result = settings_result.value.validate_business_rules()
         if validation_result.is_failure:
             return r[str].fail(
-                validation_result.error or "Configuration validation failed"
+                validation_result.error or "Configuration validation failed",
             )
         return r[str].ok("validation_ok")
 
@@ -99,7 +99,8 @@ class OracleTargetCommandFactory:
 
     @staticmethod
     def create_load_command(
-        config_file: str | None = None, state_file: str | None = None
+        config_file: str | None = None,
+        state_file: str | None = None,
     ) -> OracleTargetLoadCommand:
         """Create load command instance."""
         return OracleTargetLoadCommand(
@@ -125,12 +126,12 @@ def _load_settings(config_file: str | None) -> r[FlextTargetOracleSettings]:
     """Load settings from JSON file or environment defaults."""
     if config_file is None:
         return r[FlextTargetOracleSettings].ok(
-            FlextTargetOracleSettings.model_validate({})
+            FlextTargetOracleSettings.model_validate({}),
         )
     config_path = Path(config_file)
     if not config_path.exists():
         return r[FlextTargetOracleSettings].fail(
-            f"Configuration file not found: {config_file}"
+            f"Configuration file not found: {config_file}",
         )
     try:
         content = config_path.read_text(encoding="utf-8")

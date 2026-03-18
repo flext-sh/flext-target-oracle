@@ -28,7 +28,9 @@ class SchemaService(Protocol):
     """Contract for Oracle schema services."""
 
     def ensure_table_exists(
-        self, stream: SingerStreamModel, schema_message: m.Meltano.SingerSchemaMessage
+        self,
+        stream: SingerStreamModel,
+        schema_message: m.Meltano.SingerSchemaMessage,
     ) -> r[None]:
         """Ensure destination table exists for a stream."""
         ...
@@ -38,7 +40,9 @@ class BatchService(Protocol):
     """Contract for Oracle batch services."""
 
     def add_record(
-        self, stream_name: str, record_message: m.Meltano.SingerRecordMessage
+        self,
+        stream_name: str,
+        record_message: m.Meltano.SingerRecordMessage,
     ) -> r[None]:
         """Queue one record for batch processing."""
         ...
@@ -52,7 +56,9 @@ class RecordService(Protocol):
     """Contract for record transformation services."""
 
     def transform_record(
-        self, record_message: m.Meltano.SingerRecordMessage, stream: SingerStreamModel
+        self,
+        record_message: m.Meltano.SingerRecordMessage,
+        stream: SingerStreamModel,
     ) -> r[m.Meltano.SingerRecordMessage]:
         """Transform one Singer record into Oracle-ready payload."""
         ...
@@ -62,7 +68,9 @@ class OracleConnectionService:
     """Minimal Oracle connection service."""
 
     def __init__(
-        self, config: FlextTargetOracleSettings, oracle_api: FlextDbOracleApi
+        self,
+        config: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
     ) -> None:
         """Store configuration and Oracle API dependency."""
         self.config = config
@@ -75,13 +83,13 @@ class OracleConnectionService:
     def get_connection_info(self) -> r[m.TargetOracle.OracleConnectionConfig]:
         """Return normalized connection model."""
         return r[m.TargetOracle.OracleConnectionConfig].ok(
-            self.config.get_oracle_config()
+            self.config.get_oracle_config(),
         )
 
     def test_connection(self) -> r[None]:
         """Check Oracle access by listing schema tables."""
         tables_result = self.oracle_api.get_tables(
-            schema=self.config.default_target_schema
+            schema=self.config.default_target_schema,
         )
         if tables_result.is_failure:
             return r[None].fail(tables_result.error or "Connection test failed")
@@ -92,14 +100,18 @@ class OracleSchemaService:
     """Minimal schema management service."""
 
     def __init__(
-        self, config: FlextTargetOracleSettings, oracle_api: FlextDbOracleApi
+        self,
+        config: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
     ) -> None:
         """Store schema service dependencies."""
         self.config = config
         self.oracle_api = oracle_api
 
     def ensure_table_exists(
-        self, stream: SingerStreamModel, schema_message: m.Meltano.SingerSchemaMessage
+        self,
+        stream: SingerStreamModel,
+        schema_message: m.Meltano.SingerSchemaMessage,
     ) -> r[None]:
         """Validate table identity before external DDL orchestration."""
         _ = schema_message
@@ -117,7 +129,9 @@ class OracleBatchService:
     """Minimal batching service used by CLI and target orchestrators."""
 
     def __init__(
-        self, config: FlextTargetOracleSettings, oracle_api: FlextDbOracleApi
+        self,
+        config: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
     ) -> None:
         """Initialize batch storage and required dependencies."""
         self.config = config
@@ -125,7 +139,9 @@ class OracleBatchService:
         self._batches: dict[str, list[m.Meltano.SingerRecordMessage]] = {}
 
     def add_record(
-        self, stream_name: str, record_message: m.Meltano.SingerRecordMessage
+        self,
+        stream_name: str,
+        record_message: m.Meltano.SingerRecordMessage,
     ) -> r[None]:
         """Append a record to a stream buffer."""
         self._batches.setdefault(stream_name, []).append(record_message)
@@ -165,7 +181,9 @@ class OracleRecordService:
         return r[None].ok(None)
 
     def transform_record(
-        self, record_message: m.Meltano.SingerRecordMessage, stream: SingerStreamModel
+        self,
+        record_message: m.Meltano.SingerRecordMessage,
+        stream: SingerStreamModel,
     ) -> r[m.Meltano.SingerRecordMessage]:
         """Apply stream-level mappings and ignored-column filtering."""
         transformed: dict[str, t.Container] = {}
@@ -181,7 +199,7 @@ class OracleRecordService:
                 record=transformed,
                 time_extracted=record_message.time_extracted,
                 version=record_message.version,
-            )
+            ),
         )
 
     def validate_record(
@@ -199,7 +217,9 @@ class OracleTargetServiceFactory:
     """Factory for constructing all Oracle target services."""
 
     def __init__(
-        self, config: FlextTargetOracleSettings, oracle_api: FlextDbOracleApi
+        self,
+        config: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
     ) -> None:
         """Store dependencies shared by service instances."""
         self._config = config

@@ -652,3 +652,6 @@ temp_test_*/
 
 # --- workspace-sync: required ignores (auto-managed) ---
 .reports/
+
+# --- workspace-sync: required ignores (auto-managed) ---
+base.mk

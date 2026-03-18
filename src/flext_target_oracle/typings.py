@@ -30,7 +30,8 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         """Singer target protocol complex types."""
 
         type TargetConfiguration = dict[
-            str, str | int | bool | dict[str, t.ContainerValue]
+            str,
+            str | int | bool | dict[str, t.ContainerValue],
         ]
         type StreamConfiguration = dict[str, str | bool | dict[str, t.ContainerValue]]
         type MessageProcessing = dict[str, str | list[dict[str, t.ContainerValue]]]
@@ -42,7 +43,8 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         """Oracle database operation complex types."""
 
         type DatabaseConfiguration = dict[
-            str, str | int | bool | dict[str, t.ContainerValue]
+            str,
+            str | int | bool | dict[str, t.ContainerValue],
         ]
         type ConnectionManagement = dict[str, str | int | dict[str, t.ContainerValue]]
         type SessionSettings = dict[str, str | bool | dict[str, t.ContainerValue]]
@@ -57,7 +59,8 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         type SchemaDefinition = dict[str, str | list[str] | dict[str, t.ContainerValue]]
         type ColumnMapping = dict[str, str | dict[str, t.ContainerValue]]
         type IndexConfiguration = dict[
-            str, str | list[str] | dict[str, t.ContainerValue]
+            str,
+            str | list[str] | dict[str, t.ContainerValue],
         ]
         type ConstraintDefinition = dict[str, str | dict[str, t.ContainerValue]]
         type TablespaceSettings = dict[str, str | int | dict[str, t.ContainerValue]]
@@ -66,11 +69,13 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         """Oracle SQL operation complex types."""
 
         type SqlConfiguration = dict[
-            str, str | bool | int | dict[str, t.ContainerValue]
+            str,
+            str | bool | int | dict[str, t.ContainerValue],
         ]
         type QueryExecution = dict[str, str | dict[str, t.ContainerValue]]
         type BulkOperations = dict[
-            str, str | int | list[str] | dict[str, t.ContainerValue]
+            str,
+            str | int | list[str] | dict[str, t.ContainerValue],
         ]
         type PreparedStatements = dict[str, str | dict[str, t.ContainerValue]]
         type SqlOptimization = dict[str, bool | str | dict[str, t.ContainerValue]]
@@ -80,7 +85,8 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         """Oracle performance optimization complex types."""
 
         type PerformanceConfiguration = dict[
-            str, str | int | dict[str, t.ContainerValue]
+            str,
+            str | int | dict[str, t.ContainerValue],
         ]
         type ConnectionPooling = dict[str, int | bool | dict[str, t.ContainerValue]]
         type BulkLoadOptimization = dict[str, str | int | dict[str, t.ContainerValue]]
@@ -92,7 +98,8 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         """Data transformation complex types."""
 
         type TransformationConfiguration = dict[
-            str, str | bool | dict[str, t.ContainerValue]
+            str,
+            str | bool | dict[str, t.ContainerValue],
         ]
         type FieldMapping = dict[str, str | list[str] | dict[str, t.ContainerValue]]
         type DataValidation = dict[str, str | dict[str, t.ContainerValue]]
@@ -104,7 +111,8 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         """Stream processing complex types."""
 
         type StreamConfiguration = dict[
-            str, str | bool | int | dict[str, t.ContainerValue]
+            str,
+            str | bool | int | dict[str, t.ContainerValue],
         ]
         type StreamMetadata = dict[str, str | dict[str, t.ContainerValue]]
         type StreamRecord = dict[str, t.ContainerValue]
@@ -124,7 +132,8 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         """Error handling complex types."""
 
         type ErrorConfiguration = dict[
-            str, bool | str | int | dict[str, t.ContainerValue]
+            str,
+            bool | str | int | dict[str, t.ContainerValue],
         ]
         type ErrorRecovery = dict[str, str | bool | dict[str, t.ContainerValue]]
         type ErrorReporting = dict[str, str | int | dict[str, t.ContainerValue]]

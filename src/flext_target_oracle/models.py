@@ -55,7 +55,8 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             ]
             oracle_host: Annotated[str, Field(description="Configured Oracle host")]
             oracle_service: Annotated[
-                str, Field(description="Configured Oracle service name")
+                str,
+                Field(description="Configured Oracle service name"),
             ]
 
         class ProcessingSummary(FlextModels.ArbitraryTypesModel):
@@ -110,23 +111,28 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
             stream_name: Annotated[str, Field(description="Logical stream identifier")]
             started_at: Annotated[
-                str, Field(description="Load operation start timestamp")
+                str,
+                Field(description="Load operation start timestamp"),
             ]
             completed_at: Annotated[
-                str, Field(description="Load operation completion timestamp")
+                str,
+                Field(description="Load operation completion timestamp"),
             ]
             records_loaded: Annotated[
-                int, Field(ge=0, description="Number of loaded records")
+                int,
+                Field(ge=0, description="Number of loaded records"),
             ]
             records_failed: Annotated[
-                int, Field(ge=0, description="Number of failed records")
+                int,
+                Field(ge=0, description="Number of failed records"),
             ]
 
         class LoaderFinalizeResult(FlextModels.ArbitraryTypesModel):
             """Loader finalization payload for flush operations."""
 
             total_records: Annotated[
-                int, Field(ge=0, description="Total records processed")
+                int,
+                Field(ge=0, description="Total records processed"),
             ]
             streams_processed: Annotated[
                 int,
@@ -160,19 +166,23 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
             host: Annotated[str, Field(description="Oracle database host")]
             port: Annotated[
-                int, Field(ge=1, le=65535, description="Oracle database port")
+                int,
+                Field(ge=1, le=65535, description="Oracle database port"),
             ]
             service_name: Annotated[str, Field(description="Oracle service name")]
             username: Annotated[str, Field(description="Oracle database username")]
             password: Annotated[str, Field(description="Oracle database password")]
             timeout: Annotated[
-                int, Field(ge=1, description="Connection timeout in seconds")
+                int,
+                Field(ge=1, description="Connection timeout in seconds"),
             ]
             pool_min: Annotated[
-                int, Field(ge=1, description="Oracle connection pool minimum")
+                int,
+                Field(ge=1, description="Oracle connection pool minimum"),
             ]
             pool_max: Annotated[
-                int, Field(ge=1, description="Oracle connection pool maximum")
+                int,
+                Field(ge=1, description="Oracle connection pool maximum"),
             ]
             pool_increment: Annotated[
                 int,
@@ -184,7 +194,8 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             encoding: Annotated[str, Field(description="Oracle connection encoding")]
             ssl_enabled: Annotated[bool, Field(description="Whether SSL is enabled")]
             autocommit: Annotated[
-                bool, Field(description="Whether autocommit is enabled")
+                bool,
+                Field(description="Whether autocommit is enabled"),
             ]
             use_bulk_operations: Annotated[
                 bool,

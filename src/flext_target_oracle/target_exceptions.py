@@ -85,7 +85,7 @@ def _resolve_metadata(
             code=resolved_code or default_code,
             context=resolved_context,
             correlation_id=resolved_correlation_id,
-        )
+        ),
     )
 
 
