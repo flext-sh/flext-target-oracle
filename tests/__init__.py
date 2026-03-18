@@ -89,9 +89,6 @@ if TYPE_CHECKING:
         test_loader_execute_returns_ready_payload,
     )
     from .unit.test_target import TestOracleTarget, target
-    from .unit.test_target_record_writing import (
-        test_write_record_flushes_batch_with_oracle_cursor_execute,
-    )
     from .utilities import (
         TestsFlextTargetOracleUtilities,
         TestsFlextTargetOracleUtilities as u,
@@ -193,10 +190,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "tests.unit.test_loader",
         "test_loader_execute_returns_ready_payload",
     ),
-    "test_write_record_flushes_batch_with_oracle_cursor_execute": (
-        "tests.unit.test_target_record_writing",
-        "test_write_record_flushes_batch_with_oracle_cursor_execute",
-    ),
     "u": ("tests.utilities", "TestsFlextTargetOracleUtilities"),
     "unit": ("tests.unit", ""),
 }
@@ -269,7 +262,6 @@ __all__ = [
     "test_ensure_table_exists_returns_result",
     "test_load_record_buffers_and_finalize",
     "test_loader_execute_returns_ready_payload",
-    "test_write_record_flushes_batch_with_oracle_cursor_execute",
     "u",
     "unit",
 ]
