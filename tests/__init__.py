@@ -59,10 +59,7 @@ if TYPE_CHECKING:
         temp_config_file,
         temporary_env_vars,
     )
-    from .constants import (
-        TestsFlextTargetOracleConstants,
-        TestsFlextTargetOracleConstants as c,
-    )
+    from .constants import TestsFlextTargetOracleConstants, c
     from .e2e.test_singer import TestSingerWorkflowE2E
     from .integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
     from .models import TestsFlextTargetOracleModels, m
@@ -129,7 +126,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "_types": ("tests.typings", "_types"),
     "_utilities": ("tests.utilities", "_utilities"),
     "batch_records": ("tests.conftest", "batch_records"),
-    "c": ("tests.constants", "TestsFlextTargetOracleConstants"),
+    "c": ("tests.constants", "c"),
     "clean_database": ("tests.conftest", "clean_database"),
     "connected_loader": ("tests.conftest", "connected_loader"),
     "docker_control": ("tests.conftest", "docker_control"),
