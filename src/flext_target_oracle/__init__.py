@@ -48,6 +48,7 @@ if TYPE_CHECKING:
     from flext_target_oracle.target_exceptions import (
         FlextTargetOracleExceptions,
         FlextTargetOracleExceptions as e,
+        OracleErrorMetadata,
     )
     from flext_target_oracle.target_loader import FlextTargetOracleLoader
     from flext_target_oracle.target_models import (
@@ -140,6 +141,10 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_oracle.target_services",
         "OracleConnectionService",
     ),
+    "OracleErrorMetadata": (
+        "flext_target_oracle.target_exceptions",
+        "OracleErrorMetadata",
+    ),
     "OracleRecordService": (
         "flext_target_oracle.target_services",
         "OracleRecordService",
@@ -226,6 +231,7 @@ __all__ = [
     "OracleBatchService",
     "OracleConnectionModel",
     "OracleConnectionService",
+    "OracleErrorMetadata",
     "OracleRecordService",
     "OracleSchemaService",
     "OracleTargetAboutCommand",

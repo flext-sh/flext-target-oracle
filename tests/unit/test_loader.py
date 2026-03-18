@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 import pytest
-from flext_core import t
+from tests import t
 
 from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings
 

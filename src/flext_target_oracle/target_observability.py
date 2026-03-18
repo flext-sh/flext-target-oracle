@@ -5,9 +5,9 @@ from __future__ import annotations
 from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 
-from flext_core import FlextLogger, t
+from flext_core import FlextLogger, c, t
 
-from .target_exceptions import FlextTargetOracleExceptions
+from .target_exceptions import FlextTargetOracleExceptions, OracleErrorMetadata
 
 logger = FlextLogger(__name__)
 
@@ -30,7 +30,14 @@ class FlextOracleError:
                 error_code=error_code or "",
             )
             return FlextTargetOracleExceptions.AuthenticationError(
-                f"Oracle authentication failed for {username} on {oracle_service}"
+                f"Oracle authentication failed for {username} on {oracle_service}",
+                metadata=OracleErrorMetadata(
+                    code=error_code or c.Errors.AUTHENTICATION_ERROR,
+                    context={
+                        "user": username,
+                        "oracle_service": oracle_service,
+                    },
+                ),
             )
 
         @staticmethod
@@ -48,7 +55,14 @@ class FlextOracleError:
                 recovery_strategy=recovery_strategy,
             )
             return FlextTargetOracleExceptions.OracleConnectionError(
-                f"Oracle database unavailable: {connection_string}"
+                f"Oracle database unavailable: {connection_string}",
+                metadata=OracleErrorMetadata(
+                    code=error_code or c.Errors.CONNECTION_ERROR,
+                    context={
+                        "connection_string": connection_string,
+                        "recovery_strategy": recovery_strategy,
+                    },
+                ),
             )
 
     class Singer:
@@ -66,7 +80,15 @@ class FlextOracleError:
                 failed_records=failed_records,
             )
             return FlextTargetOracleExceptions.ProcessingError(
-                f"Record processing failed for {stream_name}: {failed_records}/{record_count}"
+                f"Record processing failed for {stream_name}: {failed_records}/{record_count}",
+                metadata=OracleErrorMetadata(
+                    code=c.Errors.PROCESSING_ERROR,
+                    context={
+                        "stream_name": stream_name,
+                        "record_count": record_count,
+                        "failed_records": failed_records,
+                    },
+                ),
             )
 
         @staticmethod
@@ -84,7 +106,15 @@ class FlextOracleError:
                 singer_specification=singer_specification,
             )
             return FlextTargetOracleExceptions.SchemaError(
-                f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}"
+                f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
+                metadata=OracleErrorMetadata(
+                    code=c.Errors.VALIDATION_ERROR,
+                    context={
+                        "stream_name": stream_name,
+                        "schema_errors": "; ".join(schema_errors),
+                        "singer_specification": singer_specification,
+                    },
+                ),
             )
 
 
