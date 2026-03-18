@@ -1,0 +1,27 @@
+examples/01_basic_usage.py
+  af6716664f6ebcf8 144
+examples/02_usage.py
+  af6716664f6ebcf8 34
+examples/03_production_setup.py
+  af6716664f6ebcf8 428
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.15",
+  "base_commit_sha": "b57a18a95e11de8cc3ce4cf91133670e885a7a91",
+  "prompts": {
+    "af6716664f6ebcf8": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2fdc92b12ffelvD8zSvF1iqKMa",
+        "model": "anthropic/claude-haiku-4-5"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 3,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  }
+}
