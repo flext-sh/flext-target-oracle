@@ -17,6 +17,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from flext_core import FlextLogger, r, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
+from flext_tests.docker import tk
 from pydantic import TypeAdapter
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
