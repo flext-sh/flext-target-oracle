@@ -72,7 +72,7 @@ def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
       dict[str, object]: Singer SCHEMA message for users table
 
     """
-    return m.TargetOracle.SingerSchemaMessage({
+    return m.TargetOracle.SingerSchemaMessage.model_validate({
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
@@ -98,7 +98,7 @@ def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
 
     """
     return [
-        m.TargetOracle.SingerRecordMessage({
+        m.TargetOracle.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -109,7 +109,7 @@ def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
                 "active": True,
             },
         }),
-        m.TargetOracle.SingerRecordMessage({
+        m.TargetOracle.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -120,7 +120,7 @@ def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
                 "active": True,
             },
         }),
-        m.TargetOracle.SingerRecordMessage({
+        m.TargetOracle.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
