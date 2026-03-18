@@ -141,7 +141,7 @@ def create_sample_state_message() -> m.TargetOracle.SingerStateMessage:
       dict[str, object]: Singer STATE message with bookmark information
 
     """
-    return m.TargetOracle.SingerStateMessage({
+    return m.TargetOracle.SingerStateMessage.model_validate({
         "type": "STATE",
         "value": {
             "bookmarks": {

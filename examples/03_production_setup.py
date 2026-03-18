@@ -425,7 +425,7 @@ def demonstrate_production_setup() -> None:
         logger.info("Step 6: Performing final health check")
         final_health = manager.health_check()
         if final_health.is_success:
-            logger.info("Final health status: %s", final_health.data["status"])
+            logger.info("Final health status: %s", final_health.value["status"])
         logger.info("Step 7: Performing graceful shutdown")
         shutdown_result = manager.shutdown()
         if shutdown_result.is_success:
@@ -453,7 +453,7 @@ def create_production_sample_stream() -> list[SingerMessage]:
 
     """
     messages: list[SingerMessage] = []
-    schema_message = m.TargetOracle.SingerSchemaMessage({
+    schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
         "type": "SCHEMA",
         "stream": "customer_orders",
         "schema": {
@@ -478,7 +478,7 @@ def create_production_sample_stream() -> list[SingerMessage]:
     messages.append(schema_message)
     base_date = datetime.datetime(2025, 1, 1, tzinfo=UTC)
     for i in range(1, 101):
-        record_message = m.TargetOracle.SingerRecordMessage({
+        record_message = m.TargetOracle.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "customer_orders",
             "record": {
@@ -503,7 +503,7 @@ def create_production_sample_stream() -> list[SingerMessage]:
             },
         })
         messages.append(record_message)
-    state_message = m.TargetOracle.SingerStateMessage({
+    state_message = m.TargetOracle.SingerStateMessage.model_validate({
         "type": "STATE",
         "value": {
             "bookmarks": {
