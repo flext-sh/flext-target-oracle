@@ -16,7 +16,7 @@ from flext_tests import t
 from flext_target_oracle import t
 
 
-class TestsFlextTargetOracleTypes(t, t):
+class TestsFlextTargetOracleTypes(t):
     """Test types combining t and project-specific types."""
 
     class TargetOracle(t.TargetOracle):
