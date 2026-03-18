@@ -32,11 +32,11 @@ class FlextTargetOracle:
     def discover_catalog(self) -> r[m.Meltano.SingerCatalog]:
         """Return Singer-style catalog for known schemas."""
         catalog_entries = [
-            m.Meltano.SingerCatalogEntry(
-                tap_stream_id=stream_name,
-                stream=stream_name,
-                schema_definition=schema_message.schema_definition,
-                metadata=[
+            m.Meltano.SingerCatalogEntry.model_validate({
+                "tap_stream_id": stream_name,
+                "stream": stream_name,
+                "schema": schema_message.schema_definition,
+                "metadata": [
                     m.Meltano.SingerCatalogMetadata(
                         breadcrumb=[],
                         metadata={
@@ -46,14 +46,14 @@ class FlextTargetOracle:
                         },
                     ),
                 ],
-                key_properties=[],
-                replication_key=None,
-                replication_method=None,
-                is_view=None,
-                table_name=None,
-                database_name=None,
-                row_count=None,
-            )
+                "key_properties": [],
+                "replication_key": None,
+                "replication_method": None,
+                "is_view": None,
+                "table_name": None,
+                "database_name": None,
+                "row_count": None,
+            })
             for stream_name, schema_message in self.schemas.items()
         ]
         return r[m.Meltano.SingerCatalog].ok(
@@ -116,6 +116,7 @@ class FlextTargetOracle:
                 return self._handle_state(state_message)
             case m.TargetOracle.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
+        return r[bool].fail("Unsupported Singer message type")
 
     def process_singer_messages(
         self,

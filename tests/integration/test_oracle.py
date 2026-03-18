@@ -29,7 +29,9 @@ from flext_target_oracle import (
 )
 
 
-def _schema_parts(message: Mapping[str, object]) -> tuple[object, list[str] | None]:
+def _schema_parts(
+    message: Mapping[str, object],
+) -> tuple[dict[str, t.Container], list[str]]:
     schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(message)
     return (schema_message.schema_definition, schema_message.key_properties)
 
@@ -151,17 +153,20 @@ class TestOracleIntegration:
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
         stream_name = "test_bulk"
-        schema = {
-            "type": "object",
-            "properties": {
-                "id": {"type": "integer"},
-                "data": {"type": "string"},
-                "value": {"type": "number"},
+        schema_message = {
+            "type": "SCHEMA",
+            "stream": stream_name,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                    "data": {"type": "string"},
+                    "value": {"type": "number"},
+                },
             },
+            "key_properties": ["id"],
         }
-        key_properties_list = ["id"]
-        schema_dict = schema
-        key_props: list[str] | None = key_properties_list
+        schema_dict, key_props = _schema_parts(schema_message)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.is_success
         records: list[Mapping[str, t.Scalar]] = [
@@ -213,16 +218,31 @@ class TestOracleIntegration:
             ],
             "total": 349.97,
         }
-        insert_res = loader.insert_records(stream_name, [record])
+        typed_record = TypeAdapter(dict[str, t.Scalar]).validate_python(record)
+        insert_res = loader.insert_records(stream_name, [typed_record])
         assert insert_res.is_success
         with oracle_engine.connect() as conn:
             result = conn.execute(text("SELECT json_data FROM test_json WHERE id = 1"))
             json_str = result.scalar()
             assert json_str is not None
-            stored_data = TypeAdapter(dict[str, object]).validate_json(json_str)
-            assert stored_data["customer"]["name"] == "Acme Corp"
-            assert stored_data["customer"]["address"]["city"] == "objecttown"
-            assert len(stored_data["items"]) == 2
+            stored_data = TypeAdapter(dict[str, t.Container]).validate_json(json_str)
+            customer = stored_data.get("customer")
+            customer_data = TypeAdapter(dict[str, t.Container]).validate_python(
+                customer
+            )
+            customer_name = customer_data.get("name")
+            assert customer_name == "Acme Corp"
+            customer_address = customer_data.get("address")
+            customer_address_data = TypeAdapter(dict[str, t.Container]).validate_python(
+                customer_address
+            )
+            customer_city = customer_address_data.get("city")
+            assert customer_city == "objecttown"
+            items = stored_data.get("items")
+            items_data = TypeAdapter(list[dict[str, t.Container]]).validate_python(
+                items
+            )
+            assert len(items_data) == 2
         assert loader.disconnect().is_success
 
     @pytest.mark.usefixtures("_clean_database")
@@ -244,19 +264,22 @@ class TestOracleIntegration:
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
         stream_name = "test_ordering"
-        schema = {
-            "type": "object",
-            "properties": {
-                "id": {"type": "integer"},
-                "zebra_field": {"type": "string"},
-                "alpha_field": {"type": "string"},
-                "created_at": {"type": "string", "format": "date-time"},
-                "updated_at": {"type": "string", "format": "date-time"},
+        schema_message = {
+            "type": "SCHEMA",
+            "stream": stream_name,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "id": {"type": "integer"},
+                    "zebra_field": {"type": "string"},
+                    "alpha_field": {"type": "string"},
+                    "created_at": {"type": "string", "format": "date-time"},
+                    "updated_at": {"type": "string", "format": "date-time"},
+                },
             },
+            "key_properties": ["id"],
         }
-        key_properties_list = ["id"]
-        schema_dict = schema
-        key_props: list[str] | None = key_properties_list
+        schema_dict, key_props = _schema_parts(schema_message)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.is_success
         with oracle_engine.connect() as conn:

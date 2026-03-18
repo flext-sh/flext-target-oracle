@@ -7,22 +7,22 @@ from collections.abc import Mapping
 import pytest
 from tests import t
 
-from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings
+from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings, m
 
 
 @pytest.fixture
 def loader_config() -> FlextTargetOracleSettings:
     """Build deterministic configuration for loader tests."""
-    return FlextTargetOracleSettings(
-        oracle_host="localhost",
-        oracle_port=1521,
-        oracle_service_name="XE",
-        oracle_user="test_user",
-        oracle_password="test_password",
-        default_target_schema="TEST_SCHEMA",
-        batch_size=2,
-        use_bulk_operations=True,
-    )
+    return FlextTargetOracleSettings.model_validate({
+        "oracle_host": "localhost",
+        "oracle_port": 1521,
+        "oracle_service_name": "XE",
+        "oracle_user": "test_user",
+        "oracle_password": "test_password",
+        "default_target_schema": "TEST_SCHEMA",
+        "batch_size": 2,
+        "use_bulk_operations": True,
+    })
 
 
 def test_loader_execute_returns_ready_payload(
@@ -53,9 +53,17 @@ def test_ensure_table_exists_returns_result(
 ) -> None:
     """ensure_table_exists should always return FlextResult[bool]."""
     loader = FlextTargetOracleLoader(loader_config)
-    schema = {
-        "type": "object",
-        "properties": {"id": {"type": "integer"}},
+    schema_message = {
+        "type": "SCHEMA",
+        "stream": "users",
+        "schema": {
+            "type": "object",
+            "properties": {"id": {"type": "integer"}},
+        },
+        "key_properties": ["id"],
     }
-    result = loader.ensure_table_exists("users", schema, ["id"])
+    validated = m.TargetOracle.SingerSchemaMessage.model_validate(schema_message)
+    result = loader.ensure_table_exists(
+        "users", validated.schema_definition, validated.key_properties
+    )
     assert isinstance(result.is_success, bool)

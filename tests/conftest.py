@@ -133,17 +133,17 @@ def clean_database(oracle_engine: Engine) -> None:
 @pytest.fixture
 def oracle_config() -> FlextTargetOracleSettings:
     """Create Oracle target configuration for tests."""
-    return FlextTargetOracleSettings(
-        oracle_host=ORACLE_HOST,
-        oracle_port=ORACLE_PORT,
-        oracle_service_name=ORACLE_SERVICE,
-        oracle_user=TEST_SCHEMA,
-        oracle_password="test_password",
-        default_target_schema=TEST_SCHEMA,
-        batch_size=1000,
-        use_bulk_operations=True,
-        parallel_degree=1,
-    )
+    return FlextTargetOracleSettings.model_validate({
+        "oracle_host": ORACLE_HOST,
+        "oracle_port": ORACLE_PORT,
+        "oracle_service_name": ORACLE_SERVICE,
+        "oracle_user": TEST_SCHEMA,
+        "oracle_password": "test_password",
+        "default_target_schema": TEST_SCHEMA,
+        "batch_size": 1000,
+        "use_bulk_operations": True,
+        "parallel_degree": 1,
+    })
 
 
 @pytest.fixture
@@ -194,16 +194,16 @@ def oracle_target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle
 @pytest.fixture
 def sample_config() -> FlextTargetOracleSettings:
     """Sample configuration for unit testing (no Oracle connection required)."""
-    return FlextTargetOracleSettings(
-        oracle_host="localhost",
-        oracle_port=1521,
-        oracle_service_name="XE",
-        oracle_user="test_user",
-        oracle_password="test_password",
-        default_target_schema="TEST_SCHEMA",
-        batch_size=1000,
-        use_bulk_operations=True,
-    )
+    return FlextTargetOracleSettings.model_validate({
+        "oracle_host": "localhost",
+        "oracle_port": 1521,
+        "oracle_service_name": "XE",
+        "oracle_user": "test_user",
+        "oracle_password": "test_password",
+        "default_target_schema": "TEST_SCHEMA",
+        "batch_size": 1000,
+        "use_bulk_operations": True,
+    })
 
 
 @pytest.fixture
@@ -473,7 +473,8 @@ def connected_loader(oracle_loader: FlextTargetOracleLoader) -> FlextTargetOracl
 @pytest.fixture
 def large_dataset() -> list[t.Dict]:
     """Generate large dataset for performance testing."""
-    schema = {
+    dict_adapter: TypeAdapter[t.Dict] = TypeAdapter(t.Dict)
+    schema = dict_adapter.validate_python({
         "type": "SCHEMA",
         "stream": "performance_test",
         "schema": {
@@ -486,9 +487,9 @@ def large_dataset() -> list[t.Dict]:
             },
         },
         "key_properties": ["id"],
-    }
+    })
     records = [
-        {
+        dict_adapter.validate_python({
             "type": "RECORD",
             "stream": "performance_test",
             "record": {
@@ -497,7 +498,7 @@ def large_dataset() -> list[t.Dict]:
                 "value": i * 1.5,
                 "timestamp": f"2025-01-20T12:{i % 60:02d}:00Z",
             },
-        }
+        })
         for i in range(10000)
     ]
     result: list[t.Dict] = []

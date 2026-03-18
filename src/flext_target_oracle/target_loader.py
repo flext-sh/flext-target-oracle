@@ -202,12 +202,12 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 f"Oracle connection failed: {connection_result.error}",
             )
         return r[m.TargetOracle.LoaderReadyResult].ok(
-            m.TargetOracle.LoaderReadyResult(
-                status="ready",
-                host=self.target_config.oracle_host,
-                service=self.target_config.oracle_service_name,
-                target_schema=self.target_config.default_target_schema,
-            ),
+            m.TargetOracle.LoaderReadyResult.model_validate({
+                "status": "ready",
+                "host": self.target_config.oracle_host,
+                "service": self.target_config.oracle_service_name,
+                "schema": self.target_config.default_target_schema,
+            }),
         )
 
     def finalize_all_streams(self) -> r[m.TargetOracle.LoaderFinalizeResult]:
