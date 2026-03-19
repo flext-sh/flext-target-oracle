@@ -16,6 +16,12 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
+    from flext_db_oracle.decorators import d
+    from flext_db_oracle.exceptions import e
+    from flext_db_oracle.handlers import h
+    from flext_db_oracle.mixins import x
+    from flext_db_oracle.result import r
+    from flext_db_oracle.service import s
 
     from flext_target_oracle.__version__ import (
         __all__,
@@ -47,7 +53,6 @@ if TYPE_CHECKING:
     )
     from flext_target_oracle.target_exceptions import (
         FlextTargetOracleExceptions,
-        FlextTargetOracleExceptions as e,
         OracleErrorMetadata,
     )
     from flext_target_oracle.target_loader import FlextTargetOracleLoader
@@ -63,11 +68,7 @@ if TYPE_CHECKING:
         FlextOracleObs,
         configure_oracle_observability,
     )
-    from flext_target_oracle.target_refactored import (
-        FlextTargetOracleCliService,
-        FlextTargetOracleCliService as s,
-        main,
-    )
+    from flext_target_oracle.target_refactored import FlextTargetOracleCliService, main
     from flext_target_oracle.target_service import FlextTargetOracleService
     from flext_target_oracle.target_services import (
         BatchService,
@@ -195,18 +196,22 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_oracle.target_observability",
         "configure_oracle_observability",
     ),
-    "e": ("flext_target_oracle.target_exceptions", "FlextTargetOracleExceptions"),
+    "d": ("flext_db_oracle.decorators", "d"),
+    "e": ("flext_db_oracle.exceptions", "e"),
+    "h": ("flext_db_oracle.handlers", "h"),
     "logger": ("flext_target_oracle.settings", "logger"),
     "m": ("flext_target_oracle.models", "m"),
     "main": ("flext_target_oracle.target_refactored", "main"),
     "p": ("flext_target_oracle.protocols", "p"),
-    "s": ("flext_target_oracle.target_refactored", "FlextTargetOracleCliService"),
+    "r": ("flext_db_oracle.result", "r"),
+    "s": ("flext_db_oracle.service", "s"),
     "t": ("flext_target_oracle.typings", "t"),
     "u": ("flext_target_oracle.utilities", "u"),
     "validate_oracle_configuration": (
         "flext_target_oracle.settings",
         "validate_oracle_configuration",
     ),
+    "x": ("flext_db_oracle.mixins", "x"),
 }
 
 __all__ = [
@@ -255,15 +260,19 @@ __all__ = [
     "__version_info__",
     "c",
     "configure_oracle_observability",
+    "d",
     "e",
+    "h",
     "logger",
     "m",
     "main",
     "p",
+    "r",
     "s",
     "t",
     "u",
     "validate_oracle_configuration",
+    "x",
 ]
 
 

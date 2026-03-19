@@ -69,11 +69,7 @@ if TYPE_CHECKING:
         TestsFlextTargetOracleProtocols as p,
         _protocols,
     )
-    from .typings import (
-        TestsFlextTargetOracleTypes,
-        TestsFlextTargetOracleTypes as t,
-        _types,
-    )
+    from .typings import TestsFlextTargetOracleTypes, _types
     from .unit.test_cli_dispatcher import (
         test_cli_service_falls_back_to_bus_when_flag_disabled,
         test_cli_service_uses_dispatcher_when_flag_enabled,
@@ -163,7 +159,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "singer_messages": ("tests.conftest", "singer_messages"),
     "state": ("tests.conftest", "state"),
     "state_message": ("tests.conftest", "state_message"),
-    "t": ("tests.typings", "TestsFlextTargetOracleTypes"),
     "target": ("tests.unit.test_target", "target"),
     "temp_config_file": ("tests.conftest", "temp_config_file"),
     "temporary_env_vars": ("tests.conftest", "temporary_env_vars"),
@@ -250,7 +245,6 @@ __all__ = [
     "singer_messages",
     "state",
     "state_message",
-    "t",
     "target",
     "temp_config_file",
     "temporary_env_vars",
