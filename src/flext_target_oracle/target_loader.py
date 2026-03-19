@@ -15,9 +15,11 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import ClassVar, Protocol, override
 
-from flext_core import FlextLogger, FlextService, r, t
+from flext_core import FlextLogger, FlextService, r
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import PrivateAttr, TypeAdapter
+
+from flext_target_oracle import t
 
 from .models import m
 from .settings import FlextTargetOracleSettings

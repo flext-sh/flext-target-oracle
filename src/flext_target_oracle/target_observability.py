@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 
-from flext_core import FlextLogger, c, t
+from flext_core import FlextLogger
+
+from flext_target_oracle import c, t
 
 from .target_exceptions import FlextTargetOracleExceptions, OracleErrorMetadata
 
