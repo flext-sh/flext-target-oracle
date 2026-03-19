@@ -77,9 +77,6 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
         DEFAULT_PORT: Final[int] = 1521
         MIN_PORT: Final[int] = 1024
         MAX_PORT: Final[int] = 65535
-        DEFAULT_CONNECTION_TIMEOUT: Final[int] = (
-            FlextDbOracleConstants.Network.DEFAULT_TIMEOUT
-        )
         DEFAULT_HOST: Final[str] = FlextDbOracleConstants.Network.LOCALHOST
         DEFAULT_SERVICE_NAME: Final[str] = "XE"
         DEFAULT_USERNAME: Final[str] = "system"
@@ -91,20 +88,13 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
         """
 
         DEFAULT_BATCH_SIZE: Final[int] = FlextDbOracleConstants.DEFAULT_BATCH_SIZE
-        DEFAULT_COMMIT_SIZE: Final[int] = 1000
-        DEFAULT_QUERY_TIMEOUT: Final[int] = (
-            FlextDbOracleConstants.Network.DEFAULT_TIMEOUT
-        )
-        DEFAULT_MAX_PARALLEL_STREAMS: Final[int] = 4
+        DEFAULT_COMMIT_SIZE: Final[int] = FlextMeltanoConstants.DEFAULT_BATCH_SIZE
 
     class Loading:
         """Target-specific loading configuration."""
 
         DEFAULT_POOL_MIN: Final[int] = 5
         DEFAULT_POOL_MAX: Final[int] = 20
-        DEFAULT_POOL_TIMEOUT: Final[int] = (
-            FlextDbOracleConstants.Network.DEFAULT_TIMEOUT
-        )
 
     class TargetOracleValidation:
         """Target-specific validation configuration.
@@ -112,22 +102,13 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
         Note: Does not override parent Validation class to avoid inheritance conflicts.
         """
 
-        MAX_TABLE_NAME_LENGTH: Final[int] = 30
-        MAX_COLUMN_NAME_LENGTH: Final[int] = 30
         MAX_IDENTIFIER_LENGTH: Final[int] = 30
 
     class FeatureFlags:
         """Feature toggles for progressive dispatcher rollout."""
 
-        ENABLE_DISPATCHER: Final[bool] = False
-
     class Observability:
         """Observability and monitoring constants."""
-
-        DATABASE_LOGIN: Final[str] = "database_login"
-        FAILURE: Final[str] = "failure"
-        SLOW_QUERY_THRESHOLD_SECONDS: Final[float] = 30.0
-        HIGH_UTILIZATION_THRESHOLD: Final[float] = 0.8
 
 
 c = FlextTargetOracleConstants
