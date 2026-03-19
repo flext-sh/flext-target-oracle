@@ -20,8 +20,12 @@ from types import FrameType
 from flext_core import FlextLogger, r
 from pydantic import BaseModel, Field, SecretStr
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
-from flext_target_oracle.models import m
+from flext_target_oracle import (
+    FlextTargetOracle,
+    FlextTargetOracleSettings,
+    LoadMethod,
+    m,
+)
 
 logging.basicConfig(
     level=logging.INFO,

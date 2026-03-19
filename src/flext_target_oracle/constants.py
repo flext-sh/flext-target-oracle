@@ -77,8 +77,10 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
         DEFAULT_PORT: Final[int] = 1521
         MIN_PORT: Final[int] = 1024
         MAX_PORT: Final[int] = 65535
-        DEFAULT_CONNECTION_TIMEOUT: Final[int] = 30
-        DEFAULT_HOST: Final[str] = "localhost"
+        DEFAULT_CONNECTION_TIMEOUT: Final[int] = (
+            FlextDbOracleConstants.Network.DEFAULT_TIMEOUT
+        )
+        DEFAULT_HOST: Final[str] = FlextDbOracleConstants.Network.LOCALHOST
         DEFAULT_SERVICE_NAME: Final[str] = "XE"
         DEFAULT_USERNAME: Final[str] = "system"
 
@@ -88,9 +90,11 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
         Note: Does not override parent Processing class to avoid inheritance conflicts.
         """
 
-        DEFAULT_BATCH_SIZE: Final[int] = 1000
+        DEFAULT_BATCH_SIZE: Final[int] = FlextDbOracleConstants.DEFAULT_BATCH_SIZE
         DEFAULT_COMMIT_SIZE: Final[int] = 1000
-        DEFAULT_QUERY_TIMEOUT: Final[int] = 30
+        DEFAULT_QUERY_TIMEOUT: Final[int] = (
+            FlextDbOracleConstants.Network.DEFAULT_TIMEOUT
+        )
         DEFAULT_MAX_PARALLEL_STREAMS: Final[int] = 4
 
     class Loading:
@@ -98,7 +102,9 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
 
         DEFAULT_POOL_MIN: Final[int] = 5
         DEFAULT_POOL_MAX: Final[int] = 20
-        DEFAULT_POOL_TIMEOUT: Final[int] = 30
+        DEFAULT_POOL_TIMEOUT: Final[int] = (
+            FlextDbOracleConstants.Network.DEFAULT_TIMEOUT
+        )
 
     class TargetOracleValidation:
         """Target-specific validation configuration.

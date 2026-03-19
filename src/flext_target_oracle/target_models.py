@@ -11,7 +11,7 @@ from typing import Annotated
 
 from pydantic import Field
 
-from flext_target_oracle.constants import c
+from flext_target_oracle import c
 
 from .models import m
 

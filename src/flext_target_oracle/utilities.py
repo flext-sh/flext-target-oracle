@@ -9,7 +9,7 @@ from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import FlextMeltanoUtilities
 from pydantic import TypeAdapter
 
-from flext_target_oracle.typings import t
+from flext_target_oracle import t
 
 
 class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
