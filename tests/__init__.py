@@ -64,11 +64,7 @@ if TYPE_CHECKING:
     from .integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
     from .models import TestsFlextTargetOracleModels, m
     from .performance.test_performance import TestPerformance
-    from .protocols import (
-        TestsFlextTargetOracleProtocols,
-        TestsFlextTargetOracleProtocols as p,
-        _protocols,
-    )
+    from .protocols import TestsFlextTargetOracleProtocols, _protocols
     from .typings import TestsFlextTargetOracleTypes, _types
     from .unit.test_cli_dispatcher import (
         test_cli_service_falls_back_to_bus_when_flag_disabled,
@@ -82,11 +78,7 @@ if TYPE_CHECKING:
         test_loader_execute_returns_ready_payload,
     )
     from .unit.test_target import TestOracleTarget, target
-    from .utilities import (
-        TestsFlextTargetOracleUtilities,
-        TestsFlextTargetOracleUtilities as u,
-        _utilities,
-    )
+    from .utilities import TestsFlextTargetOracleUtilities, _utilities
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "DOCKER_COMPOSE_PATH": ("tests.conftest", "DOCKER_COMPOSE_PATH"),
@@ -141,7 +133,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "oracle_engine": ("tests.conftest", "oracle_engine"),
     "oracle_loader": ("tests.conftest", "oracle_loader"),
     "oracle_target": ("tests.conftest", "oracle_target"),
-    "p": ("tests.protocols", "TestsFlextTargetOracleProtocols"),
     "performance": ("tests.performance", ""),
     "pytest_collection_modifyitems": (
         "tests.conftest",
@@ -182,7 +173,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "tests.unit.test_loader",
         "test_loader_execute_returns_ready_payload",
     ),
-    "u": ("tests.utilities", "TestsFlextTargetOracleUtilities"),
     "unit": ("tests.unit", ""),
 }
 
@@ -230,7 +220,6 @@ __all__ = [
     "oracle_engine",
     "oracle_loader",
     "oracle_target",
-    "p",
     "performance",
     "pytest_collection_modifyitems",
     "pytest_configure",
@@ -253,7 +242,6 @@ __all__ = [
     "test_ensure_table_exists_returns_result",
     "test_load_record_buffers_and_finalize",
     "test_loader_execute_returns_ready_payload",
-    "u",
     "unit",
 ]
 

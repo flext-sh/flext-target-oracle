@@ -16,7 +16,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
-    from flext_db_oracle import d, e, h, r, s, x
+    from flext_db_oracle import d, h, r, x
 
     from flext_target_oracle.__version__ import (
         __all__,
@@ -29,9 +29,18 @@ if TYPE_CHECKING:
         __version__,
         __version_info__,
     )
-    from flext_target_oracle.constants import FlextTargetOracleConstants, c
-    from flext_target_oracle.models import FlextTargetOracleModels, m
-    from flext_target_oracle.protocols import FlextTargetOracleProtocols, p
+    from flext_target_oracle.constants import (
+        FlextTargetOracleConstants,
+        FlextTargetOracleConstants as c,
+    )
+    from flext_target_oracle.models import (
+        FlextTargetOracleModels,
+        FlextTargetOracleModels as m,
+    )
+    from flext_target_oracle.protocols import (
+        FlextTargetOracleProtocols,
+        FlextTargetOracleProtocols as p,
+    )
     from flext_target_oracle.settings import (
         FlextTargetOracleSettings,
         LoadMethod,
@@ -48,6 +57,7 @@ if TYPE_CHECKING:
     )
     from flext_target_oracle.target_exceptions import (
         FlextTargetOracleExceptions,
+        FlextTargetOracleExceptions as e,
         OracleErrorMetadata,
     )
     from flext_target_oracle.target_loader import FlextTargetOracleLoader
@@ -63,7 +73,11 @@ if TYPE_CHECKING:
         FlextOracleObs,
         configure_oracle_observability,
     )
-    from flext_target_oracle.target_refactored import FlextTargetOracleCliService, main
+    from flext_target_oracle.target_refactored import (
+        FlextTargetOracleCliService,
+        FlextTargetOracleCliService as s,
+        main,
+    )
     from flext_target_oracle.target_service import FlextTargetOracleService
     from flext_target_oracle.target_services import (
         BatchService,
@@ -76,8 +90,14 @@ if TYPE_CHECKING:
         RecordService,
         SchemaService,
     )
-    from flext_target_oracle.typings import FlextTargetOracleTypes, t
-    from flext_target_oracle.utilities import FlextTargetOracleUtilities, u
+    from flext_target_oracle.typings import (
+        FlextTargetOracleTypes,
+        FlextTargetOracleTypes as t,
+    )
+    from flext_target_oracle.utilities import (
+        FlextTargetOracleUtilities,
+        FlextTargetOracleUtilities as u,
+    )
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "BatchService": ("flext_target_oracle.target_services", "BatchService"),
@@ -186,22 +206,22 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "__url__": ("flext_target_oracle.__version__", "__url__"),
     "__version__": ("flext_target_oracle.__version__", "__version__"),
     "__version_info__": ("flext_target_oracle.__version__", "__version_info__"),
-    "c": ("flext_target_oracle.constants", "c"),
+    "c": ("flext_target_oracle.constants", "FlextTargetOracleConstants"),
     "configure_oracle_observability": (
         "flext_target_oracle.target_observability",
         "configure_oracle_observability",
     ),
     "d": ("flext_db_oracle", "d"),
-    "e": ("flext_db_oracle", "e"),
+    "e": ("flext_target_oracle.target_exceptions", "FlextTargetOracleExceptions"),
     "h": ("flext_db_oracle", "h"),
     "logger": ("flext_target_oracle.settings", "logger"),
-    "m": ("flext_target_oracle.models", "m"),
+    "m": ("flext_target_oracle.models", "FlextTargetOracleModels"),
     "main": ("flext_target_oracle.target_refactored", "main"),
-    "p": ("flext_target_oracle.protocols", "p"),
+    "p": ("flext_target_oracle.protocols", "FlextTargetOracleProtocols"),
     "r": ("flext_db_oracle", "r"),
-    "s": ("flext_db_oracle", "s"),
-    "t": ("flext_target_oracle.typings", "t"),
-    "u": ("flext_target_oracle.utilities", "u"),
+    "s": ("flext_target_oracle.target_refactored", "FlextTargetOracleCliService"),
+    "t": ("flext_target_oracle.typings", "FlextTargetOracleTypes"),
+    "u": ("flext_target_oracle.utilities", "FlextTargetOracleUtilities"),
     "validate_oracle_configuration": (
         "flext_target_oracle.settings",
         "validate_oracle_configuration",
