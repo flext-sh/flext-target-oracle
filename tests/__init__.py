@@ -59,13 +59,24 @@ if TYPE_CHECKING:
         temp_config_file,
         temporary_env_vars,
     )
-    from .constants import TestsFlextTargetOracleConstants, c
+    from .constants import (
+        TestsFlextTargetOracleConstants,
+        TestsFlextTargetOracleConstants as c,
+    )
     from .e2e.test_singer import TestSingerWorkflowE2E
     from .integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
-    from .models import TestsFlextTargetOracleModels, m
+    from .models import TestsFlextTargetOracleModels, TestsFlextTargetOracleModels as m
     from .performance.test_performance import TestPerformance
-    from .protocols import TestsFlextTargetOracleProtocols, _protocols
-    from .typings import TestsFlextTargetOracleTypes, _types
+    from .protocols import (
+        TestsFlextTargetOracleProtocols,
+        TestsFlextTargetOracleProtocols as p,
+        _protocols,
+    )
+    from .typings import (
+        TestsFlextTargetOracleTypes,
+        TestsFlextTargetOracleTypes as t,
+        _types,
+    )
     from .unit.test_cli_dispatcher import (
         test_cli_service_falls_back_to_bus_when_flag_disabled,
         test_cli_service_uses_dispatcher_when_flag_enabled,
@@ -78,7 +89,11 @@ if TYPE_CHECKING:
         test_loader_execute_returns_ready_payload,
     )
     from .unit.test_target import TestOracleTarget, target
-    from .utilities import TestsFlextTargetOracleUtilities, _utilities
+    from .utilities import (
+        TestsFlextTargetOracleUtilities,
+        TestsFlextTargetOracleUtilities as u,
+        _utilities,
+    )
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "DOCKER_COMPOSE_PATH": ("tests.conftest", "DOCKER_COMPOSE_PATH"),
@@ -114,7 +129,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "_types": ("tests.typings", "_types"),
     "_utilities": ("tests.utilities", "_utilities"),
     "batch_records": ("tests.conftest", "batch_records"),
-    "c": ("tests.constants", "c"),
+    "c": ("tests.constants", "TestsFlextTargetOracleConstants"),
     "clean_database": ("tests.conftest", "clean_database"),
     "connected_loader": ("tests.conftest", "connected_loader"),
     "docker_control": ("tests.conftest", "docker_control"),
@@ -124,7 +139,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "large_dataset": ("tests.conftest", "large_dataset"),
     "loader_config": ("tests.unit.test_loader", "loader_config"),
     "logger": ("tests.conftest", "logger"),
-    "m": ("tests.models", "m"),
+    "m": ("tests.models", "TestsFlextTargetOracleModels"),
     "mock_loader": ("tests.conftest", "mock_loader"),
     "mock_oracle_api": ("tests.conftest", "mock_oracle_api"),
     "nested_schema": ("tests.conftest", "nested_schema"),
@@ -133,6 +148,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "oracle_engine": ("tests.conftest", "oracle_engine"),
     "oracle_loader": ("tests.conftest", "oracle_loader"),
     "oracle_target": ("tests.conftest", "oracle_target"),
+    "p": ("tests.protocols", "TestsFlextTargetOracleProtocols"),
     "performance": ("tests.performance", ""),
     "pytest_collection_modifyitems": (
         "tests.conftest",
@@ -150,6 +166,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "singer_messages": ("tests.conftest", "singer_messages"),
     "state": ("tests.conftest", "state"),
     "state_message": ("tests.conftest", "state_message"),
+    "t": ("tests.typings", "TestsFlextTargetOracleTypes"),
     "target": ("tests.unit.test_target", "target"),
     "temp_config_file": ("tests.conftest", "temp_config_file"),
     "temporary_env_vars": ("tests.conftest", "temporary_env_vars"),
@@ -173,6 +190,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "tests.unit.test_loader",
         "test_loader_execute_returns_ready_payload",
     ),
+    "u": ("tests.utilities", "TestsFlextTargetOracleUtilities"),
     "unit": ("tests.unit", ""),
 }
 
@@ -220,6 +238,7 @@ __all__ = [
     "oracle_engine",
     "oracle_loader",
     "oracle_target",
+    "p",
     "performance",
     "pytest_collection_modifyitems",
     "pytest_configure",
@@ -234,6 +253,7 @@ __all__ = [
     "singer_messages",
     "state",
     "state_message",
+    "t",
     "target",
     "temp_config_file",
     "temporary_env_vars",
@@ -242,6 +262,7 @@ __all__ = [
     "test_ensure_table_exists_returns_result",
     "test_load_record_buffers_and_finalize",
     "test_loader_execute_returns_ready_payload",
+    "u",
     "unit",
 ]
 
