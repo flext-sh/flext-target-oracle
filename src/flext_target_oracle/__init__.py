@@ -16,7 +16,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
-    from flext_db_oracle import d, h, r, x
+    from flext_db_oracle import d, e, h, r, s, x
 
     from flext_target_oracle.__version__ import (
         __all__,
@@ -57,7 +57,6 @@ if TYPE_CHECKING:
     )
     from flext_target_oracle.target_exceptions import (
         FlextTargetOracleExceptions,
-        FlextTargetOracleExceptions as e,
         OracleErrorMetadata,
     )
     from flext_target_oracle.target_loader import FlextTargetOracleLoader
@@ -73,11 +72,7 @@ if TYPE_CHECKING:
         FlextOracleObs,
         configure_oracle_observability,
     )
-    from flext_target_oracle.target_refactored import (
-        FlextTargetOracleCliService,
-        FlextTargetOracleCliService as s,
-        main,
-    )
+    from flext_target_oracle.target_refactored import FlextTargetOracleCliService, main
     from flext_target_oracle.target_service import FlextTargetOracleService
     from flext_target_oracle.target_services import (
         BatchService,
@@ -212,14 +207,14 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "configure_oracle_observability",
     ),
     "d": ("flext_db_oracle", "d"),
-    "e": ("flext_target_oracle.target_exceptions", "FlextTargetOracleExceptions"),
+    "e": ("flext_db_oracle", "e"),
     "h": ("flext_db_oracle", "h"),
     "logger": ("flext_target_oracle.settings", "logger"),
     "m": ("flext_target_oracle.models", "FlextTargetOracleModels"),
     "main": ("flext_target_oracle.target_refactored", "main"),
     "p": ("flext_target_oracle.protocols", "FlextTargetOracleProtocols"),
     "r": ("flext_db_oracle", "r"),
-    "s": ("flext_target_oracle.target_refactored", "FlextTargetOracleCliService"),
+    "s": ("flext_db_oracle", "s"),
     "t": ("flext_target_oracle.typings", "FlextTargetOracleTypes"),
     "u": ("flext_target_oracle.utilities", "FlextTargetOracleUtilities"),
     "validate_oracle_configuration": (
