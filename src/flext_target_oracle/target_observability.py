@@ -37,7 +37,7 @@ class FlextOracleError:
             return FlextTargetOracleExceptions.AuthenticationError(
                 f"Oracle authentication failed for {username} on {oracle_service}",
                 metadata=OracleErrorMetadata(
-                    code=error_code or c.Errors.AUTHENTICATION_ERROR,
+                    code=error_code or c.AUTHENTICATION_ERROR,
                     context={
                         "user": username,
                         "oracle_service": oracle_service,
@@ -62,7 +62,7 @@ class FlextOracleError:
             return FlextTargetOracleExceptions.OracleConnectionError(
                 f"Oracle database unavailable: {connection_string}",
                 metadata=OracleErrorMetadata(
-                    code=error_code or c.Errors.CONNECTION_ERROR,
+                    code=error_code or c.CONNECTION_ERROR,
                     context={
                         "connection_string": connection_string,
                         "recovery_strategy": recovery_strategy,
@@ -90,7 +90,7 @@ class FlextOracleError:
             return FlextTargetOracleExceptions.ProcessingError(
                 f"Record processing failed for {stream_name}: {failed_records}/{record_count}",
                 metadata=OracleErrorMetadata(
-                    code=c.Errors.PROCESSING_ERROR,
+                    code=c.PROCESSING_ERROR,
                     context={
                         "stream_name": stream_name,
                         "record_count": record_count,
@@ -116,7 +116,7 @@ class FlextOracleError:
             return FlextTargetOracleExceptions.SchemaError(
                 f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
                 metadata=OracleErrorMetadata(
-                    code=c.Errors.VALIDATION_ERROR,
+                    code=c.VALIDATION_ERROR,
                     context={
                         "stream_name": stream_name,
                         "schema_errors": "; ".join(schema_errors),

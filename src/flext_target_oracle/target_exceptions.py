@@ -122,7 +122,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 _extract_legacy_metadata_kwargs(kwargs)
             )
             metadata_result = _resolve_metadata(
-                default_code=c.Errors.CONNECTION_ERROR,
+                default_code=c.CONNECTION_ERROR,
                 metadata=metadata,
                 legacy_code=legacy_code,
                 legacy_context=legacy_context,
@@ -183,7 +183,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 _extract_legacy_metadata_kwargs(kwargs)
             )
             metadata_result = _resolve_metadata(
-                default_code=c.Errors.AUTHENTICATION_ERROR,
+                default_code=c.AUTHENTICATION_ERROR,
                 metadata=metadata,
                 legacy_code=legacy_code,
                 legacy_context=legacy_context,
@@ -241,7 +241,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 _extract_legacy_metadata_kwargs(kwargs)
             )
             metadata_result = _resolve_metadata(
-                default_code=c.Errors.PROCESSING_ERROR,
+                default_code=c.PROCESSING_ERROR,
                 metadata=metadata,
                 legacy_code=legacy_code,
                 legacy_context=legacy_context,
@@ -303,7 +303,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 _extract_legacy_metadata_kwargs(kwargs)
             )
             metadata_result = _resolve_metadata(
-                default_code=c.Errors.VALIDATION_ERROR,
+                default_code=c.VALIDATION_ERROR,
                 metadata=metadata,
                 legacy_code=legacy_code,
                 legacy_context=legacy_context,
@@ -356,7 +356,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 _extract_legacy_metadata_kwargs(kwargs)
             )
             metadata_result = _resolve_metadata(
-                default_code=c.Errors.OPERATION_ERROR,
+                default_code=c.OPERATION_ERROR,
                 metadata=metadata,
                 legacy_code=legacy_code,
                 legacy_context=legacy_context,

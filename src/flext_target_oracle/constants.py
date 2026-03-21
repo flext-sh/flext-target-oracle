@@ -77,7 +77,7 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
         DEFAULT_PORT: Final[int] = 1521
         MIN_PORT: Final[int] = 1024
         MAX_PORT: Final[int] = 65535
-        DEFAULT_HOST: Final[str] = FlextDbOracleConstants.Network.LOCALHOST
+        DEFAULT_HOST: Final[str] = FlextDbOracleConstants.LOCALHOST
         DEFAULT_SERVICE_NAME: Final[str] = "XE"
         DEFAULT_USERNAME: Final[str] = "system"
 
