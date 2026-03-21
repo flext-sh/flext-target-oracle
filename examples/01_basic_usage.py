@@ -31,7 +31,6 @@ from flext_core import FlextLogger, r
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleSettings,
-    LoadMethod,
     m,
 )
 

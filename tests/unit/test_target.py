@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+from typing import cast
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -113,9 +113,10 @@ class TestOracleTarget:
         assert target.process_singer_message(state_message).is_success
         state_value = target.state_message.value
         assert isinstance(state_value, dict)
-        bookmarks_value = state_value.get("bookmarks")
-        assert isinstance(bookmarks_value, dict)
-        assert bookmarks_value.get("users") == 1
+        bookmarks_obj: object = state_value.get("bookmarks")
+        assert isinstance(bookmarks_obj, dict)
+        bookmarks = cast(dict[str, object], bookmarks_obj)
+        assert bookmarks.get("users") == 1
 
     def test_process_singer_messages_flushes_loader(
         self, target: FlextTargetOracle

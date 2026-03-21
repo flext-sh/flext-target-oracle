@@ -21,7 +21,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import ClassVar, override
+from typing import Annotated, ClassVar, override
 
 from flext_core import t
 from pydantic import BaseModel, Field
@@ -43,15 +43,18 @@ class AuditResult(BaseModel):
 
     project: str = Field(description="Project name")
     status: str = Field(description="Audit status: PASS, FAIL, WARNING, PENDING, SKIP")
-    critical: list[AuditViolation] = Field(
-        default_factory=list, description="Critical violations"
-    )
-    high: list[AuditViolation] = Field(
-        default_factory=list, description="High priority violations"
-    )
-    medium: list[AuditViolation] = Field(
-        default_factory=list, description="Medium priority violations"
-    )
+    critical: Annotated[
+        list[AuditViolation],
+        Field(default_factory=list, description="Critical violations"),
+    ]
+    high: Annotated[
+        list[AuditViolation],
+        Field(default_factory=list, description="High priority violations"),
+    ]
+    medium: Annotated[
+        list[AuditViolation],
+        Field(default_factory=list, description="Medium priority violations"),
+    ]
     recommendations: list[str] = Field(
         default_factory=list, description="Audit recommendations"
     )
@@ -155,7 +158,10 @@ class PydanticV2Auditor:
         """Initialize auditor."""
         self.project_path = Path(project_path or ".").resolve()
         self.src_path = self.project_path / "src"
-        self.result = AuditResult(project=str(self.project_path.name), status="PENDING")
+        self.result = AuditResult.model_validate({
+            "project": str(self.project_path.name),
+            "status": "PENDING",
+        })
 
     def audit(self) -> AuditResult:
         """Run complete audit."""

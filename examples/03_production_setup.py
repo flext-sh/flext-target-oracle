@@ -17,6 +17,7 @@ import sys
 import time
 from datetime import UTC
 from types import FrameType
+from typing import cast
 
 from flext_core import FlextLogger, r
 from pydantic import BaseModel, Field
@@ -271,7 +272,7 @@ class ProductionTargetManager:
 
         """
         if not self.target:
-            return r.fail("Target not initialized")
+            return r[dict[str, object]].fail("Target not initialized")
         logger.info("Processing Singer stream with %d messages", len(messages))
         stats = ProcessingStats(processing_start_time=time.time())
         try:
@@ -290,7 +291,7 @@ class ProductionTargetManager:
                     "Processing message %d/%d: %s", i + 1, len(messages), message_type
                 )
                 if not self.target:
-                    return r.fail("Target not initialized")
+                    return r[dict[str, object]].fail("Target not initialized")
                 result = self.target.process_singer_message(message)
                 if result.is_success:
                     stats.messages_processed += 1
@@ -325,7 +326,7 @@ class ProductionTargetManager:
             logger.info(
                 "Stream processing completed in %.2f seconds", processing_duration
             )
-            return r.ok(stats.model_dump())
+            return r[dict[str, object]].ok(stats.model_dump())
         except (
             ValueError,
             TypeError,
@@ -338,7 +339,7 @@ class ProductionTargetManager:
             logger.exception("Unexpected error during stream processing")
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
-            return r.fail(f"Stream processing error: {e}")
+            return r[dict[str, object]].fail(f"Stream processing error: {e}")
 
     def shutdown(self) -> r[bool]:
         """Graceful shutdown with resource cleanup.
@@ -392,13 +393,19 @@ def demonstrate_production_setup() -> None:
             health_data = health_result.value
             if isinstance(health_data, dict):
                 logger.info(
-                    "Health check status: %s", health_data.get("status", "unknown")
+                    "Health check status",
+                    status=str(health_data.get("status", "unknown")),
                 )
-                checks = health_data.get("checks")
-                if isinstance(checks, dict):
+                checks_obj: object = health_data.get("checks")
+                checks: dict[str, object] = (
+                    cast("dict[str, object]", checks_obj)
+                    if isinstance(checks_obj, dict)
+                    else {}
+                )
+                if checks:
                     logger.info(
-                        "Oracle connectivity: %s",
-                        checks.get("oracle_connectivity", "unknown"),
+                        "Oracle connectivity",
+                        connectivity=str(checks.get("oracle_connectivity", "unknown")),
                     )
         else:
             logger.warning("Health check failed: %s", health_result.error)
@@ -412,25 +419,31 @@ def demonstrate_production_setup() -> None:
                 logger.error("Processing returned no stats")
                 return
             logger.info("=== Production Processing Statistics ===")
-            logger.info("Messages processed: %d", stats.get("messages_processed", 0))
-            logger.info("Records processed: %d", stats.get("records_processed", 0))
             logger.info(
-                "Processing duration: %.2fs",
-                stats.get("processing_duration_seconds", 0),
+                "Processing stats",
+                messages_processed=str(stats.get("messages_processed", 0)),
+                records_processed=str(stats.get("records_processed", 0)),
+                processing_duration_seconds=str(
+                    stats.get("processing_duration_seconds", 0)
+                ),
+                errors_encountered=str(stats.get("errors_encountered", 0)),
             )
-            logger.info("Errors encountered: %d", stats.get("errors_encountered", 0))
             if stats.get("total_records"):
-                logger.info("Total records loaded: %s", stats["total_records"])
                 logger.info(
-                    "Successful records: %d", stats.get("successful_records", 0)
+                    "Load stats",
+                    total_records=str(stats.get("total_records", 0)),
+                    successful_records=str(stats.get("successful_records", 0)),
+                    failed_records=str(stats.get("failed_records", 0)),
                 )
-                logger.info("Failed records: %d", stats.get("failed_records", 0))
         else:
             logger.error("Production processing failed: %s", processing_result.error)
         logger.info("Step 6: Performing final health check")
         final_health = manager.health_check()
-        if final_health.is_success:
-            logger.info("Final health status: %s", final_health.value["status"])
+        if final_health.is_success and isinstance(final_health.value, dict):
+            logger.info(
+                "Final health status",
+                status=str(final_health.value.get("status", "unknown")),
+            )
         logger.info("Step 7: Performing graceful shutdown")
         shutdown_result = manager.shutdown()
         if shutdown_result.is_success:
@@ -463,7 +476,7 @@ def create_production_sample_stream() -> list[SingerMessage]:
         "stream": "customer_orders",
         "schema": {
             "type": "object",
-            "properties": {
+            "properties": json.dumps({
                 "order_id": {"type": "integer"},
                 "customer_id": {"type": "integer"},
                 "order_date": {"type": "string", "format": "date-time"},
@@ -475,8 +488,8 @@ def create_production_sample_stream() -> list[SingerMessage]:
                 "shipping_address": {"type": "string"},
                 "created_at": {"type": "string", "format": "date-time"},
                 "updated_at": {"type": "string", "format": "date-time"},
-            },
-            "required": ["order_id", "customer_id", "order_date"],
+            }),
+            "required": json.dumps(["order_id", "customer_id", "order_date"]),
         },
         "key_properties": ["order_id"],
     })

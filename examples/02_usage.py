@@ -7,6 +7,7 @@ Singer-formatted data into an Oracle database.
 from __future__ import annotations
 
 from pathlib import Path
+from typing import cast
 
 from pydantic import TypeAdapter
 
@@ -44,7 +45,11 @@ def main() -> None:
         elif msg_type == "RECORD":
             message.get("stream", "unknown")
             record_obj: object = message.get("record", {})
-            record_dict: dict[str, object] = record_obj if isinstance(record_obj, dict) else {}
+            record_dict: dict[str, object] = (
+                cast("dict[str, object]", record_obj)
+                if isinstance(record_obj, dict)
+                else {}
+            )
             record_dict.get("id", "?")
         elif msg_type == "STATE":
             pass
