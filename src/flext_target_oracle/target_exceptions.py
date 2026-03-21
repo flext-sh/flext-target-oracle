@@ -15,9 +15,10 @@ from datetime import datetime
 from typing import override
 
 from flext_core import FlextExceptions, r
+from flext_core.constants import c
+from flext_core.models import m
+from flext_core.typings import t
 from pydantic import ConfigDict, Field
-
-from flext_target_oracle import c, m, t
 
 
 def _to_metadata_value(value: t.RuntimeData | None) -> t.MetadataValue:

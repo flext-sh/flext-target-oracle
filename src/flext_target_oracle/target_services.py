@@ -5,9 +5,8 @@ from __future__ import annotations
 from typing import Protocol
 
 from flext_core import r
+from flext_core.typings import t
 from flext_db_oracle import FlextDbOracleApi
-
-from flext_target_oracle import t
 
 from .models import m
 from .settings import FlextTargetOracleSettings

@@ -9,9 +9,8 @@ from __future__ import annotations
 
 from typing import Annotated
 
+from flext_core.constants import c
 from pydantic import Field
-
-from flext_target_oracle import c
 
 from .models import m
 

@@ -6,8 +6,8 @@ from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 
 from flext_core import FlextLogger
-
-from flext_target_oracle import c, t
+from flext_core.constants import c
+from flext_core.typings import t
 
 from .target_exceptions import FlextTargetOracleExceptions, OracleErrorMetadata
 
