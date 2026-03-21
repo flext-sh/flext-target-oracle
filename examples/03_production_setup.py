@@ -9,6 +9,7 @@ security considerations, and performance optimization.
 from __future__ import annotations
 
 import datetime
+import json
 import logging
 import os
 import signal
@@ -18,7 +19,7 @@ from datetime import UTC
 from types import FrameType
 
 from flext_core import FlextLogger, r
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field
 
 from flext_target_oracle import (
     FlextTargetOracle,
@@ -125,18 +126,18 @@ class ProductionConfig:
         connection_timeout = int(os.getenv("CONNECTION_TIMEOUT", "60"))
         load_method_str = os.getenv("LOAD_METHOD", "BULK_INSERT").upper()
         load_method = getattr(LoadMethod, load_method_str, LoadMethod.BULK_INSERT)
-        config = FlextTargetOracleSettings(
-            oracle_host=oracle_host,
-            oracle_port=oracle_port,
-            oracle_service=oracle_service,
-            oracle_user=oracle_user,
-            oracle_password=SecretStr(oracle_password),
-            default_target_schema=default_target_schema,
-            load_method=load_method,
-            batch_size=batch_size,
-            use_bulk_operations=True,
-            connection_timeout=connection_timeout,
-        )
+        _ = load_method  # reserved for future use
+        config = FlextTargetOracleSettings.model_validate({
+            "oracle_host": oracle_host,
+            "oracle_port": oracle_port,
+            "oracle_service_name": oracle_service,
+            "oracle_user": oracle_user,
+            "oracle_password": oracle_password,
+            "default_target_schema": default_target_schema,
+            "batch_size": batch_size,
+            "use_bulk_operations": True,
+            "transaction_timeout": connection_timeout,
+        })
         logger.info(
             "Production configuration created: %s:%s/%s",
             oracle_host,
@@ -207,7 +208,7 @@ class ProductionTargetManager:
                 target_metrics = self.target.get_implementation_metrics()
                 metrics.update(target_metrics.model_dump())
             logger.debug("Health check completed: %s", health_status.status)
-            return r.ok(health_status.model_dump())
+            return r[dict[str, object]].ok(health_status.model_dump())
         except (
             ValueError,
             TypeError,
@@ -220,7 +221,7 @@ class ProductionTargetManager:
             logger.exception("Health check failed")
             health_status.status = "unhealthy"
             health_status.error = str(e)
-            return r.fail(f"Health check error: {e}")
+            return r[dict[str, object]].fail(f"Health check error: {e}")
 
     def initialize(self) -> r[bool]:
         """Initialize target with comprehensive validation.

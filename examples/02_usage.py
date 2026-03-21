@@ -43,9 +43,9 @@ def main() -> None:
             message.get("stream", "unknown")
         elif msg_type == "RECORD":
             message.get("stream", "unknown")
-            record = message.get("record", {})
-            if isinstance(record, dict):
-                record.get("id", "?")
+            record_obj: object = message.get("record", {})
+            record_dict: dict[str, object] = record_obj if isinstance(record_obj, dict) else {}
+            record_dict.get("id", "?")
         elif msg_type == "STATE":
             pass
         result = target.execute()
