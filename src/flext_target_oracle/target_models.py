@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from flext_core.constants import c
 from pydantic import Field
 
+from .constants import c
 from .models import m
 
 PUBLIC = "PUBLIC"

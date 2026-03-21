@@ -1,10 +1,14 @@
 """End-to-end Singer flow checks for canonical target behavior."""
 
 from __future__ import annotations
+
+import json
 from collections.abc import Mapping
 from unittest.mock import Mock
+
 import pytest
 from flext_core import r
+
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
 
 
@@ -13,12 +17,12 @@ class TestSingerWorkflowE2E:
     """Validate SCHEMA -> RECORD -> STATE happy path."""
 
     def _target(self) -> FlextTargetOracle:
-        config = FlextTargetOracleSettings(
-            oracle_host="localhost",
-            oracle_service_name="XE",
-            oracle_user="test",
-            oracle_password="test",
-        )
+        config = FlextTargetOracleSettings.model_validate({
+            "oracle_host": "localhost",
+            "oracle_service_name": "XE",
+            "oracle_user": "test",
+            "oracle_password": "test",
+        })
         target = FlextTargetOracle(config=config)
         mock_oracle_api = Mock()
         mock_oracle_api.__enter__ = Mock(return_value=mock_oracle_api)
@@ -35,7 +39,7 @@ class TestSingerWorkflowE2E:
             "stream": "orders",
             "schema": {
                 "type": "object",
-                "properties": {"id": {"type": "integer"}, "amount": {"type": "number"}},
+                "properties": json.dumps({"id": {"type": "integer"}, "amount": {"type": "number"}}),
             },
             "key_properties": ["id"],
         }
@@ -59,9 +63,9 @@ class TestSingerWorkflowE2E:
         assert finalize_result.is_success
         assert "orders" in target.schemas
         state_value = target.state_message.value
-        assert isinstance(state_value, Mapping)
+        assert isinstance(state_value, dict)
         bookmarks_value = state_value.get("bookmarks")
-        assert isinstance(bookmarks_value, Mapping)
-        orders_value = bookmarks_value.get("orders")
-        assert isinstance(orders_value, Mapping)
+        assert isinstance(bookmarks_value, dict)
+        orders_value: object = bookmarks_value.get("orders")
+        assert isinstance(orders_value, dict)
         assert orders_value.get("version") == 1

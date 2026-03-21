@@ -1,11 +1,15 @@
 """Lean performance-oriented behavior checks for Oracle target."""
 
 from __future__ import annotations
+
+import json
 import time
 from collections.abc import Mapping
 from unittest.mock import Mock
+
 import pytest
 from flext_core import r
+
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
 
 
@@ -14,14 +18,14 @@ class TestPerformance:
     """Keep fast checks for throughput-sensitive code paths."""
 
     def _target(self) -> FlextTargetOracle:
-        config = FlextTargetOracleSettings(
-            oracle_host="localhost",
-            oracle_service_name="XE",
-            oracle_user="test",
-            oracle_password="test",
-            batch_size=5000,
-            use_bulk_operations=True,
-        )
+        config = FlextTargetOracleSettings.model_validate({
+            "oracle_host": "localhost",
+            "oracle_service_name": "XE",
+            "oracle_user": "test",
+            "oracle_password": "test",
+            "batch_size": 5000,
+            "use_bulk_operations": True,
+        })
         target = FlextTargetOracle(config=config)
         mock_oracle_api = Mock()
         mock_oracle_api.__enter__ = Mock(return_value=mock_oracle_api)
@@ -67,7 +71,7 @@ class TestPerformance:
         schema = {
             "type": "SCHEMA",
             "stream": "perf_stream",
-            "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
+            "schema": {"type": "object", "properties": json.dumps({"id": {"type": "integer"}})},
             "key_properties": ["id"],
         }
         record = {"type": "RECORD", "stream": "perf_stream", "record": {"id": 1}}

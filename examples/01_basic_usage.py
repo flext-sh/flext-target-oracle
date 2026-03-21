@@ -22,11 +22,11 @@ Usage:
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 
 from flext_core import FlextLogger, r
-from pydantic import SecretStr
 
 from flext_target_oracle import (
     FlextTargetOracle,
@@ -51,18 +51,17 @@ def create_configuration() -> FlextTargetOracleSettings:
 
     """
     logger.info("Creating Oracle target configuration")
-    config = FlextTargetOracleSettings(
-        oracle_host="localhost",
-        oracle_port=1521,
-        oracle_service="XE",
-        oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "system"),
-        oracle_password=SecretStr(os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", "")),
-        default_target_schema="FLEXT_EXAMPLES",
-        load_method=LoadMethod.INSERT,
-        batch_size=100,
-        use_bulk_operations=True,
-        connection_timeout=30,
-    )
+    config = FlextTargetOracleSettings.model_validate({
+        "oracle_host": "localhost",
+        "oracle_port": 1521,
+        "oracle_service_name": "XE",
+        "oracle_user": os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "system"),
+        "oracle_password": os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
+        "default_target_schema": "FLEXT_EXAMPLES",
+        "batch_size": 100,
+        "use_bulk_operations": True,
+        "transaction_timeout": 30,
+    })
     logger.info(
         f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service_name}"
     )
@@ -81,14 +80,14 @@ def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
         "stream": "users",
         "schema": {
             "type": "object",
-            "properties": {
+            "properties": json.dumps({
                 "id": {"type": "integer"},
                 "name": {"type": "string"},
                 "email": {"type": "string"},
                 "created_at": {"type": "string", "format": "date-time"},
                 "active": {"type": "boolean"},
-            },
-            "required": ["id", "name", "email"],
+            }),
+            "required": json.dumps(["id", "name", "email"]),
         },
         "key_properties": ["id"],
     })
@@ -239,12 +238,12 @@ def demonstrate_error_handling() -> None:
     """
     logger.info("Demonstrating error handling patterns")
     try:
-        FlextTargetOracleSettings(
-            oracle_host="",
-            oracle_service="XE",
-            oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
-            oracle_password=SecretStr(os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", "")),
-        )
+        FlextTargetOracleSettings.model_validate({
+            "oracle_host": "",
+            "oracle_service_name": "XE",
+            "oracle_user": os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
+            "oracle_password": os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
+        })
         validation_result = r[bool].ok(value=True)
         if validation_result.is_failure:
             logger.info(f"Expected validation error: {validation_result.error}")
@@ -257,7 +256,7 @@ def demonstrate_error_handling() -> None:
         RuntimeError,
         ImportError,
     ) as e:
-        logger.info("Configuration creation failed as expected: %s", e)
+        logger.info("Configuration creation failed as expected", error=str(e))
     config = create_configuration()
     target = FlextTargetOracle(config)
     invalid_message = '{"type": "INVALID", "data": "test"}'

@@ -32,9 +32,10 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
                     not isinstance(value, str | bytes)
                 )
                 if is_mapping or is_sequence:
-                    transformed[key.upper()] = (
-                        TypeAdapter(t.ContainerValue).dump_json(value).decode("utf-8")
+                    adapter: TypeAdapter[t.ContainerValue] = TypeAdapter(
+                        t.ContainerValue
                     )
+                    transformed[key.upper()] = adapter.dump_json(value).decode("utf-8")
                     continue
                 match value:
                     case bool() as bool_value:

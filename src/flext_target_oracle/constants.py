@@ -107,6 +107,8 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
     class FeatureFlags:
         """Feature toggles for progressive dispatcher rollout."""
 
+        ENABLE_DISPATCHER: Final[bool] = False
+
     class Observability:
         """Observability and monitoring constants."""
 

@@ -17,7 +17,6 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from flext_core import FlextLogger, r, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from flext_tests import u
 from flext_tests.docker import tk
 from pydantic import TypeAdapter
 from sqlalchemy import create_engine, text
@@ -78,7 +77,7 @@ def event_loop() -> Generator[AbstractEventLoop]:
 @pytest.fixture(scope="session")
 def docker_control() -> tk:
     """Provide Docker control instance for tests."""
-    return u.Tests.Docker()
+    return tk()
 
 
 @pytest.fixture(scope="session")

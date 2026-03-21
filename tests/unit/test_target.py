@@ -1,16 +1,19 @@
 """Unit tests for the canonical Oracle target client."""
 
 from __future__ import annotations
+
+import json
 from collections.abc import Mapping
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from pydantic import TypeAdapter
 from flext_core import r
+from pydantic import TypeAdapter
+
 from flext_target_oracle import (
     FlextTargetOracle,
-    FlextTargetOracleSettings,
     FlextTargetOracleExceptions,
+    FlextTargetOracleSettings,
     m,
 )
 
@@ -18,15 +21,15 @@ from flext_target_oracle import (
 @pytest.fixture
 def target(mock_oracle_api: Mock) -> FlextTargetOracle:
     """Create target with mocked loader."""
-    config = FlextTargetOracleSettings(
-        oracle_host="localhost",
-        oracle_service_name="XE",
-        oracle_user="test",
-        oracle_password="test",
-        default_target_schema="TEST_SCHEMA",
-        batch_size=200,
-        commit_interval=100,
-    )
+    config = FlextTargetOracleSettings.model_validate({
+        "oracle_host": "localhost",
+        "oracle_service_name": "XE",
+        "oracle_user": "test",
+        "oracle_password": "test",
+        "default_target_schema": "TEST_SCHEMA",
+        "batch_size": 200,
+        "commit_interval": 100,
+    })
     client = FlextTargetOracle(config=config)
     object.__setattr__(
         client.loader, "test_connection", Mock(return_value=r[bool].ok(value=True))
@@ -42,17 +45,17 @@ def target(mock_oracle_api: Mock) -> FlextTargetOracle:
         "finalize_all_streams",
         Mock(
             return_value=r[m.TargetOracle.LoaderFinalizeResult].ok(
-                m.TargetOracle.LoaderFinalizeResult(
-                    total_records=0,
-                    streams_processed=0,
-                    loading_operation=m.TargetOracle.LoaderOperation(
-                        stream_name="users",
-                        started_at="",
-                        completed_at="",
-                        records_loaded=0,
-                        records_failed=0,
-                    ),
-                )
+                m.TargetOracle.LoaderFinalizeResult.model_validate({
+                    "total_records": 0,
+                    "streams_processed": 0,
+                    "loading_operation": {
+                        "stream_name": "users",
+                        "started_at": "",
+                        "completed_at": "",
+                        "records_loaded": 0,
+                        "records_failed": 0,
+                    },
+                })
             )
         ),
     )
@@ -82,7 +85,7 @@ class TestOracleTarget:
         schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
             "type": "SCHEMA",
             "stream": "users",
-            "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
+            "schema": {"type": "object", "properties": json.dumps({"id": {"type": "integer"}})},
             "key_properties": ["id"],
         })
         assert target.process_singer_message(schema_message).is_success
@@ -94,7 +97,7 @@ class TestOracleTarget:
         schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
             "type": "SCHEMA",
             "stream": "users",
-            "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
+            "schema": {"type": "object", "properties": json.dumps({"id": {"type": "integer"}})},
         })
         record_message = m.TargetOracle.SingerRecordMessage.model_validate({
             "type": "RECORD",
@@ -109,9 +112,9 @@ class TestOracleTarget:
         assert target.process_singer_message(record_message).is_success
         assert target.process_singer_message(state_message).is_success
         state_value = target.state_message.value
-        assert isinstance(state_value, Mapping)
+        assert isinstance(state_value, dict)
         bookmarks_value = state_value.get("bookmarks")
-        assert isinstance(bookmarks_value, Mapping)
+        assert isinstance(bookmarks_value, dict)
         assert bookmarks_value.get("users") == 1
 
     def test_process_singer_messages_flushes_loader(
@@ -126,7 +129,7 @@ class TestOracleTarget:
             m.TargetOracle.SingerSchemaMessage.model_validate({
                 "type": "SCHEMA",
                 "stream": "users",
-                "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
+                "schema": {"type": "object", "properties": json.dumps({"id": {"type": "integer"}})},
             }),
             m.TargetOracle.SingerRecordMessage.model_validate({
                 "type": "RECORD",

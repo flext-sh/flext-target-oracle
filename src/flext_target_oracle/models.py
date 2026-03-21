@@ -79,7 +79,11 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             state: Annotated[
                 FlextMeltanoModels.Meltano.SingerStateMessage,
                 Field(
-                    default_factory=FlextMeltanoModels.Meltano.SingerStateMessage,
+                    default_factory=lambda: (
+                        FlextMeltanoModels.Meltano.SingerStateMessage(
+                            type="STATE", value={}
+                        )
+                    ),
                     description="Accumulated Singer STATE payload",
                 ),
             ]

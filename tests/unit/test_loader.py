@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping
 
 import pytest
@@ -58,7 +59,7 @@ def test_ensure_table_exists_returns_result(
         "stream": "users",
         "schema": {
             "type": "object",
-            "properties": {"id": {"type": "integer"}},
+            "properties": json.dumps({"id": {"type": "integer"}}),
         },
         "key_properties": ["id"],
     }
