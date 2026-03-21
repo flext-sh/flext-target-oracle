@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Annotated, Literal
 
 from flext_core import FlextModels
+from flext_core.typings import t
 from flext_db_oracle.models import FlextDbOracleModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field
@@ -63,9 +64,8 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             """Singer batch processing summary payload."""
 
             messages_processed: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
-                    ge=0,
                     description="Total Singer messages processed",
                 ),
             ]
@@ -119,25 +119,24 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 Field(description="Load operation completion timestamp"),
             ]
             records_loaded: Annotated[
-                int,
-                Field(ge=0, description="Number of loaded records"),
+                t.NonNegativeInt,
+                Field(description="Number of loaded records"),
             ]
             records_failed: Annotated[
-                int,
-                Field(ge=0, description="Number of failed records"),
+                t.NonNegativeInt,
+                Field(description="Number of failed records"),
             ]
 
         class LoaderFinalizeResult(FlextModels.ArbitraryTypesModel):
             """Loader finalization payload for flush operations."""
 
             total_records: Annotated[
-                int,
-                Field(ge=0, description="Total records processed"),
+                t.NonNegativeInt,
+                Field(description="Total records processed"),
             ]
             streams_processed: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
-                    ge=0,
                     description="Number of processed streams",
                 ),
             ]
@@ -166,28 +165,27 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
             host: Annotated[str, Field(description="Oracle database host")]
             port: Annotated[
-                int,
-                Field(ge=1, le=65535, description="Oracle database port"),
+                t.PortNumber,
+                Field(description="Oracle database port"),
             ]
             service_name: Annotated[str, Field(description="Oracle service name")]
             username: Annotated[str, Field(description="Oracle database username")]
             password: Annotated[str, Field(description="Oracle database password")]
             timeout: Annotated[
-                int,
-                Field(ge=1, description="Connection timeout in seconds"),
+                t.PositiveInt,
+                Field(description="Connection timeout in seconds"),
             ]
             pool_min: Annotated[
-                int,
-                Field(ge=1, description="Oracle connection pool minimum"),
+                t.PositiveInt,
+                Field(description="Oracle connection pool minimum"),
             ]
             pool_max: Annotated[
-                int,
-                Field(ge=1, description="Oracle connection pool maximum"),
+                t.PositiveInt,
+                Field(description="Oracle connection pool maximum"),
             ]
             pool_increment: Annotated[
-                int,
+                t.PositiveInt,
                 Field(
-                    ge=1,
                     description="Oracle connection pool increment",
                 ),
             ]
@@ -205,10 +203,9 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ),
             ]
             parallel_degree: Annotated[
-                int,
+                t.PositiveInt,
                 Field(
                     default=1,
-                    ge=1,
                     description="Oracle parallel execution degree",
                 ),
             ]
@@ -228,7 +225,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                     description="Whether bulk loading is enabled",
                 ),
             ]
-            batch_size: Annotated[int, Field(ge=1, description="Target batch size")]
+            batch_size: Annotated[t.BatchSize, Field(description="Target batch size")]
             table_prefix: Annotated[str, Field(description="Target table name prefix")]
             table_suffix: Annotated[str, Field(description="Target table name suffix")]
 
@@ -236,13 +233,14 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             """Oracle target implementation metrics."""
 
             streams_configured: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
-                    ge=0,
                     description="Number of configured streams",
                 ),
             ]
-            batch_size: Annotated[int, Field(ge=1, description="Configured batch size")]
+            batch_size: Annotated[
+                t.BatchSize, Field(description="Configured batch size")
+            ]
             use_bulk_operations: Annotated[
                 bool,
                 Field(
