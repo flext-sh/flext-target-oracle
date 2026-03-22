@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Protocol, runtime_checkable
 
 from flext_core import FlextProtocols, r
+from flext_core.typings import t
 from flext_db_oracle.protocols import FlextDbOracleProtocols
 from flext_meltano import FlextMeltanoProtocols
 
@@ -20,6 +21,20 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
 
     class TargetOracle:
         """Singer Target domain protocols."""
+
+        @runtime_checkable
+        class ConnectionOperationResult(Protocol):
+            """Protocol for connection operation results from Oracle API."""
+
+            @property
+            def is_failure(self) -> bool:
+                """Return True if the operation failed."""
+                ...
+
+            @property
+            def error(self) -> t.Container | None:
+                """Return the error value if the operation failed, else None."""
+                ...
 
         class Oracle:
             """Singer Target Oracle domain protocols for Oracle database loading."""

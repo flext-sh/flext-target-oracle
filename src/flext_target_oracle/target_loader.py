@@ -13,7 +13,7 @@ from __future__ import annotations
 import re
 from collections.abc import Mapping
 from datetime import UTC, datetime
-from typing import ClassVar, Protocol, override
+from typing import ClassVar, override
 
 from flext_core import FlextLogger, FlextService, r
 from flext_core.typings import t
@@ -21,6 +21,7 @@ from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import PrivateAttr, TypeAdapter
 
 from .models import m
+from .protocols import p
 from .settings import FlextTargetOracleSettings
 from .target_exceptions import FlextTargetOracleExceptions
 
@@ -51,13 +52,6 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         default_factory=_default_record_buffers,
     )
     _total_records: int = PrivateAttr(default=0)
-
-    class _ConnectionOperationResult(Protocol):
-        @property
-        def is_failure(self) -> bool: ...
-
-        @property
-        def error(self) -> t.Container | None: ...
 
     def __init__(self, config: FlextTargetOracleSettings, **_data: t.Scalar) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
@@ -116,7 +110,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         self,
         *,
         operation_name: str,
-        result: _ConnectionOperationResult,
+        result: p.TargetOracle.ConnectionOperationResult,
     ) -> r[bool]:
         try:
             if result.is_failure:
