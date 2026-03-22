@@ -25,9 +25,11 @@ from pydantic import BaseModel, Field
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleSettings,
-    LoadMethod,
+    c,
     m,
 )
+
+LoadMethod = c.LoadMethod
 
 logging.basicConfig(
     level=logging.INFO,
