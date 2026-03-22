@@ -33,6 +33,8 @@ if TYPE_CHECKING:
         FlextTargetOracleConstants,
         FlextTargetOracleConstants as c,
     )
+
+    LoadMethod = FlextTargetOracleConstants.LoadMethod
     from flext_target_oracle.models import (
         FlextTargetOracleModels,
         FlextTargetOracleModels as m,
