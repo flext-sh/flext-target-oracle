@@ -252,6 +252,54 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ),
             ]
 
+        class OracleConnectionModel(OracleConnectionConfig):
+            """Oracle database connection configuration model."""
+
+        class SingerStreamModel(FlextModels.ArbitraryTypesModel):
+            """Singer stream mapping to Oracle table with column configuration."""
+
+            stream_name: Annotated[str, Field(description="Singer stream name")]
+            table_name: Annotated[
+                str, Field(description="Oracle destination table name")
+            ]
+            ignored_columns: Annotated[
+                list[str],
+                Field(
+                    default_factory=list,
+                    description="Columns ignored during record transformation",
+                ),
+            ]
+            column_mappings: Annotated[
+                dict[str, str],
+                Field(
+                    default_factory=dict,
+                    description="Singer column to Oracle column mapping",
+                ),
+            ]
+
+        class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
+            """Statistics for data load operation."""
+
+            stream_name: Annotated[str, Field(description="Stream identifier")]
+            total_records_processed: Annotated[
+                int,
+                Field(
+                    ge=0,
+                    description="Total processed records",
+                ),
+            ]
+            successful_records: Annotated[
+                int, Field(ge=0, description="Successful records")
+            ]
+            failed_records: Annotated[int, Field(ge=0, description="Failed records")]
+            batches_processed: Annotated[
+                int, Field(ge=0, description="Processed batch count")
+            ]
+
+            def finalize(self) -> LoadStatisticsModel:
+                """Finalize statistics and return self."""
+                return self
+
 
 m = FlextTargetOracleModels
 

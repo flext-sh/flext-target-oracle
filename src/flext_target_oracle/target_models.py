@@ -11,7 +11,6 @@ from typing import Annotated
 
 from pydantic import Field
 
-from .constants import c
 from .models import m
 
 PUBLIC = "PUBLIC"
@@ -62,12 +61,8 @@ class LoadStatisticsModel(m.ArbitraryTypesModel):
         return self
 
 
-LoadMethodModel = c.LoadMethod
-StorageModeModel = c.StorageMode
 __all__ = [
-    "LoadMethodModel",
     "LoadStatisticsModel",
     "OracleConnectionModel",
     "SingerStreamModel",
-    "StorageModeModel",
 ]

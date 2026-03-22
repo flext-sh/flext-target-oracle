@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from flext_core import FlextProtocols
+from flext_core import FlextProtocols, r
 from flext_db_oracle.protocols import FlextDbOracleProtocols
 from flext_meltano import FlextMeltanoProtocols
 
@@ -120,6 +120,61 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 def track_progress(self, records: int) -> FlextProtocols.Result[bool]:
                     """Track progress of Oracle loading operations."""
                     ...
+
+        # Canonical MRO facade protocols
+        @runtime_checkable
+        class ConnectionService(Protocol):
+            """Contract for Oracle connection services."""
+
+            def get_connection_info(
+                self,
+            ) -> r[m.TargetOracle.OracleConnectionConfig]:
+                """Return effective Oracle connection information."""
+                ...
+
+            def test_connection(self) -> r[None]:
+                """Validate Oracle connectivity."""
+                ...
+
+        @runtime_checkable
+        class SchemaService(Protocol):
+            """Contract for Oracle schema services."""
+
+            def ensure_table_exists(
+                self,
+                stream: m.TargetOracle.SingerStreamModel,
+                schema_message: m.Meltano.SingerSchemaMessage,
+            ) -> r[None]:
+                """Ensure destination table exists for a stream."""
+                ...
+
+        @runtime_checkable
+        class BatchService(Protocol):
+            """Contract for Oracle batch services."""
+
+            def add_record(
+                self,
+                stream_name: str,
+                record_message: m.Meltano.SingerRecordMessage,
+            ) -> r[None]:
+                """Queue one record for batch processing."""
+                ...
+
+            def flush_all_batches(self) -> r[m.TargetOracle.LoadStatisticsModel]:
+                """Flush all queued batches and return aggregated stats."""
+                ...
+
+        @runtime_checkable
+        class RecordService(Protocol):
+            """Contract for record transformation services."""
+
+            def transform_record(
+                self,
+                record_message: m.Meltano.SingerRecordMessage,
+                stream: m.TargetOracle.SingerStreamModel,
+            ) -> r[m.Meltano.SingerRecordMessage]:
+                """Transform one Singer record into Oracle-ready payload."""
+                ...
 
 
 p = FlextTargetOracleProtocols

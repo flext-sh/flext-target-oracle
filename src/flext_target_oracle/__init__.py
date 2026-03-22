@@ -43,7 +43,6 @@ if TYPE_CHECKING:
     )
     from flext_target_oracle.settings import (
         FlextTargetOracleSettings,
-        LoadMethod,
         logger,
         validate_oracle_configuration,
     )
@@ -61,11 +60,9 @@ if TYPE_CHECKING:
     )
     from flext_target_oracle.target_loader import FlextTargetOracleLoader
     from flext_target_oracle.target_models import (
-        LoadMethodModel,
         LoadStatisticsModel,
         OracleConnectionModel,
         SingerStreamModel,
-        StorageModeModel,
     )
     from flext_target_oracle.target_observability import (
         FlextOracleError,
@@ -75,15 +72,11 @@ if TYPE_CHECKING:
     from flext_target_oracle.target_refactored import FlextTargetOracleCliService, main
     from flext_target_oracle.target_service import FlextTargetOracleService
     from flext_target_oracle.target_services import (
-        BatchService,
-        ConnectionService,
         OracleBatchService,
         OracleConnectionService,
         OracleRecordService,
         OracleSchemaService,
         OracleTargetServiceFactory,
-        RecordService,
-        SchemaService,
     )
     from flext_target_oracle.typings import (
         FlextTargetOracleTypes,
@@ -95,8 +88,6 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
-    "BatchService": ("flext_target_oracle.target_services", "BatchService"),
-    "ConnectionService": ("flext_target_oracle.target_services", "ConnectionService"),
     "FlextOracleError": (
         "flext_target_oracle.target_observability",
         "FlextOracleError",
@@ -140,8 +131,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_oracle.utilities",
         "FlextTargetOracleUtilities",
     ),
-    "LoadMethod": ("flext_target_oracle.settings", "LoadMethod"),
-    "LoadMethodModel": ("flext_target_oracle.target_models", "LoadMethodModel"),
     "LoadStatisticsModel": ("flext_target_oracle.target_models", "LoadStatisticsModel"),
     "OracleBatchService": ("flext_target_oracle.target_services", "OracleBatchService"),
     "OracleConnectionModel": (
@@ -188,10 +177,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "flext_target_oracle.target_commands",
         "OracleTargetValidateCommand",
     ),
-    "RecordService": ("flext_target_oracle.target_services", "RecordService"),
-    "SchemaService": ("flext_target_oracle.target_services", "SchemaService"),
     "SingerStreamModel": ("flext_target_oracle.target_models", "SingerStreamModel"),
-    "StorageModeModel": ("flext_target_oracle.target_models", "StorageModeModel"),
     "__all__": ("flext_target_oracle.__version__", "__all__"),
     "__author__": ("flext_target_oracle.__version__", "__author__"),
     "__author_email__": ("flext_target_oracle.__version__", "__author_email__"),
@@ -225,8 +211,6 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
 }
 
 __all__ = [
-    "BatchService",
-    "ConnectionService",
     "FlextOracleError",
     "FlextOracleObs",
     "FlextTargetOracle",
@@ -240,8 +224,6 @@ __all__ = [
     "FlextTargetOracleSettings",
     "FlextTargetOracleTypes",
     "FlextTargetOracleUtilities",
-    "LoadMethod",
-    "LoadMethodModel",
     "LoadStatisticsModel",
     "OracleBatchService",
     "OracleConnectionModel",
@@ -255,10 +237,7 @@ __all__ = [
     "OracleTargetLoadCommand",
     "OracleTargetServiceFactory",
     "OracleTargetValidateCommand",
-    "RecordService",
-    "SchemaService",
     "SingerStreamModel",
-    "StorageModeModel",
     "__all__",
     "__author__",
     "__author_email__",

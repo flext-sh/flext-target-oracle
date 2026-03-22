@@ -16,10 +16,9 @@ from flext_core import FlextLogger, FlextSettings, r
 from pydantic import Field, SecretStr
 
 from .constants import c
-from .target_models import OracleConnectionModel
+from .models import m
 
 logger = FlextLogger(__name__)
-LoadMethod = c.LoadMethod
 
 
 class FlextTargetOracleSettings(FlextSettings):
@@ -110,9 +109,9 @@ class FlextTargetOracleSettings(FlextSettings):
             )
         return r[bool].ok(True)
 
-    def get_oracle_config(self) -> OracleConnectionModel:
+    def get_oracle_config(self) -> m.TargetOracle.OracleConnectionModel:
         """Get Oracle database connection configuration."""
-        return OracleConnectionModel(
+        return m.TargetOracle.OracleConnectionModel(
             host=self.oracle_host,
             port=self.oracle_port,
             service_name=self.oracle_service_name,
@@ -139,6 +138,5 @@ def validate_oracle_configuration(
 
 __all__: list[str] = [
     "FlextTargetOracleSettings",
-    "LoadMethod",
     "validate_oracle_configuration",
 ]
