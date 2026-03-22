@@ -264,13 +264,13 @@ def mock_loader() -> Mock:
 
 
 @pytest.fixture
-def schema() -> dict[str, object]:
+def schema() -> dict[str, t.NormalizedValue]:
     """Simple Singer schema message for unit testing."""
     return {
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
-            "type": "object",
+            "type": "t.NormalizedValue",
             "properties": {
                 "id": {"type": "integer"},
                 "name": {"type": "string"},
@@ -282,7 +282,7 @@ def schema() -> dict[str, object]:
 
 
 @pytest.fixture
-def record() -> dict[str, object]:
+def record() -> dict[str, t.NormalizedValue]:
     """Simple Singer record message for unit testing."""
     return {
         "type": "RECORD",
@@ -292,7 +292,7 @@ def record() -> dict[str, object]:
 
 
 @pytest.fixture
-def state() -> dict[str, object]:
+def state() -> dict[str, t.NormalizedValue]:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -301,13 +301,13 @@ def state() -> dict[str, object]:
 
 
 @pytest.fixture
-def simple_schema() -> dict[str, object]:
+def simple_schema() -> dict[str, t.NormalizedValue]:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
-            "type": "object",
+            "type": "t.NormalizedValue",
             "properties": {
                 "id": {"type": "integer"},
                 "name": {"type": "string"},
@@ -320,22 +320,22 @@ def simple_schema() -> dict[str, object]:
 
 
 @pytest.fixture
-def nested_schema() -> dict[str, object]:
+def nested_schema() -> dict[str, t.NormalizedValue]:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
         "stream": "orders",
         "schema": {
-            "type": "object",
+            "type": "t.NormalizedValue",
             "properties": {
                 "id": {"type": "integer"},
                 "customer": {
-                    "type": "object",
+                    "type": "t.NormalizedValue",
                     "properties": {
                         "id": {"type": "integer"},
                         "name": {"type": "string"},
                         "address": {
-                            "type": "object",
+                            "type": "t.NormalizedValue",
                             "properties": {
                                 "street": {"type": "string"},
                                 "city": {"type": "string"},
@@ -347,7 +347,7 @@ def nested_schema() -> dict[str, object]:
                 "items": {
                     "type": "array",
                     "items": {
-                        "type": "object",
+                        "type": "t.NormalizedValue",
                         "properties": {
                             "product_id": {"type": "integer"},
                             "quantity": {"type": "integer"},
@@ -364,7 +364,7 @@ def nested_schema() -> dict[str, object]:
 
 
 @pytest.fixture
-def sample_record() -> dict[str, object]:
+def sample_record() -> dict[str, t.NormalizedValue]:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -381,7 +381,7 @@ def sample_record() -> dict[str, object]:
 
 
 @pytest.fixture
-def batch_records() -> list[dict[str, object]]:
+def batch_records() -> list[dict[str, t.NormalizedValue]]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -400,7 +400,7 @@ def batch_records() -> list[dict[str, object]]:
 
 
 @pytest.fixture
-def state_message() -> dict[str, object]:
+def state_message() -> dict[str, t.NormalizedValue]:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -418,10 +418,10 @@ def state_message() -> dict[str, object]:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema: dict[str, object],
-    sample_record: dict[str, object],
-    state_message: dict[str, object],
-) -> list[dict[str, object]]:
+    simple_schema: dict[str, t.NormalizedValue],
+    sample_record: dict[str, t.NormalizedValue],
+    state_message: dict[str, t.NormalizedValue],
+) -> list[dict[str, t.NormalizedValue]]:
     """Complete Singer message stream for testing."""
     return [simple_schema, sample_record, sample_record, state_message]
 
@@ -460,7 +460,9 @@ def temp_config_file(tmp_path: Path) -> Path:
         "use_bulk_operations": True,
     }
     config_file = tmp_path / "config.json"
-    config_file.write_text(TypeAdapter(object).dump_json(config_data).decode("utf-8"))
+    config_file.write_text(
+        TypeAdapter(t.NormalizedValue).dump_json(config_data).decode("utf-8")
+    )
     return config_file
 
 
@@ -478,7 +480,7 @@ def large_dataset() -> list[t.Dict]:
         "type": "SCHEMA",
         "stream": "performance_test",
         "schema": {
-            "type": "object",
+            "type": "t.NormalizedValue",
             "properties": {
                 "id": {"type": "integer"},
                 "data": {"type": "string"},

@@ -11,20 +11,20 @@ from typing import cast
 
 from pydantic import TypeAdapter
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, t
 
 
-def load_config() -> dict[str, object]:
+def load_config() -> dict[str, t.NormalizedValue]:
     """Load configuration from file."""
     config_path = Path("config.json")
     content = config_path.read_text(encoding="utf-8")
-    return TypeAdapter(dict[str, object]).validate_json(content)
+    return TypeAdapter(dict[str, t.NormalizedValue]).validate_json(content)
 
 
-def load_singer_messages() -> list[dict[str, object]]:
+def load_singer_messages() -> list[dict[str, t.NormalizedValue]]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
-    adapter = TypeAdapter(dict[str, object])
+    adapter = TypeAdapter(dict[str, t.NormalizedValue])
     with data_path.open(encoding="utf-8") as f:
         return [adapter.validate_json(line) for line in f if line.strip()]
 
@@ -44,9 +44,9 @@ def main() -> None:
             message.get("stream", "unknown")
         elif msg_type == "RECORD":
             message.get("stream", "unknown")
-            record_obj: object = message.get("record", {})
-            record_dict: dict[str, object] = (
-                cast("dict[str, object]", record_obj)
+            record_obj: t.NormalizedValue = message.get("record", {})
+            record_dict: dict[str, t.NormalizedValue] = (
+                cast("dict[str, t.NormalizedValue]", record_obj)
                 if isinstance(record_obj, dict)
                 else {}
             )

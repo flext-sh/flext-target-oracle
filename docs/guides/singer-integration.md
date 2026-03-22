@@ -48,7 +48,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
   "type": "SCHEMA",
   "stream": "users",
   "schema": {
-    "type": "object",
+    "type": "t.NormalizedValue",
     "properties": {
       "id": { "type": "integer" },
       "name": { "type": "string" },
@@ -177,7 +177,7 @@ class FlextOracleTarget(Target):
 
     def _write_record(self, record: Record) -> None:
         """Write single record - Singer SDK requirement."""
-        # Convert Record to dict[str, object] and process
+        # Convert Record to dict[str, t.NormalizedValue] and process
 
     def _write_records(self, records: List[Record]) -> None:
         """Write batch of records - Singer SDK requirement."""
@@ -510,7 +510,10 @@ class TestSingerIntegration:
         schema_msg = {
             "type": "SCHEMA",
             "stream": "test_stream",
-            "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
+            "schema": {
+                "type": "t.NormalizedValue",
+                "properties": {"id": {"type": "integer"}},
+            },
         }
 
         result = target.process_singer_message(schema_msg)

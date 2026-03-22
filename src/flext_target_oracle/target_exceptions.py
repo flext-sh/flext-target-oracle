@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from datetime import datetime
-from typing import override
+from typing import ClassVar, override
 
 from flext_core import FlextExceptions, r
 from flext_core.constants import c
@@ -30,7 +30,7 @@ def _to_metadata_value(value: t.RuntimeData | None) -> t.MetadataValue:
 
 
 class OracleErrorMetadata(m.Value):
-    model_config = ConfigDict(extra="allow")
+    model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
 
     code: str = Field(description="Canonical error code")
     context: Mapping[str, t.MetadataValue] | None = Field(

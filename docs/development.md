@@ -391,7 +391,7 @@ def test_table_management():
 
     # Schema definition
     schema = {
-        "type": "object",
+        "type": "t.NormalizedValue",
         "properties": {
             "id": {"type": "integer"},
             "name": {"type": "string"},
@@ -639,7 +639,7 @@ class TestOracleIntegration:
 def sample_schema():
     """Standard test schema."""
     return {
-        "type": "object",
+        "type": "t.NormalizedValue",
         "properties": {
             "id": {"type": "integer"},
             "name": {"type": "string"},

@@ -71,14 +71,14 @@ def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
-      dict[str, object]: Singer SCHEMA message for users table
+      dict[str, t.NormalizedValue]: Singer SCHEMA message for users table
 
     """
     return m.TargetOracle.SingerSchemaMessage.model_validate({
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
-            "type": "object",
+            "type": "t.NormalizedValue",
             "properties": json.dumps({
                 "id": {"type": "integer"},
                 "name": {"type": "string"},
@@ -96,7 +96,7 @@ def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
-      List[dict[str, object]]: List of Singer RECORD messages
+      List[dict[str, t.NormalizedValue]]: List of Singer RECORD messages
 
     """
     return [
@@ -140,7 +140,7 @@ def create_sample_state_message() -> m.TargetOracle.SingerStateMessage:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
-      dict[str, object]: Singer STATE message with bookmark information
+      dict[str, t.NormalizedValue]: Singer STATE message with bookmark information
 
     """
     return m.TargetOracle.SingerStateMessage.model_validate({
