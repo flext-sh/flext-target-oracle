@@ -23,7 +23,7 @@ from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
-    LoadMethod,
+    c,
     m,
     t,
 )
@@ -148,7 +148,7 @@ class TestOracleIntegration:
     ) -> None:
         """Test bulk insert with large dataset."""
         oracle_config = oracle_config.model_copy(
-            update={"load_method": LoadMethod.BULK_INSERT, "batch_size": 1000}
+            update={"load_method": c.LoadMethod.BULK_INSERT, "batch_size": 1000}
         )
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
