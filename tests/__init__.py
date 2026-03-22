@@ -11,6 +11,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
 if TYPE_CHECKING:
     from flext_core.typings import FlextTypes
+    from flext_tests import d, e, h, r, s, x
 
     from . import (
         e2e as e2e,
@@ -60,23 +61,18 @@ if TYPE_CHECKING:
         temporary_env_vars,
     )
     from .constants import (
-        TestsFlextTargetOracleConstants,
-        TestsFlextTargetOracleConstants as c,
+        FlextTargetOracleTestConstants,
+        FlextTargetOracleTestConstants as c,
     )
     from .e2e.test_singer import TestSingerWorkflowE2E
     from .integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
-    from .models import TestsFlextTargetOracleModels, TestsFlextTargetOracleModels as m
+    from .models import FlextTargetOracleTestModels, FlextTargetOracleTestModels as m
     from .performance.test_performance import TestPerformance
     from .protocols import (
-        TestsFlextTargetOracleProtocols,
-        TestsFlextTargetOracleProtocols as p,
-        _protocols,
+        FlextTargetOracleTestProtocols,
+        FlextTargetOracleTestProtocols as p,
     )
-    from .typings import (
-        TestsFlextTargetOracleTypes,
-        TestsFlextTargetOracleTypes as t,
-        _types,
-    )
+    from .typings import FlextTargetOracleTestTypes, FlextTargetOracleTestTypes as t
     from .unit.test_cli_dispatcher import (
         test_cli_service_falls_back_to_bus_when_flag_disabled,
         test_cli_service_uses_dispatcher_when_flag_enabled,
@@ -90,13 +86,26 @@ if TYPE_CHECKING:
     )
     from .unit.test_target import TestOracleTarget, target
     from .utilities import (
-        TestsFlextTargetOracleUtilities,
-        TestsFlextTargetOracleUtilities as u,
-        _utilities,
+        FlextTargetOracleTestUtilities,
+        FlextTargetOracleTestUtilities as u,
     )
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "DOCKER_COMPOSE_PATH": ("tests.conftest", "DOCKER_COMPOSE_PATH"),
+    "FlextTargetOracleTestConstants": (
+        "tests.constants",
+        "FlextTargetOracleTestConstants",
+    ),
+    "FlextTargetOracleTestModels": ("tests.models", "FlextTargetOracleTestModels"),
+    "FlextTargetOracleTestProtocols": (
+        "tests.protocols",
+        "FlextTargetOracleTestProtocols",
+    ),
+    "FlextTargetOracleTestTypes": ("tests.typings", "FlextTargetOracleTestTypes"),
+    "FlextTargetOracleTestUtilities": (
+        "tests.utilities",
+        "FlextTargetOracleTestUtilities",
+    ),
     "ORACLE_CONTAINER_NAME": ("tests.conftest", "ORACLE_CONTAINER_NAME"),
     "ORACLE_HOST": ("tests.conftest", "ORACLE_HOST"),
     "ORACLE_IMAGE": ("tests.conftest", "ORACLE_IMAGE"),
@@ -111,35 +120,21 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestOracleTargetE2E": ("tests.integration.test_oracle", "TestOracleTargetE2E"),
     "TestPerformance": ("tests.performance.test_performance", "TestPerformance"),
     "TestSingerWorkflowE2E": ("tests.e2e.test_singer", "TestSingerWorkflowE2E"),
-    "TestsFlextTargetOracleConstants": (
-        "tests.constants",
-        "TestsFlextTargetOracleConstants",
-    ),
-    "TestsFlextTargetOracleModels": ("tests.models", "TestsFlextTargetOracleModels"),
-    "TestsFlextTargetOracleProtocols": (
-        "tests.protocols",
-        "TestsFlextTargetOracleProtocols",
-    ),
-    "TestsFlextTargetOracleTypes": ("tests.typings", "TestsFlextTargetOracleTypes"),
-    "TestsFlextTargetOracleUtilities": (
-        "tests.utilities",
-        "TestsFlextTargetOracleUtilities",
-    ),
-    "_protocols": ("tests.protocols", "_protocols"),
-    "_types": ("tests.typings", "_types"),
-    "_utilities": ("tests.utilities", "_utilities"),
     "batch_records": ("tests.conftest", "batch_records"),
-    "c": ("tests.constants", "TestsFlextTargetOracleConstants"),
+    "c": ("tests.constants", "FlextTargetOracleTestConstants"),
     "clean_database": ("tests.conftest", "clean_database"),
     "connected_loader": ("tests.conftest", "connected_loader"),
+    "d": ("flext_tests", "d"),
     "docker_control": ("tests.conftest", "docker_control"),
+    "e": ("flext_tests", "e"),
     "e2e": ("tests.e2e", ""),
     "event_loop": ("tests.conftest", "event_loop"),
+    "h": ("flext_tests", "h"),
     "integration": ("tests.integration", ""),
     "large_dataset": ("tests.conftest", "large_dataset"),
     "loader_config": ("tests.unit.test_loader", "loader_config"),
     "logger": ("tests.conftest", "logger"),
-    "m": ("tests.models", "TestsFlextTargetOracleModels"),
+    "m": ("tests.models", "FlextTargetOracleTestModels"),
     "mock_loader": ("tests.conftest", "mock_loader"),
     "mock_oracle_api": ("tests.conftest", "mock_oracle_api"),
     "nested_schema": ("tests.conftest", "nested_schema"),
@@ -148,15 +143,17 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "oracle_engine": ("tests.conftest", "oracle_engine"),
     "oracle_loader": ("tests.conftest", "oracle_loader"),
     "oracle_target": ("tests.conftest", "oracle_target"),
-    "p": ("tests.protocols", "TestsFlextTargetOracleProtocols"),
+    "p": ("tests.protocols", "FlextTargetOracleTestProtocols"),
     "performance": ("tests.performance", ""),
     "pytest_collection_modifyitems": (
         "tests.conftest",
         "pytest_collection_modifyitems",
     ),
     "pytest_configure": ("tests.conftest", "pytest_configure"),
+    "r": ("flext_tests", "r"),
     "record": ("tests.conftest", "record"),
     "reset_settings_singleton": ("tests.conftest", "reset_settings_singleton"),
+    "s": ("flext_tests", "s"),
     "sample_config": ("tests.conftest", "sample_config"),
     "sample_record": ("tests.conftest", "sample_record"),
     "sample_target": ("tests.conftest", "sample_target"),
@@ -166,7 +163,7 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "singer_messages": ("tests.conftest", "singer_messages"),
     "state": ("tests.conftest", "state"),
     "state_message": ("tests.conftest", "state_message"),
-    "t": ("tests.typings", "TestsFlextTargetOracleTypes"),
+    "t": ("tests.typings", "FlextTargetOracleTestTypes"),
     "target": ("tests.unit.test_target", "target"),
     "temp_config_file": ("tests.conftest", "temp_config_file"),
     "temporary_env_vars": ("tests.conftest", "temporary_env_vars"),
@@ -190,8 +187,9 @@ _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
         "tests.unit.test_loader",
         "test_loader_execute_returns_ready_payload",
     ),
-    "u": ("tests.utilities", "TestsFlextTargetOracleUtilities"),
+    "u": ("tests.utilities", "FlextTargetOracleTestUtilities"),
     "unit": ("tests.unit", ""),
+    "x": ("flext_tests", "x"),
 }
 
 __all__ = [
@@ -204,27 +202,27 @@ __all__ = [
     "ORACLE_SERVICE",
     "ORACLE_USER",
     "TEST_SCHEMA",
+    "FlextTargetOracleTestConstants",
+    "FlextTargetOracleTestModels",
+    "FlextTargetOracleTestProtocols",
+    "FlextTargetOracleTestTypes",
+    "FlextTargetOracleTestUtilities",
     "TestOracleIntegration",
     "TestOracleSettings",
     "TestOracleTarget",
     "TestOracleTargetE2E",
     "TestPerformance",
     "TestSingerWorkflowE2E",
-    "TestsFlextTargetOracleConstants",
-    "TestsFlextTargetOracleModels",
-    "TestsFlextTargetOracleProtocols",
-    "TestsFlextTargetOracleTypes",
-    "TestsFlextTargetOracleUtilities",
-    "_protocols",
-    "_types",
-    "_utilities",
     "batch_records",
     "c",
     "clean_database",
     "connected_loader",
+    "d",
     "docker_control",
+    "e",
     "e2e",
     "event_loop",
+    "h",
     "integration",
     "large_dataset",
     "loader_config",
@@ -242,8 +240,10 @@ __all__ = [
     "performance",
     "pytest_collection_modifyitems",
     "pytest_configure",
+    "r",
     "record",
     "reset_settings_singleton",
+    "s",
     "sample_config",
     "sample_record",
     "sample_target",
@@ -264,6 +264,7 @@ __all__ = [
     "test_loader_execute_returns_ready_payload",
     "u",
     "unit",
+    "x",
 ]
 
 

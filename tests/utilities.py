@@ -2,7 +2,7 @@
 
 This module provides test-specific utilities that extend the main flext-target-oracle utilities.
 Uses the unified namespace pattern u.Oracle.Tests.* for test-only objects.
-Combines u functionality with project-specific test utilities.
+Combines FlextTestsUtilities functionality with project-specific test utilities.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -11,13 +11,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tests import u
+from flext_tests import FlextTestsUtilities
 
 from flext_target_oracle import FlextTargetOracleUtilities
 
 
-class TestsFlextTargetOracleUtilities(u, FlextTargetOracleUtilities):
-    """Test utilities combining u and project-specific utilities."""
+class FlextTargetOracleTestUtilities(FlextTestsUtilities, FlextTargetOracleUtilities):
+    """Test utilities combining FlextTestsUtilities and project-specific utilities."""
 
     class TargetOracle(FlextTargetOracleUtilities.TargetOracle):
         """TargetOracle domain utilities extending project utilities."""
@@ -26,7 +26,5 @@ class TestsFlextTargetOracleUtilities(u, FlextTargetOracleUtilities):
             """Internal tests declarations for test-only objects."""
 
 
-_utilities = TestsFlextTargetOracleUtilities
-__all__ = ["TestsFlextTargetOracleUtilities", "_utilities"]
-
-u = TestsFlextTargetOracleUtilities
+u = FlextTargetOracleTestUtilities
+__all__ = ["FlextTargetOracleTestUtilities", "u"]

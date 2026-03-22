@@ -12,7 +12,6 @@ from flext_meltano import FlextMeltanoModels
 from pydantic import Field, TypeAdapter
 
 from flext_target_oracle.constants import FlextTargetOracleConstants
-from flext_target_oracle.settings import FlextTargetOracleSettings
 
 
 class _OracleSettingsProtocol(Protocol):
@@ -426,6 +425,8 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
 def _load_target_settings(config_file: str | None) -> r[_OracleSettingsProtocol]:
     """Load settings from JSON file or environment defaults."""
+    from flext_target_oracle.settings import FlextTargetOracleSettings  # noqa: PLC0415
+
     result_type: type[r[_OracleSettingsProtocol]] = r[_OracleSettingsProtocol]
     if config_file is None:
         return result_type.ok(FlextTargetOracleSettings.model_validate({}))

@@ -2,7 +2,7 @@
 
 This module provides test-specific types that extend the main flext-target-oracle types.
 Uses the unified namespace pattern t.Oracle.Tests.* for test-only objects.
-Combines t functionality with project-specific test types.
+Combines FlextTestsTypes functionality with project-specific test types.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -11,20 +11,20 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_oracle import t
+from flext_tests import FlextTestsTypes
+
+from flext_target_oracle.typings import FlextTargetOracleTypes
 
 
-class TestsFlextTargetOracleTypes(t):
-    """Test types combining t and project-specific types."""
+class FlextTargetOracleTestTypes(FlextTestsTypes, FlextTargetOracleTypes):
+    """Test types combining FlextTestsTypes and project-specific types."""
 
-    class TargetOracle(t.TargetOracle):
+    class TargetOracle(FlextTargetOracleTypes.TargetOracle):
         """TargetOracle domain types extending project types."""
 
         class Tests:
             """Internal tests declarations for test-only objects."""
 
 
-_types = TestsFlextTargetOracleTypes
-__all__ = ["TestsFlextTargetOracleTypes", "_types"]
-
-t = TestsFlextTargetOracleTypes
+t = FlextTargetOracleTestTypes
+__all__ = ["FlextTargetOracleTestTypes", "t"]

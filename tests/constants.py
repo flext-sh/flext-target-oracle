@@ -1,6 +1,6 @@
-"""Module skeleton for TestsFlextTargetOracleConstants.
+"""Module skeleton for FlextTargetOracleTestConstants.
 
-Test constants for flexttargetoracle.
+Test constants for flext-target-oracle.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -8,12 +8,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tests import c
+from flext_tests import FlextTestsConstants
 
 
-class TestsFlextTargetOracleConstants(c):
-    """Test constants for flexttargetoracle."""
+class FlextTargetOracleTestConstants(FlextTestsConstants):
+    """Test constants for flext-target-oracle."""
 
 
-c = TestsFlextTargetOracleConstants
-__all__ = ["TestsFlextTargetOracleConstants", "c"]
+c = FlextTargetOracleTestConstants
+__all__ = ["FlextTargetOracleTestConstants", "c"]

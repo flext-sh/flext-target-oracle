@@ -2,7 +2,7 @@
 
 This module provides test-specific models that extend the main flext-target-oracle models.
 Uses the unified namespace pattern m.Oracle.Tests.* for test-only objects.
-Combines m functionality with project-specific test models.
+Combines FlextTestsModels functionality with project-specific test models.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -11,13 +11,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tests import m
+from flext_tests import FlextTestsModels
 
 from flext_target_oracle import FlextTargetOracleModels
 
 
-class TestsFlextTargetOracleModels(m, FlextTargetOracleModels):
-    """Test models combining m and project-specific models."""
+class FlextTargetOracleTestModels(FlextTestsModels, FlextTargetOracleModels):
+    """Test models combining FlextTestsModels and project-specific models."""
 
     class TargetOracle(FlextTargetOracleModels.TargetOracle):
         """TargetOracle domain models extending project models."""
@@ -26,6 +26,6 @@ class TestsFlextTargetOracleModels(m, FlextTargetOracleModels):
             """Internal tests declarations for test-only objects."""
 
 
-m = TestsFlextTargetOracleModels
+m = FlextTargetOracleTestModels
 
-__all__ = ["TestsFlextTargetOracleModels", "m"]
+__all__ = ["FlextTargetOracleTestModels", "m"]
