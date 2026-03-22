@@ -11,6 +11,9 @@ from flext_db_oracle.models import FlextDbOracleModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field, TypeAdapter
 
+from flext_target_oracle.constants import FlextTargetOracleConstants
+from flext_target_oracle.settings import FlextTargetOracleSettings
+
 
 class _OracleSettingsProtocol(Protocol):
     """Protocol for Oracle settings used by command classes."""
@@ -316,10 +319,6 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
             def execute(self) -> r[str]:
                 """Execute about command returning target information."""
-                from flext_target_oracle.constants import (  # noqa: PLC0415
-                    FlextTargetOracleConstants,
-                )
-
                 payload: dict[str, str] = {
                     "name": "flext-target-oracle",
                     "description": "Singer target for Oracle loading",
@@ -394,10 +393,6 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 output_format: str = "json",
             ) -> FlextTargetOracleModels.TargetOracle.OracleTargetAboutCommand:
                 """Create about command instance."""
-                from flext_target_oracle.constants import (  # noqa: PLC0415
-                    FlextTargetOracleConstants,
-                )
-
                 return FlextTargetOracleModels.TargetOracle.OracleTargetAboutCommand(
                     command_type=FlextTargetOracleConstants.TargetOracle.CommandTypes.ABOUT.value,
                     command_id="cmd_oracle_about",
@@ -410,10 +405,6 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 state_file: str | None = None,
             ) -> FlextTargetOracleModels.TargetOracle.OracleTargetLoadCommand:
                 """Create load command instance."""
-                from flext_target_oracle.constants import (  # noqa: PLC0415
-                    FlextTargetOracleConstants,
-                )
-
                 return FlextTargetOracleModels.TargetOracle.OracleTargetLoadCommand(
                     command_type=FlextTargetOracleConstants.TargetOracle.CommandTypes.LOAD.value,
                     command_id="cmd_oracle_load",
@@ -426,10 +417,6 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 config_file: str | None = None,
             ) -> FlextTargetOracleModels.TargetOracle.OracleTargetValidateCommand:
                 """Create validate command instance."""
-                from flext_target_oracle.constants import (  # noqa: PLC0415
-                    FlextTargetOracleConstants,
-                )
-
                 return FlextTargetOracleModels.TargetOracle.OracleTargetValidateCommand(
                     command_type=FlextTargetOracleConstants.TargetOracle.CommandTypes.VALIDATE.value,
                     command_id="cmd_oracle_validate",
@@ -438,11 +425,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
 
 def _load_target_settings(config_file: str | None) -> r[_OracleSettingsProtocol]:
-    """Load settings from JSON file or environment defaults (deferred import)."""
-    from flext_target_oracle.settings import (  # noqa: PLC0415
-        FlextTargetOracleSettings,
-    )
-
+    """Load settings from JSON file or environment defaults."""
     result_type: type[r[_OracleSettingsProtocol]] = r[_OracleSettingsProtocol]
     if config_file is None:
         return result_type.ok(FlextTargetOracleSettings.model_validate({}))
