@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 
 from flext_core import FlextModels
 from flext_core.typings import t
@@ -296,7 +296,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 int, Field(ge=0, description="Processed batch count")
             ]
 
-            def finalize(self) -> LoadStatisticsModel:
+            def finalize(self) -> Self:
                 """Finalize statistics and return self."""
                 return self
 
