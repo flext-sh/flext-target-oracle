@@ -19,7 +19,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from .test_performance import TestPerformance
+    from tests.performance.test_performance import TestPerformance
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestPerformance": ("tests.performance.test_performance", "TestPerformance"),

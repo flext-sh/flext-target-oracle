@@ -13,13 +13,8 @@ if TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_tests import d, e, h, r, s, x
 
-    from . import (
-        e2e as e2e,
-        integration as integration,
-        performance as performance,
-        unit as unit,
-    )
-    from .conftest import (
+    from tests import e2e, integration, performance, unit
+    from tests.conftest import (
         DOCKER_COMPOSE_PATH,
         ORACLE_CONTAINER_NAME,
         ORACLE_HOST,
@@ -60,32 +55,38 @@ if TYPE_CHECKING:
         temp_config_file,
         temporary_env_vars,
     )
-    from .constants import (
+    from tests.constants import (
         FlextTargetOracleTestConstants,
         FlextTargetOracleTestConstants as c,
     )
-    from .e2e.test_singer import TestSingerWorkflowE2E
-    from .integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
-    from .models import FlextTargetOracleTestModels, FlextTargetOracleTestModels as m
-    from .performance.test_performance import TestPerformance
-    from .protocols import (
+    from tests.e2e.test_singer import TestSingerWorkflowE2E
+    from tests.integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
+    from tests.models import (
+        FlextTargetOracleTestModels,
+        FlextTargetOracleTestModels as m,
+    )
+    from tests.performance.test_performance import TestPerformance
+    from tests.protocols import (
         FlextTargetOracleTestProtocols,
         FlextTargetOracleTestProtocols as p,
     )
-    from .typings import FlextTargetOracleTestTypes, FlextTargetOracleTestTypes as t
-    from .unit.test_cli_dispatcher import (
+    from tests.typings import (
+        FlextTargetOracleTestTypes,
+        FlextTargetOracleTestTypes as t,
+    )
+    from tests.unit.test_cli_dispatcher import (
         test_cli_service_falls_back_to_bus_when_flag_disabled,
         test_cli_service_uses_dispatcher_when_flag_enabled,
     )
-    from .unit.test_config import TestOracleSettings
-    from .unit.test_loader import (
+    from tests.unit.test_config import TestOracleSettings
+    from tests.unit.test_loader import (
         loader_config,
         test_ensure_table_exists_returns_result,
         test_load_record_buffers_and_finalize,
         test_loader_execute_returns_ready_payload,
     )
-    from .unit.test_target import TestOracleTarget, target
-    from .utilities import (
+    from tests.unit.test_target import TestOracleTarget, target
+    from tests.utilities import (
         FlextTargetOracleTestUtilities,
         FlextTargetOracleTestUtilities as u,
     )

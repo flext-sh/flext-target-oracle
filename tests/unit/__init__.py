@@ -12,18 +12,18 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from .test_cli_dispatcher import (
+    from tests.unit.test_cli_dispatcher import (
         test_cli_service_falls_back_to_bus_when_flag_disabled,
         test_cli_service_uses_dispatcher_when_flag_enabled,
     )
-    from .test_config import TestOracleSettings
-    from .test_loader import (
+    from tests.unit.test_config import TestOracleSettings
+    from tests.unit.test_loader import (
         loader_config,
         test_ensure_table_exists_returns_result,
         test_load_record_buffers_and_finalize,
         test_loader_execute_returns_ready_payload,
     )
-    from .test_target import TestOracleTarget, target
+    from tests.unit.test_target import TestOracleTarget, target
 
 _LAZY_IMPORTS: dict[str, tuple[str, str]] = {
     "TestOracleSettings": ("tests.unit.test_config", "TestOracleSettings"),
