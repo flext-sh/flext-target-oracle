@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 from flext_core import r
 
 from .models import m
@@ -36,7 +38,7 @@ class FlextTargetOracleService:
 
     def process_singer_messages(
         self,
-        messages: list[
+        messages: Sequence[
             m.TargetOracle.SingerSchemaMessage
             | m.TargetOracle.SingerRecordMessage
             | m.TargetOracle.SingerStateMessage

@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
 from flext_core import FlextProtocols, r, t
@@ -78,8 +79,8 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
 
                 def execute_batch_target(
                     self,
-                    operations: list[m.Meltano.SingerRecordMessage],
-                ) -> FlextProtocols.Result[list[bool]]:
+                    operations: Sequence[m.Meltano.SingerRecordMessage],
+                ) -> FlextProtocols.Result[Sequence[bool]]:
                     """Execute batch of Oracle operations."""
                     ...
 

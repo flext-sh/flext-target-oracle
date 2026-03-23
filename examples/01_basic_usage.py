@@ -25,6 +25,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+from collections.abc import Sequence
 
 from flext_core import FlextLogger, r
 
@@ -71,7 +72,7 @@ def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
-      dict[str, t.NormalizedValue]: Singer SCHEMA message for users table
+      Mapping[str, t.NormalizedValue]: Singer SCHEMA message for users table
 
     """
     return m.TargetOracle.SingerSchemaMessage.model_validate({
@@ -92,11 +93,11 @@ def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
     })
 
 
-def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
+def create_sample_record_messages() -> Sequence[m.TargetOracle.SingerRecordMessage]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
-      List[dict[str, t.NormalizedValue]]: List of Singer RECORD messages
+      List[Mapping[str, t.NormalizedValue]]: List of Singer RECORD messages
 
     """
     return [
@@ -140,7 +141,7 @@ def create_sample_state_message() -> m.TargetOracle.SingerStateMessage:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
-      dict[str, t.NormalizedValue]: Singer STATE message with bookmark information
+      Mapping[str, t.NormalizedValue]: Singer STATE message with bookmark information
 
     """
     return m.TargetOracle.SingerStateMessage.model_validate({

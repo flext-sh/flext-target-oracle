@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
@@ -27,7 +27,7 @@ from .target_exceptions import FlextTargetOracleExceptions
 logger = FlextLogger(__name__)
 
 
-def _default_record_buffers() -> dict[str, list[dict[str, t.Container]]]:
+def _default_record_buffers() -> Mapping[str, Sequence[Mapping[str, t.Container]]]:
     return {}
 
 
@@ -47,7 +47,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     model_config: ClassVar = {"frozen": False}
     _target_config: FlextTargetOracleSettings = PrivateAttr()
     _oracle_api: FlextDbOracleApi = PrivateAttr()
-    _record_buffers: dict[str, list[dict[str, t.Container]]] = PrivateAttr(
+    _record_buffers: Mapping[str, Sequence[Mapping[str, t.Container]]] = PrivateAttr(
         default_factory=_default_record_buffers,
     )
     _total_records: int = PrivateAttr(default=0)
@@ -91,7 +91,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         return self._oracle_api
 
     @property
-    def record_buffers(self) -> dict[str, list[dict[str, t.Container]]]:
+    def record_buffers(self) -> Mapping[str, Sequence[Mapping[str, t.Container]]]:
         """Access record buffers."""
         return self._record_buffers
 
@@ -150,7 +150,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         self,
         stream_name: str,
         schema: Mapping[str, t.Container],
-        _key_properties: list[str] | None = None,
+        _key_properties: Sequence[str] | None = None,
     ) -> r[bool]:
         """Ensure table exists using flext-db-oracle API with correct table creation."""
         try:
@@ -250,7 +250,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def insert_records(
         self,
         stream_name: str,
-        records: list[Mapping[str, t.Scalar]],
+        records: Sequence[Mapping[str, t.Scalar]],
     ) -> r[bool]:
         """Insert multiple records - convenience wrapper used by tests.
 
@@ -375,10 +375,12 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             with self.oracle_api as connected_api:
                 for record in records:
                     insert_sql = f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"
-                    record_adapter: TypeAdapter[dict[str, t.Container]] = TypeAdapter(
-                        dict[str, t.Container],
+                    record_adapter: TypeAdapter[Mapping[str, t.Container]] = (
+                        TypeAdapter(
+                            Mapping[str, t.Container],
+                        )
                     )
-                    params: dict[str, t.Scalar] = {
+                    params: Mapping[str, t.Scalar] = {
                         "data": record_adapter.dump_json(record).decode("utf-8"),
                         "extracted_at": str(record.get("_sdc_extracted_at", loaded_at)),
                         "loaded_at": loaded_at,

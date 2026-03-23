@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
+
 from flext_core import r, t
 from flext_db_oracle import FlextDbOracleApi
 
@@ -81,7 +83,7 @@ class OracleBatchService:
         """Initialize batch storage and required dependencies."""
         self.config = config
         self.oracle_api = oracle_api
-        self._batches: dict[str, list[m.Meltano.SingerRecordMessage]] = {}
+        self._batches: Mapping[str, Sequence[m.Meltano.SingerRecordMessage]] = {}
 
     def add_record(
         self,
@@ -131,7 +133,7 @@ class OracleRecordService:
         stream: m.TargetOracle.SingerStreamModel,
     ) -> r[m.Meltano.SingerRecordMessage]:
         """Apply stream-level mappings and ignored-column filtering."""
-        transformed: dict[str, t.Container] = {}
+        transformed: Mapping[str, t.Container] = {}
         for key, value in record_message.record.items():
             if key in stream.ignored_columns:
                 continue

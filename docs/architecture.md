@@ -198,7 +198,7 @@ class FlextOracleTargetLoader:
     def __init__(self, config: FlextOracleTargetSettings):
         # flext-db-oracle integration
         self.oracle_api = FlextDbOracleApi(oracle_config)
-        self._record_buffers: dict[str, list[t.Dict]] = {}
+        self._record_buffers: Mapping[str, Sequence[t.Dict]] = {}
 
     # Table management
     def ensure_table_exists(self, stream_name: str, schema: dict) -> r[bool]
@@ -303,7 +303,7 @@ class BatchProcessor:
     """Configurable batch processing for optimal performance."""
 
     def __init__(self, batch_size: int = 1000):
-        self._buffers: dict[str, list[Record]] = {}
+        self._buffers: Mapping[str, Sequence[Record]] = {}
         self._batch_size = batch_size
 
     def add_record(self, stream: str, record: dict) -> r[bool]:

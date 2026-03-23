@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 
 import oracledb
@@ -23,11 +24,11 @@ class FlextTargetOracle:
         """Create target with validated settings and loader dependencies."""
         self.config = config
         self.loader = FlextTargetOracleLoader(config)
-        self.schemas: dict[str, m.TargetOracle.SingerSchemaMessage] = {}
+        self.schemas: Mapping[str, m.TargetOracle.SingerSchemaMessage] = {}
         self.state_message: m.TargetOracle.SingerStateMessage = (
             m.TargetOracle.SingerStateMessage(type="STATE", value={})
         )
-        self._record_batches: dict[str, list[dict[str, t.Container]]] = {}
+        self._record_batches: Mapping[str, Sequence[Mapping[str, t.Container]]] = {}
 
     def discover_catalog(self) -> r[m.Meltano.SingerCatalog]:
         """Return Singer-style catalog for known schemas."""
@@ -120,7 +121,7 @@ class FlextTargetOracle:
 
     def process_singer_messages(
         self,
-        messages: list[
+        messages: Sequence[
             m.TargetOracle.SingerSchemaMessage
             | m.TargetOracle.SingerRecordMessage
             | m.TargetOracle.SingerStateMessage
@@ -215,8 +216,8 @@ class FlextTargetOracle:
                 execute_method = getattr(cursor, "execute", None)
                 if not callable(execute_method):
                     return r[bool].fail("Cursor does not support execute")
-                record_adapter: TypeAdapter[dict[str, t.Container]] = TypeAdapter(
-                    dict[str, t.Container],
+                record_adapter: TypeAdapter[Mapping[str, t.Container]] = TypeAdapter(
+                    Mapping[str, t.Container],
                 )
                 for record in batch:
                     extracted_at = record.get(

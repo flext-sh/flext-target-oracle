@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import os
 from asyncio import AbstractEventLoop, get_event_loop_policy
-from collections.abc import Generator
+from collections.abc import Generator, Mapping, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
@@ -264,7 +264,7 @@ def mock_loader() -> Mock:
 
 
 @pytest.fixture
-def schema() -> dict[str, t.NormalizedValue]:
+def schema() -> Mapping[str, t.NormalizedValue]:
     """Simple Singer schema message for unit testing."""
     return {
         "type": "SCHEMA",
@@ -282,7 +282,7 @@ def schema() -> dict[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def record() -> dict[str, t.NormalizedValue]:
+def record() -> Mapping[str, t.NormalizedValue]:
     """Simple Singer record message for unit testing."""
     return {
         "type": "RECORD",
@@ -292,7 +292,7 @@ def record() -> dict[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def state() -> dict[str, t.NormalizedValue]:
+def state() -> Mapping[str, t.NormalizedValue]:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -301,7 +301,7 @@ def state() -> dict[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def simple_schema() -> dict[str, t.NormalizedValue]:
+def simple_schema() -> Mapping[str, t.NormalizedValue]:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
@@ -320,7 +320,7 @@ def simple_schema() -> dict[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def nested_schema() -> dict[str, t.NormalizedValue]:
+def nested_schema() -> Mapping[str, t.NormalizedValue]:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
@@ -364,7 +364,7 @@ def nested_schema() -> dict[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def sample_record() -> dict[str, t.NormalizedValue]:
+def sample_record() -> Mapping[str, t.NormalizedValue]:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -381,7 +381,7 @@ def sample_record() -> dict[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def batch_records() -> list[dict[str, t.NormalizedValue]]:
+def batch_records() -> Sequence[Mapping[str, t.NormalizedValue]]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -400,7 +400,7 @@ def batch_records() -> list[dict[str, t.NormalizedValue]]:
 
 
 @pytest.fixture
-def state_message() -> dict[str, t.NormalizedValue]:
+def state_message() -> Mapping[str, t.NormalizedValue]:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -418,10 +418,10 @@ def state_message() -> dict[str, t.NormalizedValue]:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema: dict[str, t.NormalizedValue],
-    sample_record: dict[str, t.NormalizedValue],
-    state_message: dict[str, t.NormalizedValue],
-) -> list[dict[str, t.NormalizedValue]]:
+    simple_schema: Mapping[str, t.NormalizedValue],
+    sample_record: Mapping[str, t.NormalizedValue],
+    state_message: Mapping[str, t.NormalizedValue],
+) -> Sequence[Mapping[str, t.NormalizedValue]]:
     """Complete Singer message stream for testing."""
     return [simple_schema, sample_record, sample_record, state_message]
 
@@ -429,7 +429,7 @@ def singer_messages(
 @contextmanager
 def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
     """Temporarily set environment variables."""
-    old_values: dict[str, str | None] = {}
+    old_values: Mapping[str, str | None] = {}
     for key, value in kwargs.items():
         old_values[key] = os.environ.get(key)
         if value is None:
@@ -473,7 +473,7 @@ def connected_loader(oracle_loader: FlextTargetOracleLoader) -> FlextTargetOracl
 
 
 @pytest.fixture
-def large_dataset() -> list[t.Dict]:
+def large_dataset() -> Sequence[t.Dict]:
     """Generate large dataset for performance testing."""
     dict_adapter: TypeAdapter[t.Dict] = TypeAdapter(t.Dict)
     schema = dict_adapter.validate_python({
@@ -503,13 +503,13 @@ def large_dataset() -> list[t.Dict]:
         })
         for i in range(10000)
     ]
-    result: list[t.Dict] = []
+    result: Sequence[t.Dict] = []
     result.append(schema)
     result.extend(records)
     return result
 
 
-def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+def pytest_collection_modifyitems(items: Sequence[pytest.Item]) -> None:
     """Add markers to test items based on their location."""
     for item in items:
         if "unit" in str(item.fspath):

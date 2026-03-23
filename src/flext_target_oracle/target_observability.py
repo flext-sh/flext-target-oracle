@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator, Mapping
+from collections.abc import Generator, Mapping, Sequence
 from contextlib import contextmanager
 
 from flext_core import FlextLogger, c, t
@@ -101,7 +101,7 @@ class FlextOracleError:
         def schema_validation_failed(
             *,
             stream_name: str,
-            schema_errors: list[str],
+            schema_errors: Sequence[str],
             singer_specification: str = "1.5.0",
         ) -> FlextTargetOracleExceptions.SchemaError:
             """Build a Singer schema validation failure."""

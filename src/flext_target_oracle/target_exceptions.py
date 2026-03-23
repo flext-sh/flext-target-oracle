@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import ClassVar, override
 
@@ -41,7 +41,7 @@ class OracleErrorMetadata(m.Value):
 
 
 def _extract_legacy_metadata_kwargs(
-    kwargs: dict[str, t.RuntimeData],
+    kwargs: Mapping[str, t.RuntimeData],
 ) -> tuple[str | None, Mapping[str, t.MetadataValue] | None, str | None]:
     code_value = kwargs.pop("code", None)
     context_value = kwargs.pop("context", None)
@@ -52,7 +52,7 @@ def _extract_legacy_metadata_kwargs(
         correlation_value if isinstance(correlation_value, str) else None
     )
 
-    legacy_context: dict[str, t.MetadataValue] | None = None
+    legacy_context: Mapping[str, t.MetadataValue] | None = None
     if isinstance(context_value, Mapping):
         legacy_context = {
             str(key): _to_metadata_value(value) for key, value in context_value.items()
@@ -126,7 +126,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 legacy_correlation_id=legacy_correlation_id,
             )
             resolved_metadata = metadata_result.value
-            oracle_context: dict[str, t.MetadataValue] = (
+            oracle_context: Mapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if host is not None:
@@ -187,7 +187,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 legacy_correlation_id=legacy_correlation_id,
             )
             resolved_metadata = metadata_result.value
-            oracle_context: dict[str, t.MetadataValue] = (
+            oracle_context: Mapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if user is not None:
@@ -228,7 +228,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             *,
             stream_name: str | None = None,
             record_count: int | None = None,
-            error_records: list[Mapping[str, t.ContainerValue]] | None = None,
+            error_records: Sequence[Mapping[str, t.ContainerValue]] | None = None,
             operation: str | None = None,
             metadata: OracleErrorMetadata | None = None,
             **kwargs: t.RuntimeData,
@@ -245,7 +245,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 legacy_correlation_id=legacy_correlation_id,
             )
             resolved_metadata = metadata_result.value
-            oracle_context: dict[str, t.MetadataValue] = (
+            oracle_context: Mapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if stream_name is not None:
@@ -291,7 +291,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             stream_name: str | None = None,
             table_name: str | None = None,
             schema_hash: str | None = None,
-            validation_errors: list[str] | None = None,
+            validation_errors: Sequence[str] | None = None,
             metadata: OracleErrorMetadata | None = None,
             **kwargs: t.RuntimeData,
         ) -> None:
@@ -307,7 +307,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 legacy_correlation_id=legacy_correlation_id,
             )
             resolved_metadata = metadata_result.value
-            oracle_context: dict[str, t.MetadataValue] = (
+            oracle_context: Mapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if stream_name is not None:
@@ -360,7 +360,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 legacy_correlation_id=legacy_correlation_id,
             )
             resolved_metadata = metadata_result.value
-            oracle_context: dict[str, t.MetadataValue] = (
+            oracle_context: Mapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if sql_statement is not None:
@@ -386,4 +386,4 @@ class FlextTargetOracleExceptions(FlextExceptions):
         """Oracle record processing errors."""
 
 
-__all__: list[str] = ["FlextTargetOracleExceptions"]
+__all__: Sequence[str] = ["FlextTargetOracleExceptions"]

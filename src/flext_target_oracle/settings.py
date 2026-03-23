@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import TYPE_CHECKING, Annotated
 
 from flext_core import FlextLogger, FlextSettings, r
@@ -142,7 +143,7 @@ def validate_oracle_configuration(
     return config.validate_business_rules()
 
 
-__all__: list[str] = [
+__all__: Sequence[str] = [
     "FlextTargetOracleSettings",
     "validate_oracle_configuration",
 ]
