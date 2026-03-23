@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import time
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 
 import pytest
 from pydantic import TypeAdapter
@@ -23,15 +23,14 @@ from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
-    c,
     m,
-    t,
 )
+from tests import c, t
 
 
 def _schema_parts(
-    message: Mapping[str, object],
-) -> tuple[dict[str, t.Container], list[str]]:
+    message: Mapping[str, t.NormalizedValue],
+) -> tuple[Mapping[str, t.Container], Sequence[str]]:
     schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(message)
     return (schema_message.schema_definition, schema_message.key_properties)
 
@@ -46,7 +45,7 @@ class TestOracleIntegration:
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: Engine,
-        simple_schema: dict[str, object],
+        simple_schema: Mapping[str, t.NormalizedValue],
     ) -> None:
         """Test creating a simple table with basic data types."""
         stream_name = "test_users"
@@ -81,7 +80,7 @@ class TestOracleIntegration:
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: Engine,
-        simple_schema: dict[str, object],
+        simple_schema: Mapping[str, t.NormalizedValue],
     ) -> None:
         """Test inserting data and retrieving it."""
         stream_name = "test_insert"
@@ -90,7 +89,7 @@ class TestOracleIntegration:
             stream_name, schema_dict, key_props
         )
         assert create_res.is_success
-        records: list[Mapping[str, t.Scalar]] = [
+        records: Sequence[Mapping[str, t.Scalar]] = [
             {"id": 1, "name": "John Doe", "email": "john@example.com"},
             {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
         ]
@@ -110,7 +109,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        simple_schema: dict[str, object],
+        simple_schema: Mapping[str, t.NormalizedValue],
     ) -> None:
         """Test merge mode for updating existing records."""
         oracle_config = oracle_config.model_copy(update={"sdc_mode": "merge"})
@@ -121,12 +120,12 @@ class TestOracleIntegration:
         schema_dict, key_props = _schema_parts(simple_schema)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.is_success
-        initial_records: list[Mapping[str, t.Scalar]] = [
+        initial_records: Sequence[Mapping[str, t.Scalar]] = [
             {"id": 1, "name": "Original Name", "email": "original@example.com"}
         ]
         insert_result = loader.insert_records(stream_name, initial_records)
         assert insert_result.is_success
-        updated_records: list[Mapping[str, t.Scalar]] = [
+        updated_records: Sequence[Mapping[str, t.Scalar]] = [
             {"id": 1, "name": "Updated Name", "email": "updated@example.com"}
         ]
         result = loader.insert_records(stream_name, updated_records)
@@ -169,7 +168,7 @@ class TestOracleIntegration:
         schema_dict, key_props = _schema_parts(schema_message)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.is_success
-        records: list[Mapping[str, t.Scalar]] = [
+        records: Sequence[Mapping[str, t.Scalar]] = [
             {"id": i, "data": f"Bulk test data {i}", "value": i * 1.5}
             for i in range(5000)
         ]
@@ -188,7 +187,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        nested_schema: dict[str, object],
+        nested_schema: Mapping[str, t.NormalizedValue],
     ) -> None:
         """Test JSON storage mode with nested data."""
         oracle_config = oracle_config.model_copy(update={})
@@ -307,7 +306,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        simple_schema: dict[str, object],
+        simple_schema: Mapping[str, t.NormalizedValue],
     ) -> None:
         """Test truncate table before loading data."""
         oracle_config = oracle_config.model_copy(update={"truncate_before_load": True})
@@ -335,7 +334,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        simple_schema: dict[str, object],
+        simple_schema: Mapping[str, t.NormalizedValue],
     ) -> None:
         """Test creation of custom indexes."""
         oracle_config = oracle_config.model_copy(
@@ -382,7 +381,7 @@ class TestOracleTargetE2E:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        singer_messages: list[dict[str, object]],
+        singer_messages: Sequence[Mapping[str, t.NormalizedValue]],
     ) -> None:
         """Test complete Singer workflow: schema -> records -> state."""
         target = FlextTargetOracle(config=oracle_config)

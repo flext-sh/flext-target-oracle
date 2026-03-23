@@ -10,9 +10,10 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import cast
 
+from flext_core import t
 from pydantic import TypeAdapter
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, t
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 
 def load_config() -> Mapping[str, t.NormalizedValue]:

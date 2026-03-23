@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from flext_target_oracle import FlextTargetOracleSettings, c
+from flext_target_oracle import FlextTargetOracleSettings
+from tests import c
 
 
 class TestOracleSettings:

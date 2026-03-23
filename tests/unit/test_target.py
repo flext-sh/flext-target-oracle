@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping, Sequence
 from typing import cast
 from unittest.mock import MagicMock, Mock, patch
 
@@ -16,6 +17,7 @@ from flext_target_oracle import (
     FlextTargetOracleSettings,
     m,
 )
+from tests import t
 
 
 @pytest.fixture
@@ -113,15 +115,15 @@ class TestOracleTarget:
         assert target.process_singer_message(state_message).is_success
         state_value = target.state_message.value
         assert isinstance(state_value, dict)
-        bookmarks_obj: object = state_value.get("bookmarks")
+        bookmarks_obj: t.NormalizedValue | None = state_value.get("bookmarks")
         assert isinstance(bookmarks_obj, dict)
-        bookmarks = cast(dict[str, object], bookmarks_obj)
+        bookmarks = cast(Mapping[str, t.NormalizedValue], bookmarks_obj)
         assert bookmarks.get("users") == 1
 
     def test_process_singer_messages_flushes_loader(
         self, target: FlextTargetOracle
     ) -> None:
-        messages: list[
+        messages: Sequence[
             m.TargetOracle.SingerSchemaMessage
             | m.TargetOracle.SingerRecordMessage
             | m.TargetOracle.SingerStateMessage

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from typing import cast
 from unittest.mock import Mock
 
@@ -10,6 +11,7 @@ import pytest
 from flext_core import r
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
+from tests import t
 
 
 @pytest.mark.e2e
@@ -64,10 +66,10 @@ class TestSingerWorkflowE2E:
         assert "orders" in target.schemas
         state_value = target.state_message.value
         assert isinstance(state_value, dict)
-        bookmarks_obj: object = state_value.get("bookmarks")
+        bookmarks_obj: t.NormalizedValue | None = state_value.get("bookmarks")
         assert isinstance(bookmarks_obj, dict)
-        bookmarks = cast(dict[str, object], bookmarks_obj)
-        orders_obj: object = bookmarks.get("orders")
+        bookmarks = cast(Mapping[str, t.NormalizedValue], bookmarks_obj)
+        orders_obj: t.NormalizedValue | None = bookmarks.get("orders")
         assert isinstance(orders_obj, dict)
-        orders = cast(dict[str, object], orders_obj)
+        orders = cast(Mapping[str, t.NormalizedValue], orders_obj)
         assert orders.get("version") == 1

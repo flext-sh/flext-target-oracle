@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import time
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from unittest.mock import Mock
 
 import pytest
@@ -45,7 +45,7 @@ class TestPerformance:
 
     def test_message_processing_scales_linearly_for_state_updates(self) -> None:
         target = self._target()
-        messages: list[
+        messages: Sequence[
             m.TargetOracle.SingerSchemaMessage
             | m.TargetOracle.SingerRecordMessage
             | m.TargetOracle.SingerStateMessage
