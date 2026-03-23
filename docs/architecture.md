@@ -1,7 +1,6 @@
 # Architecture Guide
 
 <!-- TOC START -->
-
 - [Overview](#overview)
 - [Architecture Principles](#architecture-principles)
   - [FLEXT Core Integration](#flext-core-integration)
@@ -33,7 +32,6 @@
   - [Planned Improvements](#planned-improvements)
   - [Scalability Considerations](#scalability-considerations)
 - [Related Documentation](#related-documentation)
-
 <!-- TOC END -->
 
 **FLEXT Target Oracle - Technical Architecture Documentation**

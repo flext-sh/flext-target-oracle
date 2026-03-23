@@ -1,7 +1,6 @@
 # Singer SDK Integration Guide
 
 <!-- TOC START -->
-
 - [Overview](#overview)
 - [Singer Protocol Implementation](#singer-protocol-implementation)
   - [Message Types Supported](#message-types-supported)
@@ -19,7 +18,7 @@
   - [Batch Size Tuning](#batch-size-tuning)
   - [Oracle-Specific Optimizations](#oracle-specific-optimizations)
 - [Error Handling and Reliability](#error-handling-and-reliability)
-  - [r Error Patterns](#flextresult-error-patterns)
+  - [r Error Patterns](#r-error-patterns)
   - [Transaction Management](#transaction-management)
 - [Testing Singer Integration](#testing-singer-integration)
   - [Unit Testing Singer Messages](#unit-testing-singer-messages)
@@ -28,7 +27,6 @@
   - [Version 0.9.9 Requirements](#version-099-requirements)
   - [Version 1.1.0 Enhancements](#version-110-enhancements)
   - [Version 1.2.0 Advanced Features](#version-120-advanced-features)
-
 <!-- TOC END -->
 
 **FLEXT Target Oracle - Singer Protocol Compliance Documentation**

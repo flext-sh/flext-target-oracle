@@ -1,7 +1,6 @@
 # TODO - Status dos Desvios e Melhorias do Projeto
 
 <!-- TOC START -->
-
 - [🚨 DESVIOS CRÍTICOS DE ARQUITETURA](#desvios-crticos-de-arquitetura)
   - [1. **DUPLICAÇÃO DE EXCEÇÕES** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE](#1-duplicao-de-excees-documentado-implementao-pendente)
   - [2. **USO INCORRETO DE execute_ddl PARA DML** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE](#2-uso-incorreto-de-executeddl-para-dml-documentado-implementao-pendente)
@@ -34,7 +33,6 @@
   - [**Métricas de Qualidade Documentação**](#mtricas-de-qualidade-documentao)
   - [**Status de Produção Realista**](#status-de-produo-realista)
   - [**Próxima Fase Necessária**](#prxima-fase-necessria)
-
 <!-- TOC END -->
 
 **Data da Análise**: 2025-08-04\

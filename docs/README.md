@@ -1,15 +1,14 @@
 # FLEXT Target Oracle Documentation
 
 <!-- TOC START -->
-
 - [Quick Navigation](#quick-navigation)
   - [📚 **Core Documentation**](#core-documentation)
   - [🚀 **Getting Started**](#getting-started)
 - [Document Overview](#document-overview)
-  - \[[Architecture Guide](architecture.md)\](#architecture-guidearchitecturemd)
-  - \[[Development Guide](development.md)\](#development-guidedevelopmentmd)
-  - \[[Singer Integration](guides/singer-integration.md)\](#singer-integrationguidessinger-integrationmd)
-  - \[[TODO & Issues](TODO.md)\](#todo-issuestodomd)
+  - [[Architecture Guide](architecture.md)](#architecture-guidearchitecturemd)
+  - [[Development Guide](development.md)](#development-guidedevelopmentmd)
+  - [[Singer Integration](guides/singer-integration.md)](#singer-integrationguidessinger-integrationmd)
+  - [[TODO & Issues](TODO.md)](#todo-issuestodomd)
 - [Project Status](#project-status)
   - [**Current Version**: 0.9.9 - Pre-production](#current-version-099-pre-production)
   - [**Production Readiness Checklist**](#production-readiness-checklist)
@@ -24,7 +23,6 @@
   - [Getting Help](#getting-help)
   - [Contributing to Documentation](#contributing-to-documentation)
   - [Feedback Channels](#feedback-channels)
-
 <!-- TOC END -->
 
 **Complete technical documentation for the FLEXT Target Oracle Singer target.**

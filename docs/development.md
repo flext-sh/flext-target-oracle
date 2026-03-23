@@ -1,7 +1,6 @@
 # Development Guide
 
 <!-- TOC START -->
-
 - [Quick Start](#quick-start)
   - [Prerequisites](#prerequisites)
   - [Environment Setup](#environment-setup)
@@ -11,7 +10,7 @@
   - [Testing Workflow](#testing-workflow)
   - [Code Quality Standards](#code-quality-standards)
 - [FLEXT Pattern Implementation](#flext-pattern-implementation)
-  - [r Railway Pattern](#flextresult-railway-pattern)
+  - [r Railway Pattern](#r-railway-pattern)
   - [Configuration Patterns](#configuration-patterns)
   - [Logging Patterns](#logging-patterns)
 - [Oracle Integration Development](#oracle-integration-development)
@@ -30,7 +29,6 @@
   - [Pull Request Checklist](#pull-request-checklist)
   - [Commit Message Format](#commit-message-format)
   - [Review Process](#review-process)
-
 <!-- TOC END -->
 
 **FLEXT Target Oracle - Developer Documentation**
