@@ -116,7 +116,7 @@ class FlextTargetOracleSettings(FlextSettings):
         self,
     ) -> FlextTargetOracleModels.TargetOracle.OracleConnectionModel:
         """Get Oracle database connection configuration."""
-        from .models import FlextTargetOracleModels
+        from .models import FlextTargetOracleModels  # noqa: PLC0415 — lazy import breaks circular dependency with models
 
         return FlextTargetOracleModels.TargetOracle.OracleConnectionModel(
             host=self.oracle_host,
