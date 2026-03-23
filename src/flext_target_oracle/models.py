@@ -424,7 +424,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
 def _load_target_settings(config_file: str | None) -> r[_OracleSettingsProtocol]:
     """Load settings from JSON file or environment defaults."""
-    from flext_target_oracle.settings import FlextTargetOracleSettings  # noqa: PLC0415
+    from flext_target_oracle.settings import FlextTargetOracleSettings
 
     result_type: type[r[_OracleSettingsProtocol]] = r[_OracleSettingsProtocol]
     if config_file is None:

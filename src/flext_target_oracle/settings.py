@@ -115,7 +115,7 @@ class FlextTargetOracleSettings(FlextSettings):
         self,
     ) -> FlextTargetOracleModels.TargetOracle.OracleConnectionModel:
         """Get Oracle database connection configuration."""
-        from .models import FlextTargetOracleModels  # noqa: PLC0415
+        from .models import FlextTargetOracleModels
 
         return FlextTargetOracleModels.TargetOracle.OracleConnectionModel(
             host=self.oracle_host,
