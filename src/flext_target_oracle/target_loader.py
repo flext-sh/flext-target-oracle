@@ -27,7 +27,7 @@ from .target_exceptions import FlextTargetOracleExceptions
 logger = FlextLogger(__name__)
 
 
-def _default_record_buffers() -> Mapping[str, Sequence[Mapping[str, t.Container]]]:
+def _default_record_buffers() -> dict[str, list[Mapping[str, t.Container]]]:
     return {}
 
 
@@ -47,7 +47,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     model_config: ClassVar = {"frozen": False}
     _target_config: FlextTargetOracleSettings = PrivateAttr()
     _oracle_api: FlextDbOracleApi = PrivateAttr()
-    _record_buffers: Mapping[str, Sequence[Mapping[str, t.Container]]] = PrivateAttr(
+    _record_buffers: dict[str, list[Mapping[str, t.Container]]] = PrivateAttr(
         default_factory=_default_record_buffers,
     )
     _total_records: int = PrivateAttr(default=0)
@@ -91,7 +91,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         return self._oracle_api
 
     @property
-    def record_buffers(self) -> Mapping[str, Sequence[Mapping[str, t.Container]]]:
+    def record_buffers(self) -> dict[str, list[Mapping[str, t.Container]]]:
         """Access record buffers."""
         return self._record_buffers
 

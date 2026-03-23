@@ -524,8 +524,10 @@ split-on-trailing-comma = true
   "S105",
 ]
 "**/models.py" = [
+  "PLC0415",
   "PLC2801",
   "S102",
+  "S105",
 ]
 "**/output.py" = [
   "FBT001",
@@ -548,6 +550,8 @@ split-on-trailing-comma = true
 ]
 "**/settings.py" = [
   "ANN401",
+  "PLC0415",
+  "S105",
 ]
 "**/singer/*.py" = [
   "S404",

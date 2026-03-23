@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-
 from flext_core import r, t
 from flext_db_oracle import FlextDbOracleApi
 
@@ -83,7 +81,7 @@ class OracleBatchService:
         """Initialize batch storage and required dependencies."""
         self.config = config
         self.oracle_api = oracle_api
-        self._batches: Mapping[str, Sequence[m.Meltano.SingerRecordMessage]] = {}
+        self._batches: dict[str, list[m.Meltano.SingerRecordMessage]] = {}
 
     def add_record(
         self,
@@ -133,20 +131,20 @@ class OracleRecordService:
         stream: m.TargetOracle.SingerStreamModel,
     ) -> r[m.Meltano.SingerRecordMessage]:
         """Apply stream-level mappings and ignored-column filtering."""
-        transformed: Mapping[str, t.Container] = {}
+        transformed: dict[str, t.Container] = {}
         for key, value in record_message.record.items():
             if key in stream.ignored_columns:
                 continue
             mapped_key = stream.column_mappings.get(key) or key
             transformed[mapped_key] = value
         return r[m.Meltano.SingerRecordMessage].ok(
-            m.Meltano.SingerRecordMessage(
-                type="RECORD",
-                stream=record_message.stream,
-                record=transformed,
-                time_extracted=record_message.time_extracted,
-                version=record_message.version,
-            ),
+            m.Meltano.SingerRecordMessage.model_validate({
+                "type": "RECORD",
+                "stream": record_message.stream,
+                "record": transformed,
+                "time_extracted": record_message.time_extracted,
+                "version": record_message.version,
+            }),
         )
 
     def validate_record(
