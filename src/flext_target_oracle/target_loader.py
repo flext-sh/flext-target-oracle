@@ -15,8 +15,7 @@ from collections.abc import Mapping
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
-from flext_core import FlextLogger, FlextService, r
-from flext_core.typings import t
+from flext_core import FlextLogger, FlextService, r, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import PrivateAttr, TypeAdapter
 

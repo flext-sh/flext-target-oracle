@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from flext_core import r
-from flext_core.typings import t
+from flext_core import r, t
 from flext_db_oracle import FlextDbOracleApi
 
 from .models import m

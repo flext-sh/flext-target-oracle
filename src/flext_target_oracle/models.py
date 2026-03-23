@@ -5,8 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Annotated, Literal, Protocol, Self, override
 
-from flext_core import FlextModels, h, r
-from flext_core.typings import t
+from flext_core import FlextModels, h, r, t
 from flext_db_oracle.models import FlextDbOracleModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field, TypeAdapter

@@ -6,8 +6,7 @@ import re
 from datetime import UTC, datetime
 
 import oracledb
-from flext_core import FlextLogger, r
-from flext_core.typings import t
+from flext_core import FlextLogger, r, t
 from pydantic import TypeAdapter, ValidationError
 
 from .models import m

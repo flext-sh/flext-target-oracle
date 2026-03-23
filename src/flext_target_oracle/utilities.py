@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
-from flext_core import r
-from flext_core.typings import t
+from flext_core import r, t
 from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import FlextMeltanoUtilities
 from pydantic import TypeAdapter
