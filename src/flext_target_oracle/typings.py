@@ -36,19 +36,24 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
             FlextMeltanoTypes.Scalar | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type StreamConfiguration = Mapping[
-            str, str | bool | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | bool | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type MessageProcessing = Mapping[
-            str, str | Sequence[FlextMeltanoTypes.ContainerValueMapping]
+            str,
+            str | Sequence[FlextMeltanoTypes.ContainerValueMapping],
         ]
         type RecordHandling = Mapping[
-            str, str | FlextMeltanoTypes.ContainerValueMapping | bool
+            str,
+            str | FlextMeltanoTypes.ContainerValueMapping | bool,
         ]
         type StateManagement = Mapping[
-            str, str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type BatchProcessing = Mapping[
-            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
 
     class OracleDatabase:
@@ -59,26 +64,32 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
             FlextMeltanoTypes.Scalar | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type ConnectionManagement = Mapping[
-            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type SessionSettings = Mapping[
-            str, str | bool | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | bool | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type TransactionControl = Mapping[
-            str, str | bool | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | bool | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type DatabaseMetadata = Mapping[
-            str, str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type PerformanceSettings = Mapping[
-            str, int | float | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            int | float | FlextMeltanoTypes.ContainerValueMapping,
         ]
 
     class OracleTable:
         """Oracle table and schema complex types."""
 
         type TableConfiguration = Mapping[
-            str, str | bool | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | bool | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type SchemaDefinition = Mapping[
             str,
@@ -94,10 +105,12 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
             | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type ConstraintDefinition = Mapping[
-            str, str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type TablespaceSettings = Mapping[
-            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
 
     class OracleSql:
@@ -108,7 +121,8 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
             str | bool | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type QueryExecution = Mapping[
-            str, str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type BulkOperations = Mapping[
             str,
@@ -118,13 +132,16 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
             | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type PreparedStatements = Mapping[
-            str, str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type SqlOptimization = Mapping[
-            str, bool | str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            bool | str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type ResultSetHandling = Mapping[
-            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
 
     class OraclePerformance:
@@ -135,19 +152,24 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
             str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type ConnectionPooling = Mapping[
-            str, int | bool | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            int | bool | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type BulkLoadOptimization = Mapping[
-            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type QueryOptimization = Mapping[
-            str, str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type CachingStrategy = Mapping[
-            str, bool | str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            bool | str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type ParallelProcessing = Mapping[
-            str, int | str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            int | str | FlextMeltanoTypes.ContainerValueMapping,
         ]
 
     class DataTransformation:
@@ -164,16 +186,20 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
             | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type DataValidation = Mapping[
-            str, str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type TypeConversion = Mapping[
-            str, bool | str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            bool | str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type FilteringRules = Mapping[
-            str, str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type TransformationResult = Mapping[
-            str, Mapping[str, FlextMeltanoTypes.ContainerValue]
+            str,
+            Mapping[str, FlextMeltanoTypes.ContainerValue],
         ]
 
     class StreamProcessing:
@@ -184,17 +210,21 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
             str | bool | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type StreamMetadata = Mapping[
-            str, str | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type StreamRecord = Mapping[str, FlextMeltanoTypes.ContainerValue]
         type StreamState = Mapping[
-            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type StreamBookmark = Mapping[
-            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type StreamSchema = Mapping[
-            str, str | FlextMeltanoTypes.ContainerValueMapping | bool
+            str,
+            str | FlextMeltanoTypes.ContainerValueMapping | bool,
         ]
 
     class SingerMessage:
@@ -218,16 +248,20 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
             bool | str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type ErrorRecovery = Mapping[
-            str, str | bool | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | bool | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type ErrorReporting = Mapping[
-            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type ErrorClassification = Mapping[
-            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type ErrorMetrics = Mapping[
-            str, int | float | FlextMeltanoTypes.ContainerValueMapping
+            str,
+            int | float | FlextMeltanoTypes.ContainerValueMapping,
         ]
         type ErrorTracking = Sequence[
             Mapping[str, str | int | FlextMeltanoTypes.ContainerValueMapping]

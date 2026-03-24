@@ -63,7 +63,7 @@ def create_configuration() -> FlextTargetOracleSettings:
         "transaction_timeout": 30,
     })
     logger.info(
-        f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service_name}"
+        f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service_name}",
     )
     return config
 
@@ -148,8 +148,8 @@ def create_sample_state_message() -> m.TargetOracle.SingerStateMessage:
         "type": "STATE",
         "value": {
             "bookmarks": {
-                "users": {"last_id": 3, "last_updated": "2025-01-01T12:00:00Z"}
-            }
+                "users": {"last_id": 3, "last_updated": "2025-01-01T12:00:00Z"},
+            },
         },
     })
 

@@ -150,10 +150,14 @@ class ProductionConfig:
             oracle_service,
         )
         logger.info(
-            "Target schema: %s, Batch size: %s", default_target_schema, batch_size
+            "Target schema: %s, Batch size: %s",
+            default_target_schema,
+            batch_size,
         )
         logger.info(
-            "Load method: %s, Connection timeout: %ss", load_method, connection_timeout
+            "Load method: %s, Connection timeout: %ss",
+            load_method,
+            connection_timeout,
         )
         return config
 
@@ -241,7 +245,7 @@ class ProductionTargetManager:
             validation_result = r[bool].ok(value=True)
             if validation_result.is_failure:
                 return r[bool].fail(
-                    f"Configuration validation failed: {validation_result.error}"
+                    f"Configuration validation failed: {validation_result.error}",
                 )
             logger.info("Creating Oracle target instance")
             self.target = FlextTargetOracle(self.config)
@@ -264,7 +268,8 @@ class ProductionTargetManager:
             return r[bool].fail(f"Initialization error: {e}")
 
     def process_singer_stream(
-        self, messages: Sequence[SingerMessage]
+        self,
+        messages: Sequence[SingerMessage],
     ) -> r[t.ContainerMapping]:
         """Process complete Singer message stream with comprehensive error handling.
 
@@ -292,7 +297,10 @@ class ProductionTargetManager:
                 elif isinstance(message, m.TargetOracle.SingerStateMessage):
                     message_type = "STATE"
                 logger.debug(
-                    "Processing message %d/%d: %s", i + 1, len(messages), message_type
+                    "Processing message %d/%d: %s",
+                    i + 1,
+                    len(messages),
+                    message_type,
                 )
                 if not self.target:
                     return r[t.ContainerMapping].fail("Target not initialized")
@@ -308,7 +316,9 @@ class ProductionTargetManager:
                 else:
                     stats.errors_encountered += 1
                     logger.error(
-                        "Message %d processing failed: %s", i + 1, result.error
+                        "Message %d processing failed: %s",
+                        i + 1,
+                        result.error,
                     )
                 if (i + 1) % 1000 == 0:
                     logger.info("Processed %d/%d messages", i + 1, len(messages))
@@ -328,7 +338,8 @@ class ProductionTargetManager:
             )
             stats.processing_duration_seconds = processing_duration
             logger.info(
-                "Stream processing completed in %.2f seconds", processing_duration
+                "Stream processing completed in %.2f seconds",
+                processing_duration,
             )
             return r[t.ContainerMapping].ok(stats.model_dump())
         except (
@@ -428,7 +439,7 @@ def demonstrate_production_setup() -> None:
                 messages_processed=str(stats.get("messages_processed", 0)),
                 records_processed=str(stats.get("records_processed", 0)),
                 processing_duration_seconds=str(
-                    stats.get("processing_duration_seconds", 0)
+                    stats.get("processing_duration_seconds", 0),
                 ),
                 errors_encountered=str(stats.get("errors_encountered", 0)),
             )
@@ -535,8 +546,8 @@ def create_production_sample_stream() -> Sequence[SingerMessage]:
                         base_date + datetime.timedelta(hours=100)
                     ).isoformat()
                     + "Z",
-                }
-            }
+                },
+            },
         },
     })
     messages.append(state_message)
@@ -551,7 +562,8 @@ def main() -> None:
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     if missing_vars:
         logger.error(
-            "Missing required environment variables: %s", ", ".join(missing_vars)
+            "Missing required environment variables: %s",
+            ", ".join(missing_vars),
         )
         logger.error("Please set the following environment variables:")
         for var in required_vars:

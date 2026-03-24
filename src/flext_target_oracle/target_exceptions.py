@@ -29,6 +29,8 @@ def _to_metadata_value(value: t.RuntimeData | None) -> t.MetadataValue:
 
 
 class FlextTargetOracleErrorMetadata(m.Value):
+    """Structured metadata attached to Oracle target error responses."""
+
     model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
 
     code: str = Field(description="Canonical error code")

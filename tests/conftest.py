@@ -120,7 +120,7 @@ def clean_database(oracle_engine: Engine) -> None:
     with oracle_engine.connect() as conn:
         result = conn.execute(
             text(
-                "\n\n              SELECT table_name\n              FROM all_tables\n              WHERE owner = :schema\n              "
+                "\n\n              SELECT table_name\n              FROM all_tables\n              WHERE owner = :schema\n              ",
             ),
             {"schema": TEST_SCHEMA},
         )
@@ -219,34 +219,54 @@ def mock_oracle_api() -> Mock:
     mock_api.__enter__ = Mock(return_value=mock_api)
     mock_api.__exit__ = Mock(return_value=None)
     mock_api.connect.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.disconnect.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.get_tables.return_value = MagicMock(
-        is_success=True, is_failure=False, value=[]
+        is_success=True,
+        is_failure=False,
+        value=[],
     )
     mock_api.create_table_ddl.return_value = MagicMock(
-        is_success=True, is_failure=False, value="CREATE TABLE..."
+        is_success=True,
+        is_failure=False,
+        value="CREATE TABLE...",
     )
     mock_api.execute_ddl.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.build_insert_statement.return_value = MagicMock(
-        is_success=True, is_failure=False, value="INSERT INTO..."
+        is_success=True,
+        is_failure=False,
+        value="INSERT INTO...",
     )
     mock_api.build_merge_statement.return_value = MagicMock(
-        is_success=True, is_failure=False, value="MERGE INTO..."
+        is_success=True,
+        is_failure=False,
+        value="MERGE INTO...",
     )
     mock_api.query.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.execute_batch.return_value = MagicMock(
-        is_success=True, is_failure=False, value=None
+        is_success=True,
+        is_failure=False,
+        value=None,
     )
     mock_api.get_columns.return_value = MagicMock(
-        is_success=True, is_failure=False, value=[]
+        is_success=True,
+        is_failure=False,
+        value=[],
     )
     mock_api.connection = MagicMock()
     return mock_api
@@ -410,8 +430,8 @@ def state_message() -> t.ContainerMapping:
                     "replication_key": "created_at",
                     "replication_key_value": "2025-01-20T12:00:00Z",
                     "version": 1,
-                }
-            }
+                },
+            },
         },
     }
 
@@ -461,7 +481,7 @@ def temp_config_file(tmp_path: Path) -> Path:
     }
     config_file = tmp_path / "config.json"
     config_file.write_text(
-        TypeAdapter(t.NormalizedValue).dump_json(config_data).decode("utf-8")
+        TypeAdapter(t.NormalizedValue).dump_json(config_data).decode("utf-8"),
     )
     return config_file
 

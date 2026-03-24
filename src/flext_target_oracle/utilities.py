@@ -34,7 +34,7 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
                 )
                 if is_mapping or is_sequence:
                     adapter: TypeAdapter[t.ContainerValue] = TypeAdapter(
-                        t.ContainerValue
+                        t.ContainerValue,
                     )
                     transformed[key.upper()] = adapter.dump_json(value).decode("utf-8")
                     continue

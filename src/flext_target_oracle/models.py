@@ -91,7 +91,8 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 Field(
                     default_factory=lambda: (
                         FlextMeltanoModels.Meltano.SingerStateMessage(
-                            type="STATE", value={}
+                            type="STATE",
+                            value={},
                         )
                     ),
                     description="Accumulated Singer STATE payload",
@@ -253,7 +254,8 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ),
             ]
             batch_size: Annotated[
-                t.BatchSize, Field(description="Configured batch size")
+                t.BatchSize,
+                Field(description="Configured batch size"),
             ]
             use_bulk_operations: Annotated[
                 bool,
@@ -270,7 +272,8 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
             stream_name: Annotated[str, Field(description="Singer stream name")]
             table_name: Annotated[
-                str, Field(description="Oracle destination table name")
+                str,
+                Field(description="Oracle destination table name"),
             ]
             ignored_columns: Annotated[
                 t.StrSequence,
@@ -298,13 +301,16 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ),
             ]
             successful_records: Annotated[
-                t.NonNegativeInt, Field(description="Successful records")
+                t.NonNegativeInt,
+                Field(description="Successful records"),
             ]
             failed_records: Annotated[
-                t.NonNegativeInt, Field(description="Failed records")
+                t.NonNegativeInt,
+                Field(description="Failed records"),
             ]
             batches_processed: Annotated[
-                t.NonNegativeInt, Field(description="Processed batch count")
+                t.NonNegativeInt,
+                Field(description="Processed batch count"),
             ]
 
             def finalize(self) -> Self:
@@ -329,7 +335,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ):
                     return r[str].ok("flext-target-oracle")
                 return r[str].ok(
-                    TypeAdapter(t.StrMapping).dump_json(payload).decode("utf-8")
+                    TypeAdapter(t.StrMapping).dump_json(payload).decode("utf-8"),
                 )
 
         class OracleTargetLoadCommand(FlextMeltanoModels.Command):
@@ -341,7 +347,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             def execute(self) -> r[str]:
                 """Execute load command to initialize target."""
                 settings_result = FlextTargetOracleModels._load_target_settings(
-                    self.config_file
+                    self.config_file,
                 )
                 if settings_result.is_failure:
                     return r[str].fail(settings_result.error or "Invalid settings")
@@ -356,7 +362,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             def execute(self) -> r[str]:
                 """Execute validation of target configuration."""
                 settings_result = FlextTargetOracleModels._load_target_settings(
-                    self.config_file
+                    self.config_file,
                 )
                 if settings_result.is_failure:
                     return r[str].fail(

@@ -133,7 +133,8 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 """Protocol for Oracle loading monitoring."""
 
                 def track_progress(
-                    self, records: int
+                    self,
+                    records: int,
                 ) -> FlextMeltanoProtocols.Result[bool]:
                     """Track progress of Oracle loading operations."""
                     ...
