@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Sequence
+from collections.abc import MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 
 import oracledb
@@ -25,11 +25,13 @@ class FlextTargetOracle:
         """Create target with validated settings and loader dependencies."""
         self.config = config
         self.loader = FlextTargetOracleLoader(config)
-        self.schemas: dict[str, m.TargetOracle.SingerSchemaMessage] = {}
+        self.schemas: MutableMapping[str, m.TargetOracle.SingerSchemaMessage] = {}
         self.state_message: m.TargetOracle.SingerStateMessage = (
             m.TargetOracle.SingerStateMessage(type="STATE", value={})
         )
-        self._record_batches: dict[str, list[t.FlatContainerMapping]] = {}
+        self._record_batches: MutableMapping[
+            str, MutableSequence[t.FlatContainerMapping]
+        ] = {}
 
     def discover_catalog(self) -> r[m.Meltano.SingerCatalog]:
         """Return Singer-style catalog for known schemas."""

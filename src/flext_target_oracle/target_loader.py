@@ -98,7 +98,9 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         return self._oracle_api
 
     @property
-    def record_buffers(self) -> dict[str, list[t.FlatContainerMapping]]:
+    def record_buffers(
+        self,
+    ) -> dict[str, list[t.FlatContainerMapping]]:
         """Access record buffers."""
         return self._record_buffers
 

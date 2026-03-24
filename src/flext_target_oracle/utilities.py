@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 
 from flext_core import r
 from flext_db_oracle import FlextDbOracleUtilities
@@ -28,7 +28,7 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
             record: Mapping[str, t.ContainerValue],
         ) -> r[Mapping[str, t.ContainerValue]]:
             """Normalize record values for Oracle persistence."""
-            transformed: dict[str, t.ContainerValue] = {}
+            transformed: MutableMapping[str, t.ContainerValue] = {}
             for key, value in record.items():
                 is_mapping = isinstance(value, Mapping)
                 is_sequence = isinstance(value, Sequence) and (

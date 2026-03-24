@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import MutableMapping
 
 from flext_core import r
 from flext_db_oracle import FlextDbOracleApi
@@ -134,7 +135,7 @@ class FlextTargetOracleRecordService:
         stream: m.TargetOracle.SingerStreamModel,
     ) -> r[m.Meltano.SingerRecordMessage]:
         """Apply stream-level mappings and ignored-column filtering."""
-        transformed: dict[str, t.Container] = {}
+        transformed: MutableMapping[str, t.Container] = {}
         for key, value in record_message.record.items():
             if key in stream.ignored_columns:
                 continue

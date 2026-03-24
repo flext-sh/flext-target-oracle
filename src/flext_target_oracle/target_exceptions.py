@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 from datetime import datetime
 from typing import Annotated, ClassVar, override
 
@@ -51,7 +51,7 @@ class FlextTargetOracleErrorMetadata(m.Value):
 
 
 def _extract_legacy_metadata_kwargs(
-    kwargs: dict[str, t.RuntimeData],
+    kwargs: MutableMapping[str, t.RuntimeData],
 ) -> tuple[str | None, Mapping[str, t.MetadataValue] | None, str | None]:
     code_value = kwargs.pop("code", None)
     context_value = kwargs.pop("context", None)
@@ -136,7 +136,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 legacy_correlation_id=legacy_correlation_id,
             )
             resolved_metadata = metadata_result.value
-            oracle_context: dict[str, t.MetadataValue] = (
+            oracle_context: MutableMapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if host is not None:
@@ -197,7 +197,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 legacy_correlation_id=legacy_correlation_id,
             )
             resolved_metadata = metadata_result.value
-            oracle_context: dict[str, t.MetadataValue] = (
+            oracle_context: MutableMapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if user is not None:
@@ -255,7 +255,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 legacy_correlation_id=legacy_correlation_id,
             )
             resolved_metadata = metadata_result.value
-            oracle_context: dict[str, t.MetadataValue] = (
+            oracle_context: MutableMapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if stream_name is not None:
@@ -317,7 +317,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 legacy_correlation_id=legacy_correlation_id,
             )
             resolved_metadata = metadata_result.value
-            oracle_context: dict[str, t.MetadataValue] = (
+            oracle_context: MutableMapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if stream_name is not None:
@@ -370,7 +370,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 legacy_correlation_id=legacy_correlation_id,
             )
             resolved_metadata = metadata_result.value
-            oracle_context: dict[str, t.MetadataValue] = (
+            oracle_context: MutableMapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if sql_statement is not None:
