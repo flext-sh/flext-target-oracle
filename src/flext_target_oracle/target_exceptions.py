@@ -291,7 +291,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             stream_name: str | None = None,
             table_name: str | None = None,
             schema_hash: str | None = None,
-            validation_errors: t.StrSequence | None = None,
+            validation_errors: Sequence[str] | None = None,
             metadata: OracleErrorMetadata | None = None,
             **kwargs: t.RuntimeData,
         ) -> None:
@@ -386,4 +386,4 @@ class FlextTargetOracleExceptions(FlextExceptions):
         """Oracle record processing errors."""
 
 
-__all__: t.StrSequence = ["FlextTargetOracleExceptions"]
+__all__: Sequence[str] = ["FlextTargetOracleExceptions"]

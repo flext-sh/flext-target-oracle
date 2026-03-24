@@ -89,95 +89,32 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "FlextOracleError": (
-        "flext_target_oracle.target_observability",
-        "FlextOracleError",
-    ),
+    "FlextOracleError": ("flext_target_oracle.target_observability", "FlextOracleError"),
     "FlextOracleObs": ("flext_target_oracle.target_observability", "FlextOracleObs"),
     "FlextTargetOracle": ("flext_target_oracle.target_client", "FlextTargetOracle"),
-    "FlextTargetOracleCliService": (
-        "flext_target_oracle.target_refactored",
-        "FlextTargetOracleCliService",
-    ),
-    "FlextTargetOracleConstants": (
-        "flext_target_oracle.constants",
-        "FlextTargetOracleConstants",
-    ),
-    "FlextTargetOracleExceptions": (
-        "flext_target_oracle.target_exceptions",
-        "FlextTargetOracleExceptions",
-    ),
-    "FlextTargetOracleLoader": (
-        "flext_target_oracle.target_loader",
-        "FlextTargetOracleLoader",
-    ),
-    "FlextTargetOracleModels": (
-        "flext_target_oracle.models",
-        "FlextTargetOracleModels",
-    ),
-    "FlextTargetOracleProtocols": (
-        "flext_target_oracle.protocols",
-        "FlextTargetOracleProtocols",
-    ),
-    "FlextTargetOracleService": (
-        "flext_target_oracle.target_service",
-        "FlextTargetOracleService",
-    ),
-    "FlextTargetOracleSettings": (
-        "flext_target_oracle.settings",
-        "FlextTargetOracleSettings",
-    ),
+    "FlextTargetOracleCliService": ("flext_target_oracle.target_refactored", "FlextTargetOracleCliService"),
+    "FlextTargetOracleConstants": ("flext_target_oracle.constants", "FlextTargetOracleConstants"),
+    "FlextTargetOracleExceptions": ("flext_target_oracle.target_exceptions", "FlextTargetOracleExceptions"),
+    "FlextTargetOracleLoader": ("flext_target_oracle.target_loader", "FlextTargetOracleLoader"),
+    "FlextTargetOracleModels": ("flext_target_oracle.models", "FlextTargetOracleModels"),
+    "FlextTargetOracleProtocols": ("flext_target_oracle.protocols", "FlextTargetOracleProtocols"),
+    "FlextTargetOracleService": ("flext_target_oracle.target_service", "FlextTargetOracleService"),
+    "FlextTargetOracleSettings": ("flext_target_oracle.settings", "FlextTargetOracleSettings"),
     "FlextTargetOracleTypes": ("flext_target_oracle.typings", "FlextTargetOracleTypes"),
-    "FlextTargetOracleUtilities": (
-        "flext_target_oracle.utilities",
-        "FlextTargetOracleUtilities",
-    ),
+    "FlextTargetOracleUtilities": ("flext_target_oracle.utilities", "FlextTargetOracleUtilities"),
     "LoadStatisticsModel": ("flext_target_oracle.target_models", "LoadStatisticsModel"),
     "OracleBatchService": ("flext_target_oracle.target_services", "OracleBatchService"),
-    "OracleConnectionModel": (
-        "flext_target_oracle.target_models",
-        "OracleConnectionModel",
-    ),
-    "OracleConnectionService": (
-        "flext_target_oracle.target_services",
-        "OracleConnectionService",
-    ),
-    "OracleErrorMetadata": (
-        "flext_target_oracle.target_exceptions",
-        "OracleErrorMetadata",
-    ),
-    "OracleRecordService": (
-        "flext_target_oracle.target_services",
-        "OracleRecordService",
-    ),
-    "OracleSchemaService": (
-        "flext_target_oracle.target_services",
-        "OracleSchemaService",
-    ),
-    "OracleTargetAboutCommand": (
-        "flext_target_oracle.target_commands",
-        "OracleTargetAboutCommand",
-    ),
-    "OracleTargetCommandFactory": (
-        "flext_target_oracle.target_commands",
-        "OracleTargetCommandFactory",
-    ),
-    "OracleTargetCommandHandler": (
-        "flext_target_oracle.target_commands",
-        "OracleTargetCommandHandler",
-    ),
-    "OracleTargetLoadCommand": (
-        "flext_target_oracle.target_commands",
-        "OracleTargetLoadCommand",
-    ),
-    "OracleTargetServiceFactory": (
-        "flext_target_oracle.target_services",
-        "OracleTargetServiceFactory",
-    ),
-    "OracleTargetValidateCommand": (
-        "flext_target_oracle.target_commands",
-        "OracleTargetValidateCommand",
-    ),
+    "OracleConnectionModel": ("flext_target_oracle.target_models", "OracleConnectionModel"),
+    "OracleConnectionService": ("flext_target_oracle.target_services", "OracleConnectionService"),
+    "OracleErrorMetadata": ("flext_target_oracle.target_exceptions", "OracleErrorMetadata"),
+    "OracleRecordService": ("flext_target_oracle.target_services", "OracleRecordService"),
+    "OracleSchemaService": ("flext_target_oracle.target_services", "OracleSchemaService"),
+    "OracleTargetAboutCommand": ("flext_target_oracle.target_commands", "OracleTargetAboutCommand"),
+    "OracleTargetCommandFactory": ("flext_target_oracle.target_commands", "OracleTargetCommandFactory"),
+    "OracleTargetCommandHandler": ("flext_target_oracle.target_commands", "OracleTargetCommandHandler"),
+    "OracleTargetLoadCommand": ("flext_target_oracle.target_commands", "OracleTargetLoadCommand"),
+    "OracleTargetServiceFactory": ("flext_target_oracle.target_services", "OracleTargetServiceFactory"),
+    "OracleTargetValidateCommand": ("flext_target_oracle.target_commands", "OracleTargetValidateCommand"),
     "SingerStreamModel": ("flext_target_oracle.target_models", "SingerStreamModel"),
     "__all__": ("flext_target_oracle.__version__", "__all__"),
     "__author__": ("flext_target_oracle.__version__", "__author__"),
@@ -189,10 +126,7 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
     "__version__": ("flext_target_oracle.__version__", "__version__"),
     "__version_info__": ("flext_target_oracle.__version__", "__version_info__"),
     "c": ("flext_target_oracle.constants", "FlextTargetOracleConstants"),
-    "configure_oracle_observability": (
-        "flext_target_oracle.target_observability",
-        "configure_oracle_observability",
-    ),
+    "configure_oracle_observability": ("flext_target_oracle.target_observability", "configure_oracle_observability"),
     "d": ("flext_db_oracle", "d"),
     "e": ("flext_db_oracle", "e"),
     "h": ("flext_db_oracle", "h"),
@@ -204,10 +138,7 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
     "s": ("flext_db_oracle", "s"),
     "t": ("flext_target_oracle.typings", "FlextTargetOracleTypes"),
     "u": ("flext_target_oracle.utilities", "FlextTargetOracleUtilities"),
-    "validate_oracle_configuration": (
-        "flext_target_oracle.settings",
-        "validate_oracle_configuration",
-    ),
+    "validate_oracle_configuration": ("flext_target_oracle.settings", "validate_oracle_configuration"),
     "x": ("flext_db_oracle", "x"),
 }
 

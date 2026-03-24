@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Annotated, Literal, Protocol, Self, override
 
@@ -81,7 +81,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ),
             ]
             streams: Annotated[
-                t.StrSequence,
+                Sequence[str],
                 Field(
                     default_factory=list,
                     description="Singer stream names seen during processing",
@@ -274,14 +274,14 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 str, Field(description="Oracle destination table name")
             ]
             ignored_columns: Annotated[
-                t.StrSequence,
+                Sequence[str],
                 Field(
                     default_factory=list,
                     description="Columns ignored during record transformation",
                 ),
             ]
             column_mappings: Annotated[
-                t.StrMapping,
+                Mapping[str, str],
                 Field(
                     default_factory=dict,
                     description="Singer column to Oracle column mapping",
@@ -319,7 +319,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
             def execute(self) -> r[str]:
                 """Execute about command returning target information."""
-                payload: t.StrMapping = {
+                payload: Mapping[str, str] = {
                     "name": "flext-target-oracle",
                     "description": "Singer target for Oracle loading",
                     "format": self.format,
@@ -330,7 +330,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ):
                     return r[str].ok("flext-target-oracle")
                 return r[str].ok(
-                    TypeAdapter(t.StrMapping).dump_json(payload).decode("utf-8")
+                    TypeAdapter(Mapping[str, str]).dump_json(payload).decode("utf-8")
                 )
 
         class OracleTargetLoadCommand(FlextModels.Command):
