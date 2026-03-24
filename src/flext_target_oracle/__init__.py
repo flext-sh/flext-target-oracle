@@ -76,104 +76,104 @@ if TYPE_CHECKING:
         FlextTargetOracleUtilities as u,
     )
 
-_LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "FlextOracleError": (
+_LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
+    "FlextOracleError": [
         "flext_target_oracle.target_observability",
         "FlextOracleError",
-    ),
-    "FlextOracleObs": ("flext_target_oracle.target_observability", "FlextOracleObs"),
-    "FlextTargetOracle": ("flext_target_oracle.target_client", "FlextTargetOracle"),
-    "FlextTargetOracleBatchService": (
+    ],
+    "FlextOracleObs": ["flext_target_oracle.target_observability", "FlextOracleObs"],
+    "FlextTargetOracle": ["flext_target_oracle.target_client", "FlextTargetOracle"],
+    "FlextTargetOracleBatchService": [
         "flext_target_oracle.target_services",
         "FlextTargetOracleBatchService",
-    ),
-    "FlextTargetOracleCliService": (
+    ],
+    "FlextTargetOracleCliService": [
         "flext_target_oracle.target_refactored",
         "FlextTargetOracleCliService",
-    ),
-    "FlextTargetOracleConnectionService": (
+    ],
+    "FlextTargetOracleConnectionService": [
         "flext_target_oracle.target_services",
         "FlextTargetOracleConnectionService",
-    ),
-    "FlextTargetOracleConstants": (
+    ],
+    "FlextTargetOracleConstants": [
         "flext_target_oracle.constants",
         "FlextTargetOracleConstants",
-    ),
-    "FlextTargetOracleErrorMetadata": (
+    ],
+    "FlextTargetOracleErrorMetadata": [
         "flext_target_oracle.target_exceptions",
         "FlextTargetOracleErrorMetadata",
-    ),
-    "FlextTargetOracleExceptions": (
+    ],
+    "FlextTargetOracleExceptions": [
         "flext_target_oracle.target_exceptions",
         "FlextTargetOracleExceptions",
-    ),
-    "FlextTargetOracleLoader": (
+    ],
+    "FlextTargetOracleLoader": [
         "flext_target_oracle.target_loader",
         "FlextTargetOracleLoader",
-    ),
-    "FlextTargetOracleModels": (
+    ],
+    "FlextTargetOracleModels": [
         "flext_target_oracle.models",
         "FlextTargetOracleModels",
-    ),
-    "FlextTargetOracleProtocols": (
+    ],
+    "FlextTargetOracleProtocols": [
         "flext_target_oracle.protocols",
         "FlextTargetOracleProtocols",
-    ),
-    "FlextTargetOracleRecordService": (
+    ],
+    "FlextTargetOracleRecordService": [
         "flext_target_oracle.target_services",
         "FlextTargetOracleRecordService",
-    ),
-    "FlextTargetOracleSchemaService": (
+    ],
+    "FlextTargetOracleSchemaService": [
         "flext_target_oracle.target_services",
         "FlextTargetOracleSchemaService",
-    ),
-    "FlextTargetOracleService": (
+    ],
+    "FlextTargetOracleService": [
         "flext_target_oracle.target_service",
         "FlextTargetOracleService",
-    ),
-    "FlextTargetOracleServiceFactory": (
+    ],
+    "FlextTargetOracleServiceFactory": [
         "flext_target_oracle.target_services",
         "FlextTargetOracleServiceFactory",
-    ),
-    "FlextTargetOracleSettings": (
+    ],
+    "FlextTargetOracleSettings": [
         "flext_target_oracle.settings",
         "FlextTargetOracleSettings",
-    ),
-    "FlextTargetOracleTypes": ("flext_target_oracle.typings", "FlextTargetOracleTypes"),
-    "FlextTargetOracleUtilities": (
+    ],
+    "FlextTargetOracleTypes": ["flext_target_oracle.typings", "FlextTargetOracleTypes"],
+    "FlextTargetOracleUtilities": [
         "flext_target_oracle.utilities",
         "FlextTargetOracleUtilities",
-    ),
-    "__all__": ("flext_target_oracle.__version__", "__all__"),
-    "__author__": ("flext_target_oracle.__version__", "__author__"),
-    "__author_email__": ("flext_target_oracle.__version__", "__author_email__"),
-    "__description__": ("flext_target_oracle.__version__", "__description__"),
-    "__license__": ("flext_target_oracle.__version__", "__license__"),
-    "__title__": ("flext_target_oracle.__version__", "__title__"),
-    "__url__": ("flext_target_oracle.__version__", "__url__"),
-    "__version__": ("flext_target_oracle.__version__", "__version__"),
-    "__version_info__": ("flext_target_oracle.__version__", "__version_info__"),
-    "c": ("flext_target_oracle.constants", "FlextTargetOracleConstants"),
-    "configure_oracle_observability": (
+    ],
+    "__all__": ["flext_target_oracle.__version__", "__all__"],
+    "__author__": ["flext_target_oracle.__version__", "__author__"],
+    "__author_email__": ["flext_target_oracle.__version__", "__author_email__"],
+    "__description__": ["flext_target_oracle.__version__", "__description__"],
+    "__license__": ["flext_target_oracle.__version__", "__license__"],
+    "__title__": ["flext_target_oracle.__version__", "__title__"],
+    "__url__": ["flext_target_oracle.__version__", "__url__"],
+    "__version__": ["flext_target_oracle.__version__", "__version__"],
+    "__version_info__": ["flext_target_oracle.__version__", "__version_info__"],
+    "c": ["flext_target_oracle.constants", "FlextTargetOracleConstants"],
+    "configure_oracle_observability": [
         "flext_target_oracle.target_observability",
         "configure_oracle_observability",
-    ),
-    "d": ("flext_db_oracle", "d"),
-    "e": ("flext_db_oracle", "e"),
-    "h": ("flext_db_oracle", "h"),
-    "logger": ("flext_target_oracle.settings", "logger"),
-    "m": ("flext_target_oracle.models", "FlextTargetOracleModels"),
-    "main": ("flext_target_oracle.target_refactored", "main"),
-    "p": ("flext_target_oracle.protocols", "FlextTargetOracleProtocols"),
-    "r": ("flext_db_oracle", "r"),
-    "s": ("flext_db_oracle", "s"),
-    "t": ("flext_target_oracle.typings", "FlextTargetOracleTypes"),
-    "u": ("flext_target_oracle.utilities", "FlextTargetOracleUtilities"),
-    "validate_oracle_configuration": (
+    ],
+    "d": ["flext_db_oracle", "d"],
+    "e": ["flext_db_oracle", "e"],
+    "h": ["flext_db_oracle", "h"],
+    "logger": ["flext_target_oracle.settings", "logger"],
+    "m": ["flext_target_oracle.models", "FlextTargetOracleModels"],
+    "main": ["flext_target_oracle.target_refactored", "main"],
+    "p": ["flext_target_oracle.protocols", "FlextTargetOracleProtocols"],
+    "r": ["flext_db_oracle", "r"],
+    "s": ["flext_db_oracle", "s"],
+    "t": ["flext_target_oracle.typings", "FlextTargetOracleTypes"],
+    "u": ["flext_target_oracle.utilities", "FlextTargetOracleUtilities"],
+    "validate_oracle_configuration": [
         "flext_target_oracle.settings",
         "validate_oracle_configuration",
-    ),
-    "x": ("flext_db_oracle", "x"),
+    ],
+    "x": ["flext_db_oracle", "x"],
 }
 
 __all__ = [

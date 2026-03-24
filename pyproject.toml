@@ -28,10 +28,10 @@ classifiers = [
 ]
 dependencies = [
   "click>=8",
-  "flext-cli",
-  "flext-core",
-  "flext-db-oracle",
-  "flext-meltano",
+  "flext-cli @ file:../flext-cli",
+  "flext-core @ file:../flext-core",
+  "flext-db-oracle @ file:../flext-db-oracle",
+  "flext-meltano @ file:../flext-meltano",
   "pydantic-core>=2.41.4",
   "pydantic-settings>=2.10.1",
   "pydantic>=2.12.3",

@@ -20,9 +20,9 @@ if TYPE_CHECKING:
 
     from tests.integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
 
-_LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "TestOracleIntegration": ("tests.integration.test_oracle", "TestOracleIntegration"),
-    "TestOracleTargetE2E": ("tests.integration.test_oracle", "TestOracleTargetE2E"),
+_LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
+    "TestOracleIntegration": ["tests.integration.test_oracle", "TestOracleIntegration"],
+    "TestOracleTargetE2E": ["tests.integration.test_oracle", "TestOracleTargetE2E"],
 }
 
 __all__ = [

@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 
     from tests.performance.test_performance import TestPerformance
 
-_LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
-    "TestPerformance": ("tests.performance.test_performance", "TestPerformance"),
+_LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
+    "TestPerformance": ["tests.performance.test_performance", "TestPerformance"],
 }
 
 __all__ = [
