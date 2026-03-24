@@ -6,7 +6,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Annotated, Literal, Protocol, Self, override
 
-from flext_core import FlextModels, h, r, t
+from flext_core import h, r, t
 from flext_db_oracle.models import FlextDbOracleModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field, TypeAdapter
@@ -14,16 +14,15 @@ from pydantic import Field, TypeAdapter
 from flext_target_oracle.constants import FlextTargetOracleConstants
 
 
-class _OracleSettingsProtocol(Protocol):
-    """Protocol for Oracle settings used by command classes."""
-
-    def validate_business_rules(self) -> r[bool]:
-        """Validate Oracle target configuration business rules."""
-        ...
-
-
 class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
     """Complete models for Oracle target operations extending FlextModels."""
+
+    class _OracleSettingsProtocol(Protocol):
+        """Protocol for Oracle settings used by command classes."""
+
+        def validate_business_rules(self) -> r[bool]:
+            """Validate Oracle target configuration business rules."""
+            ...
 
     class Meltano(FlextMeltanoModels.Meltano):
         """Namespaced Meltano runtime model references (inherits all Singer types)."""
@@ -54,7 +53,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
         class SingerCatalog(FlextMeltanoModels.Meltano.SingerCatalog):
             """Singer catalog specialized for Oracle target domain."""
 
-        class ExecuteResult(FlextModels.ArbitraryTypesModel):
+        class ExecuteResult(FlextMeltanoModels.ArbitraryTypesModel):
             """Target execute readiness payload."""
 
             name: Annotated[str, Field(description="Target package name")]
@@ -71,7 +70,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 Field(description="Configured Oracle service name"),
             ]
 
-        class ProcessingSummary(FlextModels.ArbitraryTypesModel):
+        class ProcessingSummary(FlextMeltanoModels.ArbitraryTypesModel):
             """Singer batch processing summary payload."""
 
             messages_processed: Annotated[
@@ -99,7 +98,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ),
             ]
 
-        class LoaderReadyResult(FlextModels.ArbitraryTypesModel):
+        class LoaderReadyResult(FlextMeltanoModels.ArbitraryTypesModel):
             """Loader readiness payload after Oracle connectivity checks."""
 
             status: Annotated[
@@ -121,7 +120,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ),
             ]
 
-        class LoaderOperation(FlextModels.ArbitraryTypesModel):
+        class LoaderOperation(FlextMeltanoModels.ArbitraryTypesModel):
             """Detailed load operation summary for all streams."""
 
             stream_name: Annotated[str, Field(description="Logical stream identifier")]
@@ -142,7 +141,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 Field(description="Number of failed records"),
             ]
 
-        class LoaderFinalizeResult(FlextModels.ArbitraryTypesModel):
+        class LoaderFinalizeResult(FlextMeltanoModels.ArbitraryTypesModel):
             """Loader finalization payload for flush operations."""
 
             total_records: Annotated[
@@ -175,7 +174,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ),
             ]
 
-        class OracleConnectionConfig(FlextModels.ArbitraryTypesModel):
+        class OracleConnectionConfig(FlextMeltanoModels.ArbitraryTypesModel):
             """Oracle connection configuration payload."""
 
             host: Annotated[str, Field(description="Oracle database host")]
@@ -225,7 +224,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ),
             ]
 
-        class TargetConfig(FlextModels.ArbitraryTypesModel):
+        class TargetConfig(FlextMeltanoModels.ArbitraryTypesModel):
             """Target runtime configuration payload."""
 
             default_target_schema: Annotated[
@@ -244,7 +243,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             table_prefix: Annotated[str, Field(description="Target table name prefix")]
             table_suffix: Annotated[str, Field(description="Target table name suffix")]
 
-        class ImplementationMetrics(FlextModels.ArbitraryTypesModel):
+        class ImplementationMetrics(FlextMeltanoModels.ArbitraryTypesModel):
             """Oracle target implementation metrics."""
 
             streams_configured: Annotated[
@@ -266,7 +265,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
         class OracleConnectionModel(OracleConnectionConfig):
             """Oracle database connection configuration model."""
 
-        class SingerStreamModel(FlextModels.ArbitraryTypesModel):
+        class SingerStreamModel(FlextMeltanoModels.ArbitraryTypesModel):
             """Singer stream mapping to Oracle table with column configuration."""
 
             stream_name: Annotated[str, Field(description="Singer stream name")]
@@ -288,7 +287,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ),
             ]
 
-        class LoadStatisticsModel(FlextModels.ArbitraryTypesModel):
+        class LoadStatisticsModel(FlextMeltanoModels.ArbitraryTypesModel):
             """Statistics for data load operation."""
 
             stream_name: Annotated[str, Field(description="Stream identifier")]
@@ -312,7 +311,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 """Finalize statistics and return self."""
                 return self
 
-        class OracleTargetAboutCommand(FlextModels.Command):
+        class OracleTargetAboutCommand(FlextMeltanoModels.Command):
             """Command to return target metadata and capabilities."""
 
             format: str = "json"
@@ -333,7 +332,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                     TypeAdapter(t.StrMapping).dump_json(payload).decode("utf-8")
                 )
 
-        class OracleTargetLoadCommand(FlextModels.Command):
+        class OracleTargetLoadCommand(FlextMeltanoModels.Command):
             """Command to prepare target for data loading."""
 
             config_file: str | None = None
@@ -341,25 +340,31 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
             def execute(self) -> r[str]:
                 """Execute load command to initialize target."""
-                settings_result = _load_target_settings(self.config_file)
+                settings_result = FlextTargetOracleModels._load_target_settings(
+                    self.config_file
+                )
                 if settings_result.is_failure:
                     return r[str].fail(settings_result.error or "Invalid settings")
                 _ = self.state_file
                 return r[str].ok("load_ready")
 
-        class OracleTargetValidateCommand(FlextModels.Command):
+        class OracleTargetValidateCommand(FlextMeltanoModels.Command):
             """Command to validate target configuration."""
 
             config_file: str | None = None
 
             def execute(self) -> r[str]:
                 """Execute validation of target configuration."""
-                settings_result = _load_target_settings(self.config_file)
+                settings_result = FlextTargetOracleModels._load_target_settings(
+                    self.config_file
+                )
                 if settings_result.is_failure:
                     return r[str].fail(
                         settings_result.error or "Configuration validation failed",
                     )
-                settings: _OracleSettingsProtocol = settings_result.value
+                settings: FlextTargetOracleModels._OracleSettingsProtocol = (
+                    settings_result.value
+                )
                 validation_result = settings.validate_business_rules()
                 if validation_result.is_failure:
                     return r[str].fail(
@@ -367,13 +372,13 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                     )
                 return r[str].ok("validation_ok")
 
-        class OracleTargetCommandHandler(h[FlextModels.Command, str]):
+        class OracleTargetCommandHandler(h[FlextMeltanoModels.Command, str]):
             """Dispatch command objects to their `execute` implementation."""
 
             @override
             def handle(
                 self,
-                message: FlextModels.Command,
+                message: FlextMeltanoModels.Command,
             ) -> r[str]:
                 """Invoke command execute methods in a typed-safe way."""
                 if isinstance(
@@ -423,33 +428,37 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                     config_file=config_file,
                 )
 
+    @staticmethod
+    def _load_target_settings(
+        config_file: str | None,
+    ) -> r[FlextTargetOracleModels._OracleSettingsProtocol]:
+        """Load settings from JSON file or environment defaults."""
+        from flext_target_oracle.settings import (
+            FlextTargetOracleSettings,
+        )
 
-def _load_target_settings(config_file: str | None) -> r[_OracleSettingsProtocol]:
-    """Load settings from JSON file or environment defaults."""
-    from flext_target_oracle.settings import (
-        FlextTargetOracleSettings,
-    )
-
-    result_type: type[r[_OracleSettingsProtocol]] = r[_OracleSettingsProtocol]
-    if config_file is None:
-        return result_type.ok(FlextTargetOracleSettings.model_validate({}))
-    config_path = Path(config_file)
-    if not config_path.exists():
-        return result_type.fail(f"Configuration file not found: {config_file}")
-    try:
-        content = config_path.read_text(encoding="utf-8")
-        settings = FlextTargetOracleSettings.model_validate_json(content)
-    except (
-        ValueError,
-        TypeError,
-        KeyError,
-        AttributeError,
-        OSError,
-        RuntimeError,
-        ImportError,
-    ) as exc:
-        return result_type.fail(f"Invalid configuration file: {exc}")
-    return result_type.ok(settings)
+        result_type: type[r[FlextTargetOracleModels._OracleSettingsProtocol]] = r[
+            FlextTargetOracleModels._OracleSettingsProtocol
+        ]
+        if config_file is None:
+            return result_type.ok(FlextTargetOracleSettings.model_validate({}))
+        config_path = Path(config_file)
+        if not config_path.exists():
+            return result_type.fail(f"Configuration file not found: {config_file}")
+        try:
+            content = config_path.read_text(encoding="utf-8")
+            settings = FlextTargetOracleSettings.model_validate_json(content)
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as exc:
+            return result_type.fail(f"Invalid configuration file: {exc}")
+        return result_type.ok(settings)
 
 
 m = FlextTargetOracleModels

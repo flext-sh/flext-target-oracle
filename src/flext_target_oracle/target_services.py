@@ -5,7 +5,8 @@ from __future__ import annotations
 from flext_core import r, t
 from flext_db_oracle import FlextDbOracleApi
 
-from .models import m
+from flext_target_oracle import m
+
 from .settings import FlextTargetOracleSettings
 
 

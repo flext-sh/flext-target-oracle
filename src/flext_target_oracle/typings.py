@@ -33,103 +33,181 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type TargetConfiguration = Mapping[
             str,
-            t.Scalar | t.ContainerValueMapping,
+            FlextMeltanoTypes.Scalar | FlextMeltanoTypes.ContainerValueMapping,
         ]
-        type StreamConfiguration = Mapping[str, str | bool | t.ContainerValueMapping]
-        type MessageProcessing = Mapping[str, str | Sequence[t.ContainerValueMapping]]
-        type RecordHandling = Mapping[str, str | t.ContainerValueMapping | bool]
-        type StateManagement = Mapping[str, str | t.ContainerValueMapping]
-        type BatchProcessing = Mapping[str, str | int | t.ContainerValueMapping]
+        type StreamConfiguration = Mapping[
+            str, str | bool | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type MessageProcessing = Mapping[
+            str, str | Sequence[FlextMeltanoTypes.ContainerValueMapping]
+        ]
+        type RecordHandling = Mapping[
+            str, str | FlextMeltanoTypes.ContainerValueMapping | bool
+        ]
+        type StateManagement = Mapping[
+            str, str | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type BatchProcessing = Mapping[
+            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+        ]
 
     class OracleDatabase:
         """Oracle database operation complex types."""
 
         type DatabaseConfiguration = Mapping[
             str,
-            t.Scalar | t.ContainerValueMapping,
+            FlextMeltanoTypes.Scalar | FlextMeltanoTypes.ContainerValueMapping,
         ]
-        type ConnectionManagement = Mapping[str, str | int | t.ContainerValueMapping]
-        type SessionSettings = Mapping[str, str | bool | t.ContainerValueMapping]
-        type TransactionControl = Mapping[str, str | bool | t.ContainerValueMapping]
-        type DatabaseMetadata = Mapping[str, str | t.ContainerValueMapping]
-        type PerformanceSettings = Mapping[str, int | float | t.ContainerValueMapping]
+        type ConnectionManagement = Mapping[
+            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type SessionSettings = Mapping[
+            str, str | bool | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type TransactionControl = Mapping[
+            str, str | bool | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type DatabaseMetadata = Mapping[
+            str, str | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type PerformanceSettings = Mapping[
+            str, int | float | FlextMeltanoTypes.ContainerValueMapping
+        ]
 
     class OracleTable:
         """Oracle table and schema complex types."""
 
-        type TableConfiguration = Mapping[str, str | bool | t.ContainerValueMapping]
-        type SchemaDefinition = Mapping[
-            str, str | t.StrSequence | t.ContainerValueMapping
+        type TableConfiguration = Mapping[
+            str, str | bool | FlextMeltanoTypes.ContainerValueMapping
         ]
-        type ColumnMapping = Mapping[str, str | t.ContainerValueMapping]
+        type SchemaDefinition = Mapping[
+            str,
+            str
+            | FlextMeltanoTypes.StrSequence
+            | FlextMeltanoTypes.ContainerValueMapping,
+        ]
+        type ColumnMapping = Mapping[str, str | FlextMeltanoTypes.ContainerValueMapping]
         type IndexConfiguration = Mapping[
             str,
-            str | t.StrSequence | t.ContainerValueMapping,
+            str
+            | FlextMeltanoTypes.StrSequence
+            | FlextMeltanoTypes.ContainerValueMapping,
         ]
-        type ConstraintDefinition = Mapping[str, str | t.ContainerValueMapping]
-        type TablespaceSettings = Mapping[str, str | int | t.ContainerValueMapping]
+        type ConstraintDefinition = Mapping[
+            str, str | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type TablespaceSettings = Mapping[
+            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+        ]
 
     class OracleSql:
         """Oracle SQL operation complex types."""
 
         type SqlConfiguration = Mapping[
             str,
-            str | bool | int | t.ContainerValueMapping,
+            str | bool | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
-        type QueryExecution = Mapping[str, str | t.ContainerValueMapping]
+        type QueryExecution = Mapping[
+            str, str | FlextMeltanoTypes.ContainerValueMapping
+        ]
         type BulkOperations = Mapping[
             str,
-            str | int | t.StrSequence | t.ContainerValueMapping,
+            str
+            | int
+            | FlextMeltanoTypes.StrSequence
+            | FlextMeltanoTypes.ContainerValueMapping,
         ]
-        type PreparedStatements = Mapping[str, str | t.ContainerValueMapping]
-        type SqlOptimization = Mapping[str, bool | str | t.ContainerValueMapping]
-        type ResultSetHandling = Mapping[str, str | int | t.ContainerValueMapping]
+        type PreparedStatements = Mapping[
+            str, str | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type SqlOptimization = Mapping[
+            str, bool | str | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type ResultSetHandling = Mapping[
+            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+        ]
 
     class OraclePerformance:
         """Oracle performance optimization complex types."""
 
         type PerformanceConfiguration = Mapping[
             str,
-            str | int | t.ContainerValueMapping,
+            str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
-        type ConnectionPooling = Mapping[str, int | bool | t.ContainerValueMapping]
-        type BulkLoadOptimization = Mapping[str, str | int | t.ContainerValueMapping]
-        type QueryOptimization = Mapping[str, str | t.ContainerValueMapping]
-        type CachingStrategy = Mapping[str, bool | str | t.ContainerValueMapping]
-        type ParallelProcessing = Mapping[str, int | str | t.ContainerValueMapping]
+        type ConnectionPooling = Mapping[
+            str, int | bool | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type BulkLoadOptimization = Mapping[
+            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type QueryOptimization = Mapping[
+            str, str | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type CachingStrategy = Mapping[
+            str, bool | str | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type ParallelProcessing = Mapping[
+            str, int | str | FlextMeltanoTypes.ContainerValueMapping
+        ]
 
     class DataTransformation:
         """Data transformation complex types."""
 
         type TransformationConfiguration = Mapping[
             str,
-            str | bool | t.ContainerValueMapping,
+            str | bool | FlextMeltanoTypes.ContainerValueMapping,
         ]
-        type FieldMapping = Mapping[str, str | t.StrSequence | t.ContainerValueMapping]
-        type DataValidation = Mapping[str, str | t.ContainerValueMapping]
-        type TypeConversion = Mapping[str, bool | str | t.ContainerValueMapping]
-        type FilteringRules = Mapping[str, str | t.ContainerValueMapping]
-        type TransformationResult = Mapping[str, Mapping[str, t.ContainerValue]]
+        type FieldMapping = Mapping[
+            str,
+            str
+            | FlextMeltanoTypes.StrSequence
+            | FlextMeltanoTypes.ContainerValueMapping,
+        ]
+        type DataValidation = Mapping[
+            str, str | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type TypeConversion = Mapping[
+            str, bool | str | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type FilteringRules = Mapping[
+            str, str | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type TransformationResult = Mapping[
+            str, Mapping[str, FlextMeltanoTypes.ContainerValue]
+        ]
 
     class StreamProcessing:
         """Stream processing complex types."""
 
         type StreamConfiguration = Mapping[
             str,
-            str | bool | int | t.ContainerValueMapping,
+            str | bool | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
-        type StreamMetadata = Mapping[str, str | t.ContainerValueMapping]
-        type StreamRecord = Mapping[str, t.ContainerValue]
-        type StreamState = Mapping[str, str | int | t.ContainerValueMapping]
-        type StreamBookmark = Mapping[str, str | int | t.ContainerValueMapping]
-        type StreamSchema = Mapping[str, str | t.ContainerValueMapping | bool]
+        type StreamMetadata = Mapping[
+            str, str | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type StreamRecord = Mapping[str, FlextMeltanoTypes.ContainerValue]
+        type StreamState = Mapping[
+            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type StreamBookmark = Mapping[
+            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type StreamSchema = Mapping[
+            str, str | FlextMeltanoTypes.ContainerValueMapping | bool
+        ]
 
     class SingerMessage:
         """Singer protocol message complex types."""
 
-        type SchemaMessage = Mapping[str, str | t.StrSequence | t.ContainerValueMapping]
-        type RecordMessage = Mapping[str, str | t.ContainerValueMapping]
-        type StateMessage = Mapping[str, str | t.ContainerValueMapping]
+        type SchemaMessage = Mapping[
+            str,
+            str
+            | FlextMeltanoTypes.StrSequence
+            | FlextMeltanoTypes.ContainerValueMapping,
+        ]
+        type RecordMessage = Mapping[str, str | FlextMeltanoTypes.ContainerValueMapping]
+        type StateMessage = Mapping[str, str | FlextMeltanoTypes.ContainerValueMapping]
         type ActivateVersionMessage = Mapping[str, str | int]
 
     class ErrorHandling:
@@ -137,13 +215,23 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type ErrorConfiguration = Mapping[
             str,
-            bool | str | int | t.ContainerValueMapping,
+            bool | str | int | FlextMeltanoTypes.ContainerValueMapping,
         ]
-        type ErrorRecovery = Mapping[str, str | bool | t.ContainerValueMapping]
-        type ErrorReporting = Mapping[str, str | int | t.ContainerValueMapping]
-        type ErrorClassification = Mapping[str, str | int | t.ContainerValueMapping]
-        type ErrorMetrics = Mapping[str, int | float | t.ContainerValueMapping]
-        type ErrorTracking = Sequence[Mapping[str, str | int | t.ContainerValueMapping]]
+        type ErrorRecovery = Mapping[
+            str, str | bool | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type ErrorReporting = Mapping[
+            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type ErrorClassification = Mapping[
+            str, str | int | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type ErrorMetrics = Mapping[
+            str, int | float | FlextMeltanoTypes.ContainerValueMapping
+        ]
+        type ErrorTracking = Sequence[
+            Mapping[str, str | int | FlextMeltanoTypes.ContainerValueMapping]
+        ]
 
     class Core:
         """Core convenience type aliases for common patterns.
@@ -153,7 +241,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         Access parent core types via inheritance from FlextTargetOracleTypes.
         """
 
-        type Dict = Mapping[str, t.ContainerValue]
+        type Dict = Mapping[str, FlextMeltanoTypes.ContainerValue]
         "Type alias for generic dictionary (attribute name to value mapping)."
 
 

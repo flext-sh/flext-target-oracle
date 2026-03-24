@@ -19,8 +19,8 @@ from flext_core import FlextLogger, FlextService, r, t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import PrivateAttr, TypeAdapter
 
-from .models import m
-from .protocols import p
+from flext_target_oracle import m, p
+
 from .settings import FlextTargetOracleSettings
 from .target_exceptions import FlextTargetOracleExceptions
 

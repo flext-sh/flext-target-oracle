@@ -6,7 +6,8 @@ from collections.abc import Sequence
 
 from flext_core import r
 
-from .models import m
+from flext_target_oracle import m
+
 from .settings import FlextTargetOracleSettings
 from .target_client import FlextTargetOracle
 

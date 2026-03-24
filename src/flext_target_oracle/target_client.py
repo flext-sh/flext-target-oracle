@@ -10,7 +10,8 @@ import oracledb
 from flext_core import FlextLogger, r, t
 from pydantic import TypeAdapter, ValidationError
 
-from .models import m
+from flext_target_oracle import m
+
 from .settings import FlextTargetOracleSettings
 from .target_loader import FlextTargetOracleLoader
 

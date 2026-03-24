@@ -15,9 +15,7 @@ from typing import TYPE_CHECKING, Annotated
 from flext_core import FlextLogger, FlextSettings, r
 from pydantic import Field, SecretStr
 
-from flext_target_oracle import t
-
-from .constants import c
+from flext_target_oracle import c, t
 
 if TYPE_CHECKING:
     from .models import FlextTargetOracleModels
