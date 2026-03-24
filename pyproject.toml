@@ -589,29 +589,7 @@ indent-style = "space"
 line-ending = "lf"
 quote-style = "double"
 [tool.pyright]
-extraPaths = [
-  ".",
-  "../flext-cli/examples",
-  "../flext-cli/src",
-  "../flext-cli/tests",
-  "../flext-core/examples",
-  "../flext-core/src",
-  "../flext-core/tests",
-  "../flext-db-oracle/docs",
-  "../flext-db-oracle/examples",
-  "../flext-db-oracle/src",
-  "../flext-db-oracle/tests",
-  "../flext-meltano/docs",
-  "../flext-meltano/examples",
-  "../flext-meltano/src",
-  "../flext-meltano/tests",
-  "../typings",
-  "../typings/generated",
-  "docs",
-  "examples",
-  "src",
-  "tests",
-]
+extraPaths = [".", "../flext-cli/examples", "../flext-cli/src", "../flext-cli/tests", "../flext-core/examples", "../flext-core/src", "../flext-core/tests", "../flext-db-oracle/docs", "../flext-db-oracle/examples", "../flext-db-oracle/src", "../flext-db-oracle/tests", "../flext-meltano/docs", "../flext-meltano/examples", "../flext-meltano/src", "../flext-meltano/tests", "../typings", "../typings/generated", "docs", "examples", "src", "tests", "../flext-tests/src", "../flext-infra/src"]
 pythonPlatform = "Linux"
 pythonVersion = "3.13"
 reportCallIssue = "none"
