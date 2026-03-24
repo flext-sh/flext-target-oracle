@@ -94,11 +94,20 @@ if TYPE_CHECKING:
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "DOCKER_COMPOSE_PATH": ["tests.conftest", "DOCKER_COMPOSE_PATH"],
-    "FlextTargetOracleTestConstants": ["tests.constants", "FlextTargetOracleTestConstants"],
+    "FlextTargetOracleTestConstants": [
+        "tests.constants",
+        "FlextTargetOracleTestConstants",
+    ],
     "FlextTargetOracleTestModels": ["tests.models", "FlextTargetOracleTestModels"],
-    "FlextTargetOracleTestProtocols": ["tests.protocols", "FlextTargetOracleTestProtocols"],
+    "FlextTargetOracleTestProtocols": [
+        "tests.protocols",
+        "FlextTargetOracleTestProtocols",
+    ],
     "FlextTargetOracleTestTypes": ["tests.typings", "FlextTargetOracleTestTypes"],
-    "FlextTargetOracleTestUtilities": ["tests.utilities", "FlextTargetOracleTestUtilities"],
+    "FlextTargetOracleTestUtilities": [
+        "tests.utilities",
+        "FlextTargetOracleTestUtilities",
+    ],
     "ORACLE_CONTAINER_NAME": ["tests.conftest", "ORACLE_CONTAINER_NAME"],
     "ORACLE_HOST": ["tests.conftest", "ORACLE_HOST"],
     "ORACLE_IMAGE": ["tests.conftest", "ORACLE_IMAGE"],
@@ -138,7 +147,10 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "oracle_target": ["tests.conftest", "oracle_target"],
     "p": ["tests.protocols", "FlextTargetOracleTestProtocols"],
     "performance": ["tests.performance", ""],
-    "pytest_collection_modifyitems": ["tests.conftest", "pytest_collection_modifyitems"],
+    "pytest_collection_modifyitems": [
+        "tests.conftest",
+        "pytest_collection_modifyitems",
+    ],
     "pytest_configure": ["tests.conftest", "pytest_configure"],
     "r": ["flext_tests", "r"],
     "record": ["tests.conftest", "record"],
@@ -157,11 +169,26 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "target": ["tests.unit.test_target", "target"],
     "temp_config_file": ["tests.conftest", "temp_config_file"],
     "temporary_env_vars": ["tests.conftest", "temporary_env_vars"],
-    "test_cli_service_falls_back_to_bus_when_flag_disabled": ["tests.unit.test_cli_dispatcher", "test_cli_service_falls_back_to_bus_when_flag_disabled"],
-    "test_cli_service_uses_dispatcher_when_flag_enabled": ["tests.unit.test_cli_dispatcher", "test_cli_service_uses_dispatcher_when_flag_enabled"],
-    "test_ensure_table_exists_returns_result": ["tests.unit.test_loader", "test_ensure_table_exists_returns_result"],
-    "test_load_record_buffers_and_finalize": ["tests.unit.test_loader", "test_load_record_buffers_and_finalize"],
-    "test_loader_execute_returns_ready_payload": ["tests.unit.test_loader", "test_loader_execute_returns_ready_payload"],
+    "test_cli_service_falls_back_to_bus_when_flag_disabled": [
+        "tests.unit.test_cli_dispatcher",
+        "test_cli_service_falls_back_to_bus_when_flag_disabled",
+    ],
+    "test_cli_service_uses_dispatcher_when_flag_enabled": [
+        "tests.unit.test_cli_dispatcher",
+        "test_cli_service_uses_dispatcher_when_flag_enabled",
+    ],
+    "test_ensure_table_exists_returns_result": [
+        "tests.unit.test_loader",
+        "test_ensure_table_exists_returns_result",
+    ],
+    "test_load_record_buffers_and_finalize": [
+        "tests.unit.test_loader",
+        "test_load_record_buffers_and_finalize",
+    ],
+    "test_loader_execute_returns_ready_payload": [
+        "tests.unit.test_loader",
+        "test_loader_execute_returns_ready_payload",
+    ],
     "u": ["tests.utilities", "FlextTargetOracleTestUtilities"],
     "unit": ["tests.unit", ""],
     "x": ["flext_tests", "x"],
