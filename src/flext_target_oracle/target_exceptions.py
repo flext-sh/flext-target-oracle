@@ -28,7 +28,7 @@ def _to_metadata_value(value: t.RuntimeData | None) -> t.MetadataValue:
     return str(value)
 
 
-class OracleErrorMetadata(m.Value):
+class FlextTargetOracleErrorMetadata(m.Value):
     model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
 
     code: str = Field(description="Canonical error code")
@@ -66,11 +66,11 @@ def _extract_legacy_metadata_kwargs(
 def _resolve_metadata(
     *,
     default_code: str,
-    metadata: OracleErrorMetadata | None,
+    metadata: FlextTargetOracleErrorMetadata | None,
     legacy_code: str | None,
     legacy_context: Mapping[str, t.MetadataValue] | None,
     legacy_correlation_id: str | None,
-) -> r[OracleErrorMetadata]:
+) -> r[FlextTargetOracleErrorMetadata]:
     resolved_code = legacy_code or (metadata.code if metadata is not None else None)
     resolved_context = (
         legacy_context
@@ -82,8 +82,8 @@ def _resolve_metadata(
         if legacy_correlation_id is not None
         else (metadata.correlation_id if metadata is not None else None)
     )
-    return r[OracleErrorMetadata].ok(
-        value=OracleErrorMetadata(
+    return r[FlextTargetOracleErrorMetadata].ok(
+        value=FlextTargetOracleErrorMetadata(
             code=resolved_code or default_code,
             context=resolved_context,
             correlation_id=resolved_correlation_id,
@@ -113,7 +113,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             service_name: str | None = None,
             user: str | None = None,
             dsn: str | None = None,
-            metadata: OracleErrorMetadata | None = None,
+            metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
@@ -174,7 +174,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             user: str | None = None,
             auth_method: str | None = None,
             wallet_location: str | None = None,
-            metadata: OracleErrorMetadata | None = None,
+            metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
@@ -232,7 +232,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             record_count: int | None = None,
             error_records: Sequence[Mapping[str, t.ContainerValue]] | None = None,
             operation: str | None = None,
-            metadata: OracleErrorMetadata | None = None,
+            metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
@@ -294,7 +294,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             table_name: str | None = None,
             schema_hash: str | None = None,
             validation_errors: t.StrSequence | None = None,
-            metadata: OracleErrorMetadata | None = None,
+            metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
@@ -347,7 +347,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             sql_statement: str | None = None,
             table_name: str | None = None,
             operation: str | None = None,
-            metadata: OracleErrorMetadata | None = None,
+            metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize SQL error with Oracle-specific context."""
@@ -375,7 +375,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 oracle_context[key] = _to_metadata_value(value)
             super().__init__(
                 message=message,
-                metadata=OracleErrorMetadata(
+                metadata=FlextTargetOracleErrorMetadata(
                     code=resolved_metadata.code,
                     context=oracle_context or None,
                     correlation_id=resolved_metadata.correlation_id,
@@ -388,4 +388,4 @@ class FlextTargetOracleExceptions(FlextExceptions):
         """Oracle record processing errors."""
 
 
-__all__: t.StrSequence = ["FlextTargetOracleExceptions"]
+__all__: t.StrSequence = ["FlextTargetOracleErrorMetadata", "FlextTargetOracleExceptions"]

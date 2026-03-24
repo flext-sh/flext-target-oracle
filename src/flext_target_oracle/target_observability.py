@@ -7,7 +7,7 @@ from contextlib import contextmanager
 
 from flext_core import FlextLogger, c, t
 
-from flext_target_oracle import FlextTargetOracleExceptions, OracleErrorMetadata
+from flext_target_oracle import FlextTargetOracleExceptions, FlextTargetOracleErrorMetadata
 
 logger = FlextLogger(__name__)
 
@@ -34,7 +34,7 @@ class FlextOracleError:
             )
             return FlextTargetOracleExceptions.AuthenticationError(
                 f"Oracle authentication failed for {username} on {oracle_service}",
-                metadata=OracleErrorMetadata(
+                metadata=FlextTargetOracleErrorMetadata(
                     code=error_code or c.AUTHENTICATION_ERROR,
                     context={
                         "user": username,
@@ -59,7 +59,7 @@ class FlextOracleError:
             )
             return FlextTargetOracleExceptions.OracleConnectionError(
                 f"Oracle database unavailable: {connection_string}",
-                metadata=OracleErrorMetadata(
+                metadata=FlextTargetOracleErrorMetadata(
                     code=error_code or c.CONNECTION_ERROR,
                     context={
                         "connection_string": connection_string,
@@ -87,7 +87,7 @@ class FlextOracleError:
             )
             return FlextTargetOracleExceptions.ProcessingError(
                 f"Record processing failed for {stream_name}: {failed_records}/{record_count}",
-                metadata=OracleErrorMetadata(
+                metadata=FlextTargetOracleErrorMetadata(
                     code=c.PROCESSING_ERROR,
                     context={
                         "stream_name": stream_name,
@@ -113,7 +113,7 @@ class FlextOracleError:
             )
             return FlextTargetOracleExceptions.SchemaError(
                 f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
-                metadata=OracleErrorMetadata(
+                metadata=FlextTargetOracleErrorMetadata(
                     code=c.VALIDATION_ERROR,
                     context={
                         "stream_name": stream_name,

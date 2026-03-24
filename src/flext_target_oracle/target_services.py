@@ -8,7 +8,7 @@ from flext_db_oracle import FlextDbOracleApi
 from flext_target_oracle import FlextTargetOracleSettings, m, t
 
 
-class OracleConnectionService:
+class FlextTargetOracleConnectionService:
     """Minimal Oracle connection service implements ConnectionService protocol."""
 
     def __init__(
@@ -40,7 +40,7 @@ class OracleConnectionService:
         return r[None].ok(None)
 
 
-class OracleSchemaService:
+class FlextTargetOracleSchemaService:
     """Minimal schema management service implements SchemaService protocol."""
 
     def __init__(
@@ -69,7 +69,7 @@ class OracleSchemaService:
         return r[None].ok(None)
 
 
-class OracleBatchService:
+class FlextTargetOracleBatchService:
     """Minimal batching service implements BatchService protocol."""
 
     def __init__(
@@ -113,7 +113,7 @@ class OracleBatchService:
         return r[None].ok(None)
 
 
-class OracleRecordService:
+class FlextTargetOracleRecordService:
     """Record validation and transformation service implements RecordService protocol."""
 
     def __init__(self, config: FlextTargetOracleSettings) -> None:
@@ -157,7 +157,7 @@ class OracleRecordService:
         return r[None].ok(None)
 
 
-class OracleTargetServiceFactory:
+class FlextTargetOracleServiceFactory:
     """Factory for constructing all Oracle target services."""
 
     def __init__(
@@ -169,27 +169,27 @@ class OracleTargetServiceFactory:
         self._config = config
         self._oracle_api = oracle_api
 
-    def create_batch_service(self) -> OracleBatchService:
+    def create_batch_service(self) -> FlextTargetOracleBatchService:
         """Create Oracle batch service."""
-        return OracleBatchService(self._config, self._oracle_api)
+        return FlextTargetOracleBatchService(self._config, self._oracle_api)
 
-    def create_connection_service(self) -> OracleConnectionService:
+    def create_connection_service(self) -> FlextTargetOracleConnectionService:
         """Create Oracle connection service."""
-        return OracleConnectionService(self._config, self._oracle_api)
+        return FlextTargetOracleConnectionService(self._config, self._oracle_api)
 
-    def create_record_service(self) -> OracleRecordService:
+    def create_record_service(self) -> FlextTargetOracleRecordService:
         """Create Oracle record service."""
-        return OracleRecordService(self._config)
+        return FlextTargetOracleRecordService(self._config)
 
-    def create_schema_service(self) -> OracleSchemaService:
+    def create_schema_service(self) -> FlextTargetOracleSchemaService:
         """Create Oracle schema service."""
-        return OracleSchemaService(self._config, self._oracle_api)
+        return FlextTargetOracleSchemaService(self._config, self._oracle_api)
 
 
 __all__ = [
-    "OracleBatchService",
-    "OracleConnectionService",
-    "OracleRecordService",
-    "OracleSchemaService",
-    "OracleTargetServiceFactory",
+    "FlextTargetOracleBatchService",
+    "FlextTargetOracleConnectionService",
+    "FlextTargetOracleRecordService",
+    "FlextTargetOracleSchemaService",
+    "FlextTargetOracleServiceFactory",
 ]

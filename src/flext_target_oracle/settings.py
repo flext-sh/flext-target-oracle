@@ -129,12 +129,20 @@ class FlextTargetOracleSettings(FlextSettings):
             parallel_degree=self.parallel_degree,
         )
 
+    @staticmethod
+    def validate_oracle_configuration(
+        config: FlextTargetOracleSettings,
+    ) -> r[bool]:
+        """Validate Oracle configuration using FlextSettings patterns - ZERO DUPLICATION."""
+        return config.validate_business_rules()
 
+
+# Module-level alias for backward compatibility with __init__.py exports
 def validate_oracle_configuration(
     config: FlextTargetOracleSettings,
 ) -> r[bool]:
-    """Validate Oracle configuration using FlextSettings patterns - ZERO DUPLICATION."""
-    return config.validate_business_rules()
+    """Validate Oracle configuration - delegates to FlextTargetOracleSettings.validate_oracle_configuration."""
+    return FlextTargetOracleSettings.validate_oracle_configuration(config)
 
 
 __all__: t.StrSequence = [
