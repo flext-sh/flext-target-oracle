@@ -48,23 +48,11 @@ if TYPE_CHECKING:
         validate_oracle_configuration,
     )
     from flext_target_oracle.target_client import FlextTargetOracle
-    from flext_target_oracle.target_commands import (
-        OracleTargetAboutCommand,
-        OracleTargetCommandFactory,
-        OracleTargetCommandHandler,
-        OracleTargetLoadCommand,
-        OracleTargetValidateCommand,
-    )
     from flext_target_oracle.target_exceptions import (
         FlextTargetOracleErrorMetadata,
         FlextTargetOracleExceptions,
     )
     from flext_target_oracle.target_loader import FlextTargetOracleLoader
-    from flext_target_oracle.target_models import (
-        LoadStatisticsModel,
-        OracleConnectionModel,
-        SingerStreamModel,
-    )
     from flext_target_oracle.target_observability import (
         FlextOracleError,
         FlextOracleObs,
@@ -156,32 +144,6 @@ _LAZY_IMPORTS: Mapping[str, tuple[str, str]] = {
         "flext_target_oracle.utilities",
         "FlextTargetOracleUtilities",
     ),
-    "LoadStatisticsModel": ("flext_target_oracle.target_models", "LoadStatisticsModel"),
-    "OracleConnectionModel": (
-        "flext_target_oracle.target_models",
-        "OracleConnectionModel",
-    ),
-    "OracleTargetAboutCommand": (
-        "flext_target_oracle.target_commands",
-        "OracleTargetAboutCommand",
-    ),
-    "OracleTargetCommandFactory": (
-        "flext_target_oracle.target_commands",
-        "OracleTargetCommandFactory",
-    ),
-    "OracleTargetCommandHandler": (
-        "flext_target_oracle.target_commands",
-        "OracleTargetCommandHandler",
-    ),
-    "OracleTargetLoadCommand": (
-        "flext_target_oracle.target_commands",
-        "OracleTargetLoadCommand",
-    ),
-    "OracleTargetValidateCommand": (
-        "flext_target_oracle.target_commands",
-        "OracleTargetValidateCommand",
-    ),
-    "SingerStreamModel": ("flext_target_oracle.target_models", "SingerStreamModel"),
     "__all__": ("flext_target_oracle.__version__", "__all__"),
     "__author__": ("flext_target_oracle.__version__", "__author__"),
     "__author_email__": ("flext_target_oracle.__version__", "__author_email__"),
@@ -234,14 +196,6 @@ __all__ = [
     "FlextTargetOracleSettings",
     "FlextTargetOracleTypes",
     "FlextTargetOracleUtilities",
-    "LoadStatisticsModel",
-    "OracleConnectionModel",
-    "OracleTargetAboutCommand",
-    "OracleTargetCommandFactory",
-    "OracleTargetCommandHandler",
-    "OracleTargetLoadCommand",
-    "OracleTargetValidateCommand",
-    "SingerStreamModel",
     "__all__",
     "__author__",
     "__author_email__",
