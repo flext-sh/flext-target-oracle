@@ -11,7 +11,7 @@ from flext_db_oracle.models import FlextDbOracleModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field, TypeAdapter
 
-from flext_target_oracle.constants import FlextTargetOracleConstants
+from flext_target_oracle import FlextTargetOracleConstants
 
 
 class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):

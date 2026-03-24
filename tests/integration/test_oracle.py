@@ -23,9 +23,8 @@ from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
-    m,
 )
-from tests import c, t
+from tests import c, m, t
 
 
 def _schema_parts(

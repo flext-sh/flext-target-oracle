@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from flext_core import r, t
+from flext_core import r
 from flext_db_oracle import FlextDbOracleApi
 
-from flext_target_oracle import m
-
-from .settings import FlextTargetOracleSettings
+from flext_target_oracle import FlextTargetOracleSettings, m, t
 
 
 class OracleConnectionService:
@@ -26,9 +24,9 @@ class OracleConnectionService:
         """Run default connection validation operation."""
         return self.test_connection()
 
-    def get_connection_info(self) -> r[m.TargetOracle.OracleConnectionConfig]:
+    def get_connection_info(self) -> r[m.TargetOracle.OracleConnectionModel]:
         """Return normalized connection model."""
-        return r[m.TargetOracle.OracleConnectionConfig].ok(
+        return r[m.TargetOracle.OracleConnectionModel].ok(
             self.config.get_oracle_config(),
         )
 

@@ -15,14 +15,17 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
-from flext_core import FlextLogger, FlextService, r, t
+from flext_core import FlextLogger, FlextService, r
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import PrivateAttr, TypeAdapter
 
-from flext_target_oracle import m, p
-
-from .settings import FlextTargetOracleSettings
-from .target_exceptions import FlextTargetOracleExceptions
+from flext_target_oracle import (
+    FlextTargetOracleExceptions,
+    FlextTargetOracleSettings,
+    m,
+    p,
+    t,
+)
 
 logger = FlextLogger(__name__)
 

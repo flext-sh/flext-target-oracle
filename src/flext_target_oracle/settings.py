@@ -10,15 +10,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 
 from flext_core import FlextLogger, FlextSettings, r
 from pydantic import Field, SecretStr
 
-from flext_target_oracle import c, t
-
-if TYPE_CHECKING:
-    from .models import FlextTargetOracleModels
+from flext_target_oracle import c, m, t
 
 logger = FlextLogger(__name__)
 
@@ -113,13 +110,9 @@ class FlextTargetOracleSettings(FlextSettings):
 
     def get_oracle_config(
         self,
-    ) -> FlextTargetOracleModels.TargetOracle.OracleConnectionModel:
+    ) -> m.TargetOracle.OracleConnectionModel:
         """Get Oracle database connection configuration."""
-        from .models import (
-            FlextTargetOracleModels,
-        )
-
-        return FlextTargetOracleModels.TargetOracle.OracleConnectionModel(
+        return m.TargetOracle.OracleConnectionModel(
             host=self.oracle_host,
             port=self.oracle_port,
             service_name=self.oracle_service_name,
