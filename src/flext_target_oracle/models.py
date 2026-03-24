@@ -334,8 +334,9 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                     == FlextTargetOracleConstants.TargetOracle.OutputFormats.TEXT
                 ):
                     return r[str].ok("flext-target-oracle")
+                adapter: TypeAdapter[Mapping[str, str]] = TypeAdapter(t.StrMapping)
                 return r[str].ok(
-                    TypeAdapter(t.StrMapping).dump_json(payload).decode("utf-8"),
+                    adapter.dump_json(payload).decode("utf-8"),
                 )
 
         class OracleTargetLoadCommand(FlextMeltanoModels.Command):

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from datetime import datetime
-from typing import ClassVar, override
+from typing import Annotated, ClassVar, override
 
 from flext_core import FlextExceptions, r
 from pydantic import ConfigDict, Field
@@ -33,15 +33,21 @@ class FlextTargetOracleErrorMetadata(m.Value):
 
     model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
 
-    code: str = Field(description="Canonical error code")
-    context: Mapping[str, t.MetadataValue] | None = Field(
-        default=None,
-        description="Structured error context",
-    )
-    correlation_id: str | None = Field(
-        default=None,
-        description="Cross-service correlation identifier",
-    )
+    code: Annotated[str, Field(description="Canonical error code")]
+    context: Annotated[
+        Mapping[str, t.MetadataValue] | None,
+        Field(
+            default=None,
+            description="Structured error context",
+        ),
+    ]
+    correlation_id: Annotated[
+        str | None,
+        Field(
+            default=None,
+            description="Cross-service correlation identifier",
+        ),
+    ]
 
 
 def _extract_legacy_metadata_kwargs(
