@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
@@ -27,7 +27,7 @@ from .target_exceptions import FlextTargetOracleExceptions
 logger = FlextLogger(__name__)
 
 
-def _default_record_buffers() -> dict[str, list[Mapping[str, t.Container]]]:
+def _default_record_buffers() -> dict[str, list[t.FlatContainerMapping]]:
     return {}
 
 
@@ -47,7 +47,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     model_config: ClassVar = {"frozen": False}
     _target_config: FlextTargetOracleSettings = PrivateAttr()
     _oracle_api: FlextDbOracleApi = PrivateAttr()
-    _record_buffers: dict[str, list[Mapping[str, t.Container]]] = PrivateAttr(
+    _record_buffers: dict[str, list[t.FlatContainerMapping]] = PrivateAttr(
         default_factory=_default_record_buffers,
     )
     _total_records: int = PrivateAttr(default=0)
@@ -91,7 +91,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         return self._oracle_api
 
     @property
-    def record_buffers(self) -> dict[str, list[Mapping[str, t.Container]]]:
+    def record_buffers(self) -> dict[str, list[t.FlatContainerMapping]]:
         """Access record buffers."""
         return self._record_buffers
 
@@ -149,7 +149,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def ensure_table_exists(
         self,
         stream_name: str,
-        schema: Mapping[str, t.Container],
+        schema: t.FlatContainerMapping,
         _key_properties: Sequence[str] | None = None,
     ) -> r[bool]:
         """Ensure table exists using flext-db-oracle API with correct table creation."""
@@ -250,7 +250,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def insert_records(
         self,
         stream_name: str,
-        records: Sequence[Mapping[str, t.Scalar]],
+        records: Sequence[t.ConfigurationMapping],
     ) -> r[bool]:
         """Insert multiple records - convenience wrapper used by tests.
 
@@ -277,7 +277,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def load_record(
         self,
         stream_name: str,
-        record_data: Mapping[str, t.Container],
+        record_data: t.FlatContainerMapping,
     ) -> r[bool]:
         """Load record with batching."""
         try:
@@ -348,7 +348,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def _build_create_table_sql(
         self,
         table_name: str,
-        _schema: Mapping[str, t.Container],
+        _schema: t.FlatContainerMapping,
     ) -> str:
         """Build CREATE TABLE SQL statement."""
         schema_name = self.target_config.default_target_schema
@@ -375,12 +375,10 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             with self.oracle_api as connected_api:
                 for record in records:
                     insert_sql = f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"
-                    record_adapter: TypeAdapter[Mapping[str, t.Container]] = (
-                        TypeAdapter(
-                            Mapping[str, t.Container],
-                        )
+                    record_adapter: TypeAdapter[t.FlatContainerMapping] = TypeAdapter(
+                        t.FlatContainerMapping,
                     )
-                    params: Mapping[str, t.Scalar] = {
+                    params: t.ConfigurationMapping = {
                         "data": record_adapter.dump_json(record).decode("utf-8"),
                         "extracted_at": str(record.get("_sdc_extracted_at", loaded_at)),
                         "loaded_at": loaded_at,

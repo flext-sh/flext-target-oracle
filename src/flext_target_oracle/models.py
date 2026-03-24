@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Annotated, Literal, Protocol, Self, override
 
@@ -81,7 +81,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ),
             ]
             streams: Annotated[
-                Sequence[str],
+                t.StrSequence,
                 Field(
                     default_factory=list,
                     description="Singer stream names seen during processing",
@@ -274,14 +274,14 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 str, Field(description="Oracle destination table name")
             ]
             ignored_columns: Annotated[
-                Sequence[str],
+                t.StrSequence,
                 Field(
                     default_factory=list,
                     description="Columns ignored during record transformation",
                 ),
             ]
             column_mappings: Annotated[
-                Mapping[str, str],
+                t.StrMapping,
                 Field(
                     default_factory=dict,
                     description="Singer column to Oracle column mapping",
@@ -293,18 +293,19 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
             stream_name: Annotated[str, Field(description="Stream identifier")]
             total_records_processed: Annotated[
-                int,
+                t.NonNegativeInt,
                 Field(
-                    ge=0,
                     description="Total processed records",
                 ),
             ]
             successful_records: Annotated[
-                int, Field(ge=0, description="Successful records")
+                t.NonNegativeInt, Field(description="Successful records")
             ]
-            failed_records: Annotated[int, Field(ge=0, description="Failed records")]
+            failed_records: Annotated[
+                t.NonNegativeInt, Field(description="Failed records")
+            ]
             batches_processed: Annotated[
-                int, Field(ge=0, description="Processed batch count")
+                t.NonNegativeInt, Field(description="Processed batch count")
             ]
 
             def finalize(self) -> Self:
@@ -318,7 +319,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
 
             def execute(self) -> r[str]:
                 """Execute about command returning target information."""
-                payload: Mapping[str, str] = {
+                payload: t.StrMapping = {
                     "name": "flext-target-oracle",
                     "description": "Singer target for Oracle loading",
                     "format": self.format,
@@ -329,7 +330,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                 ):
                     return r[str].ok("flext-target-oracle")
                 return r[str].ok(
-                    TypeAdapter(Mapping[str, str]).dump_json(payload).decode("utf-8")
+                    TypeAdapter(t.StrMapping).dump_json(payload).decode("utf-8")
                 )
 
         class OracleTargetLoadCommand(FlextModels.Command):

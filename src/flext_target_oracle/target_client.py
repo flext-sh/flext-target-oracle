@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from datetime import UTC, datetime
 
 import oracledb
@@ -28,7 +28,7 @@ class FlextTargetOracle:
         self.state_message: m.TargetOracle.SingerStateMessage = (
             m.TargetOracle.SingerStateMessage(type="STATE", value={})
         )
-        self._record_batches: dict[str, list[Mapping[str, t.Container]]] = {}
+        self._record_batches: dict[str, list[t.FlatContainerMapping]] = {}
 
     def discover_catalog(self) -> r[m.Meltano.SingerCatalog]:
         """Return Singer-style catalog for known schemas."""
@@ -216,8 +216,8 @@ class FlextTargetOracle:
                 execute_method = getattr(cursor, "execute", None)
                 if not callable(execute_method):
                     return r[bool].fail("Cursor does not support execute")
-                record_adapter: TypeAdapter[Mapping[str, t.Container]] = TypeAdapter(
-                    Mapping[str, t.Container],
+                record_adapter: TypeAdapter[t.FlatContainerMapping] = TypeAdapter(
+                    t.FlatContainerMapping,
                 )
                 for record in batch:
                     extracted_at = record.get(

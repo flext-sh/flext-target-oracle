@@ -59,12 +59,12 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type TableConfiguration = Mapping[str, str | bool | t.ContainerValueMapping]
         type SchemaDefinition = Mapping[
-            str, str | Sequence[str] | t.ContainerValueMapping
+            str, str | t.StrSequence | t.ContainerValueMapping
         ]
         type ColumnMapping = Mapping[str, str | t.ContainerValueMapping]
         type IndexConfiguration = Mapping[
             str,
-            str | Sequence[str] | t.ContainerValueMapping,
+            str | t.StrSequence | t.ContainerValueMapping,
         ]
         type ConstraintDefinition = Mapping[str, str | t.ContainerValueMapping]
         type TablespaceSettings = Mapping[str, str | int | t.ContainerValueMapping]
@@ -79,7 +79,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
         type QueryExecution = Mapping[str, str | t.ContainerValueMapping]
         type BulkOperations = Mapping[
             str,
-            str | int | Sequence[str] | t.ContainerValueMapping,
+            str | int | t.StrSequence | t.ContainerValueMapping,
         ]
         type PreparedStatements = Mapping[str, str | t.ContainerValueMapping]
         type SqlOptimization = Mapping[str, bool | str | t.ContainerValueMapping]
@@ -105,7 +105,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
             str,
             str | bool | t.ContainerValueMapping,
         ]
-        type FieldMapping = Mapping[str, str | Sequence[str] | t.ContainerValueMapping]
+        type FieldMapping = Mapping[str, str | t.StrSequence | t.ContainerValueMapping]
         type DataValidation = Mapping[str, str | t.ContainerValueMapping]
         type TypeConversion = Mapping[str, bool | str | t.ContainerValueMapping]
         type FilteringRules = Mapping[str, str | t.ContainerValueMapping]
@@ -127,7 +127,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
     class SingerMessage:
         """Singer protocol message complex types."""
 
-        type SchemaMessage = Mapping[str, str | Sequence[str] | t.ContainerValueMapping]
+        type SchemaMessage = Mapping[str, str | t.StrSequence | t.ContainerValueMapping]
         type RecordMessage = Mapping[str, str | t.ContainerValueMapping]
         type StateMessage = Mapping[str, str | t.ContainerValueMapping]
         type ActivateVersionMessage = Mapping[str, str | int]
