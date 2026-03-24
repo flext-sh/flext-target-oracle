@@ -482,7 +482,9 @@ def temp_config_file(tmp_path: Path) -> Path:
     }
     config_file = tmp_path / "config.json"
     config_file.write_text(
-        TypeAdapter(t.NormalizedValue).dump_json(config_data).decode("utf-8"),
+        TypeAdapter[t.NormalizedValue](t.NormalizedValue)
+        .dump_json(config_data)
+        .decode("utf-8"),
     )
     return config_file
 

@@ -1,6 +1,5 @@
 """Tests for dispatcher integration in FlextTargetOracleCliService."""
 from __future__ import annotations
-from flext_tests import tm
 from collections.abc import Generator
 from contextlib import contextmanager
 from unittest.mock import patch
