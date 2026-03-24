@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
-
 import pytest
 from tests import t
 
@@ -40,7 +38,7 @@ def test_load_record_buffers_and_finalize(
 ) -> None:
     """load_record should buffer valid records and finalize returns model."""
     loader = FlextTargetOracleLoader(loader_config)
-    record: Mapping[str, t.Scalar] = {"id": 1, "name": "Alice"}
+    record: t.ScalarMapping = {"id": 1, "name": "Alice"}
     load_result = loader.load_record("users", record)
     assert load_result.is_success
     finalize_result = loader.finalize_all_streams()

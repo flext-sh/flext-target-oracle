@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import sys
-from collections.abc import Sequence
 
 from flext_core import FlextLogger, r
+
+from flext_target_oracle import t
 
 from .target_commands import OracleTargetCommandFactory
 
@@ -19,7 +20,7 @@ class FlextTargetOracleCliService:
         """Service readiness probe."""
         return r[str].ok("CLI ready")
 
-    def run_cli(self, args: Sequence[str] | None = None) -> r[str]:
+    def run_cli(self, args: t.StrSequence | None = None) -> r[str]:
         """Dispatch CLI args to the appropriate command."""
         argv = args if args is not None else sys.argv[1:]
         if not argv or argv[0] in {"help", "-h", "--help"}:

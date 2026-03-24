@@ -89,7 +89,7 @@ class TestOracleIntegration:
             stream_name, schema_dict, key_props
         )
         assert create_res.is_success
-        records: Sequence[Mapping[str, t.Scalar]] = [
+        records: Sequence[t.ScalarMapping] = [
             {"id": 1, "name": "John Doe", "email": "john@example.com"},
             {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
         ]
@@ -120,12 +120,12 @@ class TestOracleIntegration:
         schema_dict, key_props = _schema_parts(simple_schema)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.is_success
-        initial_records: Sequence[Mapping[str, t.Scalar]] = [
+        initial_records: Sequence[t.ScalarMapping] = [
             {"id": 1, "name": "Original Name", "email": "original@example.com"}
         ]
         insert_result = loader.insert_records(stream_name, initial_records)
         assert insert_result.is_success
-        updated_records: Sequence[Mapping[str, t.Scalar]] = [
+        updated_records: Sequence[t.ScalarMapping] = [
             {"id": 1, "name": "Updated Name", "email": "updated@example.com"}
         ]
         result = loader.insert_records(stream_name, updated_records)
@@ -168,7 +168,7 @@ class TestOracleIntegration:
         schema_dict, key_props = _schema_parts(schema_message)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.is_success
-        records: Sequence[Mapping[str, t.Scalar]] = [
+        records: Sequence[t.ScalarMapping] = [
             {"id": i, "data": f"Bulk test data {i}", "value": i * 1.5}
             for i in range(5000)
         ]

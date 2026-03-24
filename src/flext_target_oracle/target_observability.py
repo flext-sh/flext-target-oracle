@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator, Mapping, Sequence
+from collections.abc import Generator
 from contextlib import contextmanager
 
 from flext_core import FlextLogger, c, t
@@ -101,7 +101,7 @@ class FlextOracleError:
         def schema_validation_failed(
             *,
             stream_name: str,
-            schema_errors: Sequence[str],
+            schema_errors: t.StrSequence,
             singer_specification: str = "1.5.0",
         ) -> FlextTargetOracleExceptions.SchemaError:
             """Build a Singer schema validation failure."""
@@ -150,7 +150,7 @@ class FlextOracleObs:
         def query_performance(
             table_name: str,
             operation: str = "SELECT",
-        ) -> Generator[Mapping[str, str]]:
+        ) -> Generator[t.StrMapping]:
             """Yield a mutable context while timing a query operation."""
             logger.debug("Starting query performance monitor")
             context = {"table_name": table_name, "operation": operation}
