@@ -11,6 +11,8 @@ from pydantic import TypeAdapter
 
 from flext_target_oracle import t
 
+_CONTAINER_VALUE_ADAPTER: TypeAdapter[t.ContainerValue] = TypeAdapter(t.ContainerValue)
+
 
 class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
     """Focused utility namespace used by Oracle target modules."""
@@ -33,10 +35,7 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
                     not isinstance(value, str | bytes)
                 )
                 if is_mapping or is_sequence:
-                    adapter: TypeAdapter[t.ContainerValue] = TypeAdapter(
-                        t.ContainerValue,
-                    )
-                    transformed[key.upper()] = adapter.dump_json(value).decode("utf-8")
+                    transformed[key.upper()] = _CONTAINER_VALUE_ADAPTER.dump_json(value).decode("utf-8")
                     continue
                 match value:
                     case bool() as bool_value:

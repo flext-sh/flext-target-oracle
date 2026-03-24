@@ -13,6 +13,9 @@ from pydantic import TypeAdapter, ValidationError
 from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings, m
 
 logger = FlextLogger(__name__)
+_FLAT_CONTAINER_MAP_ADAPTER: TypeAdapter[t.FlatContainerMapping] = TypeAdapter(
+    t.FlatContainerMapping,
+)
 
 
 class FlextTargetOracle:
@@ -214,9 +217,6 @@ class FlextTargetOracle:
                 execute_method = getattr(cursor, "execute", None)
                 if not callable(execute_method):
                     return r[bool].fail("Cursor does not support execute")
-                record_adapter: TypeAdapter[t.FlatContainerMapping] = TypeAdapter(
-                    t.FlatContainerMapping,
-                )
                 for record in batch:
                     extracted_at = record.get(
                         "_sdc_extracted_at",
@@ -225,7 +225,7 @@ class FlextTargetOracle:
                     execute_method(
                         insert_sql,
                         {
-                            "data": record_adapter.dump_json(record).decode("utf-8"),
+                            "data": _FLAT_CONTAINER_MAP_ADAPTER.dump_json(record).decode("utf-8"),
                             "extracted_at": extracted_at,
                             "loaded_at": datetime.now(UTC).isoformat(),
                         },

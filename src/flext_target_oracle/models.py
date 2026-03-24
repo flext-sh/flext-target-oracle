@@ -13,6 +13,8 @@ from pydantic import Field, TypeAdapter
 
 from flext_target_oracle import FlextTargetOracleConstants
 
+_STR_MAP_ADAPTER: TypeAdapter[t.StrMapping] = TypeAdapter(t.StrMapping)
+
 
 class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
     """Complete models for Oracle target operations extending FlextModels."""
@@ -334,9 +336,8 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                     == FlextTargetOracleConstants.TargetOracle.OutputFormats.TEXT
                 ):
                     return r[str].ok("flext-target-oracle")
-                adapter: TypeAdapter[Mapping[str, str]] = TypeAdapter(t.StrMapping)
                 return r[str].ok(
-                    adapter.dump_json(payload).decode("utf-8"),
+                    _STR_MAP_ADAPTER.dump_json(payload).decode("utf-8"),
                 )
 
         class OracleTargetLoadCommand(FlextMeltanoModels.Command):
