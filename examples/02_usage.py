@@ -6,7 +6,7 @@ Singer-formatted data into an Oracle database.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from pathlib import Path
 from typing import cast
 
@@ -16,17 +16,17 @@ from pydantic import TypeAdapter
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 
-def load_config() -> Mapping[str, t.NormalizedValue]:
+def load_config() -> t.ContainerMapping:
     """Load configuration from file."""
     config_path = Path("config.json")
     content = config_path.read_text(encoding="utf-8")
-    return TypeAdapter(Mapping[str, t.NormalizedValue]).validate_json(content)
+    return TypeAdapter(t.ContainerMapping).validate_json(content)
 
 
-def load_singer_messages() -> Sequence[Mapping[str, t.NormalizedValue]]:
+def load_singer_messages() -> Sequence[t.ContainerMapping]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
-    adapter = TypeAdapter(Mapping[str, t.NormalizedValue])
+    adapter = TypeAdapter(t.ContainerMapping)
     with data_path.open(encoding="utf-8") as f:
         return [adapter.validate_json(line) for line in f if line.strip()]
 
@@ -47,8 +47,8 @@ def main() -> None:
         elif msg_type == "RECORD":
             message.get("stream", "unknown")
             record_obj: t.NormalizedValue = message.get("record", {})
-            record_dict: Mapping[str, t.NormalizedValue] = (
-                cast("Mapping[str, t.NormalizedValue]", record_obj)
+            record_dict: t.ContainerMapping = (
+                cast("t.ContainerMapping", record_obj)
                 if isinstance(record_obj, dict)
                 else {}
             )

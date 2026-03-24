@@ -264,7 +264,7 @@ def mock_loader() -> Mock:
 
 
 @pytest.fixture
-def schema() -> Mapping[str, t.NormalizedValue]:
+def schema() -> t.ContainerMapping:
     """Simple Singer schema message for unit testing."""
     return {
         "type": "SCHEMA",
@@ -282,7 +282,7 @@ def schema() -> Mapping[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def record() -> Mapping[str, t.NormalizedValue]:
+def record() -> t.ContainerMapping:
     """Simple Singer record message for unit testing."""
     return {
         "type": "RECORD",
@@ -292,7 +292,7 @@ def record() -> Mapping[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def state() -> Mapping[str, t.NormalizedValue]:
+def state() -> t.ContainerMapping:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -301,7 +301,7 @@ def state() -> Mapping[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def simple_schema() -> Mapping[str, t.NormalizedValue]:
+def simple_schema() -> t.ContainerMapping:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
@@ -320,7 +320,7 @@ def simple_schema() -> Mapping[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def nested_schema() -> Mapping[str, t.NormalizedValue]:
+def nested_schema() -> t.ContainerMapping:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
@@ -364,7 +364,7 @@ def nested_schema() -> Mapping[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def sample_record() -> Mapping[str, t.NormalizedValue]:
+def sample_record() -> t.ContainerMapping:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -381,7 +381,7 @@ def sample_record() -> Mapping[str, t.NormalizedValue]:
 
 
 @pytest.fixture
-def batch_records() -> Sequence[Mapping[str, t.NormalizedValue]]:
+def batch_records() -> Sequence[t.ContainerMapping]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -400,7 +400,7 @@ def batch_records() -> Sequence[Mapping[str, t.NormalizedValue]]:
 
 
 @pytest.fixture
-def state_message() -> Mapping[str, t.NormalizedValue]:
+def state_message() -> t.ContainerMapping:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -418,10 +418,10 @@ def state_message() -> Mapping[str, t.NormalizedValue]:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema: Mapping[str, t.NormalizedValue],
-    sample_record: Mapping[str, t.NormalizedValue],
-    state_message: Mapping[str, t.NormalizedValue],
-) -> Sequence[Mapping[str, t.NormalizedValue]]:
+    simple_schema: t.ContainerMapping,
+    sample_record: t.ContainerMapping,
+    state_message: t.ContainerMapping,
+) -> Sequence[t.ContainerMapping]:
     """Complete Singer message stream for testing."""
     return [simple_schema, sample_record, sample_record, state_message]
 
