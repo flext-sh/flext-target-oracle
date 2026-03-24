@@ -36,7 +36,7 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
                 )
                 if is_mapping or is_sequence:
                     transformed[key.upper()] = _CONTAINER_VALUE_ADAPTER.dump_json(
-                        value
+                        value,
                     ).decode("utf-8")
                     continue
                 match value:

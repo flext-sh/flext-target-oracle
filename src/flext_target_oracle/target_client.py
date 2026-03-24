@@ -226,7 +226,7 @@ class FlextTargetOracle:
                         insert_sql,
                         {
                             "data": _FLAT_CONTAINER_MAP_ADAPTER.dump_json(
-                                record
+                                record,
                             ).decode("utf-8"),
                             "extracted_at": extracted_at,
                             "loaded_at": datetime.now(UTC).isoformat(),

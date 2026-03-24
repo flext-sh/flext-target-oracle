@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
+
 from flext_core import r
 from flext_db_oracle import FlextDbOracleApi
 
@@ -80,7 +82,7 @@ class FlextTargetOracleBatchService:
         """Initialize batch storage and required dependencies."""
         self.config = config
         self.oracle_api = oracle_api
-        self._batches: dict[str, list[m.Meltano.SingerRecordMessage]] = {}
+        self._batches: defaultdict[str, list[m.Meltano.SingerRecordMessage]] = defaultdict(list)
 
     def add_record(
         self,
@@ -88,7 +90,7 @@ class FlextTargetOracleBatchService:
         record_message: m.Meltano.SingerRecordMessage,
     ) -> r[None]:
         """Append a record to a stream buffer."""
-        self._batches.setdefault(stream_name, []).append(record_message)
+        self._batches[stream_name].append(record_message)
         return r[None].ok(None)
 
     def execute(self) -> r[m.TargetOracle.LoadStatisticsModel]:
