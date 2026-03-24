@@ -7,7 +7,10 @@ from contextlib import contextmanager
 
 from flext_core import FlextLogger, c, t
 
-from flext_target_oracle import FlextTargetOracleExceptions, FlextTargetOracleErrorMetadata
+from flext_target_oracle import (
+    FlextTargetOracleErrorMetadata,
+    FlextTargetOracleExceptions,
+)
 
 logger = FlextLogger(__name__)
 

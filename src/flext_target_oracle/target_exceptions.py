@@ -388,4 +388,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
         """Oracle record processing errors."""
 
 
-__all__: t.StrSequence = ["FlextTargetOracleErrorMetadata", "FlextTargetOracleExceptions"]
+__all__: t.StrSequence = [
+    "FlextTargetOracleErrorMetadata",
+    "FlextTargetOracleExceptions",
+]
