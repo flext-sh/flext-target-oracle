@@ -41,7 +41,7 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
                         transformed[key.upper()] = 1 if bool_value else 0
                     case _:
                         transformed[key.upper()] = value
-            return r[Mapping[str, t.ContainerValue]].ok(transformed)
+            return r[t.ContainerValueMapping].ok(transformed)
 
 
 u = FlextTargetOracleUtilities
