@@ -15,7 +15,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from flext_core import FlextLogger, r, t
+from flext_core import FlextLogger, r
+from tests import t
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_tests import tk
 from pydantic import TypeAdapter
