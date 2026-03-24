@@ -78,7 +78,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             )
             self._target_config = config
             self._oracle_api = oracle_api
-            self._record_buffers = {}
+            self._record_buffers = dict[str, list[t.FlatContainerMapping]]()
             self._total_records = 0
         except (
             ValueError,
@@ -289,7 +289,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         """Load record with batching."""
         try:
             if stream_name not in self.record_buffers:
-                self.record_buffers[stream_name] = []
+                self.record_buffers[stream_name] = list[t.FlatContainerMapping]()
             self.record_buffers[stream_name].append(dict(record_data))
             self._total_records += 1
             if len(self.record_buffers[stream_name]) >= self.target_config.batch_size:
@@ -392,7 +392,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                     result = connected_api.execute_sql(insert_sql, parameters=params)
                     if result.is_failure:
                         return r[bool].fail(f"Batch insert failed: {result.error}")
-                self.record_buffers[stream_name] = []
+                self.record_buffers[stream_name] = list[t.FlatContainerMapping]()
                 self.log_info(f"Flushed {len(records)} records to {table_name}")
                 return r[bool].ok(value=True)
         except (

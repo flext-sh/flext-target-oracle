@@ -113,7 +113,7 @@ class FlextTargetOracleBatchService:
 
     def flush_batch(self, stream_name: str) -> r[None]:
         """Clear buffered records for a specific stream."""
-        self._batches[stream_name] = []
+        self._batches[stream_name] = list[m.Meltano.SingerRecordMessage]()
         return r[None].ok(None)
 
 

@@ -234,7 +234,7 @@ class FlextTargetOracle:
                     )
             if not self.config.autocommit:
                 connection.commit()
-            self._record_batches[stream_name] = []
+            self._record_batches[stream_name] = list[t.FlatContainerMapping]()
             return r[bool].ok(True)
         except (ValueError, TypeError, RuntimeError, AttributeError, OSError) as exc:
             return r[bool].fail(f"Failed to insert Oracle records: {exc}")
