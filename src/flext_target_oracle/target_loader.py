@@ -383,7 +383,9 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 for record in records:
                     insert_sql = f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"
                     params: t.ConfigurationMapping = {
-                        "data": _FLAT_CONTAINER_MAP_ADAPTER.dump_json(record).decode("utf-8"),
+                        "data": _FLAT_CONTAINER_MAP_ADAPTER.dump_json(record).decode(
+                            "utf-8"
+                        ),
                         "extracted_at": str(record.get("_sdc_extracted_at", loaded_at)),
                         "loaded_at": loaded_at,
                     }
