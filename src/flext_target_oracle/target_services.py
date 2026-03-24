@@ -82,7 +82,9 @@ class FlextTargetOracleBatchService:
         """Initialize batch storage and required dependencies."""
         self.config = config
         self.oracle_api = oracle_api
-        self._batches: defaultdict[str, list[m.Meltano.SingerRecordMessage]] = defaultdict(list)
+        self._batches: defaultdict[str, list[m.Meltano.SingerRecordMessage]] = (
+            defaultdict(list)
+        )
 
     def add_record(
         self,
