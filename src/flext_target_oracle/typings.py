@@ -33,7 +33,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type TargetConfiguration = Mapping[
             str,
-            str | int | bool | Mapping[str, t.ContainerValue],
+            t.Scalar | Mapping[str, t.ContainerValue],
         ]
         type StreamConfiguration = Mapping[
             str, str | bool | Mapping[str, t.ContainerValue]
@@ -50,7 +50,7 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
         type DatabaseConfiguration = Mapping[
             str,
-            str | int | bool | Mapping[str, t.ContainerValue],
+            t.Scalar | Mapping[str, t.ContainerValue],
         ]
         type ConnectionManagement = Mapping[
             str, str | int | Mapping[str, t.ContainerValue]
