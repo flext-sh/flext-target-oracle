@@ -45,6 +45,7 @@ class FlextOracleError:
                         "user": username,
                         "oracle_service": oracle_service,
                     },
+                    correlation_id=None,
                 ),
             )
 
@@ -70,6 +71,7 @@ class FlextOracleError:
                         "connection_string": connection_string,
                         "recovery_strategy": recovery_strategy,
                     },
+                    correlation_id=None,
                 ),
             )
 
@@ -99,6 +101,7 @@ class FlextOracleError:
                         "record_count": record_count,
                         "failed_records": failed_records,
                     },
+                    correlation_id=None,
                 ),
             )
 
@@ -125,6 +128,7 @@ class FlextOracleError:
                         "schema_errors": "; ".join(schema_errors),
                         "singer_specification": singer_specification,
                     },
+                    correlation_id=None,
                 ),
             )
 
