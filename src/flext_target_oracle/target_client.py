@@ -33,15 +33,15 @@ class FlextTargetOracle:
             str, MutableSequence[t.FlatContainerMapping]
         ] = {}
 
-    def discover_catalog(self) -> r[m.Meltano.SingerCatalog]:
+    def discover_catalog(self) -> r[m.TargetOracle.Meltano.SingerCatalog]:
         """Return Singer-style catalog for known schemas."""
         catalog_entries = [
-            m.Meltano.SingerCatalogEntry.model_validate({
+            m.TargetOracle.Meltano.SingerCatalogEntry.model_validate({
                 "tap_stream_id": stream_name,
                 "stream": stream_name,
                 "schema": schema_message.schema_definition,
                 "metadata": [
-                    m.Meltano.SingerCatalogMetadata(
+                    m.TargetOracle.Meltano.SingerCatalogMetadata(
                         breadcrumb=[],
                         metadata={
                             "inclusion": "available",
@@ -60,8 +60,10 @@ class FlextTargetOracle:
             })
             for stream_name, schema_message in self.schemas.items()
         ]
-        return r[m.Meltano.SingerCatalog].ok(
-            m.Meltano.SingerCatalog(type="CATALOG", streams=catalog_entries),
+        return r[m.TargetOracle.Meltano.SingerCatalog].ok(
+            m.TargetOracle.Meltano.SingerCatalog(
+                type="CATALOG", streams=catalog_entries
+            ),
         )
 
     def execute(self, payload: str | None = None) -> r[m.TargetOracle.ExecuteResult]:

@@ -18,7 +18,7 @@ class FlextTargetOracleService:
         self.config = config
         self.client = FlextTargetOracle(config)
 
-    def discover_catalog(self) -> r[m.Meltano.SingerCatalog]:
+    def discover_catalog(self) -> r[m.TargetOracle.Meltano.SingerCatalog]:
         """Delegate Singer catalog discovery."""
         return self.client.discover_catalog()
 

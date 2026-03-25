@@ -19,18 +19,18 @@ _STR_MAP_ADAPTER: TypeAdapter[t.StrMapping] = TypeAdapter(t.StrMapping)
 class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
     """Complete models for Oracle target operations extending FlextModels."""
 
-    class _OracleSettingsProtocol(Protocol):
-        """Protocol for Oracle settings used by command classes."""
-
-        def validate_business_rules(self) -> r[bool]:
-            """Validate Oracle target configuration business rules."""
-            ...
-
-    class Meltano(FlextMeltanoModels.Meltano):
-        """Namespaced Meltano runtime model references (inherits all Singer types)."""
-
     class TargetOracle:
         """TargetOracle domain namespace."""
+
+        class _OracleSettingsProtocol(Protocol):
+            """Protocol for Oracle settings used by command classes."""
+
+            def validate_business_rules(self) -> r[bool]:
+                """Validate Oracle target configuration business rules."""
+                ...
+
+        class Meltano(FlextMeltanoModels.Meltano):
+            """Namespaced Meltano runtime model references (inherits all Singer types)."""
 
         class SingerSchemaMessage(FlextMeltanoModels.Meltano.SingerSchemaMessage):
             """Singer SCHEMA message specialized for Oracle target domain."""
@@ -365,9 +365,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
                     return r[str].fail(
                         settings_result.error or "Configuration validation failed",
                     )
-                settings: FlextTargetOracleModels._OracleSettingsProtocol = (
-                    settings_result.value
-                )
+                settings: FlextTargetOracleModels.TargetOracle._OracleSettingsProtocol = settings_result.value
                 validation_result = settings.validate_business_rules()
                 if validation_result.is_failure:
                     return r[str].fail(
@@ -434,15 +432,15 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
     @staticmethod
     def _load_target_settings(
         config_file: str | None,
-    ) -> r[FlextTargetOracleModels._OracleSettingsProtocol]:
+    ) -> r[FlextTargetOracleModels.TargetOracle._OracleSettingsProtocol]:
         """Load settings from JSON file or environment defaults."""
         from flext_target_oracle.settings import (
             FlextTargetOracleSettings,
         )
 
-        result_type: type[r[FlextTargetOracleModels._OracleSettingsProtocol]] = r[
-            FlextTargetOracleModels._OracleSettingsProtocol
-        ]
+        result_type: type[
+            r[FlextTargetOracleModels.TargetOracle._OracleSettingsProtocol]
+        ] = r[FlextTargetOracleModels.TargetOracle._OracleSettingsProtocol]
         if config_file is None:
             return result_type.ok(FlextTargetOracleSettings.model_validate({}))
         config_path = Path(config_file)
