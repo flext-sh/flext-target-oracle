@@ -470,7 +470,7 @@ def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
 @pytest.fixture
 def temp_config_file(tmp_path: Path) -> Path:
     """Create temporary configuration file."""
-    config_data = {
+    config_data: t.NormalizedValue = {
         "oracle_host": ORACLE_HOST,
         "oracle_port": ORACLE_PORT,
         "oracle_service_name": ORACLE_SERVICE,
@@ -483,7 +483,7 @@ def temp_config_file(tmp_path: Path) -> Path:
     config_file = tmp_path / "config.json"
     config_file.write_text(
         TypeAdapter[t.NormalizedValue](t.NormalizedValue)
-        .dump_json(t.NormalizedValue(config_data))
+        .dump_json(config_data)
         .decode("utf-8"),
     )
     return config_file

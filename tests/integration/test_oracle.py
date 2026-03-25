@@ -151,7 +151,7 @@ class TestOracleIntegration:
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
         stream_name = "test_bulk"
-        schema_message = {
+        schema_message: Mapping[str, t.NormalizedValue] = {
             "type": "SCHEMA",
             "stream": stream_name,
             "schema": {
@@ -262,7 +262,7 @@ class TestOracleIntegration:
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
         stream_name = "test_ordering"
-        schema_message = {
+        schema_message: Mapping[str, t.NormalizedValue] = {
             "type": "SCHEMA",
             "stream": stream_name,
             "schema": {
