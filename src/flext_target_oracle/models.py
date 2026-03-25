@@ -84,22 +84,20 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             streams: Annotated[
                 t.StrSequence,
                 Field(
-                    default_factory=list,
                     description="Singer stream names seen during processing",
                 ),
-            ]
+            ] = Field(default_factory=list)
             state: Annotated[
                 FlextMeltanoModels.Meltano.SingerStateMessage,
                 Field(
-                    default_factory=lambda: (
-                        FlextMeltanoModels.Meltano.SingerStateMessage(
-                            type="STATE",
-                            value={},
-                        )
-                    ),
                     description="Accumulated Singer STATE payload",
                 ),
-            ]
+            ] = Field(
+                default_factory=lambda: FlextMeltanoModels.Meltano.SingerStateMessage(
+                    type="STATE",
+                    value={},
+                )
+            )
 
         class LoaderReadyResult(FlextMeltanoModels.ArbitraryTypesModel):
             """Loader readiness payload after Oracle connectivity checks."""
@@ -172,10 +170,9 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             buffer_status: Annotated[
                 Mapping[str, int],
                 Field(
-                    default_factory=dict,
                     description="Remaining buffered records by stream",
                 ),
-            ]
+            ] = Field(default_factory=dict)
 
         class OracleConnectionConfig(FlextMeltanoModels.ArbitraryTypesModel):
             """Oracle connection configuration payload."""
@@ -280,17 +277,15 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
             ignored_columns: Annotated[
                 t.StrSequence,
                 Field(
-                    default_factory=list,
                     description="Columns ignored during record transformation",
                 ),
-            ]
+            ] = Field(default_factory=list)
             column_mappings: Annotated[
                 t.StrMapping,
                 Field(
-                    default_factory=dict,
                     description="Singer column to Oracle column mapping",
                 ),
-            ]
+            ] = Field(default_factory=dict)
 
         class LoadStatisticsModel(FlextMeltanoModels.ArbitraryTypesModel):
             """Statistics for data load operation."""

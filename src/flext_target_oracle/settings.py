@@ -35,17 +35,15 @@ class FlextTargetOracleSettings(FlextSettings):
     oracle_user: Annotated[
         SecretStr,
         Field(
-            default_factory=lambda: SecretStr(""),
             description="Oracle database username",
         ),
-    ]
+    ] = Field(default_factory=lambda: SecretStr(""))
     oracle_password: Annotated[
         SecretStr,
         Field(
-            default_factory=lambda: SecretStr(""),
             description="Oracle database password",
         ),
-    ]
+    ] = Field(default_factory=lambda: SecretStr(""))
     default_target_schema: Annotated[
         str,
         Field(

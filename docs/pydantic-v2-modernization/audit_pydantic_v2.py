@@ -46,16 +46,16 @@ class AuditResult(BaseModel):
     status: str = Field(description="Audit status: PASS, FAIL, WARNING, PENDING, SKIP")
     critical: Annotated[
         Sequence[AuditViolation],
-        Field(default_factory=list, description="Critical violations"),
-    ]
+        Field(description="Critical violations"),
+    ] = Field(default_factory=list)
     high: Annotated[
         Sequence[AuditViolation],
-        Field(default_factory=list, description="High priority violations"),
-    ]
+        Field(description="High priority violations"),
+    ] = Field(default_factory=list)
     medium: Annotated[
         Sequence[AuditViolation],
-        Field(default_factory=list, description="Medium priority violations"),
-    ]
+        Field(description="Medium priority violations"),
+    ] = Field(default_factory=list)
     recommendations: t.StrSequence = Field(
         default_factory=list,
         description="Audit recommendations",
