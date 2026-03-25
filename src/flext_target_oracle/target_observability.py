@@ -10,6 +10,7 @@ from flext_core import FlextLogger, c
 from flext_target_oracle import (
     FlextTargetOracleErrorMetadata,
     FlextTargetOracleExceptions,
+    t,
 )
 
 logger = FlextLogger(__name__)
