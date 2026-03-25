@@ -7,10 +7,10 @@ from collections.abc import MutableMapping, MutableSequence, Sequence
 from datetime import UTC, datetime
 
 import oracledb
-from flext_core import FlextLogger, r, t
+from flext_core import FlextLogger, r
 from pydantic import TypeAdapter, ValidationError
 
-from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings, m
+from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings, m, t
 
 logger = FlextLogger(__name__)
 _FLAT_CONTAINER_MAP_ADAPTER: TypeAdapter[t.FlatContainerMapping] = TypeAdapter(

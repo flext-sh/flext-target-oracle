@@ -6,12 +6,12 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Annotated, Literal, Protocol, Self, override
 
-from flext_core import h, r, t
+from flext_core import h, r
 from flext_db_oracle.models import FlextDbOracleModels
 from flext_meltano import FlextMeltanoModels
 from pydantic import Field, TypeAdapter
 
-from flext_target_oracle import FlextTargetOracleConstants
+from flext_target_oracle import FlextTargetOracleConstants, t
 
 _STR_MAP_ADAPTER: TypeAdapter[t.StrMapping] = TypeAdapter(t.StrMapping)
 

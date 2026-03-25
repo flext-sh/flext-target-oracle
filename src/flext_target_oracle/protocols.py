@@ -9,11 +9,11 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Protocol, runtime_checkable
 
-from flext_core import r, t
+from flext_core import r
 from flext_db_oracle.protocols import FlextDbOracleProtocols
 from flext_meltano import FlextMeltanoProtocols
 
-from flext_target_oracle import m
+from flext_target_oracle import m, t
 
 
 class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
