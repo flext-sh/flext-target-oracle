@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import os
 from asyncio import AbstractEventLoop, get_event_loop_policy
-from collections.abc import Generator, Mapping, Sequence
+from collections.abc import Generator, Sequence
 from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
@@ -450,7 +450,7 @@ def singer_messages(
 @contextmanager
 def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
     """Temporarily set environment variables."""
-    old_values: Mapping[str, str | None] = {}
+    old_values: dict[str, str | None] = {}
     for key, value in kwargs.items():
         old_values[key] = os.environ.get(key)
         if value is None:
@@ -483,7 +483,7 @@ def temp_config_file(tmp_path: Path) -> Path:
     config_file = tmp_path / "config.json"
     config_file.write_text(
         TypeAdapter[t.NormalizedValue](t.NormalizedValue)
-        .dump_json(config_data)
+        .dump_json(t.NormalizedValue(config_data))
         .decode("utf-8"),
     )
     return config_file
@@ -526,7 +526,7 @@ def large_dataset() -> Sequence[t.Dict]:
         })
         for i in range(10000)
     ]
-    result: Sequence[t.Dict] = []
+    result: list[t.Dict] = []
     result.append(schema)
     result.extend(records)
     return result

@@ -20,7 +20,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Annotated, ClassVar, override
 
@@ -45,22 +45,22 @@ class AuditResult(BaseModel):
     project: str = Field(description="Project name")
     status: str = Field(description="Audit status: PASS, FAIL, WARNING, PENDING, SKIP")
     critical: Annotated[
-        Sequence[AuditViolation],
+        list[AuditViolation],
         Field(description="Critical violations"),
     ] = Field(default_factory=list)
     high: Annotated[
-        Sequence[AuditViolation],
+        list[AuditViolation],
         Field(description="High priority violations"),
     ] = Field(default_factory=list)
     medium: Annotated[
-        Sequence[AuditViolation],
+        list[AuditViolation],
         Field(description="Medium priority violations"),
     ] = Field(default_factory=list)
-    recommendations: t.StrSequence = Field(
+    recommendations: list[str] = Field(
         default_factory=list,
         description="Audit recommendations",
     )
-    stats: Mapping[str, t.Primitives] = Field(
+    stats: dict[str, t.Primitives] = Field(
         default_factory=dict,
         description="Audit statistics",
     )
@@ -281,7 +281,7 @@ class PydanticV2Auditor:
         lines: t.StrSequence,
     ) -> Sequence[int]:
         """Find all lines matching a pattern."""
-        matches: Sequence[int] = []
+        matches: list[int] = []
         for idx, line in enumerate(lines):
             if re.search(pattern, line):
                 matches.append(idx)

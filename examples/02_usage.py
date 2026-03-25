@@ -26,7 +26,7 @@ def load_config() -> t.ContainerMapping:
 def load_singer_messages() -> Sequence[t.ContainerMapping]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
-    adapter = TypeAdapter(t.ContainerMapping)
+    adapter: TypeAdapter[t.ContainerMapping] = TypeAdapter(t.ContainerMapping)
     with data_path.open(encoding="utf-8") as f:
         return [adapter.validate_json(line) for line in f if line.strip()]
 

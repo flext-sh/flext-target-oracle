@@ -52,8 +52,8 @@ class HealthStatus(BaseModel):
 
     timestamp: float
     status: str = "healthy"
-    checks: t.ContainerMapping = Field(default_factory=dict)
-    metrics: t.ContainerMapping = Field(default_factory=dict)
+    checks: t.MutableContainerMapping = Field(default_factory=dict)
+    metrics: t.MutableContainerMapping = Field(default_factory=dict)
     error: str | None = None
 
 
@@ -485,7 +485,7 @@ def create_production_sample_stream() -> Sequence[SingerMessage]:
       List of Singer messages representing a production workload
 
     """
-    messages: Sequence[SingerMessage] = []
+    messages: list[SingerMessage] = []
     schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
         "type": "SCHEMA",
         "stream": "customer_orders",
