@@ -195,7 +195,7 @@ class FlextTargetOracle:
         if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_$.]*", full_table_name):
             msg = "Invalid Oracle table identifier"
             raise ValueError(msg)
-        return f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"
+        return f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"  # nosec B608  # table name validated by re.fullmatch above
 
     def _connect_oracle(self) -> oracledb.Connection:
         dsn = oracledb.makedsn(

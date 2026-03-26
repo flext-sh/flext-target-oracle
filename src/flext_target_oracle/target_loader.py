@@ -383,7 +383,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             loaded_at = datetime.now(UTC).isoformat()
             with self.oracle_api as connected_api:
                 for record in records:
-                    insert_sql = f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"
+                    insert_sql = f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"  # nosec B608  # table name validated by re.fullmatch above
                     params: t.ConfigurationMapping = {
                         "data": _FLAT_CONTAINER_MAP_ADAPTER.dump_json(record).decode(
                             "utf-8",

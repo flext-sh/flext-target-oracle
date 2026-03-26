@@ -326,8 +326,7 @@ class ProductionTargetManager:
             finalize_result = self.target.finalize()
             if finalize_result.is_success:
                 final_stats = finalize_result.value
-                if final_stats is not None:
-                    stats.messages_processed += final_stats.total_records
+                stats.messages_processed += final_stats.total_records
                 logger.info("Target finalization completed successfully")
             else:
                 logger.error("Target finalization failed: %s", finalize_result.error)
@@ -430,9 +429,6 @@ def demonstrate_production_setup() -> None:
         processing_result = manager.process_singer_stream(messages)
         if processing_result.is_success:
             stats = processing_result.value
-            if stats is None:
-                logger.error("Processing returned no stats")
-                return
             logger.info("=== Production Processing Statistics ===")
             logger.info(
                 "Processing stats",

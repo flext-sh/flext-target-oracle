@@ -163,9 +163,9 @@ def oracle_api(oracle_config: FlextTargetOracleSettings) -> MagicMock:
     )
     mock_api = MagicMock(spec=FlextDbOracleApi)
     mock_api.config = db_config
-    mock_api.connect.return_value = r.ok("Connected successfully")
-    mock_api.disconnect.return_value = r.ok("Disconnected successfully")
-    mock_api.test_connection.return_value = r.ok(value=True)
+    mock_api.connect.return_value = r[str].ok("Connected successfully")
+    mock_api.disconnect.return_value = r[str].ok("Disconnected successfully")
+    mock_api.test_connection.return_value = r[bool].ok(value=True)
     mock_api.is_connected = True
     return mock_api
 
@@ -178,11 +178,11 @@ def oracle_loader(
     with patch("flext_target_oracle.target_client.FlextDbOracleApi") as mock_api_class:
         mock_api = MagicMock()
         mock_api_class.return_value = mock_api
-        mock_api.connect.return_value = r.ok("Connected successfully")
-        mock_api.disconnect.return_value = r.ok("Disconnected successfully")
+        mock_api.connect.return_value = r[str].ok("Connected successfully")
+        mock_api.disconnect.return_value = r[str].ok("Disconnected successfully")
         mock_api.is_connected = True
         loader = FlextTargetOracleLoader(oracle_config)
-        r.ok("Mocked connection successful")
+        r[str].ok("Mocked connection successful")
         yield loader
 
 

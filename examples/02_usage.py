@@ -20,7 +20,8 @@ def load_config() -> t.ContainerMapping:
     """Load configuration from file."""
     config_path = Path("config.json")
     content = config_path.read_text(encoding="utf-8")
-    return TypeAdapter(t.ContainerMapping).validate_json(content)
+    adapter: TypeAdapter[t.ContainerMapping] = TypeAdapter(t.ContainerMapping)
+    return adapter.validate_json(content)
 
 
 def load_singer_messages() -> Sequence[t.ContainerMapping]:
