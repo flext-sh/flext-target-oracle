@@ -10,6 +10,29 @@ from flext_meltano import FlextMeltanoUtilities
 from pydantic import TypeAdapter
 
 from flext_target_oracle import t
+from flext_target_oracle._utilities.cli import (
+    FlextTargetOracleCliService,
+    main,
+)
+from flext_target_oracle._utilities.client import FlextTargetOracle
+from flext_target_oracle._utilities.errors import (
+    FlextTargetOracleErrorMetadata,
+    FlextTargetOracleExceptions,
+)
+from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+from flext_target_oracle._utilities.observability import (
+    FlextOracleError,
+    FlextOracleObs,
+    configure_oracle_observability,
+)
+from flext_target_oracle._utilities.service import FlextTargetOracleService
+from flext_target_oracle._utilities.services import (
+    FlextTargetOracleBatchService,
+    FlextTargetOracleConnectionService,
+    FlextTargetOracleRecordService,
+    FlextTargetOracleSchemaService,
+    FlextTargetOracleServiceFactory,
+)
 
 _CONTAINER_VALUE_ADAPTER: TypeAdapter[t.ContainerValue] = TypeAdapter(t.ContainerValue)
 
@@ -18,7 +41,23 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
     """Focused utility namespace used by Oracle target modules."""
 
     class TargetOracle:
-        """Singer message operations are handled by Pydantic model constructors."""
+        """Oracle target utility namespace with absorbed loose classes."""
+
+        Client = FlextTargetOracle
+        Loader = FlextTargetOracleLoader
+        Service = FlextTargetOracleService
+        CliService = FlextTargetOracleCliService
+        Exceptions = FlextTargetOracleExceptions
+        ErrorMetadata = FlextTargetOracleErrorMetadata
+        ConnectionService = FlextTargetOracleConnectionService
+        SchemaService = FlextTargetOracleSchemaService
+        BatchService = FlextTargetOracleBatchService
+        RecordService = FlextTargetOracleRecordService
+        ServiceFactory = FlextTargetOracleServiceFactory
+        OracleError = FlextOracleError
+        OracleObs = FlextOracleObs
+        configure_observability = configure_oracle_observability
+        cli_main = main
 
     class OracleDataProcessing:
         """Data conversion helpers for Oracle storage."""
