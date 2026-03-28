@@ -135,15 +135,6 @@ class FlextTargetOracleSettings(FlextSettings):
         return config.validate_business_rules()
 
 
-# Module-level alias for backward compatibility with __init__.py exports
-def validate_oracle_configuration(
-    config: FlextTargetOracleSettings,
-) -> r[bool]:
-    """Validate Oracle configuration - delegates to FlextTargetOracleSettings.validate_oracle_configuration."""
-    return FlextTargetOracleSettings.validate_oracle_configuration(config)
-
-
 __all__: t.StrSequence = [
     "FlextTargetOracleSettings",
-    "validate_oracle_configuration",
 ]

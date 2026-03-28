@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping, Sequence
 from typing import cast
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock
 
 import pytest
 from flext_core import r
@@ -87,7 +87,10 @@ class TestOracleTarget:
         schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
             "type": "SCHEMA",
             "stream": "users",
-            "schema": {"type": "object", "properties": json.dumps({"id": {"type": "integer"}})},
+            "schema": {
+                "type": "object",
+                "properties": json.dumps({"id": {"type": "integer"}}),
+            },
             "key_properties": ["id"],
         })
         assert target.process_singer_message(schema_message).is_success
@@ -99,7 +102,10 @@ class TestOracleTarget:
         schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
             "type": "SCHEMA",
             "stream": "users",
-            "schema": {"type": "object", "properties": json.dumps({"id": {"type": "integer"}})},
+            "schema": {
+                "type": "object",
+                "properties": json.dumps({"id": {"type": "integer"}}),
+            },
         })
         record_message = m.TargetOracle.SingerRecordMessage.model_validate({
             "type": "RECORD",
@@ -117,7 +123,7 @@ class TestOracleTarget:
         assert isinstance(state_value, dict)
         bookmarks_obj: t.NormalizedValue | None = state_value.get("bookmarks")
         assert isinstance(bookmarks_obj, dict)
-        bookmarks = cast(Mapping[str, t.NormalizedValue], bookmarks_obj)
+        bookmarks = cast("Mapping[str, t.NormalizedValue]", bookmarks_obj)
         assert bookmarks.get("users") == 1
 
     def test_process_singer_messages_flushes_loader(
@@ -132,7 +138,10 @@ class TestOracleTarget:
             m.TargetOracle.SingerSchemaMessage.model_validate({
                 "type": "SCHEMA",
                 "stream": "users",
-                "schema": {"type": "object", "properties": json.dumps({"id": {"type": "integer"}})},
+                "schema": {
+                    "type": "object",
+                    "properties": json.dumps({"id": {"type": "integer"}}),
+                },
             }),
             m.TargetOracle.SingerRecordMessage.model_validate({
                 "type": "RECORD",
@@ -179,13 +188,12 @@ class TestOracleTarget:
     def test_write_record_inserts_oracle_record(
         self, target: FlextTargetOracle
     ) -> None:
-        connection = MagicMock()
-        cursor = MagicMock()
-        connection.cursor.return_value.__enter__.return_value = cursor
-        with patch.object(target, "_connect_oracle", return_value=connection):
-            result = target.write_record(
-                TypeAdapter(object)
-                .dump_json({"type": "RECORD", "stream": "users", "record": {"id": 1}})
-                .decode("utf-8")
-            )
+        mocked_load_record = Mock(return_value=r[bool].ok(value=True))
+        object.__setattr__(target.loader, "load_record", mocked_load_record)
+        result = target.write_record(
+            TypeAdapter(object)
+            .dump_json({"type": "RECORD", "stream": "users", "record": {"id": 1}})
+            .decode("utf-8")
+        )
+        mocked_load_record.assert_called_once_with("users", {"id": 1})
         assert result.is_success

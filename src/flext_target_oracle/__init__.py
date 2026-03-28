@@ -42,11 +42,7 @@ if TYPE_CHECKING:
         FlextTargetOracleProtocols,
         FlextTargetOracleProtocols as p,
     )
-    from flext_target_oracle.settings import (
-        FlextTargetOracleSettings,
-        logger,
-        validate_oracle_configuration,
-    )
+    from flext_target_oracle.settings import FlextTargetOracleSettings, logger
     from flext_target_oracle.target_client import FlextTargetOracle
     from flext_target_oracle.target_exceptions import (
         FlextTargetOracleErrorMetadata,
@@ -169,10 +165,6 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "s": ["flext_db_oracle", "s"],
     "t": ["flext_target_oracle.typings", "FlextTargetOracleTypes"],
     "u": ["flext_target_oracle.utilities", "FlextTargetOracleUtilities"],
-    "validate_oracle_configuration": [
-        "flext_target_oracle.settings",
-        "validate_oracle_configuration",
-    ],
     "x": ["flext_db_oracle", "x"],
 }
 
@@ -218,7 +210,6 @@ __all__ = [
     "s",
     "t",
     "u",
-    "validate_oracle_configuration",
     "x",
 ]
 
