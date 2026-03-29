@@ -22,11 +22,26 @@ if TYPE_CHECKING:
     from flext_target_oracle._models.singer import FlextTargetOracleModelsSinger
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
-    "FlextTargetOracleModelsCommands": ["flext_target_oracle._models.commands", "FlextTargetOracleModelsCommands"],
-    "FlextTargetOracleModelsConfig": ["flext_target_oracle._models.config", "FlextTargetOracleModelsConfig"],
-    "FlextTargetOracleModelsResults": ["flext_target_oracle._models.results", "FlextTargetOracleModelsResults"],
-    "FlextTargetOracleModelsSinger": ["flext_target_oracle._models.singer", "FlextTargetOracleModelsSinger"],
-    "load_target_settings": ["flext_target_oracle._models.commands", "load_target_settings"],
+    "FlextTargetOracleModelsCommands": [
+        "flext_target_oracle._models.commands",
+        "FlextTargetOracleModelsCommands",
+    ],
+    "FlextTargetOracleModelsConfig": [
+        "flext_target_oracle._models.config",
+        "FlextTargetOracleModelsConfig",
+    ],
+    "FlextTargetOracleModelsResults": [
+        "flext_target_oracle._models.results",
+        "FlextTargetOracleModelsResults",
+    ],
+    "FlextTargetOracleModelsSinger": [
+        "flext_target_oracle._models.singer",
+        "FlextTargetOracleModelsSinger",
+    ],
+    "load_target_settings": [
+        "flext_target_oracle._models.commands",
+        "load_target_settings",
+    ],
 }
 
 __all__ = [

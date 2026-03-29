@@ -35,20 +35,59 @@ if TYPE_CHECKING:
     )
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
-    "FlextOracleError": ["flext_target_oracle._utilities.observability", "FlextOracleError"],
-    "FlextOracleObs": ["flext_target_oracle._utilities.observability", "FlextOracleObs"],
+    "FlextOracleError": [
+        "flext_target_oracle._utilities.observability",
+        "FlextOracleError",
+    ],
+    "FlextOracleObs": [
+        "flext_target_oracle._utilities.observability",
+        "FlextOracleObs",
+    ],
     "FlextTargetOracle": ["flext_target_oracle._utilities.client", "FlextTargetOracle"],
-    "FlextTargetOracleBatchService": ["flext_target_oracle._utilities.services", "FlextTargetOracleBatchService"],
-    "FlextTargetOracleCliService": ["flext_target_oracle._utilities.cli", "FlextTargetOracleCliService"],
-    "FlextTargetOracleConnectionService": ["flext_target_oracle._utilities.services", "FlextTargetOracleConnectionService"],
-    "FlextTargetOracleErrorMetadata": ["flext_target_oracle._utilities.errors", "FlextTargetOracleErrorMetadata"],
-    "FlextTargetOracleExceptions": ["flext_target_oracle._utilities.errors", "FlextTargetOracleExceptions"],
-    "FlextTargetOracleLoader": ["flext_target_oracle._utilities.loader", "FlextTargetOracleLoader"],
-    "FlextTargetOracleRecordService": ["flext_target_oracle._utilities.services", "FlextTargetOracleRecordService"],
-    "FlextTargetOracleSchemaService": ["flext_target_oracle._utilities.services", "FlextTargetOracleSchemaService"],
-    "FlextTargetOracleService": ["flext_target_oracle._utilities.service", "FlextTargetOracleService"],
-    "FlextTargetOracleServiceFactory": ["flext_target_oracle._utilities.services", "FlextTargetOracleServiceFactory"],
-    "configure_oracle_observability": ["flext_target_oracle._utilities.observability", "configure_oracle_observability"],
+    "FlextTargetOracleBatchService": [
+        "flext_target_oracle._utilities.services",
+        "FlextTargetOracleBatchService",
+    ],
+    "FlextTargetOracleCliService": [
+        "flext_target_oracle._utilities.cli",
+        "FlextTargetOracleCliService",
+    ],
+    "FlextTargetOracleConnectionService": [
+        "flext_target_oracle._utilities.services",
+        "FlextTargetOracleConnectionService",
+    ],
+    "FlextTargetOracleErrorMetadata": [
+        "flext_target_oracle._utilities.errors",
+        "FlextTargetOracleErrorMetadata",
+    ],
+    "FlextTargetOracleExceptions": [
+        "flext_target_oracle._utilities.errors",
+        "FlextTargetOracleExceptions",
+    ],
+    "FlextTargetOracleLoader": [
+        "flext_target_oracle._utilities.loader",
+        "FlextTargetOracleLoader",
+    ],
+    "FlextTargetOracleRecordService": [
+        "flext_target_oracle._utilities.services",
+        "FlextTargetOracleRecordService",
+    ],
+    "FlextTargetOracleSchemaService": [
+        "flext_target_oracle._utilities.services",
+        "FlextTargetOracleSchemaService",
+    ],
+    "FlextTargetOracleService": [
+        "flext_target_oracle._utilities.service",
+        "FlextTargetOracleService",
+    ],
+    "FlextTargetOracleServiceFactory": [
+        "flext_target_oracle._utilities.services",
+        "FlextTargetOracleServiceFactory",
+    ],
+    "configure_oracle_observability": [
+        "flext_target_oracle._utilities.observability",
+        "configure_oracle_observability",
+    ],
     "main": ["flext_target_oracle._utilities.cli", "main"],
 }
 
