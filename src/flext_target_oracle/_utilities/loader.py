@@ -21,6 +21,7 @@ from pydantic import PrivateAttr, TypeAdapter
 
 from flext_target_oracle import (
     FlextTargetOracleSettings,
+    c,
     m,
     p,
     t,
@@ -76,15 +77,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             self._oracle_api = oracle_api
             self._record_buffers = dict[str, list[t.FlatContainerMapping]]()
             self._total_records = 0
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             msg = f"Failed to create Oracle API: {e}"
             raise FlextTargetOracleExceptions.OracleConnectionError(msg) from e
 
@@ -120,15 +113,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             if result.is_failure:
                 return r[bool].fail(f"{operation_name} failed: {result.error}")
             return r[bool].ok(value=True)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             message = f"Failed to {operation_name.lower()} loader"
             logger.exception(message)
             self.log_error(message, error=str(e))
@@ -180,15 +165,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                     return r[bool].fail(f"Failed to create table: {exec_result.error}")
                 self.log_info(f"Created table {table_name}")
                 return r[bool].ok(value=True)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             self.log_error("Failed to ensure table exists", error=str(e))
             return r[bool].fail(f"Table creation failed: {e}")
 
@@ -238,15 +215,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                     },
                 ),
             )
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             self.log_error("Failed to finalize streams", error=str(e))
             return r[m.TargetOracle.LoaderFinalizeResult].fail(
                 f"Finalization failed: {e}",
@@ -267,15 +236,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 if load_res.is_failure:
                     return r[bool].fail(f"Failed to load record: {load_res.error}")
             return self._flush_batch(stream_name)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             self.log_error("Failed to insert records", error=str(e))
             return r[bool].fail(f"Insert records failed: {e}")
 
@@ -293,15 +254,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             if len(self.record_buffers[stream_name]) >= self.target_config.batch_size:
                 return self._flush_batch(stream_name)
             return r[bool].ok(value=True)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             self.log_error("Failed to load record", error=str(e))
             return r[bool].fail(f"Record loading failed: {e}")
 
@@ -338,15 +291,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                     )
                 self.log_info("Oracle connection established successfully")
                 return r[bool].ok(value=True)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             self.log_error("Failed to connect to Oracle", error=str(e))
             return r[bool].fail(f"Connection failed: {e}")
 
@@ -393,15 +338,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 self.record_buffers[stream_name] = list[t.FlatContainerMapping]()
                 self.log_info(f"Flushed {len(records)} records to {table_name}")
                 return r[bool].ok(value=True)
-        except (
-            ValueError,
-            TypeError,
-            KeyError,
-            AttributeError,
-            OSError,
-            RuntimeError,
-            ImportError,
-        ) as e:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             self.log_error("Failed to flush batch", error=str(e))
             return r[bool].fail(f"Batch flush failed: {e}")
 

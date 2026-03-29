@@ -5,9 +5,8 @@ from __future__ import annotations
 from collections.abc import MutableMapping, Sequence
 
 from flext_core import FlextLogger, r
-from pydantic import ValidationError
 
-from flext_target_oracle import FlextTargetOracleSettings, m
+from flext_target_oracle import FlextTargetOracleSettings, c, m
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 
 logger = FlextLogger(__name__)
@@ -156,7 +155,7 @@ class FlextTargetOracle:
                 record_data,
             )
             return self.loader.load_record(payload.stream, payload.record)
-        except (ValueError, TypeError, ValidationError) as exc:
+        except c.Meltano.Singer.SAFE_EXCEPTIONS as exc:
             return r[bool].fail(f"Invalid record payload: {exc}")
 
     def _handle_activate_version(
