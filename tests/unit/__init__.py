@@ -5,27 +5,33 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping, Sequence
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING
 
-from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
+from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_core import FlextTypes
-
-    from tests.unit import test_cli_dispatcher, test_config, test_loader, test_target
+    from tests.unit import (
+        test_cli_dispatcher as test_cli_dispatcher,
+        test_config as test_config,
+        test_loader as test_loader,
+        test_target as test_target,
+    )
     from tests.unit.test_cli_dispatcher import (
-        test_cli_service_falls_back_to_bus_when_flag_disabled,
-        test_cli_service_uses_dispatcher_when_flag_enabled,
+        test_cli_service_falls_back_to_bus_when_flag_disabled as test_cli_service_falls_back_to_bus_when_flag_disabled,
+        test_cli_service_uses_dispatcher_when_flag_enabled as test_cli_service_uses_dispatcher_when_flag_enabled,
     )
-    from tests.unit.test_config import TestOracleSettings
+    from tests.unit.test_config import TestOracleSettings as TestOracleSettings
     from tests.unit.test_loader import (
-        loader_config,
-        test_ensure_table_exists_returns_result,
-        test_load_record_buffers_and_finalize,
-        test_loader_execute_returns_ready_payload,
+        loader_config as loader_config,
+        test_ensure_table_exists_returns_result as test_ensure_table_exists_returns_result,
+        test_load_record_buffers_and_finalize as test_load_record_buffers_and_finalize,
+        test_loader_execute_returns_ready_payload as test_loader_execute_returns_ready_payload,
     )
-    from tests.unit.test_target import TestOracleTarget, target
+    from tests.unit.test_target import (
+        TestOracleTarget as TestOracleTarget,
+        target as target,
+    )
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "TestOracleSettings": ["tests.unit.test_config", "TestOracleSettings"],
@@ -58,7 +64,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "test_target": ["tests.unit.test_target", ""],
 }
 
-__all__ = [
+_EXPORTS: Sequence[str] = [
     "TestOracleSettings",
     "TestOracleTarget",
     "loader_config",
@@ -75,41 +81,4 @@ __all__ = [
 ]
 
 
-_LAZY_CACHE: MutableMapping[str, FlextTypes.ModuleExport] = {}
-
-
-def __getattr__(name: str) -> FlextTypes.ModuleExport:
-    """Lazy-load module attributes on first access (PEP 562).
-
-    A local cache ``_LAZY_CACHE`` persists resolved objects across repeated
-    accesses during process lifetime.
-
-    Args:
-        name: Attribute name requested by dir()/import.
-
-    Returns:
-        Lazy-loaded module export type.
-
-    Raises:
-        AttributeError: If attribute not registered.
-
-    """
-    if name in _LAZY_CACHE:
-        return _LAZY_CACHE[name]
-
-    value = lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
-    _LAZY_CACHE[name] = value
-    return value
-
-
-def __dir__() -> Sequence[str]:
-    """Return list of available attributes for dir() and autocomplete.
-
-    Returns:
-        List of public names from module exports.
-
-    """
-    return sorted(__all__)
-
-
-cleanup_submodule_namespace(__name__, _LAZY_IMPORTS)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, _EXPORTS)

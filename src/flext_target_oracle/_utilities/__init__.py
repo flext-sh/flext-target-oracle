@@ -5,42 +5,49 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping, Sequence
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING
 
-from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
+from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_core import FlextTypes
-
     from flext_target_oracle._utilities import (
-        cli,
-        client,
-        errors,
-        loader,
-        observability,
-        service,
-        services,
+        cli as cli,
+        client as client,
+        errors as errors,
+        loader as loader,
+        observability as observability,
+        service as service,
+        services as services,
     )
-    from flext_target_oracle._utilities.cli import FlextTargetOracleCliService, main
-    from flext_target_oracle._utilities.client import FlextTargetOracle
+    from flext_target_oracle._utilities.cli import (
+        FlextTargetOracleCliService as FlextTargetOracleCliService,
+        main as main,
+    )
+    from flext_target_oracle._utilities.client import (
+        FlextTargetOracle as FlextTargetOracle,
+    )
     from flext_target_oracle._utilities.errors import (
-        FlextTargetOracleErrorMetadata,
-        FlextTargetOracleExceptions,
+        FlextTargetOracleErrorMetadata as FlextTargetOracleErrorMetadata,
+        FlextTargetOracleExceptions as FlextTargetOracleExceptions,
     )
-    from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+    from flext_target_oracle._utilities.loader import (
+        FlextTargetOracleLoader as FlextTargetOracleLoader,
+    )
     from flext_target_oracle._utilities.observability import (
-        FlextOracleError,
-        FlextOracleObs,
-        configure_oracle_observability,
+        FlextOracleError as FlextOracleError,
+        FlextOracleObs as FlextOracleObs,
+        configure_oracle_observability as configure_oracle_observability,
     )
-    from flext_target_oracle._utilities.service import FlextTargetOracleService
+    from flext_target_oracle._utilities.service import (
+        FlextTargetOracleService as FlextTargetOracleService,
+    )
     from flext_target_oracle._utilities.services import (
-        FlextTargetOracleBatchService,
-        FlextTargetOracleConnectionService,
-        FlextTargetOracleRecordService,
-        FlextTargetOracleSchemaService,
-        FlextTargetOracleServiceFactory,
+        FlextTargetOracleBatchService as FlextTargetOracleBatchService,
+        FlextTargetOracleConnectionService as FlextTargetOracleConnectionService,
+        FlextTargetOracleRecordService as FlextTargetOracleRecordService,
+        FlextTargetOracleSchemaService as FlextTargetOracleSchemaService,
+        FlextTargetOracleServiceFactory as FlextTargetOracleServiceFactory,
     )
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
@@ -107,7 +114,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "services": ["flext_target_oracle._utilities.services", ""],
 }
 
-__all__ = [
+_EXPORTS: Sequence[str] = [
     "FlextOracleError",
     "FlextOracleObs",
     "FlextTargetOracle",
@@ -133,41 +140,4 @@ __all__ = [
 ]
 
 
-_LAZY_CACHE: MutableMapping[str, FlextTypes.ModuleExport] = {}
-
-
-def __getattr__(name: str) -> FlextTypes.ModuleExport:
-    """Lazy-load module attributes on first access (PEP 562).
-
-    A local cache ``_LAZY_CACHE`` persists resolved objects across repeated
-    accesses during process lifetime.
-
-    Args:
-        name: Attribute name requested by dir()/import.
-
-    Returns:
-        Lazy-loaded module export type.
-
-    Raises:
-        AttributeError: If attribute not registered.
-
-    """
-    if name in _LAZY_CACHE:
-        return _LAZY_CACHE[name]
-
-    value = lazy_getattr(name, _LAZY_IMPORTS, globals(), __name__)
-    _LAZY_CACHE[name] = value
-    return value
-
-
-def __dir__() -> Sequence[str]:
-    """Return list of available attributes for dir() and autocomplete.
-
-    Returns:
-        List of public names from module exports.
-
-    """
-    return sorted(__all__)
-
-
-cleanup_submodule_namespace(__name__, _LAZY_IMPORTS)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, _EXPORTS)
