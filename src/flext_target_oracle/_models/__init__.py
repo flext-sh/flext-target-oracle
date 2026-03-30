@@ -6,11 +6,11 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports
 
-if TYPE_CHECKING:
+if _TYPE_CHECKING:
     from flext_target_oracle._models.commands import *
     from flext_target_oracle._models.config import *
     from flext_target_oracle._models.results import *
