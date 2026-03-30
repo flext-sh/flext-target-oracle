@@ -312,6 +312,9 @@ variance-mismatch = true
 [tool.pyright]
 exclude = [
   "**/.*",
+  "**/.mypy_cache",
+  "**/.pytest_cache",
+  "**/.ruff_cache",
   "**/.venv",
   "**/.venv/**",
   "**/__pycache__",
@@ -322,7 +325,6 @@ exclude = [
   "**/site-packages/**",
   "**/venv",
   "**/venv/**",
-  ".ruff_cache",
   ".venv",
 ]
 extraPaths = [
@@ -690,6 +692,7 @@ split-on-trailing-comma = true
   "D107",
   "F401",
   "F403",
+  "F405",
   "F822",
   "N999",
   "PLC2701",

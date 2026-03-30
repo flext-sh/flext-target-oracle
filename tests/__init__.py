@@ -10,10 +10,12 @@ from typing import TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports
 
-if TYPE_CHECKING:
-    from flext_tests import *
+from tests.e2e import _LAZY_IMPORTS as _CHILD_LAZY_0
+from tests.integration import _LAZY_IMPORTS as _CHILD_LAZY_1
+from tests.performance import _LAZY_IMPORTS as _CHILD_LAZY_2
+from tests.unit import _LAZY_IMPORTS as _CHILD_LAZY_3
 
-    from tests import conftest, constants, models, protocols, typings, utilities
+if TYPE_CHECKING:
     from tests.conftest import *
     from tests.constants import *
     from tests.e2e import *
@@ -26,6 +28,10 @@ if TYPE_CHECKING:
     from tests.utilities import *
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+    **_CHILD_LAZY_0,
+    **_CHILD_LAZY_1,
+    **_CHILD_LAZY_2,
+    **_CHILD_LAZY_3,
     "DOCKER_COMPOSE_PATH": "tests.conftest",
     "FlextTargetOracleTestConstants": "tests.constants",
     "FlextTargetOracleTestModels": "tests.models",
@@ -40,12 +46,6 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "ORACLE_SERVICE": "tests.conftest",
     "ORACLE_USER": "tests.conftest",
     "TEST_SCHEMA": "tests.conftest",
-    "TestOracleIntegration": "tests.integration.test_oracle",
-    "TestOracleSettings": "tests.unit.test_config",
-    "TestOracleTarget": "tests.unit.test_target",
-    "TestOracleTargetE2E": "tests.integration.test_oracle",
-    "TestPerformance": "tests.performance.test_performance",
-    "TestSingerWorkflowE2E": "tests.e2e.test_singer",
     "batch_records": "tests.conftest",
     "c": ["tests.constants", "FlextTargetOracleTestConstants"],
     "clean_database": "tests.conftest",
@@ -60,7 +60,6 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "h": "flext_tests",
     "integration": "tests.integration",
     "large_dataset": "tests.conftest",
-    "loader_config": "tests.unit.test_loader",
     "logger": "tests.conftest",
     "m": ["tests.models", "FlextTargetOracleTestModels"],
     "mock_loader": "tests.conftest",
@@ -91,21 +90,8 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "state": "tests.conftest",
     "state_message": "tests.conftest",
     "t": ["tests.typings", "FlextTargetOracleTestTypes"],
-    "target": "tests.unit.test_target",
     "temp_config_file": "tests.conftest",
     "temporary_env_vars": "tests.conftest",
-    "test_cli_dispatcher": "tests.unit.test_cli_dispatcher",
-    "test_cli_service_falls_back_to_bus_when_flag_disabled": "tests.unit.test_cli_dispatcher",
-    "test_cli_service_uses_dispatcher_when_flag_enabled": "tests.unit.test_cli_dispatcher",
-    "test_config": "tests.unit.test_config",
-    "test_ensure_table_exists_returns_result": "tests.unit.test_loader",
-    "test_load_record_buffers_and_finalize": "tests.unit.test_loader",
-    "test_loader": "tests.unit.test_loader",
-    "test_loader_execute_returns_ready_payload": "tests.unit.test_loader",
-    "test_oracle": "tests.integration.test_oracle",
-    "test_performance": "tests.performance.test_performance",
-    "test_singer": "tests.e2e.test_singer",
-    "test_target": "tests.unit.test_target",
     "typings": "tests.typings",
     "u": ["tests.utilities", "FlextTargetOracleTestUtilities"],
     "unit": "tests.unit",
@@ -114,4 +100,4 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
 }
 
 
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, sorted(_LAZY_IMPORTS))
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
