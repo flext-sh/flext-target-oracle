@@ -356,7 +356,7 @@ def process_with_logging(stream_name: str, batch_size: int):
 
 ```python # Test Oracle connectivity manually
 from flext_target_oracle import FlextOracleTargetSettings
-from flext_target_oracle.loader import FlextOracleTargetLoader
+from flext_target_oracle import FlextOracleTargetLoader
 
 # Create test configuration
 config = FlextOracleTargetSettings(
@@ -430,7 +430,7 @@ make oracle-connect
 # Debug with Python
 PYTHONPATH=src python -c "
 from flext_target_oracle import FlextOracleTargetSettings
-from flext_target_oracle.loader import FlextOracleTargetLoader
+from flext_target_oracle import FlextOracleTargetLoader
 logging.basicConfig(level=logging.DEBUG)
 config = FlextOracleTargetSettings(
     oracle_host='localhost',

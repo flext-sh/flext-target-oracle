@@ -6,8 +6,7 @@ import sys
 
 from flext_core import FlextLogger, r
 
-from flext_target_oracle import t
-from flext_target_oracle.models import FlextTargetOracleModels as _TargetModels
+from flext_target_oracle import FlextTargetOracleModels as _TargetModels, t
 
 OracleTargetCommandFactory = _TargetModels.TargetOracle.OracleTargetCommandFactory
 

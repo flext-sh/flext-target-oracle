@@ -101,8 +101,8 @@ from flext_core import FlextRuntime
 from flext_core import FlextService
 from flext_core import t
 from flext_core import u
-from flext_target_oracle.settings import FlextOracleTargetSettings, LoadMethod
-from flext_target_oracle.target import FlextOracleTarget
+from flext_target_oracle import FlextOracleTargetSettings, LoadMethod
+from flext_target_oracle import FlextOracleTarget
 
 
 # Exception hierarchy (consolidated from duplicated sources)
@@ -142,9 +142,9 @@ __all__: t.StringList = [
 """FLEXT Target Oracle - Clean public API."""
 
 # Import all from respective modules
-from flext_target_oracle.settings import FlextOracleTargetSettings, LoadMethod
-from flext_target_oracle.target import FlextOracleTarget
-from flext_target_oracle.exceptions import (
+from flext_target_oracle import FlextOracleTargetSettings, LoadMethod
+from flext_target_oracle import FlextOracleTarget
+from flext_target_oracle import (
     FlextOracleTargetError,
     FlextOracleTargetConnectionError,
     FlextOracleTargetAuthenticationError,
@@ -647,8 +647,8 @@ ______________________________________________________________________
 └─────────────────────────────┘
 
 # Application layer imports
-from flext_target_oracle.settings import FlextOracleTargetSettings
-from flext_target_oracle.loader import FlextOracleTargetLoader
+from flext_target_oracle import FlextOracleTargetSettings
+from flext_target_oracle import FlextOracleTargetLoader
 from flext_core import FlextBus
 from flext_core import FlextSettings
 from flext_core import FlextConstants

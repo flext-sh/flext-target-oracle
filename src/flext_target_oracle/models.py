@@ -3,16 +3,16 @@
 from __future__ import annotations
 
 from flext_core import r
-from flext_db_oracle.models import FlextDbOracleModels
+from flext_db_oracle import FlextDbOracleModels
 from flext_meltano import FlextMeltanoModels
 
-from flext_target_oracle._models.commands import (
+from flext_target_oracle import (
     FlextTargetOracleModelsCommands,
+    FlextTargetOracleModelsConfig,
+    FlextTargetOracleModelsResults,
+    FlextTargetOracleModelsSinger,
     load_target_settings,
 )
-from flext_target_oracle._models.config import FlextTargetOracleModelsConfig
-from flext_target_oracle._models.results import FlextTargetOracleModelsResults
-from flext_target_oracle._models.singer import FlextTargetOracleModelsSinger
 
 
 class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):

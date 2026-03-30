@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_target_oracle._utilities.observability import (
+from flext_target_oracle import (
     FlextOracleError,
     FlextOracleObs,
     configure_oracle_observability,

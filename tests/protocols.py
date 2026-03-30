@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsProtocols
 
-from flext_target_oracle.protocols import FlextTargetOracleProtocols
+from flext_target_oracle import FlextTargetOracleProtocols
 
 
 class FlextTargetOracleTestProtocols(FlextTestsProtocols, FlextTargetOracleProtocols):

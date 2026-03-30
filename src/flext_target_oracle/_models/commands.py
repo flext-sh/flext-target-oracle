@@ -9,8 +9,12 @@ from flext_core import h, r
 from flext_meltano import FlextMeltanoModels
 from pydantic import TypeAdapter
 
-from flext_target_oracle import FlextTargetOracleConstants, c, t
-from flext_target_oracle._models.config import FlextTargetOracleModelsConfig
+from flext_target_oracle import (
+    FlextTargetOracleConstants,
+    FlextTargetOracleModelsConfig,
+    c,
+    t,
+)
 
 _STR_MAP_ADAPTER: TypeAdapter[t.StrMapping] = TypeAdapter(t.StrMapping)
 
@@ -19,7 +23,7 @@ def load_target_settings(
     config_file: str | None,
 ) -> r[FlextTargetOracleModelsConfig.OracleSettingsProtocol]:
     """Load settings from JSON file or environment defaults."""
-    from flext_target_oracle.settings import (  # noqa: PLC0415
+    from flext_target_oracle import (  # noqa: PLC0415
         FlextTargetOracleSettings,
     )
 

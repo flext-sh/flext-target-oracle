@@ -9,29 +9,23 @@ from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import FlextMeltanoUtilities
 from pydantic import TypeAdapter
 
-from flext_target_oracle import t
-from flext_target_oracle._utilities.cli import (
-    FlextTargetOracleCliService,
-    main,
-)
-from flext_target_oracle._utilities.client import FlextTargetOracle
-from flext_target_oracle._utilities.errors import (
-    FlextTargetOracleErrorMetadata,
-    FlextTargetOracleExceptions,
-)
-from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
-from flext_target_oracle._utilities.observability import (
+from flext_target_oracle import (
     FlextOracleError,
     FlextOracleObs,
-    configure_oracle_observability,
-)
-from flext_target_oracle._utilities.service import FlextTargetOracleService
-from flext_target_oracle._utilities.services import (
+    FlextTargetOracle,
     FlextTargetOracleBatchService,
+    FlextTargetOracleCliService,
     FlextTargetOracleConnectionService,
+    FlextTargetOracleErrorMetadata,
+    FlextTargetOracleExceptions,
+    FlextTargetOracleLoader,
     FlextTargetOracleRecordService,
     FlextTargetOracleSchemaService,
+    FlextTargetOracleService,
     FlextTargetOracleServiceFactory,
+    configure_oracle_observability,
+    main,
+    t,
 )
 
 _CONTAINER_VALUE_ADAPTER: TypeAdapter[t.ContainerValue] = TypeAdapter(t.ContainerValue)

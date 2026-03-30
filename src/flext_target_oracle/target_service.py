@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from flext_target_oracle._utilities.service import FlextTargetOracleService
+from flext_target_oracle import FlextTargetOracleService
 
 __all__ = ["FlextTargetOracleService"]

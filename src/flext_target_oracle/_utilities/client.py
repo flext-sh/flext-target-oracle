@@ -6,8 +6,7 @@ from collections.abc import MutableMapping, Sequence
 
 from flext_core import FlextLogger, r
 
-from flext_target_oracle import FlextTargetOracleSettings, c, m
-from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings, c, m
 
 logger = FlextLogger(__name__)
 

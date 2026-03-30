@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsTypes
 
-from flext_target_oracle.typings import FlextTargetOracleTypes
+from flext_target_oracle import FlextTargetOracleTypes
 
 
 class FlextTargetOracleTestTypes(FlextTestsTypes, FlextTargetOracleTypes):

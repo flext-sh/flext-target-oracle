@@ -20,13 +20,13 @@ from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import PrivateAttr, TypeAdapter
 
 from flext_target_oracle import (
+    FlextTargetOracleExceptions,
     FlextTargetOracleSettings,
     c,
     m,
     p,
     t,
 )
-from flext_target_oracle._utilities.errors import FlextTargetOracleExceptions
 
 _FLAT_CONTAINER_MAP_ADAPTER: TypeAdapter[t.FlatContainerMapping] = TypeAdapter(
     t.FlatContainerMapping,

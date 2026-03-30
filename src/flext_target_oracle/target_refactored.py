@@ -2,6 +2,6 @@
 
 from __future__ import annotations
 
-from flext_target_oracle._utilities.cli import FlextTargetOracleCliService, main
+from flext_target_oracle import FlextTargetOracleCliService, main
 
 __all__ = ["FlextTargetOracleCliService", "main"]

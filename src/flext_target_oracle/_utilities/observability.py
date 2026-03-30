@@ -8,12 +8,10 @@ from contextlib import contextmanager
 from flext_core import FlextLogger
 
 from flext_target_oracle import (
-    c,
-    t,
-)
-from flext_target_oracle._utilities.errors import (
     FlextTargetOracleErrorMetadata,
     FlextTargetOracleExceptions,
+    c,
+    t,
 )
 
 logger = FlextLogger(__name__)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_target_oracle._utilities.errors import (
+from flext_target_oracle import (
     FlextTargetOracleErrorMetadata,
     FlextTargetOracleExceptions,
 )

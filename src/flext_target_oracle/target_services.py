@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_target_oracle._utilities.services import (
+from flext_target_oracle import (
     FlextTargetOracleBatchService,
     FlextTargetOracleConnectionService,
     FlextTargetOracleRecordService,
