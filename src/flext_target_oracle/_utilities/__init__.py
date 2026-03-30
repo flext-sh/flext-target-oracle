@@ -13,6 +13,15 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from flext_target_oracle._utilities import (
+        cli,
+        client,
+        errors,
+        loader,
+        observability,
+        service,
+        services,
+    )
     from flext_target_oracle._utilities.cli import FlextTargetOracleCliService, main
     from flext_target_oracle._utilities.client import FlextTargetOracle
     from flext_target_oracle._utilities.errors import (
@@ -84,11 +93,18 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "flext_target_oracle._utilities.services",
         "FlextTargetOracleServiceFactory",
     ],
+    "cli": ["flext_target_oracle._utilities.cli", ""],
+    "client": ["flext_target_oracle._utilities.client", ""],
     "configure_oracle_observability": [
         "flext_target_oracle._utilities.observability",
         "configure_oracle_observability",
     ],
+    "errors": ["flext_target_oracle._utilities.errors", ""],
+    "loader": ["flext_target_oracle._utilities.loader", ""],
     "main": ["flext_target_oracle._utilities.cli", "main"],
+    "observability": ["flext_target_oracle._utilities.observability", ""],
+    "service": ["flext_target_oracle._utilities.service", ""],
+    "services": ["flext_target_oracle._utilities.services", ""],
 }
 
 __all__ = [
@@ -105,8 +121,15 @@ __all__ = [
     "FlextTargetOracleSchemaService",
     "FlextTargetOracleService",
     "FlextTargetOracleServiceFactory",
+    "cli",
+    "client",
     "configure_oracle_observability",
+    "errors",
+    "loader",
     "main",
+    "observability",
+    "service",
+    "services",
 ]
 
 

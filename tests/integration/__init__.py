@@ -18,16 +18,19 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from tests.integration import test_oracle
     from tests.integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "TestOracleIntegration": ["tests.integration.test_oracle", "TestOracleIntegration"],
     "TestOracleTargetE2E": ["tests.integration.test_oracle", "TestOracleTargetE2E"],
+    "test_oracle": ["tests.integration.test_oracle", ""],
 }
 
 __all__ = [
     "TestOracleIntegration",
     "TestOracleTargetE2E",
+    "test_oracle",
 ]
 
 

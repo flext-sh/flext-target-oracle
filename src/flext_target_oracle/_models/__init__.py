@@ -13,6 +13,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from flext_target_oracle._models import commands, config, results, singer
     from flext_target_oracle._models.commands import (
         FlextTargetOracleModelsCommands,
         load_target_settings,
@@ -38,10 +39,14 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "flext_target_oracle._models.singer",
         "FlextTargetOracleModelsSinger",
     ],
+    "commands": ["flext_target_oracle._models.commands", ""],
+    "config": ["flext_target_oracle._models.config", ""],
     "load_target_settings": [
         "flext_target_oracle._models.commands",
         "load_target_settings",
     ],
+    "results": ["flext_target_oracle._models.results", ""],
+    "singer": ["flext_target_oracle._models.singer", ""],
 }
 
 __all__ = [
@@ -49,7 +54,11 @@ __all__ = [
     "FlextTargetOracleModelsConfig",
     "FlextTargetOracleModelsResults",
     "FlextTargetOracleModelsSinger",
+    "commands",
+    "config",
     "load_target_settings",
+    "results",
+    "singer",
 ]
 
 

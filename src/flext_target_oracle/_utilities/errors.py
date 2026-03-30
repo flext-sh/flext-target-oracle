@@ -334,7 +334,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
                 message=message,
                 error_code=resolved_metadata.code,
                 context=oracle_context or None,
-                _correlation_id=resolved_metadata.correlation_id,
+                correlation_id=resolved_metadata.correlation_id,
             )
             self.stream_name = oracle_context.get("stream_name")
             self.table_name = oracle_context.get("table_name")

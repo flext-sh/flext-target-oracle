@@ -13,6 +13,7 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from tests.unit import test_cli_dispatcher, test_config, test_loader, test_target
     from tests.unit.test_cli_dispatcher import (
         test_cli_service_falls_back_to_bus_when_flag_disabled,
         test_cli_service_uses_dispatcher_when_flag_enabled,
@@ -31,6 +32,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "TestOracleTarget": ["tests.unit.test_target", "TestOracleTarget"],
     "loader_config": ["tests.unit.test_loader", "loader_config"],
     "target": ["tests.unit.test_target", "target"],
+    "test_cli_dispatcher": ["tests.unit.test_cli_dispatcher", ""],
     "test_cli_service_falls_back_to_bus_when_flag_disabled": [
         "tests.unit.test_cli_dispatcher",
         "test_cli_service_falls_back_to_bus_when_flag_disabled",
@@ -39,6 +41,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "tests.unit.test_cli_dispatcher",
         "test_cli_service_uses_dispatcher_when_flag_enabled",
     ],
+    "test_config": ["tests.unit.test_config", ""],
     "test_ensure_table_exists_returns_result": [
         "tests.unit.test_loader",
         "test_ensure_table_exists_returns_result",
@@ -47,10 +50,12 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "tests.unit.test_loader",
         "test_load_record_buffers_and_finalize",
     ],
+    "test_loader": ["tests.unit.test_loader", ""],
     "test_loader_execute_returns_ready_payload": [
         "tests.unit.test_loader",
         "test_loader_execute_returns_ready_payload",
     ],
+    "test_target": ["tests.unit.test_target", ""],
 }
 
 __all__ = [
@@ -58,11 +63,15 @@ __all__ = [
     "TestOracleTarget",
     "loader_config",
     "target",
+    "test_cli_dispatcher",
     "test_cli_service_falls_back_to_bus_when_flag_disabled",
     "test_cli_service_uses_dispatcher_when_flag_enabled",
+    "test_config",
     "test_ensure_table_exists_returns_result",
     "test_load_record_buffers_and_finalize",
+    "test_loader",
     "test_loader_execute_returns_ready_payload",
+    "test_target",
 ]
 
 

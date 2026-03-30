@@ -14,7 +14,18 @@ if TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_tests import d, e, h, r, s, x
 
-    from tests import e2e, integration, performance, unit
+    from tests import (
+        conftest,
+        constants,
+        e2e,
+        integration,
+        models,
+        performance,
+        protocols,
+        typings,
+        unit,
+        utilities,
+    )
     from tests.conftest import (
         DOCKER_COMPOSE_PATH,
         ORACLE_CONTAINER_NAME,
@@ -60,12 +71,15 @@ if TYPE_CHECKING:
         FlextTargetOracleTestConstants,
         FlextTargetOracleTestConstants as c,
     )
+    from tests.e2e import test_singer
     from tests.e2e.test_singer import TestSingerWorkflowE2E
+    from tests.integration import test_oracle
     from tests.integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
     from tests.models import (
         FlextTargetOracleTestModels,
         FlextTargetOracleTestModels as m,
     )
+    from tests.performance import test_performance
     from tests.performance.test_performance import TestPerformance
     from tests.protocols import (
         FlextTargetOracleTestProtocols,
@@ -75,6 +89,7 @@ if TYPE_CHECKING:
         FlextTargetOracleTestTypes,
         FlextTargetOracleTestTypes as t,
     )
+    from tests.unit import test_cli_dispatcher, test_config, test_loader, test_target
     from tests.unit.test_cli_dispatcher import (
         test_cli_service_falls_back_to_bus_when_flag_disabled,
         test_cli_service_uses_dispatcher_when_flag_enabled,
@@ -125,7 +140,9 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "batch_records": ["tests.conftest", "batch_records"],
     "c": ["tests.constants", "FlextTargetOracleTestConstants"],
     "clean_database": ["tests.conftest", "clean_database"],
+    "conftest": ["tests.conftest", ""],
     "connected_loader": ["tests.conftest", "connected_loader"],
+    "constants": ["tests.constants", ""],
     "d": ["flext_tests", "d"],
     "docker_control": ["tests.conftest", "docker_control"],
     "e": ["flext_tests", "e"],
@@ -139,6 +156,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "m": ["tests.models", "FlextTargetOracleTestModels"],
     "mock_loader": ["tests.conftest", "mock_loader"],
     "mock_oracle_api": ["tests.conftest", "mock_oracle_api"],
+    "models": ["tests.models", ""],
     "nested_schema": ["tests.conftest", "nested_schema"],
     "oracle_api": ["tests.conftest", "oracle_api"],
     "oracle_config": ["tests.conftest", "oracle_config"],
@@ -147,6 +165,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "oracle_target": ["tests.conftest", "oracle_target"],
     "p": ["tests.protocols", "FlextTargetOracleTestProtocols"],
     "performance": ["tests.performance", ""],
+    "protocols": ["tests.protocols", ""],
     "pytest_collection_modifyitems": [
         "tests.conftest",
         "pytest_collection_modifyitems",
@@ -169,6 +188,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "target": ["tests.unit.test_target", "target"],
     "temp_config_file": ["tests.conftest", "temp_config_file"],
     "temporary_env_vars": ["tests.conftest", "temporary_env_vars"],
+    "test_cli_dispatcher": ["tests.unit.test_cli_dispatcher", ""],
     "test_cli_service_falls_back_to_bus_when_flag_disabled": [
         "tests.unit.test_cli_dispatcher",
         "test_cli_service_falls_back_to_bus_when_flag_disabled",
@@ -177,6 +197,7 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "tests.unit.test_cli_dispatcher",
         "test_cli_service_uses_dispatcher_when_flag_enabled",
     ],
+    "test_config": ["tests.unit.test_config", ""],
     "test_ensure_table_exists_returns_result": [
         "tests.unit.test_loader",
         "test_ensure_table_exists_returns_result",
@@ -185,12 +206,19 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "tests.unit.test_loader",
         "test_load_record_buffers_and_finalize",
     ],
+    "test_loader": ["tests.unit.test_loader", ""],
     "test_loader_execute_returns_ready_payload": [
         "tests.unit.test_loader",
         "test_loader_execute_returns_ready_payload",
     ],
+    "test_oracle": ["tests.integration.test_oracle", ""],
+    "test_performance": ["tests.performance.test_performance", ""],
+    "test_singer": ["tests.e2e.test_singer", ""],
+    "test_target": ["tests.unit.test_target", ""],
+    "typings": ["tests.typings", ""],
     "u": ["tests.utilities", "FlextTargetOracleTestUtilities"],
     "unit": ["tests.unit", ""],
+    "utilities": ["tests.utilities", ""],
     "x": ["flext_tests", "x"],
 }
 
@@ -218,7 +246,9 @@ __all__ = [
     "batch_records",
     "c",
     "clean_database",
+    "conftest",
     "connected_loader",
+    "constants",
     "d",
     "docker_control",
     "e",
@@ -232,6 +262,7 @@ __all__ = [
     "m",
     "mock_loader",
     "mock_oracle_api",
+    "models",
     "nested_schema",
     "oracle_api",
     "oracle_config",
@@ -240,6 +271,7 @@ __all__ = [
     "oracle_target",
     "p",
     "performance",
+    "protocols",
     "pytest_collection_modifyitems",
     "pytest_configure",
     "r",
@@ -259,13 +291,22 @@ __all__ = [
     "target",
     "temp_config_file",
     "temporary_env_vars",
+    "test_cli_dispatcher",
     "test_cli_service_falls_back_to_bus_when_flag_disabled",
     "test_cli_service_uses_dispatcher_when_flag_enabled",
+    "test_config",
     "test_ensure_table_exists_returns_result",
     "test_load_record_buffers_and_finalize",
+    "test_loader",
     "test_loader_execute_returns_ready_payload",
+    "test_oracle",
+    "test_performance",
+    "test_singer",
+    "test_target",
+    "typings",
     "u",
     "unit",
+    "utilities",
     "x",
 ]
 

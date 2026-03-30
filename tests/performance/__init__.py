@@ -20,14 +20,17 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from tests.performance import test_performance
     from tests.performance.test_performance import TestPerformance
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "TestPerformance": ["tests.performance.test_performance", "TestPerformance"],
+    "test_performance": ["tests.performance.test_performance", ""],
 }
 
 __all__ = [
     "TestPerformance",
+    "test_performance",
 ]
 
 

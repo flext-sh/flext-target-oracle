@@ -18,14 +18,17 @@ from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 if TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from tests.e2e import test_singer
     from tests.e2e.test_singer import TestSingerWorkflowE2E
 
 _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
     "TestSingerWorkflowE2E": ["tests.e2e.test_singer", "TestSingerWorkflowE2E"],
+    "test_singer": ["tests.e2e.test_singer", ""],
 }
 
 __all__ = [
     "TestSingerWorkflowE2E",
+    "test_singer",
 ]
 
 
