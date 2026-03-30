@@ -15,21 +15,22 @@ from typing import TYPE_CHECKING
 
 from flext_core.lazy import cleanup_submodule_namespace, lazy_getattr
 
+from flext_target_oracle.__version__ import (
+    __author__,
+    __author_email__,
+    __description__,
+    __license__,
+    __title__,
+    __url__,
+    __version__,
+    __version_info__,
+)
+
 if TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_db_oracle import d, e, h, r, s, x
 
     from flext_target_oracle import _models, _utilities
-    from flext_target_oracle.__version__ import (
-        __author__,
-        __author_email__,
-        __description__,
-        __license__,
-        __title__,
-        __url__,
-        __version__,
-        __version_info__,
-    )
     from flext_target_oracle._models.commands import (
         FlextTargetOracleModelsCommands,
         load_target_settings,
@@ -166,14 +167,6 @@ _LAZY_IMPORTS: Mapping[str, Sequence[str]] = {
         "flext_target_oracle.utilities",
         "FlextTargetOracleUtilities",
     ],
-    "__author__": ["flext_target_oracle.__version__", "__author__"],
-    "__author_email__": ["flext_target_oracle.__version__", "__author_email__"],
-    "__description__": ["flext_target_oracle.__version__", "__description__"],
-    "__license__": ["flext_target_oracle.__version__", "__license__"],
-    "__title__": ["flext_target_oracle.__version__", "__title__"],
-    "__url__": ["flext_target_oracle.__version__", "__url__"],
-    "__version__": ["flext_target_oracle.__version__", "__version__"],
-    "__version_info__": ["flext_target_oracle.__version__", "__version_info__"],
     "_models": ["flext_target_oracle._models", ""],
     "_utilities": ["flext_target_oracle._utilities", ""],
     "c": ["flext_target_oracle.constants", "FlextTargetOracleConstants"],
