@@ -13,46 +13,19 @@ from flext_core.lazy import install_lazy_exports
 if TYPE_CHECKING:
     from flext_tests import *
 
-    from tests import (
-        conftest,
-        constants,
-        e2e,
-        integration,
-        models,
-        performance,
-        protocols,
-        typings,
-        unit,
-        utilities,
-    )
+    from tests import conftest, constants, models, protocols, typings, utilities
     from tests.conftest import *
     from tests.constants import *
-    from tests.e2e import test_singer
-    from tests.e2e.test_singer import *
-    from tests.integration import test_oracle
-    from tests.integration.test_oracle import *
+    from tests.e2e import *
+    from tests.integration import *
     from tests.models import *
-    from tests.performance import test_performance
-    from tests.performance.test_performance import *
+    from tests.performance import *
     from tests.protocols import *
     from tests.typings import *
-    from tests.unit import test_cli_dispatcher, test_config, test_loader, test_target
-    from tests.unit.test_cli_dispatcher import *
-    from tests.unit.test_config import *
-    from tests.unit.test_loader import *
-    from tests.unit.test_target import *
+    from tests.unit import *
     from tests.utilities import *
 
-from tests.e2e import _LAZY_IMPORTS as _E2E_LAZY
-from tests.integration import _LAZY_IMPORTS as _INTEGRATION_LAZY
-from tests.performance import _LAZY_IMPORTS as _PERFORMANCE_LAZY
-from tests.unit import _LAZY_IMPORTS as _UNIT_LAZY
-
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
-    **_E2E_LAZY,
-    **_INTEGRATION_LAZY,
-    **_PERFORMANCE_LAZY,
-    **_UNIT_LAZY,
     "DOCKER_COMPOSE_PATH": "tests.conftest",
     "FlextTargetOracleTestConstants": "tests.constants",
     "FlextTargetOracleTestModels": "tests.models",
@@ -67,6 +40,12 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "ORACLE_SERVICE": "tests.conftest",
     "ORACLE_USER": "tests.conftest",
     "TEST_SCHEMA": "tests.conftest",
+    "TestOracleIntegration": "tests.integration.test_oracle",
+    "TestOracleSettings": "tests.unit.test_config",
+    "TestOracleTarget": "tests.unit.test_target",
+    "TestOracleTargetE2E": "tests.integration.test_oracle",
+    "TestPerformance": "tests.performance.test_performance",
+    "TestSingerWorkflowE2E": "tests.e2e.test_singer",
     "batch_records": "tests.conftest",
     "c": ["tests.constants", "FlextTargetOracleTestConstants"],
     "clean_database": "tests.conftest",
@@ -81,6 +60,7 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "h": "flext_tests",
     "integration": "tests.integration",
     "large_dataset": "tests.conftest",
+    "loader_config": "tests.unit.test_loader",
     "logger": "tests.conftest",
     "m": ["tests.models", "FlextTargetOracleTestModels"],
     "mock_loader": "tests.conftest",
@@ -111,8 +91,21 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "state": "tests.conftest",
     "state_message": "tests.conftest",
     "t": ["tests.typings", "FlextTargetOracleTestTypes"],
+    "target": "tests.unit.test_target",
     "temp_config_file": "tests.conftest",
     "temporary_env_vars": "tests.conftest",
+    "test_cli_dispatcher": "tests.unit.test_cli_dispatcher",
+    "test_cli_service_falls_back_to_bus_when_flag_disabled": "tests.unit.test_cli_dispatcher",
+    "test_cli_service_uses_dispatcher_when_flag_enabled": "tests.unit.test_cli_dispatcher",
+    "test_config": "tests.unit.test_config",
+    "test_ensure_table_exists_returns_result": "tests.unit.test_loader",
+    "test_load_record_buffers_and_finalize": "tests.unit.test_loader",
+    "test_loader": "tests.unit.test_loader",
+    "test_loader_execute_returns_ready_payload": "tests.unit.test_loader",
+    "test_oracle": "tests.integration.test_oracle",
+    "test_performance": "tests.performance.test_performance",
+    "test_singer": "tests.e2e.test_singer",
+    "test_target": "tests.unit.test_target",
     "typings": "tests.typings",
     "u": ["tests.utilities", "FlextTargetOracleTestUtilities"],
     "unit": "tests.unit",

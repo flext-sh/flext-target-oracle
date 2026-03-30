@@ -23,7 +23,7 @@ def load_target_settings(
     config_file: str | None,
 ) -> r[FlextTargetOracleModelsConfig.OracleSettingsProtocol]:
     """Load settings from JSON file or environment defaults."""
-    from flext_target_oracle import (  # noqa: PLC0415
+    from flext_target_oracle import (
         FlextTargetOracleSettings,
     )
 
