@@ -18,7 +18,7 @@ from flext_core.lazy import install_lazy_exports
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from tests.integration.test_oracle import *
+    from tests.integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "TestOracleIntegration": "tests.integration.test_oracle",
