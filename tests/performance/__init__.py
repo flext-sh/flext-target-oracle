@@ -20,6 +20,7 @@ from flext_core.lazy import install_lazy_exports
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
+    from tests.performance import test_performance
     from tests.performance.test_performance import TestPerformance
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {

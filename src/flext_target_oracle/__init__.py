@@ -30,14 +30,79 @@ if _TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_db_oracle import d, e, h, r, s, x
 
-    from flext_target_oracle._models import *
-    from flext_target_oracle._utilities import *
-    from flext_target_oracle.constants import *
-    from flext_target_oracle.models import *
-    from flext_target_oracle.protocols import *
-    from flext_target_oracle.settings import *
-    from flext_target_oracle.typings import *
-    from flext_target_oracle.utilities import *
+    from flext_target_oracle import (
+        _models,
+        _utilities,
+        constants,
+        models,
+        protocols,
+        settings,
+        target_client,
+        target_exceptions,
+        target_loader,
+        target_observability,
+        target_refactored,
+        target_service,
+        target_services,
+        typings,
+        utilities,
+    )
+    from flext_target_oracle._models import (
+        FlextTargetOracleModelsCommands,
+        FlextTargetOracleModelsConfig,
+        FlextTargetOracleModelsResults,
+        FlextTargetOracleModelsSinger,
+        commands,
+        config,
+        load_target_settings,
+        results,
+        singer,
+    )
+    from flext_target_oracle._utilities import (
+        FlextOracleError,
+        FlextOracleObs,
+        FlextTargetOracle,
+        FlextTargetOracleBatchService,
+        FlextTargetOracleCliService,
+        FlextTargetOracleConnectionService,
+        FlextTargetOracleErrorMetadata,
+        FlextTargetOracleExceptions,
+        FlextTargetOracleLoader,
+        FlextTargetOracleRecordService,
+        FlextTargetOracleSchemaService,
+        FlextTargetOracleService,
+        FlextTargetOracleServiceFactory,
+        cli,
+        client,
+        configure_oracle_observability,
+        errors,
+        loader,
+        main,
+        observability,
+        service,
+        services,
+    )
+    from flext_target_oracle.constants import (
+        FlextTargetOracleConstants,
+        FlextTargetOracleConstants as c,
+    )
+    from flext_target_oracle.models import (
+        FlextTargetOracleModels,
+        FlextTargetOracleModels as m,
+    )
+    from flext_target_oracle.protocols import (
+        FlextTargetOracleProtocols,
+        FlextTargetOracleProtocols as p,
+    )
+    from flext_target_oracle.settings import FlextTargetOracleSettings, logger
+    from flext_target_oracle.typings import (
+        FlextTargetOracleTypes,
+        FlextTargetOracleTypes as t,
+    )
+    from flext_target_oracle.utilities import (
+        FlextTargetOracleUtilities,
+        FlextTargetOracleUtilities as u,
+    )
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
     (

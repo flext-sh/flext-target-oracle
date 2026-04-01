@@ -13,10 +13,14 @@ from flext_core.lazy import install_lazy_exports
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from flext_target_oracle._models.commands import *
-    from flext_target_oracle._models.config import *
-    from flext_target_oracle._models.results import *
-    from flext_target_oracle._models.singer import *
+    from flext_target_oracle._models import commands, config, results, singer
+    from flext_target_oracle._models.commands import (
+        FlextTargetOracleModelsCommands,
+        load_target_settings,
+    )
+    from flext_target_oracle._models.config import FlextTargetOracleModelsConfig
+    from flext_target_oracle._models.results import FlextTargetOracleModelsResults
+    from flext_target_oracle._models.singer import FlextTargetOracleModelsSinger
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "FlextTargetOracleModelsCommands": "flext_target_oracle._models.commands",

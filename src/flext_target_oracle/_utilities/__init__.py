@@ -13,13 +13,35 @@ from flext_core.lazy import install_lazy_exports
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
 
-    from flext_target_oracle._utilities.cli import *
-    from flext_target_oracle._utilities.client import *
-    from flext_target_oracle._utilities.errors import *
-    from flext_target_oracle._utilities.loader import *
-    from flext_target_oracle._utilities.observability import *
-    from flext_target_oracle._utilities.service import *
-    from flext_target_oracle._utilities.services import *
+    from flext_target_oracle._utilities import (
+        cli,
+        client,
+        errors,
+        loader,
+        observability,
+        service,
+        services,
+    )
+    from flext_target_oracle._utilities.cli import FlextTargetOracleCliService, main
+    from flext_target_oracle._utilities.client import FlextTargetOracle
+    from flext_target_oracle._utilities.errors import (
+        FlextTargetOracleErrorMetadata,
+        FlextTargetOracleExceptions,
+    )
+    from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+    from flext_target_oracle._utilities.observability import (
+        FlextOracleError,
+        FlextOracleObs,
+        configure_oracle_observability,
+    )
+    from flext_target_oracle._utilities.service import FlextTargetOracleService
+    from flext_target_oracle._utilities.services import (
+        FlextTargetOracleBatchService,
+        FlextTargetOracleConnectionService,
+        FlextTargetOracleRecordService,
+        FlextTargetOracleSchemaService,
+        FlextTargetOracleServiceFactory,
+    )
 
 _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "FlextOracleError": "flext_target_oracle._utilities.observability",
