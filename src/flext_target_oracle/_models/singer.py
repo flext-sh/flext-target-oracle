@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from flext_meltano import FlextMeltanoModels
 from pydantic import Field
 
+from flext_meltano import FlextMeltanoModels
 from flext_target_oracle import t
 
 

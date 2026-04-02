@@ -12,10 +12,11 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from flext_core import FlextLogger, FlextSettings, r
 from pydantic import Field, SecretStr
 
-from flext_target_oracle import c, m, t
+from flext_core import FlextLogger, FlextSettings, r
+from flext_target_oracle import c, t
+from flext_target_oracle._models.config import FlextTargetOracleModelsConfig
 
 logger = FlextLogger(__name__)
 
@@ -108,9 +109,9 @@ class FlextTargetOracleSettings(FlextSettings):
 
     def get_oracle_config(
         self,
-    ) -> m.TargetOracle.OracleConnectionModel:
+    ) -> FlextTargetOracleModelsConfig.OracleConnectionModel:
         """Get Oracle database connection configuration."""
-        return m.TargetOracle.OracleConnectionModel(
+        return FlextTargetOracleModelsConfig.OracleConnectionModel(
             host=self.oracle_host,
             port=self.oracle_port,
             service_name=self.oracle_service_name,

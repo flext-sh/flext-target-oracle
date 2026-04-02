@@ -6,7 +6,6 @@ from collections.abc import Generator
 from contextlib import contextmanager
 
 from flext_core import FlextLogger
-
 from flext_target_oracle import (
     FlextTargetOracleErrorMetadata,
     FlextTargetOracleExceptions,

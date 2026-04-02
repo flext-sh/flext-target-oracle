@@ -15,10 +15,10 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
+from pydantic import PrivateAttr
+
 from flext_core import FlextLogger, FlextService, r
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from pydantic import PrivateAttr, TypeAdapter
-
 from flext_target_oracle import (
     FlextTargetOracleExceptions,
     FlextTargetOracleSettings,
@@ -26,10 +26,6 @@ from flext_target_oracle import (
     m,
     p,
     t,
-)
-
-_FLAT_CONTAINER_MAP_ADAPTER: TypeAdapter[t.FlatContainerMapping] = TypeAdapter(
-    t.FlatContainerMapping,
 )
 
 logger = FlextLogger(__name__)
@@ -326,7 +322,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 for record in records:
                     insert_sql = f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"  # nosec B608  # table name validated by re.fullmatch above
                     params: t.ConfigurationMapping = {
-                        "data": _FLAT_CONTAINER_MAP_ADAPTER.dump_json(record).decode(
+                        "data": t.FLAT_CONTAINER_MAP_ADAPTER.dump_json(record).decode(
                             "utf-8",
                         ),
                         "extracted_at": str(record.get("_sdc_extracted_at", loaded_at)),

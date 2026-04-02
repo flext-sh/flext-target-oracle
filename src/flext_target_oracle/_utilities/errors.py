@@ -14,9 +14,9 @@ from collections.abc import Mapping, MutableMapping, Sequence
 from datetime import datetime
 from typing import Annotated, ClassVar, override
 
-from flext_core import FlextExceptions
 from pydantic import ConfigDict, Field
 
+from flext_core import FlextExceptions
 from flext_target_oracle import c, m, t
 
 

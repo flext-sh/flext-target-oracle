@@ -7,7 +7,6 @@ from collections.abc import MutableMapping
 
 from flext_core import r
 from flext_db_oracle import FlextDbOracleApi
-
 from flext_target_oracle import FlextTargetOracleSettings, m, t
 
 

@@ -14,7 +14,6 @@ from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports, merge_lazy_imports
-
 from flext_target_oracle.__version__ import (
     __author__,
     __author_email__,
@@ -29,7 +28,6 @@ from flext_target_oracle.__version__ import (
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
     from flext_db_oracle import d, e, h, r, s, x
-
     from flext_target_oracle import (
         _models,
         _utilities,
@@ -48,7 +46,6 @@ if _TYPE_CHECKING:
         FlextTargetOracleModelsSinger,
         commands,
         config,
-        load_target_settings,
         results,
         singer,
     )
@@ -97,7 +94,7 @@ if _TYPE_CHECKING:
         FlextTargetOracleUtilities as u,
     )
 
-_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
+_LAZY_IMPORTS: FlextTypes.LazyImportIndex = merge_lazy_imports(
     (
         "flext_target_oracle._models",
         "flext_target_oracle._utilities",

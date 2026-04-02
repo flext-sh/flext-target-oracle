@@ -12,7 +12,6 @@ from flext_core.lazy import install_lazy_exports
 
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
-
     from flext_target_oracle._utilities import (
         cli,
         client,
@@ -41,7 +40,7 @@ if _TYPE_CHECKING:
         FlextTargetOracleServiceFactory,
     )
 
-_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "FlextOracleError": "flext_target_oracle._utilities.observability",
     "FlextOracleObs": "flext_target_oracle._utilities.observability",
     "FlextTargetOracle": "flext_target_oracle._utilities.client",

@@ -28,7 +28,6 @@ import os
 from collections.abc import Sequence
 
 from flext_core import FlextLogger, r
-
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleSettings,

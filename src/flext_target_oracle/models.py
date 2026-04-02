@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-from flext_core import r
 from flext_db_oracle import FlextDbOracleModels
 from flext_meltano import FlextMeltanoModels
-
-from flext_target_oracle import (
+from flext_target_oracle._models import (
     FlextTargetOracleModelsCommands,
     FlextTargetOracleModelsConfig,
     FlextTargetOracleModelsResults,
     FlextTargetOracleModelsSinger,
-    load_target_settings,
 )
 
 
@@ -25,13 +22,6 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
         FlextTargetOracleModelsSinger,
     ):
         """TargetOracle domain namespace composed from _models/ submodules."""
-
-    @staticmethod
-    def _load_target_settings(
-        config_file: str | None,
-    ) -> r[FlextTargetOracleModelsConfig.OracleSettingsProtocol]:
-        """Load settings from JSON file or environment defaults."""
-        return load_target_settings(config_file)
 
 
 m = FlextTargetOracleModels

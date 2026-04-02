@@ -15,8 +15,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from flext_core import FlextLogger, r
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_tests import tk
 from pydantic import TypeAdapter
 from sqlalchemy import create_engine, text
@@ -24,6 +22,8 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import NullPool
 
+from flext_core import FlextLogger, r
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,

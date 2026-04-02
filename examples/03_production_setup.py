@@ -20,9 +20,9 @@ from datetime import UTC
 from types import FrameType
 from typing import cast
 
-from flext_core import FlextLogger, r
 from pydantic import BaseModel, Field
 
+from flext_core import FlextLogger, r
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleSettings,

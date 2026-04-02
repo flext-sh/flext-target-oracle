@@ -5,7 +5,6 @@ from __future__ import annotations
 import sys
 
 from flext_core import FlextLogger, r
-
 from flext_target_oracle import FlextTargetOracleModels as _TargetModels, t
 
 OracleTargetCommandFactory = _TargetModels.TargetOracle.OracleTargetCommandFactory

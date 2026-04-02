@@ -12,7 +12,6 @@ from __future__ import annotations
 from typing import Never, override
 
 from flext_meltano import FlextMeltanoTargetServiceBase
-
 from flext_target_oracle import t
 
 

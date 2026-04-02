@@ -12,7 +12,6 @@ from typing import Protocol, runtime_checkable
 from flext_core import r
 from flext_db_oracle import FlextDbOracleProtocols
 from flext_meltano import FlextMeltanoProtocols
-
 from flext_target_oracle import m, t
 
 
@@ -194,6 +193,17 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 stream: m.TargetOracle.SingerStreamModel,
             ) -> r[m.TargetOracle.Meltano.SingerRecordMessage]:
                 """Transform one Singer record into Oracle-ready payload."""
+                ...
+
+        class OracleSettingsProtocol(Protocol):
+            """Protocol for Oracle settings used by command classes.
+
+            Note: Primary definition is in FlextTargetOracleModelsConfig.OracleSettingsProtocol
+            in _models/config.py to avoid circular imports. This is the canonical p.* alias.
+            """
+
+            def validate_business_rules(self) -> r[bool]:
+                """Validate Oracle target configuration business rules."""
                 ...
 
 

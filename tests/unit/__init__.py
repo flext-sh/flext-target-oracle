@@ -12,7 +12,6 @@ from flext_core.lazy import install_lazy_exports
 
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
-
     from tests.unit import test_config, test_loader, test_target
     from tests.unit.test_config import TestOracleSettings
     from tests.unit.test_loader import (
@@ -23,7 +22,7 @@ if _TYPE_CHECKING:
     )
     from tests.unit.test_target import TestOracleTarget, target
 
-_LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
+_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "TestOracleSettings": "tests.unit.test_config",
     "TestOracleTarget": "tests.unit.test_target",
     "loader_config": "tests.unit.test_loader",

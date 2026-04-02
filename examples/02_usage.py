@@ -10,9 +10,9 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import cast
 
-from flext_core import t
 from pydantic import TypeAdapter
 
+from flext_core import t
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 
