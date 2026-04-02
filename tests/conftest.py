@@ -16,7 +16,6 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from flext_tests import tk
-from pydantic import TypeAdapter
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
@@ -484,9 +483,7 @@ def temp_config_file(tmp_path: Path) -> Path:
     }
     config_file = tmp_path / "config.json"
     config_file.write_text(
-        TypeAdapter[t.NormalizedValue](t.NormalizedValue)
-        .dump_json(config_data)
-        .decode("utf-8"),
+        t.NORMALIZED_VALUE_ADAPTER.dump_json(config_data).decode("utf-8"),
     )
     return config_file
 
@@ -500,8 +497,7 @@ def connected_loader(oracle_loader: FlextTargetOracleLoader) -> FlextTargetOracl
 @pytest.fixture
 def large_dataset() -> Sequence[t.Dict]:
     """Generate large dataset for performance testing."""
-    dict_adapter: TypeAdapter[t.Dict] = TypeAdapter(t.Dict)
-    schema = dict_adapter.validate_python({
+    schema = t.DICT_ADAPTER.validate_python({
         "type": "SCHEMA",
         "stream": "performance_test",
         "schema": {
@@ -516,7 +512,7 @@ def large_dataset() -> Sequence[t.Dict]:
         "key_properties": ["id"],
     })
     records = [
-        dict_adapter.validate_python({
+        t.DICT_ADAPTER.validate_python({
             "type": "RECORD",
             "stream": "performance_test",
             "record": {

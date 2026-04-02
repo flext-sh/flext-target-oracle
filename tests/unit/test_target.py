@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from typing import cast
 from unittest.mock import Mock
 
 import pytest
-from flext_core import r
-from pydantic import TypeAdapter
 
+from flext_core import r
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleExceptions,
@@ -180,7 +179,7 @@ class TestOracleTarget:
         assert metrics.batch_size > 0
         assert metrics.use_bulk_operations in {True, False}
         result = target.write_record(
-            TypeAdapter(object).dump_json({"id": 1}).decode("utf-8")
+            t.NORMALIZED_VALUE_ADAPTER.dump_json({"id": 1}).decode("utf-8")
         )
         assert result.is_failure
 
@@ -190,8 +189,9 @@ class TestOracleTarget:
         mocked_load_record = Mock(return_value=r[bool].ok(value=True))
         object.__setattr__(target.loader, "load_record", mocked_load_record)
         result = target.write_record(
-            TypeAdapter(object)
-            .dump_json({"type": "RECORD", "stream": "users", "record": {"id": 1}})
+            t.NORMALIZED_VALUE_ADAPTER.dump_json(
+                {"type": "RECORD", "stream": "users", "record": {"id": 1}}
+            )
             .decode("utf-8")
         )
         mocked_load_record.assert_called_once_with("users", {"id": 1})

@@ -15,7 +15,6 @@ import time
 from collections.abc import Mapping, Sequence
 
 import pytest
-from pydantic import TypeAdapter
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
@@ -216,28 +215,28 @@ class TestOracleIntegration:
             ],
             "total": 349.97,
         }
-        typed_record = TypeAdapter(dict[str, t.Scalar]).validate_python(record)
+        typed_record = t.SCALAR_MAPPING_ADAPTER.validate_python(record)
         insert_res = loader.insert_records(stream_name, [typed_record])
         assert insert_res.is_success
         with oracle_engine.connect() as conn:
             result = conn.execute(text("SELECT json_data FROM test_json WHERE id = 1"))
             json_str = result.scalar()
             assert json_str is not None
-            stored_data = TypeAdapter(dict[str, t.Container]).validate_json(json_str)
+            stored_data = t.CONTAINER_MAPPING_ADAPTER.validate_json(json_str)
             customer = stored_data.get("customer")
-            customer_data = TypeAdapter(dict[str, t.Container]).validate_python(
+            customer_data = t.CONTAINER_MAPPING_ADAPTER.validate_python(
                 customer
             )
             customer_name = customer_data.get("name")
             assert customer_name == "Acme Corp"
             customer_address = customer_data.get("address")
-            customer_address_data = TypeAdapter(dict[str, t.Container]).validate_python(
+            customer_address_data = t.CONTAINER_MAPPING_ADAPTER.validate_python(
                 customer_address
             )
             customer_city = customer_address_data.get("city")
             assert customer_city == "objecttown"
             items = stored_data.get("items")
-            items_data = TypeAdapter(list[dict[str, t.Container]]).validate_python(
+            items_data = t.CONTAINER_MAPPING_SEQUENCE_ADAPTER.validate_python(
                 items
             )
             assert len(items_data) == 2
@@ -388,7 +387,7 @@ class TestOracleTargetE2E:
         assert init_result.is_success
         for message in singer_messages:
             result = target.execute(
-                TypeAdapter(object).dump_json(message).decode("utf-8")
+                t.NORMALIZED_VALUE_ADAPTER.dump_json(message).decode("utf-8")
             )
             assert result.is_success
         with oracle_engine.connect() as conn:
@@ -432,7 +431,7 @@ class TestOracleTargetE2E:
             },
             "key_properties": ["id"],
         }
-        target.execute(TypeAdapter(object).dump_json(schema_msg).decode("utf-8"))
+        target.execute(t.NORMALIZED_VALUE_ADAPTER.dump_json(schema_msg).decode("utf-8"))
         record_msg = {
             "type": "RECORD",
             "stream": "users",
@@ -444,7 +443,7 @@ class TestOracleTargetE2E:
                 "internal_id": "INT-001",
             },
         }
-        target.execute(TypeAdapter(object).dump_json(record_msg).decode("utf-8"))
+        target.execute(t.NORMALIZED_VALUE_ADAPTER.dump_json(record_msg).decode("utf-8"))
         with oracle_engine.connect() as conn:
             result = conn.execute(
                 text(
