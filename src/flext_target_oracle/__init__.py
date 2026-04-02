@@ -33,6 +33,7 @@ if _TYPE_CHECKING:
     from flext_target_oracle import (
         _models,
         _utilities,
+        api,
         constants,
         models,
         protocols,
@@ -118,6 +119,7 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = merge_lazy_imports(
         "FlextTargetOracleUtilities": "flext_target_oracle.utilities",
         "_models": "flext_target_oracle._models",
         "_utilities": "flext_target_oracle._utilities",
+        "api": "flext_target_oracle.api",
         "c": ("flext_target_oracle.constants", "FlextTargetOracleConstants"),
         "constants": "flext_target_oracle.constants",
         "d": "flext_db_oracle",

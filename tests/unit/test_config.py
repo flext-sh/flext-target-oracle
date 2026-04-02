@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from flext_target_oracle import FlextTargetOracleConstants, FlextTargetOracleSettings
+from flext_target_oracle import FlextTargetOracleSettings
+from tests import c
 
 
 class TestOracleSettings:
@@ -16,10 +17,10 @@ class TestOracleSettings:
         assert config.autocommit is False
 
     def test_load_method_enum_contract(self) -> None:
-        assert FlextTargetOracleConstants.LoadMethod.INSERT == "INSERT"
-        assert FlextTargetOracleConstants.LoadMethod.BULK_INSERT == "BULK_INSERT"
-        assert FlextTargetOracleConstants.LoadMethod.MERGE == "MERGE"
-        assert FlextTargetOracleConstants.LoadMethod.BULK_MERGE == "BULK_MERGE"
+        assert c.LoadMethod.INSERT == "INSERT"
+        assert c.LoadMethod.BULK_INSERT == "BULK_INSERT"
+        assert c.LoadMethod.MERGE == "MERGE"
+        assert c.LoadMethod.BULK_MERGE == "BULK_MERGE"
 
     def test_get_oracle_config(self) -> None:
         config = FlextTargetOracleSettings.model_validate({"oracle_host": "localhost", "oracle_port": 1521, "oracle_service_name": "XE", "oracle_user": "test", "oracle_password": "test", "default_target_schema": "TEST_SCHEMA", "autocommit": True, "transaction_timeout": 120, "parallel_degree": 4, "use_bulk_operations": True})

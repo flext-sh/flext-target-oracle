@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import json
 import pytest
-from tests import t
-
-from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings, m
+from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings
+from tests import m, t
 
 
 @pytest.fixture

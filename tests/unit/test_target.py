@@ -15,9 +15,8 @@ from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleExceptions,
     FlextTargetOracleSettings,
-    m,
 )
-from tests import t
+from tests import m, t
 
 
 @pytest.fixture

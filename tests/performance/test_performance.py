@@ -10,7 +10,8 @@ from unittest.mock import Mock
 import pytest
 from flext_core import r
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
+from tests import m
 
 
 @pytest.mark.performance

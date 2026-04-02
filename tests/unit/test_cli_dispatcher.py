@@ -6,12 +6,12 @@ from unittest.mock import patch
 import pytest
 pytest.importorskip('flext_meltano', reason='Dispatcher pilot test requires flext-meltano optional dependency')
 from flext_target_oracle import FlextTargetOracleCliService
-from flext_target_oracle.constants import FlextTargetOracleConstants
+from tests import c
 
 @contextmanager
 def _enable_dispatcher(enabled: bool) -> Generator[None]:
     """Patch the ENABLE_DISPATCHER flag at runtime."""
-    with patch.object(FlextTargetOracleConstants.FeatureFlags, 'ENABLE_DISPATCHER', enabled):
+    with patch.object(c.FeatureFlags, 'ENABLE_DISPATCHER', enabled):
         yield
 
 def test_cli_service_uses_dispatcher_when_flag_enabled() -> None:
