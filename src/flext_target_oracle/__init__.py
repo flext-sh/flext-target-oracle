@@ -27,7 +27,12 @@ from flext_target_oracle.__version__ import (
 
 if _TYPE_CHECKING:
     from flext_core import FlextTypes
-    from flext_db_oracle import d, e, h, r, s, x
+    from flext_core.decorators import FlextDecorators as d
+    from flext_core.handlers import FlextHandlers as h
+    from flext_core.mixins import FlextMixins as x
+    from flext_core.result import FlextResult as r
+    from flext_core.service import FlextService as s
+    from flext_db_oracle.exceptions import FlextDbOracleExceptions as e
     from flext_target_oracle import (
         _models,
         _utilities,
@@ -84,7 +89,7 @@ if _TYPE_CHECKING:
         FlextTargetOracleProtocols,
         FlextTargetOracleProtocols as p,
     )
-    from flext_target_oracle.settings import FlextTargetOracleSettings, logger
+    from flext_target_oracle.settings import FlextTargetOracleSettings
     from flext_target_oracle.typings import (
         FlextTargetOracleTypes,
         FlextTargetOracleTypes as t,
@@ -112,22 +117,21 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = merge_lazy_imports(
         "api": "flext_target_oracle.api",
         "c": ("flext_target_oracle.constants", "FlextTargetOracleConstants"),
         "constants": "flext_target_oracle.constants",
-        "d": "flext_db_oracle",
-        "e": "flext_db_oracle",
-        "h": "flext_db_oracle",
-        "logger": "flext_target_oracle.settings",
+        "d": ("flext_core.decorators", "FlextDecorators"),
+        "e": ("flext_db_oracle.exceptions", "FlextDbOracleExceptions"),
+        "h": ("flext_core.handlers", "FlextHandlers"),
         "m": ("flext_target_oracle.models", "FlextTargetOracleModels"),
         "models": "flext_target_oracle.models",
         "p": ("flext_target_oracle.protocols", "FlextTargetOracleProtocols"),
         "protocols": "flext_target_oracle.protocols",
-        "r": "flext_db_oracle",
-        "s": "flext_db_oracle",
+        "r": ("flext_core.result", "FlextResult"),
+        "s": ("flext_core.service", "FlextService"),
         "settings": "flext_target_oracle.settings",
         "t": ("flext_target_oracle.typings", "FlextTargetOracleTypes"),
         "typings": "flext_target_oracle.typings",
         "u": ("flext_target_oracle.utilities", "FlextTargetOracleUtilities"),
         "utilities": "flext_target_oracle.utilities",
-        "x": "flext_db_oracle",
+        "x": ("flext_core.mixins", "FlextMixins"),
     },
 )
 
