@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from typing import Annotated, Literal, Self
 
 from pydantic import Field
@@ -125,7 +124,7 @@ class FlextTargetOracleModelsResults:
             description="Aggregated loading operation details",
         )
         buffer_status: Annotated[
-            Mapping[str, int],
+            t.IntMapping,
             Field(
                 description="Remaining buffered records by stream",
             ),

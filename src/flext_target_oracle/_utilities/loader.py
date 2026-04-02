@@ -136,7 +136,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         self,
         stream_name: str,
         schema: t.FlatContainerMapping,
-        _key_properties: Sequence[str] | None = None,
+        _key_properties: t.StrSequence | None = None,
     ) -> r[bool]:
         """Ensure table exists using flext-db-oracle API with correct table creation."""
         try:

@@ -122,7 +122,7 @@ class TestOracleTarget:
         assert isinstance(state_value, dict)
         bookmarks_obj: t.NormalizedValue | None = state_value.get("bookmarks")
         assert isinstance(bookmarks_obj, dict)
-        bookmarks = cast("Mapping[str, t.NormalizedValue]", bookmarks_obj)
+        bookmarks = cast("t.ContainerMapping", bookmarks_obj)
         assert bookmarks.get("users") == 1
 
     def test_process_singer_messages_flushes_loader(

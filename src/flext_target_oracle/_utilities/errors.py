@@ -187,7 +187,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             *,
             stream_name: str | None = None,
             record_count: int | None = None,
-            error_records: Sequence[Mapping[str, t.ContainerValue]] | None = None,
+            error_records: Sequence[t.ContainerValueMapping] | None = None,
             operation: str | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.RuntimeData,

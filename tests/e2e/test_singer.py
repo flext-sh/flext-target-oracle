@@ -68,8 +68,8 @@ class TestSingerWorkflowE2E:
         assert isinstance(state_value, dict)
         bookmarks_obj: t.NormalizedValue | None = state_value.get("bookmarks")
         assert isinstance(bookmarks_obj, dict)
-        bookmarks = cast(Mapping[str, t.NormalizedValue], bookmarks_obj)
+        bookmarks = cast(t.ContainerMapping, bookmarks_obj)
         orders_obj: t.NormalizedValue | None = bookmarks.get("orders")
         assert isinstance(orders_obj, dict)
-        orders = cast(Mapping[str, t.NormalizedValue], orders_obj)
+        orders = cast(t.ContainerMapping, orders_obj)
         assert orders.get("version") == 1

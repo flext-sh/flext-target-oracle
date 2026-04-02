@@ -28,7 +28,7 @@ from tests import c, m, t
 
 
 def _schema_parts(
-    message: Mapping[str, t.NormalizedValue],
+    message: t.ContainerMapping,
 ) -> tuple[Mapping[str, t.Container], Sequence[str]]:
     schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(message)
     return (schema_message.schema_definition, schema_message.key_properties)
@@ -44,7 +44,7 @@ class TestOracleIntegration:
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: Engine,
-        simple_schema: Mapping[str, t.NormalizedValue],
+        simple_schema: t.ContainerMapping,
     ) -> None:
         """Test creating a simple table with basic data types."""
         stream_name = "test_users"
@@ -79,7 +79,7 @@ class TestOracleIntegration:
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: Engine,
-        simple_schema: Mapping[str, t.NormalizedValue],
+        simple_schema: t.ContainerMapping,
     ) -> None:
         """Test inserting data and retrieving it."""
         stream_name = "test_insert"
@@ -108,7 +108,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        simple_schema: Mapping[str, t.NormalizedValue],
+        simple_schema: t.ContainerMapping,
     ) -> None:
         """Test merge mode for updating existing records."""
         oracle_config = oracle_config.model_copy(update={"sdc_mode": "merge"})
@@ -151,7 +151,7 @@ class TestOracleIntegration:
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
         stream_name = "test_bulk"
-        schema_message: Mapping[str, t.NormalizedValue] = {
+        schema_message: t.ContainerMapping = {
             "type": "SCHEMA",
             "stream": stream_name,
             "schema": {
@@ -186,7 +186,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        nested_schema: Mapping[str, t.NormalizedValue],
+        nested_schema: t.ContainerMapping,
     ) -> None:
         """Test JSON storage mode with nested data."""
         oracle_config = oracle_config.model_copy(update={})
@@ -262,7 +262,7 @@ class TestOracleIntegration:
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().is_success
         stream_name = "test_ordering"
-        schema_message: Mapping[str, t.NormalizedValue] = {
+        schema_message: t.ContainerMapping = {
             "type": "SCHEMA",
             "stream": stream_name,
             "schema": {
@@ -305,7 +305,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        simple_schema: Mapping[str, t.NormalizedValue],
+        simple_schema: t.ContainerMapping,
     ) -> None:
         """Test truncate table before loading data."""
         oracle_config = oracle_config.model_copy(update={"truncate_before_load": True})
@@ -333,7 +333,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        simple_schema: Mapping[str, t.NormalizedValue],
+        simple_schema: t.ContainerMapping,
     ) -> None:
         """Test creation of custom indexes."""
         oracle_config = oracle_config.model_copy(
@@ -380,7 +380,7 @@ class TestOracleTargetE2E:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: Engine,
-        singer_messages: Sequence[Mapping[str, t.NormalizedValue]],
+        singer_messages: Sequence[t.ContainerMapping],
     ) -> None:
         """Test complete Singer workflow: schema -> records -> state."""
         target = FlextTargetOracle(config=oracle_config)
