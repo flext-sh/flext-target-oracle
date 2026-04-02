@@ -175,7 +175,9 @@ def oracle_loader(
     oracle_config: FlextTargetOracleSettings,
 ) -> Generator[FlextTargetOracleLoader]:
     """Create FlextTargetOracleLoader instance with mocked connection."""
-    with patch("flext_target_oracle.target_client.FlextDbOracleApi") as mock_api_class:
+    with patch(
+        "flext_target_oracle._utilities.loader.FlextDbOracleApi",
+    ) as mock_api_class:
         mock_api = MagicMock()
         mock_api_class.return_value = mock_api
         mock_api.connect.return_value = r[str].ok("Connected successfully")

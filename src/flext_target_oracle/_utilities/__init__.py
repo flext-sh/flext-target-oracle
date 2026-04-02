@@ -19,7 +19,6 @@ if _TYPE_CHECKING:
         errors,
         loader,
         observability,
-        service,
         services,
     )
     from flext_target_oracle._utilities.cli import FlextTargetOracleCliService, main
@@ -34,7 +33,6 @@ if _TYPE_CHECKING:
         FlextOracleObs,
         configure_oracle_observability,
     )
-    from flext_target_oracle._utilities.service import FlextTargetOracleService
     from flext_target_oracle._utilities.services import (
         FlextTargetOracleBatchService,
         FlextTargetOracleConnectionService,
@@ -55,7 +53,6 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "FlextTargetOracleLoader": "flext_target_oracle._utilities.loader",
     "FlextTargetOracleRecordService": "flext_target_oracle._utilities.services",
     "FlextTargetOracleSchemaService": "flext_target_oracle._utilities.services",
-    "FlextTargetOracleService": "flext_target_oracle._utilities.service",
     "FlextTargetOracleServiceFactory": "flext_target_oracle._utilities.services",
     "cli": "flext_target_oracle._utilities.cli",
     "client": "flext_target_oracle._utilities.client",
@@ -64,7 +61,6 @@ _LAZY_IMPORTS: Mapping[str, str | Sequence[str]] = {
     "loader": "flext_target_oracle._utilities.loader",
     "main": "flext_target_oracle._utilities.cli",
     "observability": "flext_target_oracle._utilities.observability",
-    "service": "flext_target_oracle._utilities.service",
     "services": "flext_target_oracle._utilities.services",
 }
 

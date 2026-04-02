@@ -14,7 +14,7 @@ from collections.abc import Mapping, MutableMapping, Sequence
 from datetime import datetime
 from typing import Annotated, ClassVar, override
 
-from flext_core import FlextExceptions, r
+from flext_core import FlextExceptions
 from pydantic import ConfigDict, Field
 
 from flext_target_oracle import c, m, t
@@ -50,52 +50,15 @@ class FlextTargetOracleErrorMetadata(m.Value):
     ]
 
 
-def _extract_legacy_metadata_kwargs(
-    kwargs: MutableMapping[str, t.RuntimeData],
-) -> tuple[str | None, Mapping[str, t.MetadataValue] | None, str | None]:
-    code_value = kwargs.pop("code", None)
-    context_value = kwargs.pop("context", None)
-    correlation_value = kwargs.pop("correlation_id", None)
-
-    legacy_code = code_value if isinstance(code_value, str) else None
-    legacy_correlation_id = (
-        correlation_value if isinstance(correlation_value, str) else None
-    )
-
-    legacy_context: Mapping[str, t.MetadataValue] | None = None
-    if isinstance(context_value, Mapping):
-        legacy_context = {
-            str(key): _to_metadata_value(value) for key, value in context_value.items()
-        }
-
-    return legacy_code, legacy_context, legacy_correlation_id
-
-
 def _resolve_metadata(
     *,
     default_code: str,
     metadata: FlextTargetOracleErrorMetadata | None,
-    legacy_code: str | None,
-    legacy_context: Mapping[str, t.MetadataValue] | None,
-    legacy_correlation_id: str | None,
-) -> r[FlextTargetOracleErrorMetadata]:
-    resolved_code = legacy_code or (metadata.code if metadata is not None else None)
-    resolved_context = (
-        legacy_context
-        if legacy_context is not None
-        else (metadata.context if metadata is not None else None)
-    )
-    resolved_correlation_id = (
-        legacy_correlation_id
-        if legacy_correlation_id is not None
-        else (metadata.correlation_id if metadata is not None else None)
-    )
-    return r[FlextTargetOracleErrorMetadata].ok(
-        value=FlextTargetOracleErrorMetadata(
-            code=resolved_code or default_code,
-            context=resolved_context,
-            correlation_id=resolved_correlation_id,
-        ),
+) -> FlextTargetOracleErrorMetadata:
+    return FlextTargetOracleErrorMetadata(
+        code=metadata.code if metadata is not None else default_code,
+        context=metadata.context if metadata is not None else None,
+        correlation_id=metadata.correlation_id if metadata is not None else None,
     )
 
 
@@ -125,17 +88,10 @@ class FlextTargetOracleExceptions(FlextExceptions):
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
-            legacy_code, legacy_context, legacy_correlation_id = (
-                _extract_legacy_metadata_kwargs(kwargs)
-            )
-            metadata_result = _resolve_metadata(
+            resolved_metadata = _resolve_metadata(
                 default_code=c.CONNECTION_ERROR,
                 metadata=metadata,
-                legacy_code=legacy_code,
-                legacy_context=legacy_context,
-                legacy_correlation_id=legacy_correlation_id,
             )
-            resolved_metadata = metadata_result.value
             oracle_context: MutableMapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
@@ -186,17 +142,10 @@ class FlextTargetOracleExceptions(FlextExceptions):
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
-            legacy_code, legacy_context, legacy_correlation_id = (
-                _extract_legacy_metadata_kwargs(kwargs)
-            )
-            metadata_result = _resolve_metadata(
+            resolved_metadata = _resolve_metadata(
                 default_code=c.AUTHENTICATION_ERROR,
                 metadata=metadata,
-                legacy_code=legacy_code,
-                legacy_context=legacy_context,
-                legacy_correlation_id=legacy_correlation_id,
             )
-            resolved_metadata = metadata_result.value
             oracle_context: MutableMapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
@@ -244,17 +193,10 @@ class FlextTargetOracleExceptions(FlextExceptions):
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
-            legacy_code, legacy_context, legacy_correlation_id = (
-                _extract_legacy_metadata_kwargs(kwargs)
-            )
-            metadata_result = _resolve_metadata(
+            resolved_metadata = _resolve_metadata(
                 default_code=c.PROCESSING_ERROR,
                 metadata=metadata,
-                legacy_code=legacy_code,
-                legacy_context=legacy_context,
-                legacy_correlation_id=legacy_correlation_id,
             )
-            resolved_metadata = metadata_result.value
             oracle_context: MutableMapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
@@ -306,17 +248,10 @@ class FlextTargetOracleExceptions(FlextExceptions):
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
-            legacy_code, legacy_context, legacy_correlation_id = (
-                _extract_legacy_metadata_kwargs(kwargs)
-            )
-            metadata_result = _resolve_metadata(
+            resolved_metadata = _resolve_metadata(
                 default_code=c.VALIDATION_ERROR,
                 metadata=metadata,
-                legacy_code=legacy_code,
-                legacy_context=legacy_context,
-                legacy_correlation_id=legacy_correlation_id,
             )
-            resolved_metadata = metadata_result.value
             oracle_context: MutableMapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
@@ -359,17 +294,10 @@ class FlextTargetOracleExceptions(FlextExceptions):
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize SQL error with Oracle-specific context."""
-            legacy_code, legacy_context, legacy_correlation_id = (
-                _extract_legacy_metadata_kwargs(kwargs)
-            )
-            metadata_result = _resolve_metadata(
+            resolved_metadata = _resolve_metadata(
                 default_code=c.OPERATION_ERROR,
                 metadata=metadata,
-                legacy_code=legacy_code,
-                legacy_context=legacy_context,
-                legacy_correlation_id=legacy_correlation_id,
             )
-            resolved_metadata = metadata_result.value
             oracle_context: MutableMapping[str, t.MetadataValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
