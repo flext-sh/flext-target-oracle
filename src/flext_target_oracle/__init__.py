@@ -1,12 +1,7 @@
 # AUTO-GENERATED FILE — DO NOT EDIT MANUALLY.
 # Regenerate with: make gen
 #
-"""Production-Grade Singer Target for Oracle Database data loading.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Flext target oracle package."""
 
 from __future__ import annotations
 
@@ -15,6 +10,7 @@ from typing import TYPE_CHECKING as _TYPE_CHECKING
 
 from flext_core.lazy import install_lazy_exports, merge_lazy_imports
 from flext_target_oracle.__version__ import (
+    __all__,
     __author__,
     __author_email__,
     __description__,
@@ -37,10 +33,20 @@ if _TYPE_CHECKING:
         _models,
         _utilities,
         api,
+        cli,
+        client,
+        commands,
+        config,
         constants,
+        errors,
+        loader,
         models,
+        observability,
         protocols,
+        results,
+        services,
         settings,
+        singer,
         typings,
         utilities,
     )
@@ -49,32 +55,20 @@ if _TYPE_CHECKING:
         FlextTargetOracleModelsConfig,
         FlextTargetOracleModelsResults,
         FlextTargetOracleModelsSinger,
-        commands,
-        config,
-        results,
-        singer,
     )
     from flext_target_oracle._utilities import (
         FlextOracleError,
         FlextOracleObs,
         FlextTargetOracle,
-        FlextTargetOracleBatchService,
         FlextTargetOracleCliService,
         FlextTargetOracleConnectionService,
-        FlextTargetOracleErrorMetadata,
         FlextTargetOracleExceptions,
         FlextTargetOracleLoader,
-        FlextTargetOracleRecordService,
-        FlextTargetOracleSchemaService,
-        FlextTargetOracleServiceFactory,
-        cli,
-        client,
+        code,
         configure_oracle_observability,
-        errors,
-        loader,
+        context,
+        correlation_id,
         main,
-        observability,
-        services,
     )
     from flext_target_oracle.api import FlextTargetOracleService
     from flext_target_oracle.constants import (
@@ -89,7 +83,7 @@ if _TYPE_CHECKING:
         FlextTargetOracleProtocols,
         FlextTargetOracleProtocols as p,
     )
-    from flext_target_oracle.settings import FlextTargetOracleSettings
+    from flext_target_oracle.settings import FlextTargetOracleSettings, logger
     from flext_target_oracle.typings import (
         FlextTargetOracleTypes,
         FlextTargetOracleTypes as t,
@@ -116,17 +110,28 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = merge_lazy_imports(
         "_utilities": "flext_target_oracle._utilities",
         "api": "flext_target_oracle.api",
         "c": ("flext_target_oracle.constants", "FlextTargetOracleConstants"),
+        "cli": "flext_target_oracle.cli",
+        "client": "flext_target_oracle.client",
+        "commands": "flext_target_oracle.commands",
+        "config": "flext_target_oracle.config",
         "constants": "flext_target_oracle.constants",
         "d": ("flext_core.decorators", "FlextDecorators"),
         "e": ("flext_db_oracle.exceptions", "FlextDbOracleExceptions"),
+        "errors": "flext_target_oracle.errors",
         "h": ("flext_core.handlers", "FlextHandlers"),
+        "loader": "flext_target_oracle.loader",
+        "logger": "flext_target_oracle.settings",
         "m": ("flext_target_oracle.models", "FlextTargetOracleModels"),
         "models": "flext_target_oracle.models",
+        "observability": "flext_target_oracle.observability",
         "p": ("flext_target_oracle.protocols", "FlextTargetOracleProtocols"),
         "protocols": "flext_target_oracle.protocols",
         "r": ("flext_core.result", "FlextResult"),
+        "results": "flext_target_oracle.results",
         "s": ("flext_core.service", "FlextService"),
+        "services": "flext_target_oracle.services",
         "settings": "flext_target_oracle.settings",
+        "singer": "flext_target_oracle.singer",
         "t": ("flext_target_oracle.typings", "FlextTargetOracleTypes"),
         "typings": "flext_target_oracle.typings",
         "u": ("flext_target_oracle.utilities", "FlextTargetOracleUtilities"),
@@ -141,6 +146,7 @@ install_lazy_exports(
     globals(),
     _LAZY_IMPORTS,
     [
+        "__all__",
         "__author__",
         "__author_email__",
         "__description__",
