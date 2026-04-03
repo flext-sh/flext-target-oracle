@@ -14,42 +14,38 @@ if _t.TYPE_CHECKING:
 
     cli = _flext_target_oracle__utilities_cli
     import flext_target_oracle._utilities.client as _flext_target_oracle__utilities_client
+    from flext_target_oracle._utilities.cli import FlextTargetOracleCliService, main
 
     client = _flext_target_oracle__utilities_client
     import flext_target_oracle._utilities.errors as _flext_target_oracle__utilities_errors
+    from flext_target_oracle._utilities.client import FlextTargetOracle
 
     errors = _flext_target_oracle__utilities_errors
     import flext_target_oracle._utilities.loader as _flext_target_oracle__utilities_loader
+    from flext_target_oracle._utilities.errors import (
+        FlextTargetOracleErrorMetadata,
+        FlextTargetOracleExceptions,
+    )
 
     loader = _flext_target_oracle__utilities_loader
     import flext_target_oracle._utilities.observability as _flext_target_oracle__utilities_observability
+    from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 
     observability = _flext_target_oracle__utilities_observability
     import flext_target_oracle._utilities.services as _flext_target_oracle__utilities_services
-
-    services = _flext_target_oracle__utilities_services
-
-    _ = (
+    from flext_target_oracle._utilities.observability import (
         FlextOracleError,
         FlextOracleObs,
-        FlextTargetOracle,
+        configure_oracle_observability,
+    )
+
+    services = _flext_target_oracle__utilities_services
+    from flext_target_oracle._utilities.services import (
         FlextTargetOracleBatchService,
-        FlextTargetOracleCliService,
         FlextTargetOracleConnectionService,
-        FlextTargetOracleErrorMetadata,
-        FlextTargetOracleExceptions,
-        FlextTargetOracleLoader,
         FlextTargetOracleRecordService,
         FlextTargetOracleSchemaService,
         FlextTargetOracleServiceFactory,
-        cli,
-        client,
-        configure_oracle_observability,
-        errors,
-        loader,
-        main,
-        observability,
-        services,
     )
 _LAZY_IMPORTS = {
     "FlextOracleError": "flext_target_oracle._utilities.observability",

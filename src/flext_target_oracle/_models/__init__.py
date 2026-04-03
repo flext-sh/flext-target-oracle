@@ -14,25 +14,18 @@ if _t.TYPE_CHECKING:
 
     commands = _flext_target_oracle__models_commands
     import flext_target_oracle._models.config as _flext_target_oracle__models_config
+    from flext_target_oracle._models.commands import FlextTargetOracleModelsCommands
 
     config = _flext_target_oracle__models_config
     import flext_target_oracle._models.results as _flext_target_oracle__models_results
+    from flext_target_oracle._models.config import FlextTargetOracleModelsConfig
 
     results = _flext_target_oracle__models_results
     import flext_target_oracle._models.singer as _flext_target_oracle__models_singer
+    from flext_target_oracle._models.results import FlextTargetOracleModelsResults
 
     singer = _flext_target_oracle__models_singer
-
-    _ = (
-        FlextTargetOracleModelsCommands,
-        FlextTargetOracleModelsConfig,
-        FlextTargetOracleModelsResults,
-        FlextTargetOracleModelsSinger,
-        commands,
-        config,
-        results,
-        singer,
-    )
+    from flext_target_oracle._models.singer import FlextTargetOracleModelsSinger
 _LAZY_IMPORTS = {
     "FlextTargetOracleModelsCommands": "flext_target_oracle._models.commands",
     "FlextTargetOracleModelsConfig": "flext_target_oracle._models.config",
