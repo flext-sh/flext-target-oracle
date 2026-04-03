@@ -23,11 +23,11 @@ if _TYPE_CHECKING:
     from flext_core.service import FlextService as s
     from flext_core.typings import FlextTypes as t
     from flext_core.utilities import FlextUtilities as u
-    from flext_target_oracle import test_performance
-    from flext_target_oracle.test_performance import TestPerformance
+    from tests.performance import test_performance
+    from tests.performance.test_performance import TestPerformance
 
 _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
-    "TestPerformance": "flext_target_oracle.test_performance",
+    "TestPerformance": "tests.performance.test_performance",
     "c": ("flext_core.constants", "FlextConstants"),
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),
@@ -37,7 +37,7 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "r": ("flext_core.result", "FlextResult"),
     "s": ("flext_core.service", "FlextService"),
     "t": ("flext_core.typings", "FlextTypes"),
-    "test_performance": "flext_target_oracle.test_performance",
+    "test_performance": "tests.performance.test_performance",
     "u": ("flext_core.utilities", "FlextUtilities"),
     "x": ("flext_core.mixins", "FlextMixins"),
 }
