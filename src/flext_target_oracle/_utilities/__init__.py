@@ -5,42 +5,53 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
-from typing import TYPE_CHECKING as _TYPE_CHECKING
+import typing as _t
 
 from flext_core.lazy import install_lazy_exports
 
-if _TYPE_CHECKING:
-    from flext_core import FlextTypes
-    from flext_target_oracle._utilities import (
-        cli,
-        client,
-        errors,
-        loader,
-        observability,
-        services,
-    )
-    from flext_target_oracle._utilities.cli import FlextTargetOracleCliService, main
-    from flext_target_oracle._utilities.client import FlextTargetOracle
-    from flext_target_oracle._utilities.errors import (
-        FlextTargetOracleErrorMetadata,
-        FlextTargetOracleExceptions,
-    )
-    from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
-    from flext_target_oracle._utilities.observability import (
+if _t.TYPE_CHECKING:
+    import flext_target_oracle._utilities.cli as _flext_target_oracle__utilities_cli
+
+    cli = _flext_target_oracle__utilities_cli
+    import flext_target_oracle._utilities.client as _flext_target_oracle__utilities_client
+
+    client = _flext_target_oracle__utilities_client
+    import flext_target_oracle._utilities.errors as _flext_target_oracle__utilities_errors
+
+    errors = _flext_target_oracle__utilities_errors
+    import flext_target_oracle._utilities.loader as _flext_target_oracle__utilities_loader
+
+    loader = _flext_target_oracle__utilities_loader
+    import flext_target_oracle._utilities.observability as _flext_target_oracle__utilities_observability
+
+    observability = _flext_target_oracle__utilities_observability
+    import flext_target_oracle._utilities.services as _flext_target_oracle__utilities_services
+
+    services = _flext_target_oracle__utilities_services
+
+    _ = (
         FlextOracleError,
         FlextOracleObs,
-        configure_oracle_observability,
-    )
-    from flext_target_oracle._utilities.services import (
+        FlextTargetOracle,
         FlextTargetOracleBatchService,
+        FlextTargetOracleCliService,
         FlextTargetOracleConnectionService,
+        FlextTargetOracleErrorMetadata,
+        FlextTargetOracleExceptions,
+        FlextTargetOracleLoader,
         FlextTargetOracleRecordService,
         FlextTargetOracleSchemaService,
         FlextTargetOracleServiceFactory,
+        cli,
+        client,
+        configure_oracle_observability,
+        errors,
+        loader,
+        main,
+        observability,
+        services,
     )
-
-_LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
+_LAZY_IMPORTS = {
     "FlextOracleError": "flext_target_oracle._utilities.observability",
     "FlextOracleObs": "flext_target_oracle._utilities.observability",
     "FlextTargetOracle": "flext_target_oracle._utilities.client",
@@ -62,6 +73,29 @@ _LAZY_IMPORTS: FlextTypes.LazyImportIndex = {
     "observability": "flext_target_oracle._utilities.observability",
     "services": "flext_target_oracle._utilities.services",
 }
+
+__all__ = [
+    "FlextOracleError",
+    "FlextOracleObs",
+    "FlextTargetOracle",
+    "FlextTargetOracleBatchService",
+    "FlextTargetOracleCliService",
+    "FlextTargetOracleConnectionService",
+    "FlextTargetOracleErrorMetadata",
+    "FlextTargetOracleExceptions",
+    "FlextTargetOracleLoader",
+    "FlextTargetOracleRecordService",
+    "FlextTargetOracleSchemaService",
+    "FlextTargetOracleServiceFactory",
+    "cli",
+    "client",
+    "configure_oracle_observability",
+    "errors",
+    "loader",
+    "main",
+    "observability",
+    "services",
+]
 
 
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)

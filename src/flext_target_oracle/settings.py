@@ -15,8 +15,7 @@ from typing import Annotated
 from pydantic import Field, SecretStr
 
 from flext_core import FlextLogger, FlextSettings, r
-from flext_target_oracle import c, t
-from flext_target_oracle._models.config import FlextTargetOracleModelsConfig
+from flext_target_oracle import FlextTargetOracleModelsConfig, c, t
 
 logger = FlextLogger(__name__)
 

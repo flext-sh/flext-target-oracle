@@ -6,10 +6,12 @@ from typing import override
 
 from flext_core import h, r
 from flext_meltano import FlextMeltanoModels
-from flext_target_oracle._models.config import FlextTargetOracleModelsConfig
-from flext_target_oracle.constants import FlextTargetOracleConstants
-from flext_target_oracle.typings import t
-from flext_target_oracle.utilities import u
+from flext_target_oracle import (
+    FlextTargetOracleConstants,
+    FlextTargetOracleModelsConfig,
+    t,
+    u,
+)
 
 
 class FlextTargetOracleModelsCommands:

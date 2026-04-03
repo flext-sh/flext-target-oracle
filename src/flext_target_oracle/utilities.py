@@ -7,9 +7,11 @@ from pathlib import Path
 from flext_core import r
 from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import FlextMeltanoUtilities
-from flext_target_oracle import c
-from flext_target_oracle._models.config import FlextTargetOracleModelsConfig
-from flext_target_oracle.settings import FlextTargetOracleSettings
+from flext_target_oracle import (
+    FlextTargetOracleModelsConfig,
+    FlextTargetOracleSettings,
+    c,
+)
 
 
 class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):

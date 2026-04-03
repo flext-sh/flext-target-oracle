@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleModels
 from flext_meltano import FlextMeltanoModels
-from flext_target_oracle._models import (
+from flext_target_oracle import (
     FlextTargetOracleModelsCommands,
     FlextTargetOracleModelsConfig,
     FlextTargetOracleModelsResults,
