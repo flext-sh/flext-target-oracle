@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 
 import pytest
 from sqlalchemy import text
@@ -28,7 +28,7 @@ from tests import c, m, t
 
 def _schema_parts(
     message: t.ContainerMapping,
-) -> tuple[Mapping[str, t.Container], Sequence[str]]:
+) -> tuple[t.ContainerValueMapping, Sequence[str]]:
     schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(message)
     return (schema_message.schema_definition, schema_message.key_properties)
 

@@ -5,9 +5,9 @@ from __future__ import annotations
 import sys
 
 from flext_core import FlextLogger, r
-from flext_target_oracle import FlextTargetOracleModels as _TargetModels, t
+from flext_target_oracle import m, t
 
-OracleTargetCommandFactory = _TargetModels.TargetOracle.OracleTargetCommandFactory
+OracleTargetCommandFactory = m.TargetOracle.OracleTargetCommandFactory
 
 logger = FlextLogger(__name__)
 
