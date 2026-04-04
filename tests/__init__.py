@@ -64,18 +64,16 @@ if _t.TYPE_CHECKING:
     )
 
     e2e = _tests_e2e
-    import tests.e2e.test_singer as _tests_e2e_test_singer
-
-    test_singer = _tests_e2e_test_singer
     import tests.integration as _tests_integration
-    from tests.e2e.test_singer import TestSingerWorkflowE2E
+    from tests.e2e import TestSingerWorkflowE2E, test_singer
 
     integration = _tests_integration
-    import tests.integration.test_oracle as _tests_integration_test_oracle
-
-    test_oracle = _tests_integration_test_oracle
     import tests.models as _tests_models
-    from tests.integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
+    from tests.integration import (
+        TestOracleIntegration,
+        TestOracleTargetE2E,
+        test_oracle,
+    )
 
     models = _tests_models
     import tests.performance as _tests_performance
@@ -85,11 +83,8 @@ if _t.TYPE_CHECKING:
     )
 
     performance = _tests_performance
-    import tests.performance.test_performance as _tests_performance_test_performance
-
-    test_performance = _tests_performance_test_performance
     import tests.protocols as _tests_protocols
-    from tests.performance.test_performance import TestPerformance
+    from tests.performance import TestPerformance, test_performance
 
     protocols = _tests_protocols
     import tests.typings as _tests_typings
@@ -106,24 +101,19 @@ if _t.TYPE_CHECKING:
     )
 
     unit = _tests_unit
-    import tests.unit.test_config as _tests_unit_test_config
-
-    test_config = _tests_unit_test_config
-    import tests.unit.test_loader as _tests_unit_test_loader
-    from tests.unit.test_config import TestOracleSettings
-
-    test_loader = _tests_unit_test_loader
-    import tests.unit.test_target as _tests_unit_test_target
-    from tests.unit.test_loader import (
+    import tests.utilities as _tests_utilities
+    from tests.unit import (
+        TestOracleSettings,
+        TestOracleTarget,
         loader_config,
+        target,
+        test_config,
         test_ensure_table_exists_returns_result,
         test_load_record_buffers_and_finalize,
+        test_loader,
         test_loader_execute_returns_ready_payload,
+        test_target,
     )
-
-    test_target = _tests_unit_test_target
-    import tests.utilities as _tests_utilities
-    from tests.unit.test_target import TestOracleTarget, target
 
     utilities = _tests_utilities
     from flext_core.decorators import FlextDecorators as d

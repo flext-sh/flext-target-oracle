@@ -24,62 +24,41 @@ if _t.TYPE_CHECKING:
     )
 
     _models = _flext_target_oracle__models
-    import flext_target_oracle._models.commands as _flext_target_oracle__models_commands
-
-    commands = _flext_target_oracle__models_commands
-    import flext_target_oracle._models.config as _flext_target_oracle__models_config
-    from flext_target_oracle._models.commands import FlextTargetOracleModelsCommands
-
-    config = _flext_target_oracle__models_config
-    import flext_target_oracle._models.results as _flext_target_oracle__models_results
-    from flext_target_oracle._models.config import FlextTargetOracleModelsConfig
-
-    results = _flext_target_oracle__models_results
-    import flext_target_oracle._models.singer as _flext_target_oracle__models_singer
-    from flext_target_oracle._models.results import FlextTargetOracleModelsResults
-
-    singer = _flext_target_oracle__models_singer
     import flext_target_oracle._utilities as _flext_target_oracle__utilities
-    from flext_target_oracle._models.singer import FlextTargetOracleModelsSinger
+    from flext_target_oracle._models import (
+        FlextTargetOracleModelsCommands,
+        FlextTargetOracleModelsConfig,
+        FlextTargetOracleModelsResults,
+        FlextTargetOracleModelsSinger,
+        commands,
+        config,
+        results,
+        singer,
+    )
 
     _utilities = _flext_target_oracle__utilities
-    import flext_target_oracle._utilities.cli as _flext_target_oracle__utilities_cli
-
-    cli = _flext_target_oracle__utilities_cli
-    import flext_target_oracle._utilities.client as _flext_target_oracle__utilities_client
-    from flext_target_oracle._utilities.cli import FlextTargetOracleCliService, main
-
-    client = _flext_target_oracle__utilities_client
-    import flext_target_oracle._utilities.errors as _flext_target_oracle__utilities_errors
-    from flext_target_oracle._utilities.client import FlextTargetOracle
-
-    errors = _flext_target_oracle__utilities_errors
-    import flext_target_oracle._utilities.loader as _flext_target_oracle__utilities_loader
-    from flext_target_oracle._utilities.errors import (
-        FlextTargetOracleErrorMetadata,
-        FlextTargetOracleExceptions,
-    )
-
-    loader = _flext_target_oracle__utilities_loader
-    import flext_target_oracle._utilities.observability as _flext_target_oracle__utilities_observability
-    from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
-
-    observability = _flext_target_oracle__utilities_observability
-    import flext_target_oracle._utilities.services as _flext_target_oracle__utilities_services
-    from flext_target_oracle._utilities.observability import (
+    import flext_target_oracle.api as _flext_target_oracle_api
+    from flext_target_oracle._utilities import (
         FlextOracleError,
         FlextOracleObs,
-        configure_oracle_observability,
-    )
-
-    services = _flext_target_oracle__utilities_services
-    import flext_target_oracle.api as _flext_target_oracle_api
-    from flext_target_oracle._utilities.services import (
+        FlextTargetOracle,
         FlextTargetOracleBatchService,
+        FlextTargetOracleCliService,
         FlextTargetOracleConnectionService,
+        FlextTargetOracleErrorMetadata,
+        FlextTargetOracleExceptions,
+        FlextTargetOracleLoader,
         FlextTargetOracleRecordService,
         FlextTargetOracleSchemaService,
         FlextTargetOracleServiceFactory,
+        cli,
+        client,
+        configure_oracle_observability,
+        errors,
+        loader,
+        main,
+        observability,
+        services,
     )
 
     api = _flext_target_oracle_api
