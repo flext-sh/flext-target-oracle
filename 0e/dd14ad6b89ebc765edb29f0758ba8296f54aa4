@@ -1,0 +1,27 @@
+src/flext_target_oracle/_utilities/loader.py
+  e1d2767e43e21b6f 34,54,74,88,138,242,247,297,334
+src/flext_target_oracle/typings.py
+  e1d2767e43e21b6f 19-20
+src/flext_target_oracle/_utilities/services.py
+  e1d2767e43e21b6f 137
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "0edd14ad6b89ebc765edb29f0758ba8296f54aa4",
+  "prompts": {
+    "e1d2767e43e21b6f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b88f5b43-f2ee-4bd5-8e49-f0bc2c3099ed",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "FLEXT Bot",
+      "messages": [],
+      "total_additions": 12,
+      "total_deletions": 12,
+      "accepted_lines": 12,
+      "overriden_lines": 0
+    }
+  }
+}
