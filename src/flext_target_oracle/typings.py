@@ -16,8 +16,8 @@ from flext_meltano import FlextMeltanoTypes
 class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
     """MRO facade composing Meltano + DbOracle type namespaces."""
 
-    FLAT_CONTAINER_MAP_ADAPTER: TypeAdapter[FlextMeltanoTypes.FlatContainerMapping] = (
-        TypeAdapter(FlextMeltanoTypes.FlatContainerMapping)
+    FLAT_CONTAINER_MAP_ADAPTER: TypeAdapter[FlextMeltanoTypes.ContainerValueMapping] = (
+        TypeAdapter(FlextMeltanoTypes.ContainerValueMapping)
     )
     STR_MAP_ADAPTER: TypeAdapter[FlextMeltanoTypes.StrMapping] = TypeAdapter(
         FlextMeltanoTypes.StrMapping

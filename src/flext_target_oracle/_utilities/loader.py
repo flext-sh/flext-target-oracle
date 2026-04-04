@@ -31,7 +31,7 @@ from flext_target_oracle import (
 logger = FlextLogger(__name__)
 
 
-def _default_record_buffers() -> dict[str, list[t.FlatContainerMapping]]:
+def _default_record_buffers() -> dict[str, list[t.ContainerValueMapping]]:
     return {}
 
 
@@ -51,7 +51,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     model_config: ClassVar = {"frozen": False}
     _target_config: FlextTargetOracleSettings = PrivateAttr()
     _oracle_api: FlextDbOracleApi = PrivateAttr()
-    _record_buffers: dict[str, list[t.FlatContainerMapping]] = PrivateAttr(
+    _record_buffers: dict[str, list[t.ContainerValueMapping]] = PrivateAttr(
         default_factory=_default_record_buffers,
     )
     _total_records: int = PrivateAttr(default=0)
@@ -71,7 +71,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             oracle_api = FlextDbOracleApi(oracle_config)
             self._target_config = config
             self._oracle_api = oracle_api
-            self._record_buffers = dict[str, list[t.FlatContainerMapping]]()
+            self._record_buffers = dict[str, list[t.ContainerValueMapping]]()
             self._total_records = 0
         except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
             msg = f"Failed to create Oracle API: {e}"
@@ -85,7 +85,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     @property
     def record_buffers(
         self,
-    ) -> dict[str, list[t.FlatContainerMapping]]:
+    ) -> dict[str, list[t.ContainerValueMapping]]:
         """Access record buffers."""
         return self._record_buffers
 
@@ -135,7 +135,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def ensure_table_exists(
         self,
         stream_name: str,
-        schema: t.FlatContainerMapping,
+        schema: t.ContainerValueMapping,
         _key_properties: t.StrSequence | None = None,
     ) -> r[bool]:
         """Ensure table exists using flext-db-oracle API with correct table creation."""
@@ -239,12 +239,12 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def load_record(
         self,
         stream_name: str,
-        record_data: t.FlatContainerMapping,
+        record_data: t.ContainerValueMapping,
     ) -> r[bool]:
         """Load record with batching."""
         try:
             if stream_name not in self.record_buffers:
-                self.record_buffers[stream_name] = list[t.FlatContainerMapping]()
+                self.record_buffers[stream_name] = list[t.ContainerValueMapping]()
             self.record_buffers[stream_name].append(dict(record_data))
             self._total_records += 1
             if len(self.record_buffers[stream_name]) >= self.target_config.batch_size:
@@ -294,7 +294,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def _build_create_table_sql(
         self,
         table_name: str,
-        _schema: t.FlatContainerMapping,
+        _schema: t.ContainerValueMapping,
     ) -> str:
         """Build CREATE TABLE SQL statement."""
         schema_name = self.target_config.default_target_schema
@@ -331,7 +331,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                     result = connected_api.execute_sql(insert_sql, parameters=params)
                     if result.is_failure:
                         return r[bool].fail(f"Batch insert failed: {result.error}")
-                self.record_buffers[stream_name] = list[t.FlatContainerMapping]()
+                self.record_buffers[stream_name] = list[t.ContainerValueMapping]()
                 self.log_info(f"Flushed {len(records)} records to {table_name}")
                 return r[bool].ok(value=True)
         except c.Meltano.Singer.SAFE_EXCEPTIONS as e:
