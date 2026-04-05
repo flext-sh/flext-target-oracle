@@ -1,0 +1,36 @@
+# AUTO-GENERATED — DO NOT EDIT MANUALLY
+site_name: flext-target-oracle Documentation
+site_description: Generated documentation for flext-target-oracle
+site_url: https://github.com/flext-sh/flext/blob/main/README.md
+repo_name: flext-sh/flext
+repo_url: https://github.com/flext-sh/flext
+edit_uri: edit/main/flext-target-oracle/
+docs_dir: docs
+site_dir: .reports/docs/site
+
+theme:
+  name: material
+
+plugins:
+  - search
+  - autorefs
+  - section-index
+  - mkdocstrings:
+      handlers:
+        python:
+          paths:
+            - src
+          options:
+            show_root_heading: true
+            show_root_full_path: false
+            show_source: false
+
+nav:
+  - Home: index.md
+  - Guides: guides/README.md
+  - API Reference: api-reference/README.md
+
+validation:
+  omitted_files: ignore
+  absolute_links: ignore
+  unrecognized_links: ignore

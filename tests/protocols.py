@@ -1,12 +1,7 @@
-"""Protocols for flext-target-oracle tests - uses p.Oracle.Tests.* namespace pattern.
-
-This module provides test-specific protocols that extend the main flext-target-oracle protocols.
-Uses the unified namespace pattern p.Oracle.Tests.* for test-only objects.
-Combines FlextTestsProtocols functionality with project-specific test protocols.
+"""Test protocols combining FlextTestsProtocols and project-specific protocols.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
-
 """
 
 from __future__ import annotations
@@ -27,4 +22,5 @@ class FlextTargetOracleTestProtocols(FlextTestsProtocols, FlextTargetOracleProto
 
 
 p = FlextTargetOracleTestProtocols
+
 __all__ = ["FlextTargetOracleTestProtocols", "p"]

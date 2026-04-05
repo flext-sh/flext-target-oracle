@@ -153,7 +153,7 @@ class FlextTargetOracle:
                 record_data,
             )
             return self.loader.load_record(payload.stream, payload.record)
-        except c.Meltano.Singer.SAFE_EXCEPTIONS as exc:
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             return r[bool].fail(f"Invalid record payload: {exc}")
 
     def _handle_activate_version(

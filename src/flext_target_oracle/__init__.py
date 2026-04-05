@@ -11,10 +11,14 @@ from flext_core.lazy import install_lazy_exports, merge_lazy_imports
 from flext_target_oracle.__version__ import *
 
 if _t.TYPE_CHECKING:
+    import flext_target_oracle._constants as _flext_target_oracle__constants
+
+    _constants = _flext_target_oracle__constants
     import flext_target_oracle._models as _flext_target_oracle__models
+    from flext_target_oracle._constants import FlextTargetOracleConstantsBase, base
 
     _models = _flext_target_oracle__models
-    import flext_target_oracle._utilities as _flext_target_oracle__utilities
+    import flext_target_oracle._protocols as _flext_target_oracle__protocols
     from flext_target_oracle._models import (
         FlextTargetOracleModelsCommands,
         FlextTargetOracleModelsConfig,
@@ -26,11 +30,17 @@ if _t.TYPE_CHECKING:
         singer,
     )
 
+    _protocols = _flext_target_oracle__protocols
+    import flext_target_oracle._typings as _flext_target_oracle__typings
+    from flext_target_oracle._protocols import FlextTargetOracleProtocolsBase
+
+    _typings = _flext_target_oracle__typings
+    import flext_target_oracle._utilities as _flext_target_oracle__utilities
+    from flext_target_oracle._typings import FlextTargetOracleTypesBase
+
     _utilities = _flext_target_oracle__utilities
     import flext_target_oracle.api as _flext_target_oracle_api
     from flext_target_oracle._utilities import (
-        FlextOracleError,
-        FlextOracleObs,
         FlextTargetOracle,
         FlextTargetOracleBatchService,
         FlextTargetOracleCliService,
@@ -41,9 +51,10 @@ if _t.TYPE_CHECKING:
         FlextTargetOracleRecordService,
         FlextTargetOracleSchemaService,
         FlextTargetOracleServiceFactory,
+        FlextTargetOracleUtilitiesBase,
+        FlextTargetOracleUtilitiesObservability,
         cli,
         client,
-        configure_oracle_observability,
         errors,
         loader,
         main,
@@ -102,7 +113,10 @@ if _t.TYPE_CHECKING:
     )
 _LAZY_IMPORTS = merge_lazy_imports(
     (
+        "flext_target_oracle._constants",
         "flext_target_oracle._models",
+        "flext_target_oracle._protocols",
+        "flext_target_oracle._typings",
         "flext_target_oracle._utilities",
     ),
     {
@@ -121,7 +135,10 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "__url__": "flext_target_oracle.__version__",
         "__version__": "flext_target_oracle.__version__",
         "__version_info__": "flext_target_oracle.__version__",
+        "_constants": "flext_target_oracle._constants",
         "_models": "flext_target_oracle._models",
+        "_protocols": "flext_target_oracle._protocols",
+        "_typings": "flext_target_oracle._typings",
         "_utilities": "flext_target_oracle._utilities",
         "api": "flext_target_oracle.api",
         "c": ("flext_target_oracle.constants", "FlextTargetOracleConstants"),
@@ -145,13 +162,12 @@ _LAZY_IMPORTS = merge_lazy_imports(
 )
 
 __all__ = [
-    "FlextOracleError",
-    "FlextOracleObs",
     "FlextTargetOracle",
     "FlextTargetOracleBatchService",
     "FlextTargetOracleCliService",
     "FlextTargetOracleConnectionService",
     "FlextTargetOracleConstants",
+    "FlextTargetOracleConstantsBase",
     "FlextTargetOracleErrorMetadata",
     "FlextTargetOracleExceptions",
     "FlextTargetOracleLoader",
@@ -161,13 +177,17 @@ __all__ = [
     "FlextTargetOracleModelsResults",
     "FlextTargetOracleModelsSinger",
     "FlextTargetOracleProtocols",
+    "FlextTargetOracleProtocolsBase",
     "FlextTargetOracleRecordService",
     "FlextTargetOracleSchemaService",
     "FlextTargetOracleService",
     "FlextTargetOracleServiceFactory",
     "FlextTargetOracleSettings",
     "FlextTargetOracleTypes",
+    "FlextTargetOracleTypesBase",
     "FlextTargetOracleUtilities",
+    "FlextTargetOracleUtilitiesBase",
+    "FlextTargetOracleUtilitiesObservability",
     "__author__",
     "__author_email__",
     "__description__",
@@ -176,15 +196,18 @@ __all__ = [
     "__url__",
     "__version__",
     "__version_info__",
+    "_constants",
     "_models",
+    "_protocols",
+    "_typings",
     "_utilities",
     "api",
+    "base",
     "c",
     "cli",
     "client",
     "commands",
     "config",
-    "configure_oracle_observability",
     "constants",
     "d",
     "e",

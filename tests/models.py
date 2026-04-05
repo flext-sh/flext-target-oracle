@@ -1,12 +1,7 @@
-"""Models for flext-target-oracle tests - uses m.Oracle.Tests.* namespace pattern.
-
-This module provides test-specific models that extend the main flext-target-oracle models.
-Uses the unified namespace pattern m.Oracle.Tests.* for test-only objects.
-Combines FlextTestsModels functionality with project-specific test models.
+"""Test models combining FlextTestsModels and project-specific models.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
-
 """
 
 from __future__ import annotations

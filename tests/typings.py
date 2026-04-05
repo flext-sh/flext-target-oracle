@@ -19,7 +19,7 @@ from flext_target_oracle import FlextTargetOracleTypes
 class FlextTargetOracleTestTypes(FlextTestsTypes, FlextTargetOracleTypes):
     """Test types combining FlextTestsTypes and project-specific types."""
 
-    class TargetOracle:
+    class TargetOracle(FlextTargetOracleTypes.TargetOracle):
         """TargetOracle domain types extending project types."""
 
         class Tests:
@@ -27,4 +27,5 @@ class FlextTargetOracleTestTypes(FlextTestsTypes, FlextTargetOracleTypes):
 
 
 t = FlextTargetOracleTestTypes
+
 __all__ = ["FlextTargetOracleTestTypes", "t"]

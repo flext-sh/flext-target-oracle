@@ -31,8 +31,6 @@ from flext_target_oracle import (
     t,
 )
 
-LoadMethod = c.LoadMethod
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -130,7 +128,11 @@ class ProductionConfig:
         batch_size = int(os.getenv("BATCH_SIZE", "5000"))
         connection_timeout = int(os.getenv("CONNECTION_TIMEOUT", "60"))
         load_method_str = os.getenv("LOAD_METHOD", "BULK_INSERT").upper()
-        load_method = getattr(LoadMethod, load_method_str, LoadMethod.BULK_INSERT)
+        load_method = getattr(
+            c.TargetOracle,
+            f"LOAD_METHOD_{load_method_str}",
+            c.TargetOracle.LOAD_METHOD_BULK_INSERT,
+        )
         _ = load_method  # reserved for future use
         config = FlextTargetOracleSettings.model_validate({
             "oracle_host": oracle_host,

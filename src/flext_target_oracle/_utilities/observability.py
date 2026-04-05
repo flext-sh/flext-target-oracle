@@ -2,187 +2,175 @@
 
 from __future__ import annotations
 
+import typing as _t
 from collections.abc import Generator
 from contextlib import contextmanager
 
 from flext_core import FlextLogger
-from flext_target_oracle import (
+from flext_target_oracle._utilities.errors import (
     FlextTargetOracleErrorMetadata,
     FlextTargetOracleExceptions,
-    c,
-    t,
 )
+from flext_target_oracle.constants import c
 
-logger = FlextLogger(__name__)
-
-
-class FlextOracleError:
-    """Domain-specific exception factories."""
-
-    class Connection:
-        """Connection error factories."""
-
-        @staticmethod
-        def authentication_failed(
-            *,
-            username: str,
-            oracle_service: str,
-            error_code: str | None = None,
-        ) -> FlextTargetOracleExceptions.AuthenticationError:
-            """Build an authentication failure error with service context."""
-            logger.error(
-                "Oracle authentication failure",
-                username=username,
-                oracle_service=oracle_service,
-                error_code=error_code or "",
-            )
-            return FlextTargetOracleExceptions.AuthenticationError(
-                f"Oracle authentication failed for {username} on {oracle_service}",
-                metadata=FlextTargetOracleErrorMetadata(
-                    code=error_code or c.AUTHENTICATION_ERROR,
-                    context={
-                        "user": username,
-                        "oracle_service": oracle_service,
-                    },
-                    correlation_id=None,
-                ),
-            )
-
-        @staticmethod
-        def database_unavailable(
-            *,
-            connection_string: str,
-            error_code: str | None = None,
-            recovery_strategy: str = "retry_with_backoff",
-        ) -> FlextTargetOracleExceptions.OracleConnectionError:
-            """Build a connection error for unavailable Oracle endpoints."""
-            logger.error(
-                "Oracle database unavailable",
-                connection_string=connection_string,
-                error_code=error_code or "",
-                recovery_strategy=recovery_strategy,
-            )
-            return FlextTargetOracleExceptions.OracleConnectionError(
-                f"Oracle database unavailable: {connection_string}",
-                metadata=FlextTargetOracleErrorMetadata(
-                    code=error_code or c.CONNECTION_ERROR,
-                    context={
-                        "connection_string": connection_string,
-                        "recovery_strategy": recovery_strategy,
-                    },
-                    correlation_id=None,
-                ),
-            )
-
-    class Singer:
-        """Singer protocol error factories."""
-
-        @staticmethod
-        def record_processing_failed(
-            *,
-            stream_name: str,
-            record_count: int,
-            failed_records: int,
-        ) -> FlextTargetOracleExceptions.ProcessingError:
-            """Build a Singer record processing failure."""
-            logger.error(
-                "Singer record processing failed",
-                stream_name=stream_name,
-                record_count=record_count,
-                failed_records=failed_records,
-            )
-            return FlextTargetOracleExceptions.ProcessingError(
-                f"Record processing failed for {stream_name}: {failed_records}/{record_count}",
-                metadata=FlextTargetOracleErrorMetadata(
-                    code=c.PROCESSING_ERROR,
-                    context={
-                        "stream_name": stream_name,
-                        "record_count": record_count,
-                        "failed_records": failed_records,
-                    },
-                    correlation_id=None,
-                ),
-            )
-
-        @staticmethod
-        def schema_validation_failed(
-            *,
-            stream_name: str,
-            schema_errors: t.StrSequence,
-            singer_specification: str = "1.5.0",
-        ) -> FlextTargetOracleExceptions.SchemaError:
-            """Build a Singer schema validation failure."""
-            logger.error(
-                "Singer schema validation failed",
-                stream_name=stream_name,
-                schema_errors="; ".join(schema_errors),
-                singer_specification=singer_specification,
-            )
-            return FlextTargetOracleExceptions.SchemaError(
-                f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
-                metadata=FlextTargetOracleErrorMetadata(
-                    code=c.VALIDATION_ERROR,
-                    context={
-                        "stream_name": stream_name,
-                        "schema_errors": "; ".join(schema_errors),
-                        "singer_specification": singer_specification,
-                    },
-                    correlation_id=None,
-                ),
-            )
+logger = FlextLogger("flext_target_oracle.observability")
 
 
-class FlextOracleObs:
-    """Runtime monitoring helpers."""
+class FlextTargetOracleUtilitiesObservability:
+    """Runtime observability and error factory utilities."""
 
-    class Monitor:
-        """Monitoring utility namespace."""
+    @staticmethod
+    def target_oracle_connection_authentication_failed(
+        *,
+        username: str,
+        oracle_service: str,
+        error_code: str | None = None,
+    ) -> FlextTargetOracleExceptions.AuthenticationError:
+        """Build an authentication failure error with service context."""
+        logger.error(
+            "Oracle authentication failure",
+            username=username,
+            oracle_service=oracle_service,
+            error_code=error_code or "",
+        )
+        return FlextTargetOracleExceptions.AuthenticationError(
+            f"Oracle authentication failed for {username} on {oracle_service}",
+            metadata=FlextTargetOracleErrorMetadata(
+                code=error_code or c.AUTHENTICATION_ERROR,
+                context={
+                    "user": username,
+                    "oracle_service": oracle_service,
+                },
+                correlation_id=None,
+            ),
+        )
 
-        @staticmethod
-        def connection_health(
-            connection_pool_size: int,
-            active_connections: int,
-            **context: t.Scalar,
-        ) -> None:
-            """Log Oracle connection pool health snapshots."""
-            context_keys = list(context.keys())
-            logger.info(
-                "Oracle connection pool health",
-                connection_pool_size=connection_pool_size,
-                active_connections=active_connections,
-                context_keys=",".join(context_keys),
-            )
+    @staticmethod
+    def target_oracle_connection_database_unavailable(
+        *,
+        connection_string: str,
+        error_code: str | None = None,
+        recovery_strategy: str = "retry_with_backoff",
+    ) -> FlextTargetOracleExceptions.OracleConnectionError:
+        """Build a connection error for unavailable Oracle endpoints."""
+        logger.error(
+            "Oracle database unavailable",
+            connection_string=connection_string,
+            error_code=error_code or "",
+            recovery_strategy=recovery_strategy,
+        )
+        return FlextTargetOracleExceptions.OracleConnectionError(
+            f"Oracle database unavailable: {connection_string}",
+            metadata=FlextTargetOracleErrorMetadata(
+                code=error_code or c.CONNECTION_ERROR,
+                context={
+                    "connection_string": connection_string,
+                    "recovery_strategy": recovery_strategy,
+                },
+                correlation_id=None,
+            ),
+        )
 
-        @staticmethod
-        @contextmanager
-        def query_performance(
-            table_name: str,
-            operation: str = "SELECT",
-        ) -> Generator[t.StrMapping]:
-            """Yield a mutable context while timing a query operation."""
-            logger.debug("Starting query performance monitor")
-            context = {"table_name": table_name, "operation": operation}
-            try:
-                yield context
-            finally:
-                logger.debug("Finished query performance monitor")
+    @staticmethod
+    def target_oracle_singer_record_processing_failed(
+        *,
+        stream_name: str,
+        record_count: int,
+        failed_records: int,
+    ) -> FlextTargetOracleExceptions.ProcessingError:
+        """Build a Singer record processing failure."""
+        logger.error(
+            "Singer record processing failed",
+            stream_name=stream_name,
+            record_count=record_count,
+            failed_records=failed_records,
+        )
+        return FlextTargetOracleExceptions.ProcessingError(
+            f"Record processing failed for {stream_name}: {failed_records}/{record_count}",
+            metadata=FlextTargetOracleErrorMetadata(
+                code=c.PROCESSING_ERROR,
+                context={
+                    "stream_name": stream_name,
+                    "record_count": record_count,
+                    "failed_records": failed_records,
+                },
+                correlation_id=None,
+            ),
+        )
+
+    @staticmethod
+    def target_oracle_singer_schema_validation_failed(
+        *,
+        stream_name: str,
+        schema_errors: _t.Sequence[str],
+        singer_specification: str = "1.5.0",
+    ) -> FlextTargetOracleExceptions.SchemaError:
+        """Build a Singer schema validation failure."""
+        logger.error(
+            "Singer schema validation failed",
+            stream_name=stream_name,
+            schema_errors="; ".join(schema_errors),
+            singer_specification=singer_specification,
+        )
+
+        return FlextTargetOracleExceptions.SchemaError(
+            f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
+            metadata=FlextTargetOracleErrorMetadata(
+                code=c.VALIDATION_ERROR,
+                context={
+                    "stream_name": stream_name,
+                    "schema_errors": "; ".join(schema_errors),
+                    "singer_specification": singer_specification,
+                },
+                correlation_id=None,
+            ),
+        )
+
+    @staticmethod
+    def target_oracle_monitor_connection_health(
+        connection_pool_size: int,
+        active_connections: int,
+        **context: str | float | bool | None,
+    ) -> None:
+        """Log Oracle connection pool health snapshots."""
+        context_keys = list(context.keys())
+        logger.info(
+            "Oracle connection pool health",
+            connection_pool_size=connection_pool_size,
+            active_connections=active_connections,
+            context_keys=",".join(context_keys),
+        )
+
+    @staticmethod
+    @contextmanager
+    def target_oracle_monitor_query_performance(
+        table_name: str,
+        operation: str = "SELECT",
+    ) -> Generator[_t.Mapping[str, str]]:
+        """Yield a mutable context while timing a query operation."""
+        logger.debug("Starting query performance monitor")
+        context_data = {"table_name": table_name, "operation": operation}
+        try:
+            yield context_data
+        finally:
+            logger.debug("Finished query performance monitor")
+
+    @staticmethod
+    def configure_oracle_observability(
+        *,
+        oracle_host: str,
+        oracle_service: str,
+        enable_performance_monitoring: bool = True,
+        enable_connection_monitoring: bool = True,
+    ) -> None:
+        """Configure runtime observability logging context."""
+        logger.info(
+            "Oracle observability configured",
+            oracle_host=oracle_host,
+            oracle_service=oracle_service,
+            enable_performance_monitoring=enable_performance_monitoring,
+            enable_connection_monitoring=enable_connection_monitoring,
+        )
 
 
-def configure_oracle_observability(
-    *,
-    oracle_host: str,
-    oracle_service: str,
-    enable_performance_monitoring: bool = True,
-    enable_connection_monitoring: bool = True,
-) -> None:
-    """Configure runtime observability logging context."""
-    logger.info(
-        "Oracle observability configured",
-        oracle_host=oracle_host,
-        oracle_service=oracle_service,
-        enable_performance_monitoring=enable_performance_monitoring,
-        enable_connection_monitoring=enable_connection_monitoring,
-    )
-
-
-__all__ = ["FlextOracleError", "FlextOracleObs", "configure_oracle_observability"]
+__all__ = ["FlextTargetOracleUtilitiesObservability"]

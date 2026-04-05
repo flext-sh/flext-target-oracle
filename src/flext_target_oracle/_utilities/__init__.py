@@ -10,7 +10,11 @@ import typing as _t
 from flext_core.lazy import install_lazy_exports
 
 if _t.TYPE_CHECKING:
+    import flext_target_oracle._utilities.base as _flext_target_oracle__utilities_base
+
+    base = _flext_target_oracle__utilities_base
     import flext_target_oracle._utilities.cli as _flext_target_oracle__utilities_cli
+    from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
 
     cli = _flext_target_oracle__utilities_cli
     import flext_target_oracle._utilities.client as _flext_target_oracle__utilities_client
@@ -34,9 +38,7 @@ if _t.TYPE_CHECKING:
     observability = _flext_target_oracle__utilities_observability
     import flext_target_oracle._utilities.services as _flext_target_oracle__utilities_services
     from flext_target_oracle._utilities.observability import (
-        FlextOracleError,
-        FlextOracleObs,
-        configure_oracle_observability,
+        FlextTargetOracleUtilitiesObservability,
     )
 
     services = _flext_target_oracle__utilities_services
@@ -48,8 +50,6 @@ if _t.TYPE_CHECKING:
         FlextTargetOracleServiceFactory,
     )
 _LAZY_IMPORTS = {
-    "FlextOracleError": "flext_target_oracle._utilities.observability",
-    "FlextOracleObs": "flext_target_oracle._utilities.observability",
     "FlextTargetOracle": "flext_target_oracle._utilities.client",
     "FlextTargetOracleBatchService": "flext_target_oracle._utilities.services",
     "FlextTargetOracleCliService": "flext_target_oracle._utilities.cli",
@@ -60,9 +60,11 @@ _LAZY_IMPORTS = {
     "FlextTargetOracleRecordService": "flext_target_oracle._utilities.services",
     "FlextTargetOracleSchemaService": "flext_target_oracle._utilities.services",
     "FlextTargetOracleServiceFactory": "flext_target_oracle._utilities.services",
+    "FlextTargetOracleUtilitiesBase": "flext_target_oracle._utilities.base",
+    "FlextTargetOracleUtilitiesObservability": "flext_target_oracle._utilities.observability",
+    "base": "flext_target_oracle._utilities.base",
     "cli": "flext_target_oracle._utilities.cli",
     "client": "flext_target_oracle._utilities.client",
-    "configure_oracle_observability": "flext_target_oracle._utilities.observability",
     "errors": "flext_target_oracle._utilities.errors",
     "loader": "flext_target_oracle._utilities.loader",
     "main": "flext_target_oracle._utilities.cli",
@@ -71,8 +73,6 @@ _LAZY_IMPORTS = {
 }
 
 __all__ = [
-    "FlextOracleError",
-    "FlextOracleObs",
     "FlextTargetOracle",
     "FlextTargetOracleBatchService",
     "FlextTargetOracleCliService",
@@ -83,9 +83,11 @@ __all__ = [
     "FlextTargetOracleRecordService",
     "FlextTargetOracleSchemaService",
     "FlextTargetOracleServiceFactory",
+    "FlextTargetOracleUtilitiesBase",
+    "FlextTargetOracleUtilitiesObservability",
+    "base",
     "cli",
     "client",
-    "configure_oracle_observability",
     "errors",
     "loader",
     "main",

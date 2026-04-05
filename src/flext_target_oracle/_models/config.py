@@ -2,28 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Protocol
+from typing import Annotated
 
 from pydantic import Field
 
-from flext_core import r
 from flext_meltano import FlextMeltanoModels
 from flext_target_oracle import t
 
 
 class FlextTargetOracleModelsConfig:
     """Configuration MRO mixin for TargetOracle namespace."""
-
-    class OracleSettingsProtocol(Protocol):
-        """Protocol for Oracle settings used by command classes.
-
-        Canonical definition is in p.TargetOracle.OracleSettingsProtocol.
-        Kept here to avoid circular import (_models → protocols → models → _models).
-        """
-
-        def validate_business_rules(self) -> r[bool]:
-            """Validate Oracle target configuration business rules."""
-            ...
 
     class OracleConnectionConfig(FlextMeltanoModels.ArbitraryTypesModel):
         """Oracle connection configuration payload."""

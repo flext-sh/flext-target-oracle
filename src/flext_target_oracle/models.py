@@ -12,7 +12,10 @@ from flext_target_oracle import (
 )
 
 
-class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
+class FlextTargetOracleModels(
+    FlextMeltanoModels,
+    FlextDbOracleModels,
+):
     """Complete models for Oracle target operations extending FlextModels."""
 
     class TargetOracle(
@@ -21,7 +24,7 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
         FlextTargetOracleModelsResults,
         FlextTargetOracleModelsSinger,
     ):
-        """TargetOracle domain namespace composed from _models/ submodules."""
+        """Namespace of models for Oracle target."""
 
 
 m = FlextTargetOracleModels

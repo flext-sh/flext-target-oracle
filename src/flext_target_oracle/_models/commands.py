@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, override
+from typing import TYPE_CHECKING, Annotated, override
 
 from pydantic import Field
 
@@ -10,10 +10,12 @@ from flext_core import h, r
 from flext_meltano import FlextMeltanoModels
 from flext_target_oracle import (
     FlextTargetOracleConstants,
-    FlextTargetOracleModelsConfig,
     t,
     u,
 )
+
+if TYPE_CHECKING:
+    from flext_target_oracle import p
 
 
 class FlextTargetOracleModelsCommands:
@@ -39,11 +41,11 @@ class FlextTargetOracleModelsCommands:
             }
             if (
                 self.format
-                == FlextTargetOracleConstants.TargetOracle.OutputFormats.TEXT
+                == FlextTargetOracleConstants.TargetOracle.OUTPUT_FORMAT_TEXT
             ):
                 return r[str].ok("flext-target-oracle")
             return r[str].ok(
-                t.STR_MAP_ADAPTER.dump_json(payload).decode("utf-8"),
+                t.TargetOracle.STR_MAP_ADAPTER.dump_json(payload).decode("utf-8"),
             )
 
     class OracleTargetLoadCommand(FlextMeltanoModels.Command):
@@ -90,9 +92,7 @@ class FlextTargetOracleModelsCommands:
                 return r[str].fail(
                     settings_result.error or "Configuration validation failed",
                 )
-            settings: FlextTargetOracleModelsConfig.OracleSettingsProtocol = (
-                settings_result.value
-            )
+            settings: p.TargetOracle.OracleSettingsProtocol = settings_result.value
             validation_result = settings.validate_business_rules()
             if validation_result.is_failure:
                 return r[str].fail(
@@ -127,7 +127,7 @@ class FlextTargetOracleModelsCommands:
         ) -> FlextTargetOracleModelsCommands.OracleTargetAboutCommand:
             """Create about command instance."""
             return FlextTargetOracleModelsCommands.OracleTargetAboutCommand(
-                command_type=FlextTargetOracleConstants.TargetOracle.CommandTypes.ABOUT.value,
+                command_type=FlextTargetOracleConstants.TargetOracle.COMMAND_TYPE_ABOUT,
                 command_id="cmd_oracle_about",
                 format=output_format,
             )
@@ -139,7 +139,7 @@ class FlextTargetOracleModelsCommands:
         ) -> FlextTargetOracleModelsCommands.OracleTargetLoadCommand:
             """Create load command instance."""
             return FlextTargetOracleModelsCommands.OracleTargetLoadCommand(
-                command_type=FlextTargetOracleConstants.TargetOracle.CommandTypes.LOAD.value,
+                command_type=FlextTargetOracleConstants.TargetOracle.COMMAND_TYPE_LOAD,
                 command_id="cmd_oracle_load",
                 config_file=config_file,
                 state_file=state_file,
@@ -151,7 +151,7 @@ class FlextTargetOracleModelsCommands:
         ) -> FlextTargetOracleModelsCommands.OracleTargetValidateCommand:
             """Create validate command instance."""
             return FlextTargetOracleModelsCommands.OracleTargetValidateCommand(
-                command_type=FlextTargetOracleConstants.TargetOracle.CommandTypes.VALIDATE.value,
+                command_type=FlextTargetOracleConstants.TargetOracle.COMMAND_TYPE_VALIDATE,
                 command_id="cmd_oracle_validate",
                 config_file=config_file,
             )
