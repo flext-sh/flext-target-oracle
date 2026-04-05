@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from typing import override
+from typing import Annotated, override
+
+from pydantic import Field
 
 from flext_core import h, r
 from flext_meltano import FlextMeltanoModels
@@ -20,7 +22,13 @@ class FlextTargetOracleModelsCommands:
     class OracleTargetAboutCommand(FlextMeltanoModels.Command):
         """Command to return target metadata and capabilities."""
 
-        format: str = "json"
+        format: Annotated[
+            str,
+            Field(
+                default="json",
+                description="Output format for about command response",
+            ),
+        ]
 
         def execute(self) -> r[str]:
             """Execute about command returning target information."""
@@ -41,8 +49,20 @@ class FlextTargetOracleModelsCommands:
     class OracleTargetLoadCommand(FlextMeltanoModels.Command):
         """Command to prepare target for data loading."""
 
-        config_file: str | None = None
-        state_file: str | None = None
+        config_file: Annotated[
+            str | None,
+            Field(
+                default=None,
+                description="Path to JSON configuration file for target settings",
+            ),
+        ]
+        state_file: Annotated[
+            str | None,
+            Field(
+                default=None,
+                description="Path to Singer state file for incremental loads",
+            ),
+        ]
 
         def execute(self) -> r[str]:
             """Execute load command to initialize target."""
@@ -55,7 +75,13 @@ class FlextTargetOracleModelsCommands:
     class OracleTargetValidateCommand(FlextMeltanoModels.Command):
         """Command to validate target configuration."""
 
-        config_file: str | None = None
+        config_file: Annotated[
+            str | None,
+            Field(
+                default=None,
+                description="Path to JSON configuration file to validate",
+            ),
+        ]
 
         def execute(self) -> r[str]:
             """Execute validation of target configuration."""

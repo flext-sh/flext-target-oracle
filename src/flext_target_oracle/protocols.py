@@ -195,6 +195,7 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
                 """Transform one Singer record into Oracle-ready payload."""
                 ...
 
+        @runtime_checkable
         class OracleSettingsProtocol(Protocol):
             """Protocol for Oracle settings used by command classes.
 

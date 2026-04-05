@@ -58,9 +58,7 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
         DEFAULT_PORT: Final[int] = 1521
         MAX_PORT: Final[int] = 65535
 
-    class Loading:
-        """Target-specific loading configuration."""
-
+        # Loading configuration (formerly separate Loading class)
         DEFAULT_POOL_MIN: Final[int] = 5
         DEFAULT_POOL_MAX: Final[int] = 20
 

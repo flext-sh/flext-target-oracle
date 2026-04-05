@@ -12,9 +12,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping, Sequence
 from datetime import datetime
-from typing import Annotated, ClassVar, override
+from typing import Annotated, override
 
-from pydantic import ConfigDict, Field
+from pydantic import Field
 
 from flext_core import FlextExceptions
 from flext_target_oracle import c, m, t
@@ -28,10 +28,8 @@ def _to_metadata_value(value: t.RuntimeData | None) -> t.MetadataValue:
     return str(value)
 
 
-class FlextTargetOracleErrorMetadata(m.Value):
+class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
     """Structured metadata attached to Oracle target error responses."""
-
-    model_config: ClassVar[ConfigDict] = ConfigDict(extra="allow")
 
     code: Annotated[str, Field(description="Canonical error code")]
     context: Annotated[

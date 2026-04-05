@@ -30,6 +30,8 @@ from flext_target_oracle import (
 )
 from tests import t
 
+pytest_plugins = ["flext_tests.conftest_plugin"]
+
 logger = FlextLogger(__name__)
 ORACLE_CONTAINER_NAME = "flext-oracle-test"
 ORACLE_IMAGE = "gvenzl/oracle-xe:21-slim"
@@ -52,18 +54,6 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line("markers", "e2e: mark test as end-to-end test")
     config.addinivalue_line("markers", "slow: mark test as slow running")
     config.addinivalue_line("markers", "oracle: mark test as requiring Oracle database")
-
-
-@pytest.fixture(autouse=True)
-def reset_settings_singleton() -> Generator[None]:
-    """Reset FlextSettings singleton between tests to ensure isolation.
-
-    FlextSettings uses singleton pattern - tests can pollute each other's state
-    if not reset between runs.
-    """
-    FlextTargetOracleSettings.reset_for_testing()
-    yield
-    FlextTargetOracleSettings.reset_for_testing()
 
 
 @pytest.fixture(scope="session")

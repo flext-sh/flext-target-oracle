@@ -10,9 +10,10 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, ClassVar
 
 from pydantic import Field, SecretStr
+from pydantic_settings import SettingsConfigDict
 
 from flext_core import FlextLogger, FlextSettings, r
 from flext_target_oracle import FlextTargetOracleModelsConfig, c, t
@@ -20,17 +21,35 @@ from flext_target_oracle import FlextTargetOracleModelsConfig, c, t
 logger = FlextLogger(__name__)
 
 
+@FlextSettings.auto_register("target-oracle")
 class FlextTargetOracleSettings(FlextSettings):
     """Runtime settings for Oracle Singer target operations."""
 
+    model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
+        env_prefix="FLEXT_TARGET_ORACLE_",
+        extra="ignore",
+    )
+
     oracle_host: Annotated[
         str,
-        Field(default="localhost", description="Oracle database host"),
+        Field(
+            default=c.DbOracle.OracleDefaults.DEFAULT_HOST,
+            description="Oracle database host",
+        ),
     ]
-    oracle_port: Annotated[int, Field(default=1521, description="Oracle database port")]
+    oracle_port: Annotated[
+        int,
+        Field(
+            default=c.DbOracle.Connection.DEFAULT_PORT,
+            description="Oracle database port",
+        ),
+    ]
     oracle_service_name: Annotated[
         str,
-        Field(default="ORCL", description="Oracle service name or SID"),
+        Field(
+            default=c.DbOracle.Connection.DEFAULT_SERVICE_NAME,
+            description="Oracle service name or SID",
+        ),
     ]
     oracle_user: Annotated[
         SecretStr,
@@ -117,8 +136,8 @@ class FlextTargetOracleSettings(FlextSettings):
             username=self.oracle_user.get_secret_value(),
             password=self.oracle_password.get_secret_value(),
             timeout=self.transaction_timeout,
-            pool_min=c.Loading.DEFAULT_POOL_MIN,
-            pool_max=c.Loading.DEFAULT_POOL_MAX,
+            pool_min=c.TargetOracle.DEFAULT_POOL_MIN,
+            pool_max=c.TargetOracle.DEFAULT_POOL_MAX,
             pool_increment=1,
             encoding="UTF-8",
             ssl_enabled=False,
