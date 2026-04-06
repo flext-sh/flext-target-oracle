@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from flext_core import FlextLogger
 from flext_target_oracle._utilities.errors import (
     FlextTargetOracleErrorMetadata,
-    FlextTargetOracleExceptions,
+    FlextTargetOracleExceptions as e,
 )
 from flext_target_oracle.constants import c
 
@@ -25,7 +25,7 @@ class FlextTargetOracleUtilitiesObservability:
         username: str,
         oracle_service: str,
         error_code: str | None = None,
-    ) -> FlextTargetOracleExceptions.AuthenticationError:
+    ) -> e.AuthenticationError:
         """Build an authentication failure error with service context."""
         logger.error(
             "Oracle authentication failure",
@@ -33,7 +33,7 @@ class FlextTargetOracleUtilitiesObservability:
             oracle_service=oracle_service,
             error_code=error_code or "",
         )
-        return FlextTargetOracleExceptions.AuthenticationError(
+        return e.AuthenticationError(
             f"Oracle authentication failed for {username} on {oracle_service}",
             metadata=FlextTargetOracleErrorMetadata(
                 code=error_code or c.AUTHENTICATION_ERROR,
@@ -51,7 +51,7 @@ class FlextTargetOracleUtilitiesObservability:
         connection_string: str,
         error_code: str | None = None,
         recovery_strategy: str = "retry_with_backoff",
-    ) -> FlextTargetOracleExceptions.OracleConnectionError:
+    ) -> e.OracleConnectionError:
         """Build a connection error for unavailable Oracle endpoints."""
         logger.error(
             "Oracle database unavailable",
@@ -59,7 +59,7 @@ class FlextTargetOracleUtilitiesObservability:
             error_code=error_code or "",
             recovery_strategy=recovery_strategy,
         )
-        return FlextTargetOracleExceptions.OracleConnectionError(
+        return e.OracleConnectionError(
             f"Oracle database unavailable: {connection_string}",
             metadata=FlextTargetOracleErrorMetadata(
                 code=error_code or c.CONNECTION_ERROR,
@@ -77,7 +77,7 @@ class FlextTargetOracleUtilitiesObservability:
         stream_name: str,
         record_count: int,
         failed_records: int,
-    ) -> FlextTargetOracleExceptions.ProcessingError:
+    ) -> e.ProcessingError:
         """Build a Singer record processing failure."""
         logger.error(
             "Singer record processing failed",
@@ -85,7 +85,7 @@ class FlextTargetOracleUtilitiesObservability:
             record_count=record_count,
             failed_records=failed_records,
         )
-        return FlextTargetOracleExceptions.ProcessingError(
+        return e.ProcessingError(
             f"Record processing failed for {stream_name}: {failed_records}/{record_count}",
             metadata=FlextTargetOracleErrorMetadata(
                 code=c.PROCESSING_ERROR,
@@ -104,7 +104,7 @@ class FlextTargetOracleUtilitiesObservability:
         stream_name: str,
         schema_errors: _t.Sequence[str],
         singer_specification: str = "1.5.0",
-    ) -> FlextTargetOracleExceptions.SchemaError:
+    ) -> e.SchemaError:
         """Build a Singer schema validation failure."""
         logger.error(
             "Singer schema validation failed",
@@ -113,7 +113,7 @@ class FlextTargetOracleUtilitiesObservability:
             singer_specification=singer_specification,
         )
 
-        return FlextTargetOracleExceptions.SchemaError(
+        return e.SchemaError(
             f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
             metadata=FlextTargetOracleErrorMetadata(
                 code=c.VALIDATION_ERROR,

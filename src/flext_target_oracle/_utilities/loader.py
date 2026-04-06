@@ -20,13 +20,13 @@ from pydantic import PrivateAttr
 from flext_core import FlextLogger, FlextService, r
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_target_oracle import (
-    FlextTargetOracleExceptions,
     FlextTargetOracleSettings,
     c,
     m,
     p,
     t,
 )
+from flext_target_oracle._utilities.errors import FlextTargetOracleExceptions as e
 
 logger = FlextLogger(__name__)
 
@@ -73,9 +73,9 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             self._oracle_api = oracle_api
             self._record_buffers = dict[str, list[t.ContainerValueMapping]]()
             self._total_records = 0
-        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            msg = f"Failed to create Oracle API: {e}"
-            raise FlextTargetOracleExceptions.OracleConnectionError(msg) from e
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
+            msg = f"Failed to create Oracle API: {exc}"
+            raise e.OracleConnectionError(msg) from exc
 
     @property
     def oracle_api(self) -> FlextDbOracleApi:
