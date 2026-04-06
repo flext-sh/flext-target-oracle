@@ -15,7 +15,10 @@ if _t.TYPE_CHECKING:
     base = _flext_target_oracle__protocols_base
     from flext_target_oracle._protocols.base import FlextTargetOracleProtocolsBase
 _LAZY_IMPORTS = {
-    "FlextTargetOracleProtocolsBase": "flext_target_oracle._protocols.base",
+    "FlextTargetOracleProtocolsBase": (
+        "flext_target_oracle._protocols.base",
+        "FlextTargetOracleProtocolsBase",
+    ),
     "base": "flext_target_oracle._protocols.base",
 }
 

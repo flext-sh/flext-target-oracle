@@ -15,7 +15,10 @@ if _t.TYPE_CHECKING:
     base = _flext_target_oracle__typings_base
     from flext_target_oracle._typings.base import FlextTargetOracleTypesBase
 _LAZY_IMPORTS = {
-    "FlextTargetOracleTypesBase": "flext_target_oracle._typings.base",
+    "FlextTargetOracleTypesBase": (
+        "flext_target_oracle._typings.base",
+        "FlextTargetOracleTypesBase",
+    ),
     "base": "flext_target_oracle._typings.base",
 }
 

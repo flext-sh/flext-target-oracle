@@ -26,7 +26,7 @@ if _t.TYPE_CHECKING:
     from flext_core.utilities import FlextUtilities as u
     from tests.performance.test_performance import TestPerformance
 _LAZY_IMPORTS = {
-    "TestPerformance": "tests.performance.test_performance",
+    "TestPerformance": ("tests.performance.test_performance", "TestPerformance"),
     "c": ("flext_core.constants", "FlextConstants"),
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),

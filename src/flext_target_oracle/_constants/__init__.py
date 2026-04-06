@@ -15,7 +15,10 @@ if _t.TYPE_CHECKING:
     base = _flext_target_oracle__constants_base
     from flext_target_oracle._constants.base import FlextTargetOracleConstantsBase
 _LAZY_IMPORTS = {
-    "FlextTargetOracleConstantsBase": "flext_target_oracle._constants.base",
+    "FlextTargetOracleConstantsBase": (
+        "flext_target_oracle._constants.base",
+        "FlextTargetOracleConstantsBase",
+    ),
     "base": "flext_target_oracle._constants.base",
 }
 

@@ -27,10 +27,22 @@ if _t.TYPE_CHECKING:
     singer = _flext_target_oracle__models_singer
     from flext_target_oracle._models.singer import FlextTargetOracleModelsSinger
 _LAZY_IMPORTS = {
-    "FlextTargetOracleModelsCommands": "flext_target_oracle._models.commands",
-    "FlextTargetOracleModelsConfig": "flext_target_oracle._models.config",
-    "FlextTargetOracleModelsResults": "flext_target_oracle._models.results",
-    "FlextTargetOracleModelsSinger": "flext_target_oracle._models.singer",
+    "FlextTargetOracleModelsCommands": (
+        "flext_target_oracle._models.commands",
+        "FlextTargetOracleModelsCommands",
+    ),
+    "FlextTargetOracleModelsConfig": (
+        "flext_target_oracle._models.config",
+        "FlextTargetOracleModelsConfig",
+    ),
+    "FlextTargetOracleModelsResults": (
+        "flext_target_oracle._models.results",
+        "FlextTargetOracleModelsResults",
+    ),
+    "FlextTargetOracleModelsSinger": (
+        "flext_target_oracle._models.singer",
+        "FlextTargetOracleModelsSinger",
+    ),
     "commands": "flext_target_oracle._models.commands",
     "config": "flext_target_oracle._models.config",
     "results": "flext_target_oracle._models.results",
