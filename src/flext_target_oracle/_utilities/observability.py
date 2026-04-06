@@ -7,11 +7,11 @@ from collections.abc import Generator
 from contextlib import contextmanager
 
 from flext_core import FlextLogger
-from flext_target_oracle._utilities.errors import (
+from flext_target_oracle import (
     FlextTargetOracleErrorMetadata,
     FlextTargetOracleExceptions as e,
+    c,
 )
-from flext_target_oracle.constants import c
 
 logger = FlextLogger("flext_target_oracle.observability")
 

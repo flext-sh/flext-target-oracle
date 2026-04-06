@@ -20,13 +20,13 @@ from pydantic import PrivateAttr
 from flext_core import FlextLogger, FlextService, r
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_target_oracle import (
+    FlextTargetOracleExceptions as e,
     FlextTargetOracleSettings,
     c,
     m,
     p,
     t,
 )
-from flext_target_oracle._utilities.errors import FlextTargetOracleExceptions as e
 
 logger = FlextLogger(__name__)
 

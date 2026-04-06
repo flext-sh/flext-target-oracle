@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import FlextMeltanoUtilities
-from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
-from flext_target_oracle._utilities.observability import (
+from flext_target_oracle import (
+    FlextTargetOracleUtilitiesBase,
     FlextTargetOracleUtilitiesObservability,
 )
 

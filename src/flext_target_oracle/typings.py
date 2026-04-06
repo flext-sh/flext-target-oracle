@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleTypes
 from flext_meltano import FlextMeltanoTypes
-from flext_target_oracle._typings.base import FlextTargetOracleTypesBase
+from flext_target_oracle import FlextTargetOracleTypesBase
 
 
 class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
