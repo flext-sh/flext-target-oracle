@@ -12,12 +12,19 @@ from __future__ import annotations
 
 from collections.abc import Mapping, MutableMapping, Sequence
 from datetime import datetime
-from typing import Annotated, override
+from typing import TYPE_CHECKING, Annotated, override
 
 from pydantic import Field
 
-from flext_core import FlextExceptions
-from flext_target_oracle import c, m, t
+from flext_core import FlextConstants, FlextExceptions, FlextModels, FlextTypes
+
+if TYPE_CHECKING:
+    from flext_target_oracle import t
+else:
+    t = FlextTypes
+
+c = FlextConstants
+m = FlextModels
 
 
 def _to_metadata_value(value: t.RuntimeData | None) -> t.MetadataValue:
