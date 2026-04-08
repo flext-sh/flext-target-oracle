@@ -27,7 +27,7 @@ from tests import c, m, t
 
 def _schema_parts(
     message: t.ContainerMapping,
-) -> tuple[t.ContainerValueMapping, Sequence[str]]:
+) -> t.Pair[t.ContainerValueMapping, Sequence[str]]:
     schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(message)
     return (schema_message.schema_definition, schema_message.key_properties)
 

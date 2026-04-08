@@ -483,7 +483,7 @@ def create_production_sample_stream() -> Sequence[SingerMessage]:
       List of Singer messages representing a production workload
 
     """
-    messages: list[SingerMessage] = []
+    messages: t.MutableSequenceOf[SingerMessage] = []
     schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
         "type": "SCHEMA",
         "stream": "customer_orders",

@@ -37,14 +37,24 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     """
 
     @staticmethod
-    def _default_record_buffers() -> dict[str, list[t.ContainerValueMapping]]:
+    def _default_record_buffers() -> t.MutableMappingKV[
+        str,
+        t.MutableSequenceOf[t.ContainerValueMapping],
+    ]:
         """Return an empty typed buffer mapping for loader state."""
-        return {}
+        empty_buffers: t.MutableMappingKV[
+            str,
+            t.MutableSequenceOf[t.ContainerValueMapping],
+        ] = {}
+        return empty_buffers
 
     model_config: ClassVar = {"frozen": False}
     _target_config: FlextTargetOracleSettings = PrivateAttr()
     _oracle_api: FlextDbOracleApi = PrivateAttr()
-    _record_buffers: dict[str, list[t.ContainerValueMapping]] = PrivateAttr(
+    _record_buffers: t.MutableMappingKV[
+        str,
+        t.MutableSequenceOf[t.ContainerValueMapping],
+    ] = PrivateAttr(
         default_factory=_default_record_buffers,
     )
     _total_records: int = PrivateAttr(default=0)
@@ -57,7 +67,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         return str(value)
 
     @staticmethod
-    def _loader_columns() -> list[t.ContainerValueMapping]:
+    def _loader_columns() -> t.MutableSequenceOf[t.ContainerValueMapping]:
         """Return the canonical loader columns for db-oracle DDL generation."""
         return [
             {"name": "DATA", "data_type": "CLOB", "nullable": True},
