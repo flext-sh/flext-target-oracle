@@ -11,91 +11,71 @@ from flext_core.lazy import install_lazy_exports, merge_lazy_imports
 from flext_target_oracle.__version__ import *
 
 if _t.TYPE_CHECKING:
-    import flext_target_oracle._constants as _flext_target_oracle__constants
-
-    _constants = _flext_target_oracle__constants
-    import flext_target_oracle._models as _flext_target_oracle__models
-    from flext_target_oracle._constants import FlextTargetOracleConstantsBase
-
-    _models = _flext_target_oracle__models
-    import flext_target_oracle._protocols as _flext_target_oracle__protocols
-    from flext_target_oracle._models import (
-        FlextTargetOracleModelsCommands,
-        FlextTargetOracleModelsConfig,
-        FlextTargetOracleModelsResults,
-        FlextTargetOracleModelsSinger,
-    )
-
-    _protocols = _flext_target_oracle__protocols
-    import flext_target_oracle._typings as _flext_target_oracle__typings
-    from flext_target_oracle._protocols import FlextTargetOracleProtocolsBase
-
-    _typings = _flext_target_oracle__typings
-    import flext_target_oracle._utilities as _flext_target_oracle__utilities
-    from flext_target_oracle._typings import FlextTargetOracleTypesBase
-
-    _utilities = _flext_target_oracle__utilities
-    import flext_target_oracle.api as _flext_target_oracle_api
-    from flext_target_oracle._utilities import (
-        FlextTargetOracle,
-        FlextTargetOracleBatchService,
-        FlextTargetOracleCliService,
-        FlextTargetOracleConnectionService,
-        FlextTargetOracleErrorMetadata,
-        FlextTargetOracleExceptions,
-        FlextTargetOracleLoader,
-        FlextTargetOracleRecordService,
-        FlextTargetOracleSchemaService,
-        FlextTargetOracleServiceFactory,
-        FlextTargetOracleUtilitiesBase,
-        FlextTargetOracleUtilitiesObservability,
-    )
-
-    api = _flext_target_oracle_api
-    import flext_target_oracle.constants as _flext_target_oracle_constants
-    from flext_target_oracle.api import (
-        FlextTargetOracleService,
-        FlextTargetOracleService as s,
-    )
-
-    constants = _flext_target_oracle_constants
-    import flext_target_oracle.models as _flext_target_oracle_models
-    from flext_target_oracle.constants import (
-        FlextTargetOracleConstants,
-        FlextTargetOracleConstants as c,
-    )
-
-    models = _flext_target_oracle_models
-    import flext_target_oracle.protocols as _flext_target_oracle_protocols
-    from flext_target_oracle.models import (
-        FlextTargetOracleModels,
-        FlextTargetOracleModels as m,
-    )
-
-    protocols = _flext_target_oracle_protocols
-    import flext_target_oracle.settings as _flext_target_oracle_settings
-    from flext_target_oracle.protocols import (
-        FlextTargetOracleProtocols,
-        FlextTargetOracleProtocols as p,
-    )
-
-    settings = _flext_target_oracle_settings
-    import flext_target_oracle.typings as _flext_target_oracle_typings
-    from flext_target_oracle.settings import FlextTargetOracleSettings
-
-    typings = _flext_target_oracle_typings
-    import flext_target_oracle.utilities as _flext_target_oracle_utilities
-    from flext_target_oracle.typings import (
-        FlextTargetOracleTypes,
-        FlextTargetOracleTypes as t,
-    )
-
-    utilities = _flext_target_oracle_utilities
     from flext_core.decorators import FlextDecorators as d
     from flext_core.exceptions import FlextExceptions as e
     from flext_core.handlers import FlextHandlers as h
     from flext_core.mixins import FlextMixins as x
     from flext_core.result import FlextResult as r
+    from flext_target_oracle import (
+        _constants,
+        _models,
+        _protocols,
+        _typings,
+        _utilities,
+        api,
+        constants,
+        models,
+        protocols,
+        settings,
+        typings,
+        utilities,
+    )
+    from flext_target_oracle._constants.base import FlextTargetOracleConstantsBase
+    from flext_target_oracle._models.commands import FlextTargetOracleModelsCommands
+    from flext_target_oracle._models.config import FlextTargetOracleModelsConfig
+    from flext_target_oracle._models.results import FlextTargetOracleModelsResults
+    from flext_target_oracle._models.singer import FlextTargetOracleModelsSinger
+    from flext_target_oracle._protocols.base import FlextTargetOracleProtocolsBase
+    from flext_target_oracle._typings.base import FlextTargetOracleTypesBase
+    from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
+    from flext_target_oracle._utilities.cli import FlextTargetOracleCliService
+    from flext_target_oracle._utilities.client import FlextTargetOracle
+    from flext_target_oracle._utilities.errors import (
+        FlextTargetOracleErrorMetadata,
+        FlextTargetOracleExceptions,
+    )
+    from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+    from flext_target_oracle._utilities.observability import (
+        FlextTargetOracleUtilitiesObservability,
+    )
+    from flext_target_oracle._utilities.services import (
+        FlextTargetOracleBatchService,
+        FlextTargetOracleConnectionService,
+        FlextTargetOracleRecordService,
+        FlextTargetOracleSchemaService,
+        FlextTargetOracleServiceFactory,
+    )
+    from flext_target_oracle.api import (
+        FlextTargetOracleService,
+        FlextTargetOracleService as s,
+    )
+    from flext_target_oracle.constants import (
+        FlextTargetOracleConstants,
+        FlextTargetOracleConstants as c,
+    )
+    from flext_target_oracle.models import (
+        FlextTargetOracleModels,
+        FlextTargetOracleModels as m,
+    )
+    from flext_target_oracle.protocols import (
+        FlextTargetOracleProtocols,
+        FlextTargetOracleProtocols as p,
+    )
+    from flext_target_oracle.settings import FlextTargetOracleSettings
+    from flext_target_oracle.typings import (
+        FlextTargetOracleTypes,
+        FlextTargetOracleTypes as t,
+    )
     from flext_target_oracle.utilities import (
         FlextTargetOracleUtilities,
         FlextTargetOracleUtilities as u,
