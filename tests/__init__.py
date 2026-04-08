@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import typing as _t
 
-from flext_core.lazy import install_lazy_exports, merge_lazy_imports
+from flext_core.lazy import install_lazy_exports
 
 if _t.TYPE_CHECKING:
     import tests.conftest as _tests_conftest
@@ -24,67 +24,26 @@ if _t.TYPE_CHECKING:
         ORACLE_SERVICE,
         ORACLE_USER,
         TEST_SCHEMA,
-        batch_records,
-        clean_database,
-        connected_loader,
-        docker_control,
-        event_loop,
-        large_dataset,
         logger,
-        mock_loader,
-        mock_oracle_api,
-        nested_schema,
-        oracle_api,
-        oracle_config,
-        oracle_engine,
-        oracle_loader,
-        oracle_target,
         pytest_collection_modifyitems,
         pytest_configure,
         pytest_plugins,
-        record,
-        sample_config,
-        sample_record,
-        sample_target,
-        schema,
-        shared_oracle_container,
-        simple_schema,
-        singer_messages,
-        state,
-        state_message,
-        temp_config_file,
         temporary_env_vars,
     )
 
     constants = _tests_constants
-    import tests.e2e as _tests_e2e
+    import tests.models as _tests_models
     from tests.constants import (
         FlextTargetOracleTestConstants,
         FlextTargetOracleTestConstants as c,
     )
 
-    e2e = _tests_e2e
-    import tests.integration as _tests_integration
-    from tests.e2e import TestSingerWorkflowE2E, test_singer
-
-    integration = _tests_integration
-    import tests.models as _tests_models
-    from tests.integration import (
-        TestOracleIntegration,
-        TestOracleTargetE2E,
-        test_oracle,
-    )
-
     models = _tests_models
-    import tests.performance as _tests_performance
+    import tests.protocols as _tests_protocols
     from tests.models import (
         FlextTargetOracleTestModels,
         FlextTargetOracleTestModels as m,
     )
-
-    performance = _tests_performance
-    import tests.protocols as _tests_protocols
-    from tests.performance import TestPerformance, test_performance
 
     protocols = _tests_protocols
     import tests.test_module_governance as _tests_test_module_governance
@@ -95,34 +54,13 @@ if _t.TYPE_CHECKING:
 
     test_module_governance = _tests_test_module_governance
     import tests.typings as _tests_typings
-    from tests.test_module_governance import (
-        ALLOWED_MODULE_FUNCTIONS,
-        PACKAGE_ROOT,
-        test_package_modules_do_not_define_module_level_loggers,
-        test_package_modules_do_not_define_unapproved_top_level_functions,
-    )
+    from tests.test_module_governance import ALLOWED_MODULE_FUNCTIONS, PACKAGE_ROOT
 
     typings = _tests_typings
-    import tests.unit as _tests_unit
+    import tests.utilities as _tests_utilities
     from tests.typings import (
         FlextTargetOracleTestTypes,
         FlextTargetOracleTestTypes as t,
-    )
-
-    unit = _tests_unit
-    import tests.utilities as _tests_utilities
-    from tests.unit import (
-        TestOracleSettings,
-        TestOracleTarget,
-        loader_config,
-        target,
-        test_config,
-        test_ensure_table_exists_returns_result,
-        test_flush_batch_uses_db_oracle_owned_sql_builders,
-        test_load_record_buffers_and_finalize,
-        test_loader,
-        test_loader_execute_returns_ready_payload,
-        test_target,
     )
 
     utilities = _tests_utilities
@@ -136,113 +74,62 @@ if _t.TYPE_CHECKING:
         FlextTargetOracleTestUtilities,
         FlextTargetOracleTestUtilities as u,
     )
-_LAZY_IMPORTS = merge_lazy_imports(
-    (
-        "tests.e2e",
-        "tests.integration",
-        "tests.performance",
-        "tests.unit",
+_LAZY_IMPORTS = {
+    "ALLOWED_MODULE_FUNCTIONS": (
+        "tests.test_module_governance",
+        "ALLOWED_MODULE_FUNCTIONS",
     ),
-    {
-        "ALLOWED_MODULE_FUNCTIONS": (
-            "tests.test_module_governance",
-            "ALLOWED_MODULE_FUNCTIONS",
-        ),
-        "DOCKER_COMPOSE_PATH": ("tests.conftest", "DOCKER_COMPOSE_PATH"),
-        "FlextTargetOracleTestConstants": (
-            "tests.constants",
-            "FlextTargetOracleTestConstants",
-        ),
-        "FlextTargetOracleTestModels": ("tests.models", "FlextTargetOracleTestModels"),
-        "FlextTargetOracleTestProtocols": (
-            "tests.protocols",
-            "FlextTargetOracleTestProtocols",
-        ),
-        "FlextTargetOracleTestTypes": ("tests.typings", "FlextTargetOracleTestTypes"),
-        "FlextTargetOracleTestUtilities": (
-            "tests.utilities",
-            "FlextTargetOracleTestUtilities",
-        ),
-        "ORACLE_CONTAINER_NAME": ("tests.conftest", "ORACLE_CONTAINER_NAME"),
-        "ORACLE_HOST": ("tests.conftest", "ORACLE_HOST"),
-        "ORACLE_IMAGE": ("tests.conftest", "ORACLE_IMAGE"),
-        "ORACLE_PASSWORD": ("tests.conftest", "ORACLE_PASSWORD"),
-        "ORACLE_PORT": ("tests.conftest", "ORACLE_PORT"),
-        "ORACLE_SERVICE": ("tests.conftest", "ORACLE_SERVICE"),
-        "ORACLE_USER": ("tests.conftest", "ORACLE_USER"),
-        "PACKAGE_ROOT": ("tests.test_module_governance", "PACKAGE_ROOT"),
-        "TEST_SCHEMA": ("tests.conftest", "TEST_SCHEMA"),
-        "batch_records": ("tests.conftest", "batch_records"),
-        "c": ("tests.constants", "FlextTargetOracleTestConstants"),
-        "clean_database": ("tests.conftest", "clean_database"),
-        "conftest": "tests.conftest",
-        "connected_loader": ("tests.conftest", "connected_loader"),
-        "constants": "tests.constants",
-        "d": ("flext_core.decorators", "FlextDecorators"),
-        "docker_control": ("tests.conftest", "docker_control"),
-        "e": ("flext_core.exceptions", "FlextExceptions"),
-        "e2e": "tests.e2e",
-        "event_loop": ("tests.conftest", "event_loop"),
-        "h": ("flext_core.handlers", "FlextHandlers"),
-        "integration": "tests.integration",
-        "large_dataset": ("tests.conftest", "large_dataset"),
-        "logger": ("tests.conftest", "logger"),
-        "m": ("tests.models", "FlextTargetOracleTestModels"),
-        "mock_loader": ("tests.conftest", "mock_loader"),
-        "mock_oracle_api": ("tests.conftest", "mock_oracle_api"),
-        "models": "tests.models",
-        "nested_schema": ("tests.conftest", "nested_schema"),
-        "oracle_api": ("tests.conftest", "oracle_api"),
-        "oracle_config": ("tests.conftest", "oracle_config"),
-        "oracle_engine": ("tests.conftest", "oracle_engine"),
-        "oracle_loader": ("tests.conftest", "oracle_loader"),
-        "oracle_target": ("tests.conftest", "oracle_target"),
-        "p": ("tests.protocols", "FlextTargetOracleTestProtocols"),
-        "performance": "tests.performance",
-        "protocols": "tests.protocols",
-        "pytest_collection_modifyitems": (
-            "tests.conftest",
-            "pytest_collection_modifyitems",
-        ),
-        "pytest_configure": ("tests.conftest", "pytest_configure"),
-        "pytest_plugins": ("tests.conftest", "pytest_plugins"),
-        "r": ("flext_core.result", "FlextResult"),
-        "record": ("tests.conftest", "record"),
-        "s": ("flext_core.service", "FlextService"),
-        "sample_config": ("tests.conftest", "sample_config"),
-        "sample_record": ("tests.conftest", "sample_record"),
-        "sample_target": ("tests.conftest", "sample_target"),
-        "schema": ("tests.conftest", "schema"),
-        "shared_oracle_container": ("tests.conftest", "shared_oracle_container"),
-        "simple_schema": ("tests.conftest", "simple_schema"),
-        "singer_messages": ("tests.conftest", "singer_messages"),
-        "state": ("tests.conftest", "state"),
-        "state_message": ("tests.conftest", "state_message"),
-        "t": ("tests.typings", "FlextTargetOracleTestTypes"),
-        "temp_config_file": ("tests.conftest", "temp_config_file"),
-        "temporary_env_vars": ("tests.conftest", "temporary_env_vars"),
-        "test_module_governance": "tests.test_module_governance",
-        "test_package_modules_do_not_define_module_level_loggers": (
-            "tests.test_module_governance",
-            "test_package_modules_do_not_define_module_level_loggers",
-        ),
-        "test_package_modules_do_not_define_unapproved_top_level_functions": (
-            "tests.test_module_governance",
-            "test_package_modules_do_not_define_unapproved_top_level_functions",
-        ),
-        "typings": "tests.typings",
-        "u": ("tests.utilities", "FlextTargetOracleTestUtilities"),
-        "unit": "tests.unit",
-        "utilities": "tests.utilities",
-        "x": ("flext_core.mixins", "FlextMixins"),
-    },
-)
-_ = _LAZY_IMPORTS.pop("cleanup_submodule_namespace", None)
-_ = _LAZY_IMPORTS.pop("install_lazy_exports", None)
-_ = _LAZY_IMPORTS.pop("lazy_getattr", None)
-_ = _LAZY_IMPORTS.pop("merge_lazy_imports", None)
-_ = _LAZY_IMPORTS.pop("output", None)
-_ = _LAZY_IMPORTS.pop("output_reporting", None)
+    "DOCKER_COMPOSE_PATH": ("tests.conftest", "DOCKER_COMPOSE_PATH"),
+    "FlextTargetOracleTestConstants": (
+        "tests.constants",
+        "FlextTargetOracleTestConstants",
+    ),
+    "FlextTargetOracleTestModels": ("tests.models", "FlextTargetOracleTestModels"),
+    "FlextTargetOracleTestProtocols": (
+        "tests.protocols",
+        "FlextTargetOracleTestProtocols",
+    ),
+    "FlextTargetOracleTestTypes": ("tests.typings", "FlextTargetOracleTestTypes"),
+    "FlextTargetOracleTestUtilities": (
+        "tests.utilities",
+        "FlextTargetOracleTestUtilities",
+    ),
+    "ORACLE_CONTAINER_NAME": ("tests.conftest", "ORACLE_CONTAINER_NAME"),
+    "ORACLE_HOST": ("tests.conftest", "ORACLE_HOST"),
+    "ORACLE_IMAGE": ("tests.conftest", "ORACLE_IMAGE"),
+    "ORACLE_PASSWORD": ("tests.conftest", "ORACLE_PASSWORD"),
+    "ORACLE_PORT": ("tests.conftest", "ORACLE_PORT"),
+    "ORACLE_SERVICE": ("tests.conftest", "ORACLE_SERVICE"),
+    "ORACLE_USER": ("tests.conftest", "ORACLE_USER"),
+    "PACKAGE_ROOT": ("tests.test_module_governance", "PACKAGE_ROOT"),
+    "TEST_SCHEMA": ("tests.conftest", "TEST_SCHEMA"),
+    "c": ("tests.constants", "FlextTargetOracleTestConstants"),
+    "conftest": "tests.conftest",
+    "constants": "tests.constants",
+    "d": ("flext_core.decorators", "FlextDecorators"),
+    "e": ("flext_core.exceptions", "FlextExceptions"),
+    "h": ("flext_core.handlers", "FlextHandlers"),
+    "logger": ("tests.conftest", "logger"),
+    "m": ("tests.models", "FlextTargetOracleTestModels"),
+    "models": "tests.models",
+    "p": ("tests.protocols", "FlextTargetOracleTestProtocols"),
+    "protocols": "tests.protocols",
+    "pytest_collection_modifyitems": (
+        "tests.conftest",
+        "pytest_collection_modifyitems",
+    ),
+    "pytest_configure": ("tests.conftest", "pytest_configure"),
+    "pytest_plugins": ("tests.conftest", "pytest_plugins"),
+    "r": ("flext_core.result", "FlextResult"),
+    "s": ("flext_core.service", "FlextService"),
+    "t": ("tests.typings", "FlextTargetOracleTestTypes"),
+    "temporary_env_vars": ("tests.conftest", "temporary_env_vars"),
+    "test_module_governance": "tests.test_module_governance",
+    "typings": "tests.typings",
+    "u": ("tests.utilities", "FlextTargetOracleTestUtilities"),
+    "utilities": "tests.utilities",
+    "x": ("flext_core.mixins", "FlextMixins"),
+}
 
 __all__ = [
     "ALLOWED_MODULE_FUNCTIONS",
@@ -261,76 +148,27 @@ __all__ = [
     "FlextTargetOracleTestProtocols",
     "FlextTargetOracleTestTypes",
     "FlextTargetOracleTestUtilities",
-    "TestOracleIntegration",
-    "TestOracleSettings",
-    "TestOracleTarget",
-    "TestOracleTargetE2E",
-    "TestPerformance",
-    "TestSingerWorkflowE2E",
-    "batch_records",
     "c",
-    "clean_database",
     "conftest",
-    "connected_loader",
     "constants",
     "d",
-    "docker_control",
     "e",
-    "e2e",
-    "event_loop",
     "h",
-    "integration",
-    "large_dataset",
-    "loader_config",
     "logger",
     "m",
-    "mock_loader",
-    "mock_oracle_api",
     "models",
-    "nested_schema",
-    "oracle_api",
-    "oracle_config",
-    "oracle_engine",
-    "oracle_loader",
-    "oracle_target",
     "p",
-    "performance",
     "protocols",
     "pytest_collection_modifyitems",
     "pytest_configure",
     "pytest_plugins",
     "r",
-    "record",
     "s",
-    "sample_config",
-    "sample_record",
-    "sample_target",
-    "schema",
-    "shared_oracle_container",
-    "simple_schema",
-    "singer_messages",
-    "state",
-    "state_message",
     "t",
-    "target",
-    "temp_config_file",
     "temporary_env_vars",
-    "test_config",
-    "test_ensure_table_exists_returns_result",
-    "test_flush_batch_uses_db_oracle_owned_sql_builders",
-    "test_load_record_buffers_and_finalize",
-    "test_loader",
-    "test_loader_execute_returns_ready_payload",
     "test_module_governance",
-    "test_oracle",
-    "test_package_modules_do_not_define_module_level_loggers",
-    "test_package_modules_do_not_define_unapproved_top_level_functions",
-    "test_performance",
-    "test_singer",
-    "test_target",
     "typings",
     "u",
-    "unit",
     "utilities",
     "x",
 ]
