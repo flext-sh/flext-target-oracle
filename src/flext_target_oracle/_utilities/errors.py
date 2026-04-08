@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Annotated, override
 
 from pydantic import Field
 
-from flext_core import FlextConstants, FlextExceptions, FlextModels, FlextTypes
+from flext_core import FlextConstants, FlextModels, FlextTypes, e
 
 if TYPE_CHECKING:
     from flext_target_oracle import t
@@ -47,7 +47,7 @@ class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
     ]
 
 
-class FlextTargetOracleExceptions(FlextExceptions):
+class FlextTargetOracleExceptions(e):
     """Oracle Target exceptions using flext-core SOURCE OF TRUTH."""
 
     @staticmethod
@@ -70,13 +70,13 @@ class FlextTargetOracleExceptions(FlextExceptions):
             correlation_id=metadata.correlation_id if metadata is not None else None,
         )
 
-    class Error(FlextExceptions.BaseError):
+    class Error(e.BaseError):
         """Oracle Target main error - inherits from base error."""
 
-    class ConfigurationError(FlextExceptions.ConfigurationError):
+    class ConfigurationError(e.ConfigurationError):
         """Oracle configuration error using flext-core foundation."""
 
-    class OracleConnectionError(FlextExceptions.ConnectionError):
+    class OracleConnectionError(e.ConnectionError):
         """Oracle connection error with Oracle-specific context."""
 
         @override
@@ -131,10 +131,10 @@ class FlextTargetOracleExceptions(FlextExceptions):
             self.user = oracle_context.get("user")
             self.dsn = oracle_context.get("dsn")
 
-    class ValidationError(FlextExceptions.ValidationError):
+    class ValidationError(e.ValidationError):
         """Oracle validation error using flext-core foundation."""
 
-    class AuthenticationError(FlextExceptions.AuthenticationError):
+    class AuthenticationError(e.AuthenticationError):
         """Oracle authentication error with Oracle-specific context."""
 
         @override
@@ -186,7 +186,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             )
             self.wallet_location = oracle_context.get("wallet_location")
 
-    class ProcessingError(FlextExceptions.OperationError):
+    class ProcessingError(e.OperationError):
         """Oracle processing error with Oracle-specific context."""
 
         @override
@@ -240,7 +240,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             operation_val = oracle_context.get("operation")
             self.operation = str(operation_val) if operation_val is not None else None
 
-    class OracleTimeoutError(FlextExceptions.TimeoutError):
+    class OracleTimeoutError(e.TimeoutError):
         """Oracle timeout error using flext-core foundation."""
 
     class SchemaError(ValidationError):

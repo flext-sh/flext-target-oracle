@@ -8,7 +8,7 @@ from flext_meltano import FlextMeltanoModels
 from flext_target_oracle import t
 
 
-class FlextTargetOracleModelsConfig:
+class FlextTargetOracleModelsSettings:
     """Configuration MRO mixin for TargetOracle namespace."""
 
     class OracleConnectionConfig(FlextMeltanoModels.ArbitraryTypesModel):

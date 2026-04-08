@@ -1,4 +1,4 @@
-"""Oracle Data Loader using FlextService and SOURCE OF TRUTH patterns.
+"""Oracle Data Loader using s and SOURCE OF TRUTH patterns.
 
 ZERO DUPLICATION - Uses flext-db-oracle API exclusively.
 SOLID COMPLIANCE - Single responsibility: Oracle data loading only.
@@ -17,7 +17,7 @@ from typing import ClassVar, override
 
 from pydantic import PrivateAttr
 
-from flext_core import FlextService, r
+from flext_core import r, s
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_target_oracle import (
     FlextTargetOracleExceptions as e,
@@ -29,8 +29,8 @@ from flext_target_oracle import (
 )
 
 
-class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
-    """Oracle data loader using FlextService and flext-db-oracle SOURCE OF TRUTH.
+class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
+    """Oracle data loader using s and flext-db-oracle SOURCE OF TRUTH.
 
     ZERO DUPLICATION - Uses ONLY public flext-db-oracle API.
     SOLID COMPLIANCE - Single responsibility: Oracle data loading operations.

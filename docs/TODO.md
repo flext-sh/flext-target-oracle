@@ -278,7 +278,7 @@ ______________________________________________________________________
 ```python
 class OracleConnectionFactory:
     @staticmethod
-    def create_api(config: FlextOracleTargetConfig) -> FlextDbOracleApi:
+    def create_api(config: FlextOracleTargetSettings) -> FlextDbOracleApi:
         # Factory para criação de conexões
 ```
 
@@ -369,7 +369,7 @@ ______________________________________________________________________
 
 #### **Padrões FLEXT Implementados na Documentação**
 
-- ✅ **Railway-Oriented Programming**: FlextResult patterns documentados
+- ✅ **Railway-Oriented Programming**: r patterns documentados
 - ✅ **Clean Architecture**: Separação de camadas documentada
 - ✅ **Domain-Driven Design**: Entidades e value objects documentados
 - ✅ **Security Awareness**: Vulnerabilidades claramente identificadas
@@ -424,7 +424,7 @@ ______________________________________________________________________
 
 ### **FLEXT Patterns**
 
-- `flext-core`: FlextResult, FlextModels.Value
+- `flext-core`: r, FlextModels.Value
 - `flext-meltano`: Target base class
 - `flext-db-oracle`: Oracle operations
 

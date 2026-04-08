@@ -16,7 +16,7 @@ from pydantic import Field, SecretStr
 from pydantic_settings import SettingsConfigDict
 
 from flext_core import FlextSettings, r
-from flext_target_oracle import FlextTargetOracleModelsConfig, c
+from flext_target_oracle import FlextTargetOracleModelsSettings, c
 
 
 @FlextSettings.auto_register("target-oracle")
@@ -125,9 +125,9 @@ class FlextTargetOracleSettings(FlextSettings):
 
     def get_oracle_config(
         self,
-    ) -> FlextTargetOracleModelsConfig.OracleConnectionModel:
+    ) -> FlextTargetOracleModelsSettings.OracleConnectionModel:
         """Get Oracle database connection configuration."""
-        return FlextTargetOracleModelsConfig.OracleConnectionModel(
+        return FlextTargetOracleModelsSettings.OracleConnectionModel(
             host=self.oracle_host,
             port=self.oracle_port,
             service_name=self.oracle_service_name,
