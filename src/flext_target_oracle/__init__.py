@@ -68,69 +68,51 @@ if _t.TYPE_CHECKING:
     )
 _LAZY_IMPORTS = merge_lazy_imports(
     (
-        "flext_target_oracle._constants",
-        "flext_target_oracle._models",
-        "flext_target_oracle._protocols",
-        "flext_target_oracle._typings",
-        "flext_target_oracle._utilities",
+        "._constants",
+        "._models",
+        "._protocols",
+        "._typings",
+        "._utilities",
     ),
     {
-        "FlextTargetOracleConstants": (
-            "flext_target_oracle.constants",
-            "FlextTargetOracleConstants",
-        ),
-        "FlextTargetOracleModels": (
-            "flext_target_oracle.models",
-            "FlextTargetOracleModels",
-        ),
-        "FlextTargetOracleProtocols": (
-            "flext_target_oracle.protocols",
-            "FlextTargetOracleProtocols",
-        ),
-        "FlextTargetOracleService": (
-            "flext_target_oracle.api",
-            "FlextTargetOracleService",
-        ),
-        "FlextTargetOracleSettings": (
-            "flext_target_oracle.settings",
-            "FlextTargetOracleSettings",
-        ),
-        "FlextTargetOracleTypes": (
-            "flext_target_oracle.typings",
-            "FlextTargetOracleTypes",
-        ),
-        "FlextTargetOracleUtilities": (
-            "flext_target_oracle.utilities",
-            "FlextTargetOracleUtilities",
-        ),
-        "__author__": ("flext_target_oracle.__version__", "__author__"),
-        "__author_email__": ("flext_target_oracle.__version__", "__author_email__"),
-        "__description__": ("flext_target_oracle.__version__", "__description__"),
-        "__license__": ("flext_target_oracle.__version__", "__license__"),
-        "__title__": ("flext_target_oracle.__version__", "__title__"),
-        "__url__": ("flext_target_oracle.__version__", "__url__"),
-        "__version__": ("flext_target_oracle.__version__", "__version__"),
-        "__version_info__": ("flext_target_oracle.__version__", "__version_info__"),
-        "c": ("flext_target_oracle.constants", "FlextTargetOracleConstants"),
+        "FlextTargetOracleConstants": ".constants",
+        "FlextTargetOracleModels": ".models",
+        "FlextTargetOracleProtocols": ".protocols",
+        "FlextTargetOracleService": ".api",
+        "FlextTargetOracleSettings": ".settings",
+        "FlextTargetOracleTypes": ".typings",
+        "FlextTargetOracleUtilities": ".utilities",
+        "__author__": ".__version__",
+        "__author_email__": ".__version__",
+        "__description__": ".__version__",
+        "__license__": ".__version__",
+        "__title__": ".__version__",
+        "__url__": ".__version__",
+        "__version__": ".__version__",
+        "__version_info__": ".__version__",
+        "c": (".constants", "FlextTargetOracleConstants"),
         "d": ("flext_core.decorators", "FlextDecorators"),
         "e": ("flext_core.exceptions", "FlextExceptions"),
         "h": ("flext_core.handlers", "FlextHandlers"),
-        "m": ("flext_target_oracle.models", "FlextTargetOracleModels"),
-        "p": ("flext_target_oracle.protocols", "FlextTargetOracleProtocols"),
+        "m": (".models", "FlextTargetOracleModels"),
+        "p": (".protocols", "FlextTargetOracleProtocols"),
         "r": ("flext_core.result", "FlextResult"),
-        "s": ("flext_target_oracle.api", "FlextTargetOracleService"),
-        "t": ("flext_target_oracle.typings", "FlextTargetOracleTypes"),
-        "u": ("flext_target_oracle.utilities", "FlextTargetOracleUtilities"),
+        "s": (".api", "FlextTargetOracleService"),
+        "t": (".typings", "FlextTargetOracleTypes"),
+        "u": (".utilities", "FlextTargetOracleUtilities"),
         "x": ("flext_core.mixins", "FlextMixins"),
     },
+    exclude_names=(
+        "cleanup_submodule_namespace",
+        "install_lazy_exports",
+        "lazy_getattr",
+        "logger",
+        "merge_lazy_imports",
+        "output",
+        "output_reporting",
+    ),
+    module_name=__name__,
 )
-_ = _LAZY_IMPORTS.pop("cleanup_submodule_namespace", None)
-_ = _LAZY_IMPORTS.pop("install_lazy_exports", None)
-_ = _LAZY_IMPORTS.pop("lazy_getattr", None)
-_ = _LAZY_IMPORTS.pop("logger", None)
-_ = _LAZY_IMPORTS.pop("merge_lazy_imports", None)
-_ = _LAZY_IMPORTS.pop("output", None)
-_ = _LAZY_IMPORTS.pop("output_reporting", None)
 
 __all__ = [
     "FlextTargetOracle",
