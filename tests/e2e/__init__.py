@@ -24,9 +24,7 @@ if _t.TYPE_CHECKING:
     from flext_core.service import FlextService as s
     from flext_core.typings import FlextTypes as t
     from flext_core.utilities import FlextUtilities as u
-    from tests.e2e.test_singer import TestSingerWorkflowE2E
 _LAZY_IMPORTS = {
-    "TestSingerWorkflowE2E": ("tests.e2e.test_singer", "TestSingerWorkflowE2E"),
     "c": ("flext_core.constants", "FlextConstants"),
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),
@@ -42,7 +40,6 @@ _LAZY_IMPORTS = {
 }
 
 __all__ = [
-    "TestSingerWorkflowE2E",
     "c",
     "d",
     "e",

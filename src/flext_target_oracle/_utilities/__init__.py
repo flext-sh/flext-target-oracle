@@ -18,7 +18,7 @@ if _t.TYPE_CHECKING:
 
     cli = _flext_target_oracle__utilities_cli
     import flext_target_oracle._utilities.client as _flext_target_oracle__utilities_client
-    from flext_target_oracle._utilities.cli import FlextTargetOracleCliService, main
+    from flext_target_oracle._utilities.cli import FlextTargetOracleCliService
 
     client = _flext_target_oracle__utilities_client
     import flext_target_oracle._utilities.errors as _flext_target_oracle__utilities_errors
@@ -100,7 +100,6 @@ _LAZY_IMPORTS = {
     "client": "flext_target_oracle._utilities.client",
     "errors": "flext_target_oracle._utilities.errors",
     "loader": "flext_target_oracle._utilities.loader",
-    "main": ("flext_target_oracle._utilities.cli", "main"),
     "observability": "flext_target_oracle._utilities.observability",
     "services": "flext_target_oracle._utilities.services",
 }
@@ -123,7 +122,6 @@ __all__ = [
     "client",
     "errors",
     "loader",
-    "main",
     "observability",
     "services",
 ]

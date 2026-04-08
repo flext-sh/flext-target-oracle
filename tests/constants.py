@@ -11,7 +11,7 @@ from flext_tests import FlextTestsConstants
 from flext_target_oracle import FlextTargetOracleConstants
 
 
-class FlextTargetOracleTestConstants(FlextTestsConstants, FlextTargetOracleConstants):
+class TestsFlextTargetOracleConstants(FlextTestsConstants, FlextTargetOracleConstants):
     """Test constants combining FlextTestsConstants and project-specific constants."""
 
     class TargetOracle(FlextTargetOracleConstants.TargetOracle):
@@ -21,6 +21,6 @@ class FlextTargetOracleTestConstants(FlextTestsConstants, FlextTargetOracleConst
             """Internal tests declarations for test-only objects."""
 
 
-c = FlextTargetOracleTestConstants
+c = TestsFlextTargetOracleConstants
 
-__all__ = ["FlextTargetOracleTestConstants", "c"]
+__all__ = ["TestsFlextTargetOracleConstants", "c"]

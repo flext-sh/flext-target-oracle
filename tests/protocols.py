@@ -1,4 +1,4 @@
-"""Test protocols combining FlextTestsProtocols and project-specific protocols.
+"""Test protocols combining TestsFlextProtocols and project-specific protocols.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -11,8 +11,8 @@ from flext_tests import FlextTestsProtocols
 from flext_target_oracle import FlextTargetOracleProtocols
 
 
-class FlextTargetOracleTestProtocols(FlextTestsProtocols, FlextTargetOracleProtocols):
-    """Test protocols combining FlextTestsProtocols and project-specific protocols."""
+class TestsFlextTargetOracleProtocols(FlextTestsProtocols, FlextTargetOracleProtocols):
+    """Test protocols combining TestsFlextProtocols and project-specific protocols."""
 
     class TargetOracle(FlextTargetOracleProtocols.TargetOracle):
         """TargetOracle domain protocols extending project protocols."""
@@ -21,6 +21,6 @@ class FlextTargetOracleTestProtocols(FlextTestsProtocols, FlextTargetOracleProto
             """Internal tests declarations for test-only objects."""
 
 
-p = FlextTargetOracleTestProtocols
+p = TestsFlextTargetOracleProtocols
 
-__all__ = ["FlextTargetOracleTestProtocols", "p"]
+__all__ = ["TestsFlextTargetOracleProtocols", "p"]

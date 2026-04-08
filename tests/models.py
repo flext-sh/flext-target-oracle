@@ -1,4 +1,4 @@
-"""Test models combining FlextTestsModels and project-specific models.
+"""Test models combining TestsFlextModels and project-specific models.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -11,8 +11,8 @@ from flext_tests import FlextTestsModels
 from flext_target_oracle import FlextTargetOracleModels
 
 
-class FlextTargetOracleTestModels(FlextTestsModels, FlextTargetOracleModels):
-    """Test models combining FlextTestsModels and project-specific models."""
+class TestsFlextTargetOracleModels(FlextTestsModels, FlextTargetOracleModels):
+    """Test models combining TestsFlextModels and project-specific models."""
 
     class TargetOracle(FlextTargetOracleModels.TargetOracle):
         """TargetOracle domain models extending project models."""
@@ -21,6 +21,6 @@ class FlextTargetOracleTestModels(FlextTestsModels, FlextTargetOracleModels):
             """Internal tests declarations for test-only objects."""
 
 
-m = FlextTargetOracleTestModels
+m = TestsFlextTargetOracleModels
 
-__all__ = ["FlextTargetOracleTestModels", "m"]
+__all__ = ["TestsFlextTargetOracleModels", "m"]

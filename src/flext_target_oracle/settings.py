@@ -16,7 +16,7 @@ from pydantic import Field, SecretStr
 from pydantic_settings import SettingsConfigDict
 
 from flext_core import FlextSettings, r
-from flext_target_oracle import FlextTargetOracleModelsConfig, c, t
+from flext_target_oracle import FlextTargetOracleModelsConfig, c
 
 
 @FlextSettings.auto_register("target-oracle")
@@ -150,8 +150,3 @@ class FlextTargetOracleSettings(FlextSettings):
     ) -> r[bool]:
         """Validate Oracle configuration using FlextSettings patterns - ZERO DUPLICATION."""
         return config.validate_business_rules()
-
-
-__all__: t.StrSequence = [
-    "FlextTargetOracleSettings",
-]

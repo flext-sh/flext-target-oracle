@@ -24,9 +24,7 @@ if _t.TYPE_CHECKING:
     from flext_core.service import FlextService as s
     from flext_core.typings import FlextTypes as t
     from flext_core.utilities import FlextUtilities as u
-    from tests.performance.test_performance import TestPerformance
 _LAZY_IMPORTS = {
-    "TestPerformance": ("tests.performance.test_performance", "TestPerformance"),
     "c": ("flext_core.constants", "FlextConstants"),
     "d": ("flext_core.decorators", "FlextDecorators"),
     "e": ("flext_core.exceptions", "FlextExceptions"),
@@ -42,7 +40,6 @@ _LAZY_IMPORTS = {
 }
 
 __all__ = [
-    "TestPerformance",
     "c",
     "d",
     "e",
