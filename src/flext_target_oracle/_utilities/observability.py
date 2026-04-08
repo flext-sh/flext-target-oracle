@@ -5,6 +5,7 @@ from __future__ import annotations
 import typing as _t
 from collections.abc import Generator
 from contextlib import contextmanager
+from typing import ClassVar
 
 from flext_core import FlextLogger
 from flext_target_oracle import (
@@ -13,11 +14,13 @@ from flext_target_oracle import (
     c,
 )
 
-logger = FlextLogger("flext_target_oracle.observability")
-
 
 class FlextTargetOracleUtilitiesObservability:
     """Runtime observability and error factory utilities."""
+
+    _logger: ClassVar[FlextLogger] = FlextLogger(
+        "flext_target_oracle.observability",
+    )
 
     @staticmethod
     def target_oracle_connection_authentication_failed(
@@ -27,7 +30,7 @@ class FlextTargetOracleUtilitiesObservability:
         error_code: str | None = None,
     ) -> e.AuthenticationError:
         """Build an authentication failure error with service context."""
-        logger.error(
+        FlextTargetOracleUtilitiesObservability._logger.error(
             "Oracle authentication failure",
             username=username,
             oracle_service=oracle_service,
@@ -53,7 +56,7 @@ class FlextTargetOracleUtilitiesObservability:
         recovery_strategy: str = "retry_with_backoff",
     ) -> e.OracleConnectionError:
         """Build a connection error for unavailable Oracle endpoints."""
-        logger.error(
+        FlextTargetOracleUtilitiesObservability._logger.error(
             "Oracle database unavailable",
             connection_string=connection_string,
             error_code=error_code or "",
@@ -79,7 +82,7 @@ class FlextTargetOracleUtilitiesObservability:
         failed_records: int,
     ) -> e.ProcessingError:
         """Build a Singer record processing failure."""
-        logger.error(
+        FlextTargetOracleUtilitiesObservability._logger.error(
             "Singer record processing failed",
             stream_name=stream_name,
             record_count=record_count,
@@ -106,7 +109,7 @@ class FlextTargetOracleUtilitiesObservability:
         singer_specification: str = "1.5.0",
     ) -> e.SchemaError:
         """Build a Singer schema validation failure."""
-        logger.error(
+        FlextTargetOracleUtilitiesObservability._logger.error(
             "Singer schema validation failed",
             stream_name=stream_name,
             schema_errors="; ".join(schema_errors),
@@ -134,7 +137,7 @@ class FlextTargetOracleUtilitiesObservability:
     ) -> None:
         """Log Oracle connection pool health snapshots."""
         context_keys = list(context.keys())
-        logger.info(
+        FlextTargetOracleUtilitiesObservability._logger.info(
             "Oracle connection pool health",
             connection_pool_size=connection_pool_size,
             active_connections=active_connections,
@@ -148,12 +151,16 @@ class FlextTargetOracleUtilitiesObservability:
         operation: str = "SELECT",
     ) -> Generator[_t.Mapping[str, str]]:
         """Yield a mutable context while timing a query operation."""
-        logger.debug("Starting query performance monitor")
+        FlextTargetOracleUtilitiesObservability._logger.debug(
+            "Starting query performance monitor",
+        )
         context_data = {"table_name": table_name, "operation": operation}
         try:
             yield context_data
         finally:
-            logger.debug("Finished query performance monitor")
+            FlextTargetOracleUtilitiesObservability._logger.debug(
+                "Finished query performance monitor",
+            )
 
     @staticmethod
     def configure_oracle_observability(
@@ -164,7 +171,7 @@ class FlextTargetOracleUtilitiesObservability:
         enable_connection_monitoring: bool = True,
     ) -> None:
         """Configure runtime observability logging context."""
-        logger.info(
+        FlextTargetOracleUtilitiesObservability._logger.info(
             "Oracle observability configured",
             oracle_host=oracle_host,
             oracle_service=oracle_service,

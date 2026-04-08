@@ -15,10 +15,8 @@ from typing import Annotated, ClassVar
 from pydantic import Field, SecretStr
 from pydantic_settings import SettingsConfigDict
 
-from flext_core import FlextLogger, FlextSettings, r
+from flext_core import FlextSettings, r
 from flext_target_oracle import FlextTargetOracleModelsConfig, c, t
-
-logger = FlextLogger(__name__)
 
 
 @FlextSettings.auto_register("target-oracle")

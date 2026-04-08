@@ -3,15 +3,16 @@
 from __future__ import annotations
 
 from collections.abc import MutableMapping, Sequence
+from typing import ClassVar
 
 from flext_core import FlextLogger, r
 from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings, c, m
 
-logger = FlextLogger(__name__)
-
 
 class FlextTargetOracle:
     """Singer target client that coordinates schema and record loading."""
+
+    _logger: ClassVar[FlextLogger] = FlextLogger(__name__)
 
     def __init__(self, config: FlextTargetOracleSettings) -> None:
         """Create target with validated settings and loader dependencies."""
@@ -160,7 +161,7 @@ class FlextTargetOracle:
         self,
         activate_message: m.TargetOracle.SingerActivateVersionMessage,
     ) -> r[bool]:
-        logger.info(
+        self._logger.info(
             "ACTIVATE_VERSION received for Oracle target",
             stream=activate_message.stream,
             version=activate_message.version,
@@ -200,7 +201,7 @@ class FlextTargetOracle:
         state_message: m.TargetOracle.SingerStateMessage,
     ) -> r[bool]:
         self.state_message = state_message
-        logger.debug("State updated for Oracle target")
+        self._logger.debug("State updated for Oracle target")
         return r[bool].ok(True)
 
 

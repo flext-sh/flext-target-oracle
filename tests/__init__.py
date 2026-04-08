@@ -87,10 +87,19 @@ if _t.TYPE_CHECKING:
     from tests.performance import TestPerformance, test_performance
 
     protocols = _tests_protocols
-    import tests.typings as _tests_typings
+    import tests.test_module_governance as _tests_test_module_governance
     from tests.protocols import (
         FlextTargetOracleTestProtocols,
         FlextTargetOracleTestProtocols as p,
+    )
+
+    test_module_governance = _tests_test_module_governance
+    import tests.typings as _tests_typings
+    from tests.test_module_governance import (
+        ALLOWED_MODULE_FUNCTIONS,
+        PACKAGE_ROOT,
+        test_package_modules_do_not_define_module_level_loggers,
+        test_package_modules_do_not_define_unapproved_top_level_functions,
     )
 
     typings = _tests_typings
@@ -135,6 +144,10 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "tests.unit",
     ),
     {
+        "ALLOWED_MODULE_FUNCTIONS": (
+            "tests.test_module_governance",
+            "ALLOWED_MODULE_FUNCTIONS",
+        ),
         "DOCKER_COMPOSE_PATH": ("tests.conftest", "DOCKER_COMPOSE_PATH"),
         "FlextTargetOracleTestConstants": (
             "tests.constants",
@@ -157,6 +170,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "ORACLE_PORT": ("tests.conftest", "ORACLE_PORT"),
         "ORACLE_SERVICE": ("tests.conftest", "ORACLE_SERVICE"),
         "ORACLE_USER": ("tests.conftest", "ORACLE_USER"),
+        "PACKAGE_ROOT": ("tests.test_module_governance", "PACKAGE_ROOT"),
         "TEST_SCHEMA": ("tests.conftest", "TEST_SCHEMA"),
         "batch_records": ("tests.conftest", "batch_records"),
         "c": ("tests.constants", "FlextTargetOracleTestConstants"),
@@ -207,6 +221,15 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "t": ("tests.typings", "FlextTargetOracleTestTypes"),
         "temp_config_file": ("tests.conftest", "temp_config_file"),
         "temporary_env_vars": ("tests.conftest", "temporary_env_vars"),
+        "test_module_governance": "tests.test_module_governance",
+        "test_package_modules_do_not_define_module_level_loggers": (
+            "tests.test_module_governance",
+            "test_package_modules_do_not_define_module_level_loggers",
+        ),
+        "test_package_modules_do_not_define_unapproved_top_level_functions": (
+            "tests.test_module_governance",
+            "test_package_modules_do_not_define_unapproved_top_level_functions",
+        ),
         "typings": "tests.typings",
         "u": ("tests.utilities", "FlextTargetOracleTestUtilities"),
         "unit": "tests.unit",
@@ -222,6 +245,7 @@ _ = _LAZY_IMPORTS.pop("output", None)
 _ = _LAZY_IMPORTS.pop("output_reporting", None)
 
 __all__ = [
+    "ALLOWED_MODULE_FUNCTIONS",
     "DOCKER_COMPOSE_PATH",
     "ORACLE_CONTAINER_NAME",
     "ORACLE_HOST",
@@ -230,6 +254,7 @@ __all__ = [
     "ORACLE_PORT",
     "ORACLE_SERVICE",
     "ORACLE_USER",
+    "PACKAGE_ROOT",
     "TEST_SCHEMA",
     "FlextTargetOracleTestConstants",
     "FlextTargetOracleTestModels",
@@ -296,7 +321,10 @@ __all__ = [
     "test_load_record_buffers_and_finalize",
     "test_loader",
     "test_loader_execute_returns_ready_payload",
+    "test_module_governance",
     "test_oracle",
+    "test_package_modules_do_not_define_module_level_loggers",
+    "test_package_modules_do_not_define_unapproved_top_level_functions",
     "test_performance",
     "test_singer",
     "test_target",

@@ -27,14 +27,6 @@ c = FlextConstants
 m = FlextModels
 
 
-def _to_metadata_value(value: t.RuntimeData | None) -> t.MetadataValue:
-    if isinstance(value, (str, int, float, bool, datetime)):
-        return value
-    if value is None:
-        return ""
-    return str(value)
-
-
 class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
     """Structured metadata attached to Oracle target error responses."""
 
@@ -55,20 +47,28 @@ class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
     ]
 
 
-def _resolve_metadata(
-    *,
-    default_code: str,
-    metadata: FlextTargetOracleErrorMetadata | None,
-) -> FlextTargetOracleErrorMetadata:
-    return FlextTargetOracleErrorMetadata(
-        code=metadata.code if metadata is not None else default_code,
-        context=metadata.context if metadata is not None else None,
-        correlation_id=metadata.correlation_id if metadata is not None else None,
-    )
-
-
 class FlextTargetOracleExceptions(FlextExceptions):
     """Oracle Target exceptions using flext-core SOURCE OF TRUTH."""
+
+    @staticmethod
+    def _to_metadata_value(value: t.RuntimeData | None) -> t.MetadataValue:
+        if isinstance(value, (str, int, float, bool, datetime)):
+            return value
+        if value is None:
+            return ""
+        return str(value)
+
+    @staticmethod
+    def _resolve_metadata(
+        *,
+        default_code: str,
+        metadata: FlextTargetOracleErrorMetadata | None,
+    ) -> FlextTargetOracleErrorMetadata:
+        return FlextTargetOracleErrorMetadata(
+            code=metadata.code if metadata is not None else default_code,
+            context=metadata.context if metadata is not None else None,
+            correlation_id=metadata.correlation_id if metadata is not None else None,
+        )
 
     class Error(FlextExceptions.BaseError):
         """Oracle Target main error - inherits from base error."""
@@ -93,7 +93,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
-            resolved_metadata = _resolve_metadata(
+            resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
                 default_code=c.CONNECTION_ERROR,
                 metadata=metadata,
             )
@@ -111,7 +111,9 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if dsn is not None:
                 oracle_context["dsn"] = dsn
             for key, value in kwargs.items():
-                oracle_context[key] = _to_metadata_value(value)
+                oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
+                    value,
+                )
             if resolved_metadata.correlation_id is None:
                 super().__init__(
                     message=message,
@@ -147,7 +149,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
-            resolved_metadata = _resolve_metadata(
+            resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
                 default_code=c.AUTHENTICATION_ERROR,
                 metadata=metadata,
             )
@@ -161,7 +163,9 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if wallet_location is not None:
                 oracle_context["wallet_location"] = wallet_location
             for key, value in kwargs.items():
-                oracle_context[key] = _to_metadata_value(value)
+                oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
+                    value,
+                )
             if resolved_metadata.correlation_id is None:
                 super().__init__(
                     message=message,
@@ -198,7 +202,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
-            resolved_metadata = _resolve_metadata(
+            resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
                 default_code=c.PROCESSING_ERROR,
                 metadata=metadata,
             )
@@ -214,7 +218,9 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if operation is not None:
                 oracle_context["operation"] = operation
             for key, value in kwargs.items():
-                oracle_context[key] = _to_metadata_value(value)
+                oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
+                    value,
+                )
             if resolved_metadata.correlation_id is None:
                 super().__init__(
                     message=message,
@@ -253,7 +259,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
-            resolved_metadata = _resolve_metadata(
+            resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
                 default_code=c.VALIDATION_ERROR,
                 metadata=metadata,
             )
@@ -269,7 +275,9 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if validation_errors is not None:
                 oracle_context["validation_errors"] = ", ".join(validation_errors)
             for key, value in kwargs.items():
-                oracle_context[key] = _to_metadata_value(value)
+                oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
+                    value,
+                )
             super().__init__(
                 message=message,
                 error_code=resolved_metadata.code,
@@ -299,7 +307,7 @@ class FlextTargetOracleExceptions(FlextExceptions):
             **kwargs: t.RuntimeData,
         ) -> None:
             """Initialize SQL error with Oracle-specific context."""
-            resolved_metadata = _resolve_metadata(
+            resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
                 default_code=c.OPERATION_ERROR,
                 metadata=metadata,
             )
@@ -313,7 +321,9 @@ class FlextTargetOracleExceptions(FlextExceptions):
             if operation is not None:
                 oracle_context["operation"] = operation
             for key, value in kwargs.items():
-                oracle_context[key] = _to_metadata_value(value)
+                oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
+                    value,
+                )
             super().__init__(
                 message=message,
                 metadata=FlextTargetOracleErrorMetadata(

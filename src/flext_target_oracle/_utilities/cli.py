@@ -3,21 +3,30 @@
 from __future__ import annotations
 
 import sys
+from typing import ClassVar
 
 from flext_core import FlextLogger, r
 from flext_target_oracle import m, t
 
 OracleTargetCommandFactory = m.TargetOracle.OracleTargetCommandFactory
 
-logger = FlextLogger(__name__)
-
 
 class FlextTargetOracleCliService:
     """Simple CLI service that maps args to command executions."""
 
+    _logger: ClassVar[FlextLogger] = FlextLogger(__name__)
+
     def execute(self) -> r[str]:
         """Service readiness probe."""
         return r[str].ok("CLI ready")
+
+    def finalize_cli_result(self, result: r[str]) -> int:
+        """Convert a CLI result into process exit semantics."""
+        if result.is_failure:
+            self._logger.error(result.error or "Command failed")
+            return 1
+        self._logger.info(result.value)
+        return 0
 
     def run_cli(self, args: t.StrSequence | None = None) -> r[str]:
         """Dispatch CLI args to the appropriate command."""
@@ -40,12 +49,8 @@ class FlextTargetOracleCliService:
 
 def main() -> int:
     """CLI entrypoint."""
-    result = FlextTargetOracleCliService().run_cli()
-    if result.is_failure:
-        logger.error(result.error or "Command failed")
-        return 1
-    logger.info(result.value)
-    return 0
+    cli_service = FlextTargetOracleCliService()
+    return cli_service.finalize_cli_result(cli_service.run_cli())
 
 
 if __name__ == "__main__":
