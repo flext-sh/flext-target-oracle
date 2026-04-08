@@ -5,7 +5,11 @@ from __future__ import annotations
 
 import typing as _t
 
-from flext_core.lazy import install_lazy_exports, merge_lazy_imports
+from flext_core.lazy import (
+    build_lazy_import_map,
+    install_lazy_exports,
+    merge_lazy_imports,
+)
 from flext_target_oracle.__version__ import *
 
 if _t.TYPE_CHECKING:
@@ -72,34 +76,40 @@ _LAZY_IMPORTS = merge_lazy_imports(
         "._typings",
         "._utilities",
     ),
-    {
-        "FlextTargetOracleConstants": ".constants",
-        "FlextTargetOracleModels": ".models",
-        "FlextTargetOracleProtocols": ".protocols",
-        "FlextTargetOracleService": ".api",
-        "FlextTargetOracleSettings": ".settings",
-        "FlextTargetOracleTypes": ".typings",
-        "FlextTargetOracleUtilities": ".utilities",
-        "__author__": ".__version__",
-        "__author_email__": ".__version__",
-        "__description__": ".__version__",
-        "__license__": ".__version__",
-        "__title__": ".__version__",
-        "__url__": ".__version__",
-        "__version__": ".__version__",
-        "__version_info__": ".__version__",
-        "c": (".constants", "FlextTargetOracleConstants"),
-        "d": ("flext_core.decorators", "FlextDecorators"),
-        "e": ("flext_core.exceptions", "FlextExceptions"),
-        "h": ("flext_core.handlers", "FlextHandlers"),
-        "m": (".models", "FlextTargetOracleModels"),
-        "p": (".protocols", "FlextTargetOracleProtocols"),
-        "r": ("flext_core.result", "FlextResult"),
-        "s": (".api", "FlextTargetOracleService"),
-        "t": (".typings", "FlextTargetOracleTypes"),
-        "u": (".utilities", "FlextTargetOracleUtilities"),
-        "x": ("flext_core.mixins", "FlextMixins"),
-    },
+    build_lazy_import_map(
+        {
+            ".__version__": (
+                "__author__",
+                "__author_email__",
+                "__description__",
+                "__license__",
+                "__title__",
+                "__url__",
+                "__version__",
+                "__version_info__",
+            ),
+            ".api": ("FlextTargetOracleService",),
+            ".constants": ("FlextTargetOracleConstants",),
+            ".models": ("FlextTargetOracleModels",),
+            ".protocols": ("FlextTargetOracleProtocols",),
+            ".settings": ("FlextTargetOracleSettings",),
+            ".typings": ("FlextTargetOracleTypes",),
+            ".utilities": ("FlextTargetOracleUtilities",),
+        },
+        alias_groups={
+            ".api": (("s", "FlextTargetOracleService"),),
+            ".constants": (("c", "FlextTargetOracleConstants"),),
+            ".models": (("m", "FlextTargetOracleModels"),),
+            ".protocols": (("p", "FlextTargetOracleProtocols"),),
+            ".typings": (("t", "FlextTargetOracleTypes"),),
+            ".utilities": (("u", "FlextTargetOracleUtilities"),),
+            "flext_core.decorators": (("d", "FlextDecorators"),),
+            "flext_core.exceptions": (("e", "FlextExceptions"),),
+            "flext_core.handlers": (("h", "FlextHandlers"),),
+            "flext_core.mixins": (("x", "FlextMixins"),),
+            "flext_core.result": (("r", "FlextResult"),),
+        },
+    ),
     exclude_names=(
         "cleanup_submodule_namespace",
         "install_lazy_exports",
