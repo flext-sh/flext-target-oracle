@@ -17,7 +17,7 @@ from typing import ClassVar, override
 
 from pydantic import PrivateAttr
 
-from flext_core import FlextLogger, FlextService, r
+from flext_core import FlextService, r
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_target_oracle import (
     FlextTargetOracleExceptions as e,
@@ -28,18 +28,6 @@ from flext_target_oracle import (
     t,
 )
 
-logger = FlextLogger(__name__)
-
-
-def _default_record_buffers() -> dict[str, list[t.ContainerValueMapping]]:
-    return {}
-
-
-def _normalize_log_value(value: t.ContainerValue) -> t.NormalizedValue:
-    if isinstance(value, (str, int, float, bool, datetime)):
-        return value
-    return str(value)
-
 
 class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     """Oracle data loader using FlextService and flext-db-oracle SOURCE OF TRUTH.
@@ -48,6 +36,11 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     SOLID COMPLIANCE - Single responsibility: Oracle data loading operations.
     """
 
+    @staticmethod
+    def _default_record_buffers() -> dict[str, list[t.ContainerValueMapping]]:
+        """Return an empty typed buffer mapping for loader state."""
+        return {}
+
     model_config: ClassVar = {"frozen": False}
     _target_config: FlextTargetOracleSettings = PrivateAttr()
     _oracle_api: FlextDbOracleApi = PrivateAttr()
@@ -55,6 +48,30 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
         default_factory=_default_record_buffers,
     )
     _total_records: int = PrivateAttr(default=0)
+
+    @staticmethod
+    def _normalize_log_value(value: t.ContainerValue) -> t.NormalizedValue:
+        """Normalize logging payloads into scalar or string values."""
+        if isinstance(value, (str, int, float, bool, datetime)):
+            return value
+        return str(value)
+
+    @staticmethod
+    def _loader_columns() -> list[t.ContainerValueMapping]:
+        """Return the canonical loader columns for db-oracle DDL generation."""
+        return [
+            {"name": "DATA", "data_type": "CLOB", "nullable": True},
+            {
+                "name": "_SDC_EXTRACTED_AT",
+                "data_type": "TIMESTAMP",
+                "nullable": True,
+            },
+            {
+                "name": "_SDC_LOADED_AT",
+                "data_type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+                "nullable": True,
+            },
+        ]
 
     def __init__(self, config: FlextTargetOracleSettings, **_data: t.Scalar) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
@@ -111,7 +128,7 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
             message = f"Failed to {operation_name.lower()} loader"
-            logger.exception(message)
+            self.logger.exception(message)
             self.log_error(message, error=str(e))
             return r[bool].fail(f"{operation_name} failed: {e}")
 
@@ -155,7 +172,12 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 if table_exists:
                     self.log_info(f"Table {table_name} already exists")
                     return r[bool].ok(value=True)
-                ddl_sql = self._build_create_table_sql(table_name, schema)
+                ddl_result = self._build_create_table_statement(table_name, schema)
+                if ddl_result.is_failure:
+                    return r[bool].fail(
+                        f"Failed to build create table SQL: {ddl_result.error}",
+                    )
+                ddl_sql = ddl_result.value
                 exec_result = connected_api.execute_sql(ddl_sql)
                 if exec_result.is_failure:
                     return r[bool].fail(f"Failed to create table: {exec_result.error}")
@@ -257,22 +279,22 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
     def log_error(self, message: str, **kwargs: t.Scalar) -> None:
         """Log error message."""
         if not kwargs:
-            logger.error(message)
+            self.logger.error(message)
             return
         details = ", ".join(
-            f"{key}={_normalize_log_value(value)}" for key, value in kwargs.items()
+            f"{key}={self._normalize_log_value(value)}" for key, value in kwargs.items()
         )
-        logger.error("%s | %s", message, details)
+        self.logger.error("%s | %s", message, details)
 
     def log_info(self, message: str, **kwargs: t.Scalar) -> None:
         """Log info message."""
         if not kwargs:
-            logger.info(message)
+            self.logger.info(message)
             return
         details = ", ".join(
-            f"{key}={_normalize_log_value(value)}" for key, value in kwargs.items()
+            f"{key}={self._normalize_log_value(value)}" for key, value in kwargs.items()
         )
-        logger.info("%s | %s", message, details)
+        self.logger.info("%s | %s", message, details)
 
     def test_connection(self) -> r[bool]:
         """Test connection to Oracle database using flext-db-oracle API."""
@@ -291,20 +313,39 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
             self.log_error("Failed to connect to Oracle", error=str(e))
             return r[bool].fail(f"Connection failed: {e}")
 
-    def _build_create_table_sql(
+    def _build_create_table_statement(
         self,
         table_name: str,
         _schema: t.ContainerValueMapping,
-    ) -> str:
-        """Build CREATE TABLE SQL statement."""
-        schema_name = self.target_config.default_target_schema
-        full_table_name = f"{schema_name}.{table_name}"
-        sql = (
-            "\n CREATE TABLE "
-            + full_table_name
-            + " (\n DATA CLOB,\n _SDC_EXTRACTED_AT TIMESTAMP,\n _SDC_LOADED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n )\n "
+    ) -> r[str]:
+        """Build CREATE TABLE SQL through the db-oracle owner service."""
+        return self.oracle_api.oracle_services.create_table_ddl(
+            table_name,
+            self._loader_columns(),
+            schema=self.target_config.default_target_schema,
         )
-        return sql.strip()
+
+    def _build_insert_statement(self, table_name: str) -> r[str]:
+        """Build INSERT SQL through the db-oracle owner service."""
+        return self.oracle_api.oracle_services.build_insert_statement(
+            table_name,
+            ["DATA", "_SDC_EXTRACTED_AT", "_SDC_LOADED_AT"],
+            schema=self.target_config.default_target_schema,
+        )
+
+    @staticmethod
+    def _build_insert_parameters(
+        record: t.ContainerValueMapping,
+        loaded_at: str,
+    ) -> t.ContainerValueMapping:
+        """Normalize one record into the owner-managed insert payload shape."""
+        return {
+            "DATA": t.TargetOracle.FLAT_CONTAINER_MAP_ADAPTER.dump_json(record).decode(
+                "utf-8",
+            ),
+            "_SDC_EXTRACTED_AT": str(record.get("_sdc_extracted_at", loaded_at)),
+            "_SDC_LOADED_AT": loaded_at,
+        }
 
     def _flush_batch(self, stream_name: str) -> r[bool]:
         """Flush batch using flext-db-oracle API exclusively - NO direct SQLAlchemy."""
@@ -319,20 +360,21 @@ class FlextTargetOracleLoader(FlextService[m.TargetOracle.LoaderReadyResult]):
                 return r[bool].fail("Invalid Oracle table identifier")
             loaded_at = datetime.now(UTC).isoformat()
             with self.oracle_api as connected_api:
-                for record in records:
-                    insert_sql = f"INSERT INTO {full_table_name} (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:data, :extracted_at, :loaded_at)"  # nosec B608  # table name validated by re.fullmatch above
-                    params: t.ConfigurationMapping = {
-                        "data": t.TargetOracle.FLAT_CONTAINER_MAP_ADAPTER.dump_json(
-                            record
-                        ).decode(
-                            "utf-8",
-                        ),
-                        "extracted_at": str(record.get("_sdc_extracted_at", loaded_at)),
-                        "loaded_at": loaded_at,
-                    }
-                    result = connected_api.execute_sql(insert_sql, parameters=params)
-                    if result.is_failure:
-                        return r[bool].fail(f"Batch insert failed: {result.error}")
+                insert_sql_result = self._build_insert_statement(table_name)
+                if insert_sql_result.is_failure:
+                    return r[bool].fail(
+                        f"Failed to build insert SQL: {insert_sql_result.error}",
+                    )
+                params_list = [
+                    self._build_insert_parameters(record, loaded_at)
+                    for record in records
+                ]
+                result = connected_api.execute_many(
+                    insert_sql_result.value,
+                    params_list,
+                )
+                if result.is_failure:
+                    return r[bool].fail(f"Batch insert failed: {result.error}")
                 self.record_buffers[stream_name] = list[t.ContainerValueMapping]()
                 self.log_info(f"Flushed {len(records)} records to {table_name}")
                 return r[bool].ok(value=True)

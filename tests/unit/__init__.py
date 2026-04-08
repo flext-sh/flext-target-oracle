@@ -21,6 +21,7 @@ if _t.TYPE_CHECKING:
     from tests.unit.test_loader import (
         loader_config,
         test_ensure_table_exists_returns_result,
+        test_flush_batch_uses_db_oracle_owned_sql_builders,
         test_load_record_buffers_and_finalize,
         test_loader_execute_returns_ready_payload,
     )
@@ -57,6 +58,10 @@ _LAZY_IMPORTS = {
         "tests.unit.test_loader",
         "test_ensure_table_exists_returns_result",
     ),
+    "test_flush_batch_uses_db_oracle_owned_sql_builders": (
+        "tests.unit.test_loader",
+        "test_flush_batch_uses_db_oracle_owned_sql_builders",
+    ),
     "test_load_record_buffers_and_finalize": (
         "tests.unit.test_loader",
         "test_load_record_buffers_and_finalize",
@@ -87,6 +92,7 @@ __all__ = [
     "target",
     "test_config",
     "test_ensure_table_exists_returns_result",
+    "test_flush_batch_uses_db_oracle_owned_sql_builders",
     "test_load_record_buffers_and_finalize",
     "test_loader",
     "test_loader_execute_returns_ready_payload",

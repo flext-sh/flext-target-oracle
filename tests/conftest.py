@@ -16,13 +16,13 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 from flext_tests import tk
-from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.pool import NullPool
 
 from flext_core import FlextLogger, r
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
+from flext_db_oracle import (
+    FlextDbOracleApi,
+    FlextDbOracleSettings,
+    FlextDbOracleTypes as oracle_t,
+)
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,
@@ -78,46 +78,47 @@ def shared_oracle_container(docker_control: tk) -> Generator[str]:
 
 
 @pytest.fixture(scope="session")
-def oracle_engine() -> Engine:
-    """Create SQLAlchemy engine for direct database access.
+def oracle_engine() -> Generator[FlextDbOracleApi]:
+    """Create Oracle database API fixture for integration verification.
 
     Skips tests if Oracle is not available.
     """
-    engine = create_engine(
-        f"oracle+oracledb://{TEST_SCHEMA}:test_password@{ORACLE_HOST}:{ORACLE_PORT}/{ORACLE_SERVICE}",
-        poolclass=NullPool,
+    api = FlextDbOracleApi(
+        FlextDbOracleSettings(
+            host=ORACLE_HOST,
+            port=ORACLE_PORT,
+            service_name=ORACLE_SERVICE,
+            username=TEST_SCHEMA,
+            password="test_password",
+        )
     )
-    try:
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1 FROM DUAL"))
-    except (
-        ValueError,
-        TypeError,
-        KeyError,
-        AttributeError,
-        OSError,
-        RuntimeError,
-        ImportError,
-        SQLAlchemyError,
-    ) as e:
-        pytest.skip(f"Oracle not available: {e}")
-    return engine
+    connect_result = api.connect()
+    if connect_result.is_failure:
+        pytest.skip(connect_result.error or "Oracle not available")
+    health_result = api.oracle_services.execute_query('SELECT 1 AS "health" FROM DUAL')
+    if health_result.is_failure:
+        disconnect_result = api.disconnect()
+        _ = disconnect_result
+        pytest.skip(health_result.error or "Oracle health check failed")
+    yield api
+    disconnect_result = api.disconnect()
+    _ = disconnect_result
 
 
 @pytest.fixture
-def clean_database(oracle_engine: Engine) -> None:
+def clean_database(oracle_engine: FlextDbOracleApi) -> None:
     """Clean database before each test."""
-    with oracle_engine.connect() as conn:
-        result = conn.execute(
-            text(
-                "\n\n              SELECT table_name\n              FROM all_tables\n              WHERE owner = :schema\n              ",
-            ),
-            {"schema": TEST_SCHEMA},
+    tables_result = oracle_engine.oracle_services.execute_query(
+        'SELECT table_name AS "table_name" FROM all_tables WHERE owner = :schema',
+        oracle_t.ConfigMap(root={"schema": TEST_SCHEMA}),
+    )
+    assert tables_result.is_success, tables_result.error
+    tables = [str(row.root["table_name"]) for row in tables_result.value]
+    for table in tables:
+        drop_result = oracle_engine.execute_statement(
+            f"DROP TABLE {TEST_SCHEMA}.{table} CASCADE CONSTRAINTS"
         )
-        tables = [row[0] for row in result]
-        for table in tables:
-            conn.execute(text(f"DROP TABLE {TEST_SCHEMA}.{table} CASCADE CONSTRAINTS"))
-        conn.commit()
+        assert drop_result.is_success, drop_result.error
 
 
 @pytest.fixture
@@ -473,7 +474,7 @@ def temp_config_file(tmp_path: Path) -> Path:
     }
     config_file = tmp_path / "config.json"
     config_file.write_text(
-        t.NORMALIZED_VALUE_ADAPTER.dump_json(config_data).decode("utf-8"),
+        t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(config_data).decode("utf-8"),
     )
     return config_file
 
@@ -487,7 +488,7 @@ def connected_loader(oracle_loader: FlextTargetOracleLoader) -> FlextTargetOracl
 @pytest.fixture
 def large_dataset() -> Sequence[t.Dict]:
     """Generate large dataset for performance testing."""
-    schema = t.DICT_ADAPTER.validate_python({
+    schema = t.Tests.DICT_ADAPTER.validate_python({
         "type": "SCHEMA",
         "stream": "performance_test",
         "schema": {
@@ -502,7 +503,7 @@ def large_dataset() -> Sequence[t.Dict]:
         "key_properties": ["id"],
     })
     records = [
-        t.DICT_ADAPTER.validate_python({
+        t.Tests.DICT_ADAPTER.validate_python({
             "type": "RECORD",
             "stream": "performance_test",
             "record": {

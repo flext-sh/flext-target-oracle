@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import json
+from unittest.mock import MagicMock
+
 import pytest
+
+from flext_core import r
 from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings
 from tests import m, t
 
@@ -65,3 +69,35 @@ def test_ensure_table_exists_returns_result(
         "users", validated.schema_definition, validated.key_properties
     )
     assert isinstance(result.is_success, bool)
+
+
+def test_flush_batch_uses_db_oracle_owned_sql_builders(
+    loader_config: FlextTargetOracleSettings,
+) -> None:
+    """Flush should delegate INSERT SQL building and batching to db-oracle."""
+    loader = FlextTargetOracleLoader(loader_config)
+    table_name = loader.target_config.get_table_name("users")
+    mock_api = MagicMock()
+    mock_services = MagicMock()
+    mock_api.oracle_services = mock_services
+    mock_api.execute_many.return_value = r[int].ok(2)
+    mock_api.__enter__.return_value = mock_api
+    mock_api.__exit__.return_value = None
+    mock_services.build_insert_statement.return_value = r[str].ok(
+        "INSERT INTO TEST_SCHEMA.USERS (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:DATA, :_SDC_EXTRACTED_AT, :_SDC_LOADED_AT)"
+    )
+    object.__setattr__(loader, "_oracle_api", mock_api)
+    loader.record_buffers["users"] = [
+        {"id": 1, "name": "Alice"},
+        {"id": 2, "name": "Bob"},
+    ]
+
+    result = loader._flush_batch("users")
+
+    assert result.is_success
+    mock_services.build_insert_statement.assert_called_once_with(
+        table_name,
+        ["DATA", "_SDC_EXTRACTED_AT", "_SDC_LOADED_AT"],
+        schema="TEST_SCHEMA",
+    )
+    mock_api.execute_many.assert_called_once()
