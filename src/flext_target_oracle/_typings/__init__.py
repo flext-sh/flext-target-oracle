@@ -12,7 +12,6 @@ _LAZY_IMPORTS = {
         "flext_target_oracle._typings.base",
         "FlextTargetOracleTypesBase",
     ),
-    "base": "flext_target_oracle._typings.base",
 }
 
 

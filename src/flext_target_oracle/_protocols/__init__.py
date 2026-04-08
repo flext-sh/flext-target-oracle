@@ -12,7 +12,6 @@ _LAZY_IMPORTS = {
         "flext_target_oracle._protocols.base",
         "FlextTargetOracleProtocolsBase",
     ),
-    "base": "flext_target_oracle._protocols.base",
 }
 
 

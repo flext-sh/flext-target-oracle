@@ -53,13 +53,6 @@ _LAZY_IMPORTS = {
         "flext_target_oracle._utilities.observability",
         "FlextTargetOracleUtilitiesObservability",
     ),
-    "base": "flext_target_oracle._utilities.base",
-    "cli": "flext_target_oracle._utilities.cli",
-    "client": "flext_target_oracle._utilities.client",
-    "errors": "flext_target_oracle._utilities.errors",
-    "loader": "flext_target_oracle._utilities.loader",
-    "observability": "flext_target_oracle._utilities.observability",
-    "services": "flext_target_oracle._utilities.services",
 }
 
 

@@ -24,10 +24,6 @@ _LAZY_IMPORTS = {
         "flext_target_oracle._models.singer",
         "FlextTargetOracleModelsSinger",
     ),
-    "commands": "flext_target_oracle._models.commands",
-    "config": "flext_target_oracle._models.config",
-    "results": "flext_target_oracle._models.results",
-    "singer": "flext_target_oracle._models.singer",
 }
 
 

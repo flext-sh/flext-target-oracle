@@ -12,7 +12,6 @@ _LAZY_IMPORTS = {
         "flext_target_oracle._constants.base",
         "FlextTargetOracleConstantsBase",
     ),
-    "base": "flext_target_oracle._constants.base",
 }
 
 
