@@ -5,14 +5,21 @@ from __future__ import annotations
 from collections.abc import MutableMapping, Sequence
 from typing import ClassVar
 
-from flext_core import FlextLogger, r
-from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings, c, m
+from flext_meltano import u
+from flext_target_oracle import (
+    FlextTargetOracleLoader,
+    FlextTargetOracleSettings,
+    c,
+    m,
+    p,
+    r,
+)
 
 
 class FlextTargetOracle:
     """Singer target client that coordinates schema and record loading."""
 
-    _logger: ClassVar[FlextLogger] = FlextLogger(__name__)
+    _logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     def __init__(self, config: FlextTargetOracleSettings) -> None:
         """Create target with validated settings and loader dependencies."""

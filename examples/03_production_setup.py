@@ -22,13 +22,14 @@ from typing import cast
 
 from pydantic import BaseModel, Field
 
-from flext_core import FlextLogger, r
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleSettings,
     c,
     m,
+    r,
     t,
+    u,
 )
 
 logging.basicConfig(
@@ -36,7 +37,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(), logging.FileHandler("flext_target_oracle.log")],
 )
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 type SingerMessage = (
     m.TargetOracle.SingerSchemaMessage
     | m.TargetOracle.SingerRecordMessage

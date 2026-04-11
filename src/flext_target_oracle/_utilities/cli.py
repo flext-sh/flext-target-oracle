@@ -5,8 +5,8 @@ from __future__ import annotations
 import sys
 from typing import ClassVar
 
-from flext_core import FlextLogger, r
-from flext_target_oracle import m, t
+from flext_meltano import u
+from flext_target_oracle import m, p, r, t
 
 OracleTargetCommandFactory = m.TargetOracle.OracleTargetCommandFactory
 
@@ -14,7 +14,7 @@ OracleTargetCommandFactory = m.TargetOracle.OracleTargetCommandFactory
 class FlextTargetOracleCliService:
     """Simple CLI service that maps args to command executions."""
 
-    _logger: ClassVar[FlextLogger] = FlextLogger(__name__)
+    _logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     def execute(self) -> r[str]:
         """Service readiness probe."""

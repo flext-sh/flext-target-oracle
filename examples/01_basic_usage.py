@@ -27,15 +27,10 @@ import logging
 import os
 from collections.abc import Sequence
 
-from flext_core import FlextLogger, r
-from flext_target_oracle import (
-    FlextTargetOracle,
-    FlextTargetOracleSettings,
-    m,
-)
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m, r, u
 
 logging.basicConfig(level=logging.INFO)
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 
 
 def create_configuration() -> FlextTargetOracleSettings:

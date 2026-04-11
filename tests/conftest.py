@@ -17,7 +17,6 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 from flext_tests import tk
 
-from flext_core import FlextLogger, r
 from flext_db_oracle import (
     FlextDbOracleApi,
     FlextDbOracleSettings,
@@ -28,11 +27,11 @@ from flext_target_oracle import (
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
 )
-from tests import t
+from tests import r, t, u
 
 pytest_plugins = ["flext_tests.conftest_plugin"]
 
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 ORACLE_CONTAINER_NAME = "flext-oracle-test"
 ORACLE_IMAGE = "gvenzl/oracle-xe:21-slim"
 ORACLE_HOST = "localhost"

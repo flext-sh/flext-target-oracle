@@ -313,7 +313,7 @@ from flext_core import s
 from flext_core import t
 from flext_core import u
 
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 
 
 def process_with_logging(stream_name: str, batch_size: int):

@@ -483,7 +483,7 @@ networks:
 
 ```python
 # Structured logging with correlation IDs
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 logger.info(
     "Batch processing started",
     extra={

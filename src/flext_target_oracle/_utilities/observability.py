@@ -7,7 +7,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from typing import ClassVar
 
-from flext_core import FlextLogger
+from flext_meltano import p, u
 from flext_target_oracle import (
     FlextTargetOracleErrorMetadata,
     FlextTargetOracleExceptions as e,
@@ -18,9 +18,7 @@ from flext_target_oracle import (
 class FlextTargetOracleUtilitiesObservability:
     """Runtime observability and error factory utilities."""
 
-    _logger: ClassVar[FlextLogger] = FlextLogger(
-        "flext_target_oracle.observability",
-    )
+    _logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     @staticmethod
     def target_oracle_connection_authentication_failed(

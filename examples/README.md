@@ -157,7 +157,7 @@ from flext_core import t
 from flext_core import u
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetSettings
 
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 ```
 
 ## Testing Examples
