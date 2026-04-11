@@ -37,7 +37,7 @@ class FlextTargetOracleConnectionService:
         tables_result = self.oracle_api.get_tables(
             schema=self.config.default_target_schema,
         )
-        if tables_result.is_failure:
+        if tables_result.failure:
             return r[None].fail(tables_result.error or "Connection test failed")
         return r[None].ok(None)
 

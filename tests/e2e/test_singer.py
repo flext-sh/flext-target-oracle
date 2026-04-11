@@ -51,18 +51,18 @@ class TestSingerWorkflowE2E:
             "record": {"id": 1, "amount": 10.5},
         }
         state = {"type": "STATE", "value": {"bookmarks": {"orders": {"version": 1}}}}
-        assert target.execute().is_success
+        assert target.execute().success
         assert target.process_singer_message(
             m.TargetOracle.SingerSchemaMessage.model_validate(schema)
-        ).is_success
+        ).success
         assert target.process_singer_message(
             m.TargetOracle.SingerRecordMessage.model_validate(record)
-        ).is_success
+        ).success
         assert target.process_singer_message(
             m.TargetOracle.SingerStateMessage.model_validate(state)
-        ).is_success
+        ).success
         finalize_result = target.finalize()
-        assert finalize_result.is_success
+        assert finalize_result.success
         assert "orders" in target.schemas
         state_value = target.state_message.value
         assert isinstance(state_value, dict)

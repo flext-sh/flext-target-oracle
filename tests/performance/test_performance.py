@@ -41,7 +41,7 @@ class TestPerformance:
         start = time.perf_counter()
         result = target.execute()
         elapsed = time.perf_counter() - start
-        assert result.is_success
+        assert result.success
         assert elapsed < 0.05
 
     def test_message_processing_scales_linearly_for_state_updates(self) -> None:
@@ -61,7 +61,7 @@ class TestPerformance:
         start = time.perf_counter()
         result = target.process_singer_messages(messages)
         elapsed = time.perf_counter() - start
-        assert result.is_success
+        assert result.success
         state_value = target.state_message.value
         assert isinstance(state_value, Mapping)
         assert state_value.get("offset") == 1999
@@ -78,7 +78,7 @@ class TestPerformance:
         record = {"type": "RECORD", "stream": "perf_stream", "record": {"id": 1}}
         assert target.process_singer_message(
             m.TargetOracle.SingerSchemaMessage.model_validate(schema)
-        ).is_success
+        ).success
         assert target.process_singer_message(
             m.TargetOracle.SingerRecordMessage.model_validate(record)
-        ).is_success
+        ).success

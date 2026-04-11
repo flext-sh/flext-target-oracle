@@ -22,7 +22,7 @@ class FlextTargetOracleCliService:
 
     def finalize_cli_result(self, result: r[str]) -> int:
         """Convert a CLI result into process exit semantics."""
-        if result.is_failure:
+        if result.failure:
             self._logger.error(result.error or "Command failed")
             return 1
         self._logger.info(result.value)

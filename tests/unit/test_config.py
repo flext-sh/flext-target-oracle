@@ -43,4 +43,4 @@ class TestOracleSettings:
     def test_validate_business_rules_failure_for_commit_interval(self) -> None:
         config = FlextTargetOracleSettings.model_validate({"oracle_host": "localhost", "oracle_service_name": "XE", "oracle_user": "test", "oracle_password": "test", "batch_size": 100, "commit_interval": 200})
         result = config.validate_business_rules()
-        assert result.is_failure
+        assert result.failure

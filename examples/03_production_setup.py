@@ -199,8 +199,8 @@ class ProductionTargetManager:
             if self.target:
                 try:
                     connectivity_result = self.target.test_connection()
-                    checks["oracle_connectivity"] = connectivity_result.is_success
-                    if not connectivity_result.is_success:
+                    checks["oracle_connectivity"] = connectivity_result.success
+                    if not connectivity_result.success:
                         health_status.status = "degraded"
                 except (
                     ValueError,
@@ -245,7 +245,7 @@ class ProductionTargetManager:
         try:
             logger.info("Validating configuration domain rules")
             validation_result = r[bool].ok(value=True)
-            if validation_result.is_failure:
+            if validation_result.failure:
                 return r[bool].fail(
                     f"Configuration validation failed: {validation_result.error}",
                 )
@@ -253,7 +253,7 @@ class ProductionTargetManager:
             self.target = FlextTargetOracle(self.config)
             logger.info("Testing Oracle database connectivity")
             connection_result = self.target.test_connection()
-            if connection_result.is_failure:
+            if connection_result.failure:
                 return r[bool].fail("Oracle connectivity test failed")
             logger.info("Production target initialized successfully")
             return r[bool].ok(value=True)
@@ -307,7 +307,7 @@ class ProductionTargetManager:
                 if not self.target:
                     return r[t.ContainerMapping].fail("Target not initialized")
                 result = self.target.process_singer_message(message)
-                if result.is_success:
+                if result.success:
                     stats.messages_processed += 1
                     if message_type == "SCHEMA":
                         stats.schemas_processed += 1
@@ -326,7 +326,7 @@ class ProductionTargetManager:
                     logger.info("Processed %d/%d messages", i + 1, len(messages))
             logger.info("Finalizing target operations")
             finalize_result = self.target.finalize()
-            if finalize_result.is_success:
+            if finalize_result.success:
                 final_stats = finalize_result.value
                 stats.messages_processed += final_stats.total_records
                 logger.info("Target finalization completed successfully")
@@ -400,12 +400,12 @@ def demonstrate_production_setup() -> None:
         logger.info("Step 2: Initializing production target manager")
         manager = ProductionTargetManager(config)
         init_result = manager.initialize()
-        if init_result.is_failure:
+        if init_result.failure:
             logger.error("Production initialization failed: %s", init_result.error)
             return
         logger.info("Step 3: Performing initial health check")
         health_result = manager.health_check()
-        if health_result.is_success:
+        if health_result.success:
             health_data = health_result.value
             if isinstance(health_data, dict):
                 logger.info(
@@ -429,7 +429,7 @@ def demonstrate_production_setup() -> None:
         messages = create_production_sample_stream()
         logger.info("Step 5: Processing production data stream")
         processing_result = manager.process_singer_stream(messages)
-        if processing_result.is_success:
+        if processing_result.success:
             stats = processing_result.value
             logger.info("=== Production Processing Statistics ===")
             logger.info(
@@ -452,14 +452,14 @@ def demonstrate_production_setup() -> None:
             logger.error("Production processing failed: %s", processing_result.error)
         logger.info("Step 6: Performing final health check")
         final_health = manager.health_check()
-        if final_health.is_success and isinstance(final_health.value, dict):
+        if final_health.success and isinstance(final_health.value, dict):
             logger.info(
                 "Final health status",
                 status=str(final_health.value.get("status", "unknown")),
             )
         logger.info("Step 7: Performing graceful shutdown")
         shutdown_result = manager.shutdown()
-        if shutdown_result.is_success:
+        if shutdown_result.success:
             logger.info("Production shutdown completed successfully")
         else:
             logger.error("Shutdown issues: %s", shutdown_result.error)

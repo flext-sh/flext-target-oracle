@@ -41,7 +41,7 @@ def _query_rows(
         None if params is None else oracle_t.ConfigMap(root=dict(params))
     )
     query_result = oracle_engine.oracle_services.execute_query(sql, normalized_params)
-    assert query_result.is_success, query_result.error
+    assert query_result.success, query_result.error
     return query_result.value
 
 
@@ -74,7 +74,7 @@ class TestOracleIntegration:
         table_res = connected_loader.ensure_table_exists(
             stream_name, schema_dict, key_props
         )
-        assert table_res.is_success
+        assert table_res.success
         table_count = _query_scalar(
             oracle_engine,
             'SELECT COUNT(*) AS "count" FROM user_tables WHERE table_name = :table_name',
@@ -110,13 +110,13 @@ class TestOracleIntegration:
         create_res = connected_loader.ensure_table_exists(
             stream_name, schema_dict, key_props
         )
-        assert create_res.is_success
+        assert create_res.success
         records: Sequence[t.ScalarMapping] = [
             {"id": 1, "name": "John Doe", "email": "john@example.com"},
             {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
         ]
         result = connected_loader.insert_records(stream_name, records)
-        assert result.is_success
+        assert result.success
         rows = _query_rows(
             oracle_engine,
             'SELECT id AS "id", name AS "name", email AS "email" FROM test_insert ORDER BY id',
@@ -144,21 +144,21 @@ class TestOracleIntegration:
         oracle_config = oracle_config.model_copy(update={"sdc_mode": "merge"})
         loader = FlextTargetOracleLoader(oracle_config)
         connect_result = loader.connect()
-        assert connect_result.is_success
+        assert connect_result.success
         stream_name = "test_merge"
         schema_dict, key_props = _schema_parts(simple_schema)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
-        assert table_res.is_success
+        assert table_res.success
         initial_records: Sequence[t.ScalarMapping] = [
             {"id": 1, "name": "Original Name", "email": "original@example.com"}
         ]
         insert_result = loader.insert_records(stream_name, initial_records)
-        assert insert_result.is_success
+        assert insert_result.success
         updated_records: Sequence[t.ScalarMapping] = [
             {"id": 1, "name": "Updated Name", "email": "updated@example.com"}
         ]
         result = loader.insert_records(stream_name, updated_records)
-        assert result.is_success
+        assert result.success
         rows = _query_rows(
             oracle_engine,
             'SELECT name AS "name", email AS "email" FROM test_merge WHERE id = 1',
@@ -167,7 +167,7 @@ class TestOracleIntegration:
         assert rows[0].root["name"] == "Updated Name"
         assert rows[0].root["email"] == "updated@example.com"
         disconnect_result = loader.disconnect()
-        assert disconnect_result.is_success
+        assert disconnect_result.success
 
     @pytest.mark.usefixtures("_clean_database")
     def test_bulk_insert_performance(
@@ -178,7 +178,7 @@ class TestOracleIntegration:
             update={"load_method": c.TargetOracle.LOAD_METHOD_BULK_INSERT, "batch_size": 1000}
         )
         loader = FlextTargetOracleLoader(oracle_config)
-        assert loader.connect().is_success
+        assert loader.connect().success
         stream_name = "test_bulk"
         schema_message: t.ContainerMapping = {
             "type": "SCHEMA",
@@ -195,7 +195,7 @@ class TestOracleIntegration:
         }
         schema_dict, key_props = _schema_parts(schema_message)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
-        assert table_res.is_success
+        assert table_res.success
         records: Sequence[t.ScalarMapping] = [
             {"id": i, "data": f"Bulk test data {i}", "value": i * 1.5}
             for i in range(5000)
@@ -203,7 +203,7 @@ class TestOracleIntegration:
         start_time = time.time()
         result = loader.insert_records(stream_name, records)
         elapsed = time.time() - start_time
-        assert result.is_success
+        assert result.success
         count = _query_scalar(
             oracle_engine,
             'SELECT COUNT(*) AS "count" FROM test_bulk',
@@ -211,7 +211,7 @@ class TestOracleIntegration:
         )
         assert int(count) == 5000
         assert elapsed < 10.0
-        assert loader.disconnect().is_success
+        assert loader.disconnect().success
 
     @pytest.mark.usefixtures("_clean_database")
     def test_json_storage_mode(
@@ -226,11 +226,11 @@ class TestOracleIntegration:
             update={"storage_mode": "json", "json_column_name": "json_data"}
         )
         loader = FlextTargetOracleLoader(oracle_config)
-        assert loader.connect().is_success
+        assert loader.connect().success
         stream_name = "test_json"
         schema_dict, key_props = _schema_parts(nested_schema)
         create_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
-        assert create_res.is_success
+        assert create_res.success
         record = {
             "id": 1,
             "customer": {
@@ -250,7 +250,7 @@ class TestOracleIntegration:
         }
         typed_record = t.Tests.SCALAR_MAPPING_ADAPTER.validate_python(record)
         insert_res = loader.insert_records(stream_name, [typed_record])
-        assert insert_res.is_success
+        assert insert_res.success
         json_str = _query_scalar(
             oracle_engine,
             'SELECT json_data AS "json_data" FROM test_json WHERE id = 1',
@@ -270,7 +270,7 @@ class TestOracleIntegration:
         items = stored_data.get("items")
         items_data = t.Tests.CONTAINER_MAPPING_SEQUENCE_ADAPTER.validate_python(items)
         assert len(items_data) == 2
-        assert loader.disconnect().is_success
+        assert loader.disconnect().success
 
     @pytest.mark.usefixtures("_clean_database")
     def test_column_ordering(
@@ -291,7 +291,7 @@ class TestOracleIntegration:
             }
         )
         loader = FlextTargetOracleLoader(oracle_config)
-        assert loader.connect().is_success
+        assert loader.connect().success
         stream_name = "test_ordering"
         schema_message: t.ContainerMapping = {
             "type": "SCHEMA",
@@ -310,7 +310,7 @@ class TestOracleIntegration:
         }
         schema_dict, key_props = _schema_parts(schema_message)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
-        assert table_res.is_success
+        assert table_res.success
         column_rows = _query_rows(
             oracle_engine,
             'SELECT column_name AS "column_name", column_id AS "column_id" FROM user_tab_columns WHERE table_name = :table_name ORDER BY column_id',
@@ -325,7 +325,7 @@ class TestOracleIntegration:
         assert len(audit_cols) == 2
         sdc_cols = [column for column in columns if column.startswith("_SDC_")]
         assert all(columns.index(sdc) > columns.index("UPDATED_AT") for sdc in sdc_cols)
-        assert loader.disconnect().is_success
+        assert loader.disconnect().success
 
     @pytest.mark.usefixtures("_clean_database")
     def test_truncate_before_load(
@@ -337,15 +337,15 @@ class TestOracleIntegration:
         """Test truncate table before loading data."""
         oracle_config = oracle_config.model_copy(update={"truncate_before_load": True})
         loader = FlextTargetOracleLoader(oracle_config)
-        assert loader.connect().is_success
+        assert loader.connect().success
         stream_name = "test_truncate"
         schema_dict, key_props = _schema_parts(simple_schema)
         create_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
-        assert create_res.is_success
+        assert create_res.success
         insert_initial = loader.insert_records(
             stream_name, [{"id": 1, "name": "Initial"}]
         )
-        assert insert_initial.is_success
+        assert insert_initial.success
         count = _query_scalar(
             oracle_engine,
             'SELECT COUNT(*) AS "count" FROM test_truncate',
@@ -359,7 +359,7 @@ class TestOracleIntegration:
             "count",
         )
         assert int(count) == 0
-        assert loader.disconnect().is_success
+        assert loader.disconnect().success
 
     @pytest.mark.usefixtures("_clean_database")
     def test_custom_indexes(
@@ -384,7 +384,7 @@ class TestOracleIntegration:
             }
         )
         loader = FlextTargetOracleLoader(oracle_config)
-        assert loader.connect().is_success
+        assert loader.connect().success
         stream_name = "test_indexes"
         schema_dict, key_props = _schema_parts(simple_schema)
         loader.ensure_table_exists(stream_name, schema_dict, key_props)
@@ -401,7 +401,7 @@ class TestOracleIntegration:
         assert indexes["IDX_EMAIL_UNIQUE"] == "UNIQUE"
         composite_indexes = [index_name for index_name in indexes if "NAME" in index_name]
         assert len(composite_indexes) > 0
-        assert loader.disconnect().is_success
+        assert loader.disconnect().success
 
 
 @pytest.mark.integration
@@ -419,12 +419,12 @@ class TestOracleTargetE2E:
         """Test complete Singer workflow: schema -> records -> state."""
         target = FlextTargetOracle(config=oracle_config)
         init_result = target.initialize()
-        assert init_result.is_success
+        assert init_result.success
         for message in singer_messages:
             result = target.execute(
                 t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(message).decode("utf-8")
             )
-            assert result.is_success
+            assert result.success
         table_count = _query_scalar(
             oracle_engine,
             "SELECT COUNT(*) AS \"count\" FROM user_tables WHERE table_name = 'USERS'",

@@ -69,7 +69,7 @@ class FlextTargetOracleModelsCommands:
         def execute(self) -> r[str]:
             """Execute load command to initialize target."""
             settings_result = u.TargetOracle.load_target_settings(self.config_file)
-            if settings_result.is_failure:
+            if settings_result.failure:
                 return r[str].fail(settings_result.error or "Invalid settings")
             _ = self.state_file
             return r[str].ok("load_ready")
@@ -88,13 +88,13 @@ class FlextTargetOracleModelsCommands:
         def execute(self) -> r[str]:
             """Execute validation of target configuration."""
             settings_result = u.TargetOracle.load_target_settings(self.config_file)
-            if settings_result.is_failure:
+            if settings_result.failure:
                 return r[str].fail(
                     settings_result.error or "Configuration validation failed",
                 )
             settings: p.TargetOracle.OracleSettingsProtocol = settings_result.value
             validation_result = settings.validate_business_rules()
-            if validation_result.is_failure:
+            if validation_result.failure:
                 return r[str].fail(
                     validation_result.error or "Configuration validation failed",
                 )

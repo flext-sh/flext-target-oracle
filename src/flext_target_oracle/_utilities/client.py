@@ -60,7 +60,7 @@ class FlextTargetOracle:
         """Execute target readiness check."""
         _ = payload
         connection_result = self.loader.test_connection()
-        if connection_result.is_failure:
+        if connection_result.failure:
             return r[m.TargetOracle.ExecuteResult].fail(
                 connection_result.error or "Connection test failed",
             )
@@ -121,13 +121,13 @@ class FlextTargetOracle:
         processed = 0
         for message in messages:
             result = self.process_singer_message(message)
-            if result.is_failure:
+            if result.failure:
                 return r[m.TargetOracle.ProcessingSummary].fail(
                     result.error or "Message processing failed",
                 )
             processed += 1
         finalize_result = self.loader.finalize_all_streams()
-        if finalize_result.is_failure:
+        if finalize_result.failure:
             return r[m.TargetOracle.ProcessingSummary].fail(
                 finalize_result.error or "Finalize failed",
             )
@@ -176,7 +176,7 @@ class FlextTargetOracle:
             record_message.stream,
             record_message.record,
         )
-        if load_result.is_failure:
+        if load_result.failure:
             return r[bool].fail(load_result.error or "Failed to load record")
         return r[bool].ok(True)
 
@@ -191,7 +191,7 @@ class FlextTargetOracle:
             schema,
             schema_message.key_properties,
         )
-        if ensure_result.is_failure:
+        if ensure_result.failure:
             return r[bool].fail(ensure_result.error or "Failed to ensure table")
         self.schemas[stream_name] = schema_message
         return r[bool].ok(True)

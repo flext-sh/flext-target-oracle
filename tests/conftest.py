@@ -93,10 +93,10 @@ def oracle_engine() -> Generator[FlextDbOracleApi]:
         )
     )
     connect_result = api.connect()
-    if connect_result.is_failure:
+    if connect_result.failure:
         pytest.skip(connect_result.error or "Oracle not available")
     health_result = api.oracle_services.execute_query('SELECT 1 AS "health" FROM DUAL')
-    if health_result.is_failure:
+    if health_result.failure:
         disconnect_result = api.disconnect()
         _ = disconnect_result
         pytest.skip(health_result.error or "Oracle health check failed")
@@ -112,13 +112,13 @@ def clean_database(oracle_engine: FlextDbOracleApi) -> None:
         'SELECT table_name AS "table_name" FROM all_tables WHERE owner = :schema',
         oracle_t.ConfigMap(root={"schema": TEST_SCHEMA}),
     )
-    assert tables_result.is_success, tables_result.error
+    assert tables_result.success, tables_result.error
     tables = [str(row.root["table_name"]) for row in tables_result.value]
     for table in tables:
         drop_result = oracle_engine.execute_statement(
             f"DROP TABLE {TEST_SCHEMA}.{table} CASCADE CONSTRAINTS"
         )
-        assert drop_result.is_success, drop_result.error
+        assert drop_result.success, drop_result.error
 
 
 @pytest.fixture
@@ -212,53 +212,53 @@ def mock_oracle_api() -> Mock:
     mock_api.__enter__ = Mock(return_value=mock_api)
     mock_api.__exit__ = Mock(return_value=None)
     mock_api.connect.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
+        success=True,
+        failure=False,
         value=None,
     )
     mock_api.disconnect.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
+        success=True,
+        failure=False,
         value=None,
     )
     mock_api.get_tables.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
+        success=True,
+        failure=False,
         value=[],
     )
     mock_api.create_table_ddl.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
+        success=True,
+        failure=False,
         value="CREATE TABLE...",
     )
     mock_api.execute_ddl.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
+        success=True,
+        failure=False,
         value=None,
     )
     mock_api.build_insert_statement.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
+        success=True,
+        failure=False,
         value="INSERT INTO...",
     )
     mock_api.build_merge_statement.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
+        success=True,
+        failure=False,
         value="MERGE INTO...",
     )
     mock_api.query.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
+        success=True,
+        failure=False,
         value=None,
     )
     mock_api.execute_batch.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
+        success=True,
+        failure=False,
         value=None,
     )
     mock_api.get_columns.return_value = MagicMock(
-        is_success=True,
-        is_failure=False,
+        success=True,
+        failure=False,
         value=[],
     )
     mock_api.connection = MagicMock()
@@ -269,10 +269,10 @@ def mock_oracle_api() -> Mock:
 def mock_loader() -> Mock:
     """Create mocked FlextTargetOracleLoader for unit tests."""
     mock = Mock(spec=FlextTargetOracleLoader)
-    mock.connect.return_value = MagicMock(is_success=True, value=None)
-    mock.disconnect.return_value = MagicMock(is_success=True, value=None)
-    mock.ensure_table_exists.return_value = MagicMock(is_success=True, value=None)
-    mock.insert_records.return_value = MagicMock(is_success=True, value=None)
+    mock.connect.return_value = MagicMock(success=True, value=None)
+    mock.disconnect.return_value = MagicMock(success=True, value=None)
+    mock.ensure_table_exists.return_value = MagicMock(success=True, value=None)
+    mock.insert_records.return_value = MagicMock(success=True, value=None)
     return mock
 
 

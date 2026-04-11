@@ -33,7 +33,7 @@ def test_loader_execute_returns_ready_payload(
     """execute() should return a typed readiness payload."""
     loader = FlextTargetOracleLoader(loader_config)
     result = loader.execute()
-    assert isinstance(result.is_success, bool)
+    assert isinstance(result.success, bool)
 
 
 def test_load_record_buffers_and_finalize(
@@ -43,9 +43,9 @@ def test_load_record_buffers_and_finalize(
     loader = FlextTargetOracleLoader(loader_config)
     record: t.ScalarMapping = {"id": 1, "name": "Alice"}
     load_result = loader.load_record("users", record)
-    assert load_result.is_success
+    assert load_result.success
     finalize_result = loader.finalize_all_streams()
-    assert finalize_result.is_success
+    assert finalize_result.success
     assert finalize_result.value is not None
     assert finalize_result.value.streams_processed >= 0
 
@@ -68,7 +68,7 @@ def test_ensure_table_exists_returns_result(
     result = loader.ensure_table_exists(
         "users", validated.schema_definition, validated.key_properties
     )
-    assert isinstance(result.is_success, bool)
+    assert isinstance(result.success, bool)
 
 
 def test_flush_batch_uses_db_oracle_owned_sql_builders(
@@ -94,7 +94,7 @@ def test_flush_batch_uses_db_oracle_owned_sql_builders(
 
     result = loader._flush_batch("users")
 
-    assert result.is_success
+    assert result.success
     mock_services.build_insert_statement.assert_called_once_with(
         table_name,
         ["DATA", "_SDC_EXTRACTED_AT", "_SDC_LOADED_AT"],

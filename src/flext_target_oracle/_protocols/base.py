@@ -24,7 +24,7 @@ class FlextTargetOracleProtocolsBase:
         """Protocol for connection operation results from Oracle API."""
 
         @property
-        def is_failure(self) -> bool:
+        def failure(self) -> bool:
             """Return True if the operation failed."""
             ...
 

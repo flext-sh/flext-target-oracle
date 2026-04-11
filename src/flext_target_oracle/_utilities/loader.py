@@ -133,7 +133,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
         result: p.TargetOracle.ConnectionOperationResult,
     ) -> r[bool]:
         try:
-            if result.is_failure:
+            if result.failure:
                 return r[bool].fail(f"{operation_name} failed: {result.error}")
             return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
@@ -172,7 +172,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
                 tables_result = connected_api.get_tables(
                     schema=self.target_config.default_target_schema,
                 )
-                if tables_result.is_failure:
+                if tables_result.failure:
                     return r[bool].fail(
                         f"Failed to check tables: {tables_result.error}",
                     )
@@ -183,13 +183,13 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
                     self.log_info(f"Table {table_name} already exists")
                     return r[bool].ok(value=True)
                 ddl_result = self._build_create_table_statement(table_name, schema)
-                if ddl_result.is_failure:
+                if ddl_result.failure:
                     return r[bool].fail(
                         f"Failed to build create table SQL: {ddl_result.error}",
                     )
                 ddl_sql = ddl_result.value
                 exec_result = connected_api.execute_sql(ddl_sql)
-                if exec_result.is_failure:
+                if exec_result.failure:
                     return r[bool].fail(f"Failed to create table: {exec_result.error}")
                 self.log_info(f"Created table {table_name}")
                 return r[bool].ok(value=True)
@@ -201,7 +201,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
     def execute(self) -> r[m.TargetOracle.LoaderReadyResult]:
         """Execute domain service - returns connection test result."""
         connection_result = self.test_connection()
-        if connection_result.is_failure:
+        if connection_result.failure:
             return r[m.TargetOracle.LoaderReadyResult].fail(
                 f"Oracle connection failed: {connection_result.error}",
             )
@@ -222,7 +222,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
             for stream_name, records in self.record_buffers.items():
                 if records:
                     result = self._flush_batch(stream_name)
-                    if result.is_failure:
+                    if result.failure:
                         records_failed += len(records)
                         self.log_error(f"Failed to flush {stream_name}: {result.error}")
             return r[m.TargetOracle.LoaderFinalizeResult].ok(
@@ -261,7 +261,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
         try:
             for record in records:
                 load_res = self.load_record(stream_name, record)
-                if load_res.is_failure:
+                if load_res.failure:
                     return r[bool].fail(f"Failed to load record: {load_res.error}")
             return self._flush_batch(stream_name)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
@@ -313,7 +313,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
                 tables_result = connected_api.get_tables(
                     schema=self.target_config.default_target_schema,
                 )
-                if tables_result.is_failure:
+                if tables_result.failure:
                     return r[bool].fail(
                         f"Connection test failed: {tables_result.error}",
                     )
@@ -371,7 +371,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
             loaded_at = datetime.now(UTC).isoformat()
             with self.oracle_api as connected_api:
                 insert_sql_result = self._build_insert_statement(table_name)
-                if insert_sql_result.is_failure:
+                if insert_sql_result.failure:
                     return r[bool].fail(
                         f"Failed to build insert SQL: {insert_sql_result.error}",
                     )
@@ -383,7 +383,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
                     insert_sql_result.value,
                     params_list,
                 )
-                if result.is_failure:
+                if result.failure:
                     return r[bool].fail(f"Batch insert failed: {result.error}")
                 self.record_buffers[stream_name] = list[t.ContainerValueMapping]()
                 self.log_info(f"Flushed {len(records)} records to {table_name}")

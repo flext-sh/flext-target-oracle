@@ -8,30 +8,22 @@ import typing as _t
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if _t.TYPE_CHECKING:
-    from flext_cli.base import s
-    from flext_core.decorators import d
-    from flext_core.exceptions import e
-    from flext_core.handlers import h
-    from flext_core.mixins import x
-    from flext_core.result import r
-    from flext_target_oracle.constants import c
-    from flext_target_oracle.models import m
-    from flext_target_oracle.protocols import p
-    from flext_target_oracle.typings import t
-    from flext_target_oracle.utilities import u
+    from flext_target_oracle import c, d, e, h, m, p, r, s, t, u, x
 _LAZY_IMPORTS = build_lazy_import_map(
     {
-        "flext_cli.base": ("s",),
-        "flext_core.decorators": ("d",),
-        "flext_core.exceptions": ("e",),
-        "flext_core.handlers": ("h",),
-        "flext_core.mixins": ("x",),
-        "flext_core.result": ("r",),
-        "flext_target_oracle.constants": ("c",),
-        "flext_target_oracle.models": ("m",),
-        "flext_target_oracle.protocols": ("p",),
-        "flext_target_oracle.typings": ("t",),
-        "flext_target_oracle.utilities": ("u",),
+        "flext_target_oracle": (
+            "c",
+            "d",
+            "e",
+            "h",
+            "m",
+            "p",
+            "r",
+            "s",
+            "t",
+            "u",
+            "x",
+        ),
     },
 )
 

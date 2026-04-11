@@ -169,7 +169,7 @@ def demonstrate_basic_usage() -> None:
         config = create_configuration()
         logger.info("Validating configuration domain rules")
         validation_result = r[bool].ok(value=True)
-        if validation_result.is_failure:
+        if validation_result.failure:
             logger.error(f"Configuration validation failed: {validation_result.error}")
             return
         logger.info("Configuration validation successful")
@@ -177,14 +177,14 @@ def demonstrate_basic_usage() -> None:
         target = FlextTargetOracle(config)
         logger.info("Testing Oracle connection")
         connection_result = target.test_connection()
-        if connection_result.is_failure:
+        if connection_result.failure:
             logger.error(f"Oracle connection test failed: {connection_result.error}")
             return
         logger.info("Oracle connection test successful")
         logger.info("Step 3: Processing SCHEMA message")
         schema_message = create_sample_schema_message()
         schema_result = target.process_singer_message(schema_message)
-        if schema_result.is_failure:
+        if schema_result.failure:
             logger.error(f"Schema processing failed: {schema_result.error}")
             return
         logger.info("Schema processed successfully - table created/verified")
@@ -193,20 +193,20 @@ def demonstrate_basic_usage() -> None:
         for i, record_message in enumerate(record_messages, 1):
             logger.info(f"Processing record {i}/{len(record_messages)}")
             record_result = target.process_singer_message(record_message)
-            if record_result.is_failure:
+            if record_result.failure:
                 logger.error(f"Record {i} processing failed: {record_result.error}")
                 return
         logger.info(f"All {len(record_messages)} records processed successfully")
         logger.info("Step 5: Processing STATE message")
         state_message = create_sample_state_message()
         state_result = target.process_singer_message(state_message)
-        if state_result.is_failure:
+        if state_result.failure:
             logger.error(f"State processing failed: {state_result.error}")
             return
         logger.info("State processed successfully")
         logger.info("Step 6: Finalizing target and collecting statistics")
         stats_result = target.finalize()
-        if stats_result.is_failure:
+        if stats_result.failure:
             logger.error(f"Target finalization failed: {stats_result.error}")
             return
         stats = stats_result.value
@@ -244,7 +244,7 @@ def demonstrate_error_handling() -> None:
             "oracle_password": os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
         })
         validation_result = r[bool].ok(value=True)
-        if validation_result.is_failure:
+        if validation_result.failure:
             logger.info(f"Expected validation error: {validation_result.error}")
     except (
         ValueError,
@@ -260,7 +260,7 @@ def demonstrate_error_handling() -> None:
     target = FlextTargetOracle(config)
     invalid_message = '{"type": "INVALID", "data": "test"}'
     result = target.write_record(invalid_message)
-    if result.is_failure:
+    if result.failure:
         logger.info(f"Invalid message handled gracefully: {result.error}")
     logger.info("Error handling demonstration completed")
 

@@ -38,7 +38,7 @@ def main() -> None:
     config = FlextTargetOracleSettings.model_validate(config_dict)
     target = FlextTargetOracle(config=config)
     connection_result = target.test_connection()
-    if connection_result.is_failure:
+    if connection_result.failure:
         return
     messages = load_singer_messages()
     for message in messages:
@@ -57,7 +57,7 @@ def main() -> None:
         elif msg_type == "STATE":
             pass
         result = target.execute()
-        if result.is_failure:
+        if result.failure:
             return
 
 

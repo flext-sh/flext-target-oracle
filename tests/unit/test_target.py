@@ -66,18 +66,18 @@ class TestOracleTarget:
     """Behavioral tests for current public API."""
 
     def test_initialize_and_connection(self, target: FlextTargetOracle) -> None:
-        assert target.initialize().is_success
-        assert target.test_connection().is_success
+        assert target.initialize().success
+        assert target.test_connection().success
 
     def test_execute_returns_ready_status(self, target: FlextTargetOracle) -> None:
         result = target.execute()
-        assert result.is_success
+        assert result.success
         assert result.value.status == "ready"
         assert result.value.oracle_host == "localhost"
 
     def test_validate_configuration(self, target: FlextTargetOracle) -> None:
         result = target.validate_configuration()
-        assert result.is_success
+        assert result.success
 
     def test_discover_catalog_uses_registered_schemas(
         self, target: FlextTargetOracle
@@ -91,9 +91,9 @@ class TestOracleTarget:
             },
             "key_properties": ["id"],
         })
-        assert target.process_singer_message(schema_message).is_success
+        assert target.process_singer_message(schema_message).success
         catalog_result = target.discover_catalog()
-        assert catalog_result.is_success
+        assert catalog_result.success
         assert catalog_result.value.streams[0].stream == "users"
 
     def test_process_record_and_state_messages(self, target: FlextTargetOracle) -> None:
@@ -114,9 +114,9 @@ class TestOracleTarget:
             "type": "STATE",
             "value": {"bookmarks": {"users": 1}},
         })
-        assert target.process_singer_message(schema_message).is_success
-        assert target.process_singer_message(record_message).is_success
-        assert target.process_singer_message(state_message).is_success
+        assert target.process_singer_message(schema_message).success
+        assert target.process_singer_message(record_message).success
+        assert target.process_singer_message(state_message).success
         state_value = target.state_message.value
         assert isinstance(state_value, dict)
         bookmarks_obj: t.NormalizedValue | None = state_value.get("bookmarks")
@@ -152,22 +152,22 @@ class TestOracleTarget:
             }),
         ]
         result = target.process_singer_messages(messages)
-        assert result.is_success
+        assert result.success
         assert result.value.messages_processed == 3
 
     def test_unsupported_message_type_fails(self, target: FlextTargetOracle) -> None:
         result = target.write_record('{"type": "UNKNOWN"}')
-        assert result.is_failure
+        assert result.failure
 
     def test_invalid_json_payload_maps_to_processing_failure(
         self, target: FlextTargetOracle
     ) -> None:
         result = target.execute("{ invalid }")
-        assert result.is_success
+        assert result.success
         parse_result = target.write_record(
             '{"type": "RECORD", "stream": "users", "record": "bad"}'
         )
-        assert parse_result.is_failure
+        assert parse_result.failure
         assert issubclass(FlextTargetOracleExceptions.ProcessingError, Exception)
 
     def test_missing_schema_path_uses_schema_error_type(self) -> None:
@@ -181,7 +181,7 @@ class TestOracleTarget:
         result = target.write_record(
             t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json({"id": 1}).decode("utf-8")
         )
-        assert result.is_failure
+        assert result.failure
 
     def test_write_record_inserts_oracle_record(
         self, target: FlextTargetOracle
@@ -195,4 +195,4 @@ class TestOracleTarget:
             .decode("utf-8")
         )
         mocked_load_record.assert_called_once_with("users", {"id": 1})
-        assert result.is_success
+        assert result.success
