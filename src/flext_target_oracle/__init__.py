@@ -13,6 +13,7 @@ from flext_core.lazy import (
 from flext_target_oracle.__version__ import *
 
 if _t.TYPE_CHECKING:
+    from flext_cli.base import s
     from flext_core.decorators import d
     from flext_core.exceptions import e
     from flext_core.handlers import h
@@ -43,31 +44,13 @@ if _t.TYPE_CHECKING:
         FlextTargetOracleSchemaService,
         FlextTargetOracleServiceFactory,
     )
-    from flext_target_oracle.api import (
-        FlextTargetOracleService,
-        FlextTargetOracleService as s,
-    )
-    from flext_target_oracle.constants import (
-        FlextTargetOracleConstants,
-        FlextTargetOracleConstants as c,
-    )
-    from flext_target_oracle.models import (
-        FlextTargetOracleModels,
-        FlextTargetOracleModels as m,
-    )
-    from flext_target_oracle.protocols import (
-        FlextTargetOracleProtocols,
-        FlextTargetOracleProtocols as p,
-    )
+    from flext_target_oracle.api import FlextTargetOracleService
+    from flext_target_oracle.constants import FlextTargetOracleConstants, c
+    from flext_target_oracle.models import FlextTargetOracleModels, m
+    from flext_target_oracle.protocols import FlextTargetOracleProtocols, p
     from flext_target_oracle.settings import FlextTargetOracleSettings
-    from flext_target_oracle.typings import (
-        FlextTargetOracleTypes,
-        FlextTargetOracleTypes as t,
-    )
-    from flext_target_oracle.utilities import (
-        FlextTargetOracleUtilities,
-        FlextTargetOracleUtilities as u,
-    )
+    from flext_target_oracle.typings import FlextTargetOracleTypes, t
+    from flext_target_oracle.utilities import FlextTargetOracleUtilities, u
 _LAZY_IMPORTS = merge_lazy_imports(
     (
         "._constants",
@@ -89,25 +72,33 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "__version_info__",
             ),
             ".api": ("FlextTargetOracleService",),
-            ".constants": ("FlextTargetOracleConstants",),
-            ".models": ("FlextTargetOracleModels",),
-            ".protocols": ("FlextTargetOracleProtocols",),
+            ".constants": (
+                "FlextTargetOracleConstants",
+                "c",
+            ),
+            ".models": (
+                "FlextTargetOracleModels",
+                "m",
+            ),
+            ".protocols": (
+                "FlextTargetOracleProtocols",
+                "p",
+            ),
             ".settings": ("FlextTargetOracleSettings",),
-            ".typings": ("FlextTargetOracleTypes",),
-            ".utilities": ("FlextTargetOracleUtilities",),
+            ".typings": (
+                "FlextTargetOracleTypes",
+                "t",
+            ),
+            ".utilities": (
+                "FlextTargetOracleUtilities",
+                "u",
+            ),
+            "flext_cli.base": ("s",),
             "flext_core.decorators": ("d",),
             "flext_core.exceptions": ("e",),
             "flext_core.handlers": ("h",),
             "flext_core.mixins": ("x",),
             "flext_core.result": ("r",),
-        },
-        alias_groups={
-            ".api": (("s", "FlextTargetOracleService"),),
-            ".constants": (("c", "FlextTargetOracleConstants"),),
-            ".models": (("m", "FlextTargetOracleModels"),),
-            ".protocols": (("p", "FlextTargetOracleProtocols"),),
-            ".typings": (("t", "FlextTargetOracleTypes"),),
-            ".utilities": (("u", "FlextTargetOracleUtilities"),),
         },
     ),
     exclude_names=(
@@ -121,6 +112,9 @@ _LAZY_IMPORTS = merge_lazy_imports(
     ),
     module_name=__name__,
 )
+
+
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
 
 __all__ = [
     "FlextTargetOracle",
@@ -169,6 +163,3 @@ __all__ = [
     "u",
     "x",
 ]
-
-
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
