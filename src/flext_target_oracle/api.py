@@ -31,4 +31,6 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         raise TypeError(msg)
 
 
-__all__ = ["FlextTargetOracleService"]
+target_oracle = FlextTargetOracleService
+
+__all__ = ["FlextTargetOracleService", "target_oracle"]

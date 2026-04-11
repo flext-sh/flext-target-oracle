@@ -94,7 +94,7 @@ class FlextTargetOracleExceptions(e):
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
             resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
-                default_code=c.CONNECTION_ERROR,
+                default_code=c.ErrorCode.CONNECTION_ERROR,
                 metadata=metadata,
             )
             oracle_context: MutableMapping[str, t.MetadataValue] = (
@@ -150,7 +150,7 @@ class FlextTargetOracleExceptions(e):
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
             resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
-                default_code=c.AUTHENTICATION_ERROR,
+                default_code=c.ErrorCode.AUTHENTICATION_ERROR,
                 metadata=metadata,
             )
             oracle_context: MutableMapping[str, t.MetadataValue] = (
@@ -203,7 +203,7 @@ class FlextTargetOracleExceptions(e):
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
             resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
-                default_code=c.PROCESSING_ERROR,
+                default_code=c.ErrorCode.PROCESSING_ERROR,
                 metadata=metadata,
             )
             oracle_context: MutableMapping[str, t.MetadataValue] = (
@@ -260,7 +260,7 @@ class FlextTargetOracleExceptions(e):
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
             resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
-                default_code=c.VALIDATION_ERROR,
+                default_code=c.ErrorCode.VALIDATION_ERROR,
                 metadata=metadata,
             )
             oracle_context: MutableMapping[str, t.MetadataValue] = (
@@ -308,7 +308,7 @@ class FlextTargetOracleExceptions(e):
         ) -> None:
             """Initialize SQL error with Oracle-specific context."""
             resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
-                default_code=c.OPERATION_ERROR,
+                default_code=c.ErrorCode.OPERATION_ERROR,
                 metadata=metadata,
             )
             oracle_context: MutableMapping[str, t.MetadataValue] = (

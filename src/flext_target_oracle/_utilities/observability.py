@@ -37,7 +37,7 @@ class FlextTargetOracleUtilitiesObservability:
         return e.AuthenticationError(
             f"Oracle authentication failed for {username} on {oracle_service}",
             metadata=FlextTargetOracleErrorMetadata(
-                code=error_code or c.AUTHENTICATION_ERROR,
+                code=error_code or c.ErrorCode.AUTHENTICATION_ERROR,
                 context={
                     "user": username,
                     "oracle_service": oracle_service,
@@ -63,7 +63,7 @@ class FlextTargetOracleUtilitiesObservability:
         return e.OracleConnectionError(
             f"Oracle database unavailable: {connection_string}",
             metadata=FlextTargetOracleErrorMetadata(
-                code=error_code or c.CONNECTION_ERROR,
+                code=error_code or c.ErrorCode.CONNECTION_ERROR,
                 context={
                     "connection_string": connection_string,
                     "recovery_strategy": recovery_strategy,
@@ -89,7 +89,7 @@ class FlextTargetOracleUtilitiesObservability:
         return e.ProcessingError(
             f"Record processing failed for {stream_name}: {failed_records}/{record_count}",
             metadata=FlextTargetOracleErrorMetadata(
-                code=c.PROCESSING_ERROR,
+                code=c.ErrorCode.PROCESSING_ERROR,
                 context={
                     "stream_name": stream_name,
                     "record_count": record_count,
@@ -117,7 +117,7 @@ class FlextTargetOracleUtilitiesObservability:
         return e.SchemaError(
             f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
             metadata=FlextTargetOracleErrorMetadata(
-                code=c.VALIDATION_ERROR,
+                code=c.ErrorCode.VALIDATION_ERROR,
                 context={
                     "stream_name": stream_name,
                     "schema_errors": "; ".join(schema_errors),
