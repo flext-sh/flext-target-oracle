@@ -193,7 +193,7 @@ class FlextOracleTargetSettings(m.Value):
 class FlextOracleTargetLoader:
     """Oracle data loading with batch processing."""
 
-    def __init__(self, config: FlextOracleTargetSettings):
+    def __init__(self, settings: FlextOracleTargetSettings):
         # flext-db-oracle integration
         self.oracle_api = FlextDbOracleApi(oracle_config)
         self._record_buffers: Mapping[str, Sequence[t.Dict]] = {}
@@ -434,15 +434,15 @@ graph TB
 
 ```python
 # flext-core patterns
-config = FlextOracleTargetSettings(...)
-validation_result = config.validate_domain_rules()
+settings = FlextOracleTargetSettings(...)
+validation_result = settings.validate_domain_rules()
 
 # flext-db-oracle integration
-oracle_config = config.get_oracle_config()
+oracle_config = settings.get_oracle_config()
 api = FlextDbOracleApi(oracle_config)
 
 # flext-meltano integration
-target = FlextOracleTarget(config)
+target = FlextOracleTarget(settings)
 ```
 
 ## Deployment Architecture

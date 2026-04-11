@@ -65,7 +65,7 @@ ______________________________________________________________________
 ```python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Public API gateway & exports
-├── config.py                # ⚙️ m.Value configuration patterns
+├── settings.py                # ⚙️ m.Value configuration patterns
 ├── target.py                # 🎯 Singer Target implementation
 ├── loader.py                # 🔧 Oracle data loading operations
 └── exceptions.py            # 🚨 Domain-specific error hierarchy
@@ -179,7 +179,7 @@ __version__ = "0.9.9"
 
 #### **Domain Configuration Layer**
 
-##### **`config.py` - Configuration with Domain Validation**
+##### **`settings.py` - Configuration with Domain Validation**
 
 ```python
 """Oracle target configuration using FLEXT Value patterns."""
@@ -358,7 +358,7 @@ from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 class FlextOracleTargetLoader:
     """Oracle data loading with batch processing and error handling."""
 
-    def __init__(self, config: FlextOracleTargetSettings) -> None:
+    def __init__(self, settings: FlextOracleTargetSettings) -> None:
         """Initialize with flext-db-oracle integration."""
 
     def ensure_table_exists(self, stream_name: str, schema: dict) -> r[bool]:
@@ -435,7 +435,7 @@ ______________________________________________________________________
 ```python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean public API exports
-├── config/                  # ⚙️ Configuration module
+├── settings/                  # ⚙️ Configuration module
 │   ├── __init__.py         # Configuration exports
 │   ├── settings.py         # FlextOracleTargetSettings
 │   ├── validation.py       # Domain validation rules
@@ -464,7 +464,7 @@ For simple Singer targets, the current flat structure is acceptable with fixes:
 ```python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean exports (fixed)
-├── config.py                # ⚙️ Enhanced configuration
+├── settings.py                # ⚙️ Enhanced configuration
 ├── target.py                # 🎯 Singer-compliant implementation (fixed)
 ├── loader.py                # 🔧 Secure data loading (fixed)
 └── exceptions.py            # 🚨 Single source of exceptions (fixed)
@@ -636,7 +636,7 @@ ______________________________________________________________________
 │     target.py               │  # Application Layer
 │  (Singer Implementation)    │
 ├─────────────────────────────┤  ↓ depends on
-│     config.py               │  # Domain Layer
+│     settings.py               │  # Domain Layer
 │  (Business Configuration)   │
 ├─────────────────────────────┤  ↓ depends on
 │     loader.py               │  # Infrastructure Layer
@@ -745,7 +745,7 @@ ______________________________________________________________________
 ```python
 tests/
 ├── unit/                           # Unit tests (isolated)
-│   ├── test_config.py             # Tests config.py
+│   ├── test_config.py             # Tests settings.py
 │   ├── test_target.py             # Tests target.py
 │   ├── test_loader.py             # Tests loader.py
 │   └── test_exceptions.py         # Tests exceptions.py
@@ -782,17 +782,17 @@ class TestFlextOracleTargetSettings:
 
     def test_valid_configuration(self):
         """Test creation of valid configuration."""
-        config = FlextOracleTargetSettings(
+        settings = FlextOracleTargetSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test_user",
             oracle_password="test_pass",
         )
 
-        assert config.oracle_host == "localhost"
-        assert config.oracle_port == 1521  # Default value
-        assert config.batch_size == 1000  # Default value
-        assert config.load_method == LoadMethod.INSERT  # Default
+        assert settings.oracle_host == "localhost"
+        assert settings.oracle_port == 1521  # Default value
+        assert settings.batch_size == 1000  # Default value
+        assert settings.load_method == LoadMethod.INSERT  # Default
 
     def test_invalid_host_validation(self):
         """Test host validation rules."""
@@ -808,14 +808,14 @@ class TestFlextOracleTargetSettings:
 
     def test_domain_rules_validation(self):
         """Test business rule validation."""
-        config = FlextOracleTargetSettings(
+        settings = FlextOracleTargetSettings(
             oracle_host="localhost",
             oracle_service="XE",
             oracle_user="test_user",
             oracle_password="test_pass",
         )
 
-        result = config.validate_domain_rules()
+        result = settings.validate_domain_rules()
         # In real test, this would validate connectivity, permissions, etc.
         assert result.success or "connection" in result.error.lower()
 ```
@@ -1236,7 +1236,7 @@ ______________________________________________________________________
 
 ```python
 src/flext_target_oracle/
-├── config/
+├── settings/
 │   ├── environments.py     # Environment-specific configurations
 │   ├── schema_evolution.py # Table modification strategies
 │   └── performance.py      # Performance optimization settings

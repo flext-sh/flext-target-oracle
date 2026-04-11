@@ -261,10 +261,10 @@ targets:
 meltano add target target-oracle
 
 # Configure target
-meltano config target-oracle set oracle_host localhost
-meltano config target-oracle set oracle_service XE
-meltano config target-oracle set oracle_user meltano_user
-meltano config target-oracle set oracle_password secret_password
+meltano settings target-oracle set oracle_host localhost
+meltano settings target-oracle set oracle_service XE
+meltano settings target-oracle set oracle_user meltano_user
+meltano settings target-oracle set oracle_password secret_password
 
 # Test connection
 meltano invoke target-oracle --about
@@ -343,8 +343,8 @@ sequenceDiagram
 
 ```python
 # Configure batch processing for optimal performance
-config = FlextOracleTargetSettings(
-    # ... connection config
+settings = FlextOracleTargetSettings(
+    # ... connection settings
     batch_size=1000,  # Records per batch
     use_bulk_operations=True,  # Enable Oracle bulk operations
     connection_timeout=60,  # Connection timeout in seconds
@@ -378,8 +378,8 @@ def benchmark_batch_performance():
     results = {}
 
     for batch_size in batch_sizes:
-        config = FlextOracleTargetSettings(batch_size=batch_size)
-        target = FlextOracleTarget(config)
+        settings = FlextOracleTargetSettings(batch_size=batch_size)
+        target = FlextOracleTarget(settings)
 
         start_time = time.time()
 
@@ -396,7 +396,7 @@ def benchmark_batch_performance():
 
 ```python
 # Oracle performance configuration
-config = FlextOracleTargetSettings(
+settings = FlextOracleTargetSettings(
     # Connection optimization
     connection_timeout=60,
     # Batch optimization
@@ -560,13 +560,13 @@ def test_singer_tap_integration():
     # Run Singer tap to generate messages
     process = create_subprocess_exec(
         "tap-csv",
-        "--config",
+        "--settings",
         "tap_config.json",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
 
-    target = FlextOracleTarget(config)
+    target = FlextOracleTarget(settings)
 
     assert process.stdout is not None
     for raw_line in process.stdout:

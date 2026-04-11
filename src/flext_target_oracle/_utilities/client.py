@@ -21,10 +21,10 @@ class FlextTargetOracle:
 
     _logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
-    def __init__(self, config: FlextTargetOracleSettings) -> None:
+    def __init__(self, settings: FlextTargetOracleSettings) -> None:
         """Create target with validated settings and loader dependencies."""
-        self.config = config
-        self.loader = FlextTargetOracleLoader(config)
+        self.settings = settings
+        self.loader = FlextTargetOracleLoader(settings)
         self.schemas: MutableMapping[str, m.TargetOracle.SingerSchemaMessage] = {}
         self.state_message: m.TargetOracle.SingerStateMessage = (
             m.TargetOracle.SingerStateMessage(type="STATE", value={})
@@ -42,8 +42,8 @@ class FlextTargetOracle:
                         breadcrumb=[],
                         metadata={
                             "inclusion": "available",
-                            "table-name": self.config.get_table_name(stream_name),
-                            "schema-name": self.config.default_target_schema,
+                            "table-name": self.settings.get_table_name(stream_name),
+                            "schema-name": self.settings.default_target_schema,
                         },
                     ),
                 ],
@@ -75,8 +75,8 @@ class FlextTargetOracle:
             m.TargetOracle.ExecuteResult(
                 name="flext-target-oracle",
                 status="ready",
-                oracle_host=self.config.oracle_host,
-                oracle_service=self.config.oracle_service_name,
+                oracle_host=self.settings.oracle_host,
+                oracle_service=self.settings.oracle_service_name,
             ),
         )
 
@@ -88,8 +88,8 @@ class FlextTargetOracle:
         """Return static target metrics."""
         return m.TargetOracle.ImplementationMetrics(
             streams_configured=len(self.schemas),
-            batch_size=self.config.batch_size,
-            use_bulk_operations=self.config.use_bulk_operations,
+            batch_size=self.settings.batch_size,
+            use_bulk_operations=self.settings.use_bulk_operations,
         )
 
     def initialize(self) -> r[bool]:
@@ -152,7 +152,7 @@ class FlextTargetOracle:
 
     def validate_configuration(self) -> r[bool]:
         """Validate target configuration rules."""
-        return self.config.validate_business_rules()
+        return self.settings.validate_business_rules()
 
     def write_record(self, record_data: str) -> r[bool]:
         """Write one Singer record payload to Oracle."""

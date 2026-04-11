@@ -16,6 +16,8 @@ _LAZY_IMPORTS = build_lazy_import_map(
         ".errors": (
             "FlextTargetOracleErrorMetadata",
             "FlextTargetOracleExceptions",
+            "c",
+            "m",
         ),
         ".loader": ("FlextTargetOracleLoader",),
         ".observability": ("FlextTargetOracleUtilitiesObservability",),

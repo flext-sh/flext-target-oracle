@@ -278,7 +278,7 @@ ______________________________________________________________________
 ```python
 class OracleConnectionFactory:
     @staticmethod
-    def create_api(config: FlextOracleTargetSettings) -> FlextDbOracleApi:
+    def create_api(settings: FlextOracleTargetSettings) -> FlextDbOracleApi:
         # Factory para criação de conexões
 ```
 
@@ -347,7 +347,7 @@ ______________________________________________________________________
 #### **Módulos Python Atualizados**
 
 - ✅ **src/flext_target_oracle/**init**.py**: Docstring completo com ecosystem integration
-- ✅ **src/flext_target_oracle/config.py**: Docstrings comprehensive com validation patterns
+- ✅ **src/flext_target_oracle/settings.py**: Docstrings comprehensive com validation patterns
 - ✅ **src/flext_target_oracle/target.py**: Singer Target documentation completa
 - ✅ **src/flext_target_oracle/loader.py**: Infrastructure documentation com security warnings
 - ✅ **src/flext_target_oracle/exceptions.py**: Exception hierarchy completa com FLEXT patterns

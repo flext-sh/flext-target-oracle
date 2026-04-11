@@ -83,11 +83,11 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
             },
         ]
 
-    def __init__(self, config: FlextTargetOracleSettings, **_data: t.Scalar) -> None:
+    def __init__(self, settings: FlextTargetOracleSettings, **_data: t.Scalar) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly."""
         try:
             super().__init__()
-            oracle_connection = config.get_oracle_config()
+            oracle_connection = settings.get_oracle_config()
             oracle_config = FlextDbOracleSettings.model_validate({
                 "host": oracle_connection.host,
                 "port": oracle_connection.port,
@@ -96,7 +96,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
                 "password": oracle_connection.password,
             })
             oracle_api = FlextDbOracleApi(oracle_config)
-            self._target_config = config
+            self._target_config = settings
             self._oracle_api = oracle_api
             self._record_buffers = dict[str, list[t.ContainerValueMapping]]()
             self._total_records = 0

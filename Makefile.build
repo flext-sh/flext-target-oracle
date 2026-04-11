@@ -299,7 +299,7 @@ std-diagnose: ## Run comprehensive diagnostics
 	@ls -la
 	@echo ""
 	@echo "$(CYAN)Poetry Configuration:$(RESET)"
-	@$(POETRY) config --list 2>/dev/null || echo "Poetry not configured"
+	@$(POETRY) settings --list 2>/dev/null || echo "Poetry not configured"
 	@echo ""
 	@echo "$(CYAN)Dependencies Status:$(RESET)"
 	@$(POETRY) show --outdated 2>/dev/null || echo "No outdated dependencies"

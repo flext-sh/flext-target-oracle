@@ -18,7 +18,7 @@ from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 def load_config() -> t.ContainerMapping:
     """Load configuration from file."""
-    config_path = Path("config.json")
+    config_path = Path("settings.json")
     content = config_path.read_text(encoding="utf-8")
     adapter: TypeAdapter[t.ContainerMapping] = TypeAdapter(t.ContainerMapping)
     return adapter.validate_json(content)
@@ -35,8 +35,8 @@ def load_singer_messages() -> Sequence[t.ContainerMapping]:
 def main() -> None:
     """Run the example."""
     config_dict = load_config()
-    config = FlextTargetOracleSettings.model_validate(config_dict)
-    target = FlextTargetOracle(config=config)
+    settings = FlextTargetOracleSettings.model_validate(config_dict)
+    target = FlextTargetOracle(settings=settings)
     connection_result = target.test_connection()
     if connection_result.failure:
         return

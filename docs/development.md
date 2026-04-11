@@ -108,7 +108,7 @@ pytest tests/test_config.py -v
 pytest tests/test_target.py::test_target_initialization -v
 
 # Run with coverage for specific module
-pytest tests/test_config.py --cov=src/flext_target_oracle/config --cov-report=term-missing
+pytest tests/test_config.py --cov=src/flext_target_oracle/settings --cov-report=term-missing
 ```
 
 #### Integration Testing (Requires Oracle)
@@ -359,7 +359,7 @@ from flext_target_oracle import FlextOracleTargetSettings
 from flext_target_oracle import FlextOracleTargetLoader
 
 # Create test configuration
-config = FlextOracleTargetSettings(
+settings = FlextOracleTargetSettings(
     oracle_host="localhost",
     oracle_port=10521,
     oracle_service="XE",
@@ -369,7 +369,7 @@ config = FlextOracleTargetSettings(
 )
 
 # Test connection
-loader = FlextOracleTargetLoader(config)
+loader = FlextOracleTargetLoader(settings)
 
 # Verify with context manager
 with loader.oracle_api as connected_api:
@@ -432,14 +432,14 @@ PYTHONPATH=src python -c "
 from flext_target_oracle import FlextOracleTargetSettings
 from flext_target_oracle import FlextOracleTargetLoader
 logging.basicConfig(level=logging.DEBUG)
-config = FlextOracleTargetSettings(
+settings = FlextOracleTargetSettings(
     oracle_host='localhost',
     oracle_port=10521,
     oracle_service='XE',
     oracle_user='system',
     oracle_password='oracle'
 )
-loader = FlextOracleTargetLoader(config)
+loader = FlextOracleTargetLoader(settings)
 print('Config created successfully')
 "
 ```
@@ -466,7 +466,7 @@ python -c "from flext_target_oracle import *; print(dir())"
 
 ```python
 # ❌ Invalid configuration
-config = FlextOracleTargetSettings(
+settings = FlextOracleTargetSettings(
     oracle_host="",  # Empty host will fail validation
     oracle_port=70000,  # Port too high
     batch_size=-1,  # Negative batch size
@@ -474,7 +474,7 @@ config = FlextOracleTargetSettings(
 
 # ✅ Valid configuration with proper validation
 try:
-    config = FlextOracleTargetSettings(
+    settings = FlextOracleTargetSettings(
         oracle_host="localhost",
         oracle_port=1521,
         oracle_service="XE",
@@ -483,7 +483,7 @@ try:
     )
 
     # Test domain rules
-    validation_result = config.validate_domain_rules()
+    validation_result = settings.validate_domain_rules()
     if validation_result.is_failure:
         print(f"Validation failed: {validation_result.error}")
 
@@ -512,7 +512,7 @@ make shell
 
 # In shell:
 >>> from flext_target_oracle import *
->>> config = FlextOracleTargetSettings(...)
+>>> settings = FlextOracleTargetSettings(...)
 >>> # Interactive testing
 ```
 
@@ -559,10 +559,10 @@ class TestNewFeature:
     def test_success_case(self):
         """Test successful operation."""
         # Arrange
-        config = FlextOracleTargetSettings(...)
+        settings = FlextOracleTargetSettings(...)
 
         # Act
-        result = new_feature_operation(config)
+        result = new_feature_operation(settings)
 
         # Assert
         assert result.success
@@ -672,12 +672,12 @@ def benchmark_batch_sizes(records: List[t.Dict]):
     results = {}
 
     for batch_size in batch_sizes:
-        config = FlextOracleTargetSettings(
-            # ... other config
+        settings = FlextOracleTargetSettings(
+            # ... other settings
             batch_size=batch_size
         )
 
-        target = FlextOracleTarget(config)
+        target = FlextOracleTarget(settings)
 
         start_time = time.time()
 

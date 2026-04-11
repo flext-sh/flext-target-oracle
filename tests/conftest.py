@@ -47,12 +47,14 @@ DOCKER_COMPOSE_PATH = (
 )
 
 
-def pytest_configure(config: pytest.Config) -> None:
+def pytest_configure(settings: pytest.Config) -> None:
     """Register custom markers."""
-    config.addinivalue_line("markers", "integration: mark test as integration test")
-    config.addinivalue_line("markers", "e2e: mark test as end-to-end test")
-    config.addinivalue_line("markers", "slow: mark test as slow running")
-    config.addinivalue_line("markers", "oracle: mark test as requiring Oracle database")
+    settings.addinivalue_line("markers", "integration: mark test as integration test")
+    settings.addinivalue_line("markers", "e2e: mark test as end-to-end test")
+    settings.addinivalue_line("markers", "slow: mark test as slow running")
+    settings.addinivalue_line(
+        "markers", "oracle: mark test as requiring Oracle database"
+    )
 
 
 @pytest.fixture(scope="session")
@@ -151,7 +153,7 @@ def oracle_api(oracle_config: FlextTargetOracleSettings) -> MagicMock:
         else str(oracle_config.oracle_password),
     )
     mock_api = MagicMock(spec=FlextDbOracleApi)
-    mock_api.config = db_config
+    mock_api.settings = db_config
     mock_api.connect.return_value = r[str].ok("Connected successfully")
     mock_api.disconnect.return_value = r[str].ok("Disconnected successfully")
     mock_api.test_connection.return_value = r[bool].ok(value=True)
@@ -180,7 +182,7 @@ def oracle_loader(
 @pytest.fixture
 def oracle_target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle:
     """Create FlextTargetOracle instance."""
-    return FlextTargetOracle(config=oracle_config)
+    return FlextTargetOracle(settings=oracle_config)
 
 
 @pytest.fixture
@@ -201,7 +203,7 @@ def sample_config() -> FlextTargetOracleSettings:
 @pytest.fixture
 def sample_target(sample_config: FlextTargetOracleSettings) -> FlextTargetOracle:
     """Create FlextTargetOracle instance for unit testing."""
-    return FlextTargetOracle(config=sample_config)
+    return FlextTargetOracle(settings=sample_config)
 
 
 @pytest.fixture
@@ -471,7 +473,7 @@ def temp_config_file(tmp_path: Path) -> Path:
         "batch_size": 1000,
         "use_bulk_operations": True,
     }
-    config_file = tmp_path / "config.json"
+    config_file = tmp_path / "settings.json"
     config_file.write_text(
         t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(config_data).decode("utf-8"),
     )

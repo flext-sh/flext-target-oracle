@@ -135,7 +135,7 @@ class ProductionConfig:
             c.TargetOracle.LOAD_METHOD_BULK_INSERT,
         )
         _ = load_method  # reserved for future use
-        config = FlextTargetOracleSettings.model_validate({
+        settings = FlextTargetOracleSettings.model_validate({
             "oracle_host": oracle_host,
             "oracle_port": oracle_port,
             "oracle_service_name": oracle_service,
@@ -162,20 +162,20 @@ class ProductionConfig:
             load_method,
             connection_timeout,
         )
-        return config
+        return settings
 
 
 class ProductionTargetManager:
     """Production-grade target manager with comprehensive error handling."""
 
-    def __init__(self, config: FlextTargetOracleSettings) -> None:
+    def __init__(self, settings: FlextTargetOracleSettings) -> None:
         """Initialize production target manager.
 
         Args:
-            config: Validated Oracle target configuration
+            settings: Validated Oracle target configuration
 
         """
-        self.config = config
+        self.settings = settings
         self.target: FlextTargetOracle | None = None
         self.shutdown_requested = False
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -251,7 +251,7 @@ class ProductionTargetManager:
                     f"Configuration validation failed: {validation_result.error}",
                 )
             logger.info("Creating Oracle target instance")
-            self.target = FlextTargetOracle(self.config)
+            self.target = FlextTargetOracle(self.settings)
             logger.info("Testing Oracle database connectivity")
             connection_result = self.target.test_connection()
             if connection_result.failure:
@@ -397,9 +397,9 @@ def demonstrate_production_setup() -> None:
     logger.info("Starting production setup demonstration")
     try:
         logger.info("Step 1: Creating production configuration")
-        config = ProductionConfig.create_from_environment()
+        settings = ProductionConfig.create_from_environment()
         logger.info("Step 2: Initializing production target manager")
-        manager = ProductionTargetManager(config)
+        manager = ProductionTargetManager(settings)
         init_result = manager.initialize()
         if init_result.failure:
             logger.error("Production initialization failed: %s", init_result.error)

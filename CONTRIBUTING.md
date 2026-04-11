@@ -180,7 +180,7 @@ pre-commit install
    - DDL/DML operations via `flext-db-oracle`
    - Schema flattening and type mapping
 
-1. **Configuration** (`src/flext_target_oracle/config.py`):
+1. **Configuration** (`src/flext_target_oracle/settings.py`):
 
    - Pydantic models for configuration
    - Validation and defaults

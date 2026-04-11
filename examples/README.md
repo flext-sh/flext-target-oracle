@@ -118,14 +118,14 @@ if result.is_failure:
 Type-safe configuration with domain validation:
 
 ```python
-config = FlextOracleTargetSettings(
+settings = FlextOracleTargetSettings(
     oracle_host="localhost",
     oracle_service="XE",
     oracle_user="target_user",
     oracle_password="secure_password",
 )
 
-validation_result = config.validate_domain_rules()
+validation_result = settings.validate_domain_rules()
 if validation_result.is_failure:
     raise ValueError(f"Invalid configuration: {validation_result.error}")
 ```

@@ -20,9 +20,9 @@ if ! docker ps | grep -q "flext-oracle-test"; then
 	cd .. && make oracle-start && cd examples
 fi
 
-# Create example config
+# Create example settings
 echo -e "${BLUE}Creating example configuration...${NC}"
-cat >config.json <<EOF
+cat >settings.json <<EOF
 {
     "oracle_host": "localhost",
     "oracle_port": 1521,
@@ -71,6 +71,6 @@ echo "  - Custom index on USERS.EMAIL"
 
 # Cleanup
 echo -e "${YELLOW}Cleaning up example files...${NC}"
-rm -f config.json singer_data.jsonl
+rm -f settings.json singer_data.jsonl
 
 echo -e "${GREEN}Done!${NC}"

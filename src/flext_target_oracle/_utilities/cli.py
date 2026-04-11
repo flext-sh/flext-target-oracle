@@ -44,7 +44,7 @@ class FlextTargetOracleCliService:
 
     def _get_help_text(self) -> str:
         """Return text help for target CLI usage."""
-        return "Usage: target-oracle [validate|load|about]\n  validate  validate config and connection\n  load      initialize target for loading\n  about     show project information"
+        return "Usage: target-oracle [validate|load|about]\n  validate  validate settings and connection\n  load      initialize target for loading\n  about     show project information"
 
 
 def main() -> int:

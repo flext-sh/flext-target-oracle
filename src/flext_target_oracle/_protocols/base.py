@@ -50,7 +50,7 @@ class FlextTargetOracleProtocolsBase:
 
         def connect_target(
             self,
-            config: m.TargetOracle.OracleConnectionConfig,
+            settings: m.TargetOracle.OracleConnectionConfig,
         ) -> FlextMeltanoProtocols.Result[bool]:
             """Connect to Oracle database."""
             ...
@@ -117,7 +117,7 @@ class FlextTargetOracleProtocolsBase:
 
         def validate_target_credentials(
             self,
-            config: m.TargetOracle.OracleConnectionConfig,
+            settings: m.TargetOracle.OracleConnectionConfig,
         ) -> FlextMeltanoProtocols.Result[bool]:
             """Validate Oracle credentials."""
             ...

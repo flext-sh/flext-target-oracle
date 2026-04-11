@@ -607,7 +607,7 @@ LINT_CORRECTIONS_*.md
 !docker-compose.yml
 !Dockerfile
 !.gitignore
-!.pre-commit-config.yaml
+!.pre-commit-settings.yaml
 !meltano.yml
 !go.mod
 !package.json

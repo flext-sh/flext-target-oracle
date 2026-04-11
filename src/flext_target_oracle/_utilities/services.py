@@ -15,11 +15,11 @@ class FlextTargetOracleConnectionService:
 
     def __init__(
         self,
-        config: FlextTargetOracleSettings,
+        settings: FlextTargetOracleSettings,
         oracle_api: FlextDbOracleApi,
     ) -> None:
         """Store configuration and Oracle API dependency."""
-        self.config = config
+        self.settings = settings
         self.oracle_api = oracle_api
 
     def execute(self) -> r[None]:
@@ -29,13 +29,13 @@ class FlextTargetOracleConnectionService:
     def get_connection_info(self) -> r[m.TargetOracle.OracleConnectionModel]:
         """Return normalized connection model."""
         return r[m.TargetOracle.OracleConnectionModel].ok(
-            self.config.get_oracle_config(),
+            self.settings.get_oracle_config(),
         )
 
     def test_connection(self) -> r[None]:
         """Check Oracle access by listing schema tables."""
         tables_result = self.oracle_api.get_tables(
-            schema=self.config.default_target_schema,
+            schema=self.settings.default_target_schema,
         )
         if tables_result.failure:
             return r[None].fail(tables_result.error or "Connection test failed")
@@ -47,11 +47,11 @@ class FlextTargetOracleSchemaService:
 
     def __init__(
         self,
-        config: FlextTargetOracleSettings,
+        settings: FlextTargetOracleSettings,
         oracle_api: FlextDbOracleApi,
     ) -> None:
         """Store schema service dependencies."""
-        self.config = config
+        self.settings = settings
         self.oracle_api = oracle_api
 
     def ensure_table_exists(
@@ -76,11 +76,11 @@ class FlextTargetOracleBatchService:
 
     def __init__(
         self,
-        config: FlextTargetOracleSettings,
+        settings: FlextTargetOracleSettings,
         oracle_api: FlextDbOracleApi,
     ) -> None:
         """Initialize batch storage and required dependencies."""
-        self.config = config
+        self.settings = settings
         self.oracle_api = oracle_api
         self._batches: defaultdict[
             str, list[m.TargetOracle.Meltano.SingerRecordMessage]
@@ -120,9 +120,9 @@ class FlextTargetOracleBatchService:
 class FlextTargetOracleRecordService:
     """Record validation and transformation service implements RecordService protocol."""
 
-    def __init__(self, config: FlextTargetOracleSettings) -> None:
+    def __init__(self, settings: FlextTargetOracleSettings) -> None:
         """Store record service configuration."""
-        self.config = config
+        self.settings = settings
 
     def execute(self) -> r[None]:
         """Run record-service readiness check."""
@@ -166,11 +166,11 @@ class FlextTargetOracleServiceFactory:
 
     def __init__(
         self,
-        config: FlextTargetOracleSettings,
+        settings: FlextTargetOracleSettings,
         oracle_api: FlextDbOracleApi,
     ) -> None:
         """Store dependencies shared by service instances."""
-        self._config = config
+        self._config = settings
         self._oracle_api = oracle_api
 
     def create_batch_service(self) -> FlextTargetOracleBatchService:

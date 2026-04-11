@@ -13,7 +13,7 @@ Key Concepts Demonstrated:
 
 Prerequisites:
     - Oracle database running (localhost:1521/XE)
-    - User 'system' with password 'oracle' (or update config)
+    - User 'system' with password 'oracle' (or update settings)
     - Python 3.13+ with flext-target-oracle installed
 
 Usage:
@@ -45,7 +45,7 @@ def create_configuration() -> FlextTargetOracleSettings:
 
     """
     logger.info("Creating Oracle target configuration")
-    config = FlextTargetOracleSettings.model_validate({
+    settings = FlextTargetOracleSettings.model_validate({
         "oracle_host": "localhost",
         "oracle_port": 1521,
         "oracle_service_name": "XE",
@@ -57,9 +57,9 @@ def create_configuration() -> FlextTargetOracleSettings:
         "transaction_timeout": 30,
     })
     logger.info(
-        f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service_name}",
+        f"Configuration created: {settings.oracle_host}:{settings.oracle_port}/{settings.oracle_service_name}",
     )
-    return config
+    return settings
 
 
 def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
@@ -161,7 +161,7 @@ def demonstrate_basic_usage() -> None:
     logger.info("Starting FLEXT Target Oracle basic usage demonstration")
     try:
         logger.info("Step 1: Creating configuration")
-        config = create_configuration()
+        settings = create_configuration()
         logger.info("Validating configuration domain rules")
         validation_result = r[bool].ok(value=True)
         if validation_result.failure:
@@ -169,7 +169,7 @@ def demonstrate_basic_usage() -> None:
             return
         logger.info("Configuration validation successful")
         logger.info("Step 2: Initializing Oracle target")
-        target = FlextTargetOracle(config)
+        target = FlextTargetOracle(settings)
         logger.info("Testing Oracle connection")
         connection_result = target.test_connection()
         if connection_result.failure:
@@ -251,8 +251,8 @@ def demonstrate_error_handling() -> None:
         ImportError,
     ) as e:
         logger.info("Configuration creation failed as expected", error=str(e))
-    config = create_configuration()
-    target = FlextTargetOracle(config)
+    settings = create_configuration()
+    target = FlextTargetOracle(settings)
     invalid_message = '{"type": "INVALID", "data": "test"}'
     result = target.write_record(invalid_message)
     if result.failure:

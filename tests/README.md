@@ -229,7 +229,7 @@ class TestNewFeature:
     def test_feature_behavior(self, mock_oracle_api):
         """Test description."""
         # Arrange
-        loader = OracleLoader(config)
+        loader = OracleLoader(settings)
 
         # Act
         result = loader.some_method()
