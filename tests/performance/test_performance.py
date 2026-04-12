@@ -8,8 +8,8 @@ from collections.abc import Mapping, Sequence
 from unittest.mock import Mock
 
 import pytest
-from flext_core import r
 
+from flext_core import r
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 from tests import m
 
@@ -19,7 +19,7 @@ class TestPerformance:
     """Keep fast checks for throughput-sensitive code paths."""
 
     def _target(self) -> FlextTargetOracle:
-        config = FlextTargetOracleSettings.model_validate({
+        settings = FlextTargetOracleSettings.model_validate({
             "oracle_host": "localhost",
             "oracle_service_name": "XE",
             "oracle_user": "test",
@@ -27,7 +27,7 @@ class TestPerformance:
             "batch_size": 5000,
             "use_bulk_operations": True,
         })
-        target = FlextTargetOracle(config=config)
+        target = FlextTargetOracle(settings=settings)
         mock_oracle_api = Mock()
         mock_oracle_api.__enter__ = Mock(return_value=mock_oracle_api)
         mock_oracle_api.__exit__ = Mock(return_value=None)

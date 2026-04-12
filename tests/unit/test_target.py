@@ -21,7 +21,7 @@ from tests import m, t
 @pytest.fixture
 def target(mock_oracle_api: Mock) -> FlextTargetOracle:
     """Create target with mocked loader."""
-    config = FlextTargetOracleSettings.model_validate({
+    settings = FlextTargetOracleSettings.model_validate({
         "oracle_host": "localhost",
         "oracle_service_name": "XE",
         "oracle_user": "test",
@@ -30,7 +30,7 @@ def target(mock_oracle_api: Mock) -> FlextTargetOracle:
         "batch_size": 200,
         "commit_interval": 100,
     })
-    client = FlextTargetOracle(config=config)
+    client = FlextTargetOracle(settings=settings)
     object.__setattr__(
         client.loader, "test_connection", Mock(return_value=r[bool].ok(value=True))
     )

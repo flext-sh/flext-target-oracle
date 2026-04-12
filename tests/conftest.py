@@ -47,14 +47,12 @@ DOCKER_COMPOSE_PATH = (
 )
 
 
-def pytest_configure(settings: pytest.Config) -> None:
+def pytest_configure(config: pytest.Config) -> None:
     """Register custom markers."""
-    settings.addinivalue_line("markers", "integration: mark test as integration test")
-    settings.addinivalue_line("markers", "e2e: mark test as end-to-end test")
-    settings.addinivalue_line("markers", "slow: mark test as slow running")
-    settings.addinivalue_line(
-        "markers", "oracle: mark test as requiring Oracle database"
-    )
+    config.addinivalue_line("markers", "integration: mark test as integration test")
+    config.addinivalue_line("markers", "e2e: mark test as end-to-end test")
+    config.addinivalue_line("markers", "slow: mark test as slow running")
+    config.addinivalue_line("markers", "oracle: mark test as requiring Oracle database")
 
 
 @pytest.fixture(scope="session")

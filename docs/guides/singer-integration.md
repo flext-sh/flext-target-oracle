@@ -560,7 +560,7 @@ def test_singer_tap_integration():
     # Run Singer tap to generate messages
     process = create_subprocess_exec(
         "tap-csv",
-        "--settings",
+        "--config",
         "tap_config.json",
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,

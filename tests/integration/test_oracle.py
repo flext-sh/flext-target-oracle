@@ -417,7 +417,7 @@ class TestOracleTargetE2E:
         singer_messages: Sequence[t.ContainerMapping],
     ) -> None:
         """Test complete Singer workflow: schema -> records -> state."""
-        target = FlextTargetOracle(config=oracle_config)
+        target = FlextTargetOracle(settings=oracle_config)
         init_result = target.initialize()
         assert init_result.success
         for message in singer_messages:
@@ -453,7 +453,7 @@ class TestOracleTargetE2E:
                 "ignored_columns": ["password", "internal_id"],
             }
         )
-        target = FlextTargetOracle(config=oracle_config)
+        target = FlextTargetOracle(settings=oracle_config)
         target.initialize()
         schema_msg = {
             "type": "SCHEMA",

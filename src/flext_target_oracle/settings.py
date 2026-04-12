@@ -24,8 +24,7 @@ class FlextTargetOracleSettings(FlextSettings):
     """Runtime settings for Oracle Singer target operations."""
 
     model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
-        env_prefix="FLEXT_TARGET_ORACLE_",
-        extra="ignore",
+        env_prefix="FLEXT_TARGET_ORACLE_", extra="ignore"
     )
 
     oracle_host: Annotated[
