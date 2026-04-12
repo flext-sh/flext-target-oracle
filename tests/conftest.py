@@ -29,8 +29,6 @@ from flext_target_oracle import (
 )
 from tests import r, t, u
 
-pytest_plugins = ["flext_tests.conftest_plugin"]
-
 logger = u.fetch_logger(__name__)
 ORACLE_CONTAINER_NAME = "flext-oracle-test"
 ORACLE_IMAGE = "gvenzl/oracle-xe:21-slim"
