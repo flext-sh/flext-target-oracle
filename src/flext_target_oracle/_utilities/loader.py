@@ -60,7 +60,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
     _total_records: int = PrivateAttr(default=0)
 
     @staticmethod
-    def _normalize_log_value(value: t.ContainerValue) -> t.NormalizedValue:
+    def _normalize_log_value(value: t.ContainerValue) -> t.RecursiveContainer:
         """Normalize logging payloads into scalar or string values."""
         if isinstance(value, (str, int, float, bool, datetime)):
             return value

@@ -16,18 +16,22 @@ from flext_core import t
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 
-def load_config() -> t.ContainerMapping:
+def load_config() -> t.RecursiveContainerMapping:
     """Load configuration from file."""
     config_path = Path("settings.json")
     content = config_path.read_text(encoding="utf-8")
-    adapter: TypeAdapter[t.ContainerMapping] = TypeAdapter(t.ContainerMapping)
+    adapter: TypeAdapter[t.RecursiveContainerMapping] = TypeAdapter(
+        t.RecursiveContainerMapping
+    )
     return adapter.validate_json(content)
 
 
-def load_singer_messages() -> Sequence[t.ContainerMapping]:
+def load_singer_messages() -> Sequence[t.RecursiveContainerMapping]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
-    adapter: TypeAdapter[t.ContainerMapping] = TypeAdapter(t.ContainerMapping)
+    adapter: TypeAdapter[t.RecursiveContainerMapping] = TypeAdapter(
+        t.RecursiveContainerMapping
+    )
     with data_path.open(encoding="utf-8") as f:
         return [adapter.validate_json(line) for line in f if line.strip()]
 
@@ -47,9 +51,9 @@ def main() -> None:
             message.get("stream", "unknown")
         elif msg_type == "RECORD":
             message.get("stream", "unknown")
-            record_obj: t.NormalizedValue = message.get("record", {})
-            record_dict: t.ContainerMapping = (
-                cast("t.ContainerMapping", record_obj)
+            record_obj: t.RecursiveContainer = message.get("record", {})
+            record_dict: t.RecursiveContainerMapping = (
+                cast("t.RecursiveContainerMapping", record_obj)
                 if isinstance(record_obj, dict)
                 else {}
             )

@@ -276,13 +276,13 @@ def mock_loader() -> Mock:
 
 
 @pytest.fixture
-def schema() -> t.ContainerMapping:
+def schema() -> t.RecursiveContainerMapping:
     """Simple Singer schema message for unit testing."""
     return {
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
-            "type": "t.NormalizedValue",
+            "type": "t.RecursiveContainer",
             "properties": {
                 "id": {"type": "integer"},
                 "name": {"type": "string"},
@@ -294,7 +294,7 @@ def schema() -> t.ContainerMapping:
 
 
 @pytest.fixture
-def record() -> t.ContainerMapping:
+def record() -> t.RecursiveContainerMapping:
     """Simple Singer record message for unit testing."""
     return {
         "type": "RECORD",
@@ -304,7 +304,7 @@ def record() -> t.ContainerMapping:
 
 
 @pytest.fixture
-def state() -> t.ContainerMapping:
+def state() -> t.RecursiveContainerMapping:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -313,13 +313,13 @@ def state() -> t.ContainerMapping:
 
 
 @pytest.fixture
-def simple_schema() -> t.ContainerMapping:
+def simple_schema() -> t.RecursiveContainerMapping:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
-            "type": "t.NormalizedValue",
+            "type": "t.RecursiveContainer",
             "properties": {
                 "id": {"type": "integer"},
                 "name": {"type": "string"},
@@ -332,22 +332,22 @@ def simple_schema() -> t.ContainerMapping:
 
 
 @pytest.fixture
-def nested_schema() -> t.ContainerMapping:
+def nested_schema() -> t.RecursiveContainerMapping:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
         "stream": "orders",
         "schema": {
-            "type": "t.NormalizedValue",
+            "type": "t.RecursiveContainer",
             "properties": {
                 "id": {"type": "integer"},
                 "customer": {
-                    "type": "t.NormalizedValue",
+                    "type": "t.RecursiveContainer",
                     "properties": {
                         "id": {"type": "integer"},
                         "name": {"type": "string"},
                         "address": {
-                            "type": "t.NormalizedValue",
+                            "type": "t.RecursiveContainer",
                             "properties": {
                                 "street": {"type": "string"},
                                 "city": {"type": "string"},
@@ -359,7 +359,7 @@ def nested_schema() -> t.ContainerMapping:
                 "items": {
                     "type": "array",
                     "items": {
-                        "type": "t.NormalizedValue",
+                        "type": "t.RecursiveContainer",
                         "properties": {
                             "product_id": {"type": "integer"},
                             "quantity": {"type": "integer"},
@@ -376,7 +376,7 @@ def nested_schema() -> t.ContainerMapping:
 
 
 @pytest.fixture
-def sample_record() -> t.ContainerMapping:
+def sample_record() -> t.RecursiveContainerMapping:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -393,7 +393,7 @@ def sample_record() -> t.ContainerMapping:
 
 
 @pytest.fixture
-def batch_records() -> Sequence[t.ContainerMapping]:
+def batch_records() -> Sequence[t.RecursiveContainerMapping]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -412,7 +412,7 @@ def batch_records() -> Sequence[t.ContainerMapping]:
 
 
 @pytest.fixture
-def state_message() -> t.ContainerMapping:
+def state_message() -> t.RecursiveContainerMapping:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -430,10 +430,10 @@ def state_message() -> t.ContainerMapping:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema: t.ContainerMapping,
-    sample_record: t.ContainerMapping,
-    state_message: t.ContainerMapping,
-) -> Sequence[t.ContainerMapping]:
+    simple_schema: t.RecursiveContainerMapping,
+    sample_record: t.RecursiveContainerMapping,
+    state_message: t.RecursiveContainerMapping,
+) -> Sequence[t.RecursiveContainerMapping]:
     """Complete Singer message stream for testing."""
     return [simple_schema, sample_record, sample_record, state_message]
 
@@ -461,7 +461,7 @@ def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
 @pytest.fixture
 def temp_config_file(tmp_path: Path) -> Path:
     """Create temporary configuration file."""
-    config_data: t.NormalizedValue = {
+    config_data: t.RecursiveContainer = {
         "oracle_host": ORACLE_HOST,
         "oracle_port": ORACLE_PORT,
         "oracle_service_name": ORACLE_SERVICE,
@@ -491,7 +491,7 @@ def large_dataset() -> Sequence[t.Dict]:
         "type": "SCHEMA",
         "stream": "performance_test",
         "schema": {
-            "type": "t.NormalizedValue",
+            "type": "t.RecursiveContainer",
             "properties": {
                 "id": {"type": "integer"},
                 "data": {"type": "string"},

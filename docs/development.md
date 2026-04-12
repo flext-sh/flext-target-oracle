@@ -387,7 +387,7 @@ def test_table_management():
 
     # Schema definition
     schema = {
-        "type": "t.NormalizedValue",
+        "type": "t.RecursiveContainer",
         "properties": {
             "id": {"type": "integer"},
             "name": {"type": "string"},
@@ -635,7 +635,7 @@ class TestOracleIntegration:
 def sample_schema():
     """Standard test schema."""
     return {
-        "type": "t.NormalizedValue",
+        "type": "t.RecursiveContainer",
         "properties": {
             "id": {"type": "integer"},
             "name": {"type": "string"},

@@ -831,7 +831,7 @@ class TestSingerCompliance:
             "type": "SCHEMA",
             "stream": "test_users",
             "schema": {
-                "type": "t.NormalizedValue",
+                "type": "t.RecursiveContainer",
                 "properties": {
                     "id": {"type": "integer"},
                     "name": {"type": "string"},
@@ -957,7 +957,7 @@ def ensure_table_exists(self, stream_name: str, schema: t.Dict) -> r[bool]:
 
     Example:
         >>> schema = {
-        ...     "type": "t.NormalizedValue",
+        ...     "type": "t.RecursiveContainer",
         ...     "properties": {"id": {"type": "integer"}, "name": {"type": "string"}},
         ... }
         >>> result = loader.ensure_table_exists("users", schema)

@@ -103,7 +103,7 @@ class FlextTargetOracleUtilitiesObservability:
     def target_oracle_singer_schema_validation_failed(
         *,
         stream_name: str,
-        schema_errors: _t.Sequence[str],
+        schema_errors: _t.t.StrSequence,
         singer_specification: str = "1.5.0",
     ) -> e.SchemaError:
         """Build a Singer schema validation failure."""
@@ -147,7 +147,7 @@ class FlextTargetOracleUtilitiesObservability:
     def target_oracle_monitor_query_performance(
         table_name: str,
         operation: str = "SELECT",
-    ) -> Generator[_t.Mapping[str, str]]:
+    ) -> Generator[_t.t.StrMapping]:
         """Yield a mutable context while timing a query operation."""
         FlextTargetOracleUtilitiesObservability._logger.debug(
             "Starting query performance monitor",

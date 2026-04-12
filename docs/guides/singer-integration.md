@@ -46,7 +46,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
   "type": "SCHEMA",
   "stream": "users",
   "schema": {
-    "type": "t.NormalizedValue",
+    "type": "t.RecursiveContainer",
     "properties": {
       "id": { "type": "integer" },
       "name": { "type": "string" },
@@ -175,7 +175,7 @@ class FlextOracleTarget(Target):
 
     def _write_record(self, record: Record) -> None:
         """Write single record - Singer SDK requirement."""
-        # Convert Record to t.ContainerMapping and process
+        # Convert Record to t.RecursiveContainerMapping and process
 
     def _write_records(self, records: List[Record]) -> None:
         """Write batch of records - Singer SDK requirement."""
@@ -509,7 +509,7 @@ class TestSingerIntegration:
             "type": "SCHEMA",
             "stream": "test_stream",
             "schema": {
-                "type": "t.NormalizedValue",
+                "type": "t.RecursiveContainer",
                 "properties": {"id": {"type": "integer"}},
             },
         }

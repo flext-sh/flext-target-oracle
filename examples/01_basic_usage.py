@@ -66,14 +66,14 @@ def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
-      t.ContainerMapping: Singer SCHEMA message for users table
+      t.RecursiveContainerMapping: Singer SCHEMA message for users table
 
     """
     return m.TargetOracle.SingerSchemaMessage.model_validate({
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
-            "type": "t.NormalizedValue",
+            "type": "t.RecursiveContainer",
             "properties": json.dumps({
                 "id": {"type": "integer"},
                 "name": {"type": "string"},
@@ -91,7 +91,7 @@ def create_sample_record_messages() -> Sequence[m.TargetOracle.SingerRecordMessa
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
-      List[t.ContainerMapping]: List of Singer RECORD messages
+      List[t.RecursiveContainerMapping]: List of Singer RECORD messages
 
     """
     return [
@@ -135,7 +135,7 @@ def create_sample_state_message() -> m.TargetOracle.SingerStateMessage:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
-      t.ContainerMapping: Singer STATE message with bookmark information
+      t.RecursiveContainerMapping: Singer STATE message with bookmark information
 
     """
     return m.TargetOracle.SingerStateMessage.model_validate({

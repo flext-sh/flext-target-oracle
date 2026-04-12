@@ -51,8 +51,8 @@ class HealthStatus(BaseModel):
 
     timestamp: float
     status: str = "healthy"
-    checks: t.MutableContainerMapping = Field(default_factory=dict)
-    metrics: t.MutableContainerMapping = Field(default_factory=dict)
+    checks: t.MutableRecursiveContainerMapping = Field(default_factory=dict)
+    metrics: t.MutableRecursiveContainerMapping = Field(default_factory=dict)
     error: str | None = None
 
 
@@ -181,7 +181,7 @@ class ProductionTargetManager:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
-    def health_check(self) -> r[t.ContainerMapping]:
+    def health_check(self) -> r[t.RecursiveContainerMapping]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
@@ -220,7 +220,7 @@ class ProductionTargetManager:
                 target_metrics = self.target.get_implementation_metrics()
                 metrics.update(target_metrics.model_dump())
             logger.debug("Health check completed: %s", health_status.status)
-            return r[t.ContainerMapping].ok(health_status.model_dump())
+            return r[t.RecursiveContainerMapping].ok(health_status.model_dump())
         except (
             ValueError,
             TypeError,
@@ -233,7 +233,7 @@ class ProductionTargetManager:
             logger.exception("Health check failed")
             health_status.status = "unhealthy"
             health_status.error = str(e)
-            return r[t.ContainerMapping].fail(f"Health check error: {e}")
+            return r[t.RecursiveContainerMapping].fail(f"Health check error: {e}")
 
     def initialize(self) -> r[bool]:
         """Initialize target with comprehensive validation.
@@ -273,7 +273,7 @@ class ProductionTargetManager:
     def process_singer_stream(
         self,
         messages: Sequence[SingerMessage],
-    ) -> r[t.ContainerMapping]:
+    ) -> r[t.RecursiveContainerMapping]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:
@@ -284,7 +284,7 @@ class ProductionTargetManager:
 
         """
         if not self.target:
-            return r[t.ContainerMapping].fail("Target not initialized")
+            return r[t.RecursiveContainerMapping].fail("Target not initialized")
         logger.info("Processing Singer stream with %d messages", len(messages))
         stats = ProcessingStats(processing_start_time=time.time())
         try:
@@ -306,7 +306,7 @@ class ProductionTargetManager:
                     message_type,
                 )
                 if not self.target:
-                    return r[t.ContainerMapping].fail("Target not initialized")
+                    return r[t.RecursiveContainerMapping].fail("Target not initialized")
                 result = self.target.process_singer_message(message)
                 if result.success:
                     stats.messages_processed += 1
@@ -343,7 +343,7 @@ class ProductionTargetManager:
                 "Stream processing completed in %.2f seconds",
                 processing_duration,
             )
-            return r[t.ContainerMapping].ok(stats.model_dump())
+            return r[t.RecursiveContainerMapping].ok(stats.model_dump())
         except (
             ValueError,
             TypeError,
@@ -356,7 +356,7 @@ class ProductionTargetManager:
             logger.exception("Unexpected error during stream processing")
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
-            return r[t.ContainerMapping].fail(f"Stream processing error: {e}")
+            return r[t.RecursiveContainerMapping].fail(f"Stream processing error: {e}")
 
     def shutdown(self) -> r[bool]:
         """Graceful shutdown with resource cleanup.
@@ -413,9 +413,9 @@ def demonstrate_production_setup() -> None:
                     "Health check status",
                     status=str(health_data.get("status", "unknown")),
                 )
-                checks_obj: t.NormalizedValue = health_data.get("checks")
-                checks: t.ContainerMapping = (
-                    cast("t.ContainerMapping", checks_obj)
+                checks_obj: t.RecursiveContainer = health_data.get("checks")
+                checks: t.RecursiveContainerMapping = (
+                    cast("t.RecursiveContainerMapping", checks_obj)
                     if isinstance(checks_obj, dict)
                     else {}
                 )
@@ -489,7 +489,7 @@ def create_production_sample_stream() -> Sequence[SingerMessage]:
         "type": "SCHEMA",
         "stream": "customer_orders",
         "schema": {
-            "type": "t.NormalizedValue",
+            "type": "t.RecursiveContainer",
             "properties": json.dumps({
                 "order_id": {"type": "integer"},
                 "customer_id": {"type": "integer"},
