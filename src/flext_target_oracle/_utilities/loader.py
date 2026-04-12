@@ -393,4 +393,4 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
             return r[bool].fail(f"Batch flush failed: {e}")
 
 
-__all__ = ["FlextTargetOracleLoader"]
+__all__: list[str] = ["FlextTargetOracleLoader"]

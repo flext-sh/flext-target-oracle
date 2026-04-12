@@ -20,4 +20,4 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
 
 
 u = FlextTargetOracleUtilities
-__all__ = ["FlextTargetOracleUtilities", "u"]
+__all__: list[str] = ["FlextTargetOracleUtilities", "u"]

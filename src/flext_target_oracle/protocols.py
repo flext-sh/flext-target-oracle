@@ -19,4 +19,4 @@ class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
 
 
 p = FlextTargetOracleProtocols
-__all__ = ["FlextTargetOracleProtocols", "p"]
+__all__: list[str] = ["FlextTargetOracleProtocols", "p"]

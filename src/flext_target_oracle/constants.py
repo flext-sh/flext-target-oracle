@@ -23,4 +23,4 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
 
 
 c = FlextTargetOracleConstants
-__all__ = ["FlextTargetOracleConstants", "c"]
+__all__: list[str] = ["FlextTargetOracleConstants", "c"]

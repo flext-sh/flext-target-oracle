@@ -212,4 +212,4 @@ class FlextTargetOracle:
         return r[bool].ok(True)
 
 
-__all__ = ["FlextTargetOracle"]
+__all__: list[str] = ["FlextTargetOracle"]

@@ -55,4 +55,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-__all__ = ["FlextTargetOracleCliService", "main"]
+__all__: list[str] = ["FlextTargetOracleCliService", "main"]

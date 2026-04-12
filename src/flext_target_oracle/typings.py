@@ -21,4 +21,4 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
 t = FlextTargetOracleTypes
 
-__all__ = ["FlextTargetOracleTypes", "t"]
+__all__: list[str] = ["FlextTargetOracleTypes", "t"]

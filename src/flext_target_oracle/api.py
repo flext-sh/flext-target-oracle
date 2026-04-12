@@ -33,4 +33,4 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
 
 target_oracle = FlextTargetOracleService
 
-__all__ = ["FlextTargetOracleService", "target_oracle"]
+__all__: list[str] = ["FlextTargetOracleService", "target_oracle"]

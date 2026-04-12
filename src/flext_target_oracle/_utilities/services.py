@@ -190,7 +190,7 @@ class FlextTargetOracleServiceFactory:
         return FlextTargetOracleSchemaService(self._config, self._oracle_api)
 
 
-__all__ = [
+__all__: list[str] = [
     "FlextTargetOracleBatchService",
     "FlextTargetOracleConnectionService",
     "FlextTargetOracleRecordService",

@@ -178,4 +178,4 @@ class FlextTargetOracleUtilitiesObservability:
         )
 
 
-__all__ = ["FlextTargetOracleUtilitiesObservability"]
+__all__: list[str] = ["FlextTargetOracleUtilitiesObservability"]

@@ -29,4 +29,4 @@ class FlextTargetOracleModels(
 
 m = FlextTargetOracleModels
 
-__all__ = ["FlextTargetOracleModels", "m"]
+__all__: list[str] = ["FlextTargetOracleModels", "m"]

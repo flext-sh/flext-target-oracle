@@ -23,4 +23,4 @@ class TestsFlextTargetOracleConstants(FlextTestsConstants, FlextTargetOracleCons
 
 c = TestsFlextTargetOracleConstants
 
-__all__ = ["TestsFlextTargetOracleConstants", "c"]
+__all__: list[str] = ["TestsFlextTargetOracleConstants", "c"]
