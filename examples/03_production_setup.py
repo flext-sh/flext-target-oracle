@@ -27,6 +27,7 @@ from flext_target_oracle import (
     FlextTargetOracleSettings,
     c,
     m,
+    p,
     r,
     t,
     u,

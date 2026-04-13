@@ -15,8 +15,8 @@ from typing import Annotated, ClassVar
 from pydantic import Field, SecretStr
 from pydantic_settings import SettingsConfigDict
 
-from flext_core import FlextSettings, r
-from flext_target_oracle import FlextTargetOracleModelsSettings, c
+from flext_core import FlextSettings
+from flext_target_oracle import FlextTargetOracleModelsSettings, c, p, r
 
 
 @FlextSettings.auto_register("target-oracle")

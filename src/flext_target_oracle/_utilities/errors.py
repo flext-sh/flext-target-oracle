@@ -16,7 +16,8 @@ from typing import TYPE_CHECKING, Annotated, override
 
 from pydantic import Field
 
-from flext_core import FlextConstants, FlextModels, FlextTypes, e
+from flext_core import FlextConstants, FlextModels, FlextTypes
+from flext_target_oracle import e
 
 if TYPE_CHECKING:
     from flext_target_oracle import t

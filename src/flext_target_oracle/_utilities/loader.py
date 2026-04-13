@@ -17,7 +17,6 @@ from typing import ClassVar, override
 
 from pydantic import PrivateAttr
 
-from flext_core import p, r, s
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_target_oracle import (
     FlextTargetOracleExceptions as e,
@@ -25,6 +24,8 @@ from flext_target_oracle import (
     c,
     m,
     p,
+    r,
+    s,
     t,
 )
 

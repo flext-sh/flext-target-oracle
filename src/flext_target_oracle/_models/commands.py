@@ -6,10 +6,11 @@ from typing import TYPE_CHECKING, Annotated, override
 
 from pydantic import Field
 
-from flext_core import h, r
-from flext_meltano import FlextMeltanoModels
+from flext_meltano import m
 from flext_target_oracle import (
     FlextTargetOracleConstants,
+    h,
+    r,
     t,
     u,
 )
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
 class FlextTargetOracleModelsCommands:
     """Command models MRO mixin for TargetOracle namespace."""
 
-    class OracleTargetAboutCommand(FlextMeltanoModels.Command):
+    class OracleTargetAboutCommand(m.Command):
         """Command to return target metadata and capabilities."""
 
         format: Annotated[
@@ -48,7 +49,7 @@ class FlextTargetOracleModelsCommands:
                 t.TargetOracle.STR_MAP_ADAPTER.dump_json(payload).decode("utf-8"),
             )
 
-    class OracleTargetLoadCommand(FlextMeltanoModels.Command):
+    class OracleTargetLoadCommand(m.Command):
         """Command to prepare target for data loading."""
 
         config_file: Annotated[
@@ -74,7 +75,7 @@ class FlextTargetOracleModelsCommands:
             _ = self.state_file
             return r[str].ok("load_ready")
 
-    class OracleTargetValidateCommand(FlextMeltanoModels.Command):
+    class OracleTargetValidateCommand(m.Command):
         """Command to validate target configuration."""
 
         config_file: Annotated[
@@ -100,13 +101,13 @@ class FlextTargetOracleModelsCommands:
                 )
             return r[str].ok("validation_ok")
 
-    class OracleTargetCommandHandler(h[FlextMeltanoModels.Command, str]):
+    class OracleTargetCommandHandler(h[m.Command, str]):
         """Dispatch command objects to their `execute` implementation."""
 
         @override
         def handle(
             self,
-            message: FlextMeltanoModels.Command,
+            message: m.Command,
         ) -> p.Result[str]:
             """Invoke command execute methods in a typed-safe way."""
             if isinstance(

@@ -5,9 +5,8 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import MutableMapping
 
-from flext_core import p, r
 from flext_db_oracle import FlextDbOracleApi
-from flext_target_oracle import FlextTargetOracleSettings, m, t
+from flext_target_oracle import FlextTargetOracleSettings, m, p, r, t
 
 
 class FlextTargetOracleConnectionService:

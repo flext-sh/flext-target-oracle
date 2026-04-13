@@ -8,12 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from flext_core import p, r
-from flext_target_oracle import (
-    FlextTargetOracleSettings,
-    c,
-    p,
-)
+from flext_target_oracle import FlextTargetOracleSettings, c, p, r
 
 
 class FlextTargetOracleUtilitiesBase:
