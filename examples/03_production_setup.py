@@ -181,7 +181,7 @@ class ProductionTargetManager:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
-    def health_check(self) -> r[t.RecursiveContainerMapping]:
+    def health_check(self) -> p.Result[t.RecursiveContainerMapping]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
@@ -235,7 +235,7 @@ class ProductionTargetManager:
             health_status.error = str(e)
             return r[t.RecursiveContainerMapping].fail(f"Health check error: {e}")
 
-    def initialize(self) -> r[bool]:
+    def initialize(self) -> p.Result[bool]:
         """Initialize target with comprehensive validation.
 
         Returns:
@@ -273,7 +273,7 @@ class ProductionTargetManager:
     def process_singer_stream(
         self,
         messages: Sequence[SingerMessage],
-    ) -> r[t.RecursiveContainerMapping]:
+    ) -> p.Result[t.RecursiveContainerMapping]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:
@@ -358,7 +358,7 @@ class ProductionTargetManager:
             stats.errors_encountered += 1
             return r[t.RecursiveContainerMapping].fail(f"Stream processing error: {e}")
 
-    def shutdown(self) -> r[bool]:
+    def shutdown(self) -> p.Result[bool]:
         """Graceful shutdown with resource cleanup.
 
         Returns:

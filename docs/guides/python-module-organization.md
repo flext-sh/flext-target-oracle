@@ -95,7 +95,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -166,7 +166,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -196,7 +196,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -235,7 +235,7 @@ class FlextOracleTargetSettings(m.Value):
     )
     connection_timeout: int = Field(default=30, gt=0, description="Connection timeout")
 
-    def validate_domain_rules(self) -> r[bool]:
+    def validate_domain_rules(self) -> p.Result[bool]:
         """Validate business rules using Chain of Responsibility pattern."""
         # Implementation using validator chain pattern
 ```
@@ -272,7 +272,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -286,16 +286,16 @@ class FlextOracleTarget(Target):
     name = "flext-oracle-target"
     config_class = FlextOracleTargetSettings
 
-    def process_singer_message(self, message: dict) -> r[bool]:
+    def process_singer_message(self, message: dict) -> p.Result[bool]:
         """Process Singer messages with railway-oriented error handling."""
 
-    def _handle_schema(self, message: dict) -> r[bool]:
+    def _handle_schema(self, message: dict) -> p.Result[bool]:
         """Handle SCHEMA messages with table management."""
 
-    def _handle_record(self, message: dict) -> r[bool]:
+    def _handle_record(self, message: dict) -> p.Result[bool]:
         """Handle RECORD messages with batched loading."""
 
-    def finalize(self) -> r[t.Dict]:
+    def finalize(self) -> p.Result[t.Dict]:
         """Finalize streams and return statistics."""
 ```
 
@@ -342,7 +342,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -356,13 +356,13 @@ class FlextOracleTargetLoader:
     def __init__(self, settings: FlextOracleTargetSettings) -> None:
         """Initialize with flext-db-oracle integration."""
 
-    def ensure_table_exists(self, stream_name: str, schema: dict) -> r[bool]:
+    def ensure_table_exists(self, stream_name: str, schema: dict) -> p.Result[bool]:
         """Ensure target table exists with proper schema."""
 
-    def load_record(self, stream_name: str, record_data: dict) -> r[bool]:
+    def load_record(self, stream_name: str, record_data: dict) -> p.Result[bool]:
         """Load record with batching and error handling."""
 
-    def finalize_all_streams(self) -> r[t.Dict]:
+    def finalize_all_streams(self) -> p.Result[t.Dict]:
         """Finalize all streams and return statistics."""
 ```
 
@@ -473,7 +473,7 @@ ______________________________________________________________________
 
 ```python
 # ✅ CORRECT - Railway-oriented programming throughout
-def process_record(self, stream_name: str, record_data: dict) -> r[bool]:
+def process_record(self, stream_name: str, record_data: dict) -> p.Result[bool]:
     """Process single record with proper error handling."""
     return (
         self
@@ -509,7 +509,7 @@ class FlextOracleTargetSettings(m.Value):
             raise ValueError("Oracle host cannot be empty")
         return v.strip()
 
-    def validate_domain_rules(self) -> r[bool]:
+    def validate_domain_rules(self) -> p.Result[bool]:
         """Business rule validation using Chain of Responsibility."""
         validators = [
             HostReachabilityValidator(),
@@ -549,7 +549,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -558,7 +558,7 @@ from flext_core import u
 logger = u.fetch_logger(__name__)
 
 
-def process_batch(self, stream_name: str, records: list) -> r[bool]:
+def process_batch(self, stream_name: str, records: list) -> p.Result[bool]:
     """Process batch with comprehensive logging."""
 
     logger.info(
@@ -657,7 +657,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -676,7 +676,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -705,7 +705,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -897,20 +897,20 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
 from flext_core import u
 
 
-def process_singer_message(self, message: t.Dict) -> r[bool]:
+def process_singer_message(self, message: t.Dict) -> p.Result[bool]:
     """Process Singer message with complete type safety."""
 
 
 def load_records(
     self, stream_name: str, records: List[t.Dict]
-) -> r[Dict[str, Union[int, str]]]:
+) -> p.Result[Dict[str, Union[int, str]]]:
     """Load records with specific return type."""
 
 
@@ -921,7 +921,7 @@ T = TypeVar("T")
 U = TypeVar("U")
 
 
-def map_result(result: r[T], func: Callable[[T], U]) -> r[U]:
+def map_result(result: r[T], func: Callable[[T], U]) -> p.Result[U]:
     """Generic result mapping with type safety."""
     if result.success:
         return r[bool].ok(func(result.data))
@@ -936,7 +936,7 @@ def process_message(self, message):  # Missing types
 ### **Documentation Standards**
 
 ```python
-def ensure_table_exists(self, stream_name: str, schema: t.Dict) -> r[bool]:
+def ensure_table_exists(self, stream_name: str, schema: t.Dict) -> p.Result[bool]:
     """
     Ensure Oracle table exists for Singer stream with proper schema.
 
@@ -996,7 +996,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -1007,7 +1007,7 @@ from flext_observability import metrics, tracing  # Future integration
 
 
 # ✅ CONSISTENT - Error handling across projects
-def sync_data_cross_system() -> r[SyncStats]:
+def sync_data_cross_system() -> p.Result[SyncStats]:
     """Example of cross-system operation with consistent patterns."""
     return (
         get_oracle_connection()
@@ -1042,7 +1042,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -1099,19 +1099,19 @@ ______________________________________________________________________
 class TargetMigration_0_9_to_1_0:
     """Migration from current structure to production-ready 0.9.9."""
 
-    def migrate_exception_handling(self) -> r[bool]:
+    def migrate_exception_handling(self) -> p.Result[bool]:
         """Consolidate duplicated exceptions into single hierarchy."""
         # 1. Move all exceptions to exceptions.py
         # 2. Remove exceptions from __init__.py
         # 3. Update all imports across modules
 
-    def migrate_singer_compliance(self) -> r[bool]:
+    def migrate_singer_compliance(self) -> p.Result[bool]:
         """Add missing Singer SDK methods for full compliance."""
         # 1. Implement _test_connection()
         # 2. Implement _write_record() and _write_records()
         # 3. Add proper Singer SDK dependency
 
-    def migrate_security_fixes(self) -> r[bool]:
+    def migrate_security_fixes(self) -> p.Result[bool]:
         """Fix SQL injection vulnerabilities."""
         # 1. Replace manual SQL construction with parameterized queries
         # 2. Add input validation and sanitization
@@ -1126,7 +1126,7 @@ from warnings import warn
 from typing import Dict, Optional
 
 
-def process_singer_message(self, message: t.Dict) -> r[bool]:
+def process_singer_message(self, message: t.Dict) -> p.Result[bool]:
     """
     DEPRECATED: Custom message processing method.
 

@@ -30,7 +30,7 @@ class FlextTargetOracle:
             m.TargetOracle.SingerStateMessage(type="STATE", value={})
         )
 
-    def discover_catalog(self) -> r[m.TargetOracle.Meltano.SingerCatalog]:
+    def discover_catalog(self) -> p.Result[m.TargetOracle.Meltano.SingerCatalog]:
         """Return Singer-style catalog for known schemas."""
         catalog_entries = [
             m.TargetOracle.Meltano.SingerCatalogEntry.model_validate({
@@ -63,7 +63,9 @@ class FlextTargetOracle:
             ),
         )
 
-    def execute(self, payload: str | None = None) -> r[m.TargetOracle.ExecuteResult]:
+    def execute(
+        self, payload: str | None = None
+    ) -> p.Result[m.TargetOracle.ExecuteResult]:
         """Execute target readiness check."""
         _ = payload
         connection_result = self.loader.test_connection()
@@ -80,7 +82,7 @@ class FlextTargetOracle:
             ),
         )
 
-    def finalize(self) -> r[m.TargetOracle.LoaderFinalizeResult]:
+    def finalize(self) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
         """Flush remaining batches and return loader statistics."""
         return self.loader.finalize_all_streams()
 
@@ -92,7 +94,7 @@ class FlextTargetOracle:
             use_bulk_operations=self.settings.use_bulk_operations,
         )
 
-    def initialize(self) -> r[bool]:
+    def initialize(self) -> p.Result[bool]:
         """Initialize target by validating connectivity."""
         return self.loader.test_connection()
 
@@ -102,7 +104,7 @@ class FlextTargetOracle:
         | m.TargetOracle.SingerRecordMessage
         | m.TargetOracle.SingerStateMessage
         | m.TargetOracle.SingerActivateVersionMessage,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Process a single Singer message."""
         match message:
             case m.TargetOracle.SingerSchemaMessage() as schema_message:
@@ -123,7 +125,7 @@ class FlextTargetOracle:
             | m.TargetOracle.SingerStateMessage
             | m.TargetOracle.SingerActivateVersionMessage
         ],
-    ) -> r[m.TargetOracle.ProcessingSummary]:
+    ) -> p.Result[m.TargetOracle.ProcessingSummary]:
         """Process SCHEMA/RECORD/STATE Singer messages."""
         processed = 0
         for message in messages:
@@ -146,15 +148,15 @@ class FlextTargetOracle:
             ),
         )
 
-    def test_connection(self) -> r[bool]:
+    def test_connection(self) -> p.Result[bool]:
         """Test Oracle connectivity through loader."""
         return self.loader.test_connection()
 
-    def validate_configuration(self) -> r[bool]:
+    def validate_configuration(self) -> p.Result[bool]:
         """Validate target configuration rules."""
         return self.settings.validate_business_rules()
 
-    def write_record(self, record_data: str) -> r[bool]:
+    def write_record(self, record_data: str) -> p.Result[bool]:
         """Write one Singer record payload to Oracle."""
         try:
             payload = m.TargetOracle.SingerRecordMessage.model_validate_json(
@@ -167,7 +169,7 @@ class FlextTargetOracle:
     def _handle_activate_version(
         self,
         activate_message: m.TargetOracle.SingerActivateVersionMessage,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         self._logger.info(
             "ACTIVATE_VERSION received for Oracle target",
             stream=activate_message.stream,
@@ -178,7 +180,7 @@ class FlextTargetOracle:
     def _handle_record(
         self,
         record_message: m.TargetOracle.SingerRecordMessage,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         load_result = self.loader.load_record(
             record_message.stream,
             record_message.record,
@@ -190,7 +192,7 @@ class FlextTargetOracle:
     def _handle_schema(
         self,
         schema_message: m.TargetOracle.SingerSchemaMessage,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         stream_name = schema_message.stream
         schema = schema_message.schema_definition
         ensure_result = self.loader.ensure_table_exists(
@@ -206,7 +208,7 @@ class FlextTargetOracle:
     def _handle_state(
         self,
         state_message: m.TargetOracle.SingerStateMessage,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         self.state_message = state_message
         self._logger.debug("State updated for Oracle target")
         return r[bool].ok(True)

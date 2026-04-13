@@ -108,7 +108,7 @@ class FlextTargetOracleSettings(FlextSettings):
         )
         return full_table_name.upper()
 
-    def validate_business_rules(self) -> r[bool]:
+    def validate_business_rules(self) -> p.Result[bool]:
         """Validate Oracle target configuration business rules."""
         if not self.oracle_host:
             return r[bool].fail("Oracle host is required")
@@ -146,6 +146,6 @@ class FlextTargetOracleSettings(FlextSettings):
     @staticmethod
     def validate_oracle_configuration(
         settings: FlextTargetOracleSettings,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Validate Oracle configuration using FlextSettings patterns - ZERO DUPLICATION."""
         return settings.validate_business_rules()

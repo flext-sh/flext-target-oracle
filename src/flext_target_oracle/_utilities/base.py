@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from flext_core import r
+from flext_core import p, r
 from flext_target_oracle import (
     FlextTargetOracleSettings,
     c,
@@ -22,7 +22,7 @@ class FlextTargetOracleUtilitiesBase:
     @staticmethod
     def load_target_settings(
         config_file: str | None,
-    ) -> r[p.TargetOracle.OracleSettingsProtocol]:
+    ) -> p.Result[p.TargetOracle.OracleSettingsProtocol]:
         """Load settings from JSON file or environment defaults."""
         result_type: type[r[p.TargetOracle.OracleSettingsProtocol]] = r[
             p.TargetOracle.OracleSettingsProtocol

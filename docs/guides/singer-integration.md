@@ -60,7 +60,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
 **Implementation**:
 
 ```python
-def _handle_schema(self, message: t.Dict) -> r[bool]:
+def _handle_schema(self, message: t.Dict) -> p.Result[bool]:
     """Handle SCHEMA message with table creation/evolution."""
     stream_name = message.get("stream")
     schema = message.get("schema", {})
@@ -91,7 +91,7 @@ def _handle_schema(self, message: t.Dict) -> r[bool]:
 **Implementation**:
 
 ```python
-def _handle_record(self, message: t.Dict) -> r[bool]:
+def _handle_record(self, message: t.Dict) -> p.Result[bool]:
     """Handle RECORD message with batched loading."""
     stream_name = message.get("stream")
     record_data = message.get("record")
@@ -120,7 +120,7 @@ def _handle_record(self, message: t.Dict) -> r[bool]:
 **Implementation**:
 
 ```python
-def _handle_state(self, message: t.Dict) -> r[bool]:
+def _handle_state(self, message: t.Dict) -> p.Result[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
     logger.debug("State message received - forwarding to Meltano")
@@ -157,7 +157,7 @@ def _handle_state(self, message: t.Dict) -> r[bool]:
 
 ```python
 # ❌ Custom method - not Singer SDK compliant
-def process_singer_message(self, message: dict) -> r[bool]:
+def process_singer_message(self, message: dict) -> p.Result[bool]:
     # Custom message processing
 ```
 
@@ -450,7 +450,7 @@ def process_with_error_handling():
 
 ```python
 # Current implementation (needs improvement)
-def _insert_batch(self, table_name: str, records: list) -> r[bool]:
+def _insert_batch(self, table_name: str, records: list) -> p.Result[bool]:
     """Insert batch with basic error handling."""
     try:
         with self.oracle_api as connected_api:
@@ -466,7 +466,7 @@ def _insert_batch(self, table_name: str, records: list) -> r[bool]:
         return r[bool].fail(f"Batch insert failed: {e}")
 
 # Improved implementation (needed)
-def _insert_batch_improved(self, table_name: str, records: list) -> r[bool]:
+def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[bool]:
     """Insert batch with proper transaction management."""
     try:
         with self.oracle_api as connected_api:

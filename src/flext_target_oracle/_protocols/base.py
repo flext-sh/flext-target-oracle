@@ -9,7 +9,6 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from flext_core import r
 from flext_meltano import FlextMeltanoProtocols
 
 if TYPE_CHECKING:
@@ -140,11 +139,11 @@ class FlextTargetOracleProtocolsBase:
 
         def get_connection_info(
             self,
-        ) -> r[m.TargetOracle.OracleConnectionConfig]:
+        ) -> p.Result[m.TargetOracle.OracleConnectionConfig]:
             """Return effective Oracle connection information."""
             ...
 
-        def test_connection(self) -> r[None]:
+        def test_connection(self) -> p.Result[None]:
             """Validate Oracle connectivity."""
             ...
 
@@ -156,7 +155,7 @@ class FlextTargetOracleProtocolsBase:
             self,
             stream: m.TargetOracle.SingerStreamModel,
             schema_message: m.TargetOracle.Meltano.SingerSchemaMessage,
-        ) -> r[None]:
+        ) -> p.Result[None]:
             """Ensure destination table exists for a stream."""
             ...
 
@@ -168,11 +167,11 @@ class FlextTargetOracleProtocolsBase:
             self,
             stream_name: str,
             record_message: m.TargetOracle.Meltano.SingerRecordMessage,
-        ) -> r[None]:
+        ) -> p.Result[None]:
             """Queue one record for batch processing."""
             ...
 
-        def flush_all_batches(self) -> r[m.TargetOracle.LoadStatisticsModel]:
+        def flush_all_batches(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
             """Flush all queued batches and return aggregated stats."""
             ...
 
@@ -184,7 +183,7 @@ class FlextTargetOracleProtocolsBase:
             self,
             record_message: m.TargetOracle.Meltano.SingerRecordMessage,
             stream: m.TargetOracle.SingerStreamModel,
-        ) -> r[m.TargetOracle.Meltano.SingerRecordMessage]:
+        ) -> p.Result[m.TargetOracle.Meltano.SingerRecordMessage]:
             """Transform one Singer record into Oracle-ready payload."""
             ...
 
@@ -192,6 +191,6 @@ class FlextTargetOracleProtocolsBase:
     class OracleSettingsProtocol(Protocol):
         """Protocol for Oracle settings used by command classes."""
 
-        def validate_business_rules(self) -> r[bool]:
+        def validate_business_rules(self) -> p.Result[bool]:
             """Validate Oracle target configuration business rules."""
             ...

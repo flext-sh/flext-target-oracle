@@ -17,7 +17,7 @@ from typing import ClassVar, override
 
 from pydantic import PrivateAttr
 
-from flext_core import r, s
+from flext_core import p, r, s
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_target_oracle import (
     FlextTargetOracleExceptions as e,
@@ -131,7 +131,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
         *,
         operation_name: str,
         result: p.TargetOracle.ConnectionOperationResult,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         try:
             if result.failure:
                 return r[bool].fail(f"{operation_name} failed: {result.error}")
@@ -142,7 +142,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
             self.log_error(message, error=str(e))
             return r[bool].fail(f"{operation_name} failed: {e}")
 
-    def connect(self) -> r[bool]:
+    def connect(self) -> p.Result[bool]:
         """Establish connection using underlying FlextDbOracleApi.
 
         Exposed for tests and parity with previous loader helpers.
@@ -152,7 +152,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
             result=self.oracle_api.connect(),
         )
 
-    def disconnect(self) -> r[bool]:
+    def disconnect(self) -> p.Result[bool]:
         """Disconnect underlying FlextDbOracleApi (exposed for tests)."""
         return self._run_connection_operation(
             operation_name="Disconnect",
@@ -164,7 +164,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
         stream_name: str,
         schema: t.ContainerValueMapping,
         _key_properties: t.StrSequence | None = None,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Ensure table exists using flext-db-oracle API with correct table creation."""
         try:
             table_name = self.target_config.get_table_name(stream_name)
@@ -198,7 +198,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
             return r[bool].fail(f"Table creation failed: {e}")
 
     @override
-    def execute(self) -> r[m.TargetOracle.LoaderReadyResult]:
+    def execute(self) -> p.Result[m.TargetOracle.LoaderReadyResult]:
         """Execute domain service - returns connection test result."""
         connection_result = self.test_connection()
         if connection_result.failure:
@@ -214,7 +214,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
             }),
         )
 
-    def finalize_all_streams(self) -> r[m.TargetOracle.LoaderFinalizeResult]:
+    def finalize_all_streams(self) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
         """Finalize all streams and return stats using standardized models."""
         try:
             started_at = str(datetime.now(UTC))
@@ -253,7 +253,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
         self,
         stream_name: str,
         records: Sequence[t.ConfigurationMapping],
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Insert multiple records - convenience wrapper used by tests.
 
         Appends records to the internal buffer via load_record and flushes the batch.
@@ -272,7 +272,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
         self,
         stream_name: str,
         record_data: t.ContainerValueMapping,
-    ) -> r[bool]:
+    ) -> p.Result[bool]:
         """Load record with batching."""
         try:
             if stream_name not in self.record_buffers:
@@ -306,7 +306,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
         )
         self.logger.info("%s | %s", message, details)
 
-    def test_connection(self) -> r[bool]:
+    def test_connection(self) -> p.Result[bool]:
         """Test connection to Oracle database using flext-db-oracle API."""
         try:
             with self.oracle_api as connected_api:
@@ -327,7 +327,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
         self,
         table_name: str,
         _schema: t.ContainerValueMapping,
-    ) -> r[str]:
+    ) -> p.Result[str]:
         """Build CREATE TABLE SQL through the db-oracle owner service."""
         return self.oracle_api.oracle_services.create_table_ddl(
             table_name,
@@ -335,7 +335,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
             schema=self.target_config.default_target_schema,
         )
 
-    def _build_insert_statement(self, table_name: str) -> r[str]:
+    def _build_insert_statement(self, table_name: str) -> p.Result[str]:
         """Build INSERT SQL through the db-oracle owner service."""
         return self.oracle_api.oracle_services.build_insert_statement(
             table_name,
@@ -357,7 +357,7 @@ class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
             "_SDC_LOADED_AT": loaded_at,
         }
 
-    def _flush_batch(self, stream_name: str) -> r[bool]:
+    def _flush_batch(self, stream_name: str) -> p.Result[bool]:
         """Flush batch using flext-db-oracle API exclusively - NO direct SQLAlchemy."""
         try:
             records = self.record_buffers.get(stream_name, [])

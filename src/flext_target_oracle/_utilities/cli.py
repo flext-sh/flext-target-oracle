@@ -16,7 +16,7 @@ class FlextTargetOracleCliService:
 
     _logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
-    def execute(self) -> r[str]:
+    def execute(self) -> p.Result[str]:
         """Service readiness probe."""
         return r[str].ok("CLI ready")
 
@@ -28,7 +28,7 @@ class FlextTargetOracleCliService:
         self._logger.info(result.value)
         return 0
 
-    def run_cli(self, args: t.StrSequence | None = None) -> r[str]:
+    def run_cli(self, args: t.StrSequence | None = None) -> p.Result[str]:
         """Dispatch CLI args to the appropriate command."""
         argv = args if args is not None else sys.argv[1:]
         if not argv or argv[0] in {"help", "-h", "--help"}:

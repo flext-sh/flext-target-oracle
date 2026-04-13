@@ -62,7 +62,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
@@ -70,7 +70,7 @@ from flext_core import u
 
 # Configuration with domain validation
 class FlextOracleTargetSettings(m.Value):
-    def validate_domain_rules(self) -> r[bool]:
+    def validate_domain_rules(self) -> p.Result[bool]:
         # Chain of Responsibility validation pattern
 ```
 
@@ -137,13 +137,13 @@ class FlextOracleTarget(Target):
     """Singer Target implementation with FLEXT patterns."""
 
     # Singer protocol compliance
-    def process_singer_message(self, message: dict) -> r[bool]
-    def _handle_schema(self, message: dict) -> r[bool]
-    def _handle_record(self, message: dict) -> r[bool]
-    def _handle_state(self, message: dict) -> r[bool]
+    def process_singer_message(self, message: dict) -> p.Result[bool]
+    def _handle_schema(self, message: dict) -> p.Result[bool]
+    def _handle_record(self, message: dict) -> p.Result[bool]
+    def _handle_state(self, message: dict) -> p.Result[bool]
 
     # Lifecycle management
-    def finalize(self) -> r[t.Dict]
+    def finalize(self) -> p.Result[t.Dict]
 ```
 
 **Key Patterns**:
@@ -174,7 +174,7 @@ class FlextOracleTargetSettings(m.Value):
     use_bulk_operations: bool = True
     connection_timeout: int = 30
 
-    def validate_domain_rules(self) -> r[bool]:
+    def validate_domain_rules(self) -> p.Result[bool]:
         """Chain of Responsibility validation pattern."""
 ```
 
@@ -198,11 +198,11 @@ class FlextOracleTargetLoader:
         self._record_buffers: Mapping[str, Sequence[t.Dict]] = {}
 
     # Table management
-    def ensure_table_exists(self, stream_name: str, schema: dict) -> r[bool]
+    def ensure_table_exists(self, stream_name: str, schema: dict) -> p.Result[bool]
 
     # Data loading with batching
-    def load_record(self, stream_name: str, record_data: dict) -> r[bool]
-    def finalize_all_streams(self) -> r[t.Dict]
+    def load_record(self, stream_name: str, record_data: dict) -> p.Result[bool]
+    def finalize_all_streams(self) -> p.Result[t.Dict]
 ```
 
 **Key Patterns**:
@@ -303,7 +303,7 @@ class BatchProcessor:
         self._buffers: Mapping[str, Sequence[Record]] = {}
         self._batch_size = batch_size
 
-    def add_record(self, stream: str, record: dict) -> r[bool]:
+    def add_record(self, stream: str, record: dict) -> p.Result[bool]:
         # Add to buffer
         buffer = self._buffers.setdefault(stream, [])
         buffer.append(record)

@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import MutableMapping
 
-from flext_core import r
+from flext_core import p, r
 from flext_db_oracle import FlextDbOracleApi
 from flext_target_oracle import FlextTargetOracleSettings, m, t
 
@@ -22,17 +22,17 @@ class FlextTargetOracleConnectionService:
         self.settings = settings
         self.oracle_api = oracle_api
 
-    def execute(self) -> r[None]:
+    def execute(self) -> p.Result[None]:
         """Run default connection validation operation."""
         return self.test_connection()
 
-    def get_connection_info(self) -> r[m.TargetOracle.OracleConnectionModel]:
+    def get_connection_info(self) -> p.Result[m.TargetOracle.OracleConnectionModel]:
         """Return normalized connection model."""
         return r[m.TargetOracle.OracleConnectionModel].ok(
             self.settings.get_oracle_config(),
         )
 
-    def test_connection(self) -> r[None]:
+    def test_connection(self) -> p.Result[None]:
         """Check Oracle access by listing schema tables."""
         tables_result = self.oracle_api.get_tables(
             schema=self.settings.default_target_schema,
@@ -58,7 +58,7 @@ class FlextTargetOracleSchemaService:
         self,
         stream: m.TargetOracle.SingerStreamModel,
         schema_message: m.TargetOracle.Meltano.SingerSchemaMessage,
-    ) -> r[None]:
+    ) -> p.Result[None]:
         """Validate table identity before external DDL orchestration."""
         _ = schema_message
         table_name = stream.table_name
@@ -66,7 +66,7 @@ class FlextTargetOracleSchemaService:
             return r[None].fail("Invalid table name")
         return r[None].ok(None)
 
-    def execute(self) -> r[None]:
+    def execute(self) -> p.Result[None]:
         """Run service health operation."""
         return r[None].ok(None)
 
@@ -90,16 +90,16 @@ class FlextTargetOracleBatchService:
         self,
         stream_name: str,
         record_message: m.TargetOracle.Meltano.SingerRecordMessage,
-    ) -> r[None]:
+    ) -> p.Result[None]:
         """Append a record to a stream buffer."""
         self._batches[stream_name].append(record_message)
         return r[None].ok(None)
 
-    def execute(self) -> r[m.TargetOracle.LoadStatisticsModel]:
+    def execute(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
         """Run default batch flush operation."""
         return self.flush_all_batches()
 
-    def flush_all_batches(self) -> r[m.TargetOracle.LoadStatisticsModel]:
+    def flush_all_batches(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
         """Summarize and clear all in-memory batch buffers."""
         total = sum(len(records) for records in self._batches.values())
         stats = m.TargetOracle.LoadStatisticsModel(
@@ -111,7 +111,7 @@ class FlextTargetOracleBatchService:
         ).finalize()
         return r[m.TargetOracle.LoadStatisticsModel].ok(stats)
 
-    def flush_batch(self, stream_name: str) -> r[None]:
+    def flush_batch(self, stream_name: str) -> p.Result[None]:
         """Clear buffered records for a specific stream."""
         self._batches[stream_name] = list[m.TargetOracle.Meltano.SingerRecordMessage]()
         return r[None].ok(None)
@@ -124,7 +124,7 @@ class FlextTargetOracleRecordService:
         """Store record service configuration."""
         self.settings = settings
 
-    def execute(self) -> r[None]:
+    def execute(self) -> p.Result[None]:
         """Run record-service readiness check."""
         return r[None].ok(None)
 
@@ -132,7 +132,7 @@ class FlextTargetOracleRecordService:
         self,
         record_message: m.TargetOracle.Meltano.SingerRecordMessage,
         stream: m.TargetOracle.SingerStreamModel,
-    ) -> r[m.TargetOracle.Meltano.SingerRecordMessage]:
+    ) -> p.Result[m.TargetOracle.Meltano.SingerRecordMessage]:
         """Apply stream-level mappings and ignored-column filtering."""
         transformed: MutableMapping[str, t.ContainerValue] = {}
         for key, value in record_message.record.items():
@@ -154,7 +154,7 @@ class FlextTargetOracleRecordService:
         self,
         record_message: m.TargetOracle.Meltano.SingerRecordMessage,
         schema_message: m.TargetOracle.Meltano.SingerSchemaMessage,
-    ) -> r[None]:
+    ) -> p.Result[None]:
         """Validate record payload against current schema contract."""
         _ = record_message
         _ = schema_message

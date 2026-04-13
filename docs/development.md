@@ -182,14 +182,14 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t
 from flext_core import u
 
 
-def operation() -> r[Data]:
+def operation() -> p.Result[Data]:
     """Clear docstring with r return type."""
     try:
         # Business logic here
@@ -228,7 +228,7 @@ class BadConfig:
 
 ```python
 # ✅ All operations return r
-def process_record(record: dict) -> r[bool]:
+def process_record(record: dict) -> p.Result[bool]:
     """Process a single record with proper error handling."""
     try:
         # Validate input
@@ -247,7 +247,7 @@ def process_record(record: dict) -> r[bool]:
         return r[bool].fail(f"Processing failed: {e}")
 
 # ✅ Chain r operations
-def process_batch(records: Sequence[t.Dict]) -> r[Stats]:
+def process_batch(records: Sequence[t.Dict]) -> p.Result[Stats]:
     """Process batch of records with early termination on failure."""
     stats = Stats()
 
@@ -281,7 +281,7 @@ class FlextOracleTargetSettings(m.Value):
         return v.strip()
 
     # Domain rule validation
-    def validate_domain_rules(self) -> r[bool]:
+    def validate_domain_rules(self) -> p.Result[bool]:
         """Validate business rules using Chain of Responsibility."""
         validator = ConfigurationValidator()
         return validator.validate(self)
@@ -305,7 +305,7 @@ from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
+from flext_core import r, p
 from flext_core import u
 from flext_core import s
 from flext_core import t

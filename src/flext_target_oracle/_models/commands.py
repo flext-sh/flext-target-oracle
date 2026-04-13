@@ -32,7 +32,7 @@ class FlextTargetOracleModelsCommands:
             ),
         ]
 
-        def execute(self) -> r[str]:
+        def execute(self) -> p.Result[str]:
             """Execute about command returning target information."""
             payload: t.StrMapping = {
                 "name": "flext-target-oracle",
@@ -66,7 +66,7 @@ class FlextTargetOracleModelsCommands:
             ),
         ]
 
-        def execute(self) -> r[str]:
+        def execute(self) -> p.Result[str]:
             """Execute load command to initialize target."""
             settings_result = u.TargetOracle.load_target_settings(self.config_file)
             if settings_result.failure:
@@ -85,7 +85,7 @@ class FlextTargetOracleModelsCommands:
             ),
         ]
 
-        def execute(self) -> r[str]:
+        def execute(self) -> p.Result[str]:
             """Execute validation of target configuration."""
             settings_result = u.TargetOracle.load_target_settings(self.config_file)
             if settings_result.failure:
@@ -107,7 +107,7 @@ class FlextTargetOracleModelsCommands:
         def handle(
             self,
             message: FlextMeltanoModels.Command,
-        ) -> r[str]:
+        ) -> p.Result[str]:
             """Invoke command execute methods in a typed-safe way."""
             if isinstance(
                 message,
