@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import typing as _t
 from collections.abc import Generator
 from contextlib import contextmanager
 from typing import ClassVar
@@ -12,6 +11,7 @@ from flext_target_oracle import (
     FlextTargetOracleErrorMetadata,
     FlextTargetOracleExceptions as e,
     c,
+    t,
 )
 
 
@@ -103,7 +103,7 @@ class FlextTargetOracleUtilitiesObservability:
     def target_oracle_singer_schema_validation_failed(
         *,
         stream_name: str,
-        schema_errors: _t.t.StrSequence,
+        schema_errors: t.StrSequence,
         singer_specification: str = "1.5.0",
     ) -> e.SchemaError:
         """Build a Singer schema validation failure."""
@@ -147,7 +147,7 @@ class FlextTargetOracleUtilitiesObservability:
     def target_oracle_monitor_query_performance(
         table_name: str,
         operation: str = "SELECT",
-    ) -> Generator[_t.t.StrMapping]:
+    ) -> Generator[t.StrMapping]:
         """Yield a mutable context while timing a query operation."""
         FlextTargetOracleUtilitiesObservability._logger.debug(
             "Starting query performance monitor",

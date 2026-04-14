@@ -53,7 +53,7 @@ FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for
 1. **FLEXT Pattern Integration**: Uses flext-core foundations (r, m.Value)
 1. **Clean Architecture Simplified**: Streamlined layers for target-specific needs
 1. **Type-Safe Everything**: Comprehensive type hints and strict MyPy compliance
-1. **Railway-Oriented Programming**: r[T] threading through all operations
+1. **Railway-Oriented Programming**: p.Result[T] threading through all operations
 1. **Ecosystem Consistency**: Patterns align with broader FLEXT ecosystem
 
 ______________________________________________________________________
@@ -921,7 +921,7 @@ T = TypeVar("T")
 U = TypeVar("U")
 
 
-def map_result(result: r[T], func: Callable[[T], U]) -> p.Result[U]:
+def map_result(result: p.Result[T], func: Callable[[T], U]) -> p.Result[U]:
     """Generic result mapping with type safety."""
     if result.success:
         return r[bool].ok(func(result.data))

@@ -18,6 +18,7 @@ from typing import ClassVar, override
 from pydantic import PrivateAttr
 
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
+from flext_meltano import FlextMeltanoServiceBase
 from flext_target_oracle import (
     FlextTargetOracleExceptions as e,
     FlextTargetOracleSettings,
@@ -25,12 +26,11 @@ from flext_target_oracle import (
     m,
     p,
     r,
-    s,
     t,
 )
 
 
-class FlextTargetOracleLoader(s[m.TargetOracle.LoaderReadyResult]):
+class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     """Oracle data loader using s and flext-db-oracle SOURCE OF TRUTH.
 
     ZERO DUPLICATION - Uses ONLY public flext-db-oracle API.

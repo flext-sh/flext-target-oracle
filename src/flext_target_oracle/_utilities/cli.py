@@ -20,7 +20,7 @@ class FlextTargetOracleCliService:
         """Service readiness probe."""
         return r[str].ok("CLI ready")
 
-    def finalize_cli_result(self, result: r[str]) -> int:
+    def finalize_cli_result(self, result: p.Result[str]) -> int:
         """Convert a CLI result into process exit semantics."""
         if result.failure:
             self._logger.error(result.error or "Command failed")

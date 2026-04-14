@@ -229,16 +229,16 @@ sequenceDiagram
     FL->>API: get_tables(schema_name)
     API->>DB: SELECT table_name FROM all_tables
     DB-->>API: Table list
-    API-->>FL: r[t.StringList]
+    API-->>FL: p.Result[t.StringList]
 
     alt Table doesn't exist
         FL->>API: execute_ddl(CREATE TABLE)
         API->>DB: CREATE TABLE statement
         DB-->>API: Success/Error
-        API-->>FL: r[bool]
+        API-->>FL: p.Result[bool]
     end
 
-    FL-->>FT: r[bool]
+    FL-->>FT: p.Result[bool]
     FT-->>ST: Processing result
 
     Note over ST,DB: RECORD Message Processing
@@ -251,11 +251,11 @@ sequenceDiagram
             FL->>API: execute_dml(INSERT batch)
             API->>DB: Batch INSERT
             DB-->>API: Success/Error
-            API-->>FL: r[bool]
+            API-->>FL: p.Result[bool]
             FL->>FL: Clear buffer
         end
 
-        FL-->>FT: r[bool]
+        FL-->>FT: p.Result[bool]
         FT-->>ST: Processing result
     end
 
@@ -267,10 +267,10 @@ sequenceDiagram
         FL->>API: execute_dml(Final batch)
         API->>DB: INSERT remaining records
         DB-->>API: Success/Error
-        API-->>FL: r[bool]
+        API-->>FL: p.Result[bool]
     end
 
-    FL-->>FT: r[Statistics]
+    FL-->>FT: p.Result[Statistics]
     FT-->>ST: Final statistics
 ```
 
