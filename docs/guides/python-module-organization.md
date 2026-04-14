@@ -34,7 +34,7 @@
   - [**Quality Gate Checklist**](#quality-gate-checklist)
   - [**Ecosystem Integration Checklist**](#ecosystem-integration-checklist)
 - [🚀 **Future Evolution Roadmap**](#future-evolution-roadmap)
-  - [**Version 0.9.9 (Production Ready)**](#version-099-production-ready)
+  - [**Version 0.9.9 (Current)**](#version-099-production-ready)
   - [**Version 1.1.0 (Enhanced Features)**](#version-110-enhanced-features)
   - [**Version 0.9.9 (Next Generation)**](#version-099-next-generation)
 <!-- TOC END -->
@@ -519,7 +519,7 @@ class FlextOracleTargetSettings(m.Value):
 
         for validator in validators:
             result = validator.validate(self)
-            if result.is_failure:
+            if result.failure:
                 return result
 
         return r[bool].| ok(value=True)
@@ -580,8 +580,8 @@ def process_batch(self, stream_name: str, records: list) -> p.Result[bool]:
                 extra={
                     "stream_name": stream_name,
                     "records_processed": len(records),
-                    "duration_ms": result.data.get("duration_ms"),
-                    "rows_affected": result.data.get("rows_affected"),
+                    "duration_ms": result.value.get("duration_ms"),
+                    "rows_affected": result.value.get("rows_affected"),
                 },
             )
         else:
@@ -870,7 +870,7 @@ class TestSingerCompliance:
         # Finalization
         stats_result = oracle_target.finalize()
         assert stats_result.success, f"Finalization failed: {stats_result.error}"
-        assert stats_result.data["total_records"] == 5
+        assert stats_result.value["total_records"] == 5
 ```
 
 ______________________________________________________________________
@@ -924,7 +924,7 @@ U = TypeVar("U")
 def map_result(result: p.Result[T], func: Callable[[T], U]) -> p.Result[U]:
     """Generic result mapping with type safety."""
     if result.success:
-        return r[bool].ok(func(result.data))
+        return r[bool].ok(func(result.value))
     return r[bool].fail(result.error)
 
 
@@ -1150,7 +1150,7 @@ def _write_record(self, record: Record) -> None:
     # Convert to old format for backward compatibility
     message = {"type": "RECORD", "stream": record.stream, "record": record.data}
     result = self._handle_message_legacy(message)
-    if result.is_failure:
+    if result.failure:
         raise RuntimeError(result.error)  # Singer SDK expects exceptions
 ```
 
@@ -1195,7 +1195,7 @@ ______________________________________________________________________
 
 ## 🚀 **Future Evolution Roadmap**
 
-### **Version 0.9.9 (Production Ready)**
+### **Version 0.9.9 (Current)**
 
 **Module Structure Improvements**:
 

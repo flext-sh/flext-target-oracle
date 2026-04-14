@@ -384,12 +384,12 @@ tests/
 def test_operation_success():
     result = operation()
     assert result.success
-    assert result.data == expected_value
+    assert result.value == expected_value
 
 
 def test_operation_failure():
     result = operation_with_error()
-    assert result.is_failure
+    assert result.failure
     assert "expected error" in result.error
 ```
 

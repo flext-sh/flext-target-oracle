@@ -237,7 +237,7 @@ def process_record(record: dict) -> p.Result[bool]:
 
         # Process record
         result = some_operation(record)
-        if result.is_failure:
+        if result.failure:
             return result  # Propagate failure
 
         return r[bool].| ok(value=True)
@@ -253,7 +253,7 @@ def process_batch(records: Sequence[t.Dict]) -> p.Result[Stats]:
 
     for record in records:
         result = process_record(record)
-        if result.is_failure:
+        if result.failure:
             return r[bool].fail(f"Batch failed on record: {result.error}")
 
         stats.increment()
@@ -373,7 +373,7 @@ loader = FlextOracleTargetLoader(settings)
 with loader.oracle_api as connected_api:
     tables_result = connected_api.get_tables("TEST_SCHEMA")
     if tables_result.success:
-        print(f"Connected! Found {len(tables_result.data)} tables")
+        print(f"Connected! Found {len(tables_result.value)} tables")
     else:
         print(f"Connection failed: {tables_result.error}")
 ```
@@ -397,7 +397,7 @@ def test_table_management():
 
     # Ensure table exists
     result = loader.ensure_table_exists("test_stream", schema)
-    if result.is_failure:
+    if result.failure:
         print(f"Table creation failed: {result.error}")
         return
 
@@ -482,7 +482,7 @@ try:
 
     # Test domain rules
     validation_result = settings.validate_domain_rules()
-    if validation_result.is_failure:
+    if validation_result.failure:
         print(f"Validation failed: {validation_result.error}")
 
 except ValidationError as e:
@@ -564,7 +564,7 @@ class TestNewFeature:
 
         # Assert
         assert result.success
-        assert result.data == expected_value
+        assert result.value == expected_value
 
     def test_failure_case(self):
         """Test failure handling."""
@@ -575,7 +575,7 @@ class TestNewFeature:
         result = new_feature_operation(invalid_config)
 
         # Assert
-        assert result.is_failure
+        assert result.failure
         assert "expected error message" in result.error
 
     @pytest.mark.parametrize(
@@ -624,7 +624,7 @@ class TestOracleIntegration:
         # Finalization
         stats_result = oracle_target.finalize()
         assert stats_result.success
-        assert stats_result.data["total_records"] > 0
+        assert stats_result.value["total_records"] > 0
 ```
 
 ### Test Data Management

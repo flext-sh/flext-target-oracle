@@ -10,7 +10,7 @@
   - [[Singer Integration](guides/singer-integration.md)](#singer-integrationguidessinger-integrationmd)
   - [[TODO & Issues](TODO.md)](#todo-issuestodomd)
 - [Project Status](#project-status)
-  - [**Current Version**: 0.9.9 - Pre-production](#current-version-099-pre-production)
+  - [**Current Version**: 0.12.0-dev - Current](#current-version-099-pre-production)
   - [**Production Readiness Checklist**](#production-readiness-checklist)
   - [**Critical Issues Summary**](#critical-issues-summary)
 - [FLEXT Ecosystem Integration](#flext-ecosystem-integration)
@@ -98,7 +98,7 @@
 
 ## Project Status
 
-### **Current Version**: 0.9.9 - Pre-production
+### **Current Version**: 0.12.0-dev - Current
 
 > ⚠️ **Important**: This target is currently undergoing architectural improvements to address identified critical issues.
 

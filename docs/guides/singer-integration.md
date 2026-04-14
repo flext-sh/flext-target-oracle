@@ -424,7 +424,7 @@ def process_with_error_handling():
 
     # Schema processing
     schema_result = target.process_singer_message(schema_msg)
-    if schema_result.is_failure:
+    if schema_result.failure:
         logger.error(f"Schema processing failed: {schema_result.error}")
         # Singer protocol: continue processing or abort based on error type
         return schema_result
@@ -432,12 +432,12 @@ def process_with_error_handling():
     # Record processing with retry logic
     for record_msg in record_messages:
         result = target.process_singer_message(record_msg)
-        if result.is_failure:
+        if result.failure:
             # Decide on retry strategy
             if is_transient_error(result.error):
                 result = retry_with_backoff(target.process_singer_message, record_msg)
 
-            if result.is_failure:
+            if result.failure:
                 logger.error(f"Record processing failed: {result.error}")
                 # Singer protocol: may skip record or abort entire stream
 
@@ -457,7 +457,7 @@ def _insert_batch(self, table_name: str, records: list) -> p.Result[bool]:
             # Each record inserted individually (not optimal)
             for record in records:
                 result = connected_api.execute_ddl(sql)  # Should be execute_dml
-                if not result.success:
+                if result.failure:
                     return r[bool].fail(f"Insert failed: {result.error}")
 
         return r[bool].| ok(value=True)
@@ -473,7 +473,7 @@ def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[boo
             with connected_api.begin_transaction():  # Explicit transaction
                 # True batch insert operation
                 result = connected_api.execute_batch_dml(sql, parameters)
-                if result.is_failure:
+                if result.failure:
                     # Transaction automatically rolled back
                     return r[bool].fail(f"Batch insert failed: {result.error}")
 
@@ -543,7 +543,7 @@ class TestSingerIntegration:
         invalid_msg = {"type": "INVALID"}
 
         result = target.process_singer_message(invalid_msg)
-        assert result.is_failure
+        assert result.failure
         assert "Unknown message type" in result.error
 ```
 
@@ -576,7 +576,7 @@ def test_singer_tap_integration():
                 continue
             message = json.loads(line)
             result = target.process_singer_message(message)
-            if result.is_failure:
+            if result.failure:
                 print(f"Message processing failed: {result.error}")
                 break
         except json.JSONDecodeError:
