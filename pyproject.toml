@@ -203,6 +203,7 @@ ignore-errors-in-generated-code = true
 project-excludes = [
   "**/*_pb2*.py",
   "**/*_pb2_grpc*.py",
+  "**/.flext-deps/**",
   "**/.venv/**",
   "**/__pycache__",
   "**/node_modules",
@@ -236,7 +237,7 @@ bad-match = true
 bad-override = false
 bad-param-name-override = true
 bad-raise = true
-bad-return = false
+bad-return = true
 bad-specialization = true
 bad-typed-dict = true
 bad-typed-dict-key = true
@@ -309,6 +310,7 @@ variance-mismatch = true
 [tool.pyright]
 exclude = [
   "**/.*",
+  "**/.flext-deps/**",
   "**/.mypy_cache",
   "**/.pytest_cache",
   "**/.ruff_cache",
@@ -388,6 +390,7 @@ python_files = [ "*_test.py", "*_tests.py", "test_*.py" ]
 # [MANAGED] ruff
 [tool.ruff]
 exclude = [
+  "**/.flext-deps/**",
   ".git",
   ".mypy_cache",
   ".pytest_cache",
