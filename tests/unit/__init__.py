@@ -11,6 +11,19 @@ _LAZY_IMPORTS = build_lazy_import_map(
         ".test_loader": ("test_loader",),
         ".test_module_governance": ("test_module_governance",),
         ".test_target": ("test_target",),
+        "flext_target_oracle": (
+            "c",
+            "d",
+            "e",
+            "h",
+            "m",
+            "p",
+            "r",
+            "s",
+            "t",
+            "u",
+            "x",
+        ),
     },
 )
 
