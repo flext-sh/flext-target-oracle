@@ -20,8 +20,6 @@ from datetime import UTC
 from types import FrameType
 from typing import cast
 
-from pydantic import BaseModel, Field
-
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleSettings,
@@ -47,17 +45,17 @@ type SingerMessage = (
 )
 
 
-class HealthStatus(BaseModel):
+class HealthStatus(m.BaseModel):
     """Runtime health snapshot used by health checks."""
 
     timestamp: float
     status: str = "healthy"
-    checks: t.MutableRecursiveContainerMapping = Field(default_factory=dict)
-    metrics: t.MutableRecursiveContainerMapping = Field(default_factory=dict)
+    checks: t.MutableRecursiveContainerMapping = m.Field(default_factory=dict)
+    metrics: t.MutableRecursiveContainerMapping = m.Field(default_factory=dict)
     error: str | None = None
 
 
-class ProcessingStats(BaseModel):
+class ProcessingStats(m.BaseModel):
     """In-memory counters for Singer stream processing."""
 
     processing_start_time: float

@@ -14,8 +14,6 @@ from collections.abc import Mapping, MutableMapping, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Annotated, override
 
-from pydantic import Field
-
 from flext_core import FlextConstants, FlextModels, FlextTypes
 from flext_target_oracle import e
 
@@ -31,21 +29,19 @@ m = FlextModels
 class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
     """Structured metadata attached to Oracle target error responses."""
 
-    code: Annotated[str, Field(description="Canonical error code")]
+    code: Annotated[str, m.Field(description="Canonical error code")]
     context: Annotated[
         Mapping[str, t.MetadataValue] | None,
-        Field(
-            default=None,
+        m.Field(
             description="Structured error context",
         ),
-    ]
+    ] = None
     correlation_id: Annotated[
         str | None,
-        Field(
-            default=None,
+        m.Field(
             description="Cross-service correlation identifier",
         ),
-    ]
+    ] = None
 
 
 class FlextTargetOracleExceptions(e):

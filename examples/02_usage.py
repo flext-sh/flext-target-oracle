@@ -13,14 +13,14 @@ from typing import cast
 from pydantic import TypeAdapter
 
 from flext_core import t
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
 
 
 def load_config() -> t.RecursiveContainerMapping:
     """Load configuration from file."""
     config_path = Path("settings.json")
     content = config_path.read_text(encoding="utf-8")
-    adapter: TypeAdapter[t.RecursiveContainerMapping] = TypeAdapter(
+    adapter: m.TypeAdapter[t.RecursiveContainerMapping] = TypeAdapter(
         t.RecursiveContainerMapping
     )
     return adapter.validate_json(content)
@@ -29,7 +29,7 @@ def load_config() -> t.RecursiveContainerMapping:
 def load_singer_messages() -> Sequence[t.RecursiveContainerMapping]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
-    adapter: TypeAdapter[t.RecursiveContainerMapping] = TypeAdapter(
+    adapter: m.TypeAdapter[t.RecursiveContainerMapping] = TypeAdapter(
         t.RecursiveContainerMapping
     )
     with data_path.open(encoding="utf-8") as f:

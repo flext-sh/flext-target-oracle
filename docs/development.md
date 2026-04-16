@@ -201,7 +201,7 @@ def operation() -> p.Result[Data]:
 
 # ✅ GOOD: Configuration with validation
 class Config(m.Value):
-    field: str = Field(..., description="Required field")
+    field: str = m.Field(..., description="Required field")
 
     @field_validator("field")
     @classmethod
@@ -269,8 +269,8 @@ class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business rule validation."""
 
     # Required fields with clear validation
-    oracle_host: str = Field(..., description="Oracle host")
-    oracle_port: int = Field(default=1521, ge=1, le=65535, description="Oracle port")
+    oracle_host: str = m.Field(..., description="Oracle host")
+    oracle_port: int = m.Field(default=1521, ge=1, le=65535, description="Oracle port")
 
     # Custom validation
     @field_validator("oracle_host")
@@ -485,7 +485,7 @@ try:
     if validation_result.failure:
         print(f"Validation failed: {validation_result.error}")
 
-except ValidationError as e:
+except c.ValidationError as e:
     print(f"Configuration error: {e}")
 ```
 

@@ -205,8 +205,8 @@ pre-commit install
 Add new fields to `FlextOracleTargetSettings`:
 
 ```python
-class FlextOracleTargetSettings(BaseModel):
-    my_new_option: bool = Field(
+class FlextOracleTargetSettings(m.BaseModel):
+    my_new_option: bool = m.Field(
         default=False,
         description="Enable my new feature",
     )

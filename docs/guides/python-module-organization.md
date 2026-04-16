@@ -218,22 +218,24 @@ class FlextOracleTargetSettings(m.Value):
     """Type-safe Oracle configuration with business rule validation."""
 
     # Required Oracle connection parameters
-    oracle_host: str = Field(..., description="Oracle database host")
-    oracle_port: int = Field(default=1521, ge=1, le=65535, description="Oracle port")
-    oracle_service: str = Field(..., description="Oracle service name")
-    oracle_user: str = Field(..., description="Oracle username")
-    oracle_password: str = Field(..., description="Oracle password")
+    oracle_host: str = m.Field(..., description="Oracle database host")
+    oracle_port: int = m.Field(default=1521, ge=1, le=65535, description="Oracle port")
+    oracle_service: str = m.Field(..., description="Oracle service name")
+    oracle_user: str = m.Field(..., description="Oracle username")
+    oracle_password: str = m.Field(..., description="Oracle password")
 
     # Business configuration
-    default_target_schema: str = Field(default="target", description="Target schema")
-    load_method: LoadMethod = Field(
+    default_target_schema: str = m.Field(default="target", description="Target schema")
+    load_method: LoadMethod = m.Field(
         default=LoadMethod.INSERT, description="Load strategy"
     )
-    batch_size: int = Field(default=1000, gt=0, description="Records per batch")
-    use_bulk_operations: bool = Field(
+    batch_size: int = m.Field(default=1000, gt=0, description="Records per batch")
+    use_bulk_operations: bool = m.Field(
         default=True, description="Enable bulk operations"
     )
-    connection_timeout: int = Field(default=30, gt=0, description="Connection timeout")
+    connection_timeout: int = m.Field(
+        default=30, gt=0, description="Connection timeout"
+    )
 
     def validate_domain_rules(self) -> p.Result[bool]:
         """Validate business rules using Chain of Responsibility pattern."""
@@ -499,8 +501,8 @@ def process_record_bad(self, stream_name: str, record_data: dict) -> None:
 class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business validation."""
 
-    oracle_host: str = Field(..., description="Oracle host")
-    batch_size: int = Field(default=1000, gt=0, le=50000, description="Batch size")
+    oracle_host: str = m.Field(..., description="Oracle host")
+    batch_size: int = m.Field(default=1000, gt=0, le=50000, description="Batch size")
 
     @field_validator("oracle_host")
     @classmethod
@@ -1074,10 +1076,12 @@ class FlextOracleTargetSettings(FlextSettings):
     """Complete target configuration composing ecosystem settings."""
 
     # Oracle-specific settings
-    oracle: OracleConnectionSettings = Field(default_factory=OracleConnectionSettings)
+    oracle: OracleConnectionSettings = m.Field(default_factory=OracleConnectionSettings)
 
     # Cross-cutting concerns
-    observability: ObservabilitySettings = Field(default_factory=ObservabilitySettings)
+    observability: ObservabilitySettings = m.Field(
+        default_factory=ObservabilitySettings
+    )
 
     # Target-specific business configuration
     default_target_schema: str = "SINGER_DATA"

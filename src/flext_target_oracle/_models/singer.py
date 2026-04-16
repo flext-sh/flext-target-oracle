@@ -4,10 +4,8 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from pydantic import Field
-
 from flext_meltano import FlextMeltanoModels
-from flext_target_oracle import t
+from flext_target_oracle import m, t
 
 
 class FlextTargetOracleModelsSinger:
@@ -42,20 +40,20 @@ class FlextTargetOracleModelsSinger:
     class SingerStreamModel(FlextMeltanoModels.ArbitraryTypesModel):
         """Singer stream mapping to Oracle table with column configuration."""
 
-        stream_name: Annotated[str, Field(description="Singer stream name")]
+        stream_name: Annotated[str, m.Field(description="Singer stream name")]
         table_name: Annotated[
             str,
-            Field(description="Oracle destination table name"),
+            m.Field(description="Oracle destination table name"),
         ]
         ignored_columns: Annotated[
             t.StrSequence,
-            Field(
+            m.Field(
                 description="Columns ignored during record transformation",
             ),
-        ] = Field(default_factory=list)
+        ] = m.Field(default_factory=list)
         column_mappings: Annotated[
             t.StrMapping,
-            Field(
+            m.Field(
                 description="Singer column to Oracle column mapping",
             ),
-        ] = Field(default_factory=dict)
+        ] = m.Field(default_factory=dict)

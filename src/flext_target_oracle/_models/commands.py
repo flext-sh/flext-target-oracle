@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated, override
 
-from pydantic import Field
-
 from flext_meltano import m
 from flext_target_oracle import (
     FlextTargetOracleConstants,
@@ -27,11 +25,10 @@ class FlextTargetOracleModelsCommands:
 
         format: Annotated[
             str,
-            Field(
-                default="json",
+            m.Field(
                 description="Output format for about command response",
             ),
-        ]
+        ] = "json"
 
         def execute(self) -> p.Result[str]:
             """Execute about command returning target information."""
@@ -54,18 +51,16 @@ class FlextTargetOracleModelsCommands:
 
         config_file: Annotated[
             str | None,
-            Field(
-                default=None,
+            m.Field(
                 description="Path to JSON configuration file for target settings",
             ),
-        ]
+        ] = None
         state_file: Annotated[
             str | None,
-            Field(
-                default=None,
+            m.Field(
                 description="Path to Singer state file for incremental loads",
             ),
-        ]
+        ] = None
 
         def execute(self) -> p.Result[str]:
             """Execute load command to initialize target."""
@@ -80,11 +75,10 @@ class FlextTargetOracleModelsCommands:
 
         config_file: Annotated[
             str | None,
-            Field(
-                default=None,
+            m.Field(
                 description="Path to JSON configuration file to validate",
             ),
-        ]
+        ] = None
 
         def execute(self) -> p.Result[str]:
             """Execute validation of target configuration."""

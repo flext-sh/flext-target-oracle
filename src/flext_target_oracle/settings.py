@@ -12,93 +12,79 @@ from __future__ import annotations
 
 from typing import Annotated, ClassVar
 
-from pydantic import Field, SecretStr
+from pydantic import SecretStr
 from pydantic_settings import SettingsConfigDict
 
 from flext_core import FlextSettings
-from flext_target_oracle import FlextTargetOracleModelsSettings, c, p, r
+from flext_target_oracle import FlextTargetOracleModelsSettings, c, m, p, r
 
 
 @FlextSettings.auto_register("target-oracle")
 class FlextTargetOracleSettings(FlextSettings):
     """Runtime settings for Oracle Singer target operations."""
 
-    model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
+    model_config: ClassVar[SettingsConfigDict] = m.SettingsConfigDict(
         env_prefix="FLEXT_TARGET_ORACLE_", extra="ignore"
     )
 
     oracle_host: Annotated[
         str,
-        Field(
-            default=c.DbOracle.OracleDefaults.DEFAULT_HOST,
+        m.Field(
             description="Oracle database host",
         ),
-    ]
+    ] = c.DbOracle.OracleDefaults.DEFAULT_HOST
     oracle_port: Annotated[
         int,
-        Field(
-            default=c.DbOracle.Connection.DEFAULT_PORT,
+        m.Field(
             description="Oracle database port",
         ),
-    ]
+    ] = c.DbOracle.Connection.DEFAULT_PORT
     oracle_service_name: Annotated[
         str,
-        Field(
-            default=c.DbOracle.Connection.DEFAULT_SERVICE_NAME,
+        m.Field(
             description="Oracle service name or SID",
         ),
-    ]
+    ] = c.DbOracle.Connection.DEFAULT_SERVICE_NAME
     oracle_user: Annotated[
         SecretStr,
-        Field(
+        m.Field(
             description="Oracle database username",
         ),
-    ] = Field(default_factory=lambda: SecretStr(""))
+    ] = m.Field(default_factory=lambda: SecretStr(""))
     oracle_password: Annotated[
         SecretStr,
-        Field(
+        m.Field(
             description="Oracle database password",
         ),
-    ] = Field(default_factory=lambda: SecretStr(""))
+    ] = m.Field(default_factory=lambda: SecretStr(""))
     default_target_schema: Annotated[
         str,
-        Field(
-            default="SINGER_DATA",
+        m.Field(
             description="Default target schema for data loading",
         ),
-    ]
+    ] = "SINGER_DATA"
     batch_size: Annotated[
-        int,
-        Field(default=1000, ge=1, description="Batch size for data loading"),
-    ]
+        int, m.Field(ge=1, description="Batch size for data loading")
+    ] = 1000
     commit_interval: Annotated[
-        int,
-        Field(default=1000, ge=1, description="Commit interval for transactions"),
-    ]
+        int, m.Field(ge=1, description="Commit interval for transactions")
+    ] = 1000
     transaction_timeout: Annotated[
-        int,
-        Field(default=30, ge=1, description="Transaction timeout in seconds"),
-    ]
+        int, m.Field(ge=1, description="Transaction timeout in seconds")
+    ] = 30
     parallel_degree: Annotated[
-        int,
-        Field(default=1, ge=1, description="Oracle parallel execution degree"),
-    ]
+        int, m.Field(ge=1, description="Oracle parallel execution degree")
+    ] = 1
     table_prefix: Annotated[
-        str,
-        Field(default="", description="Prefix applied to table names"),
-    ]
+        str, m.Field(description="Prefix applied to table names")
+    ] = ""
     table_suffix: Annotated[
-        str,
-        Field(default="", description="Suffix applied to table names"),
-    ]
+        str, m.Field(description="Suffix applied to table names")
+    ] = ""
     use_bulk_operations: Annotated[
-        bool,
-        Field(default=True, description="Use bulk operations for faster loading"),
-    ]
-    autocommit: Annotated[
-        bool,
-        Field(default=False, description="Auto-commit transactions"),
-    ]
+        bool, m.Field(description="Use bulk operations for faster loading")
+    ] = True
+    autocommit: Annotated[bool, m.Field(description="Auto-commit transactions")] = False
 
     def get_table_name(self, stream_name: str) -> str:
         """Get table name from stream name."""

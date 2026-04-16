@@ -4,10 +4,8 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, Self
 
-from pydantic import Field
-
 from flext_meltano import FlextMeltanoModels
-from flext_target_oracle import t
+from flext_target_oracle import m, t
 
 
 class FlextTargetOracleModelsResults:
@@ -16,18 +14,17 @@ class FlextTargetOracleModelsResults:
     class ExecuteResult(FlextMeltanoModels.ArbitraryTypesModel):
         """Target execute readiness payload."""
 
-        name: Annotated[str, Field(description="Target package name")]
+        name: Annotated[str, m.Field(description="Target package name")]
         status: Annotated[
             Literal["ready"],
-            Field(
-                default="ready",
+            m.Field(
                 description="Target readiness status",
             ),
-        ]
-        oracle_host: Annotated[str, Field(description="Configured Oracle host")]
+        ] = "ready"
+        oracle_host: Annotated[str, m.Field(description="Configured Oracle host")]
         oracle_service: Annotated[
             str,
-            Field(description="Configured Oracle service name"),
+            m.Field(description="Configured Oracle service name"),
         ]
 
     class ProcessingSummary(FlextMeltanoModels.ArbitraryTypesModel):
@@ -35,22 +32,22 @@ class FlextTargetOracleModelsResults:
 
         messages_processed: Annotated[
             t.NonNegativeInt,
-            Field(
+            m.Field(
                 description="Total Singer messages processed",
             ),
         ]
         streams: Annotated[
             t.StrSequence,
-            Field(
+            m.Field(
                 description="Singer stream names seen during processing",
             ),
-        ] = Field(default_factory=list)
+        ] = m.Field(default_factory=list)
         state: Annotated[
             FlextMeltanoModels.Meltano.SingerStateMessage,
-            Field(
+            m.Field(
                 description="Accumulated Singer STATE payload",
             ),
-        ] = Field(
+        ] = m.Field(
             default_factory=lambda: FlextMeltanoModels.Meltano.SingerStateMessage(
                 type="STATE",
                 value={},
@@ -62,16 +59,15 @@ class FlextTargetOracleModelsResults:
 
         status: Annotated[
             Literal["ready"],
-            Field(
-                default="ready",
+            m.Field(
                 description="Loader readiness status",
             ),
-        ]
-        host: Annotated[str, Field(description="Configured Oracle host")]
-        service: Annotated[str, Field(description="Configured Oracle service name")]
+        ] = "ready"
+        host: Annotated[str, m.Field(description="Configured Oracle host")]
+        service: Annotated[str, m.Field(description="Configured Oracle service name")]
         target_schema: Annotated[
             str,
-            Field(
+            m.Field(
                 alias="schema",
                 serialization_alias="schema",
                 validation_alias="schema",
@@ -82,22 +78,22 @@ class FlextTargetOracleModelsResults:
     class LoaderOperation(FlextMeltanoModels.ArbitraryTypesModel):
         """Detailed load operation summary for all streams."""
 
-        stream_name: Annotated[str, Field(description="Logical stream identifier")]
+        stream_name: Annotated[str, m.Field(description="Logical stream identifier")]
         started_at: Annotated[
             str,
-            Field(description="Load operation start timestamp"),
+            m.Field(description="Load operation start timestamp"),
         ]
         completed_at: Annotated[
             str,
-            Field(description="Load operation completion timestamp"),
+            m.Field(description="Load operation completion timestamp"),
         ]
         records_loaded: Annotated[
             t.NonNegativeInt,
-            Field(description="Number of loaded records"),
+            m.Field(description="Number of loaded records"),
         ]
         records_failed: Annotated[
             t.NonNegativeInt,
-            Field(description="Number of failed records"),
+            m.Field(description="Number of failed records"),
         ]
 
     class LoaderFinalizeResult(FlextMeltanoModels.ArbitraryTypesModel):
@@ -105,47 +101,46 @@ class FlextTargetOracleModelsResults:
 
         total_records: Annotated[
             t.NonNegativeInt,
-            Field(description="Total records processed"),
+            m.Field(description="Total records processed"),
         ]
         streams_processed: Annotated[
             t.NonNegativeInt,
-            Field(
+            m.Field(
                 description="Number of processed streams",
             ),
         ]
         status: Annotated[
             Literal["completed"],
-            Field(
-                default="completed",
+            m.Field(
                 description="Finalization status",
             ),
-        ]
-        loading_operation: FlextTargetOracleModelsResults.LoaderOperation = Field(
+        ] = "completed"
+        loading_operation: FlextTargetOracleModelsResults.LoaderOperation = m.Field(
             description="Aggregated loading operation details",
         )
         buffer_status: Annotated[
             t.IntMapping,
-            Field(
+            m.Field(
                 description="Remaining buffered records by stream",
             ),
-        ] = Field(default_factory=dict)
+        ] = m.Field(default_factory=dict)
 
     class ImplementationMetrics(FlextMeltanoModels.ArbitraryTypesModel):
         """Oracle target implementation metrics."""
 
         streams_configured: Annotated[
             t.NonNegativeInt,
-            Field(
+            m.Field(
                 description="Number of configured streams",
             ),
         ]
         batch_size: Annotated[
             t.BatchSize,
-            Field(description="Configured batch size"),
+            m.Field(description="Configured batch size"),
         ]
         use_bulk_operations: Annotated[
             bool,
-            Field(
+            m.Field(
                 description="Whether bulk operations are enabled",
             ),
         ]
@@ -153,24 +148,24 @@ class FlextTargetOracleModelsResults:
     class LoadStatisticsModel(FlextMeltanoModels.ArbitraryTypesModel):
         """Statistics for data load operation."""
 
-        stream_name: Annotated[str, Field(description="Stream identifier")]
+        stream_name: Annotated[str, m.Field(description="Stream identifier")]
         total_records_processed: Annotated[
             t.NonNegativeInt,
-            Field(
+            m.Field(
                 description="Total processed records",
             ),
         ]
         successful_records: Annotated[
             t.NonNegativeInt,
-            Field(description="Successful records"),
+            m.Field(description="Successful records"),
         ]
         failed_records: Annotated[
             t.NonNegativeInt,
-            Field(description="Failed records"),
+            m.Field(description="Failed records"),
         ]
         batches_processed: Annotated[
             t.NonNegativeInt,
-            Field(description="Processed batch count"),
+            m.Field(description="Processed batch count"),
         ]
 
         def finalize(self) -> Self:
