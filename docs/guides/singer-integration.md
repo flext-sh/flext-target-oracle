@@ -46,7 +46,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
   "type": "SCHEMA",
   "stream": "users",
   "schema": {
-    "type": "t.RecursiveContainer",
+    "type": "object",
     "properties": {
       "id": { "type": "integer" },
       "name": { "type": "string" },
@@ -509,7 +509,7 @@ class TestSingerIntegration:
             "type": "SCHEMA",
             "stream": "test_stream",
             "schema": {
-                "type": "t.RecursiveContainer",
+                "type": "object",
                 "properties": {"id": {"type": "integer"}},
             },
         }

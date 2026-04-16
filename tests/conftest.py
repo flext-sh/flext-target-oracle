@@ -280,7 +280,7 @@ def schema() -> t.RecursiveContainerMapping:
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
-            "type": "t.RecursiveContainer",
+            "type": "object",
             "properties": {
                 "id": {"type": "integer"},
                 "name": {"type": "string"},
@@ -317,7 +317,7 @@ def simple_schema() -> t.RecursiveContainerMapping:
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
-            "type": "t.RecursiveContainer",
+            "type": "object",
             "properties": {
                 "id": {"type": "integer"},
                 "name": {"type": "string"},
@@ -336,16 +336,16 @@ def nested_schema() -> t.RecursiveContainerMapping:
         "type": "SCHEMA",
         "stream": "orders",
         "schema": {
-            "type": "t.RecursiveContainer",
+            "type": "object",
             "properties": {
                 "id": {"type": "integer"},
                 "customer": {
-                    "type": "t.RecursiveContainer",
+                    "type": "object",
                     "properties": {
                         "id": {"type": "integer"},
                         "name": {"type": "string"},
                         "address": {
-                            "type": "t.RecursiveContainer",
+                            "type": "object",
                             "properties": {
                                 "street": {"type": "string"},
                                 "city": {"type": "string"},
@@ -357,7 +357,7 @@ def nested_schema() -> t.RecursiveContainerMapping:
                 "items": {
                     "type": "array",
                     "items": {
-                        "type": "t.RecursiveContainer",
+                        "type": "object",
                         "properties": {
                             "product_id": {"type": "integer"},
                             "quantity": {"type": "integer"},
@@ -489,7 +489,7 @@ def large_dataset() -> Sequence[t.Dict]:
         "type": "SCHEMA",
         "stream": "performance_test",
         "schema": {
-            "type": "t.RecursiveContainer",
+            "type": "object",
             "properties": {
                 "id": {"type": "integer"},
                 "data": {"type": "string"},

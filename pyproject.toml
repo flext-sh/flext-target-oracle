@@ -203,7 +203,6 @@ ignore-errors-in-generated-code = true
 project-excludes = [
   "**/*_pb2*.py",
   "**/*_pb2_grpc*.py",
-  "**/.flext-deps/**",
   "**/.venv/**",
   "**/__pycache__",
   "**/node_modules",
@@ -310,7 +309,6 @@ variance-mismatch = true
 [tool.pyright]
 exclude = [
   "**/.*",
-  "**/.flext-deps/**",
   "**/.mypy_cache",
   "**/.pytest_cache",
   "**/.ruff_cache",
@@ -390,7 +388,6 @@ python_files = [ "*_test.py", "*_tests.py", "test_*.py" ]
 # [MANAGED] ruff
 [tool.ruff]
 exclude = [
-  "**/.flext-deps/**",
   ".git",
   ".mypy_cache",
   ".pytest_cache",
@@ -650,7 +647,7 @@ split-on-trailing-comma = true
 "**/protocol_impls/*.py" = [ "SLF001" ]
 "**/providers/*.py" = [ "S106", "S107" ]
 "**/services/prompts.py" = [ "D102", "D107" ]
-"**/settings.py" = [ "ANN401", "PLC0415", "S105" ]
+"**/settings.py" = [ "ANN401", "FBT001", "SLF001" ]
 "**/singer/*.py" = [ "S404", "S603" ]
 "**/tools/*.py" = [ "FBT001", "FBT002", "N802", "S404", "S603", "S607", "T201" ]
 "**/tools/**/*.py" = [ "FBT001", "FBT002", "N802", "S404", "S603", "S607", "T201" ]

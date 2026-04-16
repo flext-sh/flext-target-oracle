@@ -73,7 +73,7 @@ def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
-            "type": "t.RecursiveContainer",
+            "type": "object",
             "properties": json.dumps({
                 "id": {"type": "integer"},
                 "name": {"type": "string"},

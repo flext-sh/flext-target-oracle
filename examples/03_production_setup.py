@@ -490,7 +490,7 @@ def create_production_sample_stream() -> Sequence[SingerMessage]:
         "type": "SCHEMA",
         "stream": "customer_orders",
         "schema": {
-            "type": "t.RecursiveContainer",
+            "type": "object",
             "properties": json.dumps({
                 "order_id": {"type": "integer"},
                 "customer_id": {"type": "integer"},

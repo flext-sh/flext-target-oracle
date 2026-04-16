@@ -47,11 +47,11 @@ EOF
 # Create example Singer data
 echo -e "${BLUE}Creating example Singer data...${NC}"
 cat >singer_data.jsonl <<EOF
-{"type": "SCHEMA", "stream": "users", "schema": {"type": "t.RecursiveContainer", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}, "email": {"type": "string", "format": "email"}, "age": {"type": "integer"}, "address": {"type": "t.RecursiveContainer", "properties": {"street": {"type": "string"}, "city": {"type": "string"}, "country": {"type": "string"}}}, "created_at": {"type": "string", "format": "date-time"}}}, "key_properties": ["id"]}
+{"type": "SCHEMA", "stream": "users", "schema": {"type": "object", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}, "email": {"type": "string", "format": "email"}, "age": {"type": "integer"}, "address": {"type": "object", "properties": {"street": {"type": "string"}, "city": {"type": "string"}, "country": {"type": "string"}}}, "created_at": {"type": "string", "format": "date-time"}}}, "key_properties": ["id"]}
 {"type": "RECORD", "stream": "users", "record": {"id": 1, "name": "John Doe", "email": "john@example.com", "age": 30, "address": {"street": "123 Main St", "city": "New York", "country": "USA"}, "created_at": "2025-01-20T12:00:00Z"}}
 {"type": "RECORD", "stream": "users", "record": {"id": 2, "name": "Jane Smith", "email": "jane@example.com", "age": 25, "address": {"street": "456 Oak Ave", "city": "Los Angeles", "country": "USA"}, "created_at": "2025-01-20T12:01:00Z"}}
 {"type": "RECORD", "stream": "users", "record": {"id": 3, "name": "Bob Johnson", "email": "bob@example.com", "age": 35, "address": {"street": "789 Pine Rd", "city": "Chicago", "country": "USA"}, "created_at": "2025-01-20T12:02:00Z"}}
-{"type": "SCHEMA", "stream": "products", "schema": {"type": "t.RecursiveContainer", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}, "price": {"type": "number"}, "category": {"type": "string"}, "in_stock": {"type": "boolean"}}}, "key_properties": ["id"]}
+{"type": "SCHEMA", "stream": "products", "schema": {"type": "object", "properties": {"id": {"type": "integer"}, "name": {"type": "string"}, "price": {"type": "number"}, "category": {"type": "string"}, "in_stock": {"type": "boolean"}}}, "key_properties": ["id"]}
 {"type": "RECORD", "stream": "products", "record": {"id": 1, "name": "Laptop", "price": 999.99, "category": "Electronics", "in_stock": true}}
 {"type": "RECORD", "stream": "products", "record": {"id": 2, "name": "Mouse", "price": 29.99, "category": "Electronics", "in_stock": true}}
 {"type": "RECORD", "stream": "products", "record": {"id": 3, "name": "Keyboard", "price": 79.99, "category": "Electronics", "in_stock": false}}
