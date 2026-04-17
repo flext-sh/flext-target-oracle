@@ -25,7 +25,7 @@ class FlextTargetOracleModelsCommands:
 
         format: Annotated[
             str,
-            m.Field(
+            u.Field(
                 description="Output format for about command response",
             ),
         ] = "json"
@@ -51,13 +51,13 @@ class FlextTargetOracleModelsCommands:
 
         config_file: Annotated[
             str | None,
-            m.Field(
+            u.Field(
                 description="Path to JSON configuration file for target settings",
             ),
         ] = None
         state_file: Annotated[
             str | None,
-            m.Field(
+            u.Field(
                 description="Path to Singer state file for incremental loads",
             ),
         ] = None
@@ -75,7 +75,7 @@ class FlextTargetOracleModelsCommands:
 
         config_file: Annotated[
             str | None,
-            m.Field(
+            u.Field(
                 description="Path to JSON configuration file to validate",
             ),
         ] = None

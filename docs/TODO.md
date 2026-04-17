@@ -402,14 +402,14 @@ ______________________________________________________________________
 
 ### **IMPORTANTE** - Estabilidade e Qualidade
 
-5. ⚠️ **Implementar transaction management**
+1. ⚠️ **Implementar transaction management**
 1. ⚠️ **Completar testes de integração**
 1. ⚠️ **Adicionar schema evolution**
 1. ⚠️ **Melhorar logging estruturado**
 
 ### **OPCIONAL** - Melhorias Arquiteturais
 
-9. 🔧 **Factory patterns** para conexões
+1. 🔧 **Factory patterns** para conexões
 1. 🔧 **Performance optimization** para batches
 1. 🔧 **Monitoring integration** avançado
 

@@ -131,13 +131,13 @@ def _handle_state(self, message: t.Dict) -> p.Result[bool]:
 
 ### ✅ Implemented Features
 
-| Feature                  | Status      | Implementation              |
-| ------------------------ | ----------- | --------------------------- |
+| Feature                  | Status     | Implementation              |
+| ------------------------ | ---------- | --------------------------- |
 | SCHEMA message handling  | ✅ Complete | `_handle_schema()`          |
 | RECORD message handling  | ✅ Complete | `_handle_record()`          |
 | STATE message handling   | ✅ Complete | `_handle_state()`           |
 | Batch processing         | ✅ Complete | Configurable batch sizes    |
-| Error handling           | ✅ Complete | r pattern         |
+| Error handling           | ✅ Complete | r pattern                   |
 | JSON storage             | ✅ Complete | CLOB-based flexible storage |
 | Configuration validation | ✅ Complete | Pydantic + domain rules     |
 

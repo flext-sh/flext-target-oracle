@@ -15,10 +15,8 @@ from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
-from pydantic import PrivateAttr
-
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from flext_meltano import FlextMeltanoServiceBase
+from flext_meltano import FlextMeltanoServiceBase, u
 from flext_target_oracle import (
     FlextTargetOracleExceptions as e,
     FlextTargetOracleSettings,
@@ -50,15 +48,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         return empty_buffers
 
     model_config: ClassVar = {"frozen": False}
-    _target_config: FlextTargetOracleSettings = PrivateAttr()
-    _oracle_api: FlextDbOracleApi = PrivateAttr()
+    _target_config: FlextTargetOracleSettings = u.PrivateAttr()
+    _oracle_api: FlextDbOracleApi = u.PrivateAttr()
     _record_buffers: t.MutableMappingKV[
         str,
         t.MutableSequenceOf[t.ContainerValueMapping],
-    ] = PrivateAttr(
+    ] = u.PrivateAttr(
         default_factory=_default_record_buffers,
     )
-    _total_records: int = PrivateAttr(default=0)
+    _total_records: int = u.PrivateAttr(default_factory=lambda: 0)
 
     @staticmethod
     def _normalize_log_value(value: t.ContainerValue) -> t.RecursiveContainer:

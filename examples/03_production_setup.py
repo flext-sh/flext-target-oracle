@@ -50,8 +50,8 @@ class HealthStatus(m.BaseModel):
 
     timestamp: float
     status: str = "healthy"
-    checks: t.MutableRecursiveContainerMapping = m.Field(default_factory=dict)
-    metrics: t.MutableRecursiveContainerMapping = m.Field(default_factory=dict)
+    checks: t.MutableRecursiveContainerMapping = u.Field(default_factory=dict)
+    metrics: t.MutableRecursiveContainerMapping = u.Field(default_factory=dict)
     error: str | None = None
 
 

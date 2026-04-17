@@ -201,13 +201,13 @@ def operation() -> p.Result[Data]:
 
 # ✅ GOOD: Configuration with validation
 class Config(m.Value):
-    field: str = m.Field(..., description="Required field")
+    field: str = u.Field(..., description="Required field")
 
-    @field_validator("field")
+    @u.field_validator("field")
     @classmethod
     def validate_field(cls, v: str) -> str:
         if not v.strip():
-            raise ValueError("Field cannot be empty")
+            raise ValueError("u.Field cannot be empty")
         return v
 
 
@@ -269,11 +269,11 @@ class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business rule validation."""
 
     # Required fields with clear validation
-    oracle_host: str = m.Field(..., description="Oracle host")
-    oracle_port: int = m.Field(default=1521, ge=1, le=65535, description="Oracle port")
+    oracle_host: str = u.Field(..., description="Oracle host")
+    oracle_port: int = u.Field(default=1521, ge=1, le=65535, description="Oracle port")
 
     # Custom validation
-    @field_validator("oracle_host")
+    @u.field_validator("oracle_host")
     @classmethod
     def validate_host(cls, v: str) -> str:
         if not v or v.isspace():

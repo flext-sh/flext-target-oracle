@@ -206,7 +206,7 @@ Add new fields to `FlextOracleTargetSettings`:
 
 ```python
 class FlextOracleTargetSettings(m.BaseModel):
-    my_new_option: bool = m.Field(
+    my_new_option: bool = u.Field(
         default=False,
         description="Enable my new feature",
     )
