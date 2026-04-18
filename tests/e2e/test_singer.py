@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-from typing import cast
 from unittest.mock import Mock
 
 import pytest
@@ -65,10 +64,8 @@ class TestSingerWorkflowE2E:
         assert "orders" in target.schemas
         state_value = target.state_message.value
         assert isinstance(state_value, dict)
-        bookmarks_obj: t.NormalizedValue | None = state_value.get("bookmarks")
+        bookmarks_obj: t.RecursiveContainer | None = state_value.get("bookmarks")
         assert isinstance(bookmarks_obj, dict)
-        bookmarks = cast("t.ContainerMapping", bookmarks_obj)
-        orders_obj: t.NormalizedValue | None = bookmarks.get("orders")
+        orders_obj: t.RecursiveContainer | None = bookmarks_obj.get("orders")
         assert isinstance(orders_obj, dict)
-        orders = cast("t.ContainerMapping", orders_obj)
-        assert orders.get("version") == 1
+        assert orders_obj.get("version") == 1

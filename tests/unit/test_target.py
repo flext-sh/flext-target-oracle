@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from collections.abc import Sequence
-from typing import cast
 from unittest.mock import Mock
 
 import pytest
@@ -119,10 +118,9 @@ class TestOracleTarget:
         assert target.process_singer_message(state_message).success
         state_value = target.state_message.value
         assert isinstance(state_value, dict)
-        bookmarks_obj: t.NormalizedValue | None = state_value.get("bookmarks")
+        bookmarks_obj: t.RecursiveContainer | None = state_value.get("bookmarks")
         assert isinstance(bookmarks_obj, dict)
-        bookmarks = cast("t.ContainerMapping", bookmarks_obj)
-        assert bookmarks.get("users") == 1
+        assert bookmarks_obj.get("users") == 1
 
     def test_process_singer_messages_flushes_loader(
         self, target: FlextTargetOracle
