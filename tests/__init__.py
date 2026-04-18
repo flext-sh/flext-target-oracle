@@ -16,9 +16,14 @@ if _t.TYPE_CHECKING:
 
     from flext_target_oracle import d, e, h, r, s, x
     from tests.constants import TestsFlextTargetOracleConstants, c
+    from tests.e2e.test_singer import TestSingerWorkflowE2E
+    from tests.integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
     from tests.models import TestsFlextTargetOracleModels, m
+    from tests.performance.test_performance import TestPerformance
     from tests.protocols import TestsFlextTargetOracleProtocols, p
     from tests.typings import TestsFlextTargetOracleTypes, t
+    from tests.unit.test_config import TestOracleSettings
+    from tests.unit.test_target import TestOracleTarget
     from tests.utilities import TestsFlextTargetOracleUtilities, u
 _LAZY_IMPORTS = merge_lazy_imports(
     (
@@ -33,10 +38,16 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "TestsFlextTargetOracleConstants",
                 "c",
             ),
+            ".e2e.test_singer": ("TestSingerWorkflowE2E",),
+            ".integration.test_oracle": (
+                "TestOracleIntegration",
+                "TestOracleTargetE2E",
+            ),
             ".models": (
                 "TestsFlextTargetOracleModels",
                 "m",
             ),
+            ".performance.test_performance": ("TestPerformance",),
             ".protocols": (
                 "TestsFlextTargetOracleProtocols",
                 "p",
@@ -45,6 +56,8 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "TestsFlextTargetOracleTypes",
                 "t",
             ),
+            ".unit.test_config": ("TestOracleSettings",),
+            ".unit.test_target": ("TestOracleTarget",),
             ".utilities": (
                 "TestsFlextTargetOracleUtilities",
                 "u",
@@ -82,6 +95,12 @@ _LAZY_IMPORTS = merge_lazy_imports(
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
 
 __all__: list[str] = [
+    "TestOracleIntegration",
+    "TestOracleSettings",
+    "TestOracleTarget",
+    "TestOracleTargetE2E",
+    "TestPerformance",
+    "TestSingerWorkflowE2E",
     "TestsFlextTargetOracleConstants",
     "TestsFlextTargetOracleModels",
     "TestsFlextTargetOracleProtocols",
