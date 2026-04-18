@@ -6,11 +6,8 @@ Singer-formatted data into an Oracle database.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import cast
-
-from pydantic import TypeAdapter
 
 from flext_core import t
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
@@ -20,7 +17,7 @@ def load_config() -> t.RecursiveContainerMapping:
     """Load configuration from file."""
     config_path = Path("settings.json")
     content = config_path.read_text(encoding="utf-8")
-    adapter: m.TypeAdapter[t.RecursiveContainerMapping] = TypeAdapter(
+    adapter: m.TypeAdapter[t.RecursiveContainerMapping] = m.TypeAdapter(
         t.RecursiveContainerMapping
     )
     return adapter.validate_json(content)
@@ -29,7 +26,7 @@ def load_config() -> t.RecursiveContainerMapping:
 def load_singer_messages() -> Sequence[t.RecursiveContainerMapping]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
-    adapter: m.TypeAdapter[t.RecursiveContainerMapping] = TypeAdapter(
+    adapter: m.TypeAdapter[t.RecursiveContainerMapping] = m.TypeAdapter(
         t.RecursiveContainerMapping
     )
     with data_path.open(encoding="utf-8") as f:
@@ -53,9 +50,7 @@ def main() -> None:
             message.get("stream", "unknown")
             record_obj: t.RecursiveContainer = message.get("record", {})
             record_dict: t.RecursiveContainerMapping = (
-                cast("t.RecursiveContainerMapping", record_obj)
-                if isinstance(record_obj, dict)
-                else {}
+                record_obj if isinstance(record_obj, Mapping) else {}
             )
             record_dict.get("id", "?")
         elif msg_type == "STATE":
