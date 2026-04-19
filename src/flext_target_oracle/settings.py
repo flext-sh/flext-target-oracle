@@ -12,18 +12,15 @@ from __future__ import annotations
 
 from typing import Annotated, ClassVar
 
-from pydantic import SecretStr
-from pydantic_settings import SettingsConfigDict
-
 from flext_core import FlextSettings
-from flext_target_oracle import FlextTargetOracleModelsSettings, c, m, p, r, u
+from flext_target_oracle import FlextTargetOracleModelsSettings, c, m, p, r, t, u
 
 
 @FlextSettings.auto_register("target-oracle")
 class FlextTargetOracleSettings(FlextSettings):
     """Runtime settings for Oracle Singer target operations."""
 
-    model_config: ClassVar[SettingsConfigDict] = m.SettingsConfigDict(
+    model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
         env_prefix="FLEXT_TARGET_ORACLE_", extra="ignore"
     )
 
@@ -46,17 +43,17 @@ class FlextTargetOracleSettings(FlextSettings):
         ),
     ] = c.DbOracle.Connection.DEFAULT_SERVICE_NAME
     oracle_user: Annotated[
-        SecretStr,
+        t.SecretStr,
         u.Field(
             description="Oracle database username",
         ),
-    ] = u.Field(default_factory=lambda: SecretStr(""))
+    ] = u.Field(default_factory=lambda: t.SecretStr(""))
     oracle_password: Annotated[
-        SecretStr,
+        t.SecretStr,
         u.Field(
             description="Oracle database password",
         ),
-    ] = u.Field(default_factory=lambda: SecretStr(""))
+    ] = u.Field(default_factory=lambda: t.SecretStr(""))
     default_target_schema: Annotated[
         str,
         u.Field(

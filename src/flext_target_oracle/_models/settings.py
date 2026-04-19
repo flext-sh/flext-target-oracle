@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Annotated, ClassVar
+from typing import TYPE_CHECKING, Annotated, ClassVar
 
-from flext_meltano import FlextMeltanoModels
-from flext_target_oracle import t, u
+from flext_meltano import FlextMeltanoModels, u
+
+if TYPE_CHECKING:
+    from flext_target_oracle import t
 
 
 class FlextTargetOracleModelsSettings:

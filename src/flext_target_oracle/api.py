@@ -9,8 +9,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Never, override
+from typing import Annotated, Never, override
 
+from flext_core import u
 from flext_meltano import FlextMeltanoTargetServiceBase
 from flext_target_oracle import t
 
@@ -18,7 +19,10 @@ from flext_target_oracle import t
 class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     """Orchestrator for target-oracle. Loader-based, not Singer sink."""
 
-    target_name: t.NonEmptyStr = "target-oracle"
+    target_name: Annotated[
+        t.NonEmptyStr,
+        u.Field(description="Canonical Singer target identifier."),
+    ] = "target-oracle"
 
     @override
     def create_sink(

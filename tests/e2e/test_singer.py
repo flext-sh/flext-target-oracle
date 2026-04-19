@@ -7,9 +7,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from flext_core import r
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
-from tests import m, t
+from tests import m, r, t
 
 
 @pytest.mark.e2e
@@ -39,7 +38,10 @@ class TestSingerWorkflowE2E:
             "stream": "orders",
             "schema": {
                 "type": "object",
-                "properties": json.dumps({"id": {"type": "integer"}, "amount": {"type": "number"}}),
+                "properties": json.dumps({
+                    "id": {"type": "integer"},
+                    "amount": {"type": "number"},
+                }),
             },
             "key_properties": ["id"],
         }

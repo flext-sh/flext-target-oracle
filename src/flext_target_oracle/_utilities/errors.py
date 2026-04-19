@@ -67,13 +67,13 @@ class FlextTargetOracleExceptions(e):
             correlation_id=metadata.correlation_id if metadata is not None else None,
         )
 
-    class Error(e.BaseError):
+    class Error(e.Error):
         """Oracle Target main error - inherits from base error."""
 
     class ConfigurationError(e.ConfigurationError):
         """Oracle configuration error using flext-core foundation."""
 
-    class OracleConnectionError(e.ConnectionError):
+    class OracleConnectionError(e.OracleConnectionError):
         """Oracle connection error with Oracle-specific context."""
 
         @override
@@ -111,19 +111,7 @@ class FlextTargetOracleExceptions(e):
                 oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
                     value,
                 )
-            if resolved_metadata.correlation_id is None:
-                super().__init__(
-                    message=message,
-                    error_code=resolved_metadata.code,
-                    context=oracle_context or None,
-                )
-            else:
-                super().__init__(
-                    message=message,
-                    error_code=resolved_metadata.code,
-                    context=oracle_context or None,
-                    _correlation_id=resolved_metadata.correlation_id,
-                )
+            super().__init__(message=message)
             self.service_name = oracle_context.get("service_name")
             self.user = oracle_context.get("user")
             self.dsn = oracle_context.get("dsn")
@@ -183,7 +171,7 @@ class FlextTargetOracleExceptions(e):
             )
             self.wallet_location = oracle_context.get("wallet_location")
 
-    class ProcessingError(e.OperationError):
+    class ProcessingError(e.ProcessingError):
         """Oracle processing error with Oracle-specific context."""
 
         @override
@@ -218,26 +206,14 @@ class FlextTargetOracleExceptions(e):
                 oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
                     value,
                 )
-            if resolved_metadata.correlation_id is None:
-                super().__init__(
-                    message=message,
-                    error_code=resolved_metadata.code,
-                    context=oracle_context or None,
-                )
-            else:
-                super().__init__(
-                    message=message,
-                    error_code=resolved_metadata.code,
-                    context=oracle_context or None,
-                    _correlation_id=resolved_metadata.correlation_id,
-                )
+            super().__init__(message=message)
             self.stream_name = oracle_context.get("stream_name")
             self.record_count = oracle_context.get("record_count")
             self.error_records = error_records
             operation_val = oracle_context.get("operation")
             self.operation = str(operation_val) if operation_val is not None else None
 
-    class OracleTimeoutError(e.TimeoutError):
+    class OracleTimeoutError(e.OracleTimeoutError):
         """Oracle timeout error using flext-core foundation."""
 
     class SchemaError(ValidationError):

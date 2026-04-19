@@ -6,10 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from pydantic import TypeAdapter
-
-from flext_meltano import FlextMeltanoTypes
-from flext_target_oracle import m
+from flext_meltano import FlextMeltanoTypes, m
 
 
 class FlextTargetOracleTypesBase:
@@ -17,7 +14,7 @@ class FlextTargetOracleTypesBase:
 
     FLAT_CONTAINER_MAP_ADAPTER: m.TypeAdapter[
         FlextMeltanoTypes.ContainerValueMapping
-    ] = TypeAdapter(FlextMeltanoTypes.ContainerValueMapping)
-    STR_MAP_ADAPTER: m.TypeAdapter[FlextMeltanoTypes.StrMapping] = TypeAdapter(
+    ] = m.TypeAdapter(FlextMeltanoTypes.ContainerValueMapping)
+    STR_MAP_ADAPTER: m.TypeAdapter[FlextMeltanoTypes.StrMapping] = m.TypeAdapter(
         FlextMeltanoTypes.StrMapping
     )

@@ -7,9 +7,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from flext_core import r
 from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings
-from tests import m, t
+from tests import m, r, t
 
 
 @pytest.fixture

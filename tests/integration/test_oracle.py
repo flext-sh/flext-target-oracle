@@ -16,7 +16,7 @@ from collections.abc import Sequence
 
 import pytest
 
-from flext_db_oracle import FlextDbOracleApi, FlextDbOracleTypes as oracle_t
+from flext_db_oracle import FlextDbOracleApi
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,
@@ -36,10 +36,8 @@ def _query_rows(
     oracle_engine: FlextDbOracleApi,
     sql: str,
     params: t.RecursiveContainerMapping | None = None,
-) -> Sequence[oracle_t.Dict]:
-    normalized_params = (
-        None if params is None else oracle_t.ConfigMap(root=dict(params))
-    )
+) -> Sequence[t.Dict]:
+    normalized_params = None if params is None else t.ConfigMap(root=dict(params))
     query_result = oracle_engine.oracle_services.execute_query(sql, normalized_params)
     assert query_result.success, query_result.error
     return query_result.value
@@ -175,7 +173,10 @@ class TestOracleIntegration:
     ) -> None:
         """Test bulk insert with large dataset."""
         oracle_config = oracle_config.model_copy(
-            update={"load_method": c.TargetOracle.LOAD_METHOD_BULK_INSERT, "batch_size": 1000}
+            update={
+                "load_method": c.TargetOracle.LOAD_METHOD_BULK_INSERT,
+                "batch_size": 1000,
+            }
         )
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().success
@@ -321,7 +322,9 @@ class TestOracleIntegration:
         regular_start = 1
         assert columns[regular_start] == "ALPHA_FIELD"
         assert columns[regular_start + 1] == "ZEBRA_FIELD"
-        audit_cols = [column for column in columns if column in {"CREATED_AT", "UPDATED_AT"}]
+        audit_cols = [
+            column for column in columns if column in {"CREATED_AT", "UPDATED_AT"}
+        ]
         assert len(audit_cols) == 2
         sdc_cols = [column for column in columns if column.startswith("_SDC_")]
         assert all(columns.index(sdc) > columns.index("UPDATED_AT") for sdc in sdc_cols)
@@ -399,7 +402,9 @@ class TestOracleIntegration:
         }
         assert "IDX_EMAIL_UNIQUE" in indexes
         assert indexes["IDX_EMAIL_UNIQUE"] == "UNIQUE"
-        composite_indexes = [index_name for index_name in indexes if "NAME" in index_name]
+        composite_indexes = [
+            index_name for index_name in indexes if "NAME" in index_name
+        ]
         assert len(composite_indexes) > 0
         assert loader.disconnect().success
 
@@ -470,7 +475,9 @@ class TestOracleTargetE2E:
             },
             "key_properties": ["id"],
         }
-        target.execute(t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(schema_msg).decode("utf-8"))
+        target.execute(
+            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(schema_msg).decode("utf-8")
+        )
         record_msg = {
             "type": "RECORD",
             "stream": "users",
@@ -482,7 +489,9 @@ class TestOracleTargetE2E:
                 "internal_id": "INT-001",
             },
         }
-        target.execute(t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(record_msg).decode("utf-8"))
+        target.execute(
+            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(record_msg).decode("utf-8")
+        )
         column_rows = _query_rows(
             oracle_engine,
             "SELECT column_name AS \"column_name\" FROM user_tab_columns WHERE table_name = 'USERS'",

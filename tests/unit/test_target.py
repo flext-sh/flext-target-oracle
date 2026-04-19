@@ -8,13 +8,12 @@ from unittest.mock import Mock
 
 import pytest
 
-from flext_core import r
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleExceptions,
     FlextTargetOracleSettings,
 )
-from tests import m, t
+from tests import m, r, t
 
 
 @pytest.fixture
@@ -187,10 +186,11 @@ class TestOracleTarget:
         mocked_load_record = Mock(return_value=r[bool].ok(value=True))
         object.__setattr__(target.loader, "load_record", mocked_load_record)
         result = target.write_record(
-            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(
-                {"type": "RECORD", "stream": "users", "record": {"id": 1}}
-            )
-            .decode("utf-8")
+            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json({
+                "type": "RECORD",
+                "stream": "users",
+                "record": {"id": 1},
+            }).decode("utf-8")
         )
         mocked_load_record.assert_called_once_with("users", {"id": 1})
         assert result.success

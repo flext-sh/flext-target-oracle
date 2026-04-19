@@ -2,10 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Literal, Self
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Annotated, Literal, Self
 
 from flext_meltano import FlextMeltanoModels
-from flext_target_oracle import t, u
+from flext_target_oracle import u
+
+if TYPE_CHECKING:
+    from flext_target_oracle import t
 
 
 class FlextTargetOracleModelsResults:
@@ -41,7 +45,7 @@ class FlextTargetOracleModelsResults:
             u.Field(
                 description="Singer stream names seen during processing",
             ),
-        ] = u.Field(default_factory=list)
+        ] = u.Field(default_factory=tuple)
         state: Annotated[
             FlextMeltanoModels.Meltano.SingerStateMessage,
             u.Field(
@@ -123,7 +127,7 @@ class FlextTargetOracleModelsResults:
             u.Field(
                 description="Remaining buffered records by stream",
             ),
-        ] = u.Field(default_factory=dict)
+        ] = u.Field(default_factory=lambda: MappingProxyType({}))
 
     class ImplementationMetrics(FlextMeltanoModels.ArbitraryTypesModel):
         """Oracle target implementation metrics."""

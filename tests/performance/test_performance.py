@@ -9,9 +9,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from flext_core import r
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
-from tests import m
+from tests import m, r
 
 
 @pytest.mark.performance
@@ -72,7 +71,10 @@ class TestPerformance:
         schema = {
             "type": "SCHEMA",
             "stream": "perf_stream",
-            "schema": {"type": "object", "properties": json.dumps({"id": {"type": "integer"}})},
+            "schema": {
+                "type": "object",
+                "properties": json.dumps({"id": {"type": "integer"}}),
+            },
             "key_properties": ["id"],
         }
         record = {"type": "RECORD", "stream": "perf_stream", "record": {"id": 1}}

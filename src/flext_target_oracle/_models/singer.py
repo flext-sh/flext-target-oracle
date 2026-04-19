@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Annotated, ClassVar
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Annotated, ClassVar
 
 from flext_meltano import FlextMeltanoModels, u
-from flext_target_oracle import t
+
+if TYPE_CHECKING:
+    from flext_target_oracle import t
 
 
 class FlextTargetOracleModelsSinger:
@@ -58,10 +61,10 @@ class FlextTargetOracleModelsSinger:
             u.Field(
                 description="Columns ignored during record transformation",
             ),
-        ] = u.Field(default_factory=list)
+        ] = u.Field(default_factory=tuple)
         column_mappings: Annotated[
             t.StrMapping,
             u.Field(
                 description="Singer column to Oracle column mapping",
             ),
-        ] = u.Field(default_factory=dict)
+        ] = u.Field(default_factory=lambda: MappingProxyType({}))

@@ -197,21 +197,19 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return r[bool].fail(f"Table creation failed: {e}")
 
     @override
-    def execute(self) -> p.Result[m.TargetOracle.LoaderReadyResult]:
+    def execute(self) -> p.Result[t.RecursiveContainerMapping]:
         """Execute domain service - returns connection test result."""
         connection_result = self.test_connection()
         if connection_result.failure:
-            return r[m.TargetOracle.LoaderReadyResult].fail(
+            return r[t.RecursiveContainerMapping].fail(
                 f"Oracle connection failed: {connection_result.error}",
             )
-        return r[m.TargetOracle.LoaderReadyResult].ok(
-            m.TargetOracle.LoaderReadyResult.model_validate({
-                "status": "ready",
-                "host": self.target_config.oracle_host,
-                "service": self.target_config.oracle_service_name,
-                "schema": self.target_config.default_target_schema,
-            }),
-        )
+        return r[t.RecursiveContainerMapping].ok({
+            "status": "ready",
+            "host": self.target_config.oracle_host,
+            "service": self.target_config.oracle_service_name,
+            "schema": self.target_config.default_target_schema,
+        })
 
     def finalize_all_streams(self) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
         """Finalize all streams and return stats using standardized models."""

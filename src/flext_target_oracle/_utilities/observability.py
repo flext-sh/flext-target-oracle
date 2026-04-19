@@ -4,15 +4,20 @@ from __future__ import annotations
 
 from collections.abc import Generator
 from contextlib import contextmanager
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
+from flext_core import FlextTypes
 from flext_meltano import p, u
 from flext_target_oracle import (
     FlextTargetOracleErrorMetadata,
     FlextTargetOracleExceptions as e,
     c,
-    t,
 )
+
+if TYPE_CHECKING:
+    from flext_target_oracle import t
+else:
+    t = FlextTypes
 
 
 class FlextTargetOracleUtilitiesObservability:

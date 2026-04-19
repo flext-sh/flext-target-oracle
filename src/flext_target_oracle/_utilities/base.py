@@ -6,9 +6,10 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from importlib import import_module
 from pathlib import Path
 
-from flext_target_oracle import FlextTargetOracleSettings, c, p, r
+from flext_target_oracle import c, p, r
 
 
 class FlextTargetOracleUtilitiesBase:
@@ -22,9 +23,12 @@ class FlextTargetOracleUtilitiesBase:
         result_type: type[r[p.TargetOracle.OracleSettingsProtocol]] = r[
             p.TargetOracle.OracleSettingsProtocol
         ]
+        settings_module = import_module("flext_target_oracle.settings")
+        settings_cls = settings_module.FlextTargetOracleSettings
+
         if config_file is None:
             return result_type.ok(
-                FlextTargetOracleSettings.model_validate({}),
+                settings_cls.model_validate({}),
             )
         config_path = Path(config_file)
         if not config_path.exists():
@@ -33,7 +37,7 @@ class FlextTargetOracleUtilitiesBase:
             )
         try:
             content = config_path.read_text(encoding="utf-8")
-            settings = FlextTargetOracleSettings.model_validate_json(content)
+            settings = settings_cls.model_validate_json(content)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             return result_type.fail(f"Invalid configuration file: {exc}")
         return result_type.ok(settings)

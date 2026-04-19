@@ -53,6 +53,20 @@ def pytest_configure(config: pytest.Config) -> None:
     config.addinivalue_line("markers", "oracle: mark test as requiring Oracle database")
 
 
+@pytest.fixture(autouse=True)
+def isolate_target_oracle_env(
+    monkeypatch: pytest.MonkeyPatch,
+    request: pytest.FixtureRequest,
+) -> None:
+    """Keep unit tests deterministic regardless of host FLEXT_TARGET_ORACLE_* env."""
+    if request.node.get_closest_marker(
+        "integration"
+    ) or request.node.get_closest_marker("e2e"):
+        return
+    for key in [key for key in os.environ if key.startswith("FLEXT_TARGET_ORACLE_")]:
+        monkeypatch.delenv(key, raising=False)
+
+
 @pytest.fixture(scope="session")
 def event_loop() -> Generator[AbstractEventLoop]:
     """Create event loop for tests."""
