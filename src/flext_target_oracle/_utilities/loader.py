@@ -168,7 +168,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         try:
             table_name = self.target_config.get_table_name(stream_name)
             with self.oracle_api as connected_api:
-                tables_result = connected_api.get_tables(
+                tables_result = connected_api.fetch_tables(
                     schema=self.target_config.default_target_schema,
                 )
                 if tables_result.failure:
@@ -309,7 +309,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """Test connection to Oracle database using flext-db-oracle API."""
         try:
             with self.oracle_api as connected_api:
-                tables_result = connected_api.get_tables(
+                tables_result = connected_api.fetch_tables(
                     schema=self.target_config.default_target_schema,
                 )
                 if tables_result.failure:

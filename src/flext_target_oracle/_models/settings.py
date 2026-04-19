@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, ClassVar
 
 from flext_meltano import FlextMeltanoModels
 from flext_target_oracle import t, u
@@ -46,6 +46,8 @@ class FlextTargetOracleModelsSettings:
 
     class TargetConfig(FlextMeltanoModels.ArbitraryTypesModel):
         """Target runtime configuration payload."""
+
+        _flext_enforcement_exempt: ClassVar[bool] = True
 
         default_target_schema: str = u.Field(description="Default Oracle target schema")
         use_bulk_operations: bool = u.Field(

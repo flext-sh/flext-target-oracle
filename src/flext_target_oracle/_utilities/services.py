@@ -33,7 +33,7 @@ class FlextTargetOracleConnectionService:
 
     def test_connection(self) -> p.Result[None]:
         """Check Oracle access by listing schema tables."""
-        tables_result = self.oracle_api.get_tables(
+        tables_result = self.oracle_api.fetch_tables(
             schema=self.settings.default_target_schema,
         )
         if tables_result.failure:
