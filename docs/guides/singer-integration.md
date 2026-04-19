@@ -60,7 +60,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
 **Implementation**:
 
 ```python
-def _handle_schema(self, message: t.Dict) -> p.Result[bool]:
+def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
     """Handle SCHEMA message with table creation/evolution."""
     stream_name = message.get("stream")
     schema = message.get("schema", {})
@@ -91,7 +91,7 @@ def _handle_schema(self, message: t.Dict) -> p.Result[bool]:
 **Implementation**:
 
 ```python
-def _handle_record(self, message: t.Dict) -> p.Result[bool]:
+def _handle_record(self, message: m.Dict) -> p.Result[bool]:
     """Handle RECORD message with batched loading."""
     stream_name = message.get("stream")
     record_data = message.get("record")
@@ -120,7 +120,7 @@ def _handle_record(self, message: t.Dict) -> p.Result[bool]:
 **Implementation**:
 
 ```python
-def _handle_state(self, message: t.Dict) -> p.Result[bool]:
+def _handle_state(self, message: m.Dict) -> p.Result[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
     logger.debug("State message received - forwarding to Meltano")
@@ -175,7 +175,7 @@ class FlextOracleTarget(Target):
 
     def _write_record(self, record: Record) -> None:
         """Write single record - Singer SDK requirement."""
-        # Convert Record to t.RecursiveContainerMapping and process
+        # Convert Record to Mapping[str, t.Container] and process
 
     def _write_records(self, records: List[Record]) -> None:
         """Write batch of records - Singer SDK requirement."""

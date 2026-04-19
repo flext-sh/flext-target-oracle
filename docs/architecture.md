@@ -143,7 +143,7 @@ class FlextOracleTarget(Target):
     def _handle_state(self, message: dict) -> p.Result[bool]
 
     # Lifecycle management
-    def finalize(self) -> p.Result[t.Dict]
+    def finalize(self) -> p.Result[m.Dict]
 ```
 
 **Key Patterns**:
@@ -195,14 +195,14 @@ class FlextOracleTargetLoader:
     def __init__(self, settings: FlextOracleTargetSettings):
         # flext-db-oracle integration
         self.oracle_api = FlextDbOracleApi(oracle_config)
-        self._record_buffers: Mapping[str, Sequence[t.Dict]] = {}
+        self._record_buffers: Mapping[str, Sequence[m.Dict]] = {}
 
     # Table management
     def ensure_table_exists(self, stream_name: str, schema: dict) -> p.Result[bool]
 
     # Data loading with batching
     def load_record(self, stream_name: str, record_data: dict) -> p.Result[bool]
-    def finalize_all_streams(self) -> p.Result[t.Dict]
+    def finalize_all_streams(self) -> p.Result[m.Dict]
 ```
 
 **Key Patterns**:

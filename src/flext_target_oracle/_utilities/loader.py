@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import re
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from typing import ClassVar, override
 
@@ -59,7 +59,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     _total_records: int = u.PrivateAttr(default_factory=lambda: 0)
 
     @staticmethod
-    def _normalize_log_value(value: t.ContainerValue) -> t.RecursiveContainer:
+    def _normalize_log_value(value: t.ContainerValue) -> t.Container:
         """Normalize logging payloads into scalar or string values."""
         if isinstance(value, (str, int, float, bool, datetime)):
             return value
@@ -197,14 +197,14 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return r[bool].fail(f"Table creation failed: {e}")
 
     @override
-    def execute(self) -> p.Result[t.RecursiveContainerMapping]:
+    def execute(self) -> p.Result[Mapping[str, t.Container]]:
         """Execute domain service - returns connection test result."""
         connection_result = self.test_connection()
         if connection_result.failure:
-            return r[t.RecursiveContainerMapping].fail(
+            return r[Mapping[str, t.Container]].fail(
                 f"Oracle connection failed: {connection_result.error}",
             )
-        return r[t.RecursiveContainerMapping].ok({
+        return r[Mapping[str, t.Container]].ok({
             "status": "ready",
             "host": self.target_config.oracle_host,
             "service": self.target_config.oracle_service_name,

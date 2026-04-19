@@ -247,7 +247,7 @@ def process_record(record: dict) -> p.Result[bool]:
         return r[bool].fail(f"Processing failed: {e}")
 
 # ✅ Chain r operations
-def process_batch(records: Sequence[t.Dict]) -> p.Result[Stats]:
+def process_batch(records: Sequence[m.Dict]) -> p.Result[Stats]:
     """Process batch of records with early termination on failure."""
     stats = Stats()
 
@@ -663,7 +663,7 @@ import time
 from typing import List
 
 
-def benchmark_batch_sizes(records: List[t.Dict]):
+def benchmark_batch_sizes(records: List[m.Dict]):
     """Benchmark different batch sizes."""
 
     batch_sizes = [100, 500, 1000, 2000, 5000]

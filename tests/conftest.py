@@ -9,7 +9,11 @@ from __future__ import annotations
 
 import os
 from asyncio import AbstractEventLoop, get_event_loop_policy
-from collections.abc import Generator, Sequence
+from collections.abc import (
+    Generator,
+    Mapping,
+    Sequence,
+)
 from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
@@ -288,7 +292,7 @@ def mock_loader() -> Mock:
 
 
 @pytest.fixture
-def schema() -> t.RecursiveContainerMapping:
+def schema() -> Mapping[str, t.Container]:
     """Simple Singer schema message for unit testing."""
     return {
         "type": "SCHEMA",
@@ -306,7 +310,7 @@ def schema() -> t.RecursiveContainerMapping:
 
 
 @pytest.fixture
-def record() -> t.RecursiveContainerMapping:
+def record() -> Mapping[str, t.Container]:
     """Simple Singer record message for unit testing."""
     return {
         "type": "RECORD",
@@ -316,7 +320,7 @@ def record() -> t.RecursiveContainerMapping:
 
 
 @pytest.fixture
-def state() -> t.RecursiveContainerMapping:
+def state() -> Mapping[str, t.Container]:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -325,7 +329,7 @@ def state() -> t.RecursiveContainerMapping:
 
 
 @pytest.fixture
-def simple_schema() -> t.RecursiveContainerMapping:
+def simple_schema() -> Mapping[str, t.Container]:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
@@ -344,7 +348,7 @@ def simple_schema() -> t.RecursiveContainerMapping:
 
 
 @pytest.fixture
-def nested_schema() -> t.RecursiveContainerMapping:
+def nested_schema() -> Mapping[str, t.Container]:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
@@ -388,7 +392,7 @@ def nested_schema() -> t.RecursiveContainerMapping:
 
 
 @pytest.fixture
-def sample_record() -> t.RecursiveContainerMapping:
+def sample_record() -> Mapping[str, t.Container]:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -405,7 +409,7 @@ def sample_record() -> t.RecursiveContainerMapping:
 
 
 @pytest.fixture
-def batch_records() -> Sequence[t.RecursiveContainerMapping]:
+def batch_records() -> Sequence[Mapping[str, t.Container]]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -424,7 +428,7 @@ def batch_records() -> Sequence[t.RecursiveContainerMapping]:
 
 
 @pytest.fixture
-def state_message() -> t.RecursiveContainerMapping:
+def state_message() -> Mapping[str, t.Container]:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -442,10 +446,10 @@ def state_message() -> t.RecursiveContainerMapping:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema: t.RecursiveContainerMapping,
-    sample_record: t.RecursiveContainerMapping,
-    state_message: t.RecursiveContainerMapping,
-) -> Sequence[t.RecursiveContainerMapping]:
+    simple_schema: Mapping[str, t.Container],
+    sample_record: Mapping[str, t.Container],
+    state_message: Mapping[str, t.Container],
+) -> Sequence[Mapping[str, t.Container]]:
     """Complete Singer message stream for testing."""
     return [simple_schema, sample_record, sample_record, state_message]
 
@@ -473,7 +477,7 @@ def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
 @pytest.fixture
 def temp_config_file(tmp_path: Path) -> Path:
     """Create temporary configuration file."""
-    config_data: t.RecursiveContainer = {
+    config_data: t.Container = {
         "oracle_host": ORACLE_HOST,
         "oracle_port": ORACLE_PORT,
         "oracle_service_name": ORACLE_SERVICE,
@@ -497,7 +501,7 @@ def connected_loader(oracle_loader: FlextTargetOracleLoader) -> FlextTargetOracl
 
 
 @pytest.fixture
-def large_dataset() -> Sequence[t.Dict]:
+def large_dataset() -> Sequence[m.Dict]:
     """Generate large dataset for performance testing."""
     schema = t.Tests.DICT_ADAPTER.validate_python({
         "type": "SCHEMA",
@@ -526,7 +530,7 @@ def large_dataset() -> Sequence[t.Dict]:
         })
         for i in range(10000)
     ]
-    result: list[t.Dict] = []
+    result: list[m.Dict] = []
     result.append(schema)
     result.extend(records)
     return result

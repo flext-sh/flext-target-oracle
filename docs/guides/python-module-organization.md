@@ -297,7 +297,7 @@ class FlextOracleTarget(Target):
     def _handle_record(self, message: dict) -> p.Result[bool]:
         """Handle RECORD messages with batched loading."""
 
-    def finalize(self) -> p.Result[t.Dict]:
+    def finalize(self) -> p.Result[m.Dict]:
         """Finalize streams and return statistics."""
 ```
 
@@ -364,7 +364,7 @@ class FlextOracleTargetLoader:
     def load_record(self, stream_name: str, record_data: dict) -> p.Result[bool]:
         """Load record with batching and error handling."""
 
-    def finalize_all_streams(self) -> p.Result[t.Dict]:
+    def finalize_all_streams(self) -> p.Result[m.Dict]:
         """Finalize all streams and return statistics."""
 ```
 
@@ -906,12 +906,12 @@ from flext_core import t
 from flext_core import u
 
 
-def process_singer_message(self, message: t.Dict) -> p.Result[bool]:
+def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
     """Process Singer message with complete type safety."""
 
 
 def load_records(
-    self, stream_name: str, records: List[t.Dict]
+    self, stream_name: str, records: List[m.Dict]
 ) -> p.Result[Dict[str, Union[int, str]]]:
     """Load records with specific return type."""
 
@@ -938,7 +938,7 @@ def process_message(self, message):  # Missing types
 ### **Documentation Standards**
 
 ```python
-def ensure_table_exists(self, stream_name: str, schema: t.Dict) -> p.Result[bool]:
+def ensure_table_exists(self, stream_name: str, schema: m.Dict) -> p.Result[bool]:
     """
     Ensure Oracle table exists for Singer stream with proper schema.
 
@@ -1130,7 +1130,7 @@ from warnings import warn
 from typing import Dict, Optional
 
 
-def process_singer_message(self, message: t.Dict) -> p.Result[bool]:
+def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
     """
     DEPRECATED: Custom message processing method.
 
