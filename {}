@@ -1,0 +1,1195 @@
+"""Production Setup Example - Enterprise-Grade Oracle Target Configuration.
+
+This example demonstrates production-ready configuration and deployment patterns
+for FLEXT Target Oracle, including comprehensive error handling, monitoring,
+security considerations, and performance optimization.
+
+"""
+
+from __future__ import annotations
+
+import datetime
+import json
+import logging
+import os
+import signal
+import sys
+import time
+from collections.abc import (
+    Mapping,
+    Sequence,
+)
+from datetime import UTC
+from types import FrameType
+from typing import cast
+
+from flext_target_oracle import (
+    FlextTargetOracle,
+    FlextTargetOracleSettings,
+    c,
+    m,
+    p,
+    r,
+    t,
+    u,
+)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler(), logging.FileHandler("flext_target_oracle.log")],
+)
+logger = u.fetch_logger(__name__)
+type SingerMessage = (
+    m.TargetOracle.SingerSchemaMessage
+    | m.TargetOracle.SingerRecordMessage
+    | m.TargetOracle.SingerStateMessage
+    | m.TargetOracle.SingerActivateVersionMessage
+)
+
+
+class HealthStatus(m.BaseModel):
+    """Runtime health snapshot used by health checks."""
+
+    timestamp: float
+    status: str = "healthy"
+    checks: t.MutableRecursiveContainerMapping = u.Field(default_factory=dict)
+    metrics: t.MutableRecursiveContainerMapping = u.Field(default_factory=dict)
+    error: str | None = None
+
+
+class ProcessingStats(m.BaseModel):
+    """In-memory counters for Singer stream processing."""
+
+    processing_start_time: float
+    processing_end_time: float | None = None
+    processing_duration_seconds: float = 0.0
+    messages_processed: int = 0
+    schemas_processed: int = 0
+    records_processed: int = 0
+    states_processed: int = 0
+    errors_encountered: int = 0
+
+
+class ProductionConfig:
+    """Production configuration management with environment variables."""
+
+    @staticmethod
+    def create_from_environment() -> FlextTargetOracleSettings:
+        """Create production configuration from environment variables.
+
+        Returns:
+            FlextTargetOracleSettings: Production-ready configuration
+
+        Raises:
+            ValueError: If required environment variables are missing
+
+        Environment Variables:
+            ORACLE_HOST: Oracle database hostname (required)
+            ORACLE_PORT: Oracle database port (default: 1521)
+            ORACLE_SERVICE: Oracle service name (required)
+            ORACLE_USER: Oracle username (required)
+            ORACLE_PASSWORD: Oracle password (required)
+            DEFAULT_TARGET_SCHEMA: Default schema (default: ENTERPRISE_DW)
+            BATCH_SIZE: Batch size for processing (default: 5000)
+            CONNECTION_TIMEOUT: Connection timeout (default: 60)
+            LOAD_METHOD: Loading method (default: BULK_INSERT)
+
+        """
+        logger.info("Creating production configuration from environment")
+        oracle_host = os.getenv("ORACLE_HOST")
+        oracle_service = os.getenv("ORACLE_SERVICE")
+        oracle_user = os.getenv("ORACLE_USER")
+        oracle_password = os.getenv("ORACLE_PASSWORD")
+        if not all([oracle_host, oracle_service, oracle_user, oracle_password]):
+            missing = [
+                var
+                for var, val in [
+                    ("ORACLE_HOST", oracle_host),
+                    ("ORACLE_SERVICE", oracle_service),
+                    ("ORACLE_USER", oracle_user),
+                    ("ORACLE_PASSWORD", oracle_password),
+                ]
+                if not val
+            ]
+            msg = f"Missing required environment variables: {', '.join(missing)}"
+            raise ValueError(msg)
+        if oracle_host is None:
+            msg = "ORACLE_HOST environment variable is required"
+            raise ValueError(msg)
+        if oracle_service is None:
+            msg = "ORACLE_SERVICE environment variable is required"
+            raise ValueError(msg)
+        if oracle_user is None:
+            msg = "ORACLE_USER environment variable is required"
+            raise ValueError(msg)
+        if oracle_password is None:
+            msg = "ORACLE_PASSWORD environment variable is required"
+            raise ValueError(msg)
+        oracle_port = int(os.getenv("ORACLE_PORT", "1521"))
+        default_target_schema = os.getenv("DEFAULT_TARGET_SCHEMA", "ENTERPRISE_DW")
+        batch_size = int(os.getenv("BATCH_SIZE", "5000"))
+        connection_timeout = int(os.getenv("CONNECTION_TIMEOUT", "60"))
+        load_method_str = os.getenv("LOAD_METHOD", "BULK_INSERT").upper()
+        load_method = getattr(
+            c.TargetOracle,
+            f"LOAD_METHOD_{load_method_str}",
+            c.TargetOracle.LOAD_METHOD_BULK_INSERT,
+        )
+        _ = load_method  # reserved for future use
+        settings = FlextTargetOracleSettings.model_validate({
+            "oracle_host": oracle_host,
+            "oracle_port": oracle_port,
+            "oracle_service_name": oracle_service,
+            "oracle_user": oracle_user,
+            "oracle_password": oracle_password,
+            "default_target_schema": default_target_schema,
+            "batch_size": batch_size,
+            "use_bulk_operations": True,
+            "transaction_timeout": connection_timeout,
+        })
+        logger.info(
+            "Production configuration created: %s:%s/%s",
+            oracle_host,
+            oracle_port,
+            oracle_service,
+        )
+        logger.info(
+            "Target schema: %s, Batch size: %s",
+            default_target_schema,
+            batch_size,
+        )
+        logger.info(
+            "Load method: %s, Connection timeout: %ss",
+            load_method,
+            connection_timeout,
+        )
+        return settings
+
+
+class ProductionTargetManager:
+    """Production-grade target manager with comprehensive error handling."""
+
+    def __init__(self, settings: FlextTargetOracleSettings) -> None:
+        """Initialize production target manager.
+
+        Args:
+            settings: Validated Oracle target configuration
+
+        """
+        self.settings = settings
+        self.target: FlextTargetOracle | None = None
+        self.shutdown_requested = False
+        signal.signal(signal.SIGINT, self._signal_handler)
+        signal.signal(signal.SIGTERM, self._signal_handler)
+
+    def health_check(self) -> p.Result[Mapping[str, t.Container]]:
+        """Perform comprehensive health check for monitoring systems.
+
+        Returns:
+            r with health status and metrics
+
+        """
+        logger.debug("Performing health check")
+        health_status = HealthStatus(timestamp=time.time())
+        try:
+            checks = health_status.checks
+            if not self.target:
+                health_status.status = "unhealthy"
+                checks["target_initialized"] = False
+            else:
+                checks["target_initialized"] = True
+            if self.target:
+                try:
+                    connectivity_result = self.target.test_connection()
+                    checks["oracle_connectivity"] = connectivity_result.success
+                    if not connectivity_result.success:
+                        health_status.status = "degraded"
+                except (
+                    ValueError,
+                    TypeError,
+                    KeyError,
+                    AttributeError,
+                    OSError,
+                    RuntimeError,
+                    ImportError,
+                ) as e:
+                    checks["oracle_connectivity"] = False
+                    checks["oracle_error"] = str(e)
+                    health_status.status = "unhealthy"
+            metrics = health_status.metrics
+            if self.target:
+                target_metrics = self.target.get_implementation_metrics()
+                metrics.update(target_metrics.model_dump())
+            logger.debug("Health check completed: %s", health_status.status)
+            return r[Mapping[str, t.Container]].ok(health_status.model_dump())
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
+            logger.exception("Health check failed")
+            health_status.status = "unhealthy"
+            health_status.error = str(e)
+            return r[Mapping[str, t.Container]].fail(f"Health check error: {e}")
+
+    def initialize(self) -> p.Result[bool]:
+        """Initialize target with comprehensive validation.
+
+        Returns:
+            r[bool]: Success if initialization complete, failure with error details
+
+        """
+        logger.info("Initializing production Oracle target")
+        try:
+            logger.info("Validating configuration domain rules")
+            validation_result = r[bool].ok(value=True)
+            if validation_result.failure:
+                return r[bool].fail(
+                    f"Configuration validation failed: {validation_result.error}",
+                )
+            logger.info("Creating Oracle target instance")
+            self.target = FlextTargetOracle(self.settings)
+            logger.info("Testing Oracle database connectivity")
+            connection_result = self.target.test_connection()
+            if connection_result.failure:
+                return r[bool].fail("Oracle connectivity test failed")
+            logger.info("Production target initialized successfully")
+            return r[bool].ok(value=True)
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
+            logger.exception("Failed to initialize production target")
+            return r[bool].fail(f"Initialization error: {e}")
+
+    def process_singer_stream(
+        self,
+        messages: Sequence[SingerMessage],
+    ) -> p.Result[Mapping[str, t.Container]]:
+        """Process complete Singer message stream with comprehensive error handling.
+
+        Args:
+            messages: List of Singer messages (SCHEMA, RECORD, STATE)
+
+        Returns:
+            r with processing statistics and status
+
+        """
+        if not self.target:
+            return r[Mapping[str, t.Container]].fail("Target not initialized")
+        logger.info("Processing Singer stream with %d messages", len(messages))
+        stats = ProcessingStats(processing_start_time=time.time())
+        try:
+            for i, message in enumerate(messages):
+                if self.shutdown_requested:
+                    logger.info("Shutdown requested, stopping message processing")
+                    break
+                message_type = "UNKNOWN"
+                if isinstance(message, m.TargetOracle.SingerSchemaMessage):
+                    message_type = "SCHEMA"
+                elif isinstance(message, m.TargetOracle.SingerRecordMessage):
+                    message_type = "RECORD"
+                elif isinstance(message, m.TargetOracle.SingerStateMessage):
+                    message_type = "STATE"
+                logger.debug(
+                    "Processing message %d/%d: %s",
+                    i + 1,
+                    len(messages),
+                    message_type,
+                )
+                if not self.target:
+                    return r[Mapping[str, t.Container]].fail("Target not initialized")
+                result = self.target.process_singer_message(message)
+                if result.success:
+                    stats.messages_processed += 1
+                    if message_type == "SCHEMA":
+                        stats.schemas_processed += 1
+                    elif message_type == "RECORD":
+                        stats.records_processed += 1
+                    elif message_type == "STATE":
+                        stats.states_processed += 1
+                else:
+                    stats.errors_encountered += 1
+                    logger.error(
+                        "Message %d processing failed: %s",
+                        i + 1,
+                        result.error,
+                    )
+                if (i + 1) % 1000 == 0:
+                    logger.info("Processed %d/%d messages", i + 1, len(messages))
+            logger.info("Finalizing target operations")
+            finalize_result = self.target.finalize()
+            if finalize_result.success:
+                final_stats = finalize_result.value
+                stats.messages_processed += final_stats.total_records
+                logger.info("Target finalization completed successfully")
+            else:
+                logger.error("Target finalization failed: %s", finalize_result.error)
+                stats.errors_encountered += 1
+            stats.processing_end_time = time.time()
+            processing_duration = (
+                stats.processing_end_time - stats.processing_start_time
+            )
+            stats.processing_duration_seconds = processing_duration
+            logger.info(
+                "Stream processing completed in %.2f seconds",
+                processing_duration,
+            )
+            return r[Mapping[str, t.Container]].ok(stats.model_dump())
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
+            logger.exception("Unexpected error during stream processing")
+            stats.processing_end_time = time.time()
+            stats.errors_encountered += 1
+            return r[Mapping[str, t.Container]].fail(f"Stream processing error: {e}")
+
+    def shutdown(self) -> p.Result[bool]:
+        """Graceful shutdown with resource cleanup.
+
+        Returns:
+            r[bool]: Success if shutdown completed cleanly
+
+        """
+        logger.info("Starting graceful shutdown")
+        try:
+            if self.target:
+                logger.info("Finalizing pending operations")
+                self.target.finalize()
+                logger.info("Cleaning up target resources")
+                self.target = None
+            logger.info("Graceful shutdown completed")
+            return r[bool].ok(value=True)
+        except (
+            ValueError,
+            TypeError,
+            KeyError,
+            AttributeError,
+            OSError,
+            RuntimeError,
+            ImportError,
+        ) as e:
+            logger.exception("Error during shutdown")
+            return r[bool].fail(f"Shutdown error: {e}")
+
+    def _signal_handler(self, signum: int, _frame: FrameType | None) -> None:
+        """Handle shutdown signals gracefully."""
+        logger.info("Received signal %d, initiating graceful shutdown", signum)
+        self.shutdown_requested = True
+
+
+def demonstrate_production_setup() -> None:
+    """Demonstrate production setup and processing patterns."""
+    logger.info("Starting production setup demonstration")
+    try:
+        logger.info("Step 1: Creating production configuration")
+        settings = ProductionConfig.create_from_environment()
+        logger.info("Step 2: Initializing production target manager")
+        manager = ProductionTargetManager(settings)
+        init_result = manager.initialize()
+        if init_result.failure:
+            logger.error("Production initialization failed: %s", init_result.error)
+            return
+        logger.info("Step 3: Performing initial health check")
+        health_result = manager.health_check()
+        if health_result.success:
+            health_data = health_result.value
+            if isinstance(health_data, dict):
+                logger.info(
+                    "Health check status",
+                    status=str(health_data.get("status", "unknown")),
+                )
+                checks_obj: t.Container = health_data.get("checks")
+                checks: Mapping[str, t.Container] = (
+                    cast("Mapping[str, t.Container]", checks_obj)
+                    if isinstance(checks_obj, dict)
+                    else {}
+                )
+                if checks:
+                    logger.info(
+                        "Oracle connectivity",
+                        connectivity=str(checks.get("oracle_connectivity", "unknown")),
+                    )
+        else:
+            logger.warning("Health check failed: %s", health_result.error)
+        logger.info("Step 4: Creating sample production data stream")
+        messages = create_production_sample_stream()
+        logger.info("Step 5: Processing production data stream")
+        processing_result = manager.process_singer_stream(messages)
+        if processing_result.success:
+            stats = processing_result.value
+            logger.info("=== Production Processing Statistics ===")
+            logger.info(
+                "Processing stats",
+                messages_processed=str(stats.get("messages_processed", 0)),
+                records_processed=str(stats.get("records_processed", 0)),
+                processing_duration_seconds=str(
+                    stats.get("processing_duration_seconds", 0),
+                ),
+                errors_encountered=str(stats.get("errors_encountered", 0)),
+            )
+            if stats.get("total_records"):
+                logger.info(
+                    "Load stats",
+                    total_records=str(stats.get("total_records", 0)),
+                    successful_records=str(stats.get("successful_records", 0)),
+                    failed_records=str(stats.get("failed_records", 0)),
+                )
+        else:
+            logger.error("Production processing failed: %s", processing_result.error)
+        logger.info("Step 6: Performing final health check")
+        final_health = manager.health_check()
+        if final_health.success and isinstance(final_health.value, dict):
+            logger.info(
+                "Final health status",
+                status=str(final_health.value.get("status", "unknown")),
+            )
+        logger.info("Step 7: Performing graceful shutdown")
+        shutdown_result = manager.shutdown()
+        if shutdown_result.success:
+            logger.info("Production shutdown completed successfully")
+        else:
+            logger.error("Shutdown issues: %s", shutdown_result.error)
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        OSError,
+        RuntimeError,
+        ImportError,
+    ):
+        logger.exception("Production demonstration failed")
+        raise
+
+
+def create_production_sample_stream() -> Sequence[SingerMessage]:
+    """Create a realistic production data stream for demonstration.
+
+    Returns:
+      List of Singer messages representing a production workload
+
+    """
+    messages: t.MutableSequenceOf[SingerMessage] = []
+    schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
+        "type": "SCHEMA",
+        "stream": "customer_orders",
+        "schema": {
+            "type": "object",
+            "properties": json.dumps({
+                "order_id": {"type": "integer"},
+                "customer_id": {"type": "integer"},
+                "order_date": {"type": "string", "format": "date-time"},
+                "product_sku": {"type": "string"},
+                "quantity": {"type": "integer"},
+                "unit_price": {"type": "number"},
+                "total_amount": {"type": "number"},
+                "order_status": {"type": "string"},
+                "shipping_address": {"type": "string"},
+                "created_at": {"type": "string", "format": "date-time"},
+                "updated_at": {"type": "string", "format": "date-time"},
+            }),
+            "required": json.dumps(["order_id", "customer_id", "order_date"]),
+        },
+        "key_properties": ["order_id"],
+    })
+    messages.append(schema_message)
+    base_date = datetime.datetime(2025, 1, 1, tzinfo=UTC)
+    for i in range(1, 101):
+        record_message = m.TargetOracle.SingerRecordMessage.model_validate({
+            "type": "RECORD",
+            "stream": "customer_orders",
+            "record": {
+                "order_id": i,
+                "customer_id": i % 20 + 1,
+                "order_date": (base_date + datetime.timedelta(hours=i)).isoformat()
+                + "Z",
+                "product_sku": f"SKU-{i % 10 + 1:03d}",
+                "quantity": i % 5 + 1,
+                "unit_price": round(19.99 + i % 100, 2),
+                "total_amount": round((19.99 + i % 100) * (i % 5 + 1), 2),
+                "order_status": ["pending", "processing", "shipped", "delivered"][
+                    i % 4
+                ],
+                "shipping_address": f"{i} Main St, City {i % 10}, State",
+                "created_at": (base_date + datetime.timedelta(hours=i)).isoformat()
+                + "Z",
+                "updated_at": (
+                    base_date + datetime.timedelta(hours=i, minutes=30)
+                ).isoformat()
+                + "Z",
+            },
+        })
+        messages.append(record_message)
+    state_message = m.TargetOracle.SingerStateMessage.model_validate({
+        "type": "STATE",
+        "value": {
+            "bookmarks": {
+                "customer_orders": {
+                    "last_order_id": 100,
+                    "last_updated": (
+                        base_date + datetime.timedelta(hours=100)
+                    ).isoformat()
+                    + "Z",
+                },
+            },
+        },
+    })
+    messages.append(state_message)
+    return messages
+
+
+def main() -> None:
+    """Main entry point for production setup example."""
+    logger.info("FLEXT Target Oracle - Production Setup Example")
+    logger.info("=" * 60)
+    required_vars = ["ORACLE_HOST", "ORACLE_SERVICE", "ORACLE_USER", "ORACLE_PASSWORD"]
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    if missing_vars:
+        logger.error(
+            "Missing required environment variables: %s",
+            ", ".join(missing_vars),
+        )
+        logger.error("Please set the following environment variables:")
+        for var in required_vars:
+            logger.error("  export %s=<value>", var)
+        sys.exit(1)
+    try:
+        demonstrate_production_setup()
+        logger.info("\n%s", "=" * 60)
+        logger.info("Production setup example completed successfully!")
+        logger.info("\nProduction Checklist:")
+        logger.info("✓ Environment-based configuration")
+        logger.info("✓ Comprehensive validation and error handling")
+        logger.info("✓ Health checks and monitoring integration")
+        logger.info("✓ Graceful shutdown and resource cleanup")
+        logger.info("✓ Production-grade logging and statistics")
+    except KeyboardInterrupt:
+        logger.info("Example interrupted by user")
+    except (
+        ValueError,
+        TypeError,
+        KeyError,
+        AttributeError,
+        OSError,
+        RuntimeError,
+        ImportError,
+    ):
+        logger.exception("Production setup example failed")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
+"""Oracle Data Loader using s and SOURCE OF TRUTH patterns.
+
+ZERO DUPLICATION - Uses flext-db-oracle API exclusively.
+SOLID COMPLIANCE - Single responsibility: Oracle data loading only.
+
+Copyright (c) 2025 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+
+"""
+
+from __future__ import annotations
+
+import re
+from collections.abc import (
+    Mapping,
+    Sequence,
+)
+from datetime import UTC, datetime
+from typing import ClassVar, override
+
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
+from flext_meltano import FlextMeltanoServiceBase, u
+from flext_target_oracle import (
+    FlextTargetOracleExceptions as e,
+    FlextTargetOracleSettings,
+    c,
+    m,
+    p,
+    r,
+    t,
+)
+
+
+class FlextTargetOracleLoader(FlextMeltanoServiceBase):
+    """Oracle data loader using s and flext-db-oracle SOURCE OF TRUTH.
+
+    ZERO DUPLICATION - Uses ONLY public flext-db-oracle API.
+    SOLID COMPLIANCE - Single responsibility: Oracle data loading operations.
+    """
+
+    @staticmethod
+    def _default_record_buffers() -> t.MutableMappingKV[
+        str,
+        t.MutableSequenceOf[t.ContainerValueMapping],
+    ]:
+        """Return an empty typed buffer mapping for loader state."""
+        empty_buffers: t.MutableMappingKV[
+            str,
+            t.MutableSequenceOf[t.ContainerValueMapping],
+        ] = {}
+        return empty_buffers
+
+    model_config: ClassVar = {"frozen": False}
+    _target_config: FlextTargetOracleSettings = u.PrivateAttr()
+    _oracle_api: FlextDbOracleApi = u.PrivateAttr()
+    _record_buffers: t.MutableMappingKV[
+        str,
+        t.MutableSequenceOf[t.ContainerValueMapping],
+    ] = u.PrivateAttr(
+        default_factory=_default_record_buffers,
+    )
+    _total_records: int = u.PrivateAttr(default_factory=lambda: 0)
+
+    @staticmethod
+    def _normalize_log_value(value: t.ContainerValue) -> t.Container:
+        """Normalize logging payloads into scalar or string values."""
+        if isinstance(value, (str, int, float, bool, datetime)):
+            return value
+        return str(value)
+
+    @staticmethod
+    def _loader_columns() -> t.MutableSequenceOf[t.ContainerValueMapping]:
+        """Return the canonical loader columns for db-oracle DDL generation."""
+        return [
+            {"name": "DATA", "data_type": "CLOB", "nullable": True},
+            {
+                "name": "_SDC_EXTRACTED_AT",
+                "data_type": "TIMESTAMP",
+                "nullable": True,
+            },
+            {
+                "name": "_SDC_LOADED_AT",
+                "data_type": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+                "nullable": True,
+            },
+        ]
+
+    def __init__(self, settings: FlextTargetOracleSettings, **_data: t.Scalar) -> None:
+        """Initialize loader with Oracle API using flext-db-oracle correctly."""
+        try:
+            super().__init__()
+            oracle_connection = settings.get_oracle_config()
+            oracle_config = FlextDbOracleSettings.model_validate({
+                "host": oracle_connection.host,
+                "port": oracle_connection.port,
+                "service_name": oracle_connection.service_name,
+                "username": oracle_connection.username,
+                "password": oracle_connection.password,
+            })
+            oracle_api = FlextDbOracleApi(oracle_config)
+            self._target_config = settings
+            self._oracle_api = oracle_api
+            self._record_buffers = dict[str, list[t.ContainerValueMapping]]()
+            self._total_records = 0
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
+            msg = f"Failed to create Oracle API: {exc}"
+            raise e.OracleConnectionError(msg) from exc
+
+    @property
+    def oracle_api(self) -> FlextDbOracleApi:
+        """Access Oracle API instance."""
+        return self._oracle_api
+
+    @property
+    def record_buffers(
+        self,
+    ) -> dict[str, list[t.ContainerValueMapping]]:
+        """Access record buffers."""
+        return self._record_buffers
+
+    @property
+    def target_config(self) -> FlextTargetOracleSettings:
+        """Access target configuration."""
+        return self._target_config
+
+    @property
+    def total_records(self) -> int:
+        """Access total records count."""
+        return self._total_records
+
+    def _run_connection_operation(
+        self,
+        *,
+        operation_name: str,
+        result: p.TargetOracle.ConnectionOperationResult,
+    ) -> p.Result[bool]:
+        try:
+            if result.failure:
+                return r[bool].fail(f"{operation_name} failed: {result.error}")
+            return r[bool].ok(value=True)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            message = f"Failed to {operation_name.lower()} loader"
+            self.logger.exception(message)
+            self.log_error(message, error=str(e))
+            return r[bool].fail(f"{operation_name} failed: {e}")
+
+    def connect(self) -> p.Result[bool]:
+        """Establish connection using underlying FlextDbOracleApi.
+
+        Exposed for tests and parity with previous loader helpers.
+        """
+        return self._run_connection_operation(
+            operation_name="Connect",
+            result=self.oracle_api.connect(),
+        )
+
+    def disconnect(self) -> p.Result[bool]:
+        """Disconnect underlying FlextDbOracleApi (exposed for tests)."""
+        return self._run_connection_operation(
+            operation_name="Disconnect",
+            result=self.oracle_api.disconnect(),
+        )
+
+    def ensure_table_exists(
+        self,
+        stream_name: str,
+        schema: t.ContainerValueMapping,
+        _key_properties: t.StrSequence | None = None,
+    ) -> p.Result[bool]:
+        """Ensure table exists using flext-db-oracle API with correct table creation."""
+        try:
+            table_name = self.target_config.get_table_name(stream_name)
+            with self.oracle_api as connected_api:
+                tables_result = connected_api.fetch_tables(
+                    schema=self.target_config.default_target_schema,
+                )
+                if tables_result.failure:
+                    return r[bool].fail(
+                        f"Failed to check tables: {tables_result.error}",
+                    )
+                existing_tables_raw = tables_result.value or []
+                existing_tables = [str(table).upper() for table in existing_tables_raw]
+                table_exists = table_name.upper() in existing_tables
+                if table_exists:
+                    self.log_info(f"Table {table_name} already exists")
+                    return r[bool].ok(value=True)
+                ddl_result = self._build_create_table_statement(table_name, schema)
+                if ddl_result.failure:
+                    return r[bool].fail(
+                        f"Failed to build create table SQL: {ddl_result.error}",
+                    )
+                ddl_sql = ddl_result.value
+                exec_result = connected_api.execute_sql(ddl_sql)
+                if exec_result.failure:
+                    return r[bool].fail(f"Failed to create table: {exec_result.error}")
+                self.log_info(f"Created table {table_name}")
+                return r[bool].ok(value=True)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            self.log_error("Failed to ensure table exists", error=str(e))
+            return r[bool].fail(f"Table creation failed: {e}")
+
+    @override
+    def execute(self) -> p.Result[Mapping[str, t.Container]]:
+        """Execute domain service - returns connection test result."""
+        connection_result = self.test_connection()
+        if connection_result.failure:
+            return r[Mapping[str, t.Container]].fail(
+                f"Oracle connection failed: {connection_result.error}",
+            )
+        return r[Mapping[str, t.Container]].ok({
+            "status": "ready",
+            "host": self.target_config.oracle_host,
+            "service": self.target_config.oracle_service_name,
+            "schema": self.target_config.default_target_schema,
+        })
+
+    def finalize_all_streams(self) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
+        """Finalize all streams and return stats using standardized models."""
+        try:
+            started_at = str(datetime.now(UTC))
+            records_failed = 0
+            for stream_name, records in self.record_buffers.items():
+                if records:
+                    result = self._flush_batch(stream_name)
+                    if result.failure:
+                        records_failed += len(records)
+                        self.log_error(f"Failed to flush {stream_name}: {result.error}")
+            return r[m.TargetOracle.LoaderFinalizeResult].ok(
+                m.TargetOracle.LoaderFinalizeResult(
+                    total_records=self.total_records,
+                    streams_processed=len(self.record_buffers),
+                    status="completed",
+                    loading_operation=m.TargetOracle.LoaderOperation(
+                        stream_name="all_streams",
+                        started_at=started_at,
+                        completed_at=str(datetime.now(UTC)),
+                        records_loaded=self.total_records,
+                        records_failed=records_failed,
+                    ),
+                    buffer_status={
+                        stream: len(records)
+                        for stream, records in self.record_buffers.items()
+                    },
+                ),
+            )
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            self.log_error("Failed to finalize streams", error=str(e))
+            return r[m.TargetOracle.LoaderFinalizeResult].fail(
+                f"Finalization failed: {e}",
+            )
+
+    def insert_records(
+        self,
+        stream_name: str,
+        records: Sequence[t.ConfigurationMapping],
+    ) -> p.Result[bool]:
+        """Insert multiple records - convenience wrapper used by tests.
+
+        Appends records to the internal buffer via load_record and flushes the batch.
+        """
+        try:
+            for record in records:
+                load_res = self.load_record(stream_name, record)
+                if load_res.failure:
+                    return r[bool].fail(f"Failed to load record: {load_res.error}")
+            return self._flush_batch(stream_name)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            self.log_error("Failed to insert records", error=str(e))
+            return r[bool].fail(f"Insert records failed: {e}")
+
+    def load_record(
+        self,
+        stream_name: str,
+        record_data: t.ContainerValueMapping,
+    ) -> p.Result[bool]:
+        """Load record with batching."""
+        try:
+            if stream_name not in self.record_buffers:
+                self.record_buffers[stream_name] = list[t.ContainerValueMapping]()
+            self.record_buffers[stream_name].append(dict(record_data))
+            self._total_records += 1
+            if len(self.record_buffers[stream_name]) >= self.target_config.batch_size:
+                return self._flush_batch(stream_name)
+            return r[bool].ok(value=True)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            self.log_error("Failed to load record", error=str(e))
+            return r[bool].fail(f"Record loading failed: {e}")
+
+    def log_error(self, message: str, **kwargs: t.Scalar) -> None:
+        """Log error message."""
+        if not kwargs:
+            self.logger.error(message)
+            return
+        details = ", ".join(
+            f"{key}={self._normalize_log_value(value)}" for key, value in kwargs.items()
+        )
+        self.logger.error("%s | %s", message, details)
+
+    def log_info(self, message: str, **kwargs: t.Scalar) -> None:
+        """Log info message."""
+        if not kwargs:
+            self.logger.info(message)
+            return
+        details = ", ".join(
+            f"{key}={self._normalize_log_value(value)}" for key, value in kwargs.items()
+        )
+        self.logger.info("%s | %s", message, details)
+
+    def test_connection(self) -> p.Result[bool]:
+        """Test connection to Oracle database using flext-db-oracle API."""
+        try:
+            with self.oracle_api as connected_api:
+                tables_result = connected_api.fetch_tables(
+                    schema=self.target_config.default_target_schema,
+                )
+                if tables_result.failure:
+                    return r[bool].fail(
+                        f"Connection test failed: {tables_result.error}",
+                    )
+                self.log_info("Oracle connection established successfully")
+                return r[bool].ok(value=True)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            self.log_error("Failed to connect to Oracle", error=str(e))
+            return r[bool].fail(f"Connection failed: {e}")
+
+    def _build_create_table_statement(
+        self,
+        table_name: str,
+        _schema: t.ContainerValueMapping,
+    ) -> p.Result[str]:
+        """Build CREATE TABLE SQL through the db-oracle owner service."""
+        return self.oracle_api.oracle_services.create_table_ddl(
+            table_name,
+            self._loader_columns(),
+            schema=self.target_config.default_target_schema,
+        )
+
+    def _build_insert_statement(self, table_name: str) -> p.Result[str]:
+        """Build INSERT SQL through the db-oracle owner service."""
+        return self.oracle_api.oracle_services.build_insert_statement(
+            table_name,
+            ["DATA", "_SDC_EXTRACTED_AT", "_SDC_LOADED_AT"],
+            schema=self.target_config.default_target_schema,
+        )
+
+    @staticmethod
+    def _build_insert_parameters(
+        record: t.ContainerValueMapping,
+        loaded_at: str,
+    ) -> t.ContainerValueMapping:
+        """Normalize one record into the owner-managed insert payload shape."""
+        return {
+            "DATA": t.TargetOracle.FLAT_CONTAINER_MAP_ADAPTER.dump_json(record).decode(
+                "utf-8",
+            ),
+            "_SDC_EXTRACTED_AT": str(record.get("_sdc_extracted_at", loaded_at)),
+            "_SDC_LOADED_AT": loaded_at,
+        }
+
+    def _flush_batch(self, stream_name: str) -> p.Result[bool]:
+        """Flush batch using flext-db-oracle API exclusively - NO direct SQLAlchemy."""
+        try:
+            records = self.record_buffers.get(stream_name, [])
+            if not records:
+                return r[bool].ok(value=True)
+            table_name = self.target_config.get_table_name(stream_name)
+            schema_name = self.target_config.default_target_schema
+            full_table_name = f"{schema_name}.{table_name}"
+            if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_$.]*", full_table_name):
+                return r[bool].fail("Invalid Oracle table identifier")
+            loaded_at = datetime.now(UTC).isoformat()
+            with self.oracle_api as connected_api:
+                insert_sql_result = self._build_insert_statement(table_name)
+                if insert_sql_result.failure:
+                    return r[bool].fail(
+                        f"Failed to build insert SQL: {insert_sql_result.error}",
+                    )
+                params_list = [
+                    self._build_insert_parameters(record, loaded_at)
+                    for record in records
+                ]
+                result = connected_api.execute_many(
+                    insert_sql_result.value,
+                    params_list,
+                )
+                if result.failure:
+                    return r[bool].fail(f"Batch insert failed: {result.error}")
+                self.record_buffers[stream_name] = list[t.ContainerValueMapping]()
+                self.log_info(f"Flushed {len(records)} records to {table_name}")
+                return r[bool].ok(value=True)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+            self.log_error("Failed to flush batch", error=str(e))
+            return r[bool].fail(f"Batch flush failed: {e}")
+
+
+__all__: list[str] = ["FlextTargetOracleLoader"]
+"""Focused service objects used by Oracle target components."""
+
+from __future__ import annotations
+
+from collections import defaultdict
+from collections.abc import (
+    MutableMapping,
+)
+
+from flext_db_oracle import FlextDbOracleApi
+from flext_target_oracle import FlextTargetOracleSettings, m, p, r, t
+
+
+class FlextTargetOracleConnectionService:
+    """Minimal Oracle connection service implements ConnectionService protocol."""
+
+    def __init__(
+        self,
+        settings: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
+    ) -> None:
+        """Store configuration and Oracle API dependency."""
+        self.settings = settings
+        self.oracle_api = oracle_api
+
+    def execute(self) -> p.Result[None]:
+        """Run default connection validation operation."""
+        return self.test_connection()
+
+    def get_connection_info(self) -> p.Result[m.TargetOracle.OracleConnectionModel]:
+        """Return normalized connection model."""
+        return r[m.TargetOracle.OracleConnectionModel].ok(
+            self.settings.get_oracle_config(),
+        )
+
+    def test_connection(self) -> p.Result[None]:
+        """Check Oracle access by listing schema tables."""
+        tables_result = self.oracle_api.fetch_tables(
+            schema=self.settings.default_target_schema,
+        )
+        if tables_result.failure:
+            return r[None].fail(tables_result.error or "Connection test failed")
+        return r[None].ok(None)
+
+
+class FlextTargetOracleSchemaService:
+    """Minimal schema management service implements SchemaService protocol."""
+
+    def __init__(
+        self,
+        settings: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
+    ) -> None:
+        """Store schema service dependencies."""
+        self.settings = settings
+        self.oracle_api = oracle_api
+
+    def ensure_table_exists(
+        self,
+        stream: m.TargetOracle.SingerStreamModel,
+        schema_message: m.TargetOracle.Meltano.SingerSchemaMessage,
+    ) -> p.Result[None]:
+        """Validate table identity before external DDL orchestration."""
+        _ = schema_message
+        table_name = stream.table_name
+        if not table_name:
+            return r[None].fail("Invalid table name")
+        return r[None].ok(None)
+
+    def execute(self) -> p.Result[None]:
+        """Run service health operation."""
+        return r[None].ok(None)
+
+
+class FlextTargetOracleBatchService:
+    """Minimal batching service implements BatchService protocol."""
+
+    def __init__(
+        self,
+        settings: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
+    ) -> None:
+        """Initialize batch storage and required dependencies."""
+        self.settings = settings
+        self.oracle_api = oracle_api
+        self._batches: defaultdict[
+            str, list[m.TargetOracle.Meltano.SingerRecordMessage]
+        ] = defaultdict(list)
+
+    def add_record(
+        self,
+        stream_name: str,
+        record_message: m.TargetOracle.Meltano.SingerRecordMessage,
+    ) -> p.Result[None]:
+        """Append a record to a stream buffer."""
+        self._batches[stream_name].append(record_message)
+        return r[None].ok(None)
+
+    def execute(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
+        """Run default batch flush operation."""
+        return self.flush_all_batches()
+
+    def flush_all_batches(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
+        """Summarize and clear all in-memory batch buffers."""
+        total = sum(len(records) for records in self._batches.values())
+        stats = m.TargetOracle.LoadStatisticsModel(
+            stream_name="__ALL_STREAMS__",
+            total_records_processed=total,
+            successful_records=total,
+            failed_records=0,
+            batches_processed=len(self._batches),
+        ).finalize()
+        return r[m.TargetOracle.LoadStatisticsModel].ok(stats)
+
+    def flush_batch(self, stream_name: str) -> p.Result[None]:
+        """Clear buffered records for a specific stream."""
+        self._batches[stream_name] = list[m.TargetOracle.Meltano.SingerRecordMessage]()
+        return r[None].ok(None)
+
+
+class FlextTargetOracleRecordService:
+    """Record validation and transformation service implements RecordService protocol."""
+
+    def __init__(self, settings: FlextTargetOracleSettings) -> None:
+        """Store record service configuration."""
+        self.settings = settings
+
+    def execute(self) -> p.Result[None]:
+        """Run record-service readiness check."""
+        return r[None].ok(None)
+
+    def transform_record(
+        self,
+        record_message: m.TargetOracle.Meltano.SingerRecordMessage,
+        stream: m.TargetOracle.SingerStreamModel,
+    ) -> p.Result[m.TargetOracle.Meltano.SingerRecordMessage]:
+        """Apply stream-level mappings and ignored-column filtering."""
+        transformed: MutableMapping[str, t.ContainerValue] = {}
+        for key, value in record_message.record.items():
+            if key in stream.ignored_columns:
+                continue
+            mapped_key = stream.column_mappings.get(key) or key
+            transformed[mapped_key] = value
+        return r[m.TargetOracle.Meltano.SingerRecordMessage].ok(
+            m.TargetOracle.Meltano.SingerRecordMessage.model_validate({
+                "type": "RECORD",
+                "stream": record_message.stream,
+                "record": transformed,
+                "time_extracted": record_message.time_extracted,
+                "version": record_message.version,
+            }),
+        )
+
+    def validate_record(
+        self,
+        record_message: m.TargetOracle.Meltano.SingerRecordMessage,
+        schema_message: m.TargetOracle.Meltano.SingerSchemaMessage,
+    ) -> p.Result[None]:
+        """Validate record payload against current schema contract."""
+        _ = record_message
+        _ = schema_message
+        return r[None].ok(None)
+
+
+class FlextTargetOracleServiceFactory:
+    """Factory for constructing all Oracle target services."""
+
+    def __init__(
+        self,
+        settings: FlextTargetOracleSettings,
+        oracle_api: FlextDbOracleApi,
+    ) -> None:
+        """Store dependencies shared by service instances."""
+        self._config = settings
+        self._oracle_api = oracle_api
+
+    def create_batch_service(self) -> FlextTargetOracleBatchService:
+        """Create Oracle batch service."""
+        return FlextTargetOracleBatchService(self._config, self._oracle_api)
+
+    def create_connection_service(self) -> FlextTargetOracleConnectionService:
+        """Create Oracle connection service."""
+        return FlextTargetOracleConnectionService(self._config, self._oracle_api)
+
+    def create_record_service(self) -> FlextTargetOracleRecordService:
+        """Create Oracle record service."""
+        return FlextTargetOracleRecordService(self._config)
+
+    def create_schema_service(self) -> FlextTargetOracleSchemaService:
+        """Create Oracle schema service."""
+        return FlextTargetOracleSchemaService(self._config, self._oracle_api)
+
+
+__all__: list[str] = [
+    "FlextTargetOracleBatchService",
+    "FlextTargetOracleConnectionService",
+    "FlextTargetOracleRecordService",
+    "FlextTargetOracleSchemaService",
+    "FlextTargetOracleServiceFactory",
+]

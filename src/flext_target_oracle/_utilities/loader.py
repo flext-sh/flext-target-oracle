@@ -62,7 +62,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     _total_records: int = u.PrivateAttr(default_factory=lambda: 0)
 
     @staticmethod
-    def _normalize_log_value(value: t.ContainerValue) -> t.Container:
+    def _normalize_log_value(value: t.Container) -> t.Container:
         """Normalize logging payloads into scalar or string values."""
         if isinstance(value, (str, int, float, bool, datetime)):
             return value

@@ -135,7 +135,7 @@ class FlextTargetOracleRecordService:
         stream: m.TargetOracle.SingerStreamModel,
     ) -> p.Result[m.TargetOracle.Meltano.SingerRecordMessage]:
         """Apply stream-level mappings and ignored-column filtering."""
-        transformed: MutableMapping[str, t.ContainerValue] = {}
+        transformed: MutableMapping[str, t.Container] = {}
         for key, value in record_message.record.items():
             if key in stream.ignored_columns:
                 continue
