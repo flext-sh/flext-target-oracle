@@ -6,6 +6,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Annotated, Literal, Self
 
 from flext_meltano import FlextMeltanoModels
+
 from flext_target_oracle import u
 
 if TYPE_CHECKING:

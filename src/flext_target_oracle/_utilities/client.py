@@ -9,6 +9,7 @@ from collections.abc import (
 from typing import ClassVar
 
 from flext_meltano import u
+
 from flext_target_oracle import (
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,

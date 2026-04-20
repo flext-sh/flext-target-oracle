@@ -10,10 +10,12 @@ from flext_core.lazy import (
     install_lazy_exports,
     merge_lazy_imports,
 )
+
 from flext_target_oracle.__version__ import *
 
 if _t.TYPE_CHECKING:
     from flext_db_oracle import d, e, h, r, s, x
+
     from flext_target_oracle._constants.base import FlextTargetOracleConstantsBase
     from flext_target_oracle._models.commands import FlextTargetOracleModelsCommands
     from flext_target_oracle._models.results import FlextTargetOracleModelsResults

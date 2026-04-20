@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, ClassVar
 
 from flext_core import FlextTypes
 from flext_meltano import p, u
+
 from flext_target_oracle import (
     FlextTargetOracleErrorMetadata,
     FlextTargetOracleExceptions as e,

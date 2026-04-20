@@ -20,6 +20,7 @@ from typing import ClassVar, override
 
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_meltano import FlextMeltanoServiceBase, u
+
 from flext_target_oracle import (
     FlextTargetOracleExceptions as e,
     FlextTargetOracleSettings,

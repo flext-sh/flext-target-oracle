@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleProtocols
 from flext_meltano import FlextMeltanoProtocols
+
 from flext_target_oracle import FlextTargetOracleProtocolsBase
 
 

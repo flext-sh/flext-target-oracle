@@ -19,13 +19,13 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from flext_tests import tk
-
 from flext_db_oracle import (
     FlextDbOracleApi,
     FlextDbOracleSettings,
     FlextDbOracleTypes as oracle_t,
 )
+from flext_tests import tk
+
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,
