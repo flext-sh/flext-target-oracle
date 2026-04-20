@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from collections.abc import MutableMapping, Sequence
+from collections.abc import (
+    MutableMapping,
+    Sequence,
+)
 from typing import ClassVar
 
 from flext_meltano import u

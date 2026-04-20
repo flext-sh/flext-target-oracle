@@ -6,7 +6,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import (
+    Sequence,
+)
 from typing import TYPE_CHECKING, ClassVar, Protocol, runtime_checkable
 
 from flext_meltano import p

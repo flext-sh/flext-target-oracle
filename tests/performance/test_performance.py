@@ -1,6 +1,7 @@
 """Lean performance-oriented behavior checks for Oracle target."""
 
 from __future__ import annotations
+from collections.abc import Calling , Generator, Iterable, Mapping, MutableMapping, MutableSequence, Sequence
 
 import json
 import time

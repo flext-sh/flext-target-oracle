@@ -25,7 +25,9 @@ from __future__ import annotations
 import json
 import logging
 import os
-from collections.abc import Sequence
+from collections.abc import (
+    Sequence,
+)
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m, r, u
 

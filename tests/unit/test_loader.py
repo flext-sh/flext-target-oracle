@@ -1,6 +1,7 @@
 """Unit tests for FlextTargetOracleLoader public behavior."""
 
 from __future__ import annotations
+from collections.abc import Calling , Generator, Iterable, Mapping, MutableMapping, MutableSequence, Sequence
 
 import json
 from unittest.mock import MagicMock

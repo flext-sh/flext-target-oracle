@@ -10,7 +10,11 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping, MutableMapping, Sequence
+from collections.abc import (
+    Mapping,
+    MutableMapping,
+    Sequence,
+)
 from datetime import datetime
 from typing import TYPE_CHECKING, Annotated, override
 

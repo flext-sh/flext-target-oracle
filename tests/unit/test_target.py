@@ -1,6 +1,7 @@
 """Unit tests for the canonical Oracle target client."""
 
 from __future__ import annotations
+from collections.abc import Calling , Generator, Iterable, Mapping, MutableMapping, MutableSequence, Sequence
 
 import json
 from collections.abc import Sequence

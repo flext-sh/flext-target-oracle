@@ -15,7 +15,10 @@ import os
 import signal
 import sys
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import (
+    Mapping,
+    Sequence,
+)
 from datetime import UTC
 from types import FrameType
 from typing import cast

@@ -31,7 +31,7 @@ from flext_target_oracle import (
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
 )
-from tests import r, t, u
+from tests import m, r, t, u
 
 logger = u.fetch_logger(__name__)
 ORACLE_CONTAINER_NAME = "flext-oracle-test"
