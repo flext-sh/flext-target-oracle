@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Annotated, ClassVar
+from typing import TYPE_CHECKING, Annotated
 
 from flext_meltano import m, u
 
@@ -20,15 +20,11 @@ class FlextTargetOracleModelsSinger:
     class SingerSchemaMessage(m.Meltano.SingerSchemaMessage):
         """Singer SCHEMA message specialized for Oracle target domain."""
 
-        _flext_enforcement_exempt: ClassVar[bool] = True
-
     class SingerRecordMessage(m.Meltano.SingerRecordMessage):
         """Singer RECORD message specialized for Oracle target domain."""
 
     class SingerStateMessage(m.Meltano.SingerStateMessage):
         """Singer STATE message specialized for Oracle target domain."""
-
-        _flext_enforcement_exempt: ClassVar[bool] = True
 
     class SingerActivateVersionMessage(
         m.Meltano.SingerActivateVersionMessage,
@@ -38,12 +34,8 @@ class FlextTargetOracleModelsSinger:
     class SingerCatalogMetadata(m.Meltano.SingerCatalogMetadata):
         """Singer catalog metadata specialized for Oracle target domain."""
 
-        _flext_enforcement_exempt: ClassVar[bool] = True
-
     class SingerCatalogEntry(m.Meltano.SingerCatalogEntry):
         """Singer catalog entry specialized for Oracle target domain."""
-
-        _flext_enforcement_exempt: ClassVar[bool] = True
 
     class SingerCatalog(m.Meltano.SingerCatalog):
         """Singer catalog specialized for Oracle target domain."""

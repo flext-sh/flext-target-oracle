@@ -9,7 +9,7 @@ from __future__ import annotations
 from collections.abc import (
     Sequence,
 )
-from typing import TYPE_CHECKING, ClassVar, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 from flext_meltano import p
 
@@ -93,8 +93,6 @@ class FlextTargetOracleProtocolsBase:
     @runtime_checkable
     class Message(Protocol):
         """Protocol for Singer message handling."""
-
-        _flext_enforcement_exempt: ClassVar[bool] = True
 
         def process_message_target(
             self,
