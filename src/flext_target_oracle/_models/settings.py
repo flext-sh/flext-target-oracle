@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated, ClassVar
 
-from flext_meltano import FlextMeltanoModels, u
+from flext_meltano import m, u
 
 if TYPE_CHECKING:
     from flext_target_oracle import t
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class FlextTargetOracleModelsSettings:
     """Configuration MRO mixin for TargetOracle namespace."""
 
-    class OracleConnectionConfig(FlextMeltanoModels.ArbitraryTypesModel):
+    class OracleConnectionConfig(m.ArbitraryTypesModel):
         """Oracle connection configuration payload."""
 
         host: str = u.Field(description="Oracle database host")
@@ -46,7 +46,7 @@ class FlextTargetOracleModelsSettings:
     class OracleConnectionModel(OracleConnectionConfig):
         """Oracle database connection configuration model."""
 
-    class TargetConfig(FlextMeltanoModels.ArbitraryTypesModel):
+    class TargetConfig(m.ArbitraryTypesModel):
         """Target runtime configuration payload."""
 
         _flext_enforcement_exempt: ClassVar[bool] = True

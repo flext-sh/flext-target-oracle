@@ -14,7 +14,7 @@ from flext_core.lazy import (
 from flext_target_oracle.__version__ import *
 
 if _t.TYPE_CHECKING:
-    from flext_db_oracle import d, e, h, r, s, x
+    from flext_meltano import d, e, h, r, s, x
 
     from flext_target_oracle._constants.base import FlextTargetOracleConstantsBase
     from flext_target_oracle._models.commands import FlextTargetOracleModelsCommands
@@ -116,7 +116,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetOracleUtilities",
                 "u",
             ),
-            "flext_db_oracle": (
+            "flext_meltano": (
                 "d",
                 "e",
                 "h",

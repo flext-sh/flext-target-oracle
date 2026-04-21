@@ -54,7 +54,9 @@ class FlextTargetOracleExceptions(e):
 
     @staticmethod
     def _to_metadata_value(value: t.RuntimeData | None) -> t.MetadataValue:
-        if isinstance(value, (str, int, float, bool, datetime)):
+        if isinstance(value, datetime):
+            return value.isoformat()
+        if isinstance(value, (str, int, float, bool)):
             return value
         if value is None:
             return ""

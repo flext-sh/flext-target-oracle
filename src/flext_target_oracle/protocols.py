@@ -7,12 +7,12 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleProtocols
-from flext_meltano import FlextMeltanoProtocols
+from flext_meltano import p
 
 from flext_target_oracle import FlextTargetOracleProtocolsBase
 
 
-class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
+class FlextTargetOracleProtocols(p, FlextDbOracleProtocols):
     """Singer Target Oracle protocols extending Oracle and Meltano protocols."""
 
     class TargetOracle(FlextTargetOracleProtocolsBase):

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleUtilities
-from flext_meltano import FlextMeltanoUtilities
+from flext_meltano import u
 
 from flext_target_oracle import (
     FlextTargetOracleUtilitiesBase,
@@ -11,7 +11,7 @@ from flext_target_oracle import (
 )
 
 
-class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
+class FlextTargetOracleUtilities(u, FlextDbOracleUtilities):
     """Focused utility namespace used by Oracle target modules."""
 
     class TargetOracle(

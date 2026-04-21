@@ -5,7 +5,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Annotated, Literal, Self
 
-from flext_meltano import FlextMeltanoModels
+from flext_meltano import m
 
 from flext_target_oracle import u
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class FlextTargetOracleModelsResults:
     """Result models MRO mixin for TargetOracle namespace."""
 
-    class ExecuteResult(FlextMeltanoModels.ArbitraryTypesModel):
+    class ExecuteResult(m.ArbitraryTypesModel):
         """Target execute readiness payload."""
 
         name: Annotated[str, u.Field(description="Target package name")]
@@ -32,7 +32,7 @@ class FlextTargetOracleModelsResults:
             u.Field(description="Configured Oracle service name"),
         ]
 
-    class ProcessingSummary(FlextMeltanoModels.ArbitraryTypesModel):
+    class ProcessingSummary(m.ArbitraryTypesModel):
         """Singer batch processing summary payload."""
 
         messages_processed: Annotated[
@@ -48,18 +48,18 @@ class FlextTargetOracleModelsResults:
             ),
         ] = u.Field(default_factory=tuple)
         state: Annotated[
-            FlextMeltanoModels.Meltano.SingerStateMessage,
+            m.Meltano.SingerStateMessage,
             u.Field(
                 description="Accumulated Singer STATE payload",
             ),
         ] = u.Field(
-            default_factory=lambda: FlextMeltanoModels.Meltano.SingerStateMessage(
+            default_factory=lambda: m.Meltano.SingerStateMessage(
                 type="STATE",
                 value={},
             )
         )
 
-    class LoaderReadyResult(FlextMeltanoModels.ArbitraryTypesModel):
+    class LoaderReadyResult(m.ArbitraryTypesModel):
         """Loader readiness payload after Oracle connectivity checks."""
 
         status: Annotated[
@@ -80,7 +80,7 @@ class FlextTargetOracleModelsResults:
             ),
         ]
 
-    class LoaderOperation(FlextMeltanoModels.ArbitraryTypesModel):
+    class LoaderOperation(m.ArbitraryTypesModel):
         """Detailed load operation summary for all streams."""
 
         stream_name: Annotated[str, u.Field(description="Logical stream identifier")]
@@ -101,7 +101,7 @@ class FlextTargetOracleModelsResults:
             u.Field(description="Number of failed records"),
         ]
 
-    class LoaderFinalizeResult(FlextMeltanoModels.ArbitraryTypesModel):
+    class LoaderFinalizeResult(m.ArbitraryTypesModel):
         """Loader finalization payload for flush operations."""
 
         total_records: Annotated[
@@ -130,7 +130,7 @@ class FlextTargetOracleModelsResults:
             ),
         ] = u.Field(default_factory=lambda: MappingProxyType({}))
 
-    class ImplementationMetrics(FlextMeltanoModels.ArbitraryTypesModel):
+    class ImplementationMetrics(m.ArbitraryTypesModel):
         """Oracle target implementation metrics."""
 
         streams_configured: Annotated[
@@ -150,7 +150,7 @@ class FlextTargetOracleModelsResults:
             ),
         ]
 
-    class LoadStatisticsModel(FlextMeltanoModels.ArbitraryTypesModel):
+    class LoadStatisticsModel(m.ArbitraryTypesModel):
         """Statistics for data load operation."""
 
         stream_name: Annotated[str, u.Field(description="Stream identifier")]

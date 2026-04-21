@@ -5,7 +5,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Annotated, ClassVar
 
-from flext_meltano import FlextMeltanoModels, u
+from flext_meltano import m, u
 
 if TYPE_CHECKING:
     from flext_target_oracle import t
@@ -14,41 +14,41 @@ if TYPE_CHECKING:
 class FlextTargetOracleModelsSinger:
     """Singer message MRO mixin for TargetOracle namespace."""
 
-    class Meltano(FlextMeltanoModels.Meltano):
+    class Meltano(m.Meltano):
         """Namespaced Meltano runtime model references (inherits all Singer types)."""
 
-    class SingerSchemaMessage(FlextMeltanoModels.Meltano.SingerSchemaMessage):
+    class SingerSchemaMessage(m.Meltano.SingerSchemaMessage):
         """Singer SCHEMA message specialized for Oracle target domain."""
 
         _flext_enforcement_exempt: ClassVar[bool] = True
 
-    class SingerRecordMessage(FlextMeltanoModels.Meltano.SingerRecordMessage):
+    class SingerRecordMessage(m.Meltano.SingerRecordMessage):
         """Singer RECORD message specialized for Oracle target domain."""
 
-    class SingerStateMessage(FlextMeltanoModels.Meltano.SingerStateMessage):
+    class SingerStateMessage(m.Meltano.SingerStateMessage):
         """Singer STATE message specialized for Oracle target domain."""
 
         _flext_enforcement_exempt: ClassVar[bool] = True
 
     class SingerActivateVersionMessage(
-        FlextMeltanoModels.Meltano.SingerActivateVersionMessage,
+        m.Meltano.SingerActivateVersionMessage,
     ):
         """Singer ACTIVATE_VERSION message specialized for Oracle target domain."""
 
-    class SingerCatalogMetadata(FlextMeltanoModels.Meltano.SingerCatalogMetadata):
+    class SingerCatalogMetadata(m.Meltano.SingerCatalogMetadata):
         """Singer catalog metadata specialized for Oracle target domain."""
 
         _flext_enforcement_exempt: ClassVar[bool] = True
 
-    class SingerCatalogEntry(FlextMeltanoModels.Meltano.SingerCatalogEntry):
+    class SingerCatalogEntry(m.Meltano.SingerCatalogEntry):
         """Singer catalog entry specialized for Oracle target domain."""
 
         _flext_enforcement_exempt: ClassVar[bool] = True
 
-    class SingerCatalog(FlextMeltanoModels.Meltano.SingerCatalog):
+    class SingerCatalog(m.Meltano.SingerCatalog):
         """Singer catalog specialized for Oracle target domain."""
 
-    class SingerStreamModel(FlextMeltanoModels.ArbitraryTypesModel):
+    class SingerStreamModel(m.ArbitraryTypesModel):
         """Singer stream mapping to Oracle table with column configuration."""
 
         stream_name: Annotated[str, u.Field(description="Singer stream name")]
