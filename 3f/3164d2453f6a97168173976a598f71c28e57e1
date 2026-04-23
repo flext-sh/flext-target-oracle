@@ -1,0 +1,24 @@
+src/flext_target_oracle/_utilities/loader.py
+  h_9db9d35f50cf33 65,67,103,117,119,258,282-287
+src/flext_target_oracle/_typings/base.py
+  h_9db9d35f50cf33 9,15-16,18
+src/flext_target_oracle/_models/singer.py
+  h_9db9d35f50cf33 6,8
+src/flext_target_oracle/_models/settings.py
+  h_9db9d35f50cf33 5,7
+src/flext_target_oracle/_models/results.py
+  h_9db9d35f50cf33 5,9,14-16,130,134
+src/flext_target_oracle/_utilities/errors.py
+  h_9db9d35f50cf33 21,56,77,83,97,141,181,194,223,239,287
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2",
+  "base_commit_sha": "3f3164d2453f6a97168173976a598f71c28e57e1",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
