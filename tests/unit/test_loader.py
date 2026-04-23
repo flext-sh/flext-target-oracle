@@ -40,7 +40,7 @@ def test_load_record_buffers_and_finalize(
 ) -> None:
     """load_record should buffer valid records and finalize returns model."""
     loader = FlextTargetOracleLoader(loader_config)
-    record: t.ScalarMapping = {"id": 1, "name": "Alice"}
+    record: t.JsonMapping = {"id": 1, "name": "Alice"}
     load_result = loader.load_record("users", record)
     assert load_result.success
     finalize_result = loader.finalize_all_streams()

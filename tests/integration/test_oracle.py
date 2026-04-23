@@ -37,9 +37,9 @@ def _schema_parts(
 def _query_rows(
     oracle_engine: FlextDbOracleApi,
     sql: str,
-    params: t.JsonValue | None = None,
-) -> Sequence[t.JsonValue]:
-    normalized_params = None if params is None else t.ConfigMap(root=dict(params))
+    params: t.JsonMapping | None = None,
+) -> Sequence[m.Dict]:
+    normalized_params = None if params is None else m.ConfigMap(root=dict(params))
     query_result = oracle_engine.oracle_services.execute_query(sql, normalized_params)
     assert query_result.success, query_result.error
     return query_result.value
@@ -49,7 +49,7 @@ def _query_scalar(
     oracle_engine: FlextDbOracleApi,
     sql: str,
     key: str,
-    params: t.JsonValue | None = None,
+    params: t.JsonMapping | None = None,
 ) -> str:
     rows = _query_rows(oracle_engine, sql, params)
     assert rows
@@ -111,7 +111,7 @@ class TestOracleIntegration:
             stream_name, schema_dict, key_props
         )
         assert create_res.success
-        records: Sequence[t.ScalarMapping] = [
+        records: Sequence[t.JsonMapping] = [
             {"id": 1, "name": "John Doe", "email": "john@example.com"},
             {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
         ]
@@ -149,12 +149,12 @@ class TestOracleIntegration:
         schema_dict, key_props = _schema_parts(simple_schema)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.success
-        initial_records: Sequence[t.ScalarMapping] = [
+        initial_records: Sequence[t.JsonMapping] = [
             {"id": 1, "name": "Original Name", "email": "original@example.com"}
         ]
         insert_result = loader.insert_records(stream_name, initial_records)
         assert insert_result.success
-        updated_records: Sequence[t.ScalarMapping] = [
+        updated_records: Sequence[t.JsonMapping] = [
             {"id": 1, "name": "Updated Name", "email": "updated@example.com"}
         ]
         result = loader.insert_records(stream_name, updated_records)
@@ -199,7 +199,7 @@ class TestOracleIntegration:
         schema_dict, key_props = _schema_parts(schema_message)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.success
-        records: Sequence[t.ScalarMapping] = [
+        records: Sequence[t.JsonMapping] = [
             {"id": i, "data": f"Bulk test data {i}", "value": i * 1.5}
             for i in range(5000)
         ]
@@ -251,7 +251,7 @@ class TestOracleIntegration:
             ],
             "total": 349.97,
         }
-        typed_record = t.Tests.SCALAR_MAPPING_ADAPTER.validate_python(record)
+        typed_record = t.Tests.CONTAINER_MAPPING_ADAPTER.validate_python(record)
         insert_res = loader.insert_records(stream_name, [typed_record])
         assert insert_res.success
         json_str = _query_scalar(
@@ -477,8 +477,11 @@ class TestOracleTargetE2E:
             },
             "key_properties": ["id"],
         }
+        schema_msg_value: t.JsonValue = t.Tests.NORMALIZED_VALUE_ADAPTER.validate_python(
+            schema_msg
+        )
         target.execute(
-            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(schema_msg).decode("utf-8")
+            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(schema_msg_value).decode("utf-8")
         )
         record_msg = {
             "type": "RECORD",
@@ -491,8 +494,11 @@ class TestOracleTargetE2E:
                 "internal_id": "INT-001",
             },
         }
+        record_msg_value: t.JsonValue = t.Tests.NORMALIZED_VALUE_ADAPTER.validate_python(
+            record_msg
+        )
         target.execute(
-            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(record_msg).decode("utf-8")
+            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(record_msg_value).decode("utf-8")
         )
         column_rows = _query_rows(
             oracle_engine,
