@@ -1,0 +1,24 @@
+.gitignore
+  h_9db9d35f50cf33 441
+src/flext_target_oracle/_utilities/observability.py
+  h_9db9d35f50cf33 29,39,65,91,118,146,160,167,180
+{}
+  h_9db9d35f50cf33 1169,1174,1178,1182,1186
+src/flext_target_oracle/_utilities/cli.py
+  h_9db9d35f50cf33 18,27,29
+src/flext_target_oracle/_utilities/client.py
+  h_9db9d35f50cf33 26,177,217
+src/flext_target_oracle/_utilities/services.py
+  h_9db9d35f50cf33 172,177,181,185,189
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2",
+  "base_commit_sha": "13b17ce188c345af3cd58f7a807e88af3275405d",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
