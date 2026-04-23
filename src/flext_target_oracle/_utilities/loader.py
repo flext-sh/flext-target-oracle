@@ -62,9 +62,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     _total_records: int = u.PrivateAttr(default_factory=lambda: 0)
 
     @staticmethod
-    def _normalize_log_value(value: t.JsonValue) -> t.JsonValue:
+    def _normalize_log_value(value: t.Scalar) -> t.JsonValue:
         """Normalize logging payloads into scalar or string values."""
-        if isinstance(value, (str, int, float, bool, datetime)):
+        if isinstance(value, (str, int, float, bool)):
             return value
         return str(value)
 
@@ -100,7 +100,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             oracle_api = FlextDbOracleApi(oracle_config)
             self._target_config = settings
             self._oracle_api = oracle_api
-            self._record_buffers = dict[str, list[t.JsonMapping]]()
+            self._record_buffers = self._default_record_buffers()
             self._total_records = 0
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             msg = f"Failed to create Oracle API: {exc}"
@@ -114,7 +114,10 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     @property
     def record_buffers(
         self,
-    ) -> dict[str, list[t.JsonMapping]]:
+    ) -> t.MutableMappingKV[
+        str,
+        t.MutableSequenceOf[t.JsonMapping],
+    ]:
         """Access record buffers."""
         return self._record_buffers
 
@@ -252,7 +255,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def insert_records(
         self,
         stream_name: str,
-        records: Sequence[t.ConfigurationMapping],
+        records: Sequence[t.JsonMapping],
     ) -> p.Result[bool]:
         """Insert multiple records - convenience wrapper used by tests.
 
@@ -276,8 +279,12 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """Load record with batching."""
         try:
             if stream_name not in self.record_buffers:
-                self.record_buffers[stream_name] = list[t.JsonMapping]()
-            self.record_buffers[stream_name].append(dict(record_data))
+                empty_records: t.MutableSequenceOf[t.JsonMapping] = []
+                self.record_buffers[stream_name] = empty_records
+            copied_record: t.MutableJsonMapping = {
+                str(key): value for key, value in record_data.items()
+            }
+            self.record_buffers[stream_name].append(copied_record)
             self._total_records += 1
             if len(self.record_buffers[stream_name]) >= self.target_config.batch_size:
                 return self._flush_batch(stream_name)

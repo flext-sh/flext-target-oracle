@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Annotated, Literal, Self
+from typing import Annotated, Literal, Self
 
-from flext_meltano import m
+from flext_meltano import m, t
 
 from flext_target_oracle import u
 
-if TYPE_CHECKING:
-    from flext_target_oracle import t
+
+def _default_buffer_status() -> Mapping[str, int]:
+    """Return an immutable empty buffer-status mapping."""
+    return MappingProxyType({})
 
 
 class FlextTargetOracleModelsResults:
@@ -124,11 +127,11 @@ class FlextTargetOracleModelsResults:
             description="Aggregated loading operation details",
         )
         buffer_status: Annotated[
-            t.IntMapping,
+            Mapping[str, int],
             u.Field(
                 description="Remaining buffered records by stream",
             ),
-        ] = u.Field(default_factory=lambda: MappingProxyType({}))
+        ] = u.Field(default_factory=_default_buffer_status)
 
     class ImplementationMetrics(m.ArbitraryTypesModel):
         """Oracle target implementation metrics."""

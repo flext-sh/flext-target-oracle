@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 
-from flext_meltano import m, u
-
-if TYPE_CHECKING:
-    from flext_target_oracle import t
+from flext_meltano import m, t, u
 
 
 class FlextTargetOracleModelsSinger:

@@ -18,7 +18,7 @@ from collections.abc import (
 from datetime import datetime
 from typing import TYPE_CHECKING, Annotated, override
 
-from flext_core import FlextConstants, FlextModels, FlextTypes, u
+from flext_core import FlextConstants, FlextExceptionsBase, FlextModels, FlextTypes, u
 
 from flext_target_oracle import e
 
@@ -53,7 +53,7 @@ class FlextTargetOracleExceptions(e):
     """Oracle Target exceptions using flext-core SOURCE OF TRUTH."""
 
     @staticmethod
-    def _to_metadata_value(value: t.RuntimeData | None) -> t.JsonValue:
+    def _to_metadata_value(value: t.JsonPayload | None) -> t.JsonValue:
         if isinstance(value, datetime):
             return value.isoformat()
         if isinstance(value, (str, int, float, bool)):
@@ -74,13 +74,13 @@ class FlextTargetOracleExceptions(e):
             correlation_id=metadata.correlation_id if metadata is not None else None,
         )
 
-    class Error(e.Error):
+    class Error(FlextExceptionsBase.BaseError):
         """Oracle Target main error - inherits from base error."""
 
     class ConfigurationError(e.ConfigurationError):
         """Oracle configuration error using flext-core foundation."""
 
-    class OracleConnectionError(e.OracleConnectionError):
+    class OracleConnectionError(e.ConnectionError):
         """Oracle connection error with Oracle-specific context."""
 
         @override
@@ -94,7 +94,7 @@ class FlextTargetOracleExceptions(e):
             user: str | None = None,
             dsn: str | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
-            **kwargs: t.RuntimeData,
+            **kwargs: t.JsonPayload,
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
             resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
@@ -138,7 +138,7 @@ class FlextTargetOracleExceptions(e):
             auth_method: str | None = None,
             wallet_location: str | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
-            **kwargs: t.RuntimeData,
+            **kwargs: t.JsonPayload,
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
             resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
@@ -178,7 +178,7 @@ class FlextTargetOracleExceptions(e):
             )
             self.wallet_location = oracle_context.get("wallet_location")
 
-    class ProcessingError(e.ProcessingError):
+    class ProcessingError(Error):
         """Oracle processing error with Oracle-specific context."""
 
         @override
@@ -191,7 +191,7 @@ class FlextTargetOracleExceptions(e):
             error_records: Sequence[t.JsonMapping] | None = None,
             operation: str | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
-            **kwargs: t.RuntimeData,
+            **kwargs: t.JsonPayload,
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
             resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
@@ -220,7 +220,7 @@ class FlextTargetOracleExceptions(e):
             operation_val = oracle_context.get("operation")
             self.operation = str(operation_val) if operation_val is not None else None
 
-    class OracleTimeoutError(e.OracleTimeoutError):
+    class OracleTimeoutError(e.TimeoutError):
         """Oracle timeout error using flext-core foundation."""
 
     class SchemaError(ValidationError):
@@ -236,7 +236,7 @@ class FlextTargetOracleExceptions(e):
             schema_hash: str | None = None,
             validation_errors: t.StrSequence | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
-            **kwargs: t.RuntimeData,
+            **kwargs: t.JsonPayload,
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
             resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
@@ -284,7 +284,7 @@ class FlextTargetOracleExceptions(e):
             table_name: str | None = None,
             operation: str | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
-            **kwargs: t.RuntimeData,
+            **kwargs: t.JsonPayload,
         ) -> None:
             """Initialize SQL error with Oracle-specific context."""
             resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
