@@ -1,17 +1,13 @@
 """Lean performance-oriented behavior checks for Oracle target."""
 
 from __future__ import annotations
-from collections.abc import (
-    Mapping,
-    MutableMapping,
-    MutableSequence,
-    Sequence,
-)
-from collections.abc import Generator, Iterable, Mapping, MutableMapping, MutableSequence, Sequence
 
 import json
 import time
-from collections.abc import Mapping, Sequence
+from collections.abc import (
+    Mapping,
+    Sequence,
+)
 from unittest.mock import Mock
 
 import pytest

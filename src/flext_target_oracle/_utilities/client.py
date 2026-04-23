@@ -23,7 +23,7 @@ from flext_target_oracle import (
 class FlextTargetOracle:
     """Singer target client that coordinates schema and record loading."""
 
-    _logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
+    logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     def __init__(self, settings: FlextTargetOracleSettings) -> None:
         """Create target with validated settings and loader dependencies."""
@@ -174,7 +174,7 @@ class FlextTargetOracle:
         self,
         activate_message: m.TargetOracle.SingerActivateVersionMessage,
     ) -> p.Result[bool]:
-        self._logger.info(
+        self.logger.info(
             "ACTIVATE_VERSION received for Oracle target",
             stream=activate_message.stream,
             version=activate_message.version,
@@ -214,7 +214,7 @@ class FlextTargetOracle:
         state_message: m.TargetOracle.SingerStateMessage,
     ) -> p.Result[bool]:
         self.state_message = state_message
-        self._logger.debug("State updated for Oracle target")
+        self.logger.debug("State updated for Oracle target")
         return r[bool].ok(True)
 
 

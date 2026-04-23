@@ -169,24 +169,24 @@ class FlextTargetOracleServiceFactory:
         oracle_api: FlextDbOracleApi,
     ) -> None:
         """Store dependencies shared by service instances."""
-        self._config = settings
+        self.config = settings
         self._oracle_api = oracle_api
 
     def create_batch_service(self) -> FlextTargetOracleBatchService:
         """Create Oracle batch service."""
-        return FlextTargetOracleBatchService(self._config, self._oracle_api)
+        return FlextTargetOracleBatchService(self.config, self._oracle_api)
 
     def create_connection_service(self) -> FlextTargetOracleConnectionService:
         """Create Oracle connection service."""
-        return FlextTargetOracleConnectionService(self._config, self._oracle_api)
+        return FlextTargetOracleConnectionService(self.config, self._oracle_api)
 
     def create_record_service(self) -> FlextTargetOracleRecordService:
         """Create Oracle record service."""
-        return FlextTargetOracleRecordService(self._config)
+        return FlextTargetOracleRecordService(self.config)
 
     def create_schema_service(self) -> FlextTargetOracleSchemaService:
         """Create Oracle schema service."""
-        return FlextTargetOracleSchemaService(self._config, self._oracle_api)
+        return FlextTargetOracleSchemaService(self.config, self._oracle_api)
 
 
 __all__: list[str] = [

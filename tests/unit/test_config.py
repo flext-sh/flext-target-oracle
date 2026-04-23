@@ -1,13 +1,6 @@
 """Settings tests for flext-target-oracle."""
 
 from __future__ import annotations
-from collections.abc import (
-    Mapping,
-    MutableMapping,
-    MutableSequence,
-    Sequence,
-)
-from collections.abc import Generator, Iterable, Mapping, MutableMapping, MutableSequence, Sequence
 
 from flext_target_oracle import FlextTargetOracleSettings
 from tests import c

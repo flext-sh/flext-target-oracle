@@ -438,7 +438,7 @@ plugins/
 *.state
 *.state.json
 state.json
-*_state.json
+*state.json
 catalogs/
 catalog.json
 *.catalog.json

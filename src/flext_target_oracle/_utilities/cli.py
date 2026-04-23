@@ -15,7 +15,7 @@ OracleTargetCommandFactory = m.TargetOracle.OracleTargetCommandFactory
 class FlextTargetOracleCliService:
     """Simple CLI service that maps args to command executions."""
 
-    _logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
+    logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     def execute(self) -> p.Result[str]:
         """Service readiness probe."""
@@ -24,9 +24,9 @@ class FlextTargetOracleCliService:
     def finalize_cli_result(self, result: p.Result[str]) -> int:
         """Convert a CLI result into process exit semantics."""
         if result.failure:
-            self._logger.error(result.error or "Command failed")
+            self.logger.error(result.error or "Command failed")
             return 1
-        self._logger.info(result.value)
+        self.logger.info(result.value)
         return 0
 
     def run_cli(self, args: t.StrSequence | None = None) -> p.Result[str]:

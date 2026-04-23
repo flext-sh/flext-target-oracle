@@ -10,20 +10,15 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-from collections.abc import (
-    Mapping,
-    MutableMapping,
-    MutableSequence,
-    Sequence,
-)
-from collections.abc import Generator, Iterable, Mapping, MutableMapping, MutableSequence, Sequence
 
 import time
-from collections.abc import Sequence
+from collections.abc import (
+    Sequence,
+)
 
 import pytest
-
 from flext_db_oracle import FlextDbOracleApi
+
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,
