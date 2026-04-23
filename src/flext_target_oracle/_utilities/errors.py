@@ -169,7 +169,7 @@ class FlextTargetOracleExceptions(e):
                     message=message,
                     error_code=resolved_metadata.code,
                     context=oracle_context or None,
-                    _correlation_id=resolved_metadata.correlation_id,
+                    correlation_id=resolved_metadata.correlation_id,
                 )
             self.user = oracle_context.get("user")
             auth_method_val = oracle_context.get("auth_method")
