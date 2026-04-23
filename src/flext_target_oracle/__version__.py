@@ -13,13 +13,13 @@ from __future__ import annotations
 
 from importlib.metadata import PackageMetadata, metadata
 
-from flext_core import FlextVersion, t
+from flext_core import FlextVersion
 
 
 class FlextTargetOracleVersion(FlextVersion):
     """flext-target-oracle version — MRO-derived from FlextVersion."""
 
-    _metadata: PackageMetadata | t.StrMapping = metadata("flext-target-oracle")
+    _metadata: PackageMetadata = metadata("flext-target-oracle")
 
 
 __version__ = FlextTargetOracleVersion.__version__
