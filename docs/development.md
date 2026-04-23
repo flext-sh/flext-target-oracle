@@ -51,7 +51,7 @@ cd flext-target-oracle
 
 # Complete development setup
 make setup                    # Installs dependencies + pre-commit hooks
-make validate                 # Verify setup with full quality gates
+make val                 # Verify setup with full quality gates
 
 # Alternative: Manual setup
 poetry install --with dev,test,docs
@@ -78,7 +78,7 @@ make diagnose                # System diagnostics
 
 ```bash
 # Essential quality gates (run before every commit)
-make validate                 # Complete validation pipeline
+make val                 # Complete validation pipeline
 make check                   # Quick validation (lint + type)
 make test                    # Full test suite with coverage
 
@@ -729,7 +729,7 @@ def monitor_memory_usage():
 
 Before submitting a pull request:
 
-- [ ] **Code Quality**: `make validate` passes with zero issues
+- [ ] **Code Quality**: `make val` passes with zero issues
 - [ ] **Tests**: All existing tests pass, new tests added for new functionality
 - [ ] **Documentation**: Updated relevant documentation (architecture, API)
 - [ ] **Security**: No new security vulnerabilities introduced

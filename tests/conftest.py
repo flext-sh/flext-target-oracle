@@ -11,7 +11,6 @@ import os
 from asyncio import AbstractEventLoop, get_event_loop_policy
 from collections.abc import (
     Generator,
-    Mapping,
     Sequence,
 )
 from contextlib import contextmanager
@@ -22,7 +21,6 @@ import pytest
 from flext_db_oracle import (
     FlextDbOracleApi,
     FlextDbOracleSettings,
-    FlextDbOracleTypes as oracle_t,
 )
 from flext_tests import tk
 
@@ -125,7 +123,7 @@ def clean_database(oracle_engine: FlextDbOracleApi) -> None:
     """Clean database before each test."""
     tables_result = oracle_engine.oracle_services.execute_query(
         'SELECT table_name AS "table_name" FROM all_tables WHERE owner = :schema',
-        oracle_t.ConfigMap(root={"schema": TEST_SCHEMA}),
+        m.ConfigMap(root={"schema": TEST_SCHEMA}),
     )
     assert tables_result.success, tables_result.error
     tables = [str(row.root["table_name"]) for row in tables_result.value]
@@ -292,7 +290,7 @@ def mock_loader() -> Mock:
 
 
 @pytest.fixture
-def schema() -> Mapping[str, t.Container]:
+def schema() -> t.JsonMapping:
     """Simple Singer schema message for unit testing."""
     return {
         "type": "SCHEMA",
@@ -310,7 +308,7 @@ def schema() -> Mapping[str, t.Container]:
 
 
 @pytest.fixture
-def record() -> Mapping[str, t.Container]:
+def record() -> t.JsonMapping:
     """Simple Singer record message for unit testing."""
     return {
         "type": "RECORD",
@@ -320,7 +318,7 @@ def record() -> Mapping[str, t.Container]:
 
 
 @pytest.fixture
-def state() -> Mapping[str, t.Container]:
+def state() -> t.JsonMapping:
     """Simple Singer state message for unit testing."""
     return {
         "type": "STATE",
@@ -329,7 +327,7 @@ def state() -> Mapping[str, t.Container]:
 
 
 @pytest.fixture
-def simple_schema() -> Mapping[str, t.Container]:
+def simple_schema() -> t.JsonMapping:
     """Simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
@@ -348,7 +346,7 @@ def simple_schema() -> Mapping[str, t.Container]:
 
 
 @pytest.fixture
-def nested_schema() -> Mapping[str, t.Container]:
+def nested_schema() -> t.JsonMapping:
     """Nested Singer schema for testing flattening."""
     return {
         "type": "SCHEMA",
@@ -392,7 +390,7 @@ def nested_schema() -> Mapping[str, t.Container]:
 
 
 @pytest.fixture
-def sample_record() -> Mapping[str, t.Container]:
+def sample_record() -> t.JsonMapping:
     """Sample Singer record message."""
     return {
         "type": "RECORD",
@@ -409,7 +407,7 @@ def sample_record() -> Mapping[str, t.Container]:
 
 
 @pytest.fixture
-def batch_records() -> Sequence[Mapping[str, t.Container]]:
+def batch_records() -> Sequence[t.JsonMapping]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -428,7 +426,7 @@ def batch_records() -> Sequence[Mapping[str, t.Container]]:
 
 
 @pytest.fixture
-def state_message() -> Mapping[str, t.Container]:
+def state_message() -> t.JsonMapping:
     """Sample Singer state message."""
     return {
         "type": "STATE",
@@ -446,10 +444,10 @@ def state_message() -> Mapping[str, t.Container]:
 
 @pytest.fixture
 def singer_messages(
-    simple_schema: Mapping[str, t.Container],
-    sample_record: Mapping[str, t.Container],
-    state_message: Mapping[str, t.Container],
-) -> Sequence[Mapping[str, t.Container]]:
+    simple_schema: t.JsonMapping,
+    sample_record: t.JsonMapping,
+    state_message: t.JsonMapping,
+) -> Sequence[t.JsonMapping]:
     """Complete Singer message stream for testing."""
     return [simple_schema, sample_record, sample_record, state_message]
 
@@ -477,7 +475,7 @@ def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
 @pytest.fixture
 def temp_config_file(tmp_path: Path) -> Path:
     """Create temporary configuration file."""
-    config_data: t.Container = {
+    config_data: t.JsonValue = {
         "oracle_host": ORACLE_HOST,
         "oracle_port": ORACLE_PORT,
         "oracle_service_name": ORACLE_SERVICE,

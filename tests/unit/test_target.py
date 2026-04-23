@@ -1,6 +1,12 @@
 """Unit tests for the canonical Oracle target client."""
 
 from __future__ import annotations
+from collections.abc import (
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 from collections.abc import Generator, Iterable, Mapping, MutableMapping, MutableSequence, Sequence
 
 import json
@@ -118,7 +124,7 @@ class TestOracleTarget:
         assert target.process_singer_message(state_message).success
         state_value = target.state_message.value
         assert isinstance(state_value, dict)
-        bookmarks_obj: t.RecursiveContainer | None = state_value.get("bookmarks")
+        bookmarks_obj: t.JsonValue | None = state_value.get("bookmarks")
         assert isinstance(bookmarks_obj, dict)
         assert bookmarks_obj.get("users") == 1
 

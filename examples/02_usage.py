@@ -17,22 +17,18 @@ from flext_core import t
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
 
 
-def load_config() -> Mapping[str, t.Container]:
+def load_config() -> t.JsonMapping:
     """Load configuration from file."""
     config_path = Path("settings.json")
     content = config_path.read_text(encoding="utf-8")
-    adapter: m.TypeAdapter[Mapping[str, t.Container]] = m.TypeAdapter(
-        Mapping[str, t.Container]
-    )
+    adapter: m.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)
     return adapter.validate_json(content)
 
 
-def load_singer_messages() -> Sequence[Mapping[str, t.Container]]:
+def load_singer_messages() -> Sequence[t.JsonMapping]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
-    adapter: m.TypeAdapter[Mapping[str, t.Container]] = m.TypeAdapter(
-        Mapping[str, t.Container]
-    )
+    adapter: m.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)
     with data_path.open(encoding="utf-8") as f:
         return [adapter.validate_json(line) for line in f if line.strip()]
 
@@ -52,8 +48,8 @@ def main() -> None:
             message.get("stream", "unknown")
         elif msg_type == "RECORD":
             message.get("stream", "unknown")
-            record_obj: t.Container = message.get("record", {})
-            record_dict: Mapping[str, t.Container] = (
+            record_obj: t.JsonValue = message.get("record", {})
+            record_dict: t.JsonMapping = (
                 record_obj if isinstance(record_obj, Mapping) else {}
             )
             record_dict.get("id", "?")

@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import re
 from collections.abc import (
-    Mapping,
     Sequence,
 )
 from datetime import UTC, datetime
@@ -42,12 +41,12 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     @staticmethod
     def _default_record_buffers() -> t.MutableMappingKV[
         str,
-        t.MutableSequenceOf[t.ContainerValueMapping],
+        t.MutableSequenceOf[t.JsonMapping],
     ]:
         """Return an empty typed buffer mapping for loader state."""
         empty_buffers: t.MutableMappingKV[
             str,
-            t.MutableSequenceOf[t.ContainerValueMapping],
+            t.MutableSequenceOf[t.JsonMapping],
         ] = {}
         return empty_buffers
 
@@ -56,21 +55,21 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     _oracle_api: FlextDbOracleApi = u.PrivateAttr()
     _record_buffers: t.MutableMappingKV[
         str,
-        t.MutableSequenceOf[t.ContainerValueMapping],
+        t.MutableSequenceOf[t.JsonMapping],
     ] = u.PrivateAttr(
         default_factory=_default_record_buffers,
     )
     _total_records: int = u.PrivateAttr(default_factory=lambda: 0)
 
     @staticmethod
-    def _normalize_log_value(value: t.Container) -> t.Container:
+    def _normalize_log_value(value: t.JsonValue) -> t.JsonValue:
         """Normalize logging payloads into scalar or string values."""
         if isinstance(value, (str, int, float, bool, datetime)):
             return value
         return str(value)
 
     @staticmethod
-    def _loader_columns() -> t.MutableSequenceOf[t.ContainerValueMapping]:
+    def _loader_columns() -> t.MutableSequenceOf[t.JsonMapping]:
         """Return the canonical loader columns for db-oracle DDL generation."""
         return [
             {"name": "DATA", "data_type": "CLOB", "nullable": True},
@@ -101,7 +100,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             oracle_api = FlextDbOracleApi(oracle_config)
             self._target_config = settings
             self._oracle_api = oracle_api
-            self._record_buffers = dict[str, list[t.ContainerValueMapping]]()
+            self._record_buffers = dict[str, list[t.JsonMapping]]()
             self._total_records = 0
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             msg = f"Failed to create Oracle API: {exc}"
@@ -115,7 +114,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     @property
     def record_buffers(
         self,
-    ) -> dict[str, list[t.ContainerValueMapping]]:
+    ) -> dict[str, list[t.JsonMapping]]:
         """Access record buffers."""
         return self._record_buffers
 
@@ -165,7 +164,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def ensure_table_exists(
         self,
         stream_name: str,
-        schema: t.ContainerValueMapping,
+        schema: t.JsonMapping,
         _key_properties: t.StrSequence | None = None,
     ) -> p.Result[bool]:
         """Ensure table exists using flext-db-oracle API with correct table creation."""
@@ -201,14 +200,14 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return r[bool].fail(f"Table creation failed: {e}")
 
     @override
-    def execute(self) -> p.Result[Mapping[str, t.Container]]:
+    def execute(self) -> p.Result[t.JsonMapping]:
         """Execute domain service - returns connection test result."""
         connection_result = self.test_connection()
         if connection_result.failure:
-            return r[Mapping[str, t.Container]].fail(
+            return r[t.JsonMapping].fail(
                 f"Oracle connection failed: {connection_result.error}",
             )
-        return r[Mapping[str, t.Container]].ok({
+        return r[t.JsonMapping].ok({
             "status": "ready",
             "host": self.target_config.oracle_host,
             "service": self.target_config.oracle_service_name,
@@ -272,12 +271,12 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def load_record(
         self,
         stream_name: str,
-        record_data: t.ContainerValueMapping,
+        record_data: t.JsonMapping,
     ) -> p.Result[bool]:
         """Load record with batching."""
         try:
             if stream_name not in self.record_buffers:
-                self.record_buffers[stream_name] = list[t.ContainerValueMapping]()
+                self.record_buffers[stream_name] = list[t.JsonMapping]()
             self.record_buffers[stream_name].append(dict(record_data))
             self._total_records += 1
             if len(self.record_buffers[stream_name]) >= self.target_config.batch_size:
@@ -327,7 +326,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def _build_create_table_statement(
         self,
         table_name: str,
-        _schema: t.ContainerValueMapping,
+        _schema: t.JsonMapping,
     ) -> p.Result[str]:
         """Build CREATE TABLE SQL through the db-oracle owner service."""
         return self.oracle_api.oracle_services.create_table_ddl(
@@ -346,9 +345,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
 
     @staticmethod
     def _build_insert_parameters(
-        record: t.ContainerValueMapping,
+        record: t.JsonMapping,
         loaded_at: str,
-    ) -> t.ContainerValueMapping:
+    ) -> t.JsonMapping:
         """Normalize one record into the owner-managed insert payload shape."""
         return {
             "DATA": t.TargetOracle.FLAT_CONTAINER_MAP_ADAPTER.dump_json(record).decode(
@@ -386,7 +385,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 )
                 if result.failure:
                     return r[bool].fail(f"Batch insert failed: {result.error}")
-                self.record_buffers[stream_name] = list[t.ContainerValueMapping]()
+                self.record_buffers[stream_name] = list[t.JsonMapping]()
                 self.log_info(f"Flushed {len(records)} records to {table_name}")
                 return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:

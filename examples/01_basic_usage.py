@@ -68,7 +68,7 @@ def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
-      Mapping[str, t.Container]: Singer SCHEMA message for users table
+      t.JsonMapping: Singer SCHEMA message for users table
 
     """
     return m.TargetOracle.SingerSchemaMessage.model_validate({
@@ -93,7 +93,7 @@ def create_sample_record_messages() -> Sequence[m.TargetOracle.SingerRecordMessa
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
-      List[Mapping[str, t.Container]]: List of Singer RECORD messages
+      List[t.JsonMapping]: List of Singer RECORD messages
 
     """
     return [
@@ -137,7 +137,7 @@ def create_sample_state_message() -> m.TargetOracle.SingerStateMessage:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
-      Mapping[str, t.Container]: Singer STATE message with bookmark information
+      t.JsonMapping: Singer STATE message with bookmark information
 
     """
     return m.TargetOracle.SingerStateMessage.model_validate({

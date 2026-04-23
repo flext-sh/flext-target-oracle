@@ -29,7 +29,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     def create_sink(
         self,
         stream_name: str,
-        schema: t.FlatContainerMapping,
+        schema: t.JsonMapping,
     ) -> Never:
         """Not supported — use FlextTargetOracleLoader directly."""
         msg = "target-oracle uses Loader pattern, not Singer sink"

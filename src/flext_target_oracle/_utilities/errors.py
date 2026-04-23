@@ -36,7 +36,7 @@ class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
 
     code: Annotated[str, u.Field(description="Canonical error code")]
     context: Annotated[
-        Mapping[str, t.MetadataValue] | None,
+        Mapping[str, t.JsonValue] | None,
         u.Field(
             description="Structured error context",
         ),
@@ -53,7 +53,7 @@ class FlextTargetOracleExceptions(e):
     """Oracle Target exceptions using flext-core SOURCE OF TRUTH."""
 
     @staticmethod
-    def _to_metadata_value(value: t.RuntimeData | None) -> t.MetadataValue:
+    def _to_metadata_value(value: t.RuntimeData | None) -> t.JsonValue:
         if isinstance(value, datetime):
             return value.isoformat()
         if isinstance(value, (str, int, float, bool)):
@@ -101,7 +101,7 @@ class FlextTargetOracleExceptions(e):
                 default_code=c.ErrorCode.CONNECTION_ERROR,
                 metadata=metadata,
             )
-            oracle_context: MutableMapping[str, t.MetadataValue] = (
+            oracle_context: MutableMapping[str, t.JsonValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if host is not None:
@@ -145,7 +145,7 @@ class FlextTargetOracleExceptions(e):
                 default_code=c.ErrorCode.AUTHENTICATION_ERROR,
                 metadata=metadata,
             )
-            oracle_context: MutableMapping[str, t.MetadataValue] = (
+            oracle_context: MutableMapping[str, t.JsonValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if user is not None:
@@ -188,7 +188,7 @@ class FlextTargetOracleExceptions(e):
             *,
             stream_name: str | None = None,
             record_count: int | None = None,
-            error_records: Sequence[t.ContainerValueMapping] | None = None,
+            error_records: Sequence[t.JsonMapping] | None = None,
             operation: str | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.RuntimeData,
@@ -198,7 +198,7 @@ class FlextTargetOracleExceptions(e):
                 default_code=c.ErrorCode.PROCESSING_ERROR,
                 metadata=metadata,
             )
-            oracle_context: MutableMapping[str, t.MetadataValue] = (
+            oracle_context: MutableMapping[str, t.JsonValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if stream_name is not None:
@@ -243,7 +243,7 @@ class FlextTargetOracleExceptions(e):
                 default_code=c.ErrorCode.VALIDATION_ERROR,
                 metadata=metadata,
             )
-            oracle_context: MutableMapping[str, t.MetadataValue] = (
+            oracle_context: MutableMapping[str, t.JsonValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if stream_name is not None:
@@ -291,7 +291,7 @@ class FlextTargetOracleExceptions(e):
                 default_code=c.ErrorCode.OPERATION_ERROR,
                 metadata=metadata,
             )
-            oracle_context: MutableMapping[str, t.MetadataValue] = (
+            oracle_context: MutableMapping[str, t.JsonValue] = (
                 dict(resolved_metadata.context) if resolved_metadata.context else {}
             )
             if sql_statement is not None:

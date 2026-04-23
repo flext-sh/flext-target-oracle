@@ -1,7 +1,13 @@
 """End-to-end Singer flow checks for canonical target behavior."""
 
 from __future__ import annotations
-from collections.abc import Calling , Generator, Iterable, Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import (
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+from collections.abc import Generator, Iterable, Mapping, MutableMapping, MutableSequence, Sequence
 
 import json
 from unittest.mock import Mock
@@ -67,8 +73,8 @@ class TestSingerWorkflowE2E:
         assert "orders" in target.schemas
         state_value = target.state_message.value
         assert isinstance(state_value, dict)
-        bookmarks_obj: t.RecursiveContainer | None = state_value.get("bookmarks")
+        bookmarks_obj: t.JsonValue | None = state_value.get("bookmarks")
         assert isinstance(bookmarks_obj, dict)
-        orders_obj: t.RecursiveContainer | None = bookmarks_obj.get("orders")
+        orders_obj: t.JsonValue | None = bookmarks_obj.get("orders")
         assert isinstance(orders_obj, dict)
         assert orders_obj.get("version") == 1

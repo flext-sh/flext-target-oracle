@@ -10,7 +10,13 @@ SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
-from collections.abc import Calling , Generator, Iterable, Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import (
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+from collections.abc import Generator, Iterable, Mapping, MutableMapping, MutableSequence, Sequence
 
 import time
 from collections.abc import Sequence
@@ -27,8 +33,8 @@ from tests import c, m, t
 
 
 def _schema_parts(
-    message: t.RecursiveContainerMapping,
-) -> t.Pair[t.ContainerValueMapping, Sequence[str]]:
+    message: t.JsonValue,
+) -> t.Pair[t.JsonMapping, Sequence[str]]:
     schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(message)
     return (schema_message.schema_definition, schema_message.key_properties)
 
@@ -36,8 +42,8 @@ def _schema_parts(
 def _query_rows(
     oracle_engine: FlextDbOracleApi,
     sql: str,
-    params: t.RecursiveContainerMapping | None = None,
-) -> Sequence[t.Dict]:
+    params: t.JsonValue | None = None,
+) -> Sequence[t.JsonValue]:
     normalized_params = None if params is None else t.ConfigMap(root=dict(params))
     query_result = oracle_engine.oracle_services.execute_query(sql, normalized_params)
     assert query_result.success, query_result.error
@@ -48,7 +54,7 @@ def _query_scalar(
     oracle_engine: FlextDbOracleApi,
     sql: str,
     key: str,
-    params: t.RecursiveContainerMapping | None = None,
+    params: t.JsonValue | None = None,
 ) -> str:
     rows = _query_rows(oracle_engine, sql, params)
     assert rows
@@ -65,7 +71,7 @@ class TestOracleIntegration:
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: FlextDbOracleApi,
-        simple_schema: t.RecursiveContainerMapping,
+        simple_schema: t.JsonValue,
     ) -> None:
         """Test creating a simple table with basic data types."""
         stream_name = "test_users"
@@ -101,7 +107,7 @@ class TestOracleIntegration:
         self,
         connected_loader: FlextTargetOracleLoader,
         oracle_engine: FlextDbOracleApi,
-        simple_schema: t.RecursiveContainerMapping,
+        simple_schema: t.JsonValue,
     ) -> None:
         """Test inserting data and retrieving it."""
         stream_name = "test_insert"
@@ -137,7 +143,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
-        simple_schema: t.RecursiveContainerMapping,
+        simple_schema: t.JsonValue,
     ) -> None:
         """Test merge mode for updating existing records."""
         oracle_config = oracle_config.model_copy(update={"sdc_mode": "merge"})
@@ -182,7 +188,7 @@ class TestOracleIntegration:
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().success
         stream_name = "test_bulk"
-        schema_message: t.RecursiveContainerMapping = {
+        schema_message: t.JsonValue = {
             "type": "SCHEMA",
             "stream": stream_name,
             "schema": {
@@ -220,7 +226,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
-        nested_schema: t.RecursiveContainerMapping,
+        nested_schema: t.JsonValue,
     ) -> None:
         """Test JSON storage mode with nested data."""
         oracle_config = oracle_config.model_copy(update={})
@@ -295,7 +301,7 @@ class TestOracleIntegration:
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().success
         stream_name = "test_ordering"
-        schema_message: t.RecursiveContainerMapping = {
+        schema_message: t.JsonValue = {
             "type": "SCHEMA",
             "stream": stream_name,
             "schema": {
@@ -336,7 +342,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
-        simple_schema: t.RecursiveContainerMapping,
+        simple_schema: t.JsonValue,
     ) -> None:
         """Test truncate table before loading data."""
         oracle_config = oracle_config.model_copy(update={"truncate_before_load": True})
@@ -370,7 +376,7 @@ class TestOracleIntegration:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
-        simple_schema: t.RecursiveContainerMapping,
+        simple_schema: t.JsonValue,
     ) -> None:
         """Test creation of custom indexes."""
         oracle_config = oracle_config.model_copy(
@@ -420,7 +426,7 @@ class TestOracleTargetE2E:
         self,
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
-        singer_messages: Sequence[t.RecursiveContainerMapping],
+        singer_messages: Sequence[t.JsonValue],
     ) -> None:
         """Test complete Singer workflow: schema -> records -> state."""
         target = FlextTargetOracle(settings=oracle_config)

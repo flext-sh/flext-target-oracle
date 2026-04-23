@@ -30,7 +30,7 @@ class FlextTargetOracleProtocolsBase:
             ...
 
         @property
-        def error(self) -> t.Container | None:
+        def error(self) -> t.JsonValue | None:
             """Return the error value if the operation failed, else None."""
             ...
 

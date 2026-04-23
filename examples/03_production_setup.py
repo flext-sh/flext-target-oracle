@@ -16,7 +16,6 @@ import signal
 import sys
 import time
 from collections.abc import (
-    Mapping,
     Sequence,
 )
 from datetime import UTC
@@ -53,8 +52,8 @@ class HealthStatus(m.BaseModel):
 
     timestamp: float
     status: str = "healthy"
-    checks: t.MutableFlatContainerMapping = u.Field(default_factory=dict)
-    metrics: t.MutableFlatContainerMapping = u.Field(default_factory=dict)
+    checks: t.MutableJsonMapping = u.Field(default_factory=dict)
+    metrics: t.MutableJsonMapping = u.Field(default_factory=dict)
     error: str | None = None
 
 
@@ -183,7 +182,7 @@ class ProductionTargetManager:
         signal.signal(signal.SIGINT, self._signal_handler)
         signal.signal(signal.SIGTERM, self._signal_handler)
 
-    def health_check(self) -> p.Result[Mapping[str, t.Container]]:
+    def health_check(self) -> p.Result[t.JsonMapping]:
         """Perform comprehensive health check for monitoring systems.
 
         Returns:
@@ -222,7 +221,7 @@ class ProductionTargetManager:
                 target_metrics = self.target.get_implementation_metrics()
                 metrics.update(target_metrics.model_dump())
             logger.debug("Health check completed: %s", health_status.status)
-            return r[Mapping[str, t.Container]].ok(health_status.model_dump())
+            return r[t.JsonMapping].ok(health_status.model_dump())
         except (
             ValueError,
             TypeError,
@@ -235,7 +234,7 @@ class ProductionTargetManager:
             logger.exception("Health check failed")
             health_status.status = "unhealthy"
             health_status.error = str(e)
-            return r[Mapping[str, t.Container]].fail(f"Health check error: {e}")
+            return r[t.JsonMapping].fail(f"Health check error: {e}")
 
     def initialize(self) -> p.Result[bool]:
         """Initialize target with comprehensive validation.
@@ -275,7 +274,7 @@ class ProductionTargetManager:
     def process_singer_stream(
         self,
         messages: Sequence[SingerMessage],
-    ) -> p.Result[Mapping[str, t.Container]]:
+    ) -> p.Result[t.JsonMapping]:
         """Process complete Singer message stream with comprehensive error handling.
 
         Args:
@@ -286,7 +285,7 @@ class ProductionTargetManager:
 
         """
         if not self.target:
-            return r[Mapping[str, t.Container]].fail("Target not initialized")
+            return r[t.JsonMapping].fail("Target not initialized")
         logger.info("Processing Singer stream with %d messages", len(messages))
         stats = ProcessingStats(processing_start_time=time.time())
         try:
@@ -308,7 +307,7 @@ class ProductionTargetManager:
                     message_type,
                 )
                 if not self.target:
-                    return r[Mapping[str, t.Container]].fail("Target not initialized")
+                    return r[t.JsonMapping].fail("Target not initialized")
                 result = self.target.process_singer_message(message)
                 if result.success:
                     stats.messages_processed += 1
@@ -345,7 +344,7 @@ class ProductionTargetManager:
                 "Stream processing completed in %.2f seconds",
                 processing_duration,
             )
-            return r[Mapping[str, t.Container]].ok(stats.model_dump())
+            return r[t.JsonMapping].ok(stats.model_dump())
         except (
             ValueError,
             TypeError,
@@ -358,7 +357,7 @@ class ProductionTargetManager:
             logger.exception("Unexpected error during stream processing")
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
-            return r[Mapping[str, t.Container]].fail(f"Stream processing error: {e}")
+            return r[t.JsonMapping].fail(f"Stream processing error: {e}")
 
     def shutdown(self) -> p.Result[bool]:
         """Graceful shutdown with resource cleanup.
@@ -415,9 +414,9 @@ def demonstrate_production_setup() -> None:
                     "Health check status",
                     status=str(health_data.get("status", "unknown")),
                 )
-                checks_obj: t.Container = health_data.get("checks")
-                checks: Mapping[str, t.Container] = (
-                    cast("Mapping[str, t.Container]", checks_obj)
+                checks_obj: t.JsonValue = health_data.get("checks")
+                checks: t.JsonMapping = (
+                    cast("t.JsonMapping", checks_obj)
                     if isinstance(checks_obj, dict)
                     else {}
                 )

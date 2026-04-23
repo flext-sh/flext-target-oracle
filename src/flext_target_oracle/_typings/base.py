@@ -12,8 +12,8 @@ from flext_meltano import m, t as meltano_t
 class FlextTargetOracleTypesBase:
     """TargetOracle domain types namespace."""
 
-    FLAT_CONTAINER_MAP_ADAPTER: m.TypeAdapter[meltano_t.ContainerValueMapping] = (
-        m.TypeAdapter(meltano_t.ContainerValueMapping)
+    FLAT_CONTAINER_MAP_ADAPTER: m.TypeAdapter[meltano_t.JsonMapping] = m.TypeAdapter(
+        meltano_t.JsonMapping
     )
     STR_MAP_ADAPTER: m.TypeAdapter[meltano_t.StrMapping] = m.TypeAdapter(
         meltano_t.StrMapping
