@@ -6,6 +6,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from typing import Final
+
 from flext_tests import FlextTestsConstants
 
 from flext_target_oracle import FlextTargetOracleConstants
@@ -19,6 +21,16 @@ class TestsFlextTargetOracleConstants(FlextTestsConstants, FlextTargetOracleCons
 
         class Tests:
             """Internal tests declarations for test-only objects."""
+
+            class ModuleGovernance:
+                """Module-governance constants for target-oracle tests."""
+
+                PROJECT_ROOT_PARENT_DEPTH: Final[int] = 1
+                SRC_DIR: Final[str] = "src"
+                PACKAGE_DIR: Final[str] = "flext_target_oracle"
+                ALLOWED_MODULE_FUNCTIONS: Final[dict[str, frozenset[str]]] = {
+                    "_utilities/cli.py": frozenset({"main"}),
+                }
 
 
 c = TestsFlextTargetOracleConstants
