@@ -27,7 +27,16 @@ class TestSingerWorkflowE2E:
         mock_oracle_api.__enter__ = Mock(return_value=mock_oracle_api)
         mock_oracle_api.__exit__ = Mock(return_value=None)
         mock_oracle_api.get_tables.return_value = r[list[str]].ok([])
+        mock_oracle_api.fetch_tables.return_value = r[list[str]].ok([])
         mock_oracle_api.execute_sql.return_value = r[bool].ok(value=True)
+        mock_oracle_api.oracle_services.create_table_ddl.return_value = r[str].ok(
+            "CREATE TABLE orders (id NUMBER, amount NUMBER)",
+        )
+        mock_oracle_api.oracle_services.build_insert_statement.return_value = r[str].ok(
+            "INSERT INTO orders (id, amount) VALUES (:id, :amount)",
+        )
+        mock_oracle_api.execute_statement.return_value = r[int].ok(1)
+        mock_oracle_api.execute_many.return_value = r[int].ok(1)
         object.__setattr__(target.loader, "_oracle_api", mock_oracle_api)
         return target
 

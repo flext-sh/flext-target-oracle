@@ -223,7 +223,7 @@ make test-watch
 
 ### Unit Test Example
 
-```python
+```text
 @pytest.mark.unit
 class TestNewFeature:
     def test_feature_behavior(self, mock_oracle_api):
@@ -241,7 +241,7 @@ class TestNewFeature:
 
 ### Integration Test Example
 
-```python
+```text
 @pytest.mark.integration
 @pytest.mark.oracle
 def test_real_database_operation(oracle_loader, oracle_engine):

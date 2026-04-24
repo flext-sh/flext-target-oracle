@@ -18,6 +18,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from flext_core import FlextSettings
 from flext_db_oracle import (
     FlextDbOracleApi,
     FlextDbOracleSettings,
@@ -67,6 +68,7 @@ def isolate_target_oracle_env(
         return
     for key in [key for key in os.environ if key.startswith("FLEXT_TARGET_ORACLE_")]:
         monkeypatch.delenv(key, raising=False)
+    FlextSettings.reset_for_testing()
 
 
 @pytest.fixture(scope="session")

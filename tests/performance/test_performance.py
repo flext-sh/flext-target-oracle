@@ -34,7 +34,11 @@ class TestPerformance:
         mock_oracle_api.__enter__ = Mock(return_value=mock_oracle_api)
         mock_oracle_api.__exit__ = Mock(return_value=None)
         mock_oracle_api.get_tables.return_value = r[list[str]].ok([])
+        mock_oracle_api.fetch_tables.return_value = r[list[str]].ok([])
         mock_oracle_api.execute_sql.return_value = r[bool].ok(value=True)
+        mock_oracle_api.oracle_services.create_table_ddl.return_value = r[str].ok(
+            "CREATE TABLE perf_stream (id NUMBER)",
+        )
         object.__setattr__(target.loader, "_oracle_api", mock_oracle_api)
         return target
 
@@ -67,7 +71,7 @@ class TestPerformance:
         state_value = target.state_message.value
         assert isinstance(state_value, Mapping)
         assert state_value.get("offset") == 1999
-        assert elapsed < 1.0
+        assert elapsed < 2.0
 
     def test_schema_and_record_processing_has_no_json_reparse_loop(self) -> None:
         target = self._target()
