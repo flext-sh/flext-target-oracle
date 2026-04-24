@@ -87,10 +87,10 @@ def oracle_engine() -> Generator[FlextDbOracleApi]:
     """
     api = FlextDbOracleApi(
         FlextDbOracleSettings.model_validate({
-            "host": c.TargetOracle.Tests.Integration.ORACLE_HOST,
-            "port": c.TargetOracle.Tests.Integration.ORACLE_PORT,
-            "service_name": c.TargetOracle.Tests.Integration.ORACLE_SERVICE,
-            "username": c.TargetOracle.Tests.Integration.TEST_SCHEMA,
+            "host": c.TargetOracle.Tests.ORACLE_HOST,
+            "port": c.TargetOracle.Tests.ORACLE_PORT,
+            "service_name": c.TargetOracle.Tests.ORACLE_SERVICE,
+            "username": c.TargetOracle.Tests.TEST_SCHEMA,
             "password": "test_password",
         })
     )
