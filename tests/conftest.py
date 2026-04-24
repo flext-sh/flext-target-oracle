@@ -112,13 +112,13 @@ def clean_database(oracle_engine: FlextDbOracleApi) -> None:
     """Clean database before each test."""
     tables_result = oracle_engine.oracle_services.execute_query(
         'SELECT table_name AS "table_name" FROM all_tables WHERE owner = :schema',
-        m.ConfigMap(root={"schema": c.TargetOracle.Tests.Integration.TEST_SCHEMA}),
+        m.ConfigMap(root={"schema": c.TargetOracle.Tests.TEST_SCHEMA}),
     )
     assert tables_result.success, tables_result.error
     tables = [str(row.root["table_name"]) for row in tables_result.value]
     for table in tables:
         drop_result = oracle_engine.execute_statement(
-            f"DROP TABLE {c.TargetOracle.Tests.Integration.TEST_SCHEMA}.{table} CASCADE CONSTRAINTS"
+            f"DROP TABLE {c.TargetOracle.Tests.TEST_SCHEMA}.{table} CASCADE CONSTRAINTS"
         )
         assert drop_result.success, drop_result.error
 
@@ -127,12 +127,12 @@ def clean_database(oracle_engine: FlextDbOracleApi) -> None:
 def oracle_config() -> FlextTargetOracleSettings:
     """Create Oracle target configuration for tests."""
     return FlextTargetOracleSettings.model_validate({
-        "oracle_host": c.TargetOracle.Tests.Integration.ORACLE_HOST,
-        "oracle_port": c.TargetOracle.Tests.Integration.ORACLE_PORT,
-        "oracle_service_name": c.TargetOracle.Tests.Integration.ORACLE_SERVICE,
-        "oracle_user": c.TargetOracle.Tests.Integration.TEST_SCHEMA,
+        "oracle_host": c.TargetOracle.Tests.ORACLE_HOST,
+        "oracle_port": c.TargetOracle.Tests.ORACLE_PORT,
+        "oracle_service_name": c.TargetOracle.Tests.ORACLE_SERVICE,
+        "oracle_user": c.TargetOracle.Tests.TEST_SCHEMA,
         "oracle_password": "test_password",
-        "default_target_schema": c.TargetOracle.Tests.Integration.TEST_SCHEMA,
+        "default_target_schema": c.TargetOracle.Tests.TEST_SCHEMA,
         "batch_size": 1000,
         "use_bulk_operations": True,
         "parallel_degree": 1,
@@ -190,9 +190,9 @@ def oracle_target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle
 def sample_config() -> FlextTargetOracleSettings:
     """Sample configuration for unit testing (no Oracle connection required)."""
     return FlextTargetOracleSettings.model_validate({
-        "oracle_host": c.TargetOracle.Tests.Integration.ORACLE_HOST,
-        "oracle_port": c.TargetOracle.Tests.Integration.ORACLE_PORT,
-        "oracle_service_name": c.TargetOracle.Tests.Integration.ORACLE_SERVICE,
+        "oracle_host": c.TargetOracle.Tests.ORACLE_HOST,
+        "oracle_port": c.TargetOracle.Tests.ORACLE_PORT,
+        "oracle_service_name": c.TargetOracle.Tests.ORACLE_SERVICE,
         "oracle_user": "test_user",
         "oracle_password": "test_password",
         "default_target_schema": "TEST_SCHEMA",
@@ -465,12 +465,12 @@ def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
 def temp_config_file(tmp_path: Path) -> Path:
     """Create temporary configuration file."""
     config_data: t.JsonValue = {
-        "oracle_host": c.TargetOracle.Tests.Integration.ORACLE_HOST,
-        "oracle_port": c.TargetOracle.Tests.Integration.ORACLE_PORT,
-        "oracle_service_name": c.TargetOracle.Tests.Integration.ORACLE_SERVICE,
-        "oracle_user": c.TargetOracle.Tests.Integration.TEST_SCHEMA,
+        "oracle_host": c.TargetOracle.Tests.ORACLE_HOST,
+        "oracle_port": c.TargetOracle.Tests.ORACLE_PORT,
+        "oracle_service_name": c.TargetOracle.Tests.ORACLE_SERVICE,
+        "oracle_user": c.TargetOracle.Tests.TEST_SCHEMA,
         "oracle_password": "test_password",
-        "default_target_schema": c.TargetOracle.Tests.Integration.TEST_SCHEMA,
+        "default_target_schema": c.TargetOracle.Tests.TEST_SCHEMA,
         "batch_size": 1000,
         "use_bulk_operations": True,
     }
