@@ -30,22 +30,9 @@ from flext_target_oracle import (
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
 )
-from tests import m, r, t, u
+from tests import c, m, r, t, u
 
 logger = u.fetch_logger(__name__)
-ORACLE_CONTAINER_NAME = "flext-oracle-test"
-ORACLE_IMAGE = "gvenzl/oracle-xe:21-slim"
-ORACLE_HOST = "localhost"
-ORACLE_PORT = 1521
-ORACLE_USER = "system"
-ORACLE_PASSWORD = "Oracle123"
-ORACLE_SERVICE = "XE"
-TEST_SCHEMA = "FLEXT_TEST"
-DOCKER_COMPOSE_PATH = (
-    Path(__file__).parent.parent.parent
-    / "flext-db-oracle"
-    / "docker-compose.oracle.yml"
-)
 
 
 def pytest_configure(config: pytest.Config) -> None:
@@ -99,13 +86,13 @@ def oracle_engine() -> Generator[FlextDbOracleApi]:
     Skips tests if Oracle is not available.
     """
     api = FlextDbOracleApi(
-        FlextDbOracleSettings(
-            host=ORACLE_HOST,
-            port=ORACLE_PORT,
-            service_name=ORACLE_SERVICE,
-            username=TEST_SCHEMA,
-            password="test_password",
-        )
+        FlextDbOracleSettings.model_validate({
+            "host": c.TargetOracle.Tests.Integration.ORACLE_HOST,
+            "port": c.TargetOracle.Tests.Integration.ORACLE_PORT,
+            "service_name": c.TargetOracle.Tests.Integration.ORACLE_SERVICE,
+            "username": c.TargetOracle.Tests.Integration.TEST_SCHEMA,
+            "password": "test_password",
+        })
     )
     connect_result = api.connect()
     if connect_result.failure:
@@ -125,13 +112,13 @@ def clean_database(oracle_engine: FlextDbOracleApi) -> None:
     """Clean database before each test."""
     tables_result = oracle_engine.oracle_services.execute_query(
         'SELECT table_name AS "table_name" FROM all_tables WHERE owner = :schema',
-        m.ConfigMap(root={"schema": TEST_SCHEMA}),
+        m.ConfigMap(root={"schema": c.TargetOracle.Tests.Integration.TEST_SCHEMA}),
     )
     assert tables_result.success, tables_result.error
     tables = [str(row.root["table_name"]) for row in tables_result.value]
     for table in tables:
         drop_result = oracle_engine.execute_statement(
-            f"DROP TABLE {TEST_SCHEMA}.{table} CASCADE CONSTRAINTS"
+            f"DROP TABLE {c.TargetOracle.Tests.Integration.TEST_SCHEMA}.{table} CASCADE CONSTRAINTS"
         )
         assert drop_result.success, drop_result.error
 
@@ -140,12 +127,12 @@ def clean_database(oracle_engine: FlextDbOracleApi) -> None:
 def oracle_config() -> FlextTargetOracleSettings:
     """Create Oracle target configuration for tests."""
     return FlextTargetOracleSettings.model_validate({
-        "oracle_host": ORACLE_HOST,
-        "oracle_port": ORACLE_PORT,
-        "oracle_service_name": ORACLE_SERVICE,
-        "oracle_user": TEST_SCHEMA,
+        "oracle_host": c.TargetOracle.Tests.Integration.ORACLE_HOST,
+        "oracle_port": c.TargetOracle.Tests.Integration.ORACLE_PORT,
+        "oracle_service_name": c.TargetOracle.Tests.Integration.ORACLE_SERVICE,
+        "oracle_user": c.TargetOracle.Tests.Integration.TEST_SCHEMA,
         "oracle_password": "test_password",
-        "default_target_schema": TEST_SCHEMA,
+        "default_target_schema": c.TargetOracle.Tests.Integration.TEST_SCHEMA,
         "batch_size": 1000,
         "use_bulk_operations": True,
         "parallel_degree": 1,
@@ -155,17 +142,17 @@ def oracle_config() -> FlextTargetOracleSettings:
 @pytest.fixture
 def oracle_api(oracle_config: FlextTargetOracleSettings) -> MagicMock:
     """Create mocked FlextDbOracleApi instance for testing."""
-    db_config = FlextDbOracleSettings(
-        host=oracle_config.oracle_host,
-        port=oracle_config.oracle_port,
-        service_name=oracle_config.oracle_service_name,
-        username=oracle_config.oracle_user.get_secret_value()
+    db_config = FlextDbOracleSettings.model_validate({
+        "host": oracle_config.oracle_host,
+        "port": oracle_config.oracle_port,
+        "service_name": oracle_config.oracle_service_name,
+        "username": oracle_config.oracle_user.get_secret_value()
         if hasattr(oracle_config.oracle_user, "get_secret_value")
         else str(oracle_config.oracle_user),
-        password=oracle_config.oracle_password.get_secret_value()
+        "password": oracle_config.oracle_password.get_secret_value()
         if hasattr(oracle_config.oracle_password, "get_secret_value")
         else str(oracle_config.oracle_password),
-    )
+    })
     mock_api = MagicMock(spec=FlextDbOracleApi)
     mock_api.settings = db_config
     mock_api.connect.return_value = r[str].ok("Connected successfully")
@@ -203,9 +190,9 @@ def oracle_target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle
 def sample_config() -> FlextTargetOracleSettings:
     """Sample configuration for unit testing (no Oracle connection required)."""
     return FlextTargetOracleSettings.model_validate({
-        "oracle_host": "localhost",
-        "oracle_port": 1521,
-        "oracle_service_name": "XE",
+        "oracle_host": c.TargetOracle.Tests.Integration.ORACLE_HOST,
+        "oracle_port": c.TargetOracle.Tests.Integration.ORACLE_PORT,
+        "oracle_service_name": c.TargetOracle.Tests.Integration.ORACLE_SERVICE,
         "oracle_user": "test_user",
         "oracle_password": "test_password",
         "default_target_schema": "TEST_SCHEMA",
@@ -478,12 +465,12 @@ def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
 def temp_config_file(tmp_path: Path) -> Path:
     """Create temporary configuration file."""
     config_data: t.JsonValue = {
-        "oracle_host": ORACLE_HOST,
-        "oracle_port": ORACLE_PORT,
-        "oracle_service_name": ORACLE_SERVICE,
-        "oracle_user": TEST_SCHEMA,
+        "oracle_host": c.TargetOracle.Tests.Integration.ORACLE_HOST,
+        "oracle_port": c.TargetOracle.Tests.Integration.ORACLE_PORT,
+        "oracle_service_name": c.TargetOracle.Tests.Integration.ORACLE_SERVICE,
+        "oracle_user": c.TargetOracle.Tests.Integration.TEST_SCHEMA,
         "oracle_password": "test_password",
-        "default_target_schema": TEST_SCHEMA,
+        "default_target_schema": c.TargetOracle.Tests.Integration.TEST_SCHEMA,
         "batch_size": 1000,
         "use_bulk_operations": True,
     }

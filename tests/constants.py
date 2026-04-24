@@ -22,6 +22,14 @@ class TestsFlextTargetOracleConstants(FlextTestsConstants, FlextTargetOracleCons
         class Tests:
             """Internal tests declarations for test-only objects."""
 
+            class Integration:
+                """Integration constants for target-oracle tests."""
+
+                ORACLE_HOST: Final[str] = "localhost"
+                ORACLE_PORT: Final[int] = 1521
+                ORACLE_SERVICE: Final[str] = "XE"
+                TEST_SCHEMA: Final[str] = "FLEXT_TEST"
+
             class ModuleGovernance:
                 """Module-governance constants for target-oracle tests."""
 
