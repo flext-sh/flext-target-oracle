@@ -9,7 +9,6 @@ _LAZY_IMPORTS = build_lazy_import_map(
     {
         ".test_config": ("TestOracleSettings",),
         ".test_loader": ("test_loader",),
-        ".test_module_governance": ("test_module_governance",),
         ".test_target": ("TestOracleTarget",),
     },
 )
