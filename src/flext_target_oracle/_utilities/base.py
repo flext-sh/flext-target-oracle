@@ -36,7 +36,7 @@ class FlextTargetOracleUtilitiesBase:
                 f"Configuration file not found: {config_file}",
             )
         try:
-            content = config_path.read_text(encoding="utf-8")
+            content = config_path.read_text(encoding=c.DEFAULT_ENCODING)
             settings = settings_cls.model_validate_json(content)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             return result_type.fail(f"Invalid configuration file: {exc}")

@@ -358,7 +358,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """Normalize one record into the owner-managed insert payload shape."""
         return {
             "DATA": t.TargetOracle.FLAT_CONTAINER_MAP_ADAPTER.dump_json(record).decode(
-                "utf-8",
+                c.DEFAULT_ENCODING,
             ),
             "_SDC_EXTRACTED_AT": str(record.get("_sdc_extracted_at", loaded_at)),
             "_SDC_LOADED_AT": loaded_at,

@@ -8,6 +8,7 @@ from flext_meltano import m
 
 from flext_target_oracle import (
     FlextTargetOracleConstants,
+    c,
     h,
     r,
     t,
@@ -44,7 +45,9 @@ class FlextTargetOracleModelsCommands:
             ):
                 return r[str].ok("flext-target-oracle")
             return r[str].ok(
-                t.TargetOracle.STR_MAP_ADAPTER.dump_json(payload).decode("utf-8"),
+                t.TargetOracle.STR_MAP_ADAPTER.dump_json(payload).decode(
+                    c.DEFAULT_ENCODING
+                ),
             )
 
     class OracleTargetLoadCommand(m.Command):
