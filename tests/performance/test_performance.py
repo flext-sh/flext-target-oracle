@@ -53,12 +53,12 @@ class TestPerformance:
     def test_message_processing_scales_linearly_for_state_updates(self) -> None:
         target = self._target()
         messages: Sequence[
-            m.TargetOracle.SingerSchemaMessage
-            | m.TargetOracle.SingerRecordMessage
-            | m.TargetOracle.SingerStateMessage
-            | m.TargetOracle.SingerActivateVersionMessage
+            m.Meltano.SingerSchemaMessage
+            | m.Meltano.SingerRecordMessage
+            | m.Meltano.SingerStateMessage
+            | m.Meltano.SingerActivateVersionMessage
         ] = [
-            m.TargetOracle.SingerStateMessage.model_validate({
+            m.Meltano.SingerStateMessage.model_validate({
                 "type": "STATE",
                 "value": {"offset": i},
             })
@@ -86,8 +86,8 @@ class TestPerformance:
         }
         record = {"type": "RECORD", "stream": "perf_stream", "record": {"id": 1}}
         assert target.process_singer_message(
-            m.TargetOracle.SingerSchemaMessage.model_validate(schema)
+            m.Meltano.SingerSchemaMessage.model_validate(schema)
         ).success
         assert target.process_singer_message(
-            m.TargetOracle.SingerRecordMessage.model_validate(record)
+            m.Meltano.SingerRecordMessage.model_validate(record)
         ).success

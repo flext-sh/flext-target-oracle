@@ -6,7 +6,7 @@ from collections.abc import (
     MutableMapping,
     Sequence,
 )
-from typing import ClassVar
+from typing import ClassVar, assert_never
 
 from flext_meltano import u
 
@@ -29,42 +29,45 @@ class FlextTargetOracle:
         """Create target with validated settings and loader dependencies."""
         self.settings = settings
         self.loader = FlextTargetOracleLoader(settings)
-        self.schemas: MutableMapping[str, m.TargetOracle.SingerSchemaMessage] = {}
-        self.state_message: m.TargetOracle.SingerStateMessage = (
-            m.TargetOracle.SingerStateMessage(type="STATE", value={})
+        self.schemas: MutableMapping[str, m.Meltano.SingerSchemaMessage] = {}
+        self.state_message: m.Meltano.SingerStateMessage = m.Meltano.SingerStateMessage(
+            type="STATE", value={}
         )
 
-    def discover_catalog(self) -> p.Result[m.TargetOracle.Meltano.SingerCatalog]:
+    def discover_catalog(self) -> p.Result[m.Meltano.SingerCatalog]:
         """Return Singer-style catalog for known schemas."""
-        catalog_entries = [
-            m.TargetOracle.Meltano.SingerCatalogEntry.model_validate({
-                "tap_stream_id": stream_name,
-                "stream": stream_name,
-                "schema": schema_message.schema_definition,
-                "metadata": [
-                    m.TargetOracle.Meltano.SingerCatalogMetadata(
-                        breadcrumb=[],
-                        metadata={
-                            "inclusion": "available",
-                            "table-name": self.settings.get_table_name(stream_name),
-                            "schema-name": self.settings.default_target_schema,
-                        },
-                    ),
-                ],
-                "key_properties": [],
-                "replication_key": None,
-                "replication_method": None,
-                "is_view": None,
-                "table_name": None,
-                "database_name": None,
-                "row_count": None,
-            })
-            for stream_name, schema_message in self.schemas.items()
-        ]
-        return r[m.TargetOracle.Meltano.SingerCatalog].ok(
-            m.TargetOracle.Meltano.SingerCatalog(
-                type="CATALOG", streams=catalog_entries
-            ),
+        catalog_entries: list[m.Meltano.SingerCatalogEntry] = []
+        for stream_name, schema_message in self.schemas.items():
+            entry_result = u.Meltano.build_catalog_entry(
+                stream_name=stream_name,
+                schema=schema_message.schema_definition,
+                key_properties=schema_message.key_properties,
+            )
+            if entry_result.failure or entry_result.value is None:
+                return r[m.Meltano.SingerCatalog].fail(
+                    entry_result.error
+                    or f"Failed to build Singer catalog entry for {stream_name}",
+                )
+            catalog_entries.append(
+                entry_result.value.model_copy(
+                    update={
+                        "metadata": [
+                            m.Meltano.SingerCatalogMetadata(
+                                breadcrumb=[],
+                                metadata={
+                                    "inclusion": "available",
+                                    "table-name": self.settings.get_table_name(
+                                        stream_name
+                                    ),
+                                    "schema-name": self.settings.default_target_schema,
+                                },
+                            )
+                        ]
+                    }
+                )
+            )
+        return r[m.Meltano.SingerCatalog].ok(
+            m.Meltano.SingerCatalog(type="CATALOG", streams=catalog_entries),
         )
 
     def execute(
@@ -104,30 +107,30 @@ class FlextTargetOracle:
 
     def process_singer_message(
         self,
-        message: m.TargetOracle.SingerSchemaMessage
-        | m.TargetOracle.SingerRecordMessage
-        | m.TargetOracle.SingerStateMessage
-        | m.TargetOracle.SingerActivateVersionMessage,
+        message: m.Meltano.SingerSchemaMessage
+        | m.Meltano.SingerRecordMessage
+        | m.Meltano.SingerStateMessage
+        | m.Meltano.SingerActivateVersionMessage,
     ) -> p.Result[bool]:
         """Process a single Singer message."""
         match message:
-            case m.TargetOracle.SingerSchemaMessage() as schema_message:
+            case m.Meltano.SingerSchemaMessage() as schema_message:
                 return self._handle_schema(schema_message)
-            case m.TargetOracle.SingerRecordMessage() as record_message:
+            case m.Meltano.SingerRecordMessage() as record_message:
                 return self._handle_record(record_message)
-            case m.TargetOracle.SingerStateMessage() as state_message:
+            case m.Meltano.SingerStateMessage() as state_message:
                 return self._handle_state(state_message)
-            case m.TargetOracle.SingerActivateVersionMessage() as activate_message:
+            case m.Meltano.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
-        return r[bool].fail("Unsupported Singer message type")
+        assert_never(message)
 
     def process_singer_messages(
         self,
         messages: Sequence[
-            m.TargetOracle.SingerSchemaMessage
-            | m.TargetOracle.SingerRecordMessage
-            | m.TargetOracle.SingerStateMessage
-            | m.TargetOracle.SingerActivateVersionMessage
+            m.Meltano.SingerSchemaMessage
+            | m.Meltano.SingerRecordMessage
+            | m.Meltano.SingerStateMessage
+            | m.Meltano.SingerActivateVersionMessage
         ],
     ) -> p.Result[m.TargetOracle.ProcessingSummary]:
         """Process SCHEMA/RECORD/STATE Singer messages."""
@@ -163,7 +166,7 @@ class FlextTargetOracle:
     def write_record(self, record_data: str) -> p.Result[bool]:
         """Write one Singer record payload to Oracle."""
         try:
-            payload = m.TargetOracle.SingerRecordMessage.model_validate_json(
+            payload = m.Meltano.SingerRecordMessage.model_validate_json(
                 record_data,
             )
             return self.loader.load_record(payload.stream, payload.record)
@@ -172,7 +175,7 @@ class FlextTargetOracle:
 
     def _handle_activate_version(
         self,
-        activate_message: m.TargetOracle.SingerActivateVersionMessage,
+        activate_message: m.Meltano.SingerActivateVersionMessage,
     ) -> p.Result[bool]:
         self.logger.info(
             "ACTIVATE_VERSION received for Oracle target",
@@ -183,7 +186,7 @@ class FlextTargetOracle:
 
     def _handle_record(
         self,
-        record_message: m.TargetOracle.SingerRecordMessage,
+        record_message: m.Meltano.SingerRecordMessage,
     ) -> p.Result[bool]:
         load_result = self.loader.load_record(
             record_message.stream,
@@ -195,7 +198,7 @@ class FlextTargetOracle:
 
     def _handle_schema(
         self,
-        schema_message: m.TargetOracle.SingerSchemaMessage,
+        schema_message: m.Meltano.SingerSchemaMessage,
     ) -> p.Result[bool]:
         stream_name = schema_message.stream
         schema = schema_message.schema_definition
@@ -211,7 +214,7 @@ class FlextTargetOracle:
 
     def _handle_state(
         self,
-        state_message: m.TargetOracle.SingerStateMessage,
+        state_message: m.Meltano.SingerStateMessage,
     ) -> p.Result[bool]:
         self.state_message = state_message
         self.logger.debug("State updated for Oracle target")

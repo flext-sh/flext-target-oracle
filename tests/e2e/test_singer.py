@@ -62,13 +62,13 @@ class TestSingerWorkflowE2E:
         state = {"type": "STATE", "value": {"bookmarks": {"orders": {"version": 1}}}}
         assert target.execute().success
         assert target.process_singer_message(
-            m.TargetOracle.SingerSchemaMessage.model_validate(schema)
+            m.Meltano.SingerSchemaMessage.model_validate(schema)
         ).success
         assert target.process_singer_message(
-            m.TargetOracle.SingerRecordMessage.model_validate(record)
+            m.Meltano.SingerRecordMessage.model_validate(record)
         ).success
         assert target.process_singer_message(
-            m.TargetOracle.SingerStateMessage.model_validate(state)
+            m.Meltano.SingerStateMessage.model_validate(state)
         ).success
         finalize_result = target.finalize()
         assert finalize_result.success

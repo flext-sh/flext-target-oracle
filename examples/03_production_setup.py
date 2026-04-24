@@ -40,10 +40,10 @@ logging.basicConfig(
 )
 logger = u.fetch_logger(__name__)
 type SingerMessage = (
-    m.TargetOracle.SingerSchemaMessage
-    | m.TargetOracle.SingerRecordMessage
-    | m.TargetOracle.SingerStateMessage
-    | m.TargetOracle.SingerActivateVersionMessage
+    m.Meltano.SingerSchemaMessage
+    | m.Meltano.SingerRecordMessage
+    | m.Meltano.SingerStateMessage
+    | m.Meltano.SingerActivateVersionMessage
 )
 
 
@@ -294,11 +294,11 @@ class ProductionTargetManager:
                     logger.info("Shutdown requested, stopping message processing")
                     break
                 message_type = "UNKNOWN"
-                if isinstance(message, m.TargetOracle.SingerSchemaMessage):
+                if isinstance(message, m.Meltano.SingerSchemaMessage):
                     message_type = "SCHEMA"
-                elif isinstance(message, m.TargetOracle.SingerRecordMessage):
+                elif isinstance(message, m.Meltano.SingerRecordMessage):
                     message_type = "RECORD"
-                elif isinstance(message, m.TargetOracle.SingerStateMessage):
+                elif isinstance(message, m.Meltano.SingerStateMessage):
                     message_type = "STATE"
                 logger.debug(
                     "Processing message %d/%d: %s",
@@ -486,7 +486,7 @@ def create_production_sample_stream() -> Sequence[SingerMessage]:
 
     """
     messages: t.MutableSequenceOf[SingerMessage] = []
-    schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
+    schema_message = m.Meltano.SingerSchemaMessage.model_validate({
         "type": "SCHEMA",
         "stream": "customer_orders",
         "schema": {
@@ -511,7 +511,7 @@ def create_production_sample_stream() -> Sequence[SingerMessage]:
     messages.append(schema_message)
     base_date = datetime.datetime(2025, 1, 1, tzinfo=UTC)
     for i in range(1, 101):
-        record_message = m.TargetOracle.SingerRecordMessage.model_validate({
+        record_message = m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "customer_orders",
             "record": {
@@ -536,7 +536,7 @@ def create_production_sample_stream() -> Sequence[SingerMessage]:
             },
         })
         messages.append(record_message)
-    state_message = m.TargetOracle.SingerStateMessage.model_validate({
+    state_message = m.Meltano.SingerStateMessage.model_validate({
         "type": "STATE",
         "value": {
             "bookmarks": {

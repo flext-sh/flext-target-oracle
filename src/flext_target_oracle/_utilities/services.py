@@ -56,7 +56,7 @@ class FlextTargetOracleSchemaService:
     def ensure_table_exists(
         self,
         stream: m.TargetOracle.SingerStreamModel,
-        schema_message: m.TargetOracle.Meltano.SingerSchemaMessage,
+        schema_message: m.Meltano.SingerSchemaMessage,
     ) -> p.Result[None]:
         """Validate table identity before external DDL orchestration."""
         _ = schema_message
@@ -81,14 +81,14 @@ class FlextTargetOracleBatchService:
         """Initialize batch storage and required dependencies."""
         self.settings = settings
         self.oracle_api = oracle_api
-        self._batches: defaultdict[
-            str, list[m.TargetOracle.Meltano.SingerRecordMessage]
-        ] = defaultdict(list)
+        self._batches: defaultdict[str, list[m.Meltano.SingerRecordMessage]] = (
+            defaultdict(list)
+        )
 
     def add_record(
         self,
         stream_name: str,
-        record_message: m.TargetOracle.Meltano.SingerRecordMessage,
+        record_message: m.Meltano.SingerRecordMessage,
     ) -> p.Result[None]:
         """Append a record to a stream buffer."""
         self._batches[stream_name].append(record_message)
@@ -112,7 +112,7 @@ class FlextTargetOracleBatchService:
 
     def flush_batch(self, stream_name: str) -> p.Result[None]:
         """Clear buffered records for a specific stream."""
-        self._batches[stream_name] = list[m.TargetOracle.Meltano.SingerRecordMessage]()
+        self._batches[stream_name] = list[m.Meltano.SingerRecordMessage]()
         return r[None].ok(None)
 
 
@@ -129,9 +129,9 @@ class FlextTargetOracleRecordService:
 
     def transform_record(
         self,
-        record_message: m.TargetOracle.Meltano.SingerRecordMessage,
+        record_message: m.Meltano.SingerRecordMessage,
         stream: m.TargetOracle.SingerStreamModel,
-    ) -> p.Result[m.TargetOracle.Meltano.SingerRecordMessage]:
+    ) -> p.Result[m.Meltano.SingerRecordMessage]:
         """Apply stream-level mappings and ignored-column filtering."""
         transformed: t.MutableJsonMapping = {}
         for key, value in record_message.record.items():
@@ -139,8 +139,8 @@ class FlextTargetOracleRecordService:
                 continue
             mapped_key = stream.column_mappings.get(key) or key
             transformed[mapped_key] = value
-        return r[m.TargetOracle.Meltano.SingerRecordMessage].ok(
-            m.TargetOracle.Meltano.SingerRecordMessage.model_validate({
+        return r[m.Meltano.SingerRecordMessage].ok(
+            m.Meltano.SingerRecordMessage.model_validate({
                 "type": "RECORD",
                 "stream": record_message.stream,
                 "record": transformed,
@@ -151,8 +151,8 @@ class FlextTargetOracleRecordService:
 
     def validate_record(
         self,
-        record_message: m.TargetOracle.Meltano.SingerRecordMessage,
-        schema_message: m.TargetOracle.Meltano.SingerSchemaMessage,
+        record_message: m.Meltano.SingerRecordMessage,
+        schema_message: m.Meltano.SingerSchemaMessage,
     ) -> p.Result[None]:
         """Validate record payload against current schema contract."""
         _ = record_message

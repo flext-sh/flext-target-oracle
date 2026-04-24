@@ -63,7 +63,7 @@ def test_ensure_table_exists_returns_result(
         },
         "key_properties": ["id"],
     }
-    validated = m.TargetOracle.SingerSchemaMessage.model_validate(schema_message)
+    validated = m.Meltano.SingerSchemaMessage.model_validate(schema_message)
     result = loader.ensure_table_exists(
         "users", validated.schema_definition, validated.key_properties
     )

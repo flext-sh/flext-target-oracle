@@ -82,7 +82,7 @@ class TestOracleTarget:
     def test_discover_catalog_uses_registered_schemas(
         self, target: FlextTargetOracle
     ) -> None:
-        schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
+        schema_message = m.Meltano.SingerSchemaMessage.model_validate({
             "type": "SCHEMA",
             "stream": "users",
             "schema": {
@@ -97,7 +97,7 @@ class TestOracleTarget:
         assert catalog_result.value.streams[0].stream == "users"
 
     def test_process_record_and_state_messages(self, target: FlextTargetOracle) -> None:
-        schema_message = m.TargetOracle.SingerSchemaMessage.model_validate({
+        schema_message = m.Meltano.SingerSchemaMessage.model_validate({
             "type": "SCHEMA",
             "stream": "users",
             "schema": {
@@ -105,12 +105,12 @@ class TestOracleTarget:
                 "properties": json.dumps({"id": {"type": "integer"}}),
             },
         })
-        record_message = m.TargetOracle.SingerRecordMessage.model_validate({
+        record_message = m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {"id": 1},
         })
-        state_message = m.TargetOracle.SingerStateMessage.model_validate({
+        state_message = m.Meltano.SingerStateMessage.model_validate({
             "type": "STATE",
             "value": {"bookmarks": {"users": 1}},
         })
@@ -127,12 +127,12 @@ class TestOracleTarget:
         self, target: FlextTargetOracle
     ) -> None:
         messages: Sequence[
-            m.TargetOracle.SingerSchemaMessage
-            | m.TargetOracle.SingerRecordMessage
-            | m.TargetOracle.SingerStateMessage
-            | m.TargetOracle.SingerActivateVersionMessage
+            m.Meltano.SingerSchemaMessage
+            | m.Meltano.SingerRecordMessage
+            | m.Meltano.SingerStateMessage
+            | m.Meltano.SingerActivateVersionMessage
         ] = [
-            m.TargetOracle.SingerSchemaMessage.model_validate({
+            m.Meltano.SingerSchemaMessage.model_validate({
                 "type": "SCHEMA",
                 "stream": "users",
                 "schema": {
@@ -140,12 +140,12 @@ class TestOracleTarget:
                     "properties": json.dumps({"id": {"type": "integer"}}),
                 },
             }),
-            m.TargetOracle.SingerRecordMessage.model_validate({
+            m.Meltano.SingerRecordMessage.model_validate({
                 "type": "RECORD",
                 "stream": "users",
                 "record": {"id": 1},
             }),
-            m.TargetOracle.SingerStateMessage.model_validate({
+            m.Meltano.SingerStateMessage.model_validate({
                 "type": "STATE",
                 "value": {"offset": 1},
             }),

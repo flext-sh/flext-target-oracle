@@ -64,14 +64,14 @@ def create_configuration() -> FlextTargetOracleSettings:
     return settings
 
 
-def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
+def create_sample_schema_message() -> m.Meltano.SingerSchemaMessage:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
       t.JsonMapping: Singer SCHEMA message for users table
 
     """
-    return m.TargetOracle.SingerSchemaMessage.model_validate({
+    return m.Meltano.SingerSchemaMessage.model_validate({
         "type": "SCHEMA",
         "stream": "users",
         "schema": {
@@ -89,7 +89,7 @@ def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
     })
 
 
-def create_sample_record_messages() -> Sequence[m.TargetOracle.SingerRecordMessage]:
+def create_sample_record_messages() -> Sequence[m.Meltano.SingerRecordMessage]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
@@ -97,7 +97,7 @@ def create_sample_record_messages() -> Sequence[m.TargetOracle.SingerRecordMessa
 
     """
     return [
-        m.TargetOracle.SingerRecordMessage.model_validate({
+        m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -108,7 +108,7 @@ def create_sample_record_messages() -> Sequence[m.TargetOracle.SingerRecordMessa
                 "active": True,
             },
         }),
-        m.TargetOracle.SingerRecordMessage.model_validate({
+        m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -119,7 +119,7 @@ def create_sample_record_messages() -> Sequence[m.TargetOracle.SingerRecordMessa
                 "active": True,
             },
         }),
-        m.TargetOracle.SingerRecordMessage.model_validate({
+        m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -133,14 +133,14 @@ def create_sample_record_messages() -> Sequence[m.TargetOracle.SingerRecordMessa
     ]
 
 
-def create_sample_state_message() -> m.TargetOracle.SingerStateMessage:
+def create_sample_state_message() -> m.Meltano.SingerStateMessage:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
       t.JsonMapping: Singer STATE message with bookmark information
 
     """
-    return m.TargetOracle.SingerStateMessage.model_validate({
+    return m.Meltano.SingerStateMessage.model_validate({
         "type": "STATE",
         "value": {
             "bookmarks": {

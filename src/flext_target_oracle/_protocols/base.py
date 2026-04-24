@@ -40,7 +40,7 @@ class FlextTargetOracleProtocolsBase:
 
         def process_record(
             self,
-            record: m.TargetOracle.Meltano.SingerRecordMessage,
+            record: m.Meltano.SingerRecordMessage,
         ) -> p.Result[bool]:
             """Process a Singer record for Oracle target."""
             ...
@@ -63,7 +63,7 @@ class FlextTargetOracleProtocolsBase:
         def create_table_from_schema(
             self,
             table_name: str,
-            schema_message: m.TargetOracle.Meltano.SingerSchemaMessage,
+            schema_message: m.Meltano.SingerSchemaMessage,
         ) -> p.Result[bool]:
             """Create Oracle table from schema."""
             ...
@@ -74,7 +74,7 @@ class FlextTargetOracleProtocolsBase:
 
         def execute_batch_target(
             self,
-            operations: Sequence[m.TargetOracle.Meltano.SingerRecordMessage],
+            operations: Sequence[m.Meltano.SingerRecordMessage],
         ) -> p.Result[Sequence[bool]]:
             """Execute batch of Oracle operations."""
             ...
@@ -85,8 +85,8 @@ class FlextTargetOracleProtocolsBase:
 
         def transform_record_target(
             self,
-            record: m.TargetOracle.Meltano.SingerRecordMessage,
-        ) -> p.Result[m.TargetOracle.Meltano.SingerRecordMessage]:
+            record: m.Meltano.SingerRecordMessage,
+        ) -> p.Result[m.Meltano.SingerRecordMessage]:
             """Transform Singer record for Oracle."""
             ...
 
@@ -96,7 +96,7 @@ class FlextTargetOracleProtocolsBase:
 
         def process_message_target(
             self,
-            message: m.TargetOracle.Meltano.SingerRecordMessage,
+            message: m.Meltano.SingerRecordMessage,
         ) -> p.Result[bool]:
             """Process Singer message."""
             ...
@@ -156,7 +156,7 @@ class FlextTargetOracleProtocolsBase:
         def ensure_table_exists(
             self,
             stream: m.TargetOracle.SingerStreamModel,
-            schema_message: m.TargetOracle.Meltano.SingerSchemaMessage,
+            schema_message: m.Meltano.SingerSchemaMessage,
         ) -> p.Result[None]:
             """Ensure destination table exists for a stream."""
             ...
@@ -168,7 +168,7 @@ class FlextTargetOracleProtocolsBase:
         def add_record(
             self,
             stream_name: str,
-            record_message: m.TargetOracle.Meltano.SingerRecordMessage,
+            record_message: m.Meltano.SingerRecordMessage,
         ) -> p.Result[None]:
             """Queue one record for batch processing."""
             ...
@@ -183,9 +183,9 @@ class FlextTargetOracleProtocolsBase:
 
         def transform_record(
             self,
-            record_message: m.TargetOracle.Meltano.SingerRecordMessage,
+            record_message: m.Meltano.SingerRecordMessage,
             stream: m.TargetOracle.SingerStreamModel,
-        ) -> p.Result[m.TargetOracle.Meltano.SingerRecordMessage]:
+        ) -> p.Result[m.Meltano.SingerRecordMessage]:
             """Transform one Singer record into Oracle-ready payload."""
             ...
 

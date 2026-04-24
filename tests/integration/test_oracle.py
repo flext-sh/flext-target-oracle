@@ -30,7 +30,7 @@ from tests import c, m, t
 def _schema_parts(
     message: t.JsonValue,
 ) -> t.Pair[t.JsonMapping, Sequence[str]]:
-    schema_message = m.TargetOracle.SingerSchemaMessage.model_validate(message)
+    schema_message = m.Meltano.SingerSchemaMessage.model_validate(message)
     return (schema_message.schema_definition, schema_message.key_properties)
 
 
