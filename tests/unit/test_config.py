@@ -6,7 +6,7 @@ from flext_target_oracle import FlextTargetOracleSettings
 from tests import c
 
 
-class TestOracleSettings:
+class TestsFlextTargetOracleConfig:
     """Validate canonical Oracle settings behavior."""
 
     def test_defaults_and_core_fields(self) -> None:

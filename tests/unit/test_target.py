@@ -62,8 +62,7 @@ def target(mock_oracle_api: Mock) -> FlextTargetOracle:
     return client
 
 
-class TestOracleTarget:
-    """Behavioral tests for current public API."""
+class TestsFlextTargetOracleTarget:
 
     def test_initialize_and_connection(self, target: FlextTargetOracle) -> None:
         assert target.initialize().success
