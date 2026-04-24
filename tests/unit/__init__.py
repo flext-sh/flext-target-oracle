@@ -7,9 +7,9 @@ from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 _LAZY_IMPORTS = build_lazy_import_map(
     {
-        ".test_config": ("TestOracleSettings",),
+        ".test_config": ("TestsFlextTargetOracleConfig",),
         ".test_loader": ("test_loader",),
-        ".test_target": ("TestOracleTarget",),
+        ".test_target": ("TestsFlextTargetOracleTarget",),
     },
 )
 
