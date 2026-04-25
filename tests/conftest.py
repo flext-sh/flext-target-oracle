@@ -15,7 +15,7 @@ from collections.abc import (
 )
 from contextlib import contextmanager
 from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock
 
 import pytest
 from flext_core import FlextSettings
@@ -30,7 +30,7 @@ from flext_target_oracle import (
     FlextTargetOracleLoader,
     FlextTargetOracleSettings,
 )
-from tests import c, m, r, t, u
+from tests import c, m, t, u
 
 logger = u.fetch_logger(__name__)
 
@@ -140,47 +140,6 @@ def oracle_config() -> FlextTargetOracleSettings:
 
 
 @pytest.fixture
-def oracle_api(oracle_config: FlextTargetOracleSettings) -> MagicMock:
-    """Create mocked FlextDbOracleApi instance for testing."""
-    db_config = FlextDbOracleSettings.model_validate({
-        "host": oracle_config.oracle_host,
-        "port": oracle_config.oracle_port,
-        "service_name": oracle_config.oracle_service_name,
-        "username": oracle_config.oracle_user.get_secret_value()
-        if hasattr(oracle_config.oracle_user, "get_secret_value")
-        else str(oracle_config.oracle_user),
-        "password": oracle_config.oracle_password.get_secret_value()
-        if hasattr(oracle_config.oracle_password, "get_secret_value")
-        else str(oracle_config.oracle_password),
-    })
-    mock_api = MagicMock(spec=FlextDbOracleApi)
-    mock_api.settings = db_config
-    mock_api.connect.return_value = r[str].ok("Connected successfully")
-    mock_api.disconnect.return_value = r[str].ok("Disconnected successfully")
-    mock_api.test_connection.return_value = r[bool].ok(value=True)
-    mock_api.is_connected = True
-    return mock_api
-
-
-@pytest.fixture
-def oracle_loader(
-    oracle_config: FlextTargetOracleSettings,
-) -> Generator[FlextTargetOracleLoader]:
-    """Create FlextTargetOracleLoader instance with mocked connection."""
-    with patch(
-        "flext_target_oracle._utilities.loader.FlextDbOracleApi",
-    ) as mock_api_class:
-        mock_api = MagicMock()
-        mock_api_class.return_value = mock_api
-        mock_api.connect.return_value = r[str].ok("Connected successfully")
-        mock_api.disconnect.return_value = r[str].ok("Disconnected successfully")
-        mock_api.is_connected = True
-        loader = FlextTargetOracleLoader(oracle_config)
-        r[str].ok("Mocked connection successful")
-        yield loader
-
-
-@pytest.fixture
 def oracle_target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle:
     """Create FlextTargetOracle instance."""
     return FlextTargetOracle(settings=oracle_config)
@@ -265,17 +224,6 @@ def mock_oracle_api() -> Mock:
     )
     mock_api.connection = MagicMock()
     return mock_api
-
-
-@pytest.fixture
-def mock_loader() -> Mock:
-    """Create mocked FlextTargetOracleLoader for unit tests."""
-    mock = Mock(spec=FlextTargetOracleLoader)
-    mock.connect.return_value = MagicMock(success=True, value=None)
-    mock.disconnect.return_value = MagicMock(success=True, value=None)
-    mock.ensure_table_exists.return_value = MagicMock(success=True, value=None)
-    mock.insert_records.return_value = MagicMock(success=True, value=None)
-    return mock
 
 
 @pytest.fixture
