@@ -1,657 +1,339 @@
 # ============================================================================
-# FLEXT WORKSPACE STANDARD - COMPREHENSIVE .gitignore
-# Python 3.13 | Go | Node.js | Docker | Singer/Meltano
+# AGGRESSIVE WHITELIST - Block everything by default, explicitly allow needed files
 # ============================================================================
 
+
+# Block everything at root level
+/*
+/*/
+
+
 # ============================================================================
-# PYTHON BUILD AND RUNTIME ARTIFACTS
+# ALLOWED: Core Directories
+# ============================================================================
+!src/
+!tests/
+!docs/
+!examples/
+!ansible/
+!docker/
+!dbt/
+!.github/
+!.vscode/
+
+# ============================================================================
+# ALLOWED: Root-Level Configuration Files
+# ============================================================================
+!pyproject.toml
+!poetry.lock
+!Makefile
+!README.md
+!AGENTS.md
+!LICENSE
+!.python-version
+!.tool-versions
+!.gitignore
+!.gitattributes
+!.pre-commit-settings.yaml
+
+# Environment templates (NOT .env - keep secrets out!)
+!.env.example
+!.env.test
+!.env.template
+!.env.*.example
+
+# Docker files
+!Dockerfile
+!Dockerfile.*
+!docker-compose.yml
+!docker-compose.*.yml
+!.dockerignore
+
+# ============================================================================
+# ALLOWED: Contents Inside Whitelisted Directories
+# ============================================================================
+!src/**
+!tests/**
+!docs/**
+!examples/**
+!ansible/**
+!docker/**
+!dbt/**
+!.github/**
+!.vscode/**
+
+
+# ============================================================================
+# SECURITY: Explicit Blocks (NEVER commit these)
+# ============================================================================
+.env
+.internal.invalid
+.env.production
+.env.development
+**/.env
+*.key
+*.pem
+*.p12
+*.pfx
+credentials.json
+secrets.yaml
+secrets.yml
+
+
+# ============================================================================
+# PROJECT-SPECIFIC RULES: flext-dbt-ldif
 # ============================================================================
 
-# Python cache and compiled files
-__pycache__/
+target/
+dbt_packages/
+logs/
+dbt.log
+profiles.yml.bak
+**/.user.yml
+profiles/profiles.yml.backup
 *.py[cod]
 *$py.class
-*.pyc
-*.pyo
-*.pyd
 *.so
-
-# Distribution / packaging
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
 .installed.cfg
-*.egg
 MANIFEST
-pip-wheel-metadata/
-*.dist-info/
-
-# PyInstaller
 *.manifest
 *.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
 .tox/
 .nox/
-.coverage
 .coverage.*
-.cache
-nosetests.xml
 coverage.xml
+coverage.json
 *.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
-junit.xml
-test-results/
-reports/
-
-# ============================================================================
-# VIRTUAL ENVIRONMENTS
-# ============================================================================
-
-# All virtual environment patterns
-.env
-.venv/
-env/
-venv/
 ENV/
 env.bak/
 venv.bak/
-.venv.bkp/
-*/venv/
-*/.venv/
-*/ENV/
-*/env/
-**/.venv/
-**/venv/
-**/ENV/
-**/env/
-
-# ============================================================================
-# PACKAGE MANAGERS AND DEPENDENCIES
-# ============================================================================
-
-# Poetry - keep only root lock file
-**/poetry.lock
-!/poetry.lock
-
-# pip
-pip-wheel-metadata/
-
-# pipenv
-Pipfile.lock
-
-# pdm
-pdm.lock
-.pdm.toml
-
-# PEP 582
-__pypackages__/
-
-# ============================================================================
-# ENVIRONMENT AND CONFIGURATION
-# ============================================================================
-
-# Environment files
-.env
-.env.*
-!.env.example
-!.env.template
-.internal.invalid
-.env.*.local
-.env.production
-.env.prod
-
-# ============================================================================
-# IDE AND EDITOR FILES
-# ============================================================================
-
-# VS Code
-.vscode/
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# JetBrains IDEs
-.idea/
-
-# Cursor AI
-.cursor/
-.cursorignore
-
-# Vim/Neovim
-*.swp
-*.swo
-*~
-.netrwhist
-Session.vim
-Sessionx.vim
-
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
-
-# Sublime Text
-*.sublime-*
-
-# Other editors
-.fleet/
-
-# ============================================================================
-# OS SPECIFIC FILES
-# ============================================================================
-
-# Windows
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-$RECYCLE.BIN/
-*.cab
-*.msi
-*.msix
-*.msm
-*.msp
-*.lnk
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-.DocumentRevisions-V100
-.fseventsd
-.Spotlight-V100
-.TemporaryItems
-.Trashes
-.VolumeIcon.icns
-.com.apple.timemachine.donotpresent
-
-# Linux
-*~
-.nfs*
-
-# ============================================================================
-# DEVELOPMENT TOOLS
-# ============================================================================
-
-# Type checkers
-.mypy_cache/
-.dmypy.json
-dmypy.json
 .pyre/
 .pytype/
-
-# Linting and formatting
-.ruff_cache/
-.black
-.isort.cfg
-
-# Testing frameworks
-.pytest_cache/
-
-# Documentation
-docs/_build/
-docs/build/
-_build/
-.sphinx/
-/site
-
-# ============================================================================
-# GO SPECIFIC
-# ============================================================================
-
-# Go build artifacts
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
-
-# Go executables (no extension in root only)
-/flext
-*/flext
-
-# Go test binary, built with `go test -c`
-*.test
-
-# Go coverage
-*.out
-
-# Go mod cache
-go.sum
-
-# Go workspace file
-go.work
-
-# Command binaries
-cmd/*/flext*
-cmd/*/*
-!cmd/*/Makefile
-!cmd/*/*.go
-!cmd/*/*.md
-
-# ============================================================================
-# NODE.JS SPECIFIC
-# ============================================================================
-
-# Node modules
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
-
-# Yarn
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-
-# npm
-.npm
-.npmrc
-
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
-
-# Dependency directories
-jspm_packages/
-
-# Build outputs
-dist/
-build/
-out/
-.next/
-.nuxt/
-.vercel/
-vendor/
-
-# ============================================================================
-# DOCKER AND CONTAINERIZATION
-# ============================================================================
-
-# Docker
-.dockerignore
-docker-compose.override.yml
-internal.invalid.yml
-*.tar.gz
-
-# Kubernetes secrets
-k8s-secrets.yaml
-*.secret.yaml
-
-# ============================================================================
-# DATABASES
-# ============================================================================
-
-# SQLite
-*.sqlite
-*.sqlite3
-*.db
-*.sqlite3-journal
-*.sqlite3-shm
-*.sqlite3-wal
-
-# PostgreSQL
+.vscode/
+*.swo
+*~
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.bak
 *.backup
-*.dump
-
-# ============================================================================
-# LOGS AND OUTPUT
-# ============================================================================
-
-# Log files
-logs/
-*.log
-log/
-output/
-outputs/
+*.orig
+*_backup/
+backup/
+*.tmp
 temp/
 tmp/
-.flext_logs/
-
-# Runtime data
-runtime/
-cache/
-.cache/
-pids/
-*.pid
-*.seed
-*.pid.lock
-.meltano/
-
-# ============================================================================
-# BACKUP AND TEMPORARY FILES
-# ============================================================================
-
-# Backup files
-*.backup
-*.syntax_backup
-*.bak
-.bak/
-*.broken
-*.bkp
-*.tmp
-*.orig
-*.rej
-*.diff
-*.patch
-*_backup*
-*_bak*
-*_temp*
-backup_*
-backup/
-backups/
-bak/
-temp_*/
-tmp_*/
-
-# ============================================================================
-# JUPYTER AND NOTEBOOKS
-# ============================================================================
-
-.ipynb_checkpoints/
-**/.ipynb_checkpoints/
-*.ipynb
-*/.ipynb_checkpoints/*
-
-# IPython
-profile_default/
-ipython_config.py
-
-# ============================================================================
-# SECURITY SENSITIVE FILES
-# ============================================================================
-
-# Private keys and certificates
-*.pem
-*.key
-*.crt
-*.p12
-*.pfx
-*.jks
-secret*
-*.secret
-credentials.json
-auth.json
-service-account*.json
-
-# API keys and tokens
-api_keys.json
-tokens.json
-*.token
-
-# SSL certificates
-ssl/
-certs/
-wallet/
-*.wallet
-
-# ============================================================================
-# SINGER/MELTANO SPECIFIC
-# ============================================================================
-
-# Meltano
-.meltano/
-.meltano-*
-meltano.db
-meltano-*.db
-**/.meltano/run/
-**/.meltano/logs/
-**/.meltano/transformers/
-**/.meltano/extractors/
-**/.meltano/loaders/
-**/.meltano/run_test/
-plugins/
-
-# Singer
-*.state
-*.state.json
-state.json
-*state.json
-catalogs/
-catalog.json
-*.catalog.json
-
-# dbt
-target/
-dbt_packages/
-dbt_modules/
-dbt.log
-
-# ============================================================================
-# FLEXT WORKSPACE SPECIFIC
-# ============================================================================
-
-# Multi-agent coordination
-.token
-.token*
-
-# Project scaffolding
-.scaffold-tracking/
-.doc-reorg
-.standardization_backup/
-.lock*
-archive/
-archives/
-pyproject_backups/
-
-# Plugin system backups
-.plugin_backups/
-**/.plugin_backups/
-
-# Generated content
-schemas/
-reference/
-ldif_output/
-deprecated*/
-oracle-documentation/
-
-# Analysis and temporary work
-analysis_temp/
-docs-refactored/
-meltano-plugins-extracted/
-
-# Backup patterns
-*_source_*/
-*_current_*/
-*_backup_*/
-*_original_*/
-*_extracted_*/
-*_migrated_*/
-flx*_backup_*/
-flext*_backup_*/
-
-# ============================================================================
-# PROJECT SPECIFIC PATTERNS
-# ============================================================================
-
-# Data pipeline artifacts
-data/
-extracted/
-loaded/
-transformed/
-pipeline_state/
-execution_logs/
-workflow_data/
-sync_state/
-migration_state/
-
-# LDAP specific
 *.ldif.bak
-ldap_data/
-ldap_backup/
-
-# Oracle specific
-*.ora
-tnsnames.ora
-sqlnet.ora
-cwallet.sso
-ewallet.p12
-oracle_connection.log
-oracle_trace_*.log
-*.dmp
-*.exp
-*.log.sql
-
-# Test artifacts
-test_output/
-test_data/
-e2e_results/
-test_*.py
-*_test.py
-/validate_*.py
-/investigate_*.py
-
-# Analysis and output files
-*_analysis.txt
-*_report.txt
-*_output.txt
-*.jsonl
-sync_*.txt
-
-# Monitoring
-metrics/
-monitoring/
-prometheus/
-grafana/
-*.prom
-*.metrics
-health_*.json
-status_*.json
-
-# ============================================================================
-# ARCHIVE AND COMPRESSED FILES
-# ============================================================================
-
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
-*.zip
-*.bz2
-*.xz
-
-# ============================================================================
-# AI
-# ============================================================================
-
-# AI generated files and analysis
-*.ai
-*.ai.md
-*.ai.txt
-cursor/
-.cursor/
-.cursorrules
-.aider*
-.github/copilot*
-
-# Claude/AI generated analysis files
-CLAUDE*.md
-*_ANALYSIS*.md
-*_REPORT*.md
-*_SUMMARY*.md
-DUPLICATE_CODE_*.md
-LINT_CORRECTIONS_*.md
-
-# Strinct exclude all md, but keep important documentation
-^*.md
-!README.md
-!CHANGELOG.md
-!CONTRIBUTING.md
-!.markdownlint.json
-
-# ============================================================================
-# ALWAYS INCLUDE EXCEPTIONS
-# ============================================================================
-
-# Important: Use ! to force include critical files
-!.env.example
-!.env.template
+*.ldif.tmp
+*.key
+*.pem
+*.crt
+credentials.json
+connection_info.json
+!dbt_project.yml
 !pyproject.toml
 !Makefile
 !README.md
-!docker-compose.yml
-!Dockerfile
-!.gitignore
-!.pre-commit-settings.yaml
-!meltano.yml
-!go.mod
-!package.json
-!dbt_project.yml
-!ansible.cfg
-!requirements.txt
-
-# ============================================================================
-# ROOT DIRECTORY SPECIFIC RULES
-# ============================================================================
-
-# Ignore all .md files in root except essential ones
-/*.md
-!/README.md
-!/CHANGELOG.md
-!/CONTRIBUTING.md
-
-# Ignore all .json files in root except essential ones
-/*.json
-!/.markdownlint.json
-
-# Ignore all .txt files in root
-/*.txt
-
-# FLEXT workspace directories
-.flext_backups/
-.flext_logs/
-.benchmarks/
-.qlty/
-.logfire/
-.meltano/
-
-# Development and analysis artifacts
-**/.claude/
-**/analysis_temp/
-**/*_analysis/
-**/*_backup_*/
-**/*_temp/
+!profiles.yml.template
+.cursor/
+.cursorrules
+.cursorignore
+.aider*
+.serena/
+.claude/
+.copilot/
+.github/copilot-instructions.md
+*_REPORT*.md
+*_ANALYSIS*.md
+*_SUMMARY*.md
+*_FINDINGS*.md
+CLAUDE*.md
+CURSOR.md
+CONFIG_MIGRATION*.md
+DEVELOPMENT_STANDARDS*.md
+DUPLICATION_REPORT*.md
+LINT_CORRECTIONS*.md
+*.ai.md
+*.ai.txt
+*.ai.json
+*.ai.log
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+ENV/
+.Python
+coverage.xml
+coverage.json
+*.cover
+junit.xml
+.nox/
+.pyre/
+.pytype/
+.bandit/
+.installed.cfg
+MANIFEST
+*.manifest
+*.spec
+state.json
+*.state
+*.state.json
+catalog.json
+target_settings.json
+dbt.log
+dbt_packages/
+target/
+profiles.yml.bak
+profiles/profiles.yml.backup
+**/.user.yml
+docs/_build/
+site/
+/temp_*.py
+/*_temp.py
+*_temp.md
+/fix_*.py
+/*_fix.py
+/debug_*.py
+/investigate_*.py
+/validate_*.py
+/*_validation.py
+*_analysis.txt
+*_output.txt
+*_report.txt
+/temp_test_*
+analysis_temp/
+report_*/
 reports_*/
-temp_test_*/
+*_COMPLETE.md
+*_PLAN.md
+*_GUIDE.md
+*_CHECKLIST.md
+*_PROMPT.md
+*_ASSESSMENT.md
+*_CONTROL.md
+*_AUDIT*.md
+*_RESULTS.md
+*_STATUS.md
+*_HANDOVER.md
+*_REFACTORING*.md
+*_REORGANIZATION*.md
+*_STANDARDIZATION*.md
+*_OPTIMIZATION*.md
+*_METHODOLOGY*.md
+*_BASELINE*.md
+*_MODERNIZATION*.md
+RELATORIO_*.md
+COMPREHENSIVE_*.md
+COMPLETE_*.md
+TODO.md
+lint-report.md
+mypy_*.md
+*-report.md
+*-cleanup*.md
+*-summary.md
+*_report.md
+*_analysis.md
+*_summary.md
+*_REPORT*.md
+*_ANALYSIS*.md
+*_SUMMARY*.md
+*_FINDINGS*.md
+CONFIG_MIGRATION*.md
+DEVELOPMENT_STANDARDS*.md
+DUPLICATION_REPORT*.md
+LINT_CORRECTIONS*.md
+*.ai.md
+*.ai.txt
+*.md_20250*
+CRUFT_DETECTION_REPORT.md
+*.backup
+*.bak
+*.orig
+*~
+.*.swp
+*.syntax_backup
+*.broken
+*.tmp.bak
+*_backup
+*_backup_*
+temp_backup
+.archive/
+archive/
+archives/
+backups/
+*backup*/
+Desktop.ini
+*.swo
+
+# ============================================================================
+# COMMON PATTERNS: Artifacts inside allowed directories
+# ============================================================================
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# ============================================================================
+# SAFETY: Keep .gitkeep files
+# ============================================================================
+!**/.gitkeep# ============================================================================
+# BACKUP AND TEMPORARY FILES - NEVER commit
+# ============================================================================
+# Backup files with various extensions
+*.bak
+*.backup
+*.orig
+*.old
+*_backup*
+*_old*
+*_temp*
+*backup*
+
+# Validation and test scripts outside proper directories
+/validate*.sh
+/validate*.py
+**/validate*.yml
+**/validate*.yaml
+/test*.sh
+/test*.py
+**/test*.yml
+**/test*.yaml
+
+# Temporary and working files
+*.tmp
+*.temp
+temp/
+staging/
+.cache/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude AI files
+.claude/
 .github/*.rej
 
 # --- workspace-sync: required ignores (auto-managed) ---
 .reports/
+.venv/
+__pycache__/
 
 
 

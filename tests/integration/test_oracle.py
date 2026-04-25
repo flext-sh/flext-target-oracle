@@ -512,4 +512,3 @@ class TestsFlextTargetOracleOracle:
         assert rows
         assert rows[0].root["full_name"] == "John Doe"
         assert rows[0].root["email_address"] == "john@example.com"
-

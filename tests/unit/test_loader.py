@@ -29,7 +29,7 @@ def loader_config() -> FlextTargetOracleSettings:
 class TestsFlextTargetOracleLoader:
     """Behavior contract for test_loader."""
 
-    def test_loader_execute_returns_ready_payload(self, 
+    def test_loader_execute_returns_ready_payload(self,
         loader_config: FlextTargetOracleSettings,
     ) -> None:
         """execute() should return a typed readiness payload."""
@@ -37,7 +37,7 @@ class TestsFlextTargetOracleLoader:
         result = loader.execute()
         assert isinstance(result.success, bool)
 
-    def test_load_record_buffers_and_finalize(self, 
+    def test_load_record_buffers_and_finalize(self,
         loader_config: FlextTargetOracleSettings,
     ) -> None:
         """load_record should buffer valid records and finalize returns model."""
@@ -50,7 +50,7 @@ class TestsFlextTargetOracleLoader:
         assert finalize_result.value is not None
         assert finalize_result.value.streams_processed >= 0
 
-    def test_ensure_table_exists_returns_result(self, 
+    def test_ensure_table_exists_returns_result(self,
         loader_config: FlextTargetOracleSettings,
     ) -> None:
         """ensure_table_exists should always return FlextResult[bool]."""
@@ -70,7 +70,7 @@ class TestsFlextTargetOracleLoader:
         )
         assert isinstance(result.success, bool)
 
-    def test_flush_batch_uses_db_oracle_owned_sql_builders(self, 
+    def test_flush_batch_uses_db_oracle_owned_sql_builders(self,
         loader_config: FlextTargetOracleSettings,
     ) -> None:
         """Flush should delegate INSERT SQL building and batching to db-oracle."""
