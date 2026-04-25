@@ -12,7 +12,7 @@ from tests import m, r, t
 
 
 @pytest.mark.e2e
-class TestSingerWorkflowE2E:
+class TestsFlextTargetOracleSinger:
     """Validate SCHEMA -> RECORD -> STATE happy path."""
 
     def _target(self) -> FlextTargetOracle:

@@ -16,13 +16,14 @@ if _t.TYPE_CHECKING:
 
     from flext_target_oracle import d, e, h, r, s, x
     from tests.constants import TestsFlextTargetOracleConstants, c
-    from tests.e2e.test_singer import TestSingerWorkflowE2E
-    from tests.integration.test_oracle import TestOracleIntegration, TestOracleTargetE2E
+    from tests.e2e.test_singer import TestsFlextTargetOracleSinger
+    from tests.integration.test_oracle import TestsFlextTargetOracleOracle
     from tests.models import TestsFlextTargetOracleModels, m
-    from tests.performance.test_performance import TestPerformance
+    from tests.performance.test_performance import TestsFlextTargetOraclePerformance
     from tests.protocols import TestsFlextTargetOracleProtocols, p
     from tests.typings import TestsFlextTargetOracleTypes, t
     from tests.unit.test_config import TestsFlextTargetOracleConfig
+    from tests.unit.test_loader import TestsFlextTargetOracleLoader
     from tests.unit.test_target import TestsFlextTargetOracleTarget
     from tests.utilities import TestsFlextTargetOracleUtilities, u
 _LAZY_IMPORTS = merge_lazy_imports(
@@ -38,16 +39,13 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "TestsFlextTargetOracleConstants",
                 "c",
             ),
-            ".e2e.test_singer": ("TestSingerWorkflowE2E",),
-            ".integration.test_oracle": (
-                "TestOracleIntegration",
-                "TestOracleTargetE2E",
-            ),
+            ".e2e.test_singer": ("TestsFlextTargetOracleSinger",),
+            ".integration.test_oracle": ("TestsFlextTargetOracleOracle",),
             ".models": (
                 "TestsFlextTargetOracleModels",
                 "m",
             ),
-            ".performance.test_performance": ("TestPerformance",),
+            ".performance.test_performance": ("TestsFlextTargetOraclePerformance",),
             ".protocols": (
                 "TestsFlextTargetOracleProtocols",
                 "p",
@@ -57,6 +55,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "t",
             ),
             ".unit.test_config": ("TestsFlextTargetOracleConfig",),
+            ".unit.test_loader": ("TestsFlextTargetOracleLoader",),
             ".unit.test_target": ("TestsFlextTargetOracleTarget",),
             ".utilities": (
                 "TestsFlextTargetOracleUtilities",
@@ -105,14 +104,14 @@ _LAZY_IMPORTS = merge_lazy_imports(
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS)
 
 __all__: list[str] = [
-    "TestOracleIntegration",
-    "TestOracleTargetE2E",
-    "TestPerformance",
-    "TestSingerWorkflowE2E",
     "TestsFlextTargetOracleConfig",
     "TestsFlextTargetOracleConstants",
+    "TestsFlextTargetOracleLoader",
     "TestsFlextTargetOracleModels",
+    "TestsFlextTargetOracleOracle",
+    "TestsFlextTargetOraclePerformance",
     "TestsFlextTargetOracleProtocols",
+    "TestsFlextTargetOracleSinger",
     "TestsFlextTargetOracleTarget",
     "TestsFlextTargetOracleTypes",
     "TestsFlextTargetOracleUtilities",

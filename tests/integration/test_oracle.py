@@ -58,7 +58,7 @@ def _query_scalar(
 
 @pytest.mark.integration
 @pytest.mark.oracle
-class TestOracleIntegration:
+class TestsFlextTargetOracleOracle:
     """Integration tests with real Oracle database."""
 
     @pytest.mark.usefixtures("_clean_database")
@@ -410,10 +410,6 @@ class TestOracleIntegration:
         assert len(composite_indexes) > 0
         assert loader.disconnect().success
 
-
-@pytest.mark.integration
-@pytest.mark.oracle
-class TestOracleTargetE2E:
     """End-to-end tests using the full FlextTargetOracle."""
 
     @pytest.mark.usefixtures("_clean_database")
@@ -516,3 +512,4 @@ class TestOracleTargetE2E:
         assert rows
         assert rows[0].root["full_name"] == "John Doe"
         assert rows[0].root["email_address"] == "john@example.com"
+

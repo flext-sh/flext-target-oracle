@@ -17,7 +17,7 @@ from tests import m, r
 
 
 @pytest.mark.performance
-class TestPerformance:
+class TestsFlextTargetOraclePerformance:
     """Keep fast checks for throughput-sensitive code paths."""
 
     def _target(self) -> FlextTargetOracle:
