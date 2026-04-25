@@ -10,6 +10,29 @@ site_dir: .reports/docs/site
 
 theme:
   name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - toc.integrate
+    - content.code.copy
+    - content.tabs.link
+    - search.highlight
+    - search.share
+    - search.suggest
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
 
 plugins:
   - search
@@ -29,6 +52,10 @@ plugins:
             show_root_heading: true
             show_root_full_path: false
             show_source: false
+            show_signature_annotations: true
+            separate_signature: true
+            merge_init_into_class: true
+            docstring_section_style: spacy
 
 nav:
   - Home: index.md
@@ -36,6 +63,6 @@ nav:
   - API Reference: api-reference/README.md
 
 validation:
-  omitted_files: ignore
-  absolute_links: ignore
-  unrecognized_links: ignore
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn

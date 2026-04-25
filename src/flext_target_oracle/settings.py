@@ -14,7 +14,7 @@ from typing import Annotated, ClassVar
 
 from flext_core import FlextSettings
 
-from flext_target_oracle import FlextTargetOracleModelsSettings, c, m, p, r, t, u
+from flext_target_oracle import FlextTargetOracleModelsSettings, c, e, m, p, r, t, u
 
 
 @FlextSettings.auto_register("target-oracle")
@@ -95,14 +95,15 @@ class FlextTargetOracleSettings(FlextSettings):
     def validate_business_rules(self) -> p.Result[bool]:
         """Validate Oracle target configuration business rules."""
         if not self.oracle_host:
-            return r[bool].fail("Oracle host is required")
+            return e.fail_validation("oracle_host", error="is required")
         if not self.oracle_service_name:
-            return r[bool].fail("Oracle service name is required")
+            return e.fail_validation("oracle_service_name", error="is required")
         if not self.default_target_schema:
-            return r[bool].fail("Default target schema is required")
+            return e.fail_validation("default_target_schema", error="is required")
         if self.commit_interval > self.batch_size:
-            return r[bool].fail(
-                "Commit interval must be less than or equal to batch size",
+            return e.fail_validation(
+                "commit_interval",
+                error="must be less than or equal to batch size",
             )
         return r[bool].ok(True)
 

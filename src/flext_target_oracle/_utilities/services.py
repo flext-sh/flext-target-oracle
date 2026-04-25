@@ -6,7 +6,7 @@ from collections import defaultdict
 
 from flext_db_oracle import FlextDbOracleApi
 
-from flext_target_oracle import FlextTargetOracleSettings, m, p, r, t
+from flext_target_oracle import FlextTargetOracleSettings, e, m, p, r, t
 
 
 class FlextTargetOracleConnectionService:
@@ -62,7 +62,7 @@ class FlextTargetOracleSchemaService:
         _ = schema_message
         table_name = stream.table_name
         if not table_name:
-            return r[None].fail("Invalid table name")
+            return e.fail_validation("table_name", error="invalid")
         return r[None].ok(None)
 
     def execute(self) -> p.Result[None]:

@@ -141,11 +141,11 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             if result.failure:
                 return r[bool].fail(f"{operation_name} failed: {result.error}")
             return r[bool].ok(value=True)
-        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             message = f"Failed to {operation_name.lower()} loader"
             self.logger.exception(message)
-            self.log_error(message, error=str(e))
-            return r[bool].fail(f"{operation_name} failed: {e}")
+            self.log_error(message, error=str(exc))
+            return r[bool].fail_op(operation_name.lower(), exc)
 
     def connect(self) -> p.Result[bool]:
         """Establish connection using underlying FlextDbOracleApi.
@@ -198,9 +198,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                     return r[bool].fail(f"Failed to create table: {exec_result.error}")
                 self.log_info(f"Created table {table_name}")
                 return r[bool].ok(value=True)
-        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            self.log_error("Failed to ensure table exists", error=str(e))
-            return r[bool].fail(f"Table creation failed: {e}")
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
+            self.log_error("Failed to ensure table exists", error=str(exc))
+            return r[bool].fail_op("create table", exc)
 
     @override
     def execute(self) -> p.Result[t.JsonMapping]:
@@ -246,10 +246,10 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                     },
                 ),
             )
-        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            self.log_error("Failed to finalize streams", error=str(e))
-            return r[m.TargetOracle.LoaderFinalizeResult].fail(
-                f"Finalization failed: {e}",
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
+            self.log_error("Failed to finalize streams", error=str(exc))
+            return r[m.TargetOracle.LoaderFinalizeResult].fail_op(
+                "finalize streams", exc
             )
 
     def insert_records(
@@ -267,9 +267,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 if load_res.failure:
                     return r[bool].fail(f"Failed to load record: {load_res.error}")
             return self._flush_batch(stream_name)
-        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            self.log_error("Failed to insert records", error=str(e))
-            return r[bool].fail(f"Insert records failed: {e}")
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
+            self.log_error("Failed to insert records", error=str(exc))
+            return r[bool].fail_op("insert records", exc)
 
     def load_record(
         self,
@@ -289,9 +289,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             if len(self.record_buffers[stream_name]) >= self.target_config.batch_size:
                 return self._flush_batch(stream_name)
             return r[bool].ok(value=True)
-        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            self.log_error("Failed to load record", error=str(e))
-            return r[bool].fail(f"Record loading failed: {e}")
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
+            self.log_error("Failed to load record", error=str(exc))
+            return r[bool].fail_op("load record", exc)
 
     def log_error(self, message: str, **kwargs: t.Scalar) -> None:
         """Log error message."""
@@ -326,9 +326,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                     )
                 self.log_info("Oracle connection established successfully")
                 return r[bool].ok(value=True)
-        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            self.log_error("Failed to connect to Oracle", error=str(e))
-            return r[bool].fail(f"Connection failed: {e}")
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
+            self.log_error("Failed to connect to Oracle", error=str(exc))
+            return r[bool].fail_op("connect to Oracle", exc)
 
     def _build_create_table_statement(
         self,
@@ -374,7 +374,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             schema_name = self.target_config.default_target_schema
             full_table_name = f"{schema_name}.{table_name}"
             if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_$.]*", full_table_name):
-                return r[bool].fail("Invalid Oracle table identifier")
+                return r[bool].fail_op("validate Oracle table identifier")
             loaded_at = datetime.now(UTC).isoformat()
             with self.oracle_api as connected_api:
                 insert_sql_result = self._build_insert_statement(table_name)
@@ -395,9 +395,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 self.record_buffers[stream_name] = list[t.JsonMapping]()
                 self.log_info(f"Flushed {len(records)} records to {table_name}")
                 return r[bool].ok(value=True)
-        except c.Meltano.SINGER_SAFE_EXCEPTIONS as e:
-            self.log_error("Failed to flush batch", error=str(e))
-            return r[bool].fail(f"Batch flush failed: {e}")
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
+            self.log_error("Failed to flush batch", error=str(exc))
+            return r[bool].fail_op("flush batch", exc)
 
 
 __all__: list[str] = ["FlextTargetOracleLoader"]
