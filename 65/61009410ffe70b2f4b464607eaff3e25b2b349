@@ -1,0 +1,14 @@
+tests/unit/test_module_governance.py
+  h_9db9d35f50cf33 1-27,30,32-61,63-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "6561009410ffe70b2f4b464607eaff3e25b2b349",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
