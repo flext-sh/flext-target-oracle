@@ -39,8 +39,12 @@ class TestsFlextTargetOracleModuleGovernance:
                     isinstance(target, ast.Name) and target.id in {"logger", "_logger"}
                     for target in node.targets
                 ):
-                    violations.append(str(module_path.relative_to(_package_root().parent)))
-        assert not violations, f"Module-level logger assignments are forbidden: {violations}"
+                    violations.append(
+                        str(module_path.relative_to(_package_root().parent))
+                    )
+        assert not violations, (
+            f"Module-level logger assignments are forbidden: {violations}"
+        )
 
     def test_package_modules_do_not_define_unapproved_top_level_functions(self) -> None:
         violations: t.MutableSequenceOf[str] = []
@@ -54,7 +58,8 @@ class TestsFlextTargetOracleModuleGovernance:
             unexpected_functions = sorted(
                 node.name
                 for node in module_tree.body
-                if isinstance(node, ast.FunctionDef) and node.name not in allowed_functions
+                if isinstance(node, ast.FunctionDef)
+                and node.name not in allowed_functions
             )
             if unexpected_functions:
                 violations.append(

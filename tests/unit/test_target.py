@@ -63,7 +63,6 @@ def target(mock_oracle_api: Mock) -> FlextTargetOracle:
 
 
 class TestsFlextTargetOracleTarget:
-
     def test_initialize_and_connection(self, target: FlextTargetOracle) -> None:
         assert target.initialize().success
         assert target.test_connection().success

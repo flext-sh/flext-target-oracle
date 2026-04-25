@@ -473,8 +473,8 @@ class TestsFlextTargetOracleOracle:
             },
             "key_properties": ["id"],
         }
-        schema_msg_value: t.JsonValue = t.Tests.NORMALIZED_VALUE_ADAPTER.validate_python(
-            schema_msg
+        schema_msg_value: t.JsonValue = (
+            t.Tests.NORMALIZED_VALUE_ADAPTER.validate_python(schema_msg)
         )
         target.execute(
             t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(schema_msg_value).decode("utf-8")
@@ -490,8 +490,8 @@ class TestsFlextTargetOracleOracle:
                 "internal_id": "INT-001",
             },
         }
-        record_msg_value: t.JsonValue = t.Tests.NORMALIZED_VALUE_ADAPTER.validate_python(
-            record_msg
+        record_msg_value: t.JsonValue = (
+            t.Tests.NORMALIZED_VALUE_ADAPTER.validate_python(record_msg)
         )
         target.execute(
             t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(record_msg_value).decode("utf-8")

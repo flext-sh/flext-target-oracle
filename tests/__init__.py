@@ -24,6 +24,7 @@ if _t.TYPE_CHECKING:
     from tests.typings import TestsFlextTargetOracleTypes, t
     from tests.unit.test_config import TestsFlextTargetOracleConfig
     from tests.unit.test_loader import TestsFlextTargetOracleLoader
+    from tests.unit.test_module_governance import TestsFlextTargetOracleModuleGovernance
     from tests.unit.test_target import TestsFlextTargetOracleTarget
     from tests.utilities import TestsFlextTargetOracleUtilities, u
 _LAZY_IMPORTS = merge_lazy_imports(
@@ -56,6 +57,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
             ),
             ".unit.test_config": ("TestsFlextTargetOracleConfig",),
             ".unit.test_loader": ("TestsFlextTargetOracleLoader",),
+            ".unit.test_module_governance": ("TestsFlextTargetOracleModuleGovernance",),
             ".unit.test_target": ("TestsFlextTargetOracleTarget",),
             ".utilities": (
                 "TestsFlextTargetOracleUtilities",
@@ -108,6 +110,7 @@ __all__: list[str] = [
     "TestsFlextTargetOracleConstants",
     "TestsFlextTargetOracleLoader",
     "TestsFlextTargetOracleModels",
+    "TestsFlextTargetOracleModuleGovernance",
     "TestsFlextTargetOracleOracle",
     "TestsFlextTargetOraclePerformance",
     "TestsFlextTargetOracleProtocols",

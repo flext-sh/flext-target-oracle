@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleModels
-from flext_meltano import m as meltano_m
+from flext_meltano import FlextMeltanoModels
 
 from flext_target_oracle import (
     FlextTargetOracleModelsCommands,
@@ -14,7 +14,7 @@ from flext_target_oracle import (
 
 
 class FlextTargetOracleModels(
-    meltano_m,
+    FlextMeltanoModels,
     FlextDbOracleModels,
 ):
     """Complete models for Oracle target operations extending FlextModels."""
