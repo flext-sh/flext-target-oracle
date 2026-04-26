@@ -17,8 +17,8 @@ from collections.abc import (
 )
 
 import pytest
-from flext_db_oracle import FlextDbOracleApi
 
+from flext_db_oracle import FlextDbOracleApi
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleLoader,

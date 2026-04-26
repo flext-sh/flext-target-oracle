@@ -19,7 +19,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Annotated, override
 
 from flext_core import FlextConstants, FlextExceptionsBase, FlextModels, FlextTypes, u
-
 from flext_target_oracle import e, t
 
 if TYPE_CHECKING:

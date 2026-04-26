@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleConstants
 from flext_meltano import c
-
 from flext_target_oracle import FlextTargetOracleConstantsBase
 
 

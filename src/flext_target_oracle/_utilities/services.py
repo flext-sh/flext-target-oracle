@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections import defaultdict
 
 from flext_db_oracle import FlextDbOracleApi
-
 from flext_target_oracle import FlextTargetOracleSettings, e, m, p, r, t
 
 

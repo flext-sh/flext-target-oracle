@@ -7,7 +7,6 @@ from types import MappingProxyType
 from typing import Annotated, Literal, Self
 
 from flext_meltano import m, t
-
 from flext_target_oracle import u
 
 
