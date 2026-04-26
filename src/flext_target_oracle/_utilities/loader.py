@@ -365,35 +365,44 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
 
     def _flush_batch(self, stream_name: str) -> p.Result[bool]:
         """Flush batch using flext-db-oracle API exclusively - NO direct SQLAlchemy."""
+        flush_result: p.Result[bool] = r[bool].ok(value=True)
         try:
             records = self.record_buffers.get(stream_name, [])
-            if not records:
-                return r[bool].ok(value=True)
-            table_name = self.target_config.get_table_name(stream_name)
-            schema_name = self.target_config.default_target_schema
-            full_table_name = f"{schema_name}.{table_name}"
-            if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_$.]*", full_table_name):
-                return r[bool].fail_op("validate Oracle table identifier")
-            loaded_at = datetime.now(UTC).isoformat()
-            with self.oracle_api as connected_api:
-                insert_sql_result = self._build_insert_statement(table_name)
-                if insert_sql_result.failure:
-                    return r[bool].fail(
-                        f"Failed to build insert SQL: {insert_sql_result.error}",
+            if records:
+                table_name = self.target_config.get_table_name(stream_name)
+                schema_name = self.target_config.default_target_schema
+                full_table_name = f"{schema_name}.{table_name}"
+                if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_$.]*", full_table_name):
+                    flush_result = r[bool].fail_op(
+                        "validate Oracle table identifier",
                     )
-                params_list = [
-                    self._build_insert_parameters(record, loaded_at)
-                    for record in records
-                ]
-                result = connected_api.execute_many(
-                    insert_sql_result.value,
-                    params_list,
-                )
-                if result.failure:
-                    return r[bool].fail(f"Batch insert failed: {result.error}")
-                self.record_buffers[stream_name] = list[t.JsonMapping]()
-                self.log_info(f"Flushed {len(records)} records to {table_name}")
-                return r[bool].ok(value=True)
+                else:
+                    loaded_at = datetime.now(UTC).isoformat()
+                    with self.oracle_api as connected_api:
+                        insert_sql_result = self._build_insert_statement(table_name)
+                        if insert_sql_result.failure:
+                            flush_result = r[bool].fail(
+                                f"Failed to build insert SQL: {insert_sql_result.error}",
+                            )
+                        else:
+                            params_list = [
+                                self._build_insert_parameters(record, loaded_at)
+                                for record in records
+                            ]
+                            result = connected_api.execute_many(
+                                insert_sql_result.value,
+                                params_list,
+                            )
+                            if result.failure:
+                                flush_result = r[bool].fail(
+                                    f"Batch insert failed: {result.error}",
+                                )
+                            else:
+                                self.record_buffers[stream_name] = list[t.JsonMapping]()
+                                self.log_info(
+                                    f"Flushed {len(records)} records to {table_name}",
+                                )
+            return flush_result
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             self.log_error("Failed to flush batch", error=str(exc))
             return r[bool].fail_op("flush batch", exc)
