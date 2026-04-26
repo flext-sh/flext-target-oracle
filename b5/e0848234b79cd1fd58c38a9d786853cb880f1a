@@ -1,0 +1,14 @@
+src/flext_target_oracle/_utilities/errors.py
+  h_9db9d35f50cf33 13,51,55-64,66,92,120,122-125,147,174,177,181-185
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "b5e0848234b79cd1fd58c38a9d786853cb880f1a",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
