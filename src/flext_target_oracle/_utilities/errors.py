@@ -10,11 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    Mapping,
-    MutableMapping,
-    Sequence,
-)
+from collections.abc import Mapping
 from datetime import datetime
 from typing import TYPE_CHECKING, Annotated, override
 
@@ -52,26 +48,28 @@ class FlextTargetOracleExceptions(e):
     """Oracle Target exceptions using flext-core SOURCE OF TRUTH."""
 
     @staticmethod
-    def _to_metadata_value(value: t.JsonPayload | None) -> t.JsonValue:
-        if isinstance(value, datetime):
-            return value.isoformat()
-        if isinstance(value, (str, int, float, bool)):
-            return value
-        if value is None:
-            return ""
-        return str(value)
-
-    @staticmethod
-    def _resolve_metadata(
+    def _build_context(
         *,
         default_code: str,
         metadata: FlextTargetOracleErrorMetadata | None,
-    ) -> FlextTargetOracleErrorMetadata:
-        return FlextTargetOracleErrorMetadata(
-            code=metadata.code if metadata is not None else default_code,
-            context=metadata.context if metadata is not None else None,
-            correlation_id=metadata.correlation_id if metadata is not None else None,
-        )
+        kwargs: dict[str, t.JsonPayload],
+    ) -> tuple[FlextTargetOracleErrorMetadata, dict[str, t.JsonValue]]:
+        """Resolve metadata and build merged oracle context from kwargs."""
+        resolved = metadata or FlextTargetOracleErrorMetadata(code=default_code)
+        ctx: dict[str, t.JsonValue] = dict(resolved.context) if resolved.context else {}
+        ctx.update({
+            k: (
+                v.isoformat()
+                if isinstance(v, datetime)
+                else v
+                if isinstance(v, (str, int, float, bool))
+                else ""
+                if v is None
+                else str(v)
+            )
+            for k, v in kwargs.items()
+        })
+        return resolved, ctx
 
     class Error(FlextExceptionsBase.BaseError):
         """Oracle Target main error - inherits from base error."""
@@ -87,40 +85,19 @@ class FlextTargetOracleExceptions(e):
             self,
             message: str,
             *,
-            host: str | None = None,
-            port: int | None = None,
-            service_name: str | None = None,
-            user: str | None = None,
-            dsn: str | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.JsonPayload,
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
-            resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
+            _, ctx = FlextTargetOracleExceptions._build_context(
                 default_code=c.ErrorCode.CONNECTION_ERROR,
                 metadata=metadata,
+                kwargs=kwargs,
             )
-            oracle_context: MutableMapping[str, t.JsonValue] = (
-                dict(resolved_metadata.context) if resolved_metadata.context else {}
-            )
-            if host is not None:
-                oracle_context["host"] = host
-            if port is not None:
-                oracle_context["port"] = port
-            if service_name is not None:
-                oracle_context["service_name"] = service_name
-            if user is not None:
-                oracle_context["user"] = user
-            if dsn is not None:
-                oracle_context["dsn"] = dsn
-            for key, value in kwargs.items():
-                oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
-                    value,
-                )
             super().__init__(message=message)
-            self.service_name = oracle_context.get("service_name")
-            self.user = oracle_context.get("user")
-            self.dsn = oracle_context.get("dsn")
+            self.service_name = ctx.get("service_name")
+            self.user = ctx.get("user")
+            self.dsn = ctx.get("dsn")
 
     class ValidationError(e.ValidationError):
         """Oracle validation error using flext-core foundation."""
@@ -133,49 +110,27 @@ class FlextTargetOracleExceptions(e):
             self,
             message: str,
             *,
-            user: str | None = None,
-            auth_method: str | None = None,
-            wallet_location: str | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.JsonPayload,
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
-            resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
+            resolved, ctx = FlextTargetOracleExceptions._build_context(
                 default_code=c.ErrorCode.AUTHENTICATION_ERROR,
                 metadata=metadata,
+                kwargs=kwargs,
             )
-            oracle_context: MutableMapping[str, t.JsonValue] = (
-                dict(resolved_metadata.context) if resolved_metadata.context else {}
+            super().__init__(
+                message=message,
+                error_code=resolved.code,
+                context=ctx or None,
+                correlation_id=resolved.correlation_id,
             )
-            if user is not None:
-                oracle_context["user"] = user
-            if auth_method is not None:
-                oracle_context["auth_method"] = auth_method
-            if wallet_location is not None:
-                oracle_context["wallet_location"] = wallet_location
-            for key, value in kwargs.items():
-                oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
-                    value,
-                )
-            if resolved_metadata.correlation_id is None:
-                super().__init__(
-                    message=message,
-                    error_code=resolved_metadata.code,
-                    context=oracle_context or None,
-                )
-            else:
-                super().__init__(
-                    message=message,
-                    error_code=resolved_metadata.code,
-                    context=oracle_context or None,
-                    correlation_id=resolved_metadata.correlation_id,
-                )
-            self.user = oracle_context.get("user")
-            auth_method_val = oracle_context.get("auth_method")
+            self.user = ctx.get("user")
+            auth_method_val = ctx.get("auth_method")
             self.auth_method = (
                 str(auth_method_val) if auth_method_val is not None else None
             )
-            self.wallet_location = oracle_context.get("wallet_location")
+            self.wallet_location = ctx.get("wallet_location")
 
     class ProcessingError(Error):
         """Oracle processing error with Oracle-specific context."""
@@ -185,38 +140,20 @@ class FlextTargetOracleExceptions(e):
             self,
             message: str,
             *,
-            stream_name: str | None = None,
-            record_count: int | None = None,
-            error_records: Sequence[t.JsonMapping] | None = None,
-            operation: str | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.JsonPayload,
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
-            resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
+            _, ctx = FlextTargetOracleExceptions._build_context(
                 default_code=c.ErrorCode.PROCESSING_ERROR,
                 metadata=metadata,
+                kwargs=kwargs,
             )
-            oracle_context: MutableMapping[str, t.JsonValue] = (
-                dict(resolved_metadata.context) if resolved_metadata.context else {}
-            )
-            if stream_name is not None:
-                oracle_context["stream_name"] = stream_name
-            if record_count is not None:
-                oracle_context["record_count"] = record_count
-            if error_records is not None:
-                oracle_context["error_records"] = str(error_records)
-            if operation is not None:
-                oracle_context["operation"] = operation
-            for key, value in kwargs.items():
-                oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
-                    value,
-                )
             super().__init__(message=message)
-            self.stream_name = oracle_context.get("stream_name")
-            self.record_count = oracle_context.get("record_count")
-            self.error_records = error_records
-            operation_val = oracle_context.get("operation")
+            self.stream_name = ctx.get("stream_name")
+            self.record_count = ctx.get("record_count")
+            self.error_records = ctx.get("error_records")
+            operation_val = ctx.get("operation")
             self.operation = str(operation_val) if operation_val is not None else None
 
     class OracleTimeoutError(e.TimeoutError):
@@ -230,43 +167,30 @@ class FlextTargetOracleExceptions(e):
             self,
             message: str,
             *,
-            stream_name: str | None = None,
-            table_name: str | None = None,
-            schema_hash: str | None = None,
-            validation_errors: t.StrSequence | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.JsonPayload,
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
-            resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
+            resolved, ctx = FlextTargetOracleExceptions._build_context(
                 default_code=c.ErrorCode.VALIDATION_ERROR,
                 metadata=metadata,
+                kwargs=kwargs,
             )
-            oracle_context: MutableMapping[str, t.JsonValue] = (
-                dict(resolved_metadata.context) if resolved_metadata.context else {}
-            )
-            if stream_name is not None:
-                oracle_context["stream_name"] = stream_name
-            if table_name is not None:
-                oracle_context["table_name"] = table_name
-            if schema_hash is not None:
-                oracle_context["schema_hash"] = schema_hash
-            if validation_errors is not None:
-                oracle_context["validation_errors"] = ", ".join(validation_errors)
-            for key, value in kwargs.items():
-                oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
-                    value,
-                )
             super().__init__(
                 message=message,
-                error_code=resolved_metadata.code,
-                context=oracle_context or None,
-                correlation_id=resolved_metadata.correlation_id,
+                error_code=resolved.code,
+                context=ctx or None,
+                correlation_id=resolved.correlation_id,
             )
-            self.stream_name = oracle_context.get("stream_name")
-            self.table_name = oracle_context.get("table_name")
-            self.schema_hash = oracle_context.get("schema_hash")
-            self.validation_errors = validation_errors
+            self.stream_name = ctx.get("stream_name")
+            self.table_name = ctx.get("table_name")
+            self.schema_hash = ctx.get("schema_hash")
+            validation_errors_val = ctx.get("validation_errors")
+            self.validation_errors = (
+                tuple(str(validation_errors_val).split(", "))
+                if validation_errors_val is not None
+                else None
+            )
 
     class LoadError(ProcessingError):
         """Oracle data loading errors."""
@@ -279,40 +203,21 @@ class FlextTargetOracleExceptions(e):
             self,
             message: str,
             *,
-            sql_statement: str | None = None,
-            table_name: str | None = None,
-            operation: str | None = None,
             metadata: FlextTargetOracleErrorMetadata | None = None,
             **kwargs: t.JsonPayload,
         ) -> None:
             """Initialize SQL error with Oracle-specific context."""
-            resolved_metadata = FlextTargetOracleExceptions._resolve_metadata(
+            resolved, ctx = FlextTargetOracleExceptions._build_context(
                 default_code=c.ErrorCode.OPERATION_ERROR,
                 metadata=metadata,
+                kwargs=kwargs,
             )
-            oracle_context: MutableMapping[str, t.JsonValue] = (
-                dict(resolved_metadata.context) if resolved_metadata.context else {}
-            )
-            if sql_statement is not None:
-                oracle_context["sql_statement"] = sql_statement
-            if table_name is not None:
-                oracle_context["table_name"] = table_name
-            if operation is not None:
-                oracle_context["operation"] = operation
-            for key, value in kwargs.items():
-                oracle_context[key] = FlextTargetOracleExceptions._to_metadata_value(
-                    value,
-                )
             super().__init__(
                 message=message,
-                metadata=FlextTargetOracleErrorMetadata(
-                    code=resolved_metadata.code,
-                    context=oracle_context or None,
-                    correlation_id=resolved_metadata.correlation_id,
-                ),
+                metadata=resolved.model_copy(update={"context": ctx or None}),
             )
-            self.sql_statement = oracle_context.get("sql_statement")
-            self.table_name = oracle_context.get("table_name")
+            self.sql_statement = ctx.get("sql_statement")
+            self.table_name = ctx.get("table_name")
 
     class RecordError(ProcessingError):
         """Oracle record processing errors."""
