@@ -11,6 +11,7 @@ from collections.abc import (
 )
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
+from flext_db_oracle import FlextDbOracleProtocols
 from flext_meltano import p
 
 if TYPE_CHECKING:
@@ -196,3 +197,10 @@ class FlextTargetOracleProtocolsBase:
         def validate_business_rules(self) -> p.Result[bool]:
             """Validate Oracle target configuration business rules."""
             ...
+
+
+class FlextTargetOracleProtocols(p, FlextDbOracleProtocols):
+    """Oracle target protocol facade."""
+
+    class TargetOracle(FlextTargetOracleProtocolsBase):
+        """Oracle target protocol namespace."""

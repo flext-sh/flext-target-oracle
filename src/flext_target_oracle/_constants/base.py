@@ -8,6 +8,9 @@ from __future__ import annotations
 
 from typing import Final
 
+from flext_db_oracle import FlextDbOracleConstants
+from flext_meltano import c
+
 
 class FlextTargetOracleConstantsBase:
     """TargetOracle domain constants namespace."""
@@ -38,3 +41,10 @@ class FlextTargetOracleConstantsBase:
     # Loading configuration (formerly separate Loading class)
     DEFAULT_POOL_MIN: Final[int] = 5
     DEFAULT_POOL_MAX: Final[int] = 20
+
+
+class FlextTargetOracleConstants(c, FlextDbOracleConstants):
+    """Oracle target constant facade."""
+
+    class TargetOracle(FlextTargetOracleConstantsBase):
+        """Oracle target constant namespace."""

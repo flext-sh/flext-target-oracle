@@ -1,22 +1,8 @@
-"""Target Oracle protocols for FLEXT ecosystem.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-"""
+"""Target Oracle protocol facade."""
 
 from __future__ import annotations
 
-from flext_db_oracle import FlextDbOracleProtocols
-from flext_meltano import p
-from flext_target_oracle import FlextTargetOracleProtocolsBase
-
-
-class FlextTargetOracleProtocols(p, FlextDbOracleProtocols):
-    """Singer Target Oracle protocols extending Oracle and Meltano protocols."""
-
-    class TargetOracle(FlextTargetOracleProtocolsBase):
-        """Singer Target domain protocols."""
-
+from flext_target_oracle._protocols.base import FlextTargetOracleProtocols
 
 p = FlextTargetOracleProtocols
 __all__: list[str] = ["FlextTargetOracleProtocols", "p"]

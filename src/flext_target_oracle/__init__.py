@@ -13,7 +13,6 @@ from flext_core.lazy import (
 from flext_target_oracle.__version__ import *
 
 if _t.TYPE_CHECKING:
-    from flext_meltano import d, e, h, r, s, x
     from flext_target_oracle._constants.base import FlextTargetOracleConstantsBase
     from flext_target_oracle._models.commands import FlextTargetOracleModelsCommands
     from flext_target_oracle._models.results import FlextTargetOracleModelsResults
@@ -114,14 +113,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetOracleUtilities",
                 "u",
             ),
-            "flext_meltano": (
-                "d",
-                "e",
-                "h",
-                "r",
-                "s",
-                "x",
-            ),
         },
     ),
     exclude_names=(
@@ -185,15 +176,9 @@ __all__: list[str] = [
     "__version__",
     "__version_info__",
     "c",
-    "d",
-    "e",
-    "h",
     "m",
     "p",
-    "r",
-    "s",
     "t",
     "target_oracle",
     "u",
-    "x",
 ]

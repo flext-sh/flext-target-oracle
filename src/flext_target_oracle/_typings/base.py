@@ -16,3 +16,6 @@ class FlextTargetOracleTypesBase:
         t.JsonMapping
     )
     STR_MAP_ADAPTER: m.TypeAdapter[t.StrMapping] = m.TypeAdapter(t.StrMapping)
+
+
+__all__: list[str] = ["FlextTargetOracleTypesBase"]

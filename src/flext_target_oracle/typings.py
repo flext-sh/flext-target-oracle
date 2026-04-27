@@ -1,22 +1,17 @@
-"""FLEXT Target Oracle Types — MRO composition of parent type namespaces.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Target Oracle type facade."""
 
 from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleTypes
-from flext_meltano import t
-from flext_target_oracle import FlextTargetOracleTypesBase
+from flext_meltano import t as meltano_t
+from flext_target_oracle._typings.base import FlextTargetOracleTypesBase
 
 
-class FlextTargetOracleTypes(t, FlextDbOracleTypes):
-    """MRO facade composing Meltano + DbOracle type namespaces."""
+class FlextTargetOracleTypes(meltano_t, FlextDbOracleTypes):
+    """Oracle target type facade."""
 
     class TargetOracle(FlextTargetOracleTypesBase):
-        """TargetOracle types namespace."""
+        """Oracle target type namespace."""
 
 
 t = FlextTargetOracleTypes
