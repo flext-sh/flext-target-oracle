@@ -239,6 +239,7 @@ search-path = [
   "../flext-core/examples",
   "../flext-core/scripts",
   "../flext-core/src",
+  "../flext-core/venv",
   "../flext-db-oracle/examples",
   "../flext-db-oracle/src",
   "../flext-infra/src",
@@ -325,6 +326,7 @@ unexpected-keyword = true
 unexpected-positional-argument = true
 unknown-name = true
 unnecessary-comparison = true
+unnecessary-type-conversion = true
 unreachable = true
 unresolvable-dunder-all = true
 unsafe-overlap = true
