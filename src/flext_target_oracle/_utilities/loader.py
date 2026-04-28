@@ -181,7 +181,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                         f"Failed to check tables: {tables_result.error}",
                     )
                 existing_tables_raw = tables_result.value or []
-                existing_tables = [str(table).upper() for table in existing_tables_raw]
+                existing_tables = [table.upper() for table in existing_tables_raw]
                 table_exists = table_name.upper() in existing_tables
                 if table_exists:
                     self.log_info(f"Table {table_name} already exists")
