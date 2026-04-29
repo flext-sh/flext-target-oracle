@@ -280,9 +280,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             if stream_name not in self.record_buffers:
                 empty_records: t.MutableSequenceOf[t.JsonMapping] = []
                 self.record_buffers[stream_name] = empty_records
-            copied_record: t.MutableJsonMapping = {
-                str(key): value for key, value in record_data.items()
-            }
+            copied_record: t.MutableJsonMapping = dict(record_data.items())
             self.record_buffers[stream_name].append(copied_record)
             self._total_records += 1
             if len(self.record_buffers[stream_name]) >= self.target_config.batch_size:

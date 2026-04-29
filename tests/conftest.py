@@ -69,29 +69,62 @@ def event_loop() -> Generator[AbstractEventLoop]:
 @pytest.fixture(scope="session")
 def docker_control() -> tk:
     """Provide Docker control instance for tests."""
-    return tk()
+    return tk.shared(
+        "flext-oracle-db-test",
+        workspace_root=Path(__file__).resolve().parents[2],
+    )
 
 
 @pytest.fixture(scope="session")
-def shared_oracle_container(docker_control: tk) -> Generator[str]:
+def shared_oracle_container(docker_control: tk) -> str:
     """Managed Oracle container using tk with auto-start."""
-    yield "flext-oracle-db-test"
-    _ = docker_control
+    container_name = "flext-oracle-db-test"
+    ensure_result = docker_control.execute()
+    if ensure_result.failure:
+        pytest.skip(
+            ensure_result.error or f"Oracle container {container_name} is unavailable",
+        )
+    resolved_port = next(
+        (
+            int(host_port)
+            for container_port, host_port in ensure_result.value.ports.items()
+            if container_port.startswith("1521") and host_port.isdigit()
+        ),
+        1522,
+    )
+    os.environ["TEST_ORACLE_HOST"] = "localhost"
+    os.environ["TEST_ORACLE_PORT"] = str(resolved_port)
+    os.environ["TEST_ORACLE_SERVICE"] = "FLEXTDB"
+    os.environ["TEST_ORACLE_USER"] = "flext_test"
+    os.environ["TEST_ORACLE_PASSWORD"] = "flext_test_password"
+    return container_name
 
 
 @pytest.fixture(scope="session")
-def oracle_engine() -> Generator[FlextDbOracleApi]:
+def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
     """Create Oracle database API fixture for integration verification.
 
     Skips tests if Oracle is not available.
     """
+    _ = shared_oracle_container
     api = FlextDbOracleApi(
         FlextDbOracleSettings.model_validate({
-            "host": c.TargetOracle.Tests.ORACLE_HOST,
-            "port": c.TargetOracle.Tests.ORACLE_PORT,
-            "service_name": c.TargetOracle.Tests.ORACLE_SERVICE,
-            "username": c.TargetOracle.Tests.TEST_SCHEMA,
-            "password": "test_password",
+            "host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
+            "port": int(
+                os.getenv(
+                    "TEST_ORACLE_PORT",
+                    str(c.TargetOracle.Tests.ORACLE_PORT),
+                )
+            ),
+            "service_name": os.getenv(
+                "TEST_ORACLE_SERVICE",
+                c.TargetOracle.Tests.ORACLE_SERVICE,
+            ),
+            "username": os.getenv(
+                "TEST_ORACLE_USER",
+                c.TargetOracle.Tests.TEST_SCHEMA,
+            ),
+            "password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
         })
     )
     connect_result = api.connect()
@@ -398,7 +431,7 @@ def temporary_env_vars(**kwargs: str | None) -> Generator[None]:
         if value is None:
             os.environ.pop(key, None)
         else:
-            os.environ[key] = str(value)
+            os.environ[key] = value
     try:
         yield
     finally:
