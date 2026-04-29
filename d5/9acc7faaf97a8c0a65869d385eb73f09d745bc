@@ -1,0 +1,20 @@
+tests/integration/test_oracle.py
+  h_9db9d35f50cf33 64,67,74,100,103,110,118,136,172,219,278,335,369,415,444
+tests/conftest.py
+  h_9db9d35f50cf33 18,53,98-166,227,229,231-239,241-243,245-246,545-548,550-557
+src/flext_target_oracle/_utilities/loader.py
+  h_9db9d35f50cf33 15,19,63-71,82-192,194-239,241-252,345,350-353,371-373,376-380,396-431,571-572,575,577-601,605-606,608-610,634-639,651-654,656-695
+src/flext_target_oracle/settings.py
+  h_9db9d35f50cf33 81-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "d59acc7faaf97a8c0a65869d385eb73f09d745bc",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
