@@ -15,6 +15,7 @@ from collections.abc import (
 )
 from contextlib import contextmanager
 from pathlib import Path
+from time import monotonic, sleep
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -49,10 +50,7 @@ def isolate_target_oracle_env(
     request: pytest.FixtureRequest,
 ) -> None:
     """Keep unit tests deterministic regardless of host FLEXT_TARGET_ORACLE_* env."""
-    if request.node.get_closest_marker(
-        "integration"
-    ) or request.node.get_closest_marker("e2e"):
-        return
+    _ = request
     for key in [key for key in os.environ if key.startswith("FLEXT_TARGET_ORACLE_")]:
         monkeypatch.delenv(key, raising=False)
     FlextSettings.reset_for_testing()
@@ -97,6 +95,75 @@ def shared_oracle_container(docker_control: tk) -> str:
     os.environ["TEST_ORACLE_SERVICE"] = "FLEXTDB"
     os.environ["TEST_ORACLE_USER"] = "flext_test"
     os.environ["TEST_ORACLE_PASSWORD"] = "flext_test_password"
+    admin_settings = FlextDbOracleSettings.model_validate({
+        "host": os.environ["TEST_ORACLE_HOST"],
+        "port": int(os.environ["TEST_ORACLE_PORT"]),
+        "service_name": os.environ["TEST_ORACLE_SERVICE"],
+        "username": "system",
+        "password": "flext_oracle_test",
+    })
+    oracle_settings = FlextDbOracleSettings.model_validate({
+        "host": os.environ["TEST_ORACLE_HOST"],
+        "port": int(os.environ["TEST_ORACLE_PORT"]),
+        "service_name": os.environ["TEST_ORACLE_SERVICE"],
+        "username": os.environ["TEST_ORACLE_USER"],
+        "password": os.environ["TEST_ORACLE_PASSWORD"],
+    })
+    deadline = monotonic() + 180
+    last_error = "Oracle application user is not ready yet"
+    while monotonic() < deadline:
+        admin_api = FlextDbOracleApi(admin_settings)
+        admin_connect_result = admin_api.connect()
+        if admin_connect_result.success:
+            user_query_result = admin_api.oracle_services.execute_query(
+                'SELECT COUNT(*) AS "count" FROM all_users WHERE username = :username',
+                m.ConfigMap(root={"username": "FLEXT_TEST"}),
+            )
+            if user_query_result.success:
+                raw_user_count = user_query_result.value[0].root["count"]
+                user_count = (
+                    raw_user_count
+                    if isinstance(raw_user_count, int)
+                    else int(str(raw_user_count))
+                )
+                user_exists = user_count > 0
+                if not user_exists:
+                    create_user_result = admin_api.execute_sql(
+                        "CREATE USER flext_test IDENTIFIED BY flext_test_password"
+                    )
+                    if create_user_result.failure:
+                        last_error = create_user_result.error or last_error
+                alter_user_result = admin_api.execute_sql(
+                    "ALTER USER flext_test IDENTIFIED BY flext_test_password ACCOUNT UNLOCK"
+                )
+                if alter_user_result.failure:
+                    last_error = alter_user_result.error or last_error
+                grant_result = admin_api.execute_sql(
+                    "GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SEQUENCE, CREATE TABLE, CREATE PROCEDURE, CREATE TRIGGER, UNLIMITED TABLESPACE TO flext_test"
+                )
+                if grant_result.failure:
+                    last_error = grant_result.error or last_error
+            else:
+                last_error = user_query_result.error or last_error
+            admin_disconnect_result = admin_api.disconnect()
+            _ = admin_disconnect_result
+            api = FlextDbOracleApi(oracle_settings)
+            connect_result = api.connect()
+            if connect_result.success:
+                health_result = api.oracle_services.execute_query(
+                    'SELECT 1 AS "health" FROM DUAL'
+                )
+                disconnect_result = api.disconnect()
+                _ = disconnect_result
+                if health_result.success:
+                    return container_name
+                last_error = health_result.error or last_error
+            else:
+                last_error = connect_result.error or last_error
+        else:
+            last_error = admin_connect_result.error or last_error
+        sleep(2)
+    pytest.skip(last_error)
     return container_name
 
 
@@ -157,14 +224,26 @@ def clean_database(oracle_engine: FlextDbOracleApi) -> None:
 
 
 @pytest.fixture
-def oracle_config() -> FlextTargetOracleSettings:
+def oracle_config(shared_oracle_container: str) -> FlextTargetOracleSettings:
     """Create Oracle target configuration for tests."""
+    _ = shared_oracle_container
     return FlextTargetOracleSettings.model_validate({
-        "oracle_host": c.TargetOracle.Tests.ORACLE_HOST,
-        "oracle_port": c.TargetOracle.Tests.ORACLE_PORT,
-        "oracle_service_name": c.TargetOracle.Tests.ORACLE_SERVICE,
-        "oracle_user": c.TargetOracle.Tests.TEST_SCHEMA,
-        "oracle_password": "test_password",
+        "oracle_host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
+        "oracle_port": int(
+            os.getenv(
+                "TEST_ORACLE_PORT",
+                str(c.TargetOracle.Tests.ORACLE_PORT),
+            )
+        ),
+        "oracle_service_name": os.getenv(
+            "TEST_ORACLE_SERVICE",
+            c.TargetOracle.Tests.ORACLE_SERVICE,
+        ),
+        "oracle_user": os.getenv(
+            "TEST_ORACLE_USER",
+            c.TargetOracle.Tests.TEST_SCHEMA,
+        ),
+        "oracle_password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
         "default_target_schema": c.TargetOracle.Tests.TEST_SCHEMA,
         "batch_size": 1000,
         "use_bulk_operations": True,
@@ -463,9 +542,19 @@ def temp_config_file(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def connected_loader(oracle_loader: FlextTargetOracleLoader) -> FlextTargetOracleLoader:
+def oracle_loader(
+    oracle_config: FlextTargetOracleSettings,
+    oracle_engine: FlextDbOracleApi,
+) -> Generator[FlextTargetOracleLoader]:
     """Provide a connected FlextTargetOracleLoader instance."""
-    return oracle_loader
+    _ = oracle_engine
+    loader = FlextTargetOracleLoader(oracle_config)
+    connect_result = loader.connect()
+    if connect_result.failure:
+        pytest.skip(connect_result.error or "Oracle loader could not connect")
+    yield loader
+    disconnect_result = loader.disconnect()
+    _ = disconnect_result
 
 
 @pytest.fixture

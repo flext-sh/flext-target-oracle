@@ -78,6 +78,46 @@ class FlextTargetOracleSettings(FlextSettings):
     table_suffix: Annotated[
         str, u.Field(description="Suffix applied to table names")
     ] = ""
+    load_method: Annotated[
+        str,
+        u.Field(description="Oracle loading strategy for record batches"),
+    ] = c.TargetOracle.LOAD_METHOD_INSERT
+    sdc_mode: Annotated[
+        str,
+        u.Field(description="Singer upsert mode applied during loading"),
+    ] = c.TargetOracle.LOAD_METHOD_INSERT.lower()
+    storage_mode: Annotated[
+        str,
+        u.Field(description="How record payloads are materialized into Oracle"),
+    ] = c.TargetOracle.STORAGE_MODE_FLATTENED
+    json_column_name: Annotated[
+        str,
+        u.Field(description="Column name used to persist JSON payloads"),
+    ] = "DATA"
+    truncate_before_load: Annotated[
+        bool,
+        u.Field(description="Truncate existing tables before reloading data"),
+    ] = False
+    column_ordering: Annotated[
+        str,
+        u.Field(description="Column ordering strategy for generated DDL"),
+    ] = ""
+    column_order_rules: Annotated[
+        dict[str, int],
+        u.Field(description="Priority rules applied to generated table columns"),
+    ] = u.Field(default_factory=dict)
+    column_mappings: Annotated[
+        dict[str, dict[str, str]],
+        u.Field(description="Per-stream Singer-to-Oracle column mappings"),
+    ] = u.Field(default_factory=dict)
+    ignored_columns: Annotated[
+        tuple[str, ...],
+        u.Field(description="Columns ignored during schema and record handling"),
+    ] = u.Field(default_factory=tuple)
+    custom_indexes: Annotated[
+        dict[str, tuple[t.JsonMapping, ...]],
+        u.Field(description="Per-stream custom Oracle index definitions"),
+    ] = u.Field(default_factory=dict)
     use_bulk_operations: Annotated[
         bool, u.Field(description="Use bulk operations for faster loading")
     ] = True

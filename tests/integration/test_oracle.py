@@ -61,17 +61,17 @@ def _query_scalar(
 class TestsFlextTargetOracleOracle:
     """Integration tests with real Oracle database."""
 
-    @pytest.mark.usefixtures("_clean_database")
+    @pytest.mark.usefixtures("clean_database")
     def test_create_simple_table(
         self,
-        connected_loader: FlextTargetOracleLoader,
+        oracle_loader: FlextTargetOracleLoader,
         oracle_engine: FlextDbOracleApi,
         simple_schema: t.JsonValue,
     ) -> None:
         """Test creating a simple table with basic data types."""
         stream_name = "test_users"
         schema_dict, key_props = _schema_parts(simple_schema)
-        table_res = connected_loader.ensure_table_exists(
+        table_res = oracle_loader.ensure_table_exists(
             stream_name, schema_dict, key_props
         )
         assert table_res.success
@@ -97,17 +97,17 @@ class TestsFlextTargetOracleOracle:
         assert "_SDC_EXTRACTED_AT" in columns
         assert "_SDC_LOADED_AT" in columns
 
-    @pytest.mark.usefixtures("_clean_database")
+    @pytest.mark.usefixtures("clean_database")
     def test_insert_and_retrieve_data(
         self,
-        connected_loader: FlextTargetOracleLoader,
+        oracle_loader: FlextTargetOracleLoader,
         oracle_engine: FlextDbOracleApi,
         simple_schema: t.JsonValue,
     ) -> None:
         """Test inserting data and retrieving it."""
         stream_name = "test_insert"
         schema_dict, key_props = _schema_parts(simple_schema)
-        create_res = connected_loader.ensure_table_exists(
+        create_res = oracle_loader.ensure_table_exists(
             stream_name, schema_dict, key_props
         )
         assert create_res.success
@@ -115,7 +115,7 @@ class TestsFlextTargetOracleOracle:
             {"id": 1, "name": "John Doe", "email": "john@example.com"},
             {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
         ]
-        result = connected_loader.insert_records(stream_name, records)
+        result = oracle_loader.insert_records(stream_name, records)
         assert result.success
         rows = _query_rows(
             oracle_engine,
@@ -133,7 +133,7 @@ class TestsFlextTargetOracleOracle:
             "email": "jane@example.com",
         }
 
-    @pytest.mark.usefixtures("_clean_database")
+    @pytest.mark.usefixtures("clean_database")
     def test_merge_mode_updates(
         self,
         oracle_config: FlextTargetOracleSettings,
@@ -169,7 +169,7 @@ class TestsFlextTargetOracleOracle:
         disconnect_result = loader.disconnect()
         assert disconnect_result.success
 
-    @pytest.mark.usefixtures("_clean_database")
+    @pytest.mark.usefixtures("clean_database")
     def test_bulk_insert_performance(
         self, oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi
     ) -> None:
@@ -216,7 +216,7 @@ class TestsFlextTargetOracleOracle:
         assert elapsed < 10.0
         assert loader.disconnect().success
 
-    @pytest.mark.usefixtures("_clean_database")
+    @pytest.mark.usefixtures("clean_database")
     def test_json_storage_mode(
         self,
         oracle_config: FlextTargetOracleSettings,
@@ -275,7 +275,7 @@ class TestsFlextTargetOracleOracle:
         assert len(items_data) == 2
         assert loader.disconnect().success
 
-    @pytest.mark.usefixtures("_clean_database")
+    @pytest.mark.usefixtures("clean_database")
     def test_column_ordering(
         self,
         oracle_config: FlextTargetOracleSettings,
@@ -332,7 +332,7 @@ class TestsFlextTargetOracleOracle:
         assert all(columns.index(sdc) > columns.index("UPDATED_AT") for sdc in sdc_cols)
         assert loader.disconnect().success
 
-    @pytest.mark.usefixtures("_clean_database")
+    @pytest.mark.usefixtures("clean_database")
     def test_truncate_before_load(
         self,
         oracle_config: FlextTargetOracleSettings,
@@ -366,7 +366,7 @@ class TestsFlextTargetOracleOracle:
         assert int(count) == 0
         assert loader.disconnect().success
 
-    @pytest.mark.usefixtures("_clean_database")
+    @pytest.mark.usefixtures("clean_database")
     def test_custom_indexes(
         self,
         oracle_config: FlextTargetOracleSettings,
@@ -412,7 +412,7 @@ class TestsFlextTargetOracleOracle:
 
     """End-to-end tests using the full FlextTargetOracle."""
 
-    @pytest.mark.usefixtures("_clean_database")
+    @pytest.mark.usefixtures("clean_database")
     def test_full_singer_workflow(
         self,
         oracle_config: FlextTargetOracleSettings,
@@ -441,7 +441,7 @@ class TestsFlextTargetOracleOracle:
         )
         assert int(data_count) > 0
 
-    @pytest.mark.usefixtures("_clean_database")
+    @pytest.mark.usefixtures("clean_database")
     def test_column_mapping_and_filtering(
         self,
         oracle_config: FlextTargetOracleSettings,
