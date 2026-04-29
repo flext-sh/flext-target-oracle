@@ -141,7 +141,7 @@ class TestsFlextTargetOracleOracle:
         simple_schema: t.JsonValue,
     ) -> None:
         """Test merge mode for updating existing records."""
-        oracle_config = oracle_config.model_copy(update={"sdc_mode": "merge"})
+        oracle_config = oracle_config.clone(sdc_mode="merge")
         loader = FlextTargetOracleLoader(oracle_config)
         connect_result = loader.connect()
         assert connect_result.success
@@ -174,11 +174,9 @@ class TestsFlextTargetOracleOracle:
         self, oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi
     ) -> None:
         """Test bulk insert with large dataset."""
-        oracle_config = oracle_config.model_copy(
-            update={
-                "load_method": c.TargetOracle.LOAD_METHOD_BULK_INSERT,
-                "batch_size": 1000,
-            }
+        oracle_config = oracle_config.clone(
+            load_method=c.TargetOracle.LOAD_METHOD_BULK_INSERT,
+            batch_size=1000,
         )
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().success
@@ -224,9 +222,10 @@ class TestsFlextTargetOracleOracle:
         nested_schema: t.JsonValue,
     ) -> None:
         """Test JSON storage mode with nested data."""
-        oracle_config = oracle_config.model_copy(update={})
-        oracle_config = oracle_config.model_copy(
-            update={"storage_mode": "json", "json_column_name": "json_data"}
+        oracle_config = oracle_config.clone()
+        oracle_config = oracle_config.clone(
+            storage_mode="json",
+            json_column_name="json_data",
         )
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().success
@@ -282,16 +281,14 @@ class TestsFlextTargetOracleOracle:
         oracle_engine: FlextDbOracleApi,
     ) -> None:
         """Test column ordering in created tables."""
-        oracle_config = oracle_config.model_copy(
-            update={
-                "column_ordering": "alphabetical",
-                "column_order_rules": {
-                    "primary_keys": 1,
-                    "regular_columns": 2,
-                    "audit_columns": 3,
-                    "sdc_columns": 4,
-                },
-            }
+        oracle_config = oracle_config.clone(
+            column_ordering="alphabetical",
+            column_order_rules={
+                "primary_keys": 1,
+                "regular_columns": 2,
+                "audit_columns": 3,
+                "sdc_columns": 4,
+            },
         )
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().success
@@ -340,7 +337,7 @@ class TestsFlextTargetOracleOracle:
         simple_schema: t.JsonValue,
     ) -> None:
         """Test truncate table before loading data."""
-        oracle_config = oracle_config.model_copy(update={"truncate_before_load": True})
+        oracle_config = oracle_config.clone(truncate_before_load=True)
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().success
         stream_name = "test_truncate"
@@ -374,18 +371,16 @@ class TestsFlextTargetOracleOracle:
         simple_schema: t.JsonValue,
     ) -> None:
         """Test creation of custom indexes."""
-        oracle_config = oracle_config.model_copy(
-            update={
-                "custom_indexes": {
-                    "test_indexes": [
-                        {
-                            "name": "IDX_EMAIL_UNIQUE",
-                            "columns": ["EMAIL"],
-                            "unique": True,
-                        },
-                        {"columns": ["NAME", "CREATED_AT"]},
-                    ]
-                }
+        oracle_config = oracle_config.clone(
+            custom_indexes={
+                "test_indexes": [
+                    {
+                        "name": "IDX_EMAIL_UNIQUE",
+                        "columns": ["EMAIL"],
+                        "unique": True,
+                    },
+                    {"columns": ["NAME", "CREATED_AT"]},
+                ]
             }
         )
         loader = FlextTargetOracleLoader(oracle_config)
@@ -448,13 +443,9 @@ class TestsFlextTargetOracleOracle:
         oracle_engine: FlextDbOracleApi,
     ) -> None:
         """Test column mapping and filtering features."""
-        oracle_config = oracle_config.model_copy(
-            update={
-                "column_mappings": {
-                    "users": {"name": "full_name", "email": "email_address"}
-                },
-                "ignored_columns": ["password", "internal_id"],
-            }
+        oracle_config = oracle_config.clone(
+            column_mappings={"users": {"name": "full_name", "email": "email_address"}},
+            ignored_columns=["password", "internal_id"],
         )
         target = FlextTargetOracle(settings=oracle_config)
         target.initialize()
