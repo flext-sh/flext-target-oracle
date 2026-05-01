@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from collections.abc import (
     Mapping,
-    Sequence,
 )
 from pathlib import Path
 
@@ -24,7 +23,7 @@ def load_config() -> t.JsonMapping:
     return adapter.validate_json(content)
 
 
-def load_singer_messages() -> Sequence[t.JsonMapping]:
+def load_singer_messages() -> t.SequenceOf[t.JsonMapping]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
     adapter: m.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)

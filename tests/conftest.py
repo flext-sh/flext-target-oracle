@@ -11,7 +11,6 @@ import os
 from asyncio import AbstractEventLoop, get_event_loop_policy
 from collections.abc import (
     Generator,
-    Sequence,
 )
 from contextlib import contextmanager
 from pathlib import Path
@@ -456,7 +455,7 @@ def sample_record() -> t.JsonMapping:
 
 
 @pytest.fixture
-def batch_records() -> Sequence[t.JsonMapping]:
+def batch_records() -> t.SequenceOf[t.JsonMapping]:
     """Batch of records for testing bulk operations."""
     return [
         {
@@ -496,7 +495,7 @@ def singer_messages(
     simple_schema: t.JsonMapping,
     sample_record: t.JsonMapping,
     state_message: t.JsonMapping,
-) -> Sequence[t.JsonMapping]:
+) -> t.SequenceOf[t.JsonMapping]:
     """Complete Singer message stream for testing."""
     return [simple_schema, sample_record, sample_record, state_message]
 
@@ -558,7 +557,7 @@ def oracle_loader(
 
 
 @pytest.fixture
-def large_dataset() -> Sequence[m.Dict]:
+def large_dataset() -> t.SequenceOf[m.Dict]:
     """Generate large dataset for performance testing."""
     schema = t.Tests.DICT_ADAPTER.validate_python({
         "type": "SCHEMA",
@@ -593,7 +592,7 @@ def large_dataset() -> Sequence[m.Dict]:
     return result
 
 
-def pytest_collection_modifyitems(items: Sequence[pytest.Item]) -> None:
+def pytest_collection_modifyitems(items: t.SequenceOf[pytest.Item]) -> None:
     """Add markers to test items based on their location."""
     for item in items:
         if "unit" in str(item.fspath):

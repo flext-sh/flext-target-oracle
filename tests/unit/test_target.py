@@ -3,9 +3,6 @@
 from __future__ import annotations
 
 import json
-from collections.abc import (
-    Sequence,
-)
 from unittest.mock import Mock
 
 import pytest
@@ -124,7 +121,7 @@ class TestsFlextTargetOracleTarget:
     def test_process_singer_messages_flushes_loader(
         self, target: FlextTargetOracle
     ) -> None:
-        messages: Sequence[
+        messages: t.SequenceOf[
             m.Meltano.SingerSchemaMessage
             | m.Meltano.SingerRecordMessage
             | m.Meltano.SingerStateMessage

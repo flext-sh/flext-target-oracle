@@ -15,9 +15,6 @@ import os
 import signal
 import sys
 import time
-from collections.abc import (
-    Sequence,
-)
 from datetime import UTC
 from types import FrameType
 from typing import cast
@@ -273,7 +270,7 @@ class ProductionTargetManager:
 
     def process_singer_stream(
         self,
-        messages: Sequence[SingerMessage],
+        messages: t.SequenceOf[SingerMessage],
     ) -> p.Result[t.JsonMapping]:
         """Process complete Singer message stream with comprehensive error handling.
 
@@ -478,7 +475,7 @@ def demonstrate_production_setup() -> None:
         raise
 
 
-def create_production_sample_stream() -> Sequence[SingerMessage]:
+def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
     """Create a realistic production data stream for demonstration.
 
     Returns:

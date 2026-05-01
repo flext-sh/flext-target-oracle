@@ -6,14 +6,13 @@ import json
 import time
 from collections.abc import (
     Mapping,
-    Sequence,
 )
 from unittest.mock import Mock
 
 import pytest
 
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
-from tests import m, r
+from tests import m, r, t
 
 
 @pytest.mark.performance
@@ -52,7 +51,7 @@ class TestsFlextTargetOraclePerformance:
 
     def test_message_processing_scales_linearly_for_state_updates(self) -> None:
         target = self._target()
-        messages: Sequence[
+        messages: t.SequenceOf[
             m.Meltano.SingerSchemaMessage
             | m.Meltano.SingerRecordMessage
             | m.Meltano.SingerStateMessage

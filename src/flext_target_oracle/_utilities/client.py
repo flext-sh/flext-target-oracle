@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import (
     MutableMapping,
-    Sequence,
 )
 from typing import ClassVar, assert_never
 
@@ -16,6 +15,7 @@ from flext_target_oracle import (
     m,
     p,
     r,
+    t,
 )
 
 
@@ -125,7 +125,7 @@ class FlextTargetOracle:
 
     def process_singer_messages(
         self,
-        messages: Sequence[
+        messages: t.SequenceOf[
             m.Meltano.SingerSchemaMessage
             | m.Meltano.SingerRecordMessage
             | m.Meltano.SingerStateMessage

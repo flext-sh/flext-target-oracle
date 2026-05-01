@@ -25,11 +25,8 @@ from __future__ import annotations
 import json
 import logging
 import os
-from collections.abc import (
-    Sequence,
-)
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m, r, u
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m, r, t, u
 
 logging.basicConfig(level=logging.INFO)
 logger = u.fetch_logger(__name__)
@@ -89,7 +86,7 @@ def create_sample_schema_message() -> m.Meltano.SingerSchemaMessage:
     })
 
 
-def create_sample_record_messages() -> Sequence[m.Meltano.SingerRecordMessage]:
+def create_sample_record_messages() -> t.SequenceOf[m.Meltano.SingerRecordMessage]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:

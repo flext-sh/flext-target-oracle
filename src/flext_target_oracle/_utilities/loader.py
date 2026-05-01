@@ -488,7 +488,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def insert_records(
         self,
         stream_name: str,
-        records: Sequence[t.JsonMapping],
+        records: t.SequenceOf[t.JsonMapping],
     ) -> p.Result[bool]:
         """Insert multiple records - convenience wrapper used by tests.
 

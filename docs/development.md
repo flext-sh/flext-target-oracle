@@ -247,7 +247,7 @@ def process_record(record: dict) -> p.Result[bool]:
         return r[bool].fail(f"Processing failed: {e}")
 
 # ✅ Chain r operations
-def process_batch(records: Sequence[m.Dict]) -> p.Result[Stats]:
+def process_batch(records: t.SequenceOf[m.Dict]) -> p.Result[Stats]:
     """Process batch of records with early termination on failure."""
     stats = Stats()
 

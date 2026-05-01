@@ -10,7 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from datetime import datetime
 from typing import TYPE_CHECKING, Annotated, override
 
@@ -31,7 +30,7 @@ class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
 
     code: Annotated[str, u.Field(description="Canonical error code")]
     context: Annotated[
-        Mapping[str, t.JsonValue] | None,
+        t.MappingKV[str, t.JsonValue] | None,
         u.Field(
             description="Structured error context",
         ),

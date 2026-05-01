@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 from types import MappingProxyType
 from typing import Annotated, Literal, Self
 
@@ -10,7 +9,7 @@ from flext_meltano import m, t
 from flext_target_oracle import u
 
 
-def _default_buffer_status() -> Mapping[str, int]:
+def _default_buffer_status() -> t.MappingKV[str, int]:
     """Return an immutable empty buffer-status mapping."""
     return MappingProxyType({})
 
@@ -126,7 +125,7 @@ class FlextTargetOracleModelsResults:
             description="Aggregated loading operation details",
         )
         buffer_status: Annotated[
-            Mapping[str, int],
+            t.MappingKV[str, int],
             u.Field(
                 description="Remaining buffered records by stream",
             ),

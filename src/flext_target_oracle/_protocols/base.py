@@ -75,7 +75,7 @@ class FlextTargetOracleProtocolsBase:
 
         def execute_batch_target(
             self,
-            operations: Sequence[m.Meltano.SingerRecordMessage],
+            operations: t.SequenceOf[m.Meltano.SingerRecordMessage],
         ) -> p.Result[Sequence[bool]]:
             """Execute batch of Oracle operations."""
             ...
