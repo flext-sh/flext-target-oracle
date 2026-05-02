@@ -440,9 +440,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """Execute domain service - returns connection test result."""
         connection_result = self.test_connection()
         if connection_result.failure:
-            return r[t.JsonMapping].fail(
-                f"Oracle connection failed: {connection_result.error}",
-            )
+            return r[t.JsonMapping].fail_op("Oracle connection", connection_result.error)
         return r[t.JsonMapping].ok({
             "status": "ready",
             "host": self.target_config.oracle_host,
@@ -552,9 +550,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                     schema=self.target_config.default_target_schema,
                 )
                 if tables_result.failure:
-                    return r[bool].fail(
-                        f"Connection test failed: {tables_result.error}",
-                    )
+                    return r[bool].fail_op("Connection test", tables_result.error)
                 self.log_info("Oracle connection established successfully")
                 return r[bool].ok(value=True)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
@@ -690,17 +686,13 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                                         delete_params,
                                     )
                                     if delete_result.failure:
-                                        return r[bool].fail(
-                                            f"Merge delete failed: {delete_result.error}",
-                                        )
+                                        return r[bool].fail_op("Merge delete", delete_result.error)
                             result = connected_api.execute_many(
                                 insert_sql_result.value,
                                 params_list,
                             )
                             if result.failure:
-                                flush_result = r[bool].fail(
-                                    f"Batch insert failed: {result.error}",
-                                )
+                                flush_result = r[bool].fail_op("Batch insert", result.error)
                             else:
                                 self.record_buffers[stream_name] = list[t.JsonMapping]()
                                 self.log_info(
