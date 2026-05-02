@@ -19,7 +19,7 @@ classifiers = [
   "Topic :: Database",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: System :: Archiving",
-  "Typing :: Typed",
+  "Typing :: Typed"
 ]
 dependencies = [
   "click>=8.3.3",
@@ -31,7 +31,7 @@ dependencies = [
   "pydantic-settings>=2.14.0",
   "pydantic>=2.13.3",
   "pyyaml>=6.0.3",
-  "rich>=14.3.4",
+  "rich>=14.3.4"
 ]
 description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
 keywords = [
@@ -42,7 +42,7 @@ keywords = [
   "flext",
   "library",
   "oracle",
-  "typed",
+  "typed"
 ]
 license = "MIT"
 name = "flext-target-oracle"
@@ -131,7 +131,7 @@ dev = [
   "types-setuptools>=80.9",
   "types-tabulate>=0.10",
   "types-toml>=0.10.8.20240310",
-  "vulture>=2.13",
+  "vulture>=2.13"
 ]
 
 [project.scripts]
@@ -165,7 +165,7 @@ known_first_party = [
   "flext_core",
   "flext_db_oracle",
   "flext_meltano",
-  "flext_target_oracle",
+  "flext_target_oracle"
 ]
 pep621_dev_dependency_groups = [ "dev" ]
 
@@ -182,7 +182,7 @@ disable_error_code = [
   "misc",
   "name-defined",
   "prop-decorator",
-  "valid-type",
+  "valid-type"
 ]
 exclude = "^tests/fixtures(?:/|$)"
 explicit_package_bases = true
@@ -229,7 +229,7 @@ project-excludes = [
   ".flext-deps/**",
   ".venv/**",
   "typings/**",
-  "vendor/**",
+  "vendor/**"
 ]
 project-includes = [ "examples/**/*.py*", "src/**/*.py*", "tests/**/*.py*" ]
 python-version = "3.13"
@@ -247,7 +247,7 @@ search-path = [
   "../flext-meltano/examples",
   "../flext-meltano/src",
   "../flext-tests/src",
-  "src",
+  "src"
 ]
 use-ignore-files = false
 
@@ -358,7 +358,7 @@ exclude = [
   "**/tests/fixtures/**",
   "**/venv",
   "**/venv/**",
-  ".venv",
+  ".venv"
 ]
 extraPaths = [ ".", "../typings", "src" ]
 ignore = [ "**/*.pyi", "../typings" ]
@@ -429,10 +429,10 @@ addopts = [
   "--ignore-glob=*/tests/typings.py",
   "--ignore-glob=*/tests/utilities.py",
   "--markdown-docs",
-  "--strict-markers",
+  "--strict-markers"
 ]
 filterwarnings = [
-  "ignore:.*cannot collect test class.*because it has a __init__ constructor.*:pytest.PytestCollectionWarning",
+  "ignore:.*cannot collect test class.*because it has a __init__ constructor.*:pytest.PytestCollectionWarning"
 ]
 markers = [
   "docker: tests requiring Docker",
@@ -443,7 +443,7 @@ markers = [
   "resilience: resilience tests",
   "slow: slow-running tests",
   "stress: stress tests",
-  "unit: unit tests",
+  "unit: unit tests"
 ]
 minversion = "8.0"
 python_classes = [ "Test*" ]
@@ -469,7 +469,7 @@ exclude = [
   "tests/fixtures/**",
   "typings",
   "vendor",
-  "venv",
+  "venv"
 ]
 fix = true
 line-length = 88
@@ -538,7 +538,7 @@ ignore = [
   "TRY300",
   "TRY301",
   "UP040",
-  "W293",
+  "W293"
 ]
 select = [ "ALL" ]
 
@@ -550,7 +550,7 @@ known-first-party = [
   "flext_core",
   "flext_db_oracle",
   "flext_meltano",
-  "flext_target_oracle",
+  "flext_target_oracle"
 ]
 split-on-trailing-comma = true
 
@@ -576,7 +576,7 @@ split-on-trailing-comma = true
   "S404",
   "S603",
   "T201",
-  "TID252",
+  "TID252"
 ]
 "**/*exceptions*" = [ "A001", "S105", "SLF001" ]
 "**/*handlers*" = [  ]
@@ -601,7 +601,7 @@ split-on-trailing-comma = true
   "S404",
   "S603",
   "T201",
-  "TID252",
+  "TID252"
 ]
 "**/*service*" = [ "N815", "PLC2801", "S404", "S603", "SLF001" ]
 "**/*subprocess_utils*" = [ "S404", "S603" ]
@@ -678,7 +678,7 @@ split-on-trailing-comma = true
   "TD003",
   "TID252",
   "TRY003",
-  "TRY004",
+  "TRY004"
 ]
 "**/*typings*" = [ "ANN401" ]
 "**/*utilities*" = [ "C901", "E402", "PLC2801", "PLW1510", "S404", "S603" ]
@@ -694,7 +694,7 @@ split-on-trailing-comma = true
   "N999",
   "PLC2701",
   "RUF067",
-  "TC004",
+  "TC004"
 ]
 "**/_constants/*.py" = [ "S105" ]
 "**/_utilities/parser.py" = [ "ARG004", "FBT001" ]
