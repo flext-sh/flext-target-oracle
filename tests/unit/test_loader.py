@@ -90,6 +90,19 @@ class TestsFlextTargetOracleLoader:
             "INSERT INTO TEST_SCHEMA.USERS (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:DATA, :_SDC_EXTRACTED_AT, :_SDC_LOADED_AT)"
         )
         object.__setattr__(loader, "_oracle_api", mock_api)
+        loader._stream_columns["users"] = (
+            m.DbOracle.Column(name="DATA", data_type="VARCHAR2(255)", nullable=True),
+            m.DbOracle.Column(
+                name="_SDC_EXTRACTED_AT",
+                data_type="TIMESTAMP",
+                nullable=True,
+            ),
+            m.DbOracle.Column(
+                name="_SDC_LOADED_AT",
+                data_type="TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+                nullable=True,
+            ),
+        )
         loader.record_buffers["users"] = [
             {"id": 1, "name": "Alice"},
             {"id": 2, "name": "Bob"},
