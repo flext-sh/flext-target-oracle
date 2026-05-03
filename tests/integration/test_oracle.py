@@ -368,16 +368,18 @@ class TestsFlextTargetOracleOracle:
         simple_schema: t.JsonValue,
     ) -> None:
         """Test creation of custom indexes."""
-        oracle_config = oracle_config.clone(
-            custom_indexes={
-                "test_indexes": [
-                    {
-                        "name": "IDX_EMAIL_UNIQUE",
-                        "columns": ["EMAIL"],
-                        "unique": True,
-                    },
-                    {"columns": ["NAME", "CREATED_AT"]},
-                ]
+        oracle_config = oracle_config.model_copy(
+            update={
+                "custom_indexes": {
+                    "test_indexes": (
+                        {
+                            "name": "IDX_EMAIL_UNIQUE",
+                            "columns": ["EMAIL"],
+                            "unique": True,
+                        },
+                        {"columns": ["NAME", "CREATED_AT"]},
+                    )
+                }
             }
         )
         loader = FlextTargetOracleLoader(oracle_config)
