@@ -1,0 +1,14 @@
+tests/integration/test_oracle.py
+  h_9db9d35f50cf33 371-374,381-382
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "6ea6504ea7a2f880374920d38cb3353020048a38",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
