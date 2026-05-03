@@ -224,35 +224,31 @@ def oracle_config(shared_oracle_container: str) -> FlextTargetOracleSettings:
     })
 
 
+_MOCK_API_OK_RETURNS: t.MappingKV[str, t.JsonValue] = {
+    "connect": None,
+    "disconnect": None,
+    "get_tables": [],
+    "fetch_tables": [],
+    "create_table_ddl": "CREATE TABLE...",
+    "execute_ddl": None,
+    "execute_dml": None,
+    "execute_query": [],
+    "execute_statement": None,
+    "execute_many": None,
+    "execute_sql": True,
+}
+
+
 @pytest.fixture
 def mock_oracle_api() -> Mock:
-    """Create mocked FlextDbOracleApi for unit tests."""
+    """Create mocked FlextDbOracleApi with success-shaped return values."""
     mock_api = Mock()
     mock_api.__enter__ = Mock(return_value=mock_api)
     mock_api.__exit__ = Mock(return_value=None)
-    mock_api.connect.return_value = MagicMock(success=True, failure=False, value=None)
-    mock_api.disconnect.return_value = MagicMock(
-        success=True, failure=False, value=None,
-    )
-    mock_api.get_tables.return_value = MagicMock(success=True, failure=False, value=[])
-    mock_api.create_table_ddl.return_value = MagicMock(
-        success=True, failure=False, value="CREATE TABLE...",
-    )
-    mock_api.execute_ddl.return_value = MagicMock(
-        success=True, failure=False, value=None,
-    )
-    mock_api.execute_dml.return_value = MagicMock(
-        success=True, failure=False, value=None,
-    )
-    mock_api.execute_query.return_value = MagicMock(success=True, failure=False, value=[])
-    mock_api.execute_statement.return_value = MagicMock(
-        success=True, failure=False, value=None,
-    )
-    mock_api.execute_many.return_value = MagicMock(
-        success=True, failure=False, value=None,
-    )
-    mock_api.fetch_tables.return_value = MagicMock(success=True, failure=False, value=[])
-    mock_api.execute_sql.return_value = MagicMock(success=True, failure=False, value=True)
+    for method, value in _MOCK_API_OK_RETURNS.items():
+        getattr(mock_api, method).return_value = MagicMock(
+            success=True, failure=False, value=value
+        )
     mock_api.connection = MagicMock()
     return mock_api
 
@@ -292,18 +288,20 @@ def oracle_loader(
     _ = disconnect_result
 
 
+_PATH_MARKERS: t.MappingKV[str, tuple[str, ...]] = {
+    "unit": ("unit",),
+    "integration": ("integration", "oracle"),
+    "e2e": ("e2e", "oracle", "slow"),
+    "performance": ("performance", "oracle"),
+}
+
+
 def pytest_collection_modifyitems(items: t.SequenceOf[pytest.Item]) -> None:
     """Add markers to test items based on their location."""
     for item in items:
-        if "unit" in str(item.fspath):
-            item.add_marker(pytest.mark.unit)
-        elif "integration" in str(item.fspath):
-            item.add_marker(pytest.mark.integration)
-            item.add_marker(pytest.mark.oracle)
-        elif "e2e" in str(item.fspath):
-            item.add_marker(pytest.mark.e2e)
-            item.add_marker(pytest.mark.oracle)
-            item.add_marker(pytest.mark.slow)
-        elif "performance" in str(item.fspath):
-            item.add_marker(pytest.mark.performance)
-            item.add_marker(pytest.mark.oracle)
+        fspath = str(item.fspath)
+        for path_key, markers in _PATH_MARKERS.items():
+            if path_key in fspath:
+                for marker in markers:
+                    item.add_marker(getattr(pytest.mark, marker))
+                break
