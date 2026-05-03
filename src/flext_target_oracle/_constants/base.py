@@ -32,7 +32,6 @@ class FlextTargetOracleConstantsBase:
     COMMAND_TYPE_ABOUT: Final[str] = "oracle_target_about"
 
     # OutputFormats
-    OUTPUT_FORMAT_JSON: Final[str] = "json"
     OUTPUT_FORMAT_TEXT: Final[str] = "text"
 
     DEFAULT_PORT: Final[int] = 1521
