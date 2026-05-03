@@ -191,36 +191,6 @@ class FlextTargetOracleExceptions(e):
                 else None
             )
 
-    class LoadError(ProcessingError):
-        """Oracle data loading errors."""
-
-    class SQLError(ProcessingError):
-        """Oracle SQL execution errors."""
-
-        @override
-        def __init__(
-            self,
-            message: str,
-            *,
-            metadata: FlextTargetOracleErrorMetadata | None = None,
-            **kwargs: t.JsonPayload,
-        ) -> None:
-            """Initialize SQL error with Oracle-specific context."""
-            resolved, ctx = FlextTargetOracleExceptions._build_context(
-                default_code=c.ErrorCode.OPERATION_ERROR,
-                metadata=metadata,
-                kwargs=kwargs,
-            )
-            super().__init__(
-                message=message,
-                metadata=resolved.model_copy(update={"context": ctx or None}),
-            )
-            self.sql_statement = ctx.get("sql_statement")
-            self.table_name = ctx.get("table_name")
-
-    class RecordError(ProcessingError):
-        """Oracle record processing errors."""
-
 
 __all__: t.StrSequence = [
     "FlextTargetOracleErrorMetadata",

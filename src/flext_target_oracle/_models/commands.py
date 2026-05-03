@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, override
+from typing import TYPE_CHECKING, Annotated
 
 from flext_meltano import m
 from flext_target_oracle import (
     FlextTargetOracleConstants,
     c,
-    h,
     r,
     t,
     u,
@@ -97,24 +96,6 @@ class FlextTargetOracleModelsCommands:
                     validation_result.error or "Configuration validation failed",
                 )
             return r[str].ok("validation_ok")
-
-    class OracleTargetCommandHandler(h[m.Command, str]):
-        """Dispatch command objects to their `execute` implementation."""
-
-        @override
-        def handle(
-            self,
-            message: m.Command,
-        ) -> p.Result[str]:
-            """Invoke command execute methods in a typed-safe way."""
-            if isinstance(
-                message,
-                FlextTargetOracleModelsCommands.OracleTargetAboutCommand
-                | FlextTargetOracleModelsCommands.OracleTargetLoadCommand
-                | FlextTargetOracleModelsCommands.OracleTargetValidateCommand,
-            ):
-                return message.execute()
-            return r[str].fail(f"Unsupported command: {type(message).__name__}")
 
     class OracleTargetCommandFactory:
         """Create Oracle target command objects."""

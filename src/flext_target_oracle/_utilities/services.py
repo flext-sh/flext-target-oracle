@@ -159,39 +159,9 @@ class FlextTargetOracleRecordService:
         return r[None].ok(None)
 
 
-class FlextTargetOracleServiceFactory:
-    """Factory for constructing all Oracle target services."""
-
-    def __init__(
-        self,
-        settings: FlextTargetOracleSettings,
-        oracle_api: FlextDbOracleApi,
-    ) -> None:
-        """Store dependencies shared by service instances."""
-        self.config = settings
-        self._oracle_api = oracle_api
-
-    def create_batch_service(self) -> FlextTargetOracleBatchService:
-        """Create Oracle batch service."""
-        return FlextTargetOracleBatchService(self.config, self._oracle_api)
-
-    def create_connection_service(self) -> FlextTargetOracleConnectionService:
-        """Create Oracle connection service."""
-        return FlextTargetOracleConnectionService(self.config, self._oracle_api)
-
-    def create_record_service(self) -> FlextTargetOracleRecordService:
-        """Create Oracle record service."""
-        return FlextTargetOracleRecordService(self.config)
-
-    def create_schema_service(self) -> FlextTargetOracleSchemaService:
-        """Create Oracle schema service."""
-        return FlextTargetOracleSchemaService(self.config, self._oracle_api)
-
-
 __all__: list[str] = [
     "FlextTargetOracleBatchService",
     "FlextTargetOracleConnectionService",
     "FlextTargetOracleRecordService",
     "FlextTargetOracleSchemaService",
-    "FlextTargetOracleServiceFactory",
 ]

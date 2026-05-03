@@ -60,27 +60,6 @@ class FlextTargetOracleModelsResults:
             )
         )
 
-    class LoaderReadyResult(m.ArbitraryTypesModel):
-        """Loader readiness payload after Oracle connectivity checks."""
-
-        status: Annotated[
-            Literal["ready"],
-            u.Field(
-                description="Loader readiness status",
-            ),
-        ] = "ready"
-        host: Annotated[str, u.Field(description="Configured Oracle host")]
-        service: Annotated[str, u.Field(description="Configured Oracle service name")]
-        target_schema: Annotated[
-            str,
-            u.Field(
-                alias="schema",
-                serialization_alias="schema",
-                validation_alias="schema",
-                description="Configured Oracle target schema",
-            ),
-        ]
-
     class LoaderOperation(m.ArbitraryTypesModel):
         """Detailed load operation summary for all streams."""
 

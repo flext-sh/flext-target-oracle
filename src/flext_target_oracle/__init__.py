@@ -46,7 +46,6 @@ if _t.TYPE_CHECKING:
         FlextTargetOracleConnectionService,
         FlextTargetOracleRecordService,
         FlextTargetOracleSchemaService,
-        FlextTargetOracleServiceFactory,
     )
     from flext_target_oracle.api import FlextTargetOracleService, target_oracle
     from flext_target_oracle.constants import FlextTargetOracleConstants, c
@@ -96,7 +95,6 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "FlextTargetOracleConnectionService",
                 "FlextTargetOracleRecordService",
                 "FlextTargetOracleSchemaService",
-                "FlextTargetOracleServiceFactory",
             ),
             ".api": (
                 "FlextTargetOracleService",
@@ -178,7 +176,6 @@ __all__: list[str] = [
     "FlextTargetOracleRecordService",
     "FlextTargetOracleSchemaService",
     "FlextTargetOracleService",
-    "FlextTargetOracleServiceFactory",
     "FlextTargetOracleSettings",
     "FlextTargetOracleTypes",
     "FlextTargetOracleTypesBase",
