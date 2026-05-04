@@ -1,0 +1,33 @@
+tests/unit/test_module_governance.py
+  26f224f147ec0d09 1-7,11-13,15,33-63,72-76,80,93-95,97-99
+src/flext_target_oracle/_utilities/loader.py
+  26f224f147ec0d09 618-620
+src/flext_target_oracle/_constants/base.py
+  26f224f147ec0d09 9-10,19-23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.4",
+  "base_commit_sha": "0ed9143e091eab53af488090a50d435080a3fbdc",
+  "prompts": {
+    "26f224f147ec0d09": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af795733-b18d-4c66-a653-6ff9466111c6",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "FLEXT Bot",
+      "messages": [],
+      "total_additions": 65,
+      "total_deletions": 18,
+      "accepted_lines": 65,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/969420df101ebac9b73dc0870cdbdb1c89b2a8d4d7577166fd397044ac6d6003"
+    }
+  },
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  }
+}
