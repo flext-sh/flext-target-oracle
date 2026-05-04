@@ -6,7 +6,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Final
+import re
+from typing import ClassVar, Final
 
 from flext_db_oracle import FlextDbOracleConstants
 from flext_meltano import c
@@ -14,6 +15,12 @@ from flext_meltano import c
 
 class FlextTargetOracleConstantsBase:
     """TargetOracle domain constants namespace."""
+
+    # === Regex authority for the TargetOracle domain ===
+    QUALIFIED_IDENTIFIER_PATTERN: Final[str] = r"[A-Za-z_][A-Za-z0-9_$.]*"
+    QUALIFIED_IDENTIFIER_RE: ClassVar[re.Pattern[str]] = re.compile(
+        QUALIFIED_IDENTIFIER_PATTERN
+    )
 
     # LoadMethods
     LOAD_METHOD_INSERT: Final[str] = "INSERT"

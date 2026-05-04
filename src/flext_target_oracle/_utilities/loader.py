@@ -10,7 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import re
 from collections.abc import (
     Mapping,
     Sequence,
@@ -616,7 +615,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 table_name = self.target_config.get_table_name(stream_name)
                 schema_name = self.target_config.default_target_schema
                 full_table_name = f"{schema_name}.{table_name}"
-                if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_$.]*", full_table_name):
+                if not c.TargetOracle.QUALIFIED_IDENTIFIER_RE.fullmatch(
+                    full_table_name
+                ):
                     flush_result = r[bool].fail_op(
                         "validate Oracle table identifier",
                     )
