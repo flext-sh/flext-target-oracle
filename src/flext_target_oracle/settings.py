@@ -12,12 +12,11 @@ from __future__ import annotations
 
 from typing import Annotated, ClassVar
 
-from flext_core import FlextSettings
+from flext_core import FlextSettingsBase
 from flext_target_oracle import FlextTargetOracleModelsSettings, c, e, m, p, r, t, u
 
 
-@FlextSettings.auto_register("target-oracle")
-class FlextTargetOracleSettings(FlextSettings):
+class FlextTargetOracleSettings(FlextSettingsBase):
     """Runtime settings for Oracle Singer target operations."""
 
     model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
