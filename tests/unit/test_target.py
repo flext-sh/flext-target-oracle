@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import json
 from unittest.mock import Mock
 
 import pytest
 
+from flext_cli import u as cli_u
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleExceptions,
@@ -82,7 +82,9 @@ class TestsFlextTargetOracleTarget:
             "stream": "users",
             "schema": {
                 "type": "object",
-                "properties": json.dumps({"id": {"type": "integer"}}),
+                "properties": cli_u.Cli.json_dumps({
+                    "id": {"type": "integer"}
+                }).unwrap(),
             },
             "key_properties": ["id"],
         })
@@ -97,7 +99,9 @@ class TestsFlextTargetOracleTarget:
             "stream": "users",
             "schema": {
                 "type": "object",
-                "properties": json.dumps({"id": {"type": "integer"}}),
+                "properties": cli_u.Cli.json_dumps({
+                    "id": {"type": "integer"}
+                }).unwrap(),
             },
         })
         record_message = m.Meltano.SingerRecordMessage.model_validate({
@@ -132,7 +136,9 @@ class TestsFlextTargetOracleTarget:
                 "stream": "users",
                 "schema": {
                     "type": "object",
-                    "properties": json.dumps({"id": {"type": "integer"}}),
+                    "properties": cli_u.Cli.json_dumps({
+                        "id": {"type": "integer"}
+                    }).unwrap(),
                 },
             }),
             m.Meltano.SingerRecordMessage.model_validate({

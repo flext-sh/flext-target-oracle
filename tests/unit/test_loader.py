@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import json
 from unittest.mock import MagicMock
 
 import pytest
 
+from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings
 from tests import m, r, t
 
@@ -63,7 +63,9 @@ class TestsFlextTargetOracleLoader:
             "stream": "users",
             "schema": {
                 "type": "object",
-                "properties": json.dumps({"id": {"type": "integer"}}),
+                "properties": cli_u.Cli.json_dumps({
+                    "id": {"type": "integer"}
+                }).unwrap(),
             },
             "key_properties": ["id"],
         }

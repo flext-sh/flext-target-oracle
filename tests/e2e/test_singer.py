@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-import json
 from unittest.mock import Mock
 
 import pytest
 
+from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 from tests import m, r, t
 
@@ -47,10 +47,10 @@ class TestsFlextTargetOracleSinger:
             "stream": "orders",
             "schema": {
                 "type": "object",
-                "properties": json.dumps({
+                "properties": cli_u.Cli.json_dumps({
                     "id": {"type": "integer"},
                     "amount": {"type": "number"},
-                }),
+                }).unwrap(),
             },
             "key_properties": ["id"],
         }

@@ -20,7 +20,8 @@ def load_config() -> t.JsonMapping:
     config_path = Path("settings.json")
     content = config_path.read_text(encoding="utf-8")
     adapter: m.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)
-    return adapter.validate_json(content)
+    config: t.JsonMapping = adapter.validate_json(content)
+    return config
 
 
 def load_singer_messages() -> t.SequenceOf[t.JsonMapping]:

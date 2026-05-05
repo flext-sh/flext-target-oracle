@@ -68,22 +68,25 @@ def create_sample_schema_message() -> m.Meltano.SingerSchemaMessage:
       t.JsonMapping: Singer SCHEMA message for users table
 
     """
-    return m.Meltano.SingerSchemaMessage.model_validate({
-        "type": "SCHEMA",
-        "stream": "users",
-        "schema": {
-            "type": "object",
-            "properties": json.dumps({
-                "id": {"type": "integer"},
-                "name": {"type": "string"},
-                "email": {"type": "string"},
-                "created_at": {"type": "string", "format": "date-time"},
-                "active": {"type": "boolean"},
-            }),
-            "required": json.dumps(["id", "name", "email"]),
-        },
-        "key_properties": ["id"],
-    })
+    schema_message: m.Meltano.SingerSchemaMessage = (
+        m.Meltano.SingerSchemaMessage.model_validate({
+            "type": "SCHEMA",
+            "stream": "users",
+            "schema": {
+                "type": "object",
+                "properties": json.dumps({
+                    "id": {"type": "integer"},
+                    "name": {"type": "string"},
+                    "email": {"type": "string"},
+                    "created_at": {"type": "string", "format": "date-time"},
+                    "active": {"type": "boolean"},
+                }),
+                "required": json.dumps(["id", "name", "email"]),
+            },
+            "key_properties": ["id"],
+        })
+    )
+    return schema_message
 
 
 def create_sample_record_messages() -> t.SequenceOf[m.Meltano.SingerRecordMessage]:
@@ -137,14 +140,17 @@ def create_sample_state_message() -> m.Meltano.SingerStateMessage:
       t.JsonMapping: Singer STATE message with bookmark information
 
     """
-    return m.Meltano.SingerStateMessage.model_validate({
-        "type": "STATE",
-        "value": {
-            "bookmarks": {
-                "users": {"last_id": 3, "last_updated": "2025-01-01T12:00:00Z"},
+    state_message: m.Meltano.SingerStateMessage = (
+        m.Meltano.SingerStateMessage.model_validate({
+            "type": "STATE",
+            "value": {
+                "bookmarks": {
+                    "users": {"last_id": 3, "last_updated": "2025-01-01T12:00:00Z"},
+                },
             },
-        },
-    })
+        })
+    )
+    return state_message
 
 
 def demonstrate_basic_usage() -> None:

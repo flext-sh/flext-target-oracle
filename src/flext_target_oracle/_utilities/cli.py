@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 from typing import ClassVar
 
+from flext_cli import cli
 from flext_meltano import u
 from flext_target_oracle import m, p, r, t
 
@@ -58,5 +59,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    cli.exit(main())
 __all__: list[str] = ["FlextTargetOracleCliService", "main"]
