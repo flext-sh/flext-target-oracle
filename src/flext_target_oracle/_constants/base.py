@@ -7,10 +7,13 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import re
-from typing import ClassVar, Final
+from typing import TYPE_CHECKING, ClassVar, Final
 
 from flext_db_oracle import FlextDbOracleConstants
 from flext_meltano import c
+
+if TYPE_CHECKING:
+    from flext_target_oracle import t
 
 
 class FlextTargetOracleConstantsBase:
@@ -18,7 +21,7 @@ class FlextTargetOracleConstantsBase:
 
     # === Regex authority for the TargetOracle domain ===
     QUALIFIED_IDENTIFIER_PATTERN: Final[str] = r"[A-Za-z_][A-Za-z0-9_$.]*"
-    QUALIFIED_IDENTIFIER_RE: ClassVar[re.Pattern[str]] = re.compile(
+    QUALIFIED_IDENTIFIER_RE: ClassVar[t.RegexPattern] = re.compile(
         QUALIFIED_IDENTIFIER_PATTERN
     )
 
