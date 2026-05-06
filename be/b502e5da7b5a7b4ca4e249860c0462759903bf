@@ -1,0 +1,25 @@
+src/flext_target_oracle/_utilities/errors.py
+  s_552d8e4891a938::t_49bb901bc365fe 33
+  s_552d8e4891a938::t_405c5bf59ec5b0 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.1",
+  "base_commit_sha": "beb502e5da7b5a7b4ca4e249860c0462759903bf",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  },
+  "sessions": {
+    "s_552d8e4891a938": {
+      "agent_id": {
+        "tool": "github-copilot",
+        "id": "35c0040b-2ae9-466e-90aa-7721509e1e19",
+        "model": "unknown"
+      },
+      "human_author": "FLEXT Bot <team@flext.sh>"
+    }
+  }
+}
