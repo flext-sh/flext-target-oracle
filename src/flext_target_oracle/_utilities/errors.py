@@ -30,7 +30,7 @@ class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
 
     code: Annotated[str, u.Field(description="Canonical error code")]
     context: Annotated[
-        t.MappingKV[str, t.JsonValue] | None,
+        t.JsonMapping | None,
         u.Field(
             description="Structured error context",
         ),
@@ -55,7 +55,7 @@ class FlextTargetOracleExceptions(e):
     ) -> tuple[FlextTargetOracleErrorMetadata, dict[str, t.JsonValue]]:
         """Resolve metadata and build merged oracle context from kwargs."""
         resolved = metadata or FlextTargetOracleErrorMetadata(code=default_code)
-        ctx: dict[str, t.JsonValue] = dict(resolved.context) if resolved.context else {}
+        ctx: t.JsonDict = dict(resolved.context) if resolved.context else {}
         ctx.update({
             k: (
                 v.isoformat()
