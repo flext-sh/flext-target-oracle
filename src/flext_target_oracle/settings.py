@@ -110,7 +110,7 @@ class FlextTargetOracleSettings(FlextSettingsBase):
         u.Field(description="Per-stream Singer-to-Oracle column mappings"),
     ] = u.Field(default_factory=dict)
     ignored_columns: Annotated[
-        tuple[str, ...],
+        t.StrSequence,
         u.Field(description="Columns ignored during schema and record handling"),
     ] = u.Field(default_factory=tuple)
     custom_indexes: Annotated[

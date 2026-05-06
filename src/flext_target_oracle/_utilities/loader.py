@@ -65,7 +65,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     _stream_field_mappings: dict[str, tuple[tuple[str, str], ...]] = u.PrivateAttr(
         default_factory=dict,
     )
-    _stream_key_columns: dict[str, tuple[str, ...]] = u.PrivateAttr(
+    _stream_key_columns: dict[str, t.StrSequence] = u.PrivateAttr(
         default_factory=dict,
     )
     _total_records: int = u.PrivateAttr(default_factory=lambda: 0)
@@ -73,7 +73,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     @staticmethod
     def _normalize_log_value(value: t.Scalar) -> t.JsonValue:
         """Normalize logging payloads into scalar or string values."""
-        if isinstance(value, (str, int, float, bool)):
+        if isinstance(value, t.PRIMITIVES_TYPES):
             return value
         return str(value)
 
@@ -513,7 +513,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             if stream_name not in self.record_buffers:
                 empty_records: t.MutableSequenceOf[t.JsonMapping] = []
                 self.record_buffers[stream_name] = empty_records
-            copied_record: t.MutableJsonMapping = dict(record_data.items())
+            copied_record = t.json_dict_adapter().validate_python(record_data)
             self.record_buffers[stream_name].append(copied_record)
             self._total_records += 1
             if len(self.record_buffers[stream_name]) >= self.target_config.batch_size:

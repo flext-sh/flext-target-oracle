@@ -288,7 +288,7 @@ def oracle_loader(
     _ = disconnect_result
 
 
-_PATH_MARKERS: t.MappingKV[str, tuple[str, ...]] = {
+_PATH_MARKERS: t.MappingKV[str, t.StrSequence] = {
     "unit": ("unit",),
     "integration": ("integration", "oracle"),
     "e2e": ("e2e", "oracle", "slow"),

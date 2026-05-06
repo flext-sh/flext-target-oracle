@@ -247,7 +247,7 @@ class TestsFlextTargetOracleOracle:
             ],
             "total": 349.97,
         }
-        typed_record = t.Tests.CONTAINER_MAPPING_ADAPTER.validate_python(record)
+        typed_record = t.json_mapping_adapter().validate_python(record)
         insert_res = loader.insert_records(stream_name, [typed_record])
         assert insert_res.success
         json_str = _query_scalar(
@@ -255,13 +255,13 @@ class TestsFlextTargetOracleOracle:
             'SELECT json_data AS "json_data" FROM test_json WHERE id = 1',
             "json_data",
         )
-        stored_data = t.Tests.CONTAINER_MAPPING_ADAPTER.validate_json(json_str)
+        stored_data = t.json_mapping_adapter().validate_json(json_str)
         customer = stored_data.get("customer")
-        customer_data = t.Tests.CONTAINER_MAPPING_ADAPTER.validate_python(customer)
+        customer_data = t.json_mapping_adapter().validate_python(customer)
         customer_name = customer_data.get("name")
         assert customer_name == "Acme Corp"
         customer_address = customer_data.get("address")
-        customer_address_data = t.Tests.CONTAINER_MAPPING_ADAPTER.validate_python(
+        customer_address_data = t.json_mapping_adapter().validate_python(
             customer_address
         )
         customer_city = customer_address_data.get("city")
@@ -419,7 +419,7 @@ class TestsFlextTargetOracleOracle:
         assert init_result.success
         for message in singer_messages:
             result = target.execute(
-                t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(message).decode("utf-8")
+                t.json_value_adapter().dump_json(message).decode("utf-8")
             )
             assert result.success
         table_count = _query_scalar(
@@ -463,11 +463,11 @@ class TestsFlextTargetOracleOracle:
             },
             "key_properties": ["id"],
         }
-        schema_msg_value: t.JsonValue = (
-            t.Tests.NORMALIZED_VALUE_ADAPTER.validate_python(schema_msg)
+        schema_msg_value: t.JsonValue = t.json_value_adapter().validate_python(
+            schema_msg
         )
         target.execute(
-            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(schema_msg_value).decode("utf-8")
+            t.json_value_adapter().dump_json(schema_msg_value).decode("utf-8")
         )
         record_msg = {
             "type": "RECORD",
@@ -480,11 +480,11 @@ class TestsFlextTargetOracleOracle:
                 "internal_id": "INT-001",
             },
         }
-        record_msg_value: t.JsonValue = (
-            t.Tests.NORMALIZED_VALUE_ADAPTER.validate_python(record_msg)
+        record_msg_value: t.JsonValue = t.json_value_adapter().validate_python(
+            record_msg
         )
         target.execute(
-            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json(record_msg_value).decode("utf-8")
+            t.json_value_adapter().dump_json(record_msg_value).decode("utf-8")
         )
         column_rows = _query_rows(
             oracle_engine,

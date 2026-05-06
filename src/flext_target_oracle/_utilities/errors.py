@@ -52,7 +52,7 @@ class FlextTargetOracleExceptions(e):
         default_code: str,
         metadata: FlextTargetOracleErrorMetadata | None,
         kwargs: dict[str, t.JsonPayload],
-    ) -> tuple[FlextTargetOracleErrorMetadata, dict[str, t.JsonValue]]:
+    ) -> tuple[FlextTargetOracleErrorMetadata, t.JsonDict]:
         """Resolve metadata and build merged oracle context from kwargs."""
         resolved = metadata or FlextTargetOracleErrorMetadata(code=default_code)
         ctx: t.JsonDict = dict(resolved.context) if resolved.context else {}
@@ -61,7 +61,7 @@ class FlextTargetOracleExceptions(e):
                 v.isoformat()
                 if isinstance(v, datetime)
                 else v
-                if isinstance(v, (str, int, float, bool))
+                if isinstance(v, t.PRIMITIVES_TYPES)
                 else ""
                 if v is None
                 else str(v)
@@ -192,7 +192,7 @@ class FlextTargetOracleExceptions(e):
             )
 
 
-__all__: t.StrSequence = [
+__all__: t.StrSequence = (
     "FlextTargetOracleErrorMetadata",
     "FlextTargetOracleExceptions",
-]
+)

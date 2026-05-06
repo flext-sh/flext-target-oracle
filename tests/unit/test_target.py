@@ -179,7 +179,7 @@ class TestsFlextTargetOracleTarget:
         assert metrics.batch_size > 0
         assert metrics.use_bulk_operations in {True, False}
         result = target.write_record(
-            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json({"id": 1}).decode("utf-8")
+            t.json_value_adapter().dump_json({"id": 1}).decode("utf-8")
         )
         assert result.failure
 
@@ -189,11 +189,14 @@ class TestsFlextTargetOracleTarget:
         mocked_load_record = Mock(return_value=r[bool].ok(value=True))
         object.__setattr__(target.loader, "load_record", mocked_load_record)
         result = target.write_record(
-            t.Tests.NORMALIZED_VALUE_ADAPTER.dump_json({
+            t
+            .json_value_adapter()
+            .dump_json({
                 "type": "RECORD",
                 "stream": "users",
                 "record": {"id": 1},
-            }).decode("utf-8")
+            })
+            .decode("utf-8")
         )
         mocked_load_record.assert_called_once_with("users", {"id": 1})
         assert result.success
