@@ -140,7 +140,6 @@ def shared_oracle_container(docker_control: tk) -> str:
             last_error = admin_connect_result.error or last_error
         sleep(2)
     pytest.skip(last_error)
-    return container_name
 
 
 @pytest.fixture(scope="session")

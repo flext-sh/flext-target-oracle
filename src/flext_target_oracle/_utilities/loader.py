@@ -62,7 +62,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     _stream_columns: dict[str, tuple[m.DbOracle.Column, ...]] = u.PrivateAttr(
         default_factory=dict,
     )
-    _stream_field_mappings: dict[str, tuple[tuple[str, str], ...]] = u.PrivateAttr(
+    _stream_field_mappings: t.MutableStrPairTupleMapping = u.PrivateAttr(
         default_factory=dict,
     )
     _stream_key_columns: dict[str, t.StrSequence] = u.PrivateAttr(
@@ -118,7 +118,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 c.TargetOracle.STORAGE_MODE_JSON,
                 c.TargetOracle.STORAGE_MODE_HYBRID,
             }
-            field_mappings: list[tuple[str, str]] = []
+            field_mappings: t.MutableStrPairSequence = []
             columns: list[m.DbOracle.Column] = []
             for source_name, definition_value in properties.items():
                 if source_name in ignored_columns:

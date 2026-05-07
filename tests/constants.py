@@ -13,7 +13,7 @@ from flext_tests import FlextTestsConstants
 from flext_target_oracle import FlextTargetOracleConstants
 
 
-class TestsFlextTargetOracleConstants(FlextTestsConstants, FlextTargetOracleConstants):
+class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsConstants):
     """Test constants combining FlextTestsConstants and project-specific constants."""
 
     class TargetOracle(FlextTargetOracleConstants.TargetOracle):
