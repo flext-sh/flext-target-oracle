@@ -14,9 +14,8 @@ from time import monotonic, sleep
 from unittest.mock import MagicMock, Mock
 
 import pytest
-from flext_tests import tk
+from flext_tests import reset_settings as _shared_reset_settings, tk
 
-from flext_core import FlextSettings
 from flext_db_oracle import (
     FlextDbOracleApi,
     FlextDbOracleSettings,
@@ -27,17 +26,19 @@ from flext_target_oracle import (
 )
 from tests import c, m, t
 
+reset_settings = _shared_reset_settings
+
 
 @pytest.fixture(autouse=True)
 def isolate_target_oracle_env(
     monkeypatch: pytest.MonkeyPatch,
     request: pytest.FixtureRequest,
+    reset_settings: None,
 ) -> None:
     """Keep unit tests deterministic regardless of host FLEXT_TARGET_ORACLE_* env."""
-    _ = request
+    _ = (request, reset_settings)
     for key in [key for key in os.environ if key.startswith("FLEXT_TARGET_ORACLE_")]:
         monkeypatch.delenv(key, raising=False)
-    FlextSettings.reset_for_testing()
 
 
 @pytest.fixture(scope="session")

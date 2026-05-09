@@ -12,15 +12,16 @@ from flext_core.lazy import (
 )
 
 if _t.TYPE_CHECKING:
-    from flext_tests import td, tf, tk, tm, tv
+    from flext_tests import d, e, h, r, td, tf, tk, tm, tv, x
 
-    from flext_target_oracle import d, e, h, r, s, x
+    from tests.base import TestsFlextTargetOracleServiceBase, s
     from tests.constants import TestsFlextTargetOracleConstants, c
     from tests.e2e.test_singer import TestsFlextTargetOracleSinger
     from tests.integration.test_oracle import TestsFlextTargetOracleOracle
     from tests.models import TestsFlextTargetOracleModels, m
     from tests.performance.test_performance import TestsFlextTargetOraclePerformance
     from tests.protocols import TestsFlextTargetOracleProtocols, p
+    from tests.settings import TestsFlextTargetOracleSettings
     from tests.typings import TestsFlextTargetOracleTypes, t
     from tests.unit.test_config import TestsFlextTargetOracleConfig
     from tests.unit.test_loader import TestsFlextTargetOracleLoader
@@ -36,6 +37,10 @@ _LAZY_IMPORTS = merge_lazy_imports(
     ),
     build_lazy_import_map(
         {
+            ".base": (
+                "TestsFlextTargetOracleServiceBase",
+                "s",
+            ),
             ".constants": (
                 "TestsFlextTargetOracleConstants",
                 "c",
@@ -51,6 +56,7 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "TestsFlextTargetOracleProtocols",
                 "p",
             ),
+            ".settings": ("TestsFlextTargetOracleSettings",),
             ".typings": (
                 "TestsFlextTargetOracleTypes",
                 "t",
@@ -63,20 +69,17 @@ _LAZY_IMPORTS = merge_lazy_imports(
                 "TestsFlextTargetOracleUtilities",
                 "u",
             ),
-            "flext_target_oracle": (
+            "flext_tests": (
                 "d",
                 "e",
                 "h",
                 "r",
-                "s",
-                "x",
-            ),
-            "flext_tests": (
                 "td",
                 "tf",
                 "tk",
                 "tm",
                 "tv",
+                "x",
             ),
         },
     ),
@@ -114,6 +117,8 @@ __all__: list[str] = [
     "TestsFlextTargetOracleOracle",
     "TestsFlextTargetOraclePerformance",
     "TestsFlextTargetOracleProtocols",
+    "TestsFlextTargetOracleServiceBase",
+    "TestsFlextTargetOracleSettings",
     "TestsFlextTargetOracleSinger",
     "TestsFlextTargetOracleTarget",
     "TestsFlextTargetOracleTypes",

@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from flext_target_oracle import FlextTargetOracleSettings
-from tests import c
+from tests import c, m
+from tests.base import s
 
 
 class TestsFlextTargetOracleConfig:
@@ -20,6 +21,12 @@ class TestsFlextTargetOracleConfig:
         assert config.default_target_schema == "SINGER_DATA"
         assert config.use_bulk_operations is True
         assert config.autocommit is False
+
+    def test_test_service_settings_include_tests_namespace(self) -> None:
+        settings = s.fetch_settings()
+
+        assert isinstance(settings.Tests, m.SettingsValue)
+        assert settings.oracle_host
 
     def test_load_method_enum_contract(self) -> None:
         assert c.TargetOracle.LOAD_METHOD_INSERT == "INSERT"
