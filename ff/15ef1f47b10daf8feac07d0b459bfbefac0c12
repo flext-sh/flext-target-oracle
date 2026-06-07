@@ -1,0 +1,47 @@
+docs/architecture.md
+  s_73cbfc60e45e37::t_87c4fb96a9b35b 49,135,159,191,298,320,348,356,382,434,483
+examples/README.md
+  s_73cbfc60e45e37::t_26928f45d13ffe 109,120,137
+docs/guides/configuration.md
+  s_73cbfc60e45e37::t_201ce4ae9aca42 106,144,164,178,231,264,308,344,380,417,455
+docs/guides/testing.md
+  s_73cbfc60e45e37::t_87b2b1381cd6fb 76,128,176,219,292,333,357,396,439,471,517,588,611,638,658,700
+docs/development.md
+  s_73cbfc60e45e37::t_654c6aa97013f9 355
+  s_73cbfc60e45e37::t_7c5f2cad8625fa 169,229,266,292,383,447,465,496,519,547,596,632,660,705
+docs/TODO.md
+  s_73cbfc60e45e37::t_60fd53b27bbaf0 63,84,98,157,178,199,219,234,263,278,293,331
+docs/guides/python-module-organization.md
+  s_73cbfc60e45e37::t_553931d4fd4e9b 65,80,140,182,260,312,330,379,390,432,461,476,499,538,629,694,738,764,816,884,940,985,1031,1101,1127,1229
+docs/guides/singer-integration.md
+  s_73cbfc60e45e37::t_355d2bd6656374 62,93,122,158,166,344,370,397,420,451,494,552
+docs/guides/development.md
+  s_73cbfc60e45e37::t_47f58ecd9fb37b 152,169,189,228,313,404,432
+docs/guides/getting-started.md
+  s_73cbfc60e45e37::t_f31f67d0b180fc 101,133,154,207,278
+docs/guides/troubleshooting.md
+  s_73cbfc60e45e37::t_32458e2024053e 88,118,139,148,175,196,210,225,255,291,300,315,325,348,357,372,380,397,408,430,442,453,490,527,558,619,642,722,733,771,784,795,808
+CONTRIBUTING.md
+  s_73cbfc60e45e37::t_6955d3847a11e4 117,125,207,241
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "ff15ef1f47b10daf8feac07d0b459bfbefac0c12",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  },
+  "sessions": {
+    "s_73cbfc60e45e37": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "80f2c44c-f1f2-49a0-8035-ccac60ac602b",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Zed <hi@zed.dev>"
+    }
+  }
+}
