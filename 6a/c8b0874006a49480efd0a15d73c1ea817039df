@@ -1,0 +1,26 @@
+src/flext_target_oracle/_utilities/loader.py
+  s_9942ef7a89ba9a::t_b9fe50e25cc8b0 470
+  s_9942ef7a89ba9a::t_193309909a1cef 624
+  s_9942ef7a89ba9a::t_dd99ca3f89c643 454
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.3",
+  "base_commit_sha": "6ac8b0874006a49480efd0a15d73c1ea817039df",
+  "prompts": {},
+  "humans": {
+    "h_9db9d35f50cf33": {
+      "author": "FLEXT Bot"
+    }
+  },
+  "sessions": {
+    "s_9942ef7a89ba9a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "84fb5cb9-a1bd-4654-9339-7a49b63e96d1",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Zed <hi@zed.dev>"
+    }
+  }
+}
