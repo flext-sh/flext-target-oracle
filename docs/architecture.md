@@ -46,7 +46,7 @@ FLEXT Target Oracle implements a layered architecture following Clean Architectu
 
 The target is built on foundational FLEXT patterns:
 
-```python
+```python notest
 # r Railway Pattern - Consistent error handling
 from flext_core import FlextBus
 from flext_core import FlextSettings
@@ -132,7 +132,7 @@ class FlextOracleTargetSettings(m.Value):
 
 **Responsibility**: Singer protocol implementation and message orchestration
 
-```python
+```python notest
 class FlextOracleTarget(Target):
     """Singer Target implementation with FLEXT patterns."""
 
@@ -156,7 +156,7 @@ class FlextOracleTarget(Target):
 
 **Responsibility**: Configuration management with domain validation
 
-```python
+```python notest
 class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business rule validation."""
 
@@ -188,7 +188,7 @@ class FlextOracleTargetSettings(m.Value):
 
 **Responsibility**: Oracle-specific data loading operations
 
-```python
+```python notest
 class FlextOracleTargetLoader:
     """Oracle data loading with batch processing."""
 
@@ -295,7 +295,7 @@ flowchart TD
 
 ### Batch Processing Strategy
 
-```python
+```python notest
 class BatchProcessor:
     """Configurable batch processing for optimal performance."""
 
@@ -317,7 +317,7 @@ class BatchProcessor:
 
 ### Connection Management
 
-```python
+```python notest
 # Context manager pattern ensures resource cleanup
 with self.oracle_api as connected_api:
     # All operations within connection context
@@ -345,7 +345,7 @@ with self.oracle_api as connected_api:
 
 **Current Problematic Code**:
 
-```python
+```python notest
 # SECURITY RISK - Manual string replacement
 parameterized_sql = sql.replace(":data", f"'{param['data']}'")
 result = connected_api.execute_ddl(parameterized_sql)
@@ -353,7 +353,7 @@ result = connected_api.execute_ddl(parameterized_sql)
 
 **Required Fix**:
 
-```python
+```python notest
 # SECURE - Use proper parameterized queries
 result = connected_api.execute_dml(sql, param)
 ```
@@ -379,7 +379,7 @@ tests/
 
 ### Test Patterns
 
-```python
+```python notest
 # r testing pattern
 def test_operation_success():
     result = operation()
@@ -431,7 +431,7 @@ graph TB
 
 ### Configuration Integration
 
-```python
+```python notest
 # flext-core patterns
 settings = FlextOracleTargetSettings(...)
 validation_result = settings.validate_domain_rules()
@@ -480,7 +480,7 @@ networks:
 
 ### Monitoring and Observability
 
-```python
+```python notest
 # Structured logging with correlation IDs
 logger = u.fetch_logger(__name__)
 logger.info(

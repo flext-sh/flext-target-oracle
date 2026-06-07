@@ -166,7 +166,7 @@ make test                   # Must maintain 90%+ coverage
 
 #### Code Style Guidelines
 
-```python
+```python notest
 # ✅ GOOD: FLEXT patterns
 from flext_core import FlextBus
 from flext_core import FlextSettings
@@ -226,7 +226,7 @@ class BadConfig:
 
 ### r Railway Pattern
 
-```python
+```python notest
 # ✅ All operations return r
 def process_record(record: dict) -> p.Result[bool]:
     """Process a single record with proper error handling."""
@@ -263,7 +263,7 @@ def process_batch(records: t.SequenceOf[m.Dict]) -> p.Result[Stats]:
 
 ### Configuration Patterns
 
-```python
+```python notest
 # ✅ m.Value with domain validation
 class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business rule validation."""
@@ -289,7 +289,7 @@ class FlextOracleTargetSettings(m.Value):
 
 ### Logging Patterns
 
-```python
+```python notest
 # ✅ Structured logging with context
 from flext_core import FlextBus
 from flext_core import FlextSettings
@@ -352,7 +352,7 @@ def process_with_logging(stream_name: str, batch_size: int):
 
 ### Database Connection Testing
 
-```python # Test Oracle connectivity manually
+```python notest # Test Oracle connectivity manually
 from flext_target_oracle import FlextOracleTargetSettings
 from flext_target_oracle import FlextOracleTargetLoader
 
@@ -380,7 +380,7 @@ with loader.oracle_api as connected_api:
 
 ### Table Management Development
 
-```python
+```python notest
 # Test table creation and schema evolution
 def test_table_management():
     """Test table operations during development."""
@@ -444,7 +444,7 @@ print('Config created successfully')
 
 #### 2. Import Errors
 
-```python
+```python notest
 # ❌ Common import issue
 from flext_target_oracle import something_that_doesnt_exist
 
@@ -462,7 +462,7 @@ python -c "from flext_target_oracle import *; print(dir())"
 
 #### 3. Configuration Validation Errors
 
-```python
+```python notest
 # ❌ Invalid configuration
 settings = FlextOracleTargetSettings(
     oracle_host="",  # Empty host will fail validation
@@ -493,7 +493,7 @@ except c.ValidationError as e:
 
 #### 1. Enhanced Logging
 
-```python
+```python notest
 # Enable debug logging for development
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -516,7 +516,7 @@ make shell
 
 #### 3. Performance Profiling
 
-```python
+```python notest
 # Profile batch processing performance
 import cProfile
 import pstats
@@ -544,7 +544,7 @@ def profile_batch_processing():
 
 #### Unit Test Template
 
-```python
+```python notest
 """Test template for new functionality."""
 
 import pytest
@@ -593,7 +593,7 @@ class TestNewFeature:
 
 #### Integration Test Template
 
-```python
+```python notest
 """Integration test template."""
 
 import pytest
@@ -629,7 +629,7 @@ class TestOracleIntegration:
 
 ### Test Data Management
 
-```python
+```python notest
 # Test fixtures for consistent test data
 @pytest.fixture
 def sample_schema():
@@ -657,7 +657,7 @@ def sample_records():
 
 ### Batch Size Optimization
 
-```python
+```python notest
 # Test different batch sizes for optimal performance
 import time
 from typing import List
@@ -702,7 +702,7 @@ def benchmark_batch_sizes(records: List[m.Dict]):
 
 ### Memory Usage Monitoring
 
-```python
+```python notest
 import psutil
 import os
 

@@ -59,7 +59,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
 
 **Implementation**:
 
-```python
+```python notest
 def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
     """Handle SCHEMA message with table creation/evolution."""
     stream_name = message.get("stream")
@@ -90,7 +90,7 @@ def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
 
 **Implementation**:
 
-```python
+```python notest
 def _handle_record(self, message: m.Dict) -> p.Result[bool]:
     """Handle RECORD message with batched loading."""
     stream_name = message.get("stream")
@@ -119,7 +119,7 @@ def _handle_record(self, message: m.Dict) -> p.Result[bool]:
 
 **Implementation**:
 
-```python
+```python notest
 def _handle_state(self, message: m.Dict) -> p.Result[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
@@ -155,7 +155,7 @@ def _handle_state(self, message: m.Dict) -> p.Result[bool]:
 
 **Current Non-Standard Implementation**:
 
-```python
+```python notest
 # ❌ Custom method - not Singer SDK compliant
 def process_singer_message(self, message: dict) -> p.Result[bool]:
     # Custom message processing
@@ -163,7 +163,7 @@ def process_singer_message(self, message: dict) -> p.Result[bool]:
 
 **Required Singer SDK Methods**:
 
-```python
+```python notest
 # ✅ Standard Singer SDK interface
 class FlextOracleTarget(Target):
     name = "target-oracle"
@@ -341,7 +341,7 @@ sequenceDiagram
 
 ### Batch Processing Configuration
 
-```python
+```python notest
 # Configure batch processing for optimal performance
 settings = FlextOracleTargetSettings(
     # ... connection settings
@@ -367,7 +367,7 @@ settings = FlextOracleTargetSettings(
 | 1000-2000  | Standard workloads           | Optimal     | Medium       |
 | 5000-10000 | Large datasets, bulk loading | Best        | High         |
 
-```python
+```python notest
 # Performance testing different batch sizes
 import time
 
@@ -394,7 +394,7 @@ def benchmark_batch_performance():
 
 ### Oracle-Specific Optimizations
 
-```python
+```python notest
 # Oracle performance configuration
 settings = FlextOracleTargetSettings(
     # Connection optimization
@@ -417,7 +417,7 @@ settings = FlextOracleTargetSettings(
 
 ### r Error Patterns
 
-```python
+```python notest
 # Consistent error handling with r
 def process_with_error_handling():
     """Example of proper error handling in Singer context."""
@@ -448,7 +448,7 @@ def process_with_error_handling():
 
 ### Transaction Management
 
-```python
+```python notest
 # Current implementation (needs improvement)
 def _insert_batch(self, table_name: str, records: list) -> p.Result[bool]:
     """Insert batch with basic error handling."""
@@ -491,7 +491,7 @@ def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[boo
 
 ### Unit Testing Singer Messages
 
-```python
+```python notest
 import pytest
 from flext_target_oracle import FlextOracleTarget
 
@@ -549,7 +549,7 @@ class TestSingerIntegration:
 
 ### Integration Testing with Singer Ecosystem
 
-```python
+```python notest
 # Test with actual Singer tap output ()
 import json
 

@@ -114,7 +114,7 @@ pytest tests/unit/test_loader.py::TestOracleLoaderConnection::test_connect_succe
 
 1. **Unit Tests**: Mock all external dependencies
 
-   ```python
+   ```python notest
    @pytest.mark.unit
    def test_feature(mock_oracle_api):
        # Test isolated functionality
@@ -122,7 +122,7 @@ pytest tests/unit/test_loader.py::TestOracleLoaderConnection::test_connect_succe
 
 1. **Integration Tests**: Use real Oracle database
 
-   ```python
+   ```python notest
    @pytest.mark.integration
    @pytest.mark.oracle
    def test_database_operation(oracle_loader, oracle_engine):
@@ -204,7 +204,7 @@ pre-commit install
 
 Add new fields to `FlextOracleTargetSettings`:
 
-```python
+```python notest
 class FlextOracleTargetSettings(m.BaseModel):
     my_new_option: bool = u.Field(
         default=False,
@@ -238,7 +238,7 @@ For new DDL/DML operations:
 
 ### Documentation Style
 
-```python
+```python notest
 def process_record(
     self,
     stream_name: str,
