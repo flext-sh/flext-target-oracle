@@ -14,7 +14,6 @@ from collections.abc import (
     Mapping,
     Sequence,
 )
-from datetime import UTC, datetime
 from operator import itemgetter
 from typing import ClassVar, override
 
@@ -452,7 +451,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def finalize_all_streams(self) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
         """Finalize all streams and return stats using standardized models."""
         try:
-            started_at = str(datetime.now(UTC))
+            started_at = str(u.now())
             records_failed = 0
             for stream_name, records in self.record_buffers.items():
                 if records:
@@ -468,7 +467,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                     loading_operation=m.TargetOracle.LoaderOperation(
                         stream_name="all_streams",
                         started_at=started_at,
-                        completed_at=str(datetime.now(UTC)),
+                        completed_at=str(u.now()),
                         records_loaded=self.total_records,
                         records_failed=records_failed,
                     ),
@@ -622,7 +621,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                         "validate Oracle table identifier",
                     )
                 else:
-                    loaded_at = datetime.now(UTC).isoformat()
+                    loaded_at = u.generate_datetime_utc().isoformat()
                     with self.oracle_api as connected_api:
                         stream_columns = self._stream_columns.get(stream_name, ())
                         if not stream_columns:
