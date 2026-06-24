@@ -1,39 +1,5 @@
 # Architecture Guide
 
-<!-- TOC START -->
-- [Overview](#overview)
-- [Architecture Principles](#architecture-principles)
-  - [FLEXT Core Integration](#flext-core-integration)
-  - [Clean Architecture Layers](#clean-architecture-layers)
-- [Component Architecture](#component-architecture)
-  - [1. FlextOracleTarget (Application Layer)](#1-flextoracletarget-application-layer)
-  - [2. FlextOracleTargetSettings (Domain Layer)](#2-flextoracletargetsettings-domain-layer)
-  - [3. FlextOracleTargetLoader (Infrastructure Layer)](#3-flextoracletargetloader-infrastructure-layer)
-- [Data Flow Architecture](#data-flow-architecture)
-  - [Singer Message Processing Flow](#singer-message-processing-flow)
-  - [Error Handling Flow](#error-handling-flow)
-- [Performance Architecture](#performance-architecture)
-  - [Batch Processing Strategy](#batch-processing-strategy)
-  - [Connection Management](#connection-management)
-  - [Memory Management](#memory-management)
-- [Security Architecture](#security-architecture)
-  - [Current Security Measures](#current-security-measures)
-  - [Security Issues (TO BE ADDRESSED)](#security-issues-to-be-addressed)
-- [Testing Architecture](#testing-architecture)
-  - [Test Structure](#test-structure)
-  - [Test Patterns](#test-patterns)
-- [Integration Architecture](#integration-architecture)
-  - [FLEXT Ecosystem Integration](#flext-ecosystem-integration)
-  - [Configuration Integration](#configuration-integration)
-- [Deployment Architecture](#deployment-architecture)
-  - [Production Deployment Patterns](#production-deployment-patterns)
-  - [Monitoring and Observability](#monitoring-and-observability)
-- [Future Architecture Considerations](#future-architecture-considerations)
-  - [Planned Improvements](#planned-improvements)
-  - [Scalability Considerations](#scalability-considerations)
-- [Related Documentation](#related-documentation)
-<!-- TOC END -->
-
 **FLEXT Target Oracle - Technical Architecture Documentation**
 
 ## Overview
@@ -46,7 +12,7 @@ FLEXT Target Oracle implements a layered architecture following Clean Architectu
 
 The target is built on foundational FLEXT patterns:
 
-```python notest
+```python
 # r Railway Pattern - Consistent error handling
 from flext_core import FlextBus
 from flext_core import FlextSettings
@@ -132,7 +98,7 @@ class FlextOracleTargetSettings(m.Value):
 
 **Responsibility**: Singer protocol implementation and message orchestration
 
-```python notest
+```python
 class FlextOracleTarget(Target):
     """Singer Target implementation with FLEXT patterns."""
 
@@ -156,7 +122,7 @@ class FlextOracleTarget(Target):
 
 **Responsibility**: Configuration management with domain validation
 
-```python notest
+```python
 class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business rule validation."""
 
@@ -188,7 +154,7 @@ class FlextOracleTargetSettings(m.Value):
 
 **Responsibility**: Oracle-specific data loading operations
 
-```python notest
+```python
 class FlextOracleTargetLoader:
     """Oracle data loading with batch processing."""
 
@@ -295,7 +261,7 @@ flowchart TD
 
 ### Batch Processing Strategy
 
-```python notest
+```python
 class BatchProcessor:
     """Configurable batch processing for optimal performance."""
 
@@ -317,7 +283,7 @@ class BatchProcessor:
 
 ### Connection Management
 
-```python notest
+```python
 # Context manager pattern ensures resource cleanup
 with self.oracle_api as connected_api:
     # All operations within connection context
@@ -345,7 +311,7 @@ with self.oracle_api as connected_api:
 
 **Current Problematic Code**:
 
-```python notest
+```python
 # SECURITY RISK - Manual string replacement
 parameterized_sql = sql.replace(":data", f"'{param['data']}'")
 result = connected_api.execute_ddl(parameterized_sql)
@@ -353,7 +319,7 @@ result = connected_api.execute_ddl(parameterized_sql)
 
 **Required Fix**:
 
-```python notest
+```python
 # SECURE - Use proper parameterized queries
 result = connected_api.execute_dml(sql, param)
 ```
@@ -379,7 +345,7 @@ tests/
 
 ### Test Patterns
 
-```python notest
+```python
 # r testing pattern
 def test_operation_success():
     result = operation()
@@ -431,7 +397,7 @@ graph TB
 
 ### Configuration Integration
 
-```python notest
+```python
 # flext-core patterns
 settings = FlextOracleTargetSettings(...)
 validation_result = settings.validate_domain_rules()
@@ -480,7 +446,7 @@ networks:
 
 ### Monitoring and Observability
 
-```python notest
+```python
 # Structured logging with correlation IDs
 logger = u.fetch_logger(__name__)
 logger.info(

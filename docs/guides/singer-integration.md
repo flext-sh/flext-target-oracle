@@ -1,34 +1,5 @@
 # Singer SDK Integration Guide
 
-<!-- TOC START -->
-- [Overview](#overview)
-- [Singer Protocol Implementation](#singer-protocol-implementation)
-  - [Message Types Supported](#message-types-supported)
-- [Current Implementation Status](#current-implementation-status)
-  - [✅ Implemented Features](#implemented-features)
-  - [❌ Missing Singer SDK Compliance](#missing-singer-sdk-compliance)
-- [Meltano Integration](#meltano-integration)
-  - [Configuration Schema](#configuration-schema)
-  - [Meltano Execution](#meltano-execution)
-- [Data Loading Patterns](#data-loading-patterns)
-  - [Table Creation Strategy](#table-creation-strategy)
-  - [Record Processing Flow](#record-processing-flow)
-  - [Batch Processing Configuration](#batch-processing-configuration)
-- [Performance Optimization](#performance-optimization)
-  - [Batch Size Tuning](#batch-size-tuning)
-  - [Oracle-Specific Optimizations](#oracle-specific-optimizations)
-- [Error Handling and Reliability](#error-handling-and-reliability)
-  - [r Error Patterns](#r-error-patterns)
-  - [Transaction Management](#transaction-management)
-- [Testing Singer Integration](#testing-singer-integration)
-  - [Unit Testing Singer Messages](#unit-testing-singer-messages)
-  - [Integration Testing with Singer Ecosystem](#integration-testing-with-singer-ecosystem)
-- [Compliance Roadmap](#compliance-roadmap)
-  - [Version 0.9.9 Requirements](#version-099-requirements)
-  - [Version 1.1.0 Enhancements](#version-110-enhancements)
-  - [Version 1.2.0 Advanced Features](#version-120-advanced-features)
-<!-- TOC END -->
-
 **FLEXT Target Oracle - Singer Protocol Compliance Documentation**
 
 ## Overview
@@ -59,7 +30,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
 
 **Implementation**:
 
-```python notest
+```python
 def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
     """Handle SCHEMA message with table creation/evolution."""
     stream_name = message.get("stream")
@@ -90,7 +61,7 @@ def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
 
 **Implementation**:
 
-```python notest
+```python
 def _handle_record(self, message: m.Dict) -> p.Result[bool]:
     """Handle RECORD message with batched loading."""
     stream_name = message.get("stream")
@@ -119,7 +90,7 @@ def _handle_record(self, message: m.Dict) -> p.Result[bool]:
 
 **Implementation**:
 
-```python notest
+```python
 def _handle_state(self, message: m.Dict) -> p.Result[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
@@ -155,7 +126,7 @@ def _handle_state(self, message: m.Dict) -> p.Result[bool]:
 
 **Current Non-Standard Implementation**:
 
-```python notest
+```python
 # ❌ Custom method - not Singer SDK compliant
 def process_singer_message(self, message: dict) -> p.Result[bool]:
     # Custom message processing
@@ -163,7 +134,7 @@ def process_singer_message(self, message: dict) -> p.Result[bool]:
 
 **Required Singer SDK Methods**:
 
-```python notest
+```python
 # ✅ Standard Singer SDK interface
 class FlextOracleTarget(Target):
     name = "target-oracle"
@@ -341,7 +312,7 @@ sequenceDiagram
 
 ### Batch Processing Configuration
 
-```python notest
+```python
 # Configure batch processing for optimal performance
 settings = FlextOracleTargetSettings(
     # ... connection settings
@@ -367,7 +338,7 @@ settings = FlextOracleTargetSettings(
 | 1000-2000  | Standard workloads           | Optimal     | Medium       |
 | 5000-10000 | Large datasets, bulk loading | Best        | High         |
 
-```python notest
+```python
 # Performance testing different batch sizes
 import time
 
@@ -394,7 +365,7 @@ def benchmark_batch_performance():
 
 ### Oracle-Specific Optimizations
 
-```python notest
+```python
 # Oracle performance configuration
 settings = FlextOracleTargetSettings(
     # Connection optimization
@@ -417,7 +388,7 @@ settings = FlextOracleTargetSettings(
 
 ### r Error Patterns
 
-```python notest
+```python
 # Consistent error handling with r
 def process_with_error_handling():
     """Example of proper error handling in Singer context."""
@@ -448,7 +419,7 @@ def process_with_error_handling():
 
 ### Transaction Management
 
-```python notest
+```python
 # Current implementation (needs improvement)
 def _insert_batch(self, table_name: str, records: list) -> p.Result[bool]:
     """Insert batch with basic error handling."""
@@ -491,7 +462,7 @@ def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[boo
 
 ### Unit Testing Singer Messages
 
-```python notest
+```python
 import pytest
 from flext_target_oracle import FlextOracleTarget
 
@@ -549,7 +520,7 @@ class TestSingerIntegration:
 
 ### Integration Testing with Singer Ecosystem
 
-```python notest
+```python
 # Test with actual Singer tap output ()
 import json
 

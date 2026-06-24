@@ -1,36 +1,5 @@
 # Development Guide
 
-<!-- TOC START -->
-- [Quick Start](#quick-start)
-  - [Prerequisites](#prerequisites)
-  - [Environment Setup](#environment-setup)
-  - [Verify Installation](#verify-installation)
-- [Development Workflow](#development-workflow)
-  - [Daily Development Commands](#daily-development-commands)
-  - [Testing Workflow](#testing-workflow)
-  - [Code Quality Standards](#code-quality-standards)
-- [FLEXT Pattern Implementation](#flext-pattern-implementation)
-  - [r Railway Pattern](#r-railway-pattern)
-  - [Configuration Patterns](#configuration-patterns)
-  - [Logging Patterns](#logging-patterns)
-- [Oracle Integration Development](#oracle-integration-development)
-  - [Database Connection Testing](#database-connection-testing)
-  - [Table Management Development](#table-management-development)
-- [Debugging and Troubleshooting](#debugging-and-troubleshooting)
-  - [Common Development Issues](#common-development-issues)
-  - [Debugging Tools](#debugging-tools)
-- [Testing Development](#testing-development)
-  - [Writing New Tests](#writing-new-tests)
-  - [Test Data Management](#test-data-management)
-- [Performance Development](#performance-development)
-  - [Batch Size Optimization](#batch-size-optimization)
-  - [Memory Usage Monitoring](#memory-usage-monitoring)
-- [Contributing Guidelines](#contributing-guidelines)
-  - [Pull Request Checklist](#pull-request-checklist)
-  - [Commit Message Format](#commit-message-format)
-  - [Review Process](#review-process)
-<!-- TOC END -->
-
 **FLEXT Target Oracle - Developer Documentation**
 
 ## Quick Start
@@ -166,7 +135,7 @@ make test                   # Must maintain 90%+ coverage
 
 #### Code Style Guidelines
 
-```python notest
+```python
 # ✅ GOOD: FLEXT patterns
 from flext_core import FlextBus
 from flext_core import FlextSettings
@@ -226,7 +195,7 @@ class BadConfig:
 
 ### r Railway Pattern
 
-```python notest
+```python
 # ✅ All operations return r
 def process_record(record: dict) -> p.Result[bool]:
     """Process a single record with proper error handling."""
@@ -263,7 +232,7 @@ def process_batch(records: t.SequenceOf[m.Dict]) -> p.Result[Stats]:
 
 ### Configuration Patterns
 
-```python notest
+```python
 # ✅ m.Value with domain validation
 class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business rule validation."""
@@ -289,7 +258,7 @@ class FlextOracleTargetSettings(m.Value):
 
 ### Logging Patterns
 
-```python notest
+```python
 # ✅ Structured logging with context
 from flext_core import FlextBus
 from flext_core import FlextSettings
@@ -380,7 +349,7 @@ with loader.oracle_api as connected_api:
 
 ### Table Management Development
 
-```python notest
+```python
 # Test table creation and schema evolution
 def test_table_management():
     """Test table operations during development."""
@@ -444,7 +413,7 @@ print('Config created successfully')
 
 #### 2. Import Errors
 
-```python notest
+```python
 # ❌ Common import issue
 from flext_target_oracle import something_that_doesnt_exist
 
@@ -462,7 +431,7 @@ python -c "from flext_target_oracle import *; print(dir())"
 
 #### 3. Configuration Validation Errors
 
-```python notest
+```python
 # ❌ Invalid configuration
 settings = FlextOracleTargetSettings(
     oracle_host="",  # Empty host will fail validation
@@ -493,7 +462,7 @@ except c.ValidationError as e:
 
 #### 1. Enhanced Logging
 
-```python notest
+```python
 # Enable debug logging for development
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -516,7 +485,7 @@ make shell
 
 #### 3. Performance Profiling
 
-```python notest
+```python
 # Profile batch processing performance
 import cProfile
 import pstats
@@ -544,7 +513,7 @@ def profile_batch_processing():
 
 #### Unit Test Template
 
-```python notest
+```python
 """Test template for new functionality."""
 
 import pytest
@@ -593,7 +562,7 @@ class TestNewFeature:
 
 #### Integration Test Template
 
-```python notest
+```python
 """Integration test template."""
 
 import pytest
@@ -629,7 +598,7 @@ class TestOracleIntegration:
 
 ### Test Data Management
 
-```python notest
+```python
 # Test fixtures for consistent test data
 @pytest.fixture
 def sample_schema():
@@ -657,7 +626,7 @@ def sample_records():
 
 ### Batch Size Optimization
 
-```python notest
+```python
 # Test different batch sizes for optimal performance
 import time
 from typing import List
@@ -702,7 +671,7 @@ def benchmark_batch_sizes(records: List[m.Dict]):
 
 ### Memory Usage Monitoring
 
-```python notest
+```python
 import psutil
 import os
 
