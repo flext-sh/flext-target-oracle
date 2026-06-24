@@ -8,6 +8,9 @@ edit_uri: edit/main/flext-target-oracle/
 docs_dir: docs
 site_dir: .reports/docs/site
 
+exclude_docs: |
+  README.md
+
 theme:
   name: material
   features:
@@ -57,12 +60,26 @@ plugins:
             merge_init_into_class: true
             docstring_section_style: spacy
 
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
 nav:
   - Home: index.md
   - Guides: guides/README.md
   - API Reference: api-reference/README.md
 
+not_in_nav: |
+  api-reference/generated/**
 validation:
-  omitted_files: warn
+  omitted_files: ignore
   absolute_links: warn
   unrecognized_links: warn
