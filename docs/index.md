@@ -2,7 +2,7 @@
 
 # flext-target-oracle Documentation
 
-- Version: `unknown`
+- Version: `0.12.0-dev`
 - Project class: `integration`
 - Package: `flext_target_oracle`
 - Description: FLEXT Target Oracle - Singer Target for Oracle Database Data Loading

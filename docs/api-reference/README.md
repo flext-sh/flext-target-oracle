@@ -19,7 +19,7 @@ This section is generated from public exports and real docstrings.
 
 ## Surface Summary
 
-- Primary facades: `FlextTargetOracleProtocols`, `FlextTargetOracleTypesBase`, `FlextTargetOracleCliService`, `FlextTargetOracleErrorMetadata`, `FlextTargetOracleExceptions`, `FlextTargetOracleBatchService` (+20 more)
-- Generated module pages: `8`
+- Primary facades: _none_
+- Generated module pages: `7`
 
 - [Back to project docs](../index.md)
