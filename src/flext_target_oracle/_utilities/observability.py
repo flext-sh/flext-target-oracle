@@ -18,7 +18,7 @@ from flext_target_oracle import (
 )
 
 if TYPE_CHECKING:
-    from flext_target_oracle import t
+    pass
 else:
     t = FlextTypes
 

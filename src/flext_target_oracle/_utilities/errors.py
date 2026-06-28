@@ -17,7 +17,7 @@ from flext_core import FlextConstants, FlextExceptionsBase, FlextModels, FlextTy
 from flext_target_oracle import e, t
 
 if TYPE_CHECKING:
-    from flext_target_oracle import t
+    pass
 else:
     t = FlextTypes
 
