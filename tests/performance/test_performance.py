@@ -9,10 +9,13 @@ from collections.abc import (
 from unittest.mock import Mock
 
 import pytest
+from flext_tests import r
 
 from flext_cli import u as cli_u
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
-from tests import m, r, t
+from flext_target_oracle import FlextTargetOracleSettings
+from flext_target_oracle._utilities.client import FlextTargetOracle
+from tests.models import m
+from tests.typings import t
 
 
 @pytest.mark.performance

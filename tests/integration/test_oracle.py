@@ -16,12 +16,12 @@ import time
 import pytest
 
 from flext_db_oracle import FlextDbOracleApi
-from flext_target_oracle import (
-    FlextTargetOracle,
-    FlextTargetOracleLoader,
-    FlextTargetOracleSettings,
-)
-from tests import c, m, t
+from flext_target_oracle import FlextTargetOracleSettings
+from flext_target_oracle._utilities.client import FlextTargetOracle
+from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+from tests.constants import c
+from tests.models import m
+from tests.typings import t
 
 
 def _schema_parts(

@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-import typing as _t
+from typing import TYPE_CHECKING
 
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 from flext_target_oracle.__version__ import (
@@ -17,8 +17,11 @@ from flext_target_oracle.__version__ import (
     __version_info__,
 )
 
-if _t.TYPE_CHECKING:
+if TYPE_CHECKING:
     from flext_meltano import d as d, e as e, h as h, r as r, s as s, x as x
+    from flext_target_oracle._utilities.client import (
+        FlextTargetOracle as FlextTargetOracle,
+    )
     from flext_target_oracle.api import (
         FlextTargetOracleService as FlextTargetOracleService,
         target_oracle as target_oracle,
@@ -48,6 +51,7 @@ if _t.TYPE_CHECKING:
     )
 _LAZY_IMPORTS = build_lazy_import_map(
     {
+        "._utilities.client": ("FlextTargetOracle",),
         ".api": (
             "FlextTargetOracleService",
             "target_oracle",
@@ -86,6 +90,7 @@ _LAZY_IMPORTS = build_lazy_import_map(
 
 
 __all__: tuple[str, ...] = (
+    "FlextTargetOracle",
     "FlextTargetOracleConstants",
     "FlextTargetOracleModels",
     "FlextTargetOracleProtocols",

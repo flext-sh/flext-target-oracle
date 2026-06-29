@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from flext_target_oracle import FlextTargetOracleSettings
-from tests import c, m
 from tests.base import s
+from tests.constants import c
+from tests.models import m
 
 
 class TestsFlextTargetOracleConfig:

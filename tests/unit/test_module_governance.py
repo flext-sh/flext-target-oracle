@@ -14,7 +14,9 @@ from collections.abc import Iterator
 from pathlib import Path
 from types import ModuleType
 
-from tests import c, m, t
+from tests.constants import c
+from tests.models import m
+from tests.typings import t
 
 
 def _package_root() -> Path:

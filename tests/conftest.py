@@ -20,11 +20,11 @@ from flext_db_oracle import (
     FlextDbOracleApi,
     FlextDbOracleSettings,
 )
-from flext_target_oracle import (
-    FlextTargetOracleLoader,
-    FlextTargetOracleSettings,
-)
-from tests import c, m, t
+from flext_target_oracle import FlextTargetOracleSettings
+from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+from tests.constants import c
+from tests.models import m
+from tests.typings import t
 
 reset_settings = _shared_reset_settings
 

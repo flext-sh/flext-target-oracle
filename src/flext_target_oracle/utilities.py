@@ -5,7 +5,9 @@ from __future__ import annotations
 from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import u
 from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
-from flext_target_oracle._utilities.observability import FlextTargetOracleUtilitiesObservability
+from flext_target_oracle._utilities.observability import (
+    FlextTargetOracleUtilitiesObservability,
+)
 
 
 class FlextTargetOracleUtilities(u, FlextDbOracleUtilities):

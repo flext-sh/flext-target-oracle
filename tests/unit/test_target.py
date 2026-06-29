@@ -5,14 +5,14 @@ from __future__ import annotations
 from unittest.mock import Mock
 
 import pytest
+from flext_tests import r
 
 from flext_cli import u as cli_u
-from flext_target_oracle import (
-    FlextTargetOracle,
-    FlextTargetOracleExceptions,
-    FlextTargetOracleSettings,
-)
-from tests import m, r, t
+from flext_target_oracle import FlextTargetOracleSettings
+from flext_target_oracle._utilities.client import FlextTargetOracle
+from flext_target_oracle._utilities.errors import FlextTargetOracleExceptions
+from tests.models import m
+from tests.typings import t
 
 
 @pytest.fixture
