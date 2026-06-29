@@ -22,14 +22,20 @@ Usage:
 
 from __future__ import annotations
 
-import json
 import logging
 import os
 
+from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m, r, t, u
 
 logging.basicConfig(level=logging.INFO)
 logger = u.fetch_logger(__name__)
+
+
+def _json_text(value: t.JsonValue) -> str:
+    """Serialize JSON-compatible example payloads through the CLI facade."""
+    serialized: str = cli_u.Cli.json_dumps(value).unwrap()
+    return serialized
 
 
 def create_configuration() -> FlextTargetOracleSettings:
@@ -74,14 +80,14 @@ def create_sample_schema_message() -> m.Meltano.SingerSchemaMessage:
             "stream": "users",
             "schema": {
                 "type": "object",
-                "properties": json.dumps({
+                "properties": _json_text({
                     "id": {"type": "integer"},
                     "name": {"type": "string"},
                     "email": {"type": "string"},
                     "created_at": {"type": "string", "format": "date-time"},
                     "active": {"type": "boolean"},
                 }),
-                "required": json.dumps(["id", "name", "email"]),
+                "required": _json_text(["id", "name", "email"]),
             },
             "key_properties": ["id"],
         })
@@ -164,69 +170,57 @@ def demonstrate_basic_usage() -> None:
     5. Statistics collection and reporting
     """
     logger.info("Starting FLEXT Target Oracle basic usage demonstration")
-    try:
-        logger.info("Step 1: Creating configuration")
-        settings = create_configuration()
-        logger.info("Validating configuration domain rules")
-        validation_result = r[bool].ok(value=True)
-        if validation_result.failure:
-            logger.error(f"Configuration validation failed: {validation_result.error}")
+    logger.info("Step 1: Creating configuration")
+    settings = create_configuration()
+    logger.info("Validating configuration domain rules")
+    validation_result = r[bool].ok(value=True)
+    if validation_result.failure:
+        logger.error(f"Configuration validation failed: {validation_result.error}")
+        return
+    logger.info("Configuration validation successful")
+    logger.info("Step 2: Initializing Oracle target")
+    target = FlextTargetOracle(settings)
+    logger.info("Testing Oracle connection")
+    connection_result = target.test_connection()
+    if connection_result.failure:
+        logger.error(f"Oracle connection test failed: {connection_result.error}")
+        return
+    logger.info("Oracle connection test successful")
+    logger.info("Step 3: Processing SCHEMA message")
+    schema_message = create_sample_schema_message()
+    schema_result = target.process_singer_message(schema_message)
+    if schema_result.failure:
+        logger.error(f"Schema processing failed: {schema_result.error}")
+        return
+    logger.info("Schema processed successfully - table created/verified")
+    logger.info("Step 4: Processing RECORD messages")
+    record_messages = create_sample_record_messages()
+    for i, record_message in enumerate(record_messages, 1):
+        logger.info(f"Processing record {i}/{len(record_messages)}")
+        record_result = target.process_singer_message(record_message)
+        if record_result.failure:
+            logger.error(f"Record {i} processing failed: {record_result.error}")
             return
-        logger.info("Configuration validation successful")
-        logger.info("Step 2: Initializing Oracle target")
-        target = FlextTargetOracle(settings)
-        logger.info("Testing Oracle connection")
-        connection_result = target.test_connection()
-        if connection_result.failure:
-            logger.error(f"Oracle connection test failed: {connection_result.error}")
-            return
-        logger.info("Oracle connection test successful")
-        logger.info("Step 3: Processing SCHEMA message")
-        schema_message = create_sample_schema_message()
-        schema_result = target.process_singer_message(schema_message)
-        if schema_result.failure:
-            logger.error(f"Schema processing failed: {schema_result.error}")
-            return
-        logger.info("Schema processed successfully - table created/verified")
-        logger.info("Step 4: Processing RECORD messages")
-        record_messages = create_sample_record_messages()
-        for i, record_message in enumerate(record_messages, 1):
-            logger.info(f"Processing record {i}/{len(record_messages)}")
-            record_result = target.process_singer_message(record_message)
-            if record_result.failure:
-                logger.error(f"Record {i} processing failed: {record_result.error}")
-                return
-        logger.info(f"All {len(record_messages)} records processed successfully")
-        logger.info("Step 5: Processing STATE message")
-        state_message = create_sample_state_message()
-        state_result = target.process_singer_message(state_message)
-        if state_result.failure:
-            logger.error(f"State processing failed: {state_result.error}")
-            return
-        logger.info("State processed successfully")
-        logger.info("Step 6: Finalizing target and collecting statistics")
-        stats_result = target.finalize()
-        if stats_result.failure:
-            logger.error(f"Target finalization failed: {stats_result.error}")
-            return
-        stats = stats_result.value
-        logger.info("=== Processing Statistics ===")
-        logger.info(f"Total records processed: {stats.total_records}")
-        logger.info(f"Successful records: {stats.loading_operation.records_loaded}")
-        logger.info(f"Failed records: {stats.loading_operation.records_failed}")
-        logger.info(f"Total batches: {stats.streams_processed}")
-        logger.info("Basic usage demonstration completed successfully!")
-    except (
-        ValueError,
-        TypeError,
-        KeyError,
-        AttributeError,
-        OSError,
-        RuntimeError,
-        ImportError,
-    ):
-        logger.exception("Unexpected error during demonstration")
-        raise
+    logger.info(f"All {len(record_messages)} records processed successfully")
+    logger.info("Step 5: Processing STATE message")
+    state_message = create_sample_state_message()
+    state_result = target.process_singer_message(state_message)
+    if state_result.failure:
+        logger.error(f"State processing failed: {state_result.error}")
+        return
+    logger.info("State processed successfully")
+    logger.info("Step 6: Finalizing target and collecting statistics")
+    stats_result = target.finalize()
+    if stats_result.failure:
+        logger.error(f"Target finalization failed: {stats_result.error}")
+        return
+    stats = stats_result.value
+    logger.info("=== Processing Statistics ===")
+    logger.info(f"Total records processed: {stats.total_records}")
+    logger.info(f"Successful records: {stats.loading_operation.records_loaded}")
+    logger.info(f"Failed records: {stats.loading_operation.records_failed}")
+    logger.info(f"Total batches: {stats.streams_processed}")
+    logger.info("Basic usage demonstration completed successfully!")
 
 
 def demonstrate_error_handling() -> None:
