@@ -8,15 +8,8 @@ from collections.abc import (
 from typing import ClassVar, assert_never
 
 from flext_meltano import u
-from flext_target_oracle import (
-    FlextTargetOracleLoader,
-    FlextTargetOracleSettings,
-    c,
-    m,
-    p,
-    r,
-    t,
-)
+from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t
+from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 
 
 class FlextTargetOracle:
