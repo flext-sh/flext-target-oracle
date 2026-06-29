@@ -198,11 +198,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return field_type_value
         if isinstance(field_type_value, Sequence) and field_type_value:
             return next(
-                (
-                    str(item)
-                    for item in field_type_value
-                    if str(item).lower() != "null"
-                ),
+                (str(item) for item in field_type_value if str(item).lower() != "null"),
                 "string",
             )
         return "string"

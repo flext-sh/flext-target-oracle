@@ -39,9 +39,9 @@ class TestsFlextTargetOraclePerformance:
         type_mapping = m.DbOracle.TypeMapping.model_validate({
             "mapping": {"id": "NUMBER"},
         })
-        mock_oracle_api.oracle_services.map_singer_schema.return_value = (
-            r[m.DbOracle.TypeMapping].ok(type_mapping)
-        )
+        mock_oracle_api.oracle_services.map_singer_schema.return_value = r[
+            m.DbOracle.TypeMapping
+        ].ok(type_mapping)
         mock_oracle_api.oracle_services.create_table_ddl.return_value = r[str].ok(
             "CREATE TABLE perf_stream (id NUMBER)",
         )
