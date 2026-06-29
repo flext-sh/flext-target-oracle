@@ -72,13 +72,23 @@ class FlextTargetOracle:
     def execute(
         self, payload: str | None = None
     ) -> p.Result[m.TargetOracle.ExecuteResult]:
-        """Execute target readiness check."""
-        _ = payload
+        """Execute readiness check or process one Singer JSON line."""
+        if payload is not None:
+            payload_result = self._execute_payload(payload)
+            if payload_result.failure:
+                return r[m.TargetOracle.ExecuteResult].fail(
+                    payload_result.error or "Singer payload execution failed",
+                )
+            return self._ready_result()
         connection_result = self.loader.test_connection()
         if connection_result.failure:
             return r[m.TargetOracle.ExecuteResult].fail(
                 connection_result.error or "Connection test failed",
             )
+        return self._ready_result()
+
+    def _ready_result(self) -> p.Result[m.TargetOracle.ExecuteResult]:
+        """Return the canonical execute result payload."""
         return r[m.TargetOracle.ExecuteResult].ok(
             m.TargetOracle.ExecuteResult(
                 name="flext-target-oracle",
@@ -87,6 +97,74 @@ class FlextTargetOracle:
                 oracle_service=self.settings.oracle_service_name,
             ),
         )
+
+    def _execute_payload(self, payload: str) -> p.Result[bool]:
+        """Parse and process one Singer JSON line."""
+        message_result = self._parse_singer_payload(payload)
+        if message_result.failure:
+            return r[bool].fail(message_result.error or "Invalid Singer payload")
+        message = message_result.value
+        process_result = self.process_singer_message(message)
+        if process_result.failure:
+            return r[bool].fail(process_result.error or "Singer message failed")
+        if isinstance(message, m.Meltano.SingerRecordMessage):
+            finalize_result = self.loader.finalize_all_streams()
+            if finalize_result.failure:
+                return r[bool].fail(finalize_result.error or "Finalize failed")
+        return r[bool].ok(True)
+
+    def _parse_singer_payload(
+        self,
+        payload: str,
+    ) -> p.Result[
+        m.Meltano.SingerSchemaMessage
+        | m.Meltano.SingerRecordMessage
+        | m.Meltano.SingerStateMessage
+        | m.Meltano.SingerActivateVersionMessage
+    ]:
+        """Parse one Singer JSON payload into its Pydantic message model."""
+        try:
+            raw = t.json_mapping_adapter().validate_json(payload)
+            return self._parse_singer_mapping(raw)
+        except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
+            return r[
+                m.Meltano.SingerSchemaMessage
+                | m.Meltano.SingerRecordMessage
+                | m.Meltano.SingerStateMessage
+                | m.Meltano.SingerActivateVersionMessage
+            ].fail(f"Invalid Singer payload: {exc}")
+
+    def _parse_singer_mapping(
+        self,
+        raw: t.JsonMapping,
+    ) -> p.Result[
+        m.Meltano.SingerSchemaMessage
+        | m.Meltano.SingerRecordMessage
+        | m.Meltano.SingerStateMessage
+        | m.Meltano.SingerActivateVersionMessage
+    ]:
+        """Parse one Singer mapping into its concrete message model."""
+        msg_type = str(raw.get("type", ""))
+        if msg_type == c.Meltano.SingerMessageType.SCHEMA.value:
+            schema_message = m.Meltano.SingerSchemaMessage.model_validate(raw)
+            return r[m.Meltano.SingerSchemaMessage].ok(schema_message)
+        if msg_type == c.Meltano.SingerMessageType.RECORD.value:
+            record_message = m.Meltano.SingerRecordMessage.model_validate(raw)
+            return r[m.Meltano.SingerRecordMessage].ok(record_message)
+        if msg_type == c.Meltano.SingerMessageType.STATE.value:
+            state_message = m.Meltano.SingerStateMessage.model_validate(raw)
+            return r[m.Meltano.SingerStateMessage].ok(state_message)
+        if msg_type == c.Meltano.SingerMessageType.ACTIVATE_VERSION.value:
+            activate_message = m.Meltano.SingerActivateVersionMessage.model_validate(
+                raw,
+            )
+            return r[m.Meltano.SingerActivateVersionMessage].ok(activate_message)
+        return r[
+            m.Meltano.SingerSchemaMessage
+            | m.Meltano.SingerRecordMessage
+            | m.Meltano.SingerStateMessage
+            | m.Meltano.SingerActivateVersionMessage
+        ].fail(f"Unsupported Singer message type: {msg_type}")
 
     def finalize(self) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
         """Flush remaining batches and return loader statistics."""

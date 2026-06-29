@@ -29,7 +29,14 @@ from tests import c, m, t
 reset_settings = _shared_reset_settings
 
 
-@pytest.fixture(autouse=True)
+def pytest_configure(config: pytest.Config) -> None:
+    """Remove host FLEXT_TARGET_ORACLE_* env vars before settings singletons load."""
+    _ = config
+    for key in [key for key in os.environ if key.startswith("FLEXT_TARGET_ORACLE_")]:
+        os.environ.pop(key, None)
+
+
+@pytest.fixture
 def isolate_target_oracle_env(
     monkeypatch: pytest.MonkeyPatch,
     request: pytest.FixtureRequest,
@@ -184,22 +191,24 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
 def clean_database(oracle_engine: FlextDbOracleApi) -> None:
     """Clean database before each test."""
     tables_result = oracle_engine.oracle_services.execute_query(
-        'SELECT table_name AS "table_name" FROM all_tables WHERE owner = :schema',
-        m.ConfigMap(root={"schema": c.TargetOracle.Tests.TEST_SCHEMA}),
+        'SELECT table_name AS "table_name" FROM user_tables',
     )
     assert tables_result.success, tables_result.error
     tables = [str(row.root["table_name"]) for row in tables_result.value]
     for table in tables:
         drop_result = oracle_engine.execute_statement(
-            f"DROP TABLE {c.TargetOracle.Tests.TEST_SCHEMA}.{table} CASCADE CONSTRAINTS"
+            f"DROP TABLE {table} CASCADE CONSTRAINTS",
         )
         assert drop_result.success, drop_result.error
 
 
 @pytest.fixture
-def oracle_config(shared_oracle_container: str) -> FlextTargetOracleSettings:
+def oracle_config(
+    shared_oracle_container: str,
+    isolate_target_oracle_env: None,
+) -> FlextTargetOracleSettings:
     """Create Oracle target configuration for tests."""
-    _ = shared_oracle_container
+    _ = (shared_oracle_container, isolate_target_oracle_env)
     return FlextTargetOracleSettings.model_validate({
         "oracle_host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
         "oracle_port": int(
@@ -219,6 +228,8 @@ def oracle_config(shared_oracle_container: str) -> FlextTargetOracleSettings:
         "oracle_password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
         "default_target_schema": c.TargetOracle.Tests.TEST_SCHEMA,
         "batch_size": 1000,
+        "table_prefix": "",
+        "table_suffix": "",
         "use_bulk_operations": True,
         "parallel_degree": 1,
     })
@@ -273,6 +284,58 @@ def simple_schema() -> t.JsonMapping:
 
 
 @pytest.fixture
+def nested_schema() -> t.JsonMapping:
+    """Nested Singer schema for JSON storage tests."""
+    return {
+        "type": "SCHEMA",
+        "stream": "orders",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "customer": {"type": "object"},
+                "items": {"type": "array"},
+                "total": {"type": "number"},
+            },
+        },
+        "key_properties": ["id"],
+    }
+
+
+@pytest.fixture
+def singer_messages() -> t.SequenceOf[t.JsonValue]:
+    """Complete Singer message stream for integration workflow tests."""
+    schema: t.JsonValue = {
+        "type": "SCHEMA",
+        "stream": "users",
+        "schema": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "integer"},
+                "name": {"type": "string"},
+                "email": {"type": "string"},
+            },
+        },
+        "key_properties": ["id"],
+    }
+    first_record: t.JsonValue = {
+        "type": "RECORD",
+        "stream": "users",
+        "record": {"id": 1, "name": "John Doe", "email": "john@example.com"},
+    }
+    second_record: t.JsonValue = {
+        "type": "RECORD",
+        "stream": "users",
+        "record": {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
+    }
+    state: t.JsonValue = {
+        "type": "STATE",
+        "value": {"bookmarks": {"users": {"version": 1}}},
+    }
+    return (schema, first_record, second_record, state)
+
+
+@pytest.fixture
 def oracle_loader(
     oracle_config: FlextTargetOracleSettings,
     oracle_engine: FlextDbOracleApi,
@@ -299,6 +362,7 @@ _PATH_MARKERS: t.MappingKV[str, t.StrSequence] = {
 def pytest_collection_modifyitems(items: t.SequenceOf[pytest.Item]) -> None:
     """Add markers to test items based on their location."""
     for item in items:
+        item.add_marker(pytest.mark.usefixtures("isolate_target_oracle_env"))
         fspath = str(item.fspath)
         for path_key, markers in _PATH_MARKERS.items():
             if path_key in fspath:

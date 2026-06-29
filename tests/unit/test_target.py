@@ -163,7 +163,7 @@ class TestsFlextTargetOracleTarget:
         self, target: FlextTargetOracle
     ) -> None:
         result = target.execute("{ invalid }")
-        assert result.success
+        assert result.failure
         parse_result = target.write_record(
             '{"type": "RECORD", "stream": "users", "record": "bad"}'
         )

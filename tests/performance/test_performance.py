@@ -32,12 +32,24 @@ class TestsFlextTargetOraclePerformance:
         mock_oracle_api = Mock()
         mock_oracle_api.__enter__ = Mock(return_value=mock_oracle_api)
         mock_oracle_api.__exit__ = Mock(return_value=None)
-        mock_oracle_api.get_tables.return_value = r[list[str]].ok([])
-        mock_oracle_api.fetch_tables.return_value = r[list[str]].ok([])
+        empty_tables: list[str] = []
+        mock_oracle_api.get_tables.return_value = r[list[str]].ok(empty_tables)
+        mock_oracle_api.fetch_tables.return_value = r[list[str]].ok(empty_tables)
         mock_oracle_api.execute_sql.return_value = r[bool].ok(value=True)
+        type_mapping = m.DbOracle.TypeMapping.model_validate({
+            "mapping": {"id": "NUMBER"},
+        })
+        mock_oracle_api.oracle_services.map_singer_schema.return_value = (
+            r[m.DbOracle.TypeMapping].ok(type_mapping)
+        )
         mock_oracle_api.oracle_services.create_table_ddl.return_value = r[str].ok(
             "CREATE TABLE perf_stream (id NUMBER)",
         )
+        mock_oracle_api.oracle_services.build_insert_statement.return_value = r[str].ok(
+            "INSERT INTO perf_stream (id) VALUES (:id)",
+        )
+        mock_oracle_api.execute_statement.return_value = r[int].ok(1)
+        mock_oracle_api.execute_many.return_value = r[int].ok(1)
         object.__setattr__(target.loader, "_oracle_api", mock_oracle_api)
         return target
 
