@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import importlib
 import inspect
+import warnings
 from collections.abc import Iterator
 from pathlib import Path
 from types import ModuleType
@@ -49,7 +50,11 @@ def _import_package_module(module_path: Path) -> ModuleType | None:
     """
     try:
         return importlib.import_module(_module_dotted_name(module_path))
-    except (ImportError, AttributeError):
+    except (ImportError, AttributeError) as exc:
+        warnings.warn(
+            f"skipping unimportable governance module {module_path}: {exc}",
+            stacklevel=2,
+        )
         return None
 
 
