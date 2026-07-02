@@ -9,13 +9,11 @@ from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
     from flext_target_oracle._constants.base import (
-        FlextTargetOracleConstants as FlextTargetOracleConstants,
         FlextTargetOracleConstantsBase as FlextTargetOracleConstantsBase,
     )
 _LAZY_IMPORTS = build_lazy_import_map(
     {
         ".base": (
-            "FlextTargetOracleConstants",
             "FlextTargetOracleConstantsBase",
         ),
     },

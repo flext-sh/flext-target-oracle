@@ -9,9 +9,6 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, ClassVar, Final
 
-from flext_db_oracle import FlextDbOracleConstants
-from flext_meltano import c
-
 if TYPE_CHECKING:
     from flext_target_oracle import t
 
@@ -50,10 +47,3 @@ class FlextTargetOracleConstantsBase:
     # Loading configuration (formerly separate Loading class)
     DEFAULT_POOL_MIN: Final[int] = 5
     DEFAULT_POOL_MAX: Final[int] = 20
-
-
-class FlextTargetOracleConstants(c, FlextDbOracleConstants):
-    """Oracle target constant facade."""
-
-    class TargetOracle(FlextTargetOracleConstantsBase):
-        """Oracle target constant namespace."""
