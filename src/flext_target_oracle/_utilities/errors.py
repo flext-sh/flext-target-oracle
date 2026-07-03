@@ -13,8 +13,12 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated, override
 
-from flext_core import FlextExceptionsBase, c, m, t, u
+from flext_core import FlextExceptionsBase
 from flext_target_oracle import e
+from flext_target_oracle.constants import c
+from flext_target_oracle.models import m
+from flext_target_oracle.typings import t
+from flext_target_oracle.utilities import u
 
 
 class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
