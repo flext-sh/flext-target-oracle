@@ -12,8 +12,9 @@ from __future__ import annotations
 
 from typing import Annotated, ClassVar
 
-from flext_core import FlextSettingsBase
-from flext_target_oracle import c, e, m, p, r, t, u
+from flext_core import FlextSettingsBase, e, r
+from flext_meltano import m, u
+from flext_target_oracle import c, p, t
 from flext_target_oracle._models.settings import FlextTargetOracleModelsSettings
 
 

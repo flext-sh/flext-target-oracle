@@ -1,4 +1,5 @@
 # AUTO-GENERATED FILE — Regenerate with: make gen
+from flext_core import d as d, e as e, h as h, r as r, s as s, x as x
 from flext_target_oracle.__version__ import (
     __author__ as __author__,
     __author_email__ as __author_email__,
@@ -56,9 +57,15 @@ __all__ = (
     "__version__",
     "__version_info__",
     "c",
+    "d",
+    "e",
+    "h",
     "m",
     "p",
+    "r",
+    "s",
     "t",
     "target_oracle",
     "u",
+    "x",
 )

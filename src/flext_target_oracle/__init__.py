@@ -14,7 +14,7 @@ from flext_target_oracle.__version__ import (
     __version__,
     __version_info__,
 )
-from flext_target_oracle._exports_lazy import FLEXT_TARGET_ORACLE_LAZY_IMPORTS
+from flext_target_oracle._exports import FLEXT_TARGET_ORACLE_LAZY_IMPORTS
 
 _LAZY_IMPORTS = FLEXT_TARGET_ORACLE_LAZY_IMPORTS
 
@@ -50,10 +50,16 @@ _PUBLIC_EXPORTS: tuple[str, ...] = (
     "__version__",
     "__version_info__",
     "c",
+    "d",
+    "e",
+    "h",
     "m",
     "p",
+    "r",
+    "s",
     "t",
     "u",
+    "x",
 )
 
 
