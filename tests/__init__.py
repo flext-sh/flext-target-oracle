@@ -25,51 +25,51 @@ if TYPE_CHECKING:
         x as x,
     )
 
-    from tests.base import (
+    from flext_target_oracle.tests.base import (
         TestsFlextTargetOracleServiceBase as TestsFlextTargetOracleServiceBase,
         s as s,
     )
-    from tests.constants import (
+    from flext_target_oracle.tests.constants import (
         TestsFlextTargetOracleConstants as TestsFlextTargetOracleConstants,
         c as c,
     )
-    from tests.e2e.test_singer import (
+    from flext_target_oracle.tests.e2e.test_singer import (
         TestsFlextTargetOracleSinger as TestsFlextTargetOracleSinger,
     )
-    from tests.integration.test_oracle import (
+    from flext_target_oracle.tests.integration.test_oracle import (
         TestsFlextTargetOracleOracle as TestsFlextTargetOracleOracle,
     )
-    from tests.models import (
+    from flext_target_oracle.tests.models import (
         TestsFlextTargetOracleModels as TestsFlextTargetOracleModels,
         m as m,
     )
-    from tests.performance.test_performance import (
+    from flext_target_oracle.tests.performance.test_performance import (
         TestsFlextTargetOraclePerformance as TestsFlextTargetOraclePerformance,
     )
-    from tests.protocols import (
+    from flext_target_oracle.tests.protocols import (
         TestsFlextTargetOracleProtocols as TestsFlextTargetOracleProtocols,
         p as p,
     )
-    from tests.settings import (
+    from flext_target_oracle.tests.settings import (
         TestsFlextTargetOracleSettings as TestsFlextTargetOracleSettings,
     )
-    from tests.typings import (
+    from flext_target_oracle.tests.typings import (
         TestsFlextTargetOracleTypes as TestsFlextTargetOracleTypes,
         t as t,
     )
-    from tests.unit.test_config import (
+    from flext_target_oracle.tests.unit.test_config import (
         TestsFlextTargetOracleConfig as TestsFlextTargetOracleConfig,
     )
-    from tests.unit.test_loader import (
+    from flext_target_oracle.tests.unit.test_loader import (
         TestsFlextTargetOracleLoader as TestsFlextTargetOracleLoader,
     )
-    from tests.unit.test_module_governance import (
+    from flext_target_oracle.tests.unit.test_module_governance import (
         TestsFlextTargetOracleModuleGovernance as TestsFlextTargetOracleModuleGovernance,
     )
-    from tests.unit.test_target import (
+    from flext_target_oracle.tests.unit.test_target import (
         TestsFlextTargetOracleTarget as TestsFlextTargetOracleTarget,
     )
-    from tests.utilities import (
+    from flext_target_oracle.tests.utilities import (
         TestsFlextTargetOracleUtilities as TestsFlextTargetOracleUtilities,
         u as u,
     )

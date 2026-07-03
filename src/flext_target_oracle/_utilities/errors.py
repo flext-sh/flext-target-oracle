@@ -11,18 +11,10 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Annotated, override
+from typing import Annotated, override
 
-from flext_core import FlextConstants, FlextExceptionsBase, FlextModels, FlextTypes, u
-from flext_target_oracle import e, t
-
-if TYPE_CHECKING:
-    pass
-else:
-    t = FlextTypes
-
-c = FlextConstants
-m = FlextModels
+from flext_core import FlextExceptionsBase, c, m, t, u
+from flext_target_oracle import e
 
 
 class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):

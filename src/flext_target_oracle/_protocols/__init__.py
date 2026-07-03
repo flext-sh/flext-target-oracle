@@ -13,9 +13,7 @@ if TYPE_CHECKING:
     )
 _LAZY_IMPORTS = build_lazy_import_map(
     {
-        ".base": (
-            "FlextTargetOracleProtocolsBase",
-        ),
+        ".base": ("FlextTargetOracleProtocolsBase",),
     },
 )
 
