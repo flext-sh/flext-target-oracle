@@ -114,7 +114,7 @@ pytest tests/unit/test_loader.py::TestOracleLoaderConnection::test_connect_succe
 
 1. **Unit Tests**: Mock all external dependencies
 
-   ```python
+   ```python notest
    @pytest.mark.unit
    def test_feature(mock_oracle_api):
        # Test isolated functionality
@@ -122,7 +122,7 @@ pytest tests/unit/test_loader.py::TestOracleLoaderConnection::test_connect_succe
 
 1. **Integration Tests**: Use real Oracle database
 
-   ```python
+   ```python notest
    @pytest.mark.integration
    @pytest.mark.oracle
    def test_database_operation(oracle_loader, oracle_engine):
@@ -180,7 +180,7 @@ pre-commit install
    - DDL/DML operations via `flext-db-oracle`
    - Schema flattening and type mapping
 
-1. **Configuration** (`src/flext_target_oracle/config.py`):
+1. **Configuration** (`src/flext_target_oracle/settings.py`):
 
    - Pydantic models for configuration
    - Validation and defaults
@@ -202,11 +202,11 @@ pre-commit install
 
 ### 1. Configuration Options
 
-Add new fields to `FlextOracleTargetConfig`:
+Add new fields to `FlextOracleTargetSettings`:
 
-```python
-class FlextOracleTargetConfig(BaseModel):
-    my_new_option: bool = Field(
+```python notest
+class FlextOracleTargetSettings(m.BaseModel):
+    my_new_option: bool = u.Field(
         default=False,
         description="Enable my new feature",
     )
@@ -238,13 +238,13 @@ For new DDL/DML operations:
 
 ### Documentation Style
 
-```python
+```python notest
 def process_record(
     self,
     stream_name: str,
     record: FlextTypes.Dict,
     schema: FlextTypes.Dict,
-) -> r[bool]:
+) -> p.Result[bool]:
     """Process a single record for insertion.
 
     Args:

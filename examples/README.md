@@ -106,7 +106,7 @@ python examples/performance_tuning.py
 
 All examples demonstrate railway-oriented programming with r patterns:
 
-```python
+```python notest
 result = target.process_singer_message(message)
 if result.is_failure:
     logger.error(f"Processing failed: {result.error}")
@@ -117,15 +117,15 @@ if result.is_failure:
 
 Type-safe configuration with domain validation:
 
-```python
-config = FlextOracleTargetSettings(
+```python notest
+settings = FlextOracleTargetSettings(
     oracle_host="localhost",
     oracle_service="XE",
     oracle_user="target_user",
     oracle_password="secure_password",
 )
 
-validation_result = config.validate_domain_rules()
+validation_result = settings.validate_domain_rules()
 if validation_result.is_failure:
     raise ValueError(f"Invalid configuration: {validation_result.error}")
 ```
@@ -134,30 +134,29 @@ if validation_result.is_failure:
 
 Integration with FLEXT core patterns and flext-db-oracle:
 
-```python
+```python notest
 from flext_core import FlextBus
 from flext_core import FlextSettings
 from flext_core import FlextConstants
 from flext_core import FlextContainer
 from flext_core import FlextContext
-from flext_core import FlextDecorators
+from flext_core import d
 from flext_core import FlextDispatcher
-from flext_core import FlextExceptions
+from flext_core import e
 from flext_core import h
-from flext_core import FlextLogger
 from flext_core import x
 from flext_core import FlextModels
 from flext_core import FlextProcessors
 from flext_core import p
 from flext_core import FlextRegistry
-from flext_core import r
-from flext_core import FlextRuntime
-from flext_core import FlextService
+from flext_core import r, p
+from flext_core import u
+from flext_core import s
 from flext_core import t
 from flext_core import u
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetSettings
 
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
 ```
 
 ## Testing Examples

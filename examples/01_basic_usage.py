@@ -13,7 +13,7 @@ Key Concepts Demonstrated:
 
 Prerequisites:
     - Oracle database running (localhost:1521/XE)
-    - User 'system' with password 'oracle' (or update config)
+    - User 'system' with password 'oracle' (or update settings)
     - Python 3.13+ with flext-target-oracle installed
 
 Usage:
@@ -25,14 +25,17 @@ from __future__ import annotations
 import logging
 import os
 
-from flext_core import FlextLogger, r
-from pydantic import SecretStr
-
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, LoadMethod
-from flext_target_oracle.models import m
+from flext_cli import u as cli_u
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m, r, t, u
 
 logging.basicConfig(level=logging.INFO)
-logger = FlextLogger(__name__)
+logger = u.fetch_logger(__name__)
+
+
+def _json_text(value: t.JsonValue) -> str:
+    """Serialize JSON-compatible example payloads through the CLI facade."""
+    serialized: str = cli_u.Cli.json_dumps(value).unwrap()
+    return serialized
 
 
 def create_configuration() -> FlextTargetOracleSettings:
@@ -47,58 +50,60 @@ def create_configuration() -> FlextTargetOracleSettings:
 
     """
     logger.info("Creating Oracle target configuration")
-    config = FlextTargetOracleSettings(
-        oracle_host="localhost",
-        oracle_port=1521,
-        oracle_service="XE",
-        oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "system"),
-        oracle_password=SecretStr(os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", "")),
-        default_target_schema="FLEXT_EXAMPLES",
-        load_method=LoadMethod.INSERT,
-        batch_size=100,
-        use_bulk_operations=True,
-        connection_timeout=30,
-    )
+    settings = FlextTargetOracleSettings.model_validate({
+        "oracle_host": "localhost",
+        "oracle_port": 1521,
+        "oracle_service_name": "XE",
+        "oracle_user": os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "system"),
+        "oracle_password": os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
+        "default_target_schema": "FLEXT_EXAMPLES",
+        "batch_size": 100,
+        "use_bulk_operations": True,
+        "transaction_timeout": 30,
+    })
     logger.info(
-        f"Configuration created: {config.oracle_host}:{config.oracle_port}/{config.oracle_service_name}"
+        f"Configuration created: {settings.oracle_host}:{settings.oracle_port}/{settings.oracle_service_name}",
     )
-    return config
+    return settings
 
 
-def create_sample_schema_message() -> m.TargetOracle.SingerSchemaMessage:
+def create_sample_schema_message() -> m.Meltano.SingerSchemaMessage:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
-      dict[str, object]: Singer SCHEMA message for users table
+      t.JsonMapping: Singer SCHEMA message for users table
 
     """
-    return m.TargetOracle.SingerSchemaMessage({
-        "type": "SCHEMA",
-        "stream": "users",
-        "schema": {
-            "type": "object",
-            "properties": {
-                "id": {"type": "integer"},
-                "name": {"type": "string"},
-                "email": {"type": "string"},
-                "created_at": {"type": "string", "format": "date-time"},
-                "active": {"type": "boolean"},
+    schema_message: m.Meltano.SingerSchemaMessage = (
+        m.Meltano.SingerSchemaMessage.model_validate({
+            "type": "SCHEMA",
+            "stream": "users",
+            "schema": {
+                "type": "object",
+                "properties": _json_text({
+                    "id": {"type": "integer"},
+                    "name": {"type": "string"},
+                    "email": {"type": "string"},
+                    "created_at": {"type": "string", "format": "date-time"},
+                    "active": {"type": "boolean"},
+                }),
+                "required": _json_text(["id", "name", "email"]),
             },
-            "required": ["id", "name", "email"],
-        },
-        "key_properties": ["id"],
-    })
+            "key_properties": ["id"],
+        })
+    )
+    return schema_message
 
 
-def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
+def create_sample_record_messages() -> t.SequenceOf[m.Meltano.SingerRecordMessage]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
-      List[dict[str, object]]: List of Singer RECORD messages
+      List[t.JsonMapping]: List of Singer RECORD messages
 
     """
     return [
-        m.TargetOracle.SingerRecordMessage({
+        m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -109,7 +114,7 @@ def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
                 "active": True,
             },
         }),
-        m.TargetOracle.SingerRecordMessage({
+        m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -120,7 +125,7 @@ def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
                 "active": True,
             },
         }),
-        m.TargetOracle.SingerRecordMessage({
+        m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
             "record": {
@@ -134,21 +139,24 @@ def create_sample_record_messages() -> list[m.TargetOracle.SingerRecordMessage]:
     ]
 
 
-def create_sample_state_message() -> m.TargetOracle.SingerStateMessage:
+def create_sample_state_message() -> m.Meltano.SingerStateMessage:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
-      dict[str, object]: Singer STATE message with bookmark information
+      t.JsonMapping: Singer STATE message with bookmark information
 
     """
-    return m.TargetOracle.SingerStateMessage({
-        "type": "STATE",
-        "value": {
-            "bookmarks": {
-                "users": {"last_id": 3, "last_updated": "2025-01-01T12:00:00Z"}
-            }
-        },
-    })
+    state_message: m.Meltano.SingerStateMessage = (
+        m.Meltano.SingerStateMessage.model_validate({
+            "type": "STATE",
+            "value": {
+                "bookmarks": {
+                    "users": {"last_id": 3, "last_updated": "2025-01-01T12:00:00Z"},
+                },
+            },
+        })
+    )
+    return state_message
 
 
 def demonstrate_basic_usage() -> None:
@@ -162,69 +170,57 @@ def demonstrate_basic_usage() -> None:
     5. Statistics collection and reporting
     """
     logger.info("Starting FLEXT Target Oracle basic usage demonstration")
-    try:
-        logger.info("Step 1: Creating configuration")
-        config = create_configuration()
-        logger.info("Validating configuration domain rules")
-        validation_result = r[bool].ok(value=True)
-        if validation_result.is_failure:
-            logger.error(f"Configuration validation failed: {validation_result.error}")
+    logger.info("Step 1: Creating configuration")
+    settings = create_configuration()
+    logger.info("Validating configuration domain rules")
+    validation_result = r[bool].ok(value=True)
+    if validation_result.failure:
+        logger.error(f"Configuration validation failed: {validation_result.error}")
+        return
+    logger.info("Configuration validation successful")
+    logger.info("Step 2: Initializing Oracle target")
+    target = FlextTargetOracle(settings)
+    logger.info("Testing Oracle connection")
+    connection_result = target.test_connection()
+    if connection_result.failure:
+        logger.error(f"Oracle connection test failed: {connection_result.error}")
+        return
+    logger.info("Oracle connection test successful")
+    logger.info("Step 3: Processing SCHEMA message")
+    schema_message = create_sample_schema_message()
+    schema_result = target.process_singer_message(schema_message)
+    if schema_result.failure:
+        logger.error(f"Schema processing failed: {schema_result.error}")
+        return
+    logger.info("Schema processed successfully - table created/verified")
+    logger.info("Step 4: Processing RECORD messages")
+    record_messages = create_sample_record_messages()
+    for i, record_message in enumerate(record_messages, 1):
+        logger.info(f"Processing record {i}/{len(record_messages)}")
+        record_result = target.process_singer_message(record_message)
+        if record_result.failure:
+            logger.error(f"Record {i} processing failed: {record_result.error}")
             return
-        logger.info("Configuration validation successful")
-        logger.info("Step 2: Initializing Oracle target")
-        target = FlextTargetOracle(config)
-        logger.info("Testing Oracle connection")
-        connection_result = target.test_connection()
-        if connection_result.is_failure:
-            logger.error(f"Oracle connection test failed: {connection_result.error}")
-            return
-        logger.info("Oracle connection test successful")
-        logger.info("Step 3: Processing SCHEMA message")
-        schema_message = create_sample_schema_message()
-        schema_result = target.process_singer_message(schema_message)
-        if schema_result.is_failure:
-            logger.error(f"Schema processing failed: {schema_result.error}")
-            return
-        logger.info("Schema processed successfully - table created/verified")
-        logger.info("Step 4: Processing RECORD messages")
-        record_messages = create_sample_record_messages()
-        for i, record_message in enumerate(record_messages, 1):
-            logger.info(f"Processing record {i}/{len(record_messages)}")
-            record_result = target.process_singer_message(record_message)
-            if record_result.is_failure:
-                logger.error(f"Record {i} processing failed: {record_result.error}")
-                return
-        logger.info(f"All {len(record_messages)} records processed successfully")
-        logger.info("Step 5: Processing STATE message")
-        state_message = create_sample_state_message()
-        state_result = target.process_singer_message(state_message)
-        if state_result.is_failure:
-            logger.error(f"State processing failed: {state_result.error}")
-            return
-        logger.info("State processed successfully")
-        logger.info("Step 6: Finalizing target and collecting statistics")
-        stats_result = target.finalize()
-        if stats_result.is_failure:
-            logger.error(f"Target finalization failed: {stats_result.error}")
-            return
-        stats = stats_result.value
-        logger.info("=== Processing Statistics ===")
-        logger.info(f"Total records processed: {stats.total_records}")
-        logger.info(f"Successful records: {stats.loading_operation.records_loaded}")
-        logger.info(f"Failed records: {stats.loading_operation.records_failed}")
-        logger.info(f"Total batches: {stats.streams_processed}")
-        logger.info("Basic usage demonstration completed successfully!")
-    except (
-        ValueError,
-        TypeError,
-        KeyError,
-        AttributeError,
-        OSError,
-        RuntimeError,
-        ImportError,
-    ):
-        logger.exception("Unexpected error during demonstration")
-        raise
+    logger.info(f"All {len(record_messages)} records processed successfully")
+    logger.info("Step 5: Processing STATE message")
+    state_message = create_sample_state_message()
+    state_result = target.process_singer_message(state_message)
+    if state_result.failure:
+        logger.error(f"State processing failed: {state_result.error}")
+        return
+    logger.info("State processed successfully")
+    logger.info("Step 6: Finalizing target and collecting statistics")
+    stats_result = target.finalize()
+    if stats_result.failure:
+        logger.error(f"Target finalization failed: {stats_result.error}")
+        return
+    stats = stats_result.value
+    logger.info("=== Processing Statistics ===")
+    logger.info(f"Total records processed: {stats.total_records}")
+    logger.info(f"Successful records: {stats.loading_operation.records_loaded}")
+    logger.info(f"Failed records: {stats.loading_operation.records_failed}")
+    logger.info(f"Total batches: {stats.streams_processed}")
+    logger.info("Basic usage demonstration completed successfully!")
 
 
 def demonstrate_error_handling() -> None:
@@ -235,14 +231,14 @@ def demonstrate_error_handling() -> None:
     """
     logger.info("Demonstrating error handling patterns")
     try:
-        FlextTargetOracleSettings(
-            oracle_host="",
-            oracle_service="XE",
-            oracle_user=os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
-            oracle_password=SecretStr(os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", "")),
-        )
+        FlextTargetOracleSettings.model_validate({
+            "oracle_host": "",
+            "oracle_service_name": "XE",
+            "oracle_user": os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
+            "oracle_password": os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
+        })
         validation_result = r[bool].ok(value=True)
-        if validation_result.is_failure:
+        if validation_result.failure:
             logger.info(f"Expected validation error: {validation_result.error}")
     except (
         ValueError,
@@ -253,12 +249,12 @@ def demonstrate_error_handling() -> None:
         RuntimeError,
         ImportError,
     ) as e:
-        logger.info("Configuration creation failed as expected: %s", e)
-    config = create_configuration()
-    target = FlextTargetOracle(config)
+        logger.info("Configuration creation failed as expected", error=str(e))
+    settings = create_configuration()
+    target = FlextTargetOracle(settings)
     invalid_message = '{"type": "INVALID", "data": "test"}'
     result = target.write_record(invalid_message)
-    if result.is_failure:
+    if result.failure:
         logger.info(f"Invalid message handled gracefully: {result.error}")
     logger.info("Error handling demonstration completed")
 

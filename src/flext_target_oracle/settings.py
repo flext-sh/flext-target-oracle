@@ -10,72 +10,118 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, ClassVar
 
-from flext_core import FlextLogger, FlextSettings, r
-from pydantic import Field, SecretStr
-
-from .constants import c
-from .target_models import OracleConnectionModel
-
-logger = FlextLogger(__name__)
-LoadMethod = c.LoadMethod
+from flext_core import FlextSettingsBase
+from flext_target_oracle import c, e, m, p, r, t, u
+from flext_target_oracle._models.settings import FlextTargetOracleModelsSettings
 
 
-class FlextTargetOracleSettings(FlextSettings):
+class FlextTargetOracleSettings(FlextSettingsBase):
     """Runtime settings for Oracle Singer target operations."""
 
+    model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
+        env_prefix="FLEXT_TARGET_ORACLE_", extra="ignore"
+    )
+
     oracle_host: Annotated[
-        str, Field(default="localhost", description="Oracle database host")
-    ]
-    oracle_port: Annotated[int, Field(default=1521, description="Oracle database port")]
+        str,
+        u.Field(
+            description="Oracle database host",
+        ),
+    ] = c.DbOracle.DEFAULT_HOST
+    oracle_port: Annotated[
+        int,
+        u.Field(
+            description="Oracle database port",
+        ),
+    ] = c.DbOracle.DEFAULT_PORT
     oracle_service_name: Annotated[
-        str, Field(default="ORCL", description="Oracle service name or SID")
-    ]
+        str,
+        u.Field(
+            description="Oracle service name or SID",
+        ),
+    ] = c.DbOracle.DEFAULT_SERVICE_NAME
     oracle_user: Annotated[
-        SecretStr,
-        Field(
-            default_factory=lambda: SecretStr(""),
+        t.SecretStr,
+        u.Field(
             description="Oracle database username",
         ),
-    ]
+    ] = u.Field(default_factory=lambda: t.SecretStr(""))
     oracle_password: Annotated[
-        SecretStr,
-        Field(
-            default_factory=lambda: SecretStr(""),
+        t.SecretStr,
+        u.Field(
             description="Oracle database password",
         ),
-    ]
+    ] = u.Field(default_factory=lambda: t.SecretStr(""))
     default_target_schema: Annotated[
         str,
-        Field(
-            default="SINGER_DATA", description="Default target schema for data loading"
+        u.Field(
+            description="Default target schema for data loading",
         ),
-    ]
+    ] = "SINGER_DATA"
     batch_size: Annotated[
-        int, Field(default=1000, ge=1, description="Batch size for data loading")
-    ]
+        int, u.Field(ge=1, description="Batch size for data loading")
+    ] = 1000
     commit_interval: Annotated[
-        int, Field(default=1000, ge=1, description="Commit interval for transactions")
-    ]
+        int, u.Field(ge=1, description="Commit interval for transactions")
+    ] = 1000
     transaction_timeout: Annotated[
-        int, Field(default=30, ge=1, description="Transaction timeout in seconds")
-    ]
+        int, u.Field(ge=1, description="Transaction timeout in seconds")
+    ] = 30
     parallel_degree: Annotated[
-        int, Field(default=1, ge=1, description="Oracle parallel execution degree")
-    ]
+        int, u.Field(ge=1, description="Oracle parallel execution degree")
+    ] = 1
     table_prefix: Annotated[
-        str, Field(default="", description="Prefix applied to table names")
-    ]
+        str, u.Field(description="Prefix applied to table names")
+    ] = ""
     table_suffix: Annotated[
-        str, Field(default="", description="Suffix applied to table names")
-    ]
+        str, u.Field(description="Suffix applied to table names")
+    ] = ""
+    load_method: Annotated[
+        str,
+        u.Field(description="Oracle loading strategy for record batches"),
+    ] = c.TargetOracle.LOAD_METHOD_INSERT
+    sdc_mode: Annotated[
+        str,
+        u.Field(description="Singer upsert mode applied during loading"),
+    ] = c.TargetOracle.LOAD_METHOD_INSERT.lower()
+    storage_mode: Annotated[
+        str,
+        u.Field(description="How record payloads are materialized into Oracle"),
+    ] = c.TargetOracle.STORAGE_MODE_FLATTENED
+    json_column_name: Annotated[
+        str,
+        u.Field(description="Column name used to persist JSON payloads"),
+    ] = "DATA"
+    truncate_before_load: Annotated[
+        bool,
+        u.Field(description="Truncate existing tables before reloading data"),
+    ] = False
+    column_ordering: Annotated[
+        str,
+        u.Field(description="Column ordering strategy for generated DDL"),
+    ] = ""
+    column_order_rules: Annotated[
+        dict[str, int],
+        u.Field(description="Priority rules applied to generated table columns"),
+    ] = u.Field(default_factory=dict)
+    column_mappings: Annotated[
+        dict[str, dict[str, str]],
+        u.Field(description="Per-stream Singer-to-Oracle column mappings"),
+    ] = u.Field(default_factory=dict)
+    ignored_columns: Annotated[
+        t.StrSequence,
+        u.Field(description="Columns ignored during schema and record handling"),
+    ] = u.Field(default_factory=tuple)
+    custom_indexes: Annotated[
+        dict[str, tuple[t.JsonMapping, ...]],
+        u.Field(description="Per-stream custom Oracle index definitions"),
+    ] = u.Field(default_factory=dict)
     use_bulk_operations: Annotated[
-        bool, Field(default=True, description="Use bulk operations for faster loading")
-    ]
-    autocommit: Annotated[
-        bool, Field(default=False, description="Auto-commit transactions")
-    ]
+        bool, u.Field(description="Use bulk operations for faster loading")
+    ] = True
+    autocommit: Annotated[bool, u.Field(description="Auto-commit transactions")] = False
 
     def get_table_name(self, stream_name: str) -> str:
         """Get table name from stream name."""
@@ -85,31 +131,34 @@ class FlextTargetOracleSettings(FlextSettings):
         )
         return full_table_name.upper()
 
-    def validate_business_rules(self) -> r[bool]:
+    def validate_business_rules(self) -> p.Result[bool]:
         """Validate Oracle target configuration business rules."""
         if not self.oracle_host:
-            return r[bool].fail("Oracle host is required")
+            return e.fail_validation("oracle_host", error="is required")
         if not self.oracle_service_name:
-            return r[bool].fail("Oracle service name is required")
+            return e.fail_validation("oracle_service_name", error="is required")
         if not self.default_target_schema:
-            return r[bool].fail("Default target schema is required")
+            return e.fail_validation("default_target_schema", error="is required")
         if self.commit_interval > self.batch_size:
-            return r[bool].fail(
-                "Commit interval must be less than or equal to batch size"
+            return e.fail_validation(
+                "commit_interval",
+                error="must be less than or equal to batch size",
             )
         return r[bool].ok(True)
 
-    def get_oracle_config(self) -> OracleConnectionModel:
+    def get_oracle_config(
+        self,
+    ) -> FlextTargetOracleModelsSettings.OracleConnectionModel:
         """Get Oracle database connection configuration."""
-        return OracleConnectionModel(
+        return FlextTargetOracleModelsSettings.OracleConnectionModel(
             host=self.oracle_host,
             port=self.oracle_port,
             service_name=self.oracle_service_name,
             username=self.oracle_user.get_secret_value(),
             password=self.oracle_password.get_secret_value(),
             timeout=self.transaction_timeout,
-            pool_min=c.Loading.DEFAULT_POOL_MIN,
-            pool_max=c.Loading.DEFAULT_POOL_MAX,
+            pool_min=c.TargetOracle.DEFAULT_POOL_MIN,
+            pool_max=c.TargetOracle.DEFAULT_POOL_MAX,
             pool_increment=1,
             encoding="UTF-8",
             ssl_enabled=False,
@@ -118,16 +167,9 @@ class FlextTargetOracleSettings(FlextSettings):
             parallel_degree=self.parallel_degree,
         )
 
-
-def validate_oracle_configuration(
-    config: FlextTargetOracleSettings,
-) -> r[bool]:
-    """Validate Oracle configuration using FlextSettings patterns - ZERO DUPLICATION."""
-    return config.validate_business_rules()
-
-
-__all__: list[str] = [
-    "FlextTargetOracleSettings",
-    "LoadMethod",
-    "validate_oracle_configuration",
-]
+    @staticmethod
+    def validate_oracle_configuration(
+        settings: FlextTargetOracleSettings,
+    ) -> p.Result[bool]:
+        """Validate Oracle configuration using FlextSettings patterns - ZERO DUPLICATION."""
+        return settings.validate_business_rules()

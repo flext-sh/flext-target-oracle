@@ -1,8 +1,38 @@
-"""Performance test module.
+# AUTO-GENERATED FILE — Regenerate with: make gen
+"""Performance package."""
 
-This module is part of the FLEXT ecosystem. Docstrings follow PEP 257 and Google style.
+from __future__ import annotations
 
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
+from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
-"""
+_LAZY_IMPORTS = build_lazy_import_map(
+    {
+        ".test_performance": ("TestsFlextTargetOraclePerformance",),
+        "flext_tests": (
+            "c",
+            "d",
+            "e",
+            "h",
+            "m",
+            "p",
+            "r",
+            "s",
+            "t",
+            "td",
+            "tf",
+            "tk",
+            "tm",
+            "tv",
+            "u",
+            "x",
+        ),
+    },
+)
+
+
+install_lazy_exports(
+    __name__,
+    globals(),
+    _LAZY_IMPORTS,
+    publish_all=False,
+)

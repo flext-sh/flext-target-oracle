@@ -1,124 +1,19 @@
-"""Constants for FLEXT Target Oracle module.
-
-This module defines centralized constants following the FlextConstants pattern
-from flext-core, extending it with Oracle target-specific constants.
-
-Copyright (c) 2025 FLEXT Team. All rights reserved.
-SPDX-License-Identifier: MIT
-
-"""
+"""Target Oracle constants facade."""
 
 from __future__ import annotations
 
-from enum import StrEnum
-from typing import Final
-
 from flext_db_oracle import FlextDbOracleConstants
-from flext_meltano import FlextMeltanoConstants
+from flext_meltano import c as _c
+from flext_target_oracle import t
+from flext_target_oracle._constants.base import FlextTargetOracleConstantsBase
 
 
-class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
-    """Target Oracle constants extending FlextConstants.
+class FlextTargetOracleConstants(_c, FlextDbOracleConstants):
+    """Oracle target constant facade."""
 
-    Composes with 1000 to avoid duplication and ensure consistency.
-    """
-
-    class LoadMethod(StrEnum):
-        """Oracle data loading strategies with performance characteristics.
-
-        Defines the available strategies for loading Singer data into Oracle
-        tables, each optimized for different use cases and performance requirements.
-
-        DRY Pattern:
-            StrEnum is the single source of truth. Use LoadMethod.INSERT.value
-            or LoadMethod.INSERT directly - no base strings needed.
-        """
-
-        INSERT = "INSERT"
-        MERGE = "MERGE"
-        BULK_INSERT = "BULK_INSERT"
-        BULK_MERGE = "BULK_MERGE"
-
-    class StorageMode(StrEnum):
-        """Data storage modes for Oracle target operations.
-
-        Defines how Singer data should be stored in Oracle tables,
-        with different approaches for handling nested JSON data.
-
-        DRY Pattern:
-            StrEnum is the single source of truth. Use StorageMode.FLATTENED.value
-            or StorageMode.FLATTENED directly - no base strings needed.
-        """
-
-        FLATTENED = "flattened"
-        JSON = "json"
-        HYBRID = "hybrid"
-
-    class TargetOracle:
-        """Connection-related constants for Oracle target."""
-
-        class CommandTypes(StrEnum):
-            """Command type identifiers for Oracle target operations."""
-
-            VALIDATE = "oracle_target_validate"
-            LOAD = "oracle_target_load"
-            ABOUT = "oracle_target_about"
-
-        class OutputFormats(StrEnum):
-            """Output format options for command responses."""
-
-            JSON = "json"
-            TEXT = "text"
-
-        DEFAULT_PORT: Final[int] = 1521
-        MIN_PORT: Final[int] = 1024
-        MAX_PORT: Final[int] = 65535
-        DEFAULT_CONNECTION_TIMEOUT: Final[int] = 30
-        DEFAULT_HOST: Final[str] = "localhost"
-        DEFAULT_SERVICE_NAME: Final[str] = "XE"
-        DEFAULT_USERNAME: Final[str] = "system"
-
-    class TargetOracleProcessing:
-        """Processing-related constants for Oracle target.
-
-        Note: Does not override parent Processing class to avoid inheritance conflicts.
-        """
-
-        DEFAULT_BATCH_SIZE: Final[int] = 1000
-        DEFAULT_COMMIT_SIZE: Final[int] = 1000
-        DEFAULT_QUERY_TIMEOUT: Final[int] = 30
-        DEFAULT_MAX_PARALLEL_STREAMS: Final[int] = 4
-
-    class Loading:
-        """Target-specific loading configuration."""
-
-        DEFAULT_POOL_MIN: Final[int] = 5
-        DEFAULT_POOL_MAX: Final[int] = 20
-        DEFAULT_POOL_TIMEOUT: Final[int] = 30
-
-    class TargetOracleValidation:
-        """Target-specific validation configuration.
-
-        Note: Does not override parent Validation class to avoid inheritance conflicts.
-        """
-
-        MAX_TABLE_NAME_LENGTH: Final[int] = 30
-        MAX_COLUMN_NAME_LENGTH: Final[int] = 30
-        MAX_IDENTIFIER_LENGTH: Final[int] = 30
-
-    class FeatureFlags:
-        """Feature toggles for progressive dispatcher rollout."""
-
-        ENABLE_DISPATCHER: Final[bool] = False
-
-    class Observability:
-        """Observability and monitoring constants."""
-
-        DATABASE_LOGIN: Final[str] = "database_login"
-        FAILURE: Final[str] = "failure"
-        SLOW_QUERY_THRESHOLD_SECONDS: Final[float] = 30.0
-        HIGH_UTILIZATION_THRESHOLD: Final[float] = 0.8
+    class TargetOracle(FlextTargetOracleConstantsBase):
+        """Oracle target constant namespace."""
 
 
 c = FlextTargetOracleConstants
-__all__ = ["FlextTargetOracleConstants", "c"]
+__all__: t.StrSequence = ("FlextTargetOracleConstants", "c")
