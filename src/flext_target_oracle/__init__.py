@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-from flext_core import d, e, h, r, s, x
 from flext_core.lazy import install_lazy_exports
 from flext_target_oracle.__version__ import (
     __author__,
@@ -29,12 +28,6 @@ _EAGER_EXPORTS = (
     __url__,
     __version__,
     __version_info__,
-    d,
-    e,
-    h,
-    r,
-    s,
-    x,
 )
 
 
@@ -57,16 +50,10 @@ _PUBLIC_EXPORTS: tuple[str, ...] = (
     "__version__",
     "__version_info__",
     "c",
-    "d",
-    "e",
-    "h",
     "m",
     "p",
-    "r",
-    "s",
     "t",
     "u",
-    "x",
 )
 
 
