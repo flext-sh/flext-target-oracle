@@ -287,7 +287,6 @@ class FlextTargetOracle:
         state_message: m.Meltano.SingerStateMessage,
     ) -> p.Result[bool]:
         self.state_message = state_message
-        self.logger.debug("State updated for Oracle target")
         return r[bool].ok(True)
 
 
