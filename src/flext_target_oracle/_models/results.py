@@ -20,7 +20,9 @@ class FlextTargetOracleModelsResults:
     class ExecuteResult(m.ArbitraryTypesModel):
         """Target execute readiness payload."""
 
-        name: Annotated[str, u.Field(..., description="Target package name", validate_default=True)]
+        name: Annotated[
+            str, u.Field(..., description="Target package name", validate_default=True)
+        ]
         status: Annotated[
             Literal["ready"],
             u.Field(
@@ -29,10 +31,15 @@ class FlextTargetOracleModelsResults:
                 validate_default=True,
             ),
         ] = "ready"
-        oracle_host: Annotated[str, u.Field(..., description="Configured Oracle host", validate_default=True)]
+        oracle_host: Annotated[
+            str,
+            u.Field(..., description="Configured Oracle host", validate_default=True),
+        ]
         oracle_service: Annotated[
             str,
-            u.Field(..., description="Configured Oracle service name", validate_default=True),
+            u.Field(
+                ..., description="Configured Oracle service name", validate_default=True
+            ),
         ]
 
     class ProcessingSummary(m.ArbitraryTypesModel):
@@ -72,14 +79,25 @@ class FlextTargetOracleModelsResults:
     class LoaderOperation(m.ArbitraryTypesModel):
         """Detailed load operation summary for all streams."""
 
-        stream_name: Annotated[str, u.Field(..., description="Logical stream identifier", validate_default=True)]
+        stream_name: Annotated[
+            str,
+            u.Field(
+                ..., description="Logical stream identifier", validate_default=True
+            ),
+        ]
         started_at: Annotated[
             str,
-            u.Field(..., description="Load operation start timestamp", validate_default=True),
+            u.Field(
+                ..., description="Load operation start timestamp", validate_default=True
+            ),
         ]
         completed_at: Annotated[
             str,
-            u.Field(..., description="Load operation completion timestamp", validate_default=True),
+            u.Field(
+                ...,
+                description="Load operation completion timestamp",
+                validate_default=True,
+            ),
         ]
         records_loaded: Annotated[
             t.NonNegativeInt,
@@ -154,7 +172,9 @@ class FlextTargetOracleModelsResults:
     class LoadStatisticsModel(m.ArbitraryTypesModel):
         """Statistics for data load operation."""
 
-        stream_name: Annotated[str, u.Field(..., description="Stream identifier", validate_default=True)]
+        stream_name: Annotated[
+            str, u.Field(..., description="Stream identifier", validate_default=True)
+        ]
         total_records_processed: Annotated[
             t.NonNegativeInt,
             u.Field(
