@@ -20,17 +20,19 @@ class FlextTargetOracleModelsResults:
     class ExecuteResult(m.ArbitraryTypesModel):
         """Target execute readiness payload."""
 
-        name: Annotated[str, u.Field(description="Target package name")]
+        name: Annotated[str, u.Field(..., description="Target package name", validate_default=True)]
         status: Annotated[
             Literal["ready"],
             u.Field(
+                ...,
                 description="Target readiness status",
+                validate_default=True,
             ),
         ] = "ready"
-        oracle_host: Annotated[str, u.Field(description="Configured Oracle host")]
+        oracle_host: Annotated[str, u.Field(..., description="Configured Oracle host", validate_default=True)]
         oracle_service: Annotated[
             str,
-            u.Field(description="Configured Oracle service name"),
+            u.Field(..., description="Configured Oracle service name", validate_default=True),
         ]
 
     class ProcessingSummary(m.ArbitraryTypesModel):
@@ -39,46 +41,53 @@ class FlextTargetOracleModelsResults:
         messages_processed: Annotated[
             t.NonNegativeInt,
             u.Field(
+                ...,
                 description="Total Singer messages processed",
+                validate_default=True,
             ),
         ]
         streams: Annotated[
             t.StrSequence,
             u.Field(
+                ...,
                 description="Singer stream names seen during processing",
+                validate_default=True,
             ),
-        ] = u.Field(default_factory=tuple)
+        ] = u.Field(default_factory=tuple, validate_default=True)
         state: Annotated[
             m.Meltano.SingerStateMessage,
             u.Field(
+                ...,
                 description="Accumulated Singer STATE payload",
+                validate_default=True,
             ),
         ] = u.Field(
             default_factory=lambda: m.Meltano.SingerStateMessage(
                 type="STATE",
                 value={},
-            )
+            ),
+            validate_default=True,
         )
 
     class LoaderOperation(m.ArbitraryTypesModel):
         """Detailed load operation summary for all streams."""
 
-        stream_name: Annotated[str, u.Field(description="Logical stream identifier")]
+        stream_name: Annotated[str, u.Field(..., description="Logical stream identifier", validate_default=True)]
         started_at: Annotated[
             str,
-            u.Field(description="Load operation start timestamp"),
+            u.Field(..., description="Load operation start timestamp", validate_default=True),
         ]
         completed_at: Annotated[
             str,
-            u.Field(description="Load operation completion timestamp"),
+            u.Field(..., description="Load operation completion timestamp", validate_default=True),
         ]
         records_loaded: Annotated[
             t.NonNegativeInt,
-            u.Field(description="Number of loaded records"),
+            u.Field(..., description="Number of loaded records", validate_default=True),
         ]
         records_failed: Annotated[
             t.NonNegativeInt,
-            u.Field(description="Number of failed records"),
+            u.Field(..., description="Number of failed records", validate_default=True),
         ]
 
     class LoaderFinalizeResult(m.ArbitraryTypesModel):
@@ -86,29 +95,37 @@ class FlextTargetOracleModelsResults:
 
         total_records: Annotated[
             t.NonNegativeInt,
-            u.Field(description="Total records processed"),
+            u.Field(..., description="Total records processed", validate_default=True),
         ]
         streams_processed: Annotated[
             t.NonNegativeInt,
             u.Field(
+                ...,
                 description="Number of processed streams",
+                validate_default=True,
             ),
         ]
         status: Annotated[
             Literal["completed"],
             u.Field(
+                ...,
                 description="Finalization status",
+                validate_default=True,
             ),
         ] = "completed"
         loading_operation: FlextTargetOracleModelsResults.LoaderOperation = u.Field(
+            ...,
             description="Aggregated loading operation details",
+            validate_default=True,
         )
         buffer_status: Annotated[
             t.MappingKV[str, int],
             u.Field(
+                ...,
                 description="Remaining buffered records by stream",
+                validate_default=True,
             ),
-        ] = u.Field(default_factory=_default_buffer_status)
+        ] = u.Field(default_factory=_default_buffer_status, validate_default=True)
 
     class ImplementationMetrics(m.ArbitraryTypesModel):
         """Oracle target implementation metrics."""
@@ -116,41 +133,47 @@ class FlextTargetOracleModelsResults:
         streams_configured: Annotated[
             t.NonNegativeInt,
             u.Field(
+                ...,
                 description="Number of configured streams",
+                validate_default=True,
             ),
         ]
         batch_size: Annotated[
             t.BatchSize,
-            u.Field(description="Configured batch size"),
+            u.Field(..., description="Configured batch size", validate_default=True),
         ]
         use_bulk_operations: Annotated[
             bool,
             u.Field(
+                ...,
                 description="Whether bulk operations are enabled",
+                validate_default=True,
             ),
         ]
 
     class LoadStatisticsModel(m.ArbitraryTypesModel):
         """Statistics for data load operation."""
 
-        stream_name: Annotated[str, u.Field(description="Stream identifier")]
+        stream_name: Annotated[str, u.Field(..., description="Stream identifier", validate_default=True)]
         total_records_processed: Annotated[
             t.NonNegativeInt,
             u.Field(
+                ...,
                 description="Total processed records",
+                validate_default=True,
             ),
         ]
         successful_records: Annotated[
             t.NonNegativeInt,
-            u.Field(description="Successful records"),
+            u.Field(..., description="Successful records", validate_default=True),
         ]
         failed_records: Annotated[
             t.NonNegativeInt,
-            u.Field(description="Failed records"),
+            u.Field(..., description="Failed records", validate_default=True),
         ]
         batches_processed: Annotated[
             t.NonNegativeInt,
-            u.Field(description="Processed batch count"),
+            u.Field(..., description="Processed batch count", validate_default=True),
         ]
 
         def finalize(self) -> Self:

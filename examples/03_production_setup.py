@@ -54,8 +54,8 @@ class HealthStatus(m.BaseModel):
 
     timestamp: float
     status: str = "healthy"
-    checks: t.MutableJsonMapping = u.Field(default_factory=dict)
-    metrics: t.MutableJsonMapping = u.Field(default_factory=dict)
+    checks: t.MutableJsonMapping = u.Field(default_factory=dict, validate_default=True)
+    metrics: t.MutableJsonMapping = u.Field(default_factory=dict, validate_default=True)
     error: str | None = None
 
 

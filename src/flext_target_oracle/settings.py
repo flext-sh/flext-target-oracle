@@ -28,101 +28,137 @@ class FlextTargetOracleSettings(FlextSettingsBase):
     oracle_host: Annotated[
         str,
         u.Field(
+            ...,
             description="Oracle database host",
+            validate_default=True,
         ),
     ] = c.DbOracle.DEFAULT_HOST
     oracle_port: Annotated[
         int,
         u.Field(
+            ...,
             description="Oracle database port",
+            validate_default=True,
         ),
     ] = c.DbOracle.DEFAULT_PORT
     oracle_service_name: Annotated[
         str,
         u.Field(
+            ...,
             description="Oracle service name or SID",
+            validate_default=True,
         ),
     ] = c.DbOracle.DEFAULT_SERVICE_NAME
     oracle_user: Annotated[
         t.SecretStr,
         u.Field(
+            ...,
             description="Oracle database username",
+            validate_default=True,
         ),
-    ] = u.Field(default_factory=lambda: t.SecretStr(""))
+    ] = u.Field(default_factory=lambda: t.SecretStr(""), validate_default=True)
     oracle_password: Annotated[
         t.SecretStr,
         u.Field(
+            ...,
             description="Oracle database password",
+            validate_default=True,
         ),
-    ] = u.Field(default_factory=lambda: t.SecretStr(""))
+    ] = u.Field(default_factory=lambda: t.SecretStr(""), validate_default=True)
     default_target_schema: Annotated[
         str,
         u.Field(
+            ...,
             description="Default target schema for data loading",
+            validate_default=True,
         ),
     ] = "SINGER_DATA"
     batch_size: Annotated[
-        int, u.Field(ge=1, description="Batch size for data loading")
+        int,
+        u.Field(
+            ...,
+            ge=1,
+            description="Batch size for data loading",
+            validate_default=True,
+        ),
     ] = 1000
     commit_interval: Annotated[
-        int, u.Field(ge=1, description="Commit interval for transactions")
+        int,
+        u.Field(
+            ...,
+            ge=1,
+            description="Commit interval for transactions",
+            validate_default=True,
+        ),
     ] = 1000
     transaction_timeout: Annotated[
-        int, u.Field(ge=1, description="Transaction timeout in seconds")
+        int,
+        u.Field(
+            ...,
+            ge=1,
+            description="Transaction timeout in seconds",
+            validate_default=True,
+        ),
     ] = 30
     parallel_degree: Annotated[
-        int, u.Field(ge=1, description="Oracle parallel execution degree")
+        int,
+        u.Field(
+            ...,
+            ge=1,
+            description="Oracle parallel execution degree",
+            validate_default=True,
+        ),
     ] = 1
     table_prefix: Annotated[
-        str, u.Field(description="Prefix applied to table names")
+        str, u.Field(..., description="Prefix applied to table names", validate_default=True)
     ] = ""
     table_suffix: Annotated[
-        str, u.Field(description="Suffix applied to table names")
+        str, u.Field(..., description="Suffix applied to table names", validate_default=True)
     ] = ""
     load_method: Annotated[
         str,
-        u.Field(description="Oracle loading strategy for record batches"),
+        u.Field(..., description="Oracle loading strategy for record batches", validate_default=True),
     ] = c.TargetOracle.LOAD_METHOD_INSERT
     sdc_mode: Annotated[
         str,
-        u.Field(description="Singer upsert mode applied during loading"),
+        u.Field(..., description="Singer upsert mode applied during loading", validate_default=True),
     ] = c.TargetOracle.LOAD_METHOD_INSERT.lower()
     storage_mode: Annotated[
         str,
-        u.Field(description="How record payloads are materialized into Oracle"),
+        u.Field(..., description="How record payloads are materialized into Oracle", validate_default=True),
     ] = c.TargetOracle.STORAGE_MODE_FLATTENED
     json_column_name: Annotated[
         str,
-        u.Field(description="Column name used to persist JSON payloads"),
+        u.Field(..., description="Column name used to persist JSON payloads", validate_default=True),
     ] = "DATA"
     truncate_before_load: Annotated[
         bool,
-        u.Field(description="Truncate existing tables before reloading data"),
+        u.Field(..., description="Truncate existing tables before reloading data", validate_default=True),
     ] = False
     column_ordering: Annotated[
         str,
-        u.Field(description="Column ordering strategy for generated DDL"),
+        u.Field(..., description="Column ordering strategy for generated DDL", validate_default=True),
     ] = ""
     column_order_rules: Annotated[
         dict[str, int],
-        u.Field(description="Priority rules applied to generated table columns"),
-    ] = u.Field(default_factory=dict)
+        u.Field(..., description="Priority rules applied to generated table columns", validate_default=True),
+    ] = u.Field(default_factory=dict, validate_default=True)
     column_mappings: Annotated[
         dict[str, dict[str, str]],
-        u.Field(description="Per-stream Singer-to-Oracle column mappings"),
-    ] = u.Field(default_factory=dict)
+        u.Field(..., description="Per-stream Singer-to-Oracle column mappings", validate_default=True),
+    ] = u.Field(default_factory=dict, validate_default=True)
     ignored_columns: Annotated[
         t.StrSequence,
-        u.Field(description="Columns ignored during schema and record handling"),
-    ] = u.Field(default_factory=tuple)
+        u.Field(..., description="Columns ignored during schema and record handling", validate_default=True),
+    ] = u.Field(default_factory=tuple, validate_default=True)
     custom_indexes: Annotated[
         dict[str, tuple[t.JsonMapping, ...]],
-        u.Field(description="Per-stream custom Oracle index definitions"),
-    ] = u.Field(default_factory=dict)
+        u.Field(..., description="Per-stream custom Oracle index definitions", validate_default=True),
+    ] = u.Field(default_factory=dict, validate_default=True)
     use_bulk_operations: Annotated[
-        bool, u.Field(description="Use bulk operations for faster loading")
+        bool, u.Field(..., description="Use bulk operations for faster loading", validate_default=True)
     ] = True
-    autocommit: Annotated[bool, u.Field(description="Auto-commit transactions")] = False
+    autocommit: Annotated[bool, u.Field(..., description="Auto-commit transactions", validate_default=True)] = False
 
     def get_table_name(self, stream_name: str) -> str:
         """Get table name from stream name."""
