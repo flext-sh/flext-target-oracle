@@ -26,12 +26,12 @@ class FlextTargetOracleProtocolsBase:
 
         @property
         def failure(self) -> bool:
-            """Return True if the operation failed."""
+            """The True if the operation failed."""
             ...
 
         @property
         def error(self) -> t.JsonValue | None:
-            """Return the error value if the operation failed, else None."""
+            """The error value if the operation failed, else None."""
             ...
 
     @runtime_checkable
@@ -142,7 +142,7 @@ class FlextTargetOracleProtocolsBase:
         def get_connection_info(
             self,
         ) -> p.Result[m.TargetOracle.OracleConnectionConfig]:
-            """Return effective Oracle connection information."""
+            """The effective Oracle connection information."""
             ...
 
         def test_connection(self) -> p.Result[None]:
