@@ -429,6 +429,7 @@ addopts = [
   "--ignore-glob=*/tests/utilities.py",
   "--markdown-docs",
   "--strict-markers",
+  "-m not integration",
 ]
 filterwarnings = [
   "ignore:.*cannot collect test class.*because it has a __init__ constructor.*:pytest.PytestCollectionWarning",

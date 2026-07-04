@@ -23,6 +23,8 @@ from tests.constants import c
 from tests.models import m
 from tests.typings import t
 
+pytestmark = pytest.mark.integration
+
 
 def _schema_parts(
     message: t.JsonValue,
