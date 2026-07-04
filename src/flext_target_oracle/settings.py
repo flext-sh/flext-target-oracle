@@ -22,7 +22,8 @@ class FlextTargetOracleSettings(FlextSettingsBase):
     """Runtime settings for Oracle Singer target operations."""
 
     model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
-        env_prefix="FLEXT_TARGET_ORACLE_", extra="ignore"
+        env_prefix="FLEXT_TARGET_ORACLE_",
+        extra="ignore",
     )
 
     oracle_host: Annotated[
@@ -112,13 +113,17 @@ class FlextTargetOracleSettings(FlextSettingsBase):
     table_prefix: Annotated[
         str,
         u.Field(
-            ..., description="Prefix applied to table names", validate_default=True
+            ...,
+            description="Prefix applied to table names",
+            validate_default=True,
         ),
     ] = ""
     table_suffix: Annotated[
         str,
         u.Field(
-            ..., description="Suffix applied to table names", validate_default=True
+            ...,
+            description="Suffix applied to table names",
+            validate_default=True,
         ),
     ] = ""
     load_method: Annotated[

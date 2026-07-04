@@ -14,8 +14,7 @@ import os
 import signal
 import time
 from datetime import UTC
-from types import FrameType
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from flext_cli import u as cli_u
 from flext_target_oracle import (
@@ -28,6 +27,9 @@ from flext_target_oracle import (
     t,
     u,
 )
+
+if TYPE_CHECKING:
+    from types import FrameType
 
 logging.basicConfig(
     level=logging.INFO,

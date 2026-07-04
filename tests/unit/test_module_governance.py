@@ -11,13 +11,17 @@ from __future__ import annotations
 import importlib
 import inspect
 import warnings
-from collections.abc import Iterator
 from pathlib import Path
-from types import ModuleType
+from typing import TYPE_CHECKING
 
 from tests.constants import c
 from tests.models import m
-from tests.typings import t
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from types import ModuleType
+
+    from tests.typings import t
 
 
 def _package_root() -> Path:
@@ -25,7 +29,7 @@ def _package_root() -> Path:
     return Path(
         Path(__file__).resolve().parents[parent_depth]
         / c.TargetOracle.Tests.SRC_DIR
-        / c.TargetOracle.Tests.PACKAGE_DIR
+        / c.TargetOracle.Tests.PACKAGE_DIR,
     )
 
 
@@ -82,7 +86,7 @@ class TestsFlextTargetOracleModuleGovernance:
             for name, _ in _module_top_level_attrs(module):
                 if name in {"logger", "_logger"}:
                     violations.append(
-                        str(module_path.relative_to(_package_root().parent))
+                        str(module_path.relative_to(_package_root().parent)),
                     )
                     break
         assert not violations, (

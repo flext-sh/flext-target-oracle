@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest
@@ -11,7 +12,9 @@ from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
 from tests.models import m
-from tests.typings import t
+
+if TYPE_CHECKING:
+    from tests.typings import t
 
 
 @pytest.mark.e2e
@@ -75,13 +78,13 @@ class TestsFlextTargetOracleSinger:
         state = {"type": "STATE", "value": {"bookmarks": {"orders": {"version": 1}}}}
         assert target.execute().success
         assert target.process_singer_message(
-            m.Meltano.SingerSchemaMessage.model_validate(schema)
+            m.Meltano.SingerSchemaMessage.model_validate(schema),
         ).success
         assert target.process_singer_message(
-            m.Meltano.SingerRecordMessage.model_validate(record)
+            m.Meltano.SingerRecordMessage.model_validate(record),
         ).success
         assert target.process_singer_message(
-            m.Meltano.SingerStateMessage.model_validate(state)
+            m.Meltano.SingerStateMessage.model_validate(state),
         ).success
         finalize_result = target.finalize()
         assert finalize_result.success

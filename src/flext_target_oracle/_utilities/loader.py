@@ -545,7 +545,8 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         connection_result = self.test_connection()
         if connection_result.failure:
             return r[t.JsonMapping].fail_op(
-                "Oracle connection", connection_result.error
+                "Oracle connection",
+                connection_result.error,
             )
         return r[t.JsonMapping].ok({
             "status": "ready",
@@ -561,7 +562,8 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             self.log_error("Failed to finalize streams", error=str(exc))
             return r[m.TargetOracle.LoaderFinalizeResult].fail_op(
-                "finalize streams", exc
+                "finalize streams",
+                exc,
             )
 
     def _finalize_all_streams_unchecked(

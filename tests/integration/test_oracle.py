@@ -12,16 +12,19 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import time
+from typing import TYPE_CHECKING
 
 import pytest
 
-from flext_db_oracle import FlextDbOracleApi
-from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 from tests.constants import c
 from tests.models import m
 from tests.typings import t
+
+if TYPE_CHECKING:
+    from flext_db_oracle import FlextDbOracleApi
+    from flext_target_oracle import FlextTargetOracleSettings
 
 pytestmark = pytest.mark.integration
 
@@ -71,7 +74,9 @@ class TestsFlextTargetOracleOracle:
         stream_name = "test_users"
         schema_dict, key_props = _schema_parts(simple_schema)
         table_res = oracle_loader.ensure_table_exists(
-            stream_name, schema_dict, key_props
+            stream_name,
+            schema_dict,
+            key_props,
         )
         assert table_res.success
         table_count = _query_scalar(
@@ -107,7 +112,9 @@ class TestsFlextTargetOracleOracle:
         stream_name = "test_insert"
         schema_dict, key_props = _schema_parts(simple_schema)
         create_res = oracle_loader.ensure_table_exists(
-            stream_name, schema_dict, key_props
+            stream_name,
+            schema_dict,
+            key_props,
         )
         assert create_res.success
         records: t.SequenceOf[t.JsonMapping] = [
@@ -149,12 +156,12 @@ class TestsFlextTargetOracleOracle:
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert table_res.success
         initial_records: t.SequenceOf[t.JsonMapping] = [
-            {"id": 1, "name": "Original Name", "email": "original@example.com"}
+            {"id": 1, "name": "Original Name", "email": "original@example.com"},
         ]
         insert_result = loader.insert_records(stream_name, initial_records)
         assert insert_result.success
         updated_records: t.SequenceOf[t.JsonMapping] = [
-            {"id": 1, "name": "Updated Name", "email": "updated@example.com"}
+            {"id": 1, "name": "Updated Name", "email": "updated@example.com"},
         ]
         result = loader.insert_records(stream_name, updated_records)
         assert result.success
@@ -170,7 +177,9 @@ class TestsFlextTargetOracleOracle:
 
     @pytest.mark.usefixtures("clean_database")
     def test_bulk_insert_performance(
-        self, oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi
+        self,
+        oracle_config: FlextTargetOracleSettings,
+        oracle_engine: FlextDbOracleApi,
     ) -> None:
         """Test bulk insert with large dataset."""
         oracle_config = oracle_config.clone(
@@ -264,7 +273,7 @@ class TestsFlextTargetOracleOracle:
         assert customer_name == "Acme Corp"
         customer_address = customer_data.get("address")
         customer_address_data = t.json_mapping_adapter().validate_python(
-            customer_address
+            customer_address,
         )
         customer_city = customer_address_data.get("city")
         assert customer_city == "objecttown"
@@ -344,7 +353,8 @@ class TestsFlextTargetOracleOracle:
         create_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         assert create_res.success
         insert_initial = loader.insert_records(
-            stream_name, [{"id": 1, "name": "Initial"}]
+            stream_name,
+            [{"id": 1, "name": "Initial"}],
         )
         assert insert_initial.success
         count = _query_scalar(
@@ -380,9 +390,9 @@ class TestsFlextTargetOracleOracle:
                             "unique": True,
                         },
                         {"columns": ["NAME", "CREATED_AT"]},
-                    )
-                }
-            }
+                    ),
+                },
+            },
         )
         loader = FlextTargetOracleLoader(oracle_config)
         assert loader.connect().success
@@ -421,7 +431,7 @@ class TestsFlextTargetOracleOracle:
         assert init_result.success
         for message in singer_messages:
             result = target.execute(
-                t.json_value_adapter().dump_json(message).decode("utf-8")
+                t.json_value_adapter().dump_json(message).decode("utf-8"),
             )
             assert result.success
         table_count = _query_scalar(
@@ -466,10 +476,10 @@ class TestsFlextTargetOracleOracle:
             "key_properties": ["id"],
         }
         schema_msg_value: t.JsonValue = t.json_value_adapter().validate_python(
-            schema_msg
+            schema_msg,
         )
         target.execute(
-            t.json_value_adapter().dump_json(schema_msg_value).decode("utf-8")
+            t.json_value_adapter().dump_json(schema_msg_value).decode("utf-8"),
         )
         record_msg = {
             "type": "RECORD",
@@ -483,10 +493,10 @@ class TestsFlextTargetOracleOracle:
             },
         }
         record_msg_value: t.JsonValue = t.json_value_adapter().validate_python(
-            record_msg
+            record_msg,
         )
         target.execute(
-            t.json_value_adapter().dump_json(record_msg_value).decode("utf-8")
+            t.json_value_adapter().dump_json(record_msg_value).decode("utf-8"),
         )
         column_rows = _query_rows(
             oracle_engine,

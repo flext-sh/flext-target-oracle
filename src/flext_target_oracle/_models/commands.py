@@ -44,7 +44,7 @@ class FlextTargetOracleModelsCommands:
                 return r[str].ok("flext-target-oracle")
             return r[str].ok(
                 t.TargetOracle.STR_MAP_ADAPTER.dump_json(payload).decode(
-                    c.DEFAULT_ENCODING
+                    c.DEFAULT_ENCODING,
                 ),
             )
 

@@ -29,13 +29,19 @@ def target(mock_oracle_api: Mock) -> FlextTargetOracle:
     })
     client = FlextTargetOracle(settings=settings)
     object.__setattr__(
-        client.loader, "test_connection", Mock(return_value=r[bool].ok(value=True))
+        client.loader,
+        "test_connection",
+        Mock(return_value=r[bool].ok(value=True)),
     )
     object.__setattr__(
-        client.loader, "ensure_table_exists", Mock(return_value=r[bool].ok(value=True))
+        client.loader,
+        "ensure_table_exists",
+        Mock(return_value=r[bool].ok(value=True)),
     )
     object.__setattr__(
-        client.loader, "load_record", Mock(return_value=r[bool].ok(value=True))
+        client.loader,
+        "load_record",
+        Mock(return_value=r[bool].ok(value=True)),
     )
     object.__setattr__(
         client.loader,
@@ -52,8 +58,8 @@ def target(mock_oracle_api: Mock) -> FlextTargetOracle:
                         "records_loaded": 0,
                         "records_failed": 0,
                     },
-                })
-            )
+                }),
+            ),
         ),
     )
     return client
@@ -75,7 +81,8 @@ class TestsFlextTargetOracleTarget:
         assert result.success
 
     def test_discover_catalog_uses_registered_schemas(
-        self, target: FlextTargetOracle
+        self,
+        target: FlextTargetOracle,
     ) -> None:
         schema_message = m.Meltano.SingerSchemaMessage.model_validate({
             "type": "SCHEMA",
@@ -83,7 +90,7 @@ class TestsFlextTargetOracleTarget:
             "schema": {
                 "type": "object",
                 "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"}
+                    "id": {"type": "integer"},
                 }).unwrap(),
             },
             "key_properties": ["id"],
@@ -100,7 +107,7 @@ class TestsFlextTargetOracleTarget:
             "schema": {
                 "type": "object",
                 "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"}
+                    "id": {"type": "integer"},
                 }).unwrap(),
             },
         })
@@ -123,7 +130,8 @@ class TestsFlextTargetOracleTarget:
         assert bookmarks_obj.get("users") == 1
 
     def test_process_singer_messages_flushes_loader(
-        self, target: FlextTargetOracle
+        self,
+        target: FlextTargetOracle,
     ) -> None:
         messages: t.SequenceOf[
             m.Meltano.SingerSchemaMessage
@@ -137,7 +145,7 @@ class TestsFlextTargetOracleTarget:
                 "schema": {
                     "type": "object",
                     "properties": cli_u.Cli.json_dumps({
-                        "id": {"type": "integer"}
+                        "id": {"type": "integer"},
                     }).unwrap(),
                 },
             }),
@@ -160,12 +168,13 @@ class TestsFlextTargetOracleTarget:
         assert result.failure
 
     def test_invalid_json_payload_maps_to_processing_failure(
-        self, target: FlextTargetOracle
+        self,
+        target: FlextTargetOracle,
     ) -> None:
         result = target.execute("{ invalid }")
         assert result.failure
         parse_result = target.write_record(
-            '{"type": "RECORD", "stream": "users", "record": "bad"}'
+            '{"type": "RECORD", "stream": "users", "record": "bad"}',
         )
         assert parse_result.failure
         assert issubclass(FlextTargetOracleExceptions.ProcessingError, Exception)
@@ -179,12 +188,13 @@ class TestsFlextTargetOracleTarget:
         assert metrics.batch_size > 0
         assert metrics.use_bulk_operations in {True, False}
         result = target.write_record(
-            t.json_value_adapter().dump_json({"id": 1}).decode("utf-8")
+            t.json_value_adapter().dump_json({"id": 1}).decode("utf-8"),
         )
         assert result.failure
 
     def test_write_record_inserts_oracle_record(
-        self, target: FlextTargetOracle
+        self,
+        target: FlextTargetOracle,
     ) -> None:
         mocked_load_record = Mock(return_value=r[bool].ok(value=True))
         object.__setattr__(target.loader, "load_record", mocked_load_record)
@@ -196,7 +206,7 @@ class TestsFlextTargetOracleTarget:
                 "stream": "users",
                 "record": {"id": 1},
             })
-            .decode("utf-8")
+            .decode("utf-8"),
         )
         mocked_load_record.assert_called_once_with("users", {"id": 1})
         assert result.success

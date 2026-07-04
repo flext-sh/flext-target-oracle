@@ -8,9 +8,9 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import os
-from collections.abc import Generator
 from pathlib import Path
 from time import monotonic, sleep
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -24,7 +24,11 @@ from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 from tests.constants import c
 from tests.models import m
-from tests.typings import t
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from tests.typings import t
 
 reset_settings = _shared_reset_settings
 
@@ -113,17 +117,17 @@ def shared_oracle_container(docker_control: tk) -> str:
                 user_exists = user_count > 0
                 if not user_exists:
                     create_user_result = admin_api.execute_sql(
-                        "CREATE USER flext_test IDENTIFIED BY flext_test_password"
+                        "CREATE USER flext_test IDENTIFIED BY flext_test_password",
                     )
                     if create_user_result.failure:
                         last_error = create_user_result.error or last_error
                 alter_user_result = admin_api.execute_sql(
-                    "ALTER USER flext_test IDENTIFIED BY flext_test_password ACCOUNT UNLOCK"
+                    "ALTER USER flext_test IDENTIFIED BY flext_test_password ACCOUNT UNLOCK",
                 )
                 if alter_user_result.failure:
                     last_error = alter_user_result.error or last_error
                 grant_result = admin_api.execute_sql(
-                    "GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SEQUENCE, CREATE TABLE, CREATE PROCEDURE, CREATE TRIGGER, UNLIMITED TABLESPACE TO flext_test"
+                    "GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SEQUENCE, CREATE TABLE, CREATE PROCEDURE, CREATE TRIGGER, UNLIMITED TABLESPACE TO flext_test",
                 )
                 if grant_result.failure:
                     last_error = grant_result.error or last_error
@@ -135,7 +139,7 @@ def shared_oracle_container(docker_control: tk) -> str:
             connect_result = api.connect()
             if connect_result.success:
                 health_result = api.oracle_services.execute_query(
-                    'SELECT 1 AS "health" FROM DUAL'
+                    'SELECT 1 AS "health" FROM DUAL',
                 )
                 disconnect_result = api.disconnect()
                 _ = disconnect_result
@@ -161,7 +165,7 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
                 os.getenv(
                     "TEST_ORACLE_PORT",
                     str(c.TargetOracle.Tests.ORACLE_PORT),
-                )
+                ),
             ),
             "service_name": os.getenv(
                 "TEST_ORACLE_SERVICE",
@@ -172,7 +176,7 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
                 c.TargetOracle.Tests.TEST_SCHEMA,
             ),
             "password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
-        })
+        }),
     )
     connect_result = api.connect()
     if connect_result.failure:
@@ -215,7 +219,7 @@ def oracle_config(
             os.getenv(
                 "TEST_ORACLE_PORT",
                 str(c.TargetOracle.Tests.ORACLE_PORT),
-            )
+            ),
         ),
         "oracle_service_name": os.getenv(
             "TEST_ORACLE_SERVICE",
@@ -258,7 +262,9 @@ def mock_oracle_api() -> Mock:
     mock_api.__exit__ = Mock(return_value=None)
     for method, value in _MOCK_API_OK_RETURNS.items():
         getattr(mock_api, method).return_value = MagicMock(
-            success=True, failure=False, value=value
+            success=True,
+            failure=False,
+            value=value,
         )
     mock_api.connection = MagicMock()
     return mock_api

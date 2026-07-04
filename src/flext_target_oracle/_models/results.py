@@ -21,7 +21,8 @@ class FlextTargetOracleModelsResults:
         """Target execute readiness payload."""
 
         name: Annotated[
-            str, u.Field(..., description="Target package name", validate_default=True)
+            str,
+            u.Field(..., description="Target package name", validate_default=True),
         ]
         status: Annotated[
             Literal["ready"],
@@ -38,7 +39,9 @@ class FlextTargetOracleModelsResults:
         oracle_service: Annotated[
             str,
             u.Field(
-                ..., description="Configured Oracle service name", validate_default=True
+                ...,
+                description="Configured Oracle service name",
+                validate_default=True,
             ),
         ]
 
@@ -82,13 +85,17 @@ class FlextTargetOracleModelsResults:
         stream_name: Annotated[
             str,
             u.Field(
-                ..., description="Logical stream identifier", validate_default=True
+                ...,
+                description="Logical stream identifier",
+                validate_default=True,
             ),
         ]
         started_at: Annotated[
             str,
             u.Field(
-                ..., description="Load operation start timestamp", validate_default=True
+                ...,
+                description="Load operation start timestamp",
+                validate_default=True,
             ),
         ]
         completed_at: Annotated[
@@ -173,7 +180,8 @@ class FlextTargetOracleModelsResults:
         """Statistics for data load operation."""
 
         stream_name: Annotated[
-            str, u.Field(..., description="Stream identifier", validate_default=True)
+            str,
+            u.Field(..., description="Stream identifier", validate_default=True),
         ]
         total_records_processed: Annotated[
             t.NonNegativeInt,

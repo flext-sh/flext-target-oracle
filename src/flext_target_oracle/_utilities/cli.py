@@ -35,15 +35,16 @@ class FlextTargetOracleCliService:
         command_name = argv[0]
         if command_name == "validate":
             return m.TargetOracle.OracleTargetCommandFactory.create_validate_command(
-                None
+                None,
             ).execute()
         if command_name == "load":
             return m.TargetOracle.OracleTargetCommandFactory.create_load_command(
-                None, None
+                None,
+                None,
             ).execute()
         if command_name == "about":
             return m.TargetOracle.OracleTargetCommandFactory.create_about_command(
-                "json"
+                "json",
             ).execute()
         return r[str].fail(f"Unknown command: {command_name}")
 

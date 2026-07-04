@@ -6,6 +6,7 @@ import time
 from collections.abc import (
     Mapping,
 )
+from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest
@@ -15,7 +16,9 @@ from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
 from tests.models import m
-from tests.typings import t
+
+if TYPE_CHECKING:
+    from tests.typings import t
 
 
 @pytest.mark.performance
@@ -95,15 +98,15 @@ class TestsFlextTargetOraclePerformance:
             "schema": {
                 "type": "object",
                 "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"}
+                    "id": {"type": "integer"},
                 }).unwrap(),
             },
             "key_properties": ["id"],
         }
         record = {"type": "RECORD", "stream": "perf_stream", "record": {"id": 1}}
         assert target.process_singer_message(
-            m.Meltano.SingerSchemaMessage.model_validate(schema)
+            m.Meltano.SingerSchemaMessage.model_validate(schema),
         ).success
         assert target.process_singer_message(
-            m.Meltano.SingerRecordMessage.model_validate(record)
+            m.Meltano.SingerRecordMessage.model_validate(record),
         ).success

@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import (
-    MutableMapping,
-)
-from typing import ClassVar, assert_never
+from typing import TYPE_CHECKING, ClassVar, assert_never
 
 from flext_meltano import u
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+
+if TYPE_CHECKING:
+    from collections.abc import (
+        MutableMapping,
+    )
 
 
 class FlextTargetOracle:
@@ -23,7 +25,8 @@ class FlextTargetOracle:
         self.loader = FlextTargetOracleLoader(settings)
         self.schemas: MutableMapping[str, m.Meltano.SingerSchemaMessage] = {}
         self.state_message: m.Meltano.SingerStateMessage = m.Meltano.SingerStateMessage(
-            type="STATE", value={}
+            type="STATE",
+            value={},
         )
 
     def discover_catalog(self) -> p.Result[m.Meltano.SingerCatalog]:
@@ -49,21 +52,22 @@ class FlextTargetOracle:
                                 metadata={
                                     "inclusion": "available",
                                     "table-name": self.settings.get_table_name(
-                                        stream_name
+                                        stream_name,
                                     ),
                                     "schema-name": self.settings.default_target_schema,
                                 },
-                            )
-                        ]
-                    }
-                )
+                            ),
+                        ],
+                    },
+                ),
             )
         return r[m.Meltano.SingerCatalog].ok(
             m.Meltano.SingerCatalog(type="CATALOG", streams=catalog_entries),
         )
 
     def execute(
-        self, payload: str | None = None
+        self,
+        payload: str | None = None,
     ) -> p.Result[m.TargetOracle.ExecuteResult]:
         """Execute readiness check or process one Singer JSON line."""
         if payload is not None:

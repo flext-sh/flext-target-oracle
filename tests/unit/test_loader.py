@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
@@ -11,7 +12,9 @@ from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 from tests.models import m
-from tests.typings import t
+
+if TYPE_CHECKING:
+    from tests.typings import t
 
 
 @pytest.fixture
@@ -67,14 +70,16 @@ class TestsFlextTargetOracleLoader:
             "schema": {
                 "type": "object",
                 "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"}
+                    "id": {"type": "integer"},
                 }).unwrap(),
             },
             "key_properties": ["id"],
         }
         validated = m.Meltano.SingerSchemaMessage.model_validate(schema_message)
         result = loader.ensure_table_exists(
-            "users", validated.schema_definition, validated.key_properties
+            "users",
+            validated.schema_definition,
+            validated.key_properties,
         )
         assert isinstance(result.success, bool)
 
@@ -92,7 +97,7 @@ class TestsFlextTargetOracleLoader:
         mock_api.__enter__.return_value = mock_api
         mock_api.__exit__.return_value = None
         mock_services.build_insert_statement.return_value = r[str].ok(
-            "INSERT INTO TEST_SCHEMA.USERS (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:DATA, :_SDC_EXTRACTED_AT, :_SDC_LOADED_AT)"
+            "INSERT INTO TEST_SCHEMA.USERS (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:DATA, :_SDC_EXTRACTED_AT, :_SDC_LOADED_AT)",
         )
         object.__setattr__(loader, "_oracle_api", mock_api)
         loader._stream_columns["users"] = (
