@@ -17,6 +17,10 @@ FLEXT_TARGET_ORACLE_LAZY_IMPORTS_PART_01 = build_lazy_import_map(
             "FlextTargetOracleService",
             "target_oracle",
         ),
+        ".cli": (
+            "FlextTargetOracleCli",
+            "main",
+        ),
         ".constants": (
             "FlextTargetOracleConstants",
             "c",
@@ -38,7 +42,7 @@ FLEXT_TARGET_ORACLE_LAZY_IMPORTS_PART_01 = build_lazy_import_map(
             "FlextTargetOracleUtilities",
             "u",
         ),
-        "flext_meltano": (
+        "flext_core._root_typing_parts": (
             "d",
             "e",
             "h",

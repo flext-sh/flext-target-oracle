@@ -22,13 +22,24 @@ from flext_target_oracle._exports import (
 )
 
 if TYPE_CHECKING:
-    from flext_meltano import d as d, e as e, h as h, r as r, s as s, x as x
+    from flext_core._root_typing_parts import (
+        d as d,
+        e as e,
+        h as h,
+        r as r,
+        s as s,
+        x as x,
+    )
     from flext_target_oracle._utilities.client import (
         FlextTargetOracle as FlextTargetOracle,
     )
     from flext_target_oracle.api import (
         FlextTargetOracleService as FlextTargetOracleService,
         target_oracle as target_oracle,
+    )
+    from flext_target_oracle.cli import (
+        FlextTargetOracleCli as FlextTargetOracleCli,
+        main as main,
     )
     from flext_target_oracle.constants import (
         FlextTargetOracleConstants as FlextTargetOracleConstants,
@@ -75,6 +86,39 @@ _EAGER_EXPORTS = (
 
 
 _PUBLIC_EXPORTS: tuple[str, ...] = FLEXT_TARGET_ORACLE_PUBLIC_EXPORTS
+
+__all__: tuple[str, ...] = (
+    "FlextTargetOracle",
+    "FlextTargetOracleCli",
+    "FlextTargetOracleConstants",
+    "FlextTargetOracleModels",
+    "FlextTargetOracleProtocols",
+    "FlextTargetOracleService",
+    "FlextTargetOracleSettings",
+    "FlextTargetOracleTypes",
+    "FlextTargetOracleUtilities",
+    "__author__",
+    "__author_email__",
+    "__description__",
+    "__license__",
+    "__title__",
+    "__url__",
+    "__version__",
+    "__version_info__",
+    "c",
+    "d",
+    "e",
+    "h",
+    "m",
+    "main",
+    "p",
+    "r",
+    "s",
+    "t",
+    "target_oracle",
+    "u",
+    "x",
+)
 
 
 install_lazy_exports(

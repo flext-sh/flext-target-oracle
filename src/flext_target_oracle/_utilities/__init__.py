@@ -11,10 +11,6 @@ if TYPE_CHECKING:
     from flext_target_oracle._utilities.base import (
         FlextTargetOracleUtilitiesBase as FlextTargetOracleUtilitiesBase,
     )
-    from flext_target_oracle._utilities.cli import (
-        FlextTargetOracleCliService as FlextTargetOracleCliService,
-        main as main,
-    )
     from flext_target_oracle._utilities.client import (
         FlextTargetOracle as FlextTargetOracle,
     )
@@ -37,10 +33,6 @@ if TYPE_CHECKING:
 _LAZY_IMPORTS = build_lazy_import_map(
     {
         ".base": ("FlextTargetOracleUtilitiesBase",),
-        ".cli": (
-            "FlextTargetOracleCliService",
-            "main",
-        ),
         ".client": ("FlextTargetOracle",),
         ".errors": (
             "FlextTargetOracleErrorMetadata",

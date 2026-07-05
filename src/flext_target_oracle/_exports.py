@@ -38,6 +38,7 @@ FLEXT_TARGET_ORACLE_LAZY_IMPORTS = merge_lazy_imports(
 
 FLEXT_TARGET_ORACLE_PUBLIC_EXPORTS: tuple[str, ...] = (
     "FlextTargetOracle",
+    "FlextTargetOracleCli",
     "FlextTargetOracleConstants",
     "FlextTargetOracleModels",
     "FlextTargetOracleProtocols",
@@ -59,6 +60,7 @@ FLEXT_TARGET_ORACLE_PUBLIC_EXPORTS: tuple[str, ...] = (
     "e",
     "h",
     "m",
+    "main",
     "p",
     "r",
     "s",

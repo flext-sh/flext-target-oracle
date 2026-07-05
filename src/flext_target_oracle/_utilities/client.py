@@ -38,7 +38,7 @@ class FlextTargetOracle:
                 schema=schema_message.schema_definition,
                 key_properties=schema_message.key_properties,
             )
-            if entry_result.failure or entry_result.value is None:
+            if entry_result.failure:
                 return r[m.Meltano.SingerCatalog].fail(
                     entry_result.error
                     or f"Failed to build Singer catalog entry for {stream_name}",

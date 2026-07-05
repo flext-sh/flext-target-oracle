@@ -1,4 +1,4 @@
-"""Refactored CLI orchestration for Oracle target."""
+"""CLI orchestration for Oracle target."""
 
 from __future__ import annotations
 
@@ -6,12 +6,11 @@ import sys
 from typing import ClassVar
 
 from flext_cli import cli
-from flext_meltano import u
-from flext_target_oracle import m, p, r, t
+from flext_target_oracle import m, p, r, t, u
 
 
-class FlextTargetOracleCliService:
-    """Simple CLI service that maps args to command executions."""
+class FlextTargetOracleCli:
+    """CLI service that maps process args to Oracle target commands."""
 
     logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
@@ -54,11 +53,13 @@ class FlextTargetOracleCliService:
 
 
 def main() -> int:
-    """CLI entrypoint."""
-    cli_service = FlextTargetOracleCliService()
+    """Run the Oracle target CLI entrypoint."""
+    cli_service = FlextTargetOracleCli()
     return cli_service.finalize_cli_result(cli_service.run_cli())
 
 
 if __name__ == "__main__":
     cli.exit(main())
-__all__: list[str] = ["FlextTargetOracleCliService", "main"]
+
+
+__all__: list[str] = ["FlextTargetOracleCli", "main"]
