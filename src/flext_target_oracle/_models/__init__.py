@@ -8,18 +8,10 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_target_oracle._models.commands import (
-        FlextTargetOracleModelsCommands as FlextTargetOracleModelsCommands,
-    )
-    from flext_target_oracle._models.results import (
-        FlextTargetOracleModelsResults as FlextTargetOracleModelsResults,
-    )
-    from flext_target_oracle._models.settings import (
-        FlextTargetOracleModelsSettings as FlextTargetOracleModelsSettings,
-    )
-    from flext_target_oracle._models.singer import (
-        FlextTargetOracleModelsSinger as FlextTargetOracleModelsSinger,
-    )
+    from flext_target_oracle._models.commands import FlextTargetOracleModelsCommands
+    from flext_target_oracle._models.results import FlextTargetOracleModelsResults
+    from flext_target_oracle._models.settings import FlextTargetOracleModelsSettings
+    from flext_target_oracle._models.singer import FlextTargetOracleModelsSinger
 _LAZY_IMPORTS = build_lazy_import_map(
     {
         ".commands": ("FlextTargetOracleModelsCommands",),
