@@ -19,7 +19,7 @@ from flext_target_oracle.__version__ import (
 
 if TYPE_CHECKING:
     from flext_db_oracle import d, e, h, r, s, x
-    from flext_target_oracle.api import FlextTargetOracleService
+    from flext_target_oracle.api import FlextTargetOracleService, target_oracle
     from flext_target_oracle.cli import FlextTargetOracleCli, main
     from flext_target_oracle.constants import FlextTargetOracleConstants, c
     from flext_target_oracle.models import FlextTargetOracleModels, m
