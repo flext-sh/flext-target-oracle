@@ -22,7 +22,7 @@ from flext_target_oracle._exports import (
 )
 
 if TYPE_CHECKING:
-    from flext_core._root_typing_parts import (
+    from flext_core._root_typing_parts.facades import (
         d as d,
         e as e,
         h as h,
