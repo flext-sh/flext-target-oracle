@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, cast
 
 from flext_cli import u as cli_u
 from flext_target_oracle import (
-    FlextTargetOracle,
     FlextTargetOracleSettings,
     c,
     m,
@@ -27,6 +26,7 @@ from flext_target_oracle import (
     t,
     u,
 )
+from flext_target_oracle.utilities import FlextTargetOracle
 
 if TYPE_CHECKING:
     from types import FrameType

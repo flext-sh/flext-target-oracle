@@ -21,4 +21,6 @@ class FlextTargetOracleUtilities(u, FlextDbOracleUtilities):
 
 
 u = FlextTargetOracleUtilities
-__all__: list[str] = ["FlextTargetOracleUtilities", "u"]
+from flext_target_oracle._utilities.client import FlextTargetOracle
+
+__all__: list[str] = ["FlextTargetOracle", "FlextTargetOracleUtilities", "u"]

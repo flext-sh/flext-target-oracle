@@ -12,22 +12,67 @@ from flext_core.lazy import (
 )
 
 if TYPE_CHECKING:
-    from flext_tests import d, e, h, r, td, tf, tk, tm, tv, x
+    from flext_tests import (
+        d as d,
+        e as e,
+        h as h,
+        r as r,
+        td as td,
+        tf as tf,
+        tk as tk,
+        tm as tm,
+        tv as tv,
+        x as x,
+    )
 
-    from tests.base import TestsFlextTargetOracleServiceBase, s
-    from tests.constants import TestsFlextTargetOracleConstants, c
-    from tests.e2e.test_singer import TestsFlextTargetOracleSinger
-    from tests.integration.test_oracle import TestsFlextTargetOracleOracle
-    from tests.models import TestsFlextTargetOracleModels, m
-    from tests.performance.test_performance import TestsFlextTargetOraclePerformance
-    from tests.protocols import TestsFlextTargetOracleProtocols, p
-    from tests.settings import TestsFlextTargetOracleSettings
-    from tests.typings import TestsFlextTargetOracleTypes, t
-    from tests.unit.test_config import TestsFlextTargetOracleConfig
-    from tests.unit.test_loader import TestsFlextTargetOracleLoader
-    from tests.unit.test_module_governance import TestsFlextTargetOracleModuleGovernance
-    from tests.unit.test_target import TestsFlextTargetOracleTarget
-    from tests.utilities import TestsFlextTargetOracleUtilities, u
+    from tests.base import (
+        TestsFlextTargetOracleServiceBase as TestsFlextTargetOracleServiceBase,
+        s as s,
+    )
+    from tests.constants import (
+        TestsFlextTargetOracleConstants as TestsFlextTargetOracleConstants,
+        c as c,
+    )
+    from tests.e2e.test_singer import (
+        TestsFlextTargetOracleSinger as TestsFlextTargetOracleSinger,
+    )
+    from tests.integration.test_oracle import (
+        TestsFlextTargetOracleOracle as TestsFlextTargetOracleOracle,
+    )
+    from tests.models import (
+        TestsFlextTargetOracleModels as TestsFlextTargetOracleModels,
+        m as m,
+    )
+    from tests.performance.test_performance import (
+        TestsFlextTargetOraclePerformance as TestsFlextTargetOraclePerformance,
+    )
+    from tests.protocols import (
+        TestsFlextTargetOracleProtocols as TestsFlextTargetOracleProtocols,
+        p as p,
+    )
+    from tests.settings import (
+        TestsFlextTargetOracleSettings as TestsFlextTargetOracleSettings,
+    )
+    from tests.typings import (
+        TestsFlextTargetOracleTypes as TestsFlextTargetOracleTypes,
+        t as t,
+    )
+    from tests.unit.test_config import (
+        TestsFlextTargetOracleConfig as TestsFlextTargetOracleConfig,
+    )
+    from tests.unit.test_loader import (
+        TestsFlextTargetOracleLoader as TestsFlextTargetOracleLoader,
+    )
+    from tests.unit.test_module_governance import (
+        TestsFlextTargetOracleModuleGovernance as TestsFlextTargetOracleModuleGovernance,
+    )
+    from tests.unit.test_target import (
+        TestsFlextTargetOracleTarget as TestsFlextTargetOracleTarget,
+    )
+    from tests.utilities import (
+        TestsFlextTargetOracleUtilities as TestsFlextTargetOracleUtilities,
+        u as u,
+    )
 _LAZY_IMPORTS = merge_lazy_imports(
     (
         ".e2e",

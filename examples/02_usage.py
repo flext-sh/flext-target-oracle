@@ -12,7 +12,8 @@ from collections.abc import (
 from pathlib import Path
 
 from flext_core import t
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
+from flext_target_oracle import FlextTargetOracleSettings, m
+from flext_target_oracle.utilities import FlextTargetOracle
 
 
 def load_config() -> t.JsonMapping:
