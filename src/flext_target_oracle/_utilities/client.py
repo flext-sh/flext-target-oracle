@@ -50,10 +50,10 @@ class FlextTargetOracle:
                                 breadcrumb=[],
                                 metadata={
                                     "inclusion": "available",
-                                    "table-name": settings.get_table_name(
+                                    "table-name": (f"{settings.TargetOracle.table_prefix}{(
                                         stream_name,
-                                    ),
-                                    "schema-name": settings.default_target_schema,
+                                    ).replace(chr(45),chr(95)).replace(chr(46),chr(95))}{settings.TargetOracle.table_suffix}").upper(),
+                                    "schema-name": settings.TargetOracle.default_target_schema,
                                 },
                             ),
                         ],
@@ -89,8 +89,8 @@ class FlextTargetOracle:
             m.TargetOracle.ExecuteResult(
                 name="flext-target-oracle",
                 status="ready",
-                oracle_host=settings.oracle_host,
-                oracle_service=settings.oracle_service_name,
+                oracle_host=settings.TargetOracle.oracle_host,
+                oracle_service=settings.TargetOracle.oracle_service_name,
             ),
         )
 

@@ -28,13 +28,13 @@ class FlextTargetOracleConnectionService:
     def get_connection_info(self) -> p.Result[m.TargetOracle.OracleConnectionModel]:
         """Return normalized connection model."""
         return r[m.TargetOracle.OracleConnectionModel].ok(
-            settings.get_oracle_config(),
+            m.TargetOracle.OracleConnectionModel(host=settings.TargetOracle.oracle_host, port=settings.TargetOracle.oracle_port, service_name=settings.TargetOracle.oracle_service_name, username=settings.TargetOracle.oracle_user, password=settings.TargetOracle.oracle_password),
         )
 
     def test_connection(self) -> p.Result[None]:
         """Check Oracle access by listing schema tables."""
         tables_result = self.oracle_api.fetch_tables(
-            schema=settings.default_target_schema,
+            schema=settings.TargetOracle.default_target_schema,
         )
         if tables_result.failure:
             return r[None].fail(tables_result.error or "Connection test failed")

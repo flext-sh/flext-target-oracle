@@ -90,7 +90,17 @@ class FlextTargetOracleModelsCommands:
                     settings_result.error or "Configuration validation failed",
                 )
             settings: p.TargetOracle.OracleSettingsProtocol = settings_result.value
-            validation_result = settings.validate_business_rules()
+            validation_result = (
+                r[bool].fail("oracle_host is required")
+                if not settings.TargetOracle.oracle_host
+                else r[bool].fail("oracle_service_name is required")
+                if not settings.TargetOracle.oracle_service_name
+                else r[bool].fail("default_target_schema is required")
+                if not settings.TargetOracle.default_target_schema
+                else r[bool].fail("commit_interval must be <= batch size")
+                if settings.TargetOracle.commit_interval > settings.TargetOracle.batch_size
+                else r[bool].ok(True)
+            )
             if validation_result.failure:
                 return r[str].fail(
                     validation_result.error or "Configuration validation failed",
