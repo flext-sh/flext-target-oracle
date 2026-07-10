@@ -193,6 +193,4 @@ class FlextTargetOracleProtocolsBase:
     class OracleSettingsProtocol(Protocol):
         """Protocol for Oracle settings used by command classes."""
 
-        def validate_business_rules(self) -> p.Result[bool]:
-            """Validate Oracle target configuration business rules."""
-            ...
+        env_prefix: str
