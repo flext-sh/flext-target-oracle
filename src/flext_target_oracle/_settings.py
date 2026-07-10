@@ -12,13 +12,13 @@ from __future__ import annotations
 
 from typing import Annotated, ClassVar
 
-from flext_core import FlextSettingsBase, e, r
+from flext_core import FlextSettings, e, r
 from flext_meltano import m, u
 from flext_target_oracle import c, p, t
 from flext_target_oracle._models.settings import FlextTargetOracleModelsSettings
 
 
-class FlextTargetOracleSettings(FlextSettingsBase):
+class FlextTargetOracleSettings(FlextSettings):
     """Runtime settings for Oracle Singer target operations."""
 
     model_config: ClassVar[m.SettingsConfigDict] = m.SettingsConfigDict(
@@ -269,3 +269,7 @@ class FlextTargetOracleSettings(FlextSettingsBase):
     ) -> p.Result[bool]:
         """Validate Oracle configuration using FlextSettings patterns - ZERO DUPLICATION."""
         return settings.validate_business_rules()
+
+
+settings: FlextTargetOracleSettings = FlextTargetOracleSettings.fetch_global()
+"""Pre-instantiated project settings singleton — ``from flext_target_oracle import settings``."""

@@ -23,7 +23,7 @@ class FlextTargetOracleUtilitiesBase:
         result_type: type[r[p.TargetOracle.OracleSettingsProtocol]] = r[
             p.TargetOracle.OracleSettingsProtocol
         ]
-        settings_module = import_module("flext_target_oracle.settings")
+        settings_module = import_module("flext_target_oracle._settings")
         settings_cls = settings_module.FlextTargetOracleSettings
 
         if config_file is None:

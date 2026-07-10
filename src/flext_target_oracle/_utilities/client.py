@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, ClassVar, assert_never
 
 from flext_meltano import u
-from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t
+from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, settings, t
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 
 if TYPE_CHECKING:
@@ -21,7 +21,6 @@ class FlextTargetOracle:
 
     def __init__(self, settings: FlextTargetOracleSettings) -> None:
         """Create target with validated settings and loader dependencies."""
-        self.settings = settings
         self.loader = FlextTargetOracleLoader(settings)
         self.schemas: MutableMapping[str, m.Meltano.SingerSchemaMessage] = {}
         self.state_message: m.Meltano.SingerStateMessage = m.Meltano.SingerStateMessage(
@@ -51,10 +50,10 @@ class FlextTargetOracle:
                                 breadcrumb=[],
                                 metadata={
                                     "inclusion": "available",
-                                    "table-name": self.settings.get_table_name(
+                                    "table-name": settings.get_table_name(
                                         stream_name,
                                     ),
-                                    "schema-name": self.settings.default_target_schema,
+                                    "schema-name": settings.default_target_schema,
                                 },
                             ),
                         ],
@@ -90,8 +89,8 @@ class FlextTargetOracle:
             m.TargetOracle.ExecuteResult(
                 name="flext-target-oracle",
                 status="ready",
-                oracle_host=self.settings.oracle_host,
-                oracle_service=self.settings.oracle_service_name,
+                oracle_host=settings.oracle_host,
+                oracle_service=settings.oracle_service_name,
             ),
         )
 
@@ -171,8 +170,8 @@ class FlextTargetOracle:
         """Return static target metrics."""
         return m.TargetOracle.ImplementationMetrics(
             streams_configured=len(self.schemas),
-            batch_size=self.settings.batch_size,
-            use_bulk_operations=self.settings.use_bulk_operations,
+            batch_size=settings.TargetOracle.batch_size,
+            use_bulk_operations=settings.TargetOracle.use_bulk_operations,
         )
 
     def initialize(self) -> p.Result[bool]:
@@ -232,10 +231,6 @@ class FlextTargetOracle:
     def test_connection(self) -> p.Result[bool]:
         """Test Oracle connectivity through loader."""
         return self.loader.test_connection()
-
-    def validate_configuration(self) -> p.Result[bool]:
-        """Validate target configuration rules."""
-        return self.settings.validate_business_rules()
 
     def write_record(self, record_data: str) -> p.Result[bool]:
         """Write one Singer record payload to Oracle."""
