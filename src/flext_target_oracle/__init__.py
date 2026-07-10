@@ -19,6 +19,10 @@ from flext_target_oracle.__version__ import (
 
 if TYPE_CHECKING:
     from flext_db_oracle import d as d, e as e, h as h, r as r, s as s, x as x
+    from flext_target_oracle._settings import (
+        FlextTargetOracleSettings as FlextTargetOracleSettings,
+        settings as settings,
+    )
     from flext_target_oracle.api import (
         FlextTargetOracleService as FlextTargetOracleService,
         target_oracle as target_oracle,
