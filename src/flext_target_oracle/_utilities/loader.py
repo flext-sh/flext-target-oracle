@@ -10,6 +10,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import json
+
 from collections.abc import (
     Mapping,
     Sequence,
@@ -141,7 +143,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 type_mapping_result.error or "Failed to map Singer schema to Oracle",
             )
         stream_mappings = t.TargetOracle.STR_MAP_ADAPTER.validate_python(
-            self.target_config.TargetOracle.column_mappings.get(stream_name, {}),
+            json.loads(self.target_config.TargetOracle.column_mappings or "{}").get(stream_name, {}),
         )
         ignored_columns = frozenset(self.target_config.TargetOracle.ignored_columns)
         key_columns = tuple(
@@ -489,7 +491,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         table_name: str,
     ) -> p.Result[bool]:
         """Create configured custom indexes for a stream table."""
-        for raw_index in self.target_config.TargetOracle.custom_indexes.get(stream_name, ()):
+        for raw_index in json.loads(self.target_config.TargetOracle.custom_indexes or "{}").get(stream_name, ()):
             index_columns_result = self._custom_index_columns(raw_index, stream_name)
             if index_columns_result.failure:
                 return r[bool].fail(index_columns_result.error or "Invalid index")

@@ -53,18 +53,12 @@ class FlextTargetOracleSettings(FlextSettings):
             dict[str, int],
             Field(default_factory=dict, description="Column priority rules"),
         ]
-        column_mappings: Annotated[
-            dict[str, dict[str, str]],
-            Field(default_factory=dict, description="Per-stream Singer-to-Oracle column mappings"),
-        ]
+        column_mappings: Annotated[str, Field(default="{}", description="Per-stream Singer-to-Oracle column mappings (JSON)")]
         ignored_columns: Annotated[
             list[str],
             Field(default_factory=list, description="Ignored columns"),
         ]
-        custom_indexes: Annotated[
-            dict[str, list[str]],
-            Field(default_factory=dict, description="Per-stream custom index definitions"),
-        ]
+        custom_indexes: Annotated[str, Field(default="{}", description="Per-stream custom index definitions (JSON)")]
         use_bulk_operations: Annotated[bool, Field(default=True, description="Use bulk operations")]
         autocommit: Annotated[bool, Field(default=False, description="Auto-commit transactions")]
 
