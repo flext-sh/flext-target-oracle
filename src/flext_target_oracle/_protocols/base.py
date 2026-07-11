@@ -190,7 +190,25 @@ class FlextTargetOracleProtocolsBase:
             ...
 
     @runtime_checkable
+    class OracleTargetGroupProtocol(Protocol):
+        """Protocol for the namespaced ``settings.TargetOracle.*`` scalar group."""
+
+        # NOTE (multi-agent): mro-rn88 — the settings expose project fields under the
+        # TargetOracle namespace; declare the scalars command/client code reads.
+        oracle_host: str
+        oracle_port: int
+        oracle_service_name: str
+        oracle_user: str
+        oracle_password: str
+        default_target_schema: str
+        batch_size: int
+        commit_interval: int
+        table_prefix: str
+        table_suffix: str
+        use_bulk_operations: bool
+
     class OracleSettingsProtocol(Protocol):
         """Protocol for Oracle settings used by command classes."""
 
         env_prefix: str
+        TargetOracle: FlextTargetOracleProtocolsBase.OracleTargetGroupProtocol

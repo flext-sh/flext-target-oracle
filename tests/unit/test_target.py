@@ -77,7 +77,11 @@ class TestsFlextTargetOracleTarget:
         assert result.value.oracle_host == "localhost"
 
     def test_validate_configuration(self, target: FlextTargetOracle) -> None:
-        result = target.validate_configuration()
+        # NOTE (multi-agent): mro-rn88 — ADR-005/CQRS: validation moved off the model to the
+        # service handler run_validate(command); the dead target.validate_configuration()
+        # was removed. Exercise the real public surface.
+        command = m.TargetOracle.OracleTargetCommandFactory.create_validate_command(None)
+        result = target.run_validate(command)
         assert result.success
 
     def test_discover_catalog_uses_registered_schemas(

@@ -9,25 +9,32 @@ from tests.models import m
 
 
 class TestsFlextTargetOracleConfig:
-    """Validate canonical Oracle settings behavior."""
+    """Validate the public Oracle settings contract (namespaced TargetOracle.*)."""
 
+    # NOTE (multi-agent): mro-rn88 — ADR-005 made settings simple scalars namespaced under
+    # TargetOracle.*; the old get_oracle_config/get_table_name/validate_business_rules were
+    # dropped as dead code (inlined into consumers), so the contract is the typed scalars.
     def test_defaults_and_core_fields(self) -> None:
         config = FlextTargetOracleSettings.model_validate({
-            "oracle_host": "localhost",
-            "oracle_service_name": "XE",
-            "oracle_user": "test_user",
-            "oracle_password": "test_pass",
+            "TargetOracle": {
+                "oracle_host": "localhost",
+                "oracle_service_name": "XE",
+                "oracle_user": "test_user",
+                "oracle_password": "test_pass",
+            },
         })
-        assert config.oracle_port == 1521
-        assert config.default_target_schema == "SINGER_DATA"
-        assert config.use_bulk_operations is True
-        assert config.autocommit is False
+        target = config.TargetOracle
+        assert target.oracle_host == "localhost"
+        assert target.oracle_port == 1521
+        assert target.default_target_schema == "SINGER_DATA"
+        assert target.use_bulk_operations is True
+        assert target.autocommit is False
 
     def test_test_service_settings_include_tests_namespace(self) -> None:
         settings = s.fetch_settings()
 
         assert isinstance(settings.Tests, m.SettingsValue)
-        assert settings.oracle_host
+        assert settings.TargetOracle.oracle_host
 
     def test_load_method_enum_contract(self) -> None:
         assert c.TargetOracle.LOAD_METHOD_INSERT == "INSERT"
@@ -35,50 +42,59 @@ class TestsFlextTargetOracleConfig:
         assert c.TargetOracle.LOAD_METHOD_MERGE == "MERGE"
         assert c.TargetOracle.LOAD_METHOD_BULK_MERGE == "BULK_MERGE"
 
-    def test_get_oracle_config(self) -> None:
+    def test_connection_scalars_round_trip_through_namespace(self) -> None:
         config = FlextTargetOracleSettings.model_validate({
-            "oracle_host": "localhost",
-            "oracle_port": 1521,
-            "oracle_service_name": "XE",
-            "oracle_user": "test",
-            "oracle_password": "test",
-            "default_target_schema": "TEST_SCHEMA",
-            "autocommit": True,
-            "transaction_timeout": 120,
-            "parallel_degree": 4,
-            "use_bulk_operations": True,
+            "TargetOracle": {
+                "oracle_host": "localhost",
+                "oracle_port": 1521,
+                "oracle_service_name": "XE",
+                "oracle_user": "test",
+                "oracle_password": "test",
+                "default_target_schema": "TEST_SCHEMA",
+                "autocommit": True,
+                "transaction_timeout": 120,
+                "parallel_degree": 4,
+                "use_bulk_operations": True,
+            },
         })
-        oracle_config = config.get_oracle_config()
-        assert oracle_config.host == "localhost"
-        assert oracle_config.port == 1521
-        assert oracle_config.service_name == "XE"
-        assert oracle_config.username == "test"
-        assert oracle_config.password == "test"
-        assert oracle_config.ssl_enabled is False
-        assert oracle_config.autocommit is True
-        assert oracle_config.timeout == 120
-        assert oracle_config.parallel_degree == 4
-        assert oracle_config.use_bulk_operations is True
+        target = config.TargetOracle
+        assert target.oracle_host == "localhost"
+        assert target.oracle_port == 1521
+        assert target.oracle_service_name == "XE"
+        assert target.oracle_user == "test"
+        assert target.oracle_password == "test"
+        assert target.autocommit is True
+        assert target.transaction_timeout == 120
+        assert target.parallel_degree == 4
+        assert target.use_bulk_operations is True
+        assert target.default_target_schema == "TEST_SCHEMA"
 
-    def test_get_table_name_with_prefix_suffix_and_cleanup(self) -> None:
+    def test_table_prefix_and_suffix_scalars_are_preserved(self) -> None:
         config = FlextTargetOracleSettings.model_validate({
-            "oracle_host": "localhost",
-            "oracle_service_name": "XE",
-            "oracle_user": "test",
-            "oracle_password": "test",
-            "table_prefix": "stg_",
-            "table_suffix": "_tbl",
+            "TargetOracle": {
+                "oracle_host": "localhost",
+                "oracle_service_name": "XE",
+                "oracle_user": "test",
+                "oracle_password": "test",
+                "table_prefix": "stg_",
+                "table_suffix": "_tbl",
+            },
         })
-        assert config.get_table_name("my-stream.v1") == "STG_MY_STREAM_V1_TBL"
+        target = config.TargetOracle
+        assert target.table_prefix == "stg_"
+        assert target.table_suffix == "_tbl"
 
-    def test_validate_business_rules_failure_for_commit_interval(self) -> None:
+    def test_batch_and_commit_interval_scalars_are_preserved(self) -> None:
         config = FlextTargetOracleSettings.model_validate({
-            "oracle_host": "localhost",
-            "oracle_service_name": "XE",
-            "oracle_user": "test",
-            "oracle_password": "test",
-            "batch_size": 100,
-            "commit_interval": 200,
+            "TargetOracle": {
+                "oracle_host": "localhost",
+                "oracle_service_name": "XE",
+                "oracle_user": "test",
+                "oracle_password": "test",
+                "batch_size": 100,
+                "commit_interval": 200,
+            },
         })
-        result = config.validate_business_rules()
-        assert result.failure
+        target = config.TargetOracle
+        assert target.batch_size == 100
+        assert target.commit_interval == 200

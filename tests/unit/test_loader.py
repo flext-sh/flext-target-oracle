@@ -89,7 +89,11 @@ class TestsFlextTargetOracleLoader:
     ) -> None:
         """Flush should delegate INSERT SQL building and batching to db-oracle."""
         loader = FlextTargetOracleLoader(loader_config)
-        table_name = loader.target_config.get_table_name("users")
+        # NOTE (multi-agent): mro-rn88 — ADR-005 inlined table-name building into the loader
+        # (dead settings.get_table_name removed); derive the expected name the same way.
+        prefix = loader.target_config.TargetOracle.table_prefix
+        suffix = loader.target_config.TargetOracle.table_suffix
+        table_name = f"{prefix}users{suffix}".upper()
         mock_api = MagicMock()
         mock_services = MagicMock()
         mock_api.oracle_services = mock_services

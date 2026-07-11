@@ -52,7 +52,7 @@ class FlextTargetOracle:
                                     "inclusion": "available",
                                     "table-name": (
                                         f"{settings.TargetOracle.table_prefix}{
-                                            (stream_name,).replace(
+                                            stream_name.replace(
                                                 chr(45), chr(95)
                                             ).replace(chr(46), chr(95))
                                         }{settings.TargetOracle.table_suffix}"
