@@ -31,36 +31,81 @@ class FlextTargetOracleSettings(FlextSettings):
     class _TargetOracle(BaseModel):
         """Namespaced Oracle target settings."""
 
-        oracle_host: Annotated[str, Field(default="localhost", description="Oracle host")]
-        oracle_port: Annotated[int, Field(default=1521, ge=1, le=65535, description="Oracle port")]
-        oracle_service_name: Annotated[str, Field(default="XEPDB1", description="Oracle service/SID")]
+        oracle_host: Annotated[
+            str, Field(default="localhost", description="Oracle host")
+        ]
+        oracle_port: Annotated[
+            int, Field(default=1521, ge=1, le=65535, description="Oracle port")
+        ]
+        oracle_service_name: Annotated[
+            str, Field(default="XEPDB1", description="Oracle service/SID")
+        ]
         oracle_user: Annotated[str, Field(default="", description="Oracle username")]
-        oracle_password: Annotated[str, Field(default="", description="Oracle password")]
-        default_target_schema: Annotated[str, Field(default="SINGER_DATA", description="Default target schema")]
-        batch_size: Annotated[int, Field(default=1000, ge=1, description="Batch size for loading")]
-        commit_interval: Annotated[int, Field(default=1000, ge=1, description="Commit interval")]
-        transaction_timeout: Annotated[int, Field(default=30, ge=1, description="Transaction timeout (s)")]
-        parallel_degree: Annotated[int, Field(default=1, ge=1, description="Oracle parallel degree")]
+        oracle_password: Annotated[
+            str, Field(default="", description="Oracle password")
+        ]
+        default_target_schema: Annotated[
+            str, Field(default="SINGER_DATA", description="Default target schema")
+        ]
+        batch_size: Annotated[
+            int, Field(default=1000, ge=1, description="Batch size for loading")
+        ]
+        commit_interval: Annotated[
+            int, Field(default=1000, ge=1, description="Commit interval")
+        ]
+        transaction_timeout: Annotated[
+            int, Field(default=30, ge=1, description="Transaction timeout (s)")
+        ]
+        parallel_degree: Annotated[
+            int, Field(default=1, ge=1, description="Oracle parallel degree")
+        ]
         table_prefix: Annotated[str, Field(default="", description="Table name prefix")]
         table_suffix: Annotated[str, Field(default="", description="Table name suffix")]
-        load_method: Annotated[str, Field(default="INSERT", description="Oracle load strategy")]
-        sdc_mode: Annotated[str, Field(default="insert", description="Singer upsert mode")]
-        storage_mode: Annotated[str, Field(default="flattened", description="Record storage mode")]
-        json_column_name: Annotated[str, Field(default="DATA", description="JSON payload column")]
-        truncate_before_load: Annotated[bool, Field(default=False, description="Truncate before load")]
-        column_ordering: Annotated[str, Field(default="", description="Column ordering strategy")]
+        load_method: Annotated[
+            str, Field(default="INSERT", description="Oracle load strategy")
+        ]
+        sdc_mode: Annotated[
+            str, Field(default="insert", description="Singer upsert mode")
+        ]
+        storage_mode: Annotated[
+            str, Field(default="flattened", description="Record storage mode")
+        ]
+        json_column_name: Annotated[
+            str, Field(default="DATA", description="JSON payload column")
+        ]
+        truncate_before_load: Annotated[
+            bool, Field(default=False, description="Truncate before load")
+        ]
+        column_ordering: Annotated[
+            str, Field(default="", description="Column ordering strategy")
+        ]
         column_order_rules: Annotated[
             dict[str, int],
             Field(default_factory=dict, description="Column priority rules"),
         ]
-        column_mappings: Annotated[str, Field(default="{}", description="Per-stream Singer-to-Oracle column mappings (JSON)")]
+        column_mappings: Annotated[
+            str,
+            Field(
+                default="{}",
+                description="Per-stream Singer-to-Oracle column mappings (JSON)",
+            ),
+        ]
         ignored_columns: Annotated[
             list[str],
             Field(default_factory=list, description="Ignored columns"),
         ]
-        custom_indexes: Annotated[str, Field(default="{}", description="Per-stream custom index definitions (JSON)")]
-        use_bulk_operations: Annotated[bool, Field(default=True, description="Use bulk operations")]
-        autocommit: Annotated[bool, Field(default=False, description="Auto-commit transactions")]
+        custom_indexes: Annotated[
+            str,
+            Field(
+                default="{}", description="Per-stream custom index definitions (JSON)"
+            ),
+        ]
+        use_bulk_operations: Annotated[
+            bool, Field(default=True, description="Use bulk operations")
+        ]
+        autocommit: Annotated[
+            bool, Field(default=False, description="Auto-commit transactions")
+        ]
 
     if TYPE_CHECKING:
         TargetOracle: _TargetOracle

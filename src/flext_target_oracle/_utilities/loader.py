@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import json
-
 from collections.abc import (
     Mapping,
     Sequence,
@@ -143,7 +142,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 type_mapping_result.error or "Failed to map Singer schema to Oracle",
             )
         stream_mappings = t.TargetOracle.STR_MAP_ADAPTER.validate_python(
-            json.loads(self.target_config.TargetOracle.column_mappings or "{}").get(stream_name, {}),
+            json.loads(self.target_config.TargetOracle.column_mappings or "{}").get(
+                stream_name, {}
+            ),
         )
         ignored_columns = frozenset(self.target_config.TargetOracle.ignored_columns)
         key_columns = tuple(
@@ -423,7 +424,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         key_properties: t.StrSequence | None,
     ) -> p.Result[bool]:
         """Ensure a table exists after exception handling has been delegated."""
-        table_name = (f"{self.target_config.TargetOracle.table_prefix}{(stream_name).replace(chr(45),chr(95)).replace(chr(46),chr(95))}{self.target_config.TargetOracle.table_suffix}").upper()
+        table_name = (
+            f"{self.target_config.TargetOracle.table_prefix}{(stream_name).replace(chr(45), chr(95)).replace(chr(46), chr(95))}{self.target_config.TargetOracle.table_suffix}"
+        ).upper()
         stream_columns_result = self._loader_columns(
             stream_name,
             schema,
@@ -491,7 +494,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         table_name: str,
     ) -> p.Result[bool]:
         """Create configured custom indexes for a stream table."""
-        for raw_index in json.loads(self.target_config.TargetOracle.custom_indexes or "{}").get(stream_name, ()):
+        for raw_index in json.loads(
+            self.target_config.TargetOracle.custom_indexes or "{}"
+        ).get(stream_name, ()):
             index_columns_result = self._custom_index_columns(raw_index, stream_name)
             if index_columns_result.failure:
                 return r[bool].fail(index_columns_result.error or "Invalid index")
@@ -639,7 +644,10 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         copied_record = t.json_dict_adapter().validate_python(record_data)
         self.record_buffers[stream_name].append(copied_record)
         self._total_records += 1
-        if len(self.record_buffers[stream_name]) >= self.target_config.TargetOracle.batch_size:
+        if (
+            len(self.record_buffers[stream_name])
+            >= self.target_config.TargetOracle.batch_size
+        ):
             return self._flush_batch(stream_name)
         return r[bool].ok(value=True)
 
@@ -749,7 +757,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         records = self.record_buffers.get(stream_name, [])
         if not records:
             return r[bool].ok(value=True)
-        table_name = (f"{self.target_config.TargetOracle.table_prefix}{(stream_name).replace(chr(45),chr(95)).replace(chr(46),chr(95))}{self.target_config.TargetOracle.table_suffix}").upper()
+        table_name = (
+            f"{self.target_config.TargetOracle.table_prefix}{(stream_name).replace(chr(45), chr(95)).replace(chr(46), chr(95))}{self.target_config.TargetOracle.table_suffix}"
+        ).upper()
         schema_name = self.target_config.TargetOracle.default_target_schema
         full_table_name = f"{schema_name}.{table_name}"
         if not c.TargetOracle.QUALIFIED_IDENTIFIER_RE.fullmatch(full_table_name):

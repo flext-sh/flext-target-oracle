@@ -28,7 +28,13 @@ class FlextTargetOracleConnectionService:
     def get_connection_info(self) -> p.Result[m.TargetOracle.OracleConnectionModel]:
         """Return normalized connection model."""
         return r[m.TargetOracle.OracleConnectionModel].ok(
-            m.TargetOracle.OracleConnectionModel(host=settings.TargetOracle.oracle_host, port=settings.TargetOracle.oracle_port, service_name=settings.TargetOracle.oracle_service_name, username=settings.TargetOracle.oracle_user, password=settings.TargetOracle.oracle_password),
+            m.TargetOracle.OracleConnectionModel(
+                host=settings.TargetOracle.oracle_host,
+                port=settings.TargetOracle.oracle_port,
+                service_name=settings.TargetOracle.oracle_service_name,
+                username=settings.TargetOracle.oracle_user,
+                password=settings.TargetOracle.oracle_password,
+            ),
         )
 
     def test_connection(self) -> p.Result[None]:
