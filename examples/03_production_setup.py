@@ -140,16 +140,19 @@ class ProductionConfig:
             c.TargetOracle.LOAD_METHOD_BULK_INSERT,
         )
         _ = load_method  # reserved for future use
+        # ADR-005: project settings live under the TargetOracle namespace.
         settings = FlextTargetOracleSettings.model_validate({
-            "oracle_host": oracle_host,
-            "oracle_port": oracle_port,
-            "oracle_service_name": oracle_service,
-            "oracle_user": oracle_user,
-            "oracle_password": oracle_password,
-            "default_target_schema": default_target_schema,
-            "batch_size": batch_size,
-            "use_bulk_operations": True,
-            "transaction_timeout": connection_timeout,
+            "TargetOracle": {
+                "oracle_host": oracle_host,
+                "oracle_port": oracle_port,
+                "oracle_service_name": oracle_service,
+                "oracle_user": oracle_user,
+                "oracle_password": oracle_password,
+                "default_target_schema": default_target_schema,
+                "batch_size": batch_size,
+                "use_bulk_operations": True,
+                "transaction_timeout": connection_timeout,
+            },
         })
         logger.info(
             "Production configuration created: %s:%s/%s",
@@ -173,8 +176,9 @@ class ProductionConfig:
 class ProductionTargetManager:
     """Production-grade target manager with comprehensive error handling."""
 
-    def __init__(self) -> None:
-        """Initialize production target manager."""
+    def __init__(self, settings: FlextTargetOracleSettings) -> None:
+        """Initialize production target manager with validated settings."""
+        self.settings = settings
         self.target: FlextTargetOracle | None = None
         self.shutdown_requested = False
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -276,7 +280,7 @@ class ProductionTargetManager:
                 f"Configuration validation failed: {validation_result.error}",
             )
         logger.info("Creating Oracle target instance")
-        self.target = FlextTargetOracle()
+        self.target = FlextTargetOracle(self.settings)
         logger.info("Testing Oracle database connectivity")
         connection_result = self.target.test_connection()
         if connection_result.failure:

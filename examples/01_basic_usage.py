@@ -51,19 +51,22 @@ def create_configuration() -> FlextTargetOracleSettings:
 
     """
     logger.info("Creating Oracle target configuration")
+    # ADR-005: project settings live under the TargetOracle namespace.
     settings = FlextTargetOracleSettings.model_validate({
-        "oracle_host": "localhost",
-        "oracle_port": 1521,
-        "oracle_service_name": "XE",
-        "oracle_user": os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "system"),
-        "oracle_password": os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
-        "default_target_schema": "FLEXT_EXAMPLES",
-        "batch_size": 100,
-        "use_bulk_operations": True,
-        "transaction_timeout": 30,
+        "TargetOracle": {
+            "oracle_host": "localhost",
+            "oracle_port": 1521,
+            "oracle_service_name": "XE",
+            "oracle_user": os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "system"),
+            "oracle_password": os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
+            "default_target_schema": "FLEXT_EXAMPLES",
+            "batch_size": 100,
+            "use_bulk_operations": True,
+            "transaction_timeout": 30,
+        },
     })
     logger.info(
-        f"Configuration created: {settings.oracle_host}:{settings.oracle_port}/{settings.oracle_service_name}",
+        f"Configuration created: {settings.TargetOracle.oracle_host}:{settings.TargetOracle.oracle_port}/{settings.TargetOracle.oracle_service_name}",
     )
     return settings
 
@@ -232,11 +235,14 @@ def demonstrate_error_handling() -> None:
     """
     logger.info("Demonstrating error handling patterns")
     try:
+        # ADR-005: invalid nested values (port 0 violates ge=1) must raise.
         FlextTargetOracleSettings.model_validate({
-            "oracle_host": "",
-            "oracle_service_name": "XE",
-            "oracle_user": os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
-            "oracle_password": os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
+            "TargetOracle": {
+                "oracle_port": 0,
+                "oracle_service_name": "XE",
+                "oracle_user": os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
+                "oracle_password": os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
+            },
         })
         validation_result = r[bool].ok(value=True)
         if validation_result.failure:
