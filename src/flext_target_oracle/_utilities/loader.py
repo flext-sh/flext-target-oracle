@@ -327,12 +327,16 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def _init_oracle_loader(self, settings: FlextTargetOracleSettings) -> None:
         """Initialize mutable loader state."""
         super().__init__()
+        # NOTE (multi-agent): mro-rn88 — FlextDbOracleSettings namespaces its scalars under
+        # DbOracle.*; a flat dict is dropped by extra="ignore", leaving an empty config.
         oracle_config = FlextDbOracleSettings.model_validate({
-            "host": settings.TargetOracle.oracle_host,
-            "port": settings.TargetOracle.oracle_port,
-            "service_name": settings.TargetOracle.oracle_service_name,
-            "username": settings.TargetOracle.oracle_user,
-            "password": settings.TargetOracle.oracle_password,
+            "DbOracle": {
+                "host": settings.TargetOracle.oracle_host,
+                "port": settings.TargetOracle.oracle_port,
+                "service_name": settings.TargetOracle.oracle_service_name,
+                "username": settings.TargetOracle.oracle_user,
+                "password": settings.TargetOracle.oracle_password,
+            },
         })
         self._target_config = settings
         self._oracle_api = FlextDbOracleApi(oracle_config)

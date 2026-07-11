@@ -20,15 +20,19 @@ if TYPE_CHECKING:
 @pytest.fixture
 def loader_config() -> FlextTargetOracleSettings:
     """Build deterministic configuration for loader tests."""
+    # NOTE (multi-agent): mro-rn88 — project fields nest under TargetOracle.*; a flat dict
+    # is dropped by extra="ignore" (so default_target_schema silently fell back to default).
     return FlextTargetOracleSettings.model_validate({
-        "oracle_host": "localhost",
-        "oracle_port": 1521,
-        "oracle_service_name": "XE",
-        "oracle_user": "test_user",
-        "oracle_password": "test_password",
-        "default_target_schema": "TEST_SCHEMA",
-        "batch_size": 2,
-        "use_bulk_operations": True,
+        "TargetOracle": {
+            "oracle_host": "localhost",
+            "oracle_port": 1521,
+            "oracle_service_name": "XE",
+            "oracle_user": "test_user",
+            "oracle_password": "test_password",
+            "default_target_schema": "TEST_SCHEMA",
+            "batch_size": 2,
+            "use_bulk_operations": True,
+        },
     })
 
 

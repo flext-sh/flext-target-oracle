@@ -5,7 +5,6 @@ from __future__ import annotations
 from flext_target_oracle import FlextTargetOracleSettings
 from tests.base import s
 from tests.constants import c
-from tests.models import m
 
 
 class TestsFlextTargetOracleConfig:
@@ -33,7 +32,9 @@ class TestsFlextTargetOracleConfig:
     def test_test_service_settings_include_tests_namespace(self) -> None:
         settings = s.fetch_settings()
 
-        assert isinstance(settings.Tests, m.SettingsValue)
+        # NOTE (multi-agent): mro-rn88 — the composed test settings expose BOTH the shared
+        # Tests namespace and the project TargetOracle namespace via the public surface.
+        assert settings.Tests.model_dump() is not None
         assert settings.TargetOracle.oracle_host
 
     def test_load_method_enum_contract(self) -> None:

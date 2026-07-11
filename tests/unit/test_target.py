@@ -11,6 +11,7 @@ from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
 from flext_target_oracle._utilities.errors import FlextTargetOracleExceptions
+from flext_target_oracle.api import FlextTargetOracleService
 from tests.models import m
 from tests.typings import t
 
@@ -77,11 +78,13 @@ class TestsFlextTargetOracleTarget:
         assert result.value.oracle_host == "localhost"
 
     def test_validate_configuration(self, target: FlextTargetOracle) -> None:
-        # NOTE (multi-agent): mro-rn88 — ADR-005/CQRS: validation moved off the model to the
-        # service handler run_validate(command); the dead target.validate_configuration()
-        # was removed. Exercise the real public surface.
+        # NOTE (multi-agent): mro-rn88 — ADR-005/CQRS: config validation moved off the model
+        # AND off the client to the service handler run_validate(command). Exercise the real
+        # public surface (the service), which is where validation now lives.
+        _ = target
+        service = FlextTargetOracleService.fetch_global()
         command = m.TargetOracle.OracleTargetCommandFactory.create_validate_command(None)
-        result = target.run_validate(command)
+        result = service.run_validate(command)
         assert result.success
 
     def test_discover_catalog_uses_registered_schemas(
