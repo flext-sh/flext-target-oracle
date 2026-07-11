@@ -87,8 +87,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
             else r[bool].fail("default_target_schema is required")
             if not settings.TargetOracle.default_target_schema
             else r[bool].fail("commit_interval must be <= batch size")
-            if settings.TargetOracle.commit_interval
-            > settings.TargetOracle.batch_size
+            if settings.TargetOracle.commit_interval > settings.TargetOracle.batch_size
             else r[bool].ok(True)
         )
         if validation_result.failure:
