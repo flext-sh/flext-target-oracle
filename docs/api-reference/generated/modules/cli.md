@@ -1,8 +1,8 @@
 <!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
-# flext_target_oracle.settings
+# flext_target_oracle.cli
 
-::: flext_target_oracle.settings
+::: flext_target_oracle.cli
     options:
       show_root_heading: true
       show_root_full_path: false

@@ -9,7 +9,7 @@ docs_dir: docs
 site_dir: .reports/docs/site
 
 exclude_docs: |
-  README.md
+  /README.md
 
 theme:
   name: material
