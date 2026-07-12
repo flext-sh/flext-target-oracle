@@ -38,22 +38,15 @@ class FlextTargetOracleCli:
         service = FlextTargetOracleService.fetch_global()
         if command_name == "validate":
             return service.run_validate(
-                m.TargetOracle.OracleTargetCommandFactory.create_validate_command(
-                    None,
-                ),
+                m.TargetOracle.OracleTargetValidateCommand(),
             )
         if command_name == "load":
             return service.run_load(
-                m.TargetOracle.OracleTargetCommandFactory.create_load_command(
-                    None,
-                    None,
-                ),
+                m.TargetOracle.OracleTargetLoadCommand(),
             )
         if command_name == "about":
             return service.run_about(
-                m.TargetOracle.OracleTargetCommandFactory.create_about_command(
-                    "json",
-                ),
+                m.TargetOracle.OracleTargetAboutCommand(),
             )
         return r[str].fail(f"Unknown command: {command_name}")
 

@@ -83,9 +83,7 @@ class TestsFlextTargetOracleTarget:
         # public surface (the service), which is where validation now lives.
         _ = target
         service = FlextTargetOracleService.fetch_global()
-        command = m.TargetOracle.OracleTargetCommandFactory.create_validate_command(
-            None
-        )
+        command = m.TargetOracle.OracleTargetValidateCommand()
         result = service.run_validate(command)
         assert result.success
 
