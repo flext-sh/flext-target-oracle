@@ -63,7 +63,7 @@ def docker_control() -> tk:
 
 @pytest.fixture(scope="session")
 def shared_oracle_container(docker_control: tk) -> str:
-    """Managed Oracle container using tk with auto-start."""
+    """Manage the Oracle container using tk with auto-start."""
     container_name = "flext-oracle-db-test"
     ensure_result = docker_control.execute()
     if ensure_result.failure:
@@ -272,7 +272,7 @@ def mock_oracle_api() -> Mock:
 
 @pytest.fixture
 def simple_schema() -> t.JsonMapping:
-    """Simple Singer schema for testing."""
+    """Return a simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
         "stream": "users",
