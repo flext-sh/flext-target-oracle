@@ -11,7 +11,7 @@
 - Keywords: `data-loading`, `database`, `enterprise`, `etl`, `flext`, `library`, `oracle`, `typed`
 - Main facades: _none_
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
-- Public symbol exports: `target_oracle`, `FlextTargetOracleSettings`, `FlextTargetOracle`, `FlextTargetOracleTypes`, `FlextTargetOracleCli`, `main`, `FlextTargetOracleConstants`, `FlextTargetOracleUtilities`, `FlextTargetOracleModels`, `FlextTargetOracleService` (+2 more)
+- Public symbol exports: `FlextTargetOracleTypes`, `target_oracle`, `FlextTargetOracleService`, `FlextTargetOracleModels`, `FlextTargetOracleCli`, `FlextTargetOracleSettings`, `settings`, `FlextTargetOracleProtocols`, `FlextTargetOracleConstants`, `main` (+2 more)
 - Exported module shortcuts: _none_
 - Generated module pages: `7`
 

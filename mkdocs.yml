@@ -59,6 +59,13 @@ plugins:
             separate_signature: true
             merge_init_into_class: true
             docstring_section_style: spacy
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+  - mermaid2
+  - redirects
+  - minify:
+      minify_html: true
 
 markdown_extensions:
   - attr_list
