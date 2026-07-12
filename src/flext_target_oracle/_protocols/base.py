@@ -142,7 +142,7 @@ class FlextTargetOracleProtocolsBase:
         def get_connection_info(
             self,
         ) -> p.Result[m.TargetOracle.OracleConnectionConfig]:
-            """The effective Oracle connection information."""
+            """Return the effective Oracle connection information."""
             ...
 
         def test_connection(self) -> p.Result[None]:
