@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest
-from flext_tests import r
+from flext_tests import r, tm
 
 from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
@@ -76,23 +76,29 @@ class TestsFlextTargetOracleSinger:
             "record": {"id": 1, "amount": 10.5},
         }
         state = {"type": "STATE", "value": {"bookmarks": {"orders": {"version": 1}}}}
-        assert target.execute().success
-        assert target.process_singer_message(
-            m.Meltano.SingerSchemaMessage.model_validate(schema),
-        ).success
-        assert target.process_singer_message(
-            m.Meltano.SingerRecordMessage.model_validate(record),
-        ).success
-        assert target.process_singer_message(
-            m.Meltano.SingerStateMessage.model_validate(state),
-        ).success
+        tm.ok(target.execute())
+        tm.ok(
+            target.process_singer_message(
+                m.Meltano.SingerSchemaMessage.model_validate(schema),
+            )
+        )
+        tm.ok(
+            target.process_singer_message(
+                m.Meltano.SingerRecordMessage.model_validate(record),
+            )
+        )
+        tm.ok(
+            target.process_singer_message(
+                m.Meltano.SingerStateMessage.model_validate(state),
+            )
+        )
         finalize_result = target.finalize()
-        assert finalize_result.success
-        assert "orders" in target.schemas
+        tm.ok(finalize_result)
+        tm.that(target.schemas, has="orders")
         state_value = target.state_message.value
-        assert isinstance(state_value, dict)
+        tm.that(state_value, is_=dict)
         bookmarks_obj: t.JsonValue | None = state_value.get("bookmarks")
-        assert isinstance(bookmarks_obj, dict)
+        tm.that(bookmarks_obj, is_=dict)
         orders_obj: t.JsonValue | None = bookmarks_obj.get("orders")
-        assert isinstance(orders_obj, dict)
-        assert orders_obj.get("version") == 1
+        tm.that(orders_obj, is_=dict)
+        tm.that(orders_obj.get("version"), eq=1)

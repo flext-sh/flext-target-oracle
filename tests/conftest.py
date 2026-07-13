@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, Mock
 
 import pytest
-from flext_tests import reset_settings as _shared_reset_settings, tk
+from flext_tests import reset_settings as _shared_reset_settings, tk, tm
 
 from flext_db_oracle import (
     FlextDbOracleApi,
@@ -196,13 +196,13 @@ def clean_database(oracle_engine: FlextDbOracleApi) -> None:
     tables_result = oracle_engine.oracle_services.execute_query(
         'SELECT table_name AS "table_name" FROM user_tables',
     )
-    assert tables_result.success, tables_result.error
+    tm.ok(tables_result)
     tables = [str(row.root["table_name"]) for row in tables_result.value]
     for table in tables:
         drop_result = oracle_engine.execute_statement(
             f"DROP TABLE {table} CASCADE CONSTRAINTS",
         )
-        assert drop_result.success, drop_result.error
+        tm.ok(drop_result)
 
 
 @pytest.fixture
