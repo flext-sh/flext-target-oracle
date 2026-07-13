@@ -18,9 +18,7 @@ import pytest
 
 from flext_target_oracle._utilities.client import FlextTargetOracle
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
-from tests.constants import c
-from tests.models import m
-from tests.typings import t
+from tests import c, m, t
 
 if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleApi

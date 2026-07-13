@@ -8,7 +8,7 @@ from typing import Annotated
 # constants submodule (never the own package facade at runtime), which dissolves the
 # models→utilities→client circular import. Execution moved to FlextTargetOracleService.
 from flext_meltano import m, t, u
-from flext_target_oracle.constants import c
+from flext_target_oracle import c
 
 
 class FlextTargetOracleModelsCommands:

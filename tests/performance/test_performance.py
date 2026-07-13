@@ -15,10 +15,10 @@ from flext_tests import r
 from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
-from tests.models import m
+from tests import m
 
 if TYPE_CHECKING:
-    from tests.typings import t
+    from tests import t
 
 
 @pytest.mark.performance

@@ -12,8 +12,7 @@ from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
 from flext_target_oracle._utilities.errors import FlextTargetOracleExceptions
 from flext_target_oracle.api import FlextTargetOracleService
-from tests.models import m
-from tests.typings import t
+from tests import m, t
 
 
 @pytest.fixture

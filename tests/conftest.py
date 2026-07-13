@@ -22,13 +22,12 @@ from flext_db_oracle import (
 )
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
-from tests.constants import c
-from tests.models import m
+from tests import c, m
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from tests.typings import t
+    from tests import t
 
 reset_settings = _shared_reset_settings
 

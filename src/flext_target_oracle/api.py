@@ -1,6 +1,6 @@
 """FLEXT service orchestrator for target-oracle.
 
-from flext_target_oracle.utilities import u
+from flext_target_oracle import u
 Thin facade — all infrastructure from ``FlextMeltanoTargetServiceBase`` via MRO.
 Oracle sink creation requires FlextTargetOracleLoader integration.
 
