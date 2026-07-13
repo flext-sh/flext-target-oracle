@@ -612,7 +612,7 @@ def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
 
 
 def main() -> None:
-    """Main entry point for production setup example."""
+    """Run the production setup example."""
     logger.info("FLEXT Target Oracle - Production Setup Example")
     logger.info("=" * 60)
     required_vars = ["ORACLE_HOST", "ORACLE_SERVICE", "ORACLE_USER", "ORACLE_PASSWORD"]

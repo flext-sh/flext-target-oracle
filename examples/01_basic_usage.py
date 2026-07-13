@@ -266,7 +266,7 @@ def demonstrate_error_handling() -> None:
 
 
 def main() -> None:
-    """Main entry point for basic usage example."""
+    """Run the basic usage example."""
     logger.info("FLEXT Target Oracle - Basic Usage Example")
     logger.info("=" * 50)
     demonstrate_basic_usage()
