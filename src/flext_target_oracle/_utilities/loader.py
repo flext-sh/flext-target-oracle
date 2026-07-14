@@ -71,8 +71,6 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     @staticmethod
     def _normalize_log_value(value: t.Scalar) -> t.JsonValue:
         """Normalize logging payloads into scalar or string values."""
-        if isinstance(value, t.PRIMITIVES_TYPES):
-            return value
         return str(value)
 
     @staticmethod
@@ -137,7 +135,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         type_mapping_result = self.oracle_api.oracle_services.map_singer_schema(
             normalized_schema,
         )
-        if type_mapping_result.failure or type_mapping_result.value is None:
+        if type_mapping_result.failure:
             return r[tuple[m.DbOracle.Column, ...]].fail(
                 type_mapping_result.error or "Failed to map Singer schema to Oracle",
             )
