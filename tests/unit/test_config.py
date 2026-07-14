@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from flext_tests import tm
+
 from flext_target_oracle import FlextTargetOracleSettings
 from tests import c
 from tests.base import s
@@ -23,25 +25,25 @@ class TestsFlextTargetOracleConfig:
             },
         })
         target = config.TargetOracle
-        assert target.oracle_host == "localhost"
-        assert target.oracle_port == 1521
-        assert target.default_target_schema == "SINGER_DATA"
-        assert target.use_bulk_operations is True
-        assert target.autocommit is False
+        tm.that(target.oracle_host, eq="localhost")
+        tm.that(target.oracle_port, eq=1521)
+        tm.that(target.default_target_schema, eq="SINGER_DATA")
+        tm.that(target.use_bulk_operations, eq=True)
+        tm.that(target.autocommit, eq=False)
 
     def test_test_service_settings_include_tests_namespace(self) -> None:
         settings = s.fetch_settings()
 
         # NOTE (multi-agent): mro-rn88 — the composed test settings expose BOTH the shared
         # Tests namespace and the project TargetOracle namespace via the public surface.
-        assert settings.Tests.model_dump() is not None
+        tm.that(settings.Tests.model_dump(), none=False)
         assert settings.TargetOracle.oracle_host
 
     def test_load_method_enum_contract(self) -> None:
-        assert c.TargetOracle.LOAD_METHOD_INSERT == "INSERT"
-        assert c.TargetOracle.LOAD_METHOD_BULK_INSERT == "BULK_INSERT"
-        assert c.TargetOracle.LOAD_METHOD_MERGE == "MERGE"
-        assert c.TargetOracle.LOAD_METHOD_BULK_MERGE == "BULK_MERGE"
+        tm.that(c.TargetOracle.LOAD_METHOD_INSERT, eq="INSERT")
+        tm.that(c.TargetOracle.LOAD_METHOD_BULK_INSERT, eq="BULK_INSERT")
+        tm.that(c.TargetOracle.LOAD_METHOD_MERGE, eq="MERGE")
+        tm.that(c.TargetOracle.LOAD_METHOD_BULK_MERGE, eq="BULK_MERGE")
 
     def test_connection_scalars_round_trip_through_namespace(self) -> None:
         config = FlextTargetOracleSettings.model_validate({
@@ -59,16 +61,16 @@ class TestsFlextTargetOracleConfig:
             },
         })
         target = config.TargetOracle
-        assert target.oracle_host == "localhost"
-        assert target.oracle_port == 1521
-        assert target.oracle_service_name == "XE"
-        assert target.oracle_user == "test"
-        assert target.oracle_password == "test"
-        assert target.autocommit is True
-        assert target.transaction_timeout == 120
-        assert target.parallel_degree == 4
-        assert target.use_bulk_operations is True
-        assert target.default_target_schema == "TEST_SCHEMA"
+        tm.that(target.oracle_host, eq="localhost")
+        tm.that(target.oracle_port, eq=1521)
+        tm.that(target.oracle_service_name, eq="XE")
+        tm.that(target.oracle_user, eq="test")
+        tm.that(target.oracle_password, eq="test")
+        tm.that(target.autocommit, eq=True)
+        tm.that(target.transaction_timeout, eq=120)
+        tm.that(target.parallel_degree, eq=4)
+        tm.that(target.use_bulk_operations, eq=True)
+        tm.that(target.default_target_schema, eq="TEST_SCHEMA")
 
     def test_table_prefix_and_suffix_scalars_are_preserved(self) -> None:
         config = FlextTargetOracleSettings.model_validate({
@@ -82,8 +84,8 @@ class TestsFlextTargetOracleConfig:
             },
         })
         target = config.TargetOracle
-        assert target.table_prefix == "stg_"
-        assert target.table_suffix == "_tbl"
+        tm.that(target.table_prefix, eq="stg_")
+        tm.that(target.table_suffix, eq="_tbl")
 
     def test_batch_and_commit_interval_scalars_are_preserved(self) -> None:
         config = FlextTargetOracleSettings.model_validate({
@@ -97,5 +99,5 @@ class TestsFlextTargetOracleConfig:
             },
         })
         target = config.TargetOracle
-        assert target.batch_size == 100
-        assert target.commit_interval == 200
+        tm.that(target.batch_size, eq=100)
+        tm.that(target.commit_interval, eq=200)
