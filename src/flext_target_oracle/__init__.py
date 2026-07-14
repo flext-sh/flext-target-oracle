@@ -18,86 +18,132 @@ from flext_target_oracle.__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_db_oracle import d as d, e as e, h as h, r as r, s as s, x as x
-    from flext_target_oracle._settings import (
-        FlextTargetOracleSettings as FlextTargetOracleSettings,
-        settings as settings,
-    )
-    from flext_target_oracle.api import (
-        FlextTargetOracleService as FlextTargetOracleService,
-        target_oracle as target_oracle,
-    )
-    from flext_target_oracle.cli import (
-        FlextTargetOracleCli as FlextTargetOracleCli,
-        main as main,
-    )
-    from flext_target_oracle.constants import (
-        FlextTargetOracleConstants as FlextTargetOracleConstants,
-        c as c,
-    )
-    from flext_target_oracle.models import (
-        FlextTargetOracleModels as FlextTargetOracleModels,
-        m as m,
-    )
-    from flext_target_oracle.protocols import (
-        FlextTargetOracleProtocols as FlextTargetOracleProtocols,
+    from flext_db_oracle import d, e, h, r, s, x
+
+    from ._settings import FlextTargetOracleSettings, settings
+    from .api import FlextTargetOracleService, target_oracle
+    from .cli import FlextTargetOracleCli, main
+    from .constants import FlextTargetOracleConstants, FlextTargetOracleConstants as c
+    from .models import FlextTargetOracleModels, FlextTargetOracleModels as m
+    from .protocols import FlextTargetOracleProtocols, FlextTargetOracleProtocols as p
+    from .typings import FlextTargetOracleTypes, FlextTargetOracleTypes as t
+    from .utilities import FlextTargetOracleUtilities, FlextTargetOracleUtilities as u
+
+    _ = (
+        c,
+        FlextTargetOracleConstants,
+        t,
+        FlextTargetOracleTypes,
         p,
-    )
-    from flext_target_oracle.typings import (
-        FlextTargetOracleTypes as FlextTargetOracleTypes,
-        t as t,
-    )
-    from flext_target_oracle.utilities import (
-        FlextTargetOracle as FlextTargetOracle,
-        FlextTargetOracleUtilities as FlextTargetOracleUtilities,
+        FlextTargetOracleProtocols,
+        m,
+        FlextTargetOracleModels,
         u,
+        FlextTargetOracleUtilities,
+        d,
+        e,
+        h,
+        r,
+        s,
+        x,
+        main,
+        FlextTargetOracleCli,
+        FlextTargetOracleSettings,
+        settings,
+        FlextTargetOracleService,
+        target_oracle,
     )
+
+
+_LAZY_MODULES: dict[str, tuple[str, ...]] = {
+    "._settings": (
+        "FlextTargetOracleSettings",
+        "settings",
+    ),
+    ".api": (
+        "FlextTargetOracleService",
+        "target_oracle",
+    ),
+    ".cli": (
+        "FlextTargetOracleCli",
+        "main",
+    ),
+    ".constants": (
+        "FlextTargetOracleConstants",
+        "c",
+    ),
+    ".models": (
+        "FlextTargetOracleModels",
+        "m",
+    ),
+    ".protocols": (
+        "FlextTargetOracleProtocols",
+        "p",
+    ),
+    ".typings": (
+        "FlextTargetOracleTypes",
+        "t",
+    ),
+    ".utilities": (
+        "FlextTargetOracleUtilities",
+        "u",
+    ),
+    "flext_db_oracle": (
+        "d",
+        "e",
+        "h",
+        "r",
+        "s",
+        "x",
+    ),
+}
+
+
+_LAZY_ALIAS_GROUPS: dict[str, tuple[tuple[str, str], ...]] = {}
+
+
 _LAZY_IMPORTS = build_lazy_import_map(
-    {
-        "._settings": ("FlextTargetOracleSettings", "settings"),
-        ".api": (
-            "FlextTargetOracleService",
-            "target_oracle",
-        ),
-        ".cli": (
-            "FlextTargetOracleCli",
-            "main",
-        ),
-        ".constants": (
-            "FlextTargetOracleConstants",
-            "c",
-        ),
-        ".models": (
-            "FlextTargetOracleModels",
-            "m",
-        ),
-        ".protocols": (
-            "FlextTargetOracleProtocols",
-            "p",
-        ),
-        ".typings": (
-            "FlextTargetOracleTypes",
-            "t",
-        ),
-        ".utilities": (
-            "FlextTargetOracle",
-            "FlextTargetOracleUtilities",
-            "u",
-        ),
-        "flext_db_oracle": (
-            "d",
-            "e",
-            "h",
-            "r",
-            "s",
-            "x",
-        ),
-    },
+    _LAZY_MODULES,
+    alias_groups=_LAZY_ALIAS_GROUPS,
+    sort_keys=False,
 )
 
+_DIRECT_IMPORTS: tuple[str, ...] = (
+    "FlextTargetOracleCli",
+    "FlextTargetOracleConstants",
+    "FlextTargetOracleModels",
+    "FlextTargetOracleProtocols",
+    "FlextTargetOracleService",
+    "FlextTargetOracleSettings",
+    "FlextTargetOracleTypes",
+    "FlextTargetOracleUtilities",
+    "__author__",
+    "__author_email__",
+    "__description__",
+    "__license__",
+    "__title__",
+    "__url__",
+    "__version__",
+    "__version_info__",
+    "build_lazy_import_map",
+    "c",
+    "d",
+    "e",
+    "h",
+    "install_lazy_exports",
+    "m",
+    "main",
+    "p",
+    "r",
+    "s",
+    "settings",
+    "t",
+    "target_oracle",
+    "u",
+    "x",
+)
 
 __all__: tuple[str, ...] = (
-    "FlextTargetOracle",
     "FlextTargetOracleCli",
     "FlextTargetOracleConstants",
     "FlextTargetOracleModels",

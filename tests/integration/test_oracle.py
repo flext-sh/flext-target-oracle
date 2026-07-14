@@ -12,18 +12,15 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING
 
 import pytest
 from flext_tests import tm
 
+from flext_db_oracle import FlextDbOracleApi
+from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 from tests import c, m, t
-
-if TYPE_CHECKING:
-    from flext_db_oracle import FlextDbOracleApi
-    from flext_target_oracle import FlextTargetOracleSettings
 
 pytestmark = pytest.mark.integration
 

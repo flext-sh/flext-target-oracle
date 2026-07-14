@@ -6,7 +6,6 @@ import time
 from collections.abc import (
     Mapping,
 )
-from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest
@@ -15,10 +14,7 @@ from flext_tests import r, tm
 from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
-from tests import m
-
-if TYPE_CHECKING:
-    from tests import t
+from tests import m, t
 
 
 @pytest.mark.performance

@@ -11,16 +11,11 @@ from __future__ import annotations
 import importlib
 import inspect
 import warnings
+from collections.abc import Iterator
 from pathlib import Path
-from typing import TYPE_CHECKING
+from types import ModuleType
 
-from tests import c, m
-
-if TYPE_CHECKING:
-    from collections.abc import Iterator
-    from types import ModuleType
-
-    from tests import t
+from tests import c, m, t
 
 
 def _package_root() -> Path:

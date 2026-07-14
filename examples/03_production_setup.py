@@ -14,7 +14,8 @@ import os
 import signal
 import time
 from datetime import UTC
-from typing import TYPE_CHECKING, cast
+from types import FrameType
+from typing import cast
 
 from flext_cli import u as cli_u
 from flext_target_oracle import (
@@ -27,9 +28,6 @@ from flext_target_oracle import (
     t,
     u,
 )
-
-if TYPE_CHECKING:
-    from types import FrameType
 
 type SingerMessage = (
     m.Meltano.SingerSchemaMessage
@@ -172,7 +170,7 @@ class ProductionTargetManager:
 
     def __init__(self, settings: FlextTargetOracleSettings) -> None:
         """Initialize production target manager with validated settings."""
-        self.settings = settings
+        settings = settings
         self.target: FlextTargetOracle | None = None
         self.shutdown_requested = False
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -274,7 +272,7 @@ class ProductionTargetManager:
                 f"Configuration validation failed: {validation_result.error}",
             )
         u.logger.info("Creating Oracle target instance")
-        self.target = FlextTargetOracle(self.settings)
+        self.target = FlextTargetOracle(settings)
         u.logger.info("Testing Oracle database connectivity")
         connection_result = self.target.test_connection()
         if connection_result.failure:

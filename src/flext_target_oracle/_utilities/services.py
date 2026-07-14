@@ -3,12 +3,9 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import TYPE_CHECKING
 
+from flext_db_oracle import FlextDbOracleApi
 from flext_target_oracle import FlextTargetOracleSettings, e, m, p, r, settings, t
-
-if TYPE_CHECKING:
-    from flext_db_oracle import FlextDbOracleApi
 
 
 class FlextTargetOracleConnectionService:

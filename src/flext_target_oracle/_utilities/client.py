@@ -2,16 +2,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, assert_never
+from collections.abc import (
+    MutableMapping,
+)
+from typing import ClassVar, assert_never
 
 from flext_meltano import u
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, settings, t
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
-
-if TYPE_CHECKING:
-    from collections.abc import (
-        MutableMapping,
-    )
 
 
 class FlextTargetOracle:

@@ -137,7 +137,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         type_mapping_result = self.oracle_api.oracle_services.map_singer_schema(
             normalized_schema,
         )
-        if type_mapping_result.failure or type_mapping_result.value is None:
+        if type_mapping_result.failure:
             return r[tuple[m.DbOracle.Column, ...]].fail(
                 type_mapping_result.error or "Failed to map Singer schema to Oracle",
             )
