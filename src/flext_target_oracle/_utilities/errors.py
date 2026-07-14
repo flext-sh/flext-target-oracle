@@ -13,9 +13,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated, override
 
-from flext_core import FlextExceptionsBase
-from flext_meltano import m, u
-from flext_target_oracle import c, e, t
+from flext_meltano import u
+from flext_target_oracle import c, e, m, t
 
 
 class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
@@ -63,7 +62,7 @@ class FlextTargetOracleExceptions(e):
         })
         return resolved, ctx
 
-    class Error(FlextExceptionsBase.BaseError):
+    class Error(e.BaseError):
         """Oracle Target main error - inherits from base error."""
 
     class ConfigurationError(e.ConfigurationError):

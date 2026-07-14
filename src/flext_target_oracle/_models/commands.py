@@ -20,8 +20,14 @@ class FlextTargetOracleModelsCommands:
     class OracleTargetAboutCommand(m.Command):
         """Command to return target metadata and capabilities."""
 
-        command_type: t.NonEmptyStr = c.TargetOracle.COMMAND_TYPE_ABOUT
-        command_id: t.NonEmptyStr = "cmd_oracle_about"
+        command_type: Annotated[
+            t.NonEmptyStr,
+            u.Field(description="Command discriminator for target metadata queries"),
+        ] = c.TargetOracle.COMMAND_TYPE_ABOUT
+        command_id: Annotated[
+            t.NonEmptyStr,
+            u.Field(description="Stable identifier for the target metadata command"),
+        ] = "cmd_oracle_about"
         format: Annotated[
             str,
             u.Field(
@@ -32,8 +38,14 @@ class FlextTargetOracleModelsCommands:
     class OracleTargetLoadCommand(m.Command):
         """Command to prepare target for data loading."""
 
-        command_type: t.NonEmptyStr = c.TargetOracle.COMMAND_TYPE_LOAD
-        command_id: t.NonEmptyStr = "cmd_oracle_load"
+        command_type: Annotated[
+            t.NonEmptyStr,
+            u.Field(description="Command discriminator for target load preparation"),
+        ] = c.TargetOracle.COMMAND_TYPE_LOAD
+        command_id: Annotated[
+            t.NonEmptyStr,
+            u.Field(description="Stable identifier for the target load command"),
+        ] = "cmd_oracle_load"
         config_file: Annotated[
             str | None,
             u.Field(
@@ -50,8 +62,14 @@ class FlextTargetOracleModelsCommands:
     class OracleTargetValidateCommand(m.Command):
         """Command to validate target configuration."""
 
-        command_type: t.NonEmptyStr = c.TargetOracle.COMMAND_TYPE_VALIDATE
-        command_id: t.NonEmptyStr = "cmd_oracle_validate"
+        command_type: Annotated[
+            t.NonEmptyStr,
+            u.Field(description="Command discriminator for target validation"),
+        ] = c.TargetOracle.COMMAND_TYPE_VALIDATE
+        command_id: Annotated[
+            t.NonEmptyStr,
+            u.Field(description="Stable identifier for the target validation command"),
+        ] = "cmd_oracle_validate"
         config_file: Annotated[
             str | None,
             u.Field(
