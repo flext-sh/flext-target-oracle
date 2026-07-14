@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     )
     from flext_target_oracle.protocols import (
         FlextTargetOracleProtocols as FlextTargetOracleProtocols,
-        p as p,
+        p,
     )
     from flext_target_oracle.typings import (
         FlextTargetOracleTypes as FlextTargetOracleTypes,
@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     from flext_target_oracle.utilities import (
         FlextTargetOracle as FlextTargetOracle,
         FlextTargetOracleUtilities as FlextTargetOracleUtilities,
-        u as u,
+        u,
     )
 _LAZY_IMPORTS = build_lazy_import_map(
     {
