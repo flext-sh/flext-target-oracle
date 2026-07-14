@@ -31,12 +31,6 @@ from flext_target_oracle import (
 if TYPE_CHECKING:
     from types import FrameType
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(), logging.FileHandler("flext_target_oracle.log")],
-)
-logger = u.fetch_logger(__name__)
 type SingerMessage = (
     m.Meltano.SingerSchemaMessage
     | m.Meltano.SingerRecordMessage
@@ -99,7 +93,7 @@ class ProductionConfig:
             LOAD_METHOD: Loading method (default: BULK_INSERT)
 
         """
-        logger.info("Creating production configuration from environment")
+        u.logger.info("Creating production configuration from environment")
         oracle_host = os.getenv("ORACLE_HOST")
         oracle_service = os.getenv("ORACLE_SERVICE")
         oracle_user = os.getenv("ORACLE_USER")
@@ -154,18 +148,18 @@ class ProductionConfig:
                 "transaction_timeout": connection_timeout,
             },
         })
-        logger.info(
+        u.logger.info(
             "Production configuration created: %s:%s/%s",
             oracle_host,
             oracle_port,
             oracle_service,
         )
-        logger.info(
+        u.logger.info(
             "Target schema: %s, Batch size: %s",
             default_target_schema,
             batch_size,
         )
-        logger.info(
+        u.logger.info(
             "Load method: %s, Connection timeout: %ss",
             load_method,
             connection_timeout,
@@ -191,7 +185,7 @@ class ProductionTargetManager:
             r with health status and metrics
 
         """
-        logger.debug("Performing health check")
+        u.logger.debug("Performing health check")
         health_status = HealthStatus(timestamp=time.time())
         try:
             return self._health_check_status(health_status)
@@ -204,7 +198,7 @@ class ProductionTargetManager:
             RuntimeError,
             ImportError,
         ) as e:
-            logger.exception("Health check failed")
+            u.logger.exception("Health check failed")
             health_status.status = "unhealthy"
             health_status.error = str(e)
             return r[t.JsonMapping].fail(f"Health check error: {e}")
@@ -223,7 +217,7 @@ class ProductionTargetManager:
             self._record_oracle_connectivity(health_status)
             target_metrics = self.target.get_implementation_metrics()
             health_status.metrics.update(target_metrics.model_dump())
-        logger.debug("Health check completed: %s", health_status.status)
+        u.logger.debug("Health check completed: %s", health_status.status)
         return r[t.JsonMapping].ok(health_status.model_dump())
 
     def _record_oracle_connectivity(self, health_status: HealthStatus) -> None:
@@ -256,7 +250,7 @@ class ProductionTargetManager:
             r[bool]: Success if initialization complete, failure with error details
 
         """
-        logger.info("Initializing production Oracle target")
+        u.logger.info("Initializing production Oracle target")
         try:
             return self._initialize_checked()
         except (
@@ -268,24 +262,24 @@ class ProductionTargetManager:
             RuntimeError,
             ImportError,
         ) as e:
-            logger.exception("Failed to initialize production target")
+            u.logger.exception("Failed to initialize production target")
             return r[bool].fail(f"Initialization error: {e}")
 
     def _initialize_checked(self) -> p.Result[bool]:
         """Initialize target after the public exception boundary."""
-        logger.info("Validating configuration domain rules")
+        u.logger.info("Validating configuration domain rules")
         validation_result = r[bool].ok(value=True)
         if validation_result.failure:
             return r[bool].fail(
                 f"Configuration validation failed: {validation_result.error}",
             )
-        logger.info("Creating Oracle target instance")
+        u.logger.info("Creating Oracle target instance")
         self.target = FlextTargetOracle(self.settings)
-        logger.info("Testing Oracle database connectivity")
+        u.logger.info("Testing Oracle database connectivity")
         connection_result = self.target.test_connection()
         if connection_result.failure:
             return r[bool].fail("Oracle connectivity test failed")
-        logger.info("Production target initialized successfully")
+        u.logger.info("Production target initialized successfully")
         return r[bool].ok(value=True)
 
     def process_singer_stream(
@@ -303,7 +297,7 @@ class ProductionTargetManager:
         """
         if not self.target:
             return r[t.JsonMapping].fail("Target not initialized")
-        logger.info("Processing Singer stream with %d messages", len(messages))
+        u.logger.info("Processing Singer stream with %d messages", len(messages))
         stats = ProcessingStats(processing_start_time=time.time())
         try:
             return self._process_singer_stream_checked(messages, stats)
@@ -316,7 +310,7 @@ class ProductionTargetManager:
             RuntimeError,
             ImportError,
         ) as e:
-            logger.exception("Unexpected error during stream processing")
+            u.logger.exception("Unexpected error during stream processing")
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
             return r[t.JsonMapping].fail(f"Stream processing error: {e}")
@@ -329,7 +323,7 @@ class ProductionTargetManager:
         """Process a Singer stream after the public exception boundary."""
         for index, message in enumerate(messages):
             if self.shutdown_requested:
-                logger.info("Shutdown requested, stopping message processing")
+                u.logger.info("Shutdown requested, stopping message processing")
                 break
             self._process_singer_message(index, len(messages), message, stats)
         self._finalize_processing_stats(stats)
@@ -344,19 +338,19 @@ class ProductionTargetManager:
     ) -> None:
         """Process one Singer message and update counters."""
         message_type = self._message_type(message)
-        logger.debug("Processing message %d/%d: %s", index + 1, total, message_type)
+        u.logger.debug("Processing message %d/%d: %s", index + 1, total, message_type)
         if self.target is None:
             stats.errors_encountered += 1
-            logger.error("Target not initialized")
+            u.logger.error("Target not initialized")
             return
         result = self.target.process_singer_message(message)
         if result.success:
             self._record_processed_message(stats, message_type)
         else:
             stats.errors_encountered += 1
-            logger.error("Message %d processing failed: %s", index + 1, result.error)
+            u.logger.error("Message %d processing failed: %s", index + 1, result.error)
         if (index + 1) % 1000 == 0:
-            logger.info("Processed %d/%d messages", index + 1, total)
+            u.logger.info("Processed %d/%d messages", index + 1, total)
 
     @staticmethod
     def _message_type(message: SingerMessage) -> str:
@@ -385,19 +379,21 @@ class ProductionTargetManager:
         if self.target is None:
             stats.errors_encountered += 1
             return
-        logger.info("Finalizing target operations")
+        u.logger.info("Finalizing target operations")
         finalize_result = self.target.finalize()
         if finalize_result.success:
             final_stats = finalize_result.value
             stats.messages_processed += final_stats.total_records
-            logger.info("Target finalization completed successfully")
+            u.logger.info("Target finalization completed successfully")
         else:
-            logger.error("Target finalization failed: %s", finalize_result.error)
+            u.logger.error("Target finalization failed: %s", finalize_result.error)
             stats.errors_encountered += 1
         stats.processing_end_time = time.time()
         processing_duration = stats.processing_end_time - stats.processing_start_time
         stats.processing_duration_seconds = processing_duration
-        logger.info("Stream processing completed in %.2f seconds", processing_duration)
+        u.logger.info(
+            "Stream processing completed in %.2f seconds", processing_duration
+        )
 
     def shutdown(self) -> p.Result[bool]:
         """Graceful shutdown with resource cleanup.
@@ -406,7 +402,7 @@ class ProductionTargetManager:
             r[bool]: Success if shutdown completed cleanly
 
         """
-        logger.info("Starting graceful shutdown")
+        u.logger.info("Starting graceful shutdown")
         try:
             return self._shutdown_checked()
         except (
@@ -418,28 +414,28 @@ class ProductionTargetManager:
             RuntimeError,
             ImportError,
         ) as e:
-            logger.exception("Error during shutdown")
+            u.logger.exception("Error during shutdown")
             return r[bool].fail(f"Shutdown error: {e}")
 
     def _shutdown_checked(self) -> p.Result[bool]:
         """Shutdown target after the public exception boundary."""
         if self.target:
-            logger.info("Finalizing pending operations")
+            u.logger.info("Finalizing pending operations")
             self.target.finalize()
-            logger.info("Cleaning up target resources")
+            u.logger.info("Cleaning up target resources")
             self.target = None
-        logger.info("Graceful shutdown completed")
+        u.logger.info("Graceful shutdown completed")
         return r[bool].ok(value=True)
 
     def _signal_handler(self, signum: int, _frame: FrameType | None) -> None:
         """Handle shutdown signals gracefully."""
-        logger.info("Received signal %d, initiating graceful shutdown", signum)
+        u.logger.info("Received signal %d, initiating graceful shutdown", signum)
         self.shutdown_requested = True
 
 
 def demonstrate_production_setup() -> None:
     """Demonstrate production setup and processing patterns."""
-    logger.info("Starting production setup demonstration")
+    u.logger.info("Starting production setup demonstration")
     try:
         _demonstrate_production_setup_checked()
     except (
@@ -451,45 +447,47 @@ def demonstrate_production_setup() -> None:
         RuntimeError,
         ImportError,
     ):
-        logger.exception("Production demonstration failed")
+        u.logger.exception("Production demonstration failed")
         raise
 
 
 def _demonstrate_production_setup_checked() -> None:
     """Run the production demonstration after the public exception boundary."""
-    logger.info("Step 1: Creating production configuration")
+    u.logger.info("Step 1: Creating production configuration")
     settings = ProductionConfig.create_from_environment()
-    logger.info("Step 2: Initializing production target manager")
+    u.logger.info("Step 2: Initializing production target manager")
     manager = ProductionTargetManager(settings)
     init_result = manager.initialize()
     if init_result.failure:
-        logger.error("Production initialization failed: %s", init_result.error)
+        u.logger.error("Production initialization failed: %s", init_result.error)
         return
-    logger.info("Step 3: Performing initial health check")
+    u.logger.info("Step 3: Performing initial health check")
     _log_health_result(manager.health_check())
-    logger.info("Step 4: Creating sample production data stream")
+    u.logger.info("Step 4: Creating sample production data stream")
     messages = create_production_sample_stream()
-    logger.info("Step 5: Processing production data stream")
+    u.logger.info("Step 5: Processing production data stream")
     _log_processing_result(manager.process_singer_stream(messages))
-    logger.info("Step 6: Performing final health check")
+    u.logger.info("Step 6: Performing final health check")
     _log_final_health(manager.health_check())
-    logger.info("Step 7: Performing graceful shutdown")
+    u.logger.info("Step 7: Performing graceful shutdown")
     _log_shutdown_result(manager.shutdown())
 
 
 def _log_health_result(health_result: p.Result[t.JsonMapping]) -> None:
     """Log the initial health check result."""
     if health_result.failure:
-        logger.warning("Health check failed: %s", health_result.error)
+        u.logger.warning("Health check failed: %s", health_result.error)
         return
     health_data = health_result.value
-    logger.info("Health check status", status=str(health_data.get("status", "unknown")))
+    u.logger.info(
+        "Health check status", status=str(health_data.get("status", "unknown"))
+    )
     checks_obj: t.JsonValue = health_data.get("checks")
     checks: t.JsonMapping = (
         cast("t.JsonMapping", checks_obj) if isinstance(checks_obj, dict) else {}
     )
     if checks:
-        logger.info(
+        u.logger.info(
             "Oracle connectivity",
             connectivity=str(checks.get("oracle_connectivity", "unknown")),
         )
@@ -498,11 +496,11 @@ def _log_health_result(health_result: p.Result[t.JsonMapping]) -> None:
 def _log_processing_result(processing_result: p.Result[t.JsonMapping]) -> None:
     """Log production stream processing result details."""
     if processing_result.failure:
-        logger.error("Production processing failed: %s", processing_result.error)
+        u.logger.error("Production processing failed: %s", processing_result.error)
         return
     stats = processing_result.value
-    logger.info("=== Production Processing Statistics ===")
-    logger.info(
+    u.logger.info("=== Production Processing Statistics ===")
+    u.logger.info(
         "Processing stats",
         messages_processed=str(stats.get("messages_processed", 0)),
         records_processed=str(stats.get("records_processed", 0)),
@@ -510,7 +508,7 @@ def _log_processing_result(processing_result: p.Result[t.JsonMapping]) -> None:
         errors_encountered=str(stats.get("errors_encountered", 0)),
     )
     if stats.get("total_records"):
-        logger.info(
+        u.logger.info(
             "Load stats",
             total_records=str(stats.get("total_records", 0)),
             successful_records=str(stats.get("successful_records", 0)),
@@ -521,7 +519,7 @@ def _log_processing_result(processing_result: p.Result[t.JsonMapping]) -> None:
 def _log_final_health(final_health: p.Result[t.JsonMapping]) -> None:
     """Log final health result."""
     if final_health.success:
-        logger.info(
+        u.logger.info(
             "Final health status",
             status=str(final_health.value.get("status", "unknown")),
         )
@@ -530,9 +528,9 @@ def _log_final_health(final_health: p.Result[t.JsonMapping]) -> None:
 def _log_shutdown_result(shutdown_result: p.Result[bool]) -> None:
     """Log shutdown result."""
     if shutdown_result.success:
-        logger.info("Production shutdown completed successfully")
+        u.logger.info("Production shutdown completed successfully")
     else:
-        logger.error("Shutdown issues: %s", shutdown_result.error)
+        u.logger.error("Shutdown issues: %s", shutdown_result.error)
 
 
 def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
@@ -613,23 +611,23 @@ def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
 
 def main() -> None:
     """Run the production setup example."""
-    logger.info("FLEXT Target Oracle - Production Setup Example")
-    logger.info("=" * 60)
+    u.logger.info("FLEXT Target Oracle - Production Setup Example")
+    u.logger.info("=" * 60)
     required_vars = ["ORACLE_HOST", "ORACLE_SERVICE", "ORACLE_USER", "ORACLE_PASSWORD"]
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     if missing_vars:
-        logger.error(
+        u.logger.error(
             "Missing required environment variables: %s",
             ", ".join(missing_vars),
         )
-        logger.error("Please set the following environment variables:")
+        u.logger.error("Please set the following environment variables:")
         for var in required_vars:
-            logger.error("  export %s=<value>", var)
+            u.logger.error("  export %s=<value>", var)
         raise SystemExit(1) from None
     try:
         _run_main_demo()
     except KeyboardInterrupt:
-        logger.info("Example interrupted by user")
+        u.logger.info("Example interrupted by user")
     except (
         ValueError,
         TypeError,
@@ -639,22 +637,33 @@ def main() -> None:
         RuntimeError,
         ImportError,
     ):
-        logger.exception("Production setup example failed")
+        u.logger.exception("Production setup example failed")
         raise SystemExit(1) from None
 
 
 def _run_main_demo() -> None:
     """Run the production demo and completion checklist."""
     demonstrate_production_setup()
-    logger.info("\n%s", "=" * 60)
-    logger.info("Production setup example completed successfully!")
-    logger.info("\nProduction Checklist:")
-    logger.info("Environment-based configuration")
-    logger.info("Comprehensive validation and error handling")
-    logger.info("Health checks and monitoring integration")
-    logger.info("Graceful shutdown and resource cleanup")
-    logger.info("Production-grade logging and statistics")
+    u.logger.info("\n%s", "=" * 60)
+    u.logger.info("Production setup example completed successfully!")
+    u.logger.info("\nProduction Checklist:")
+    u.logger.info("Environment-based configuration")
+    u.logger.info("Comprehensive validation and error handling")
+    u.logger.info("Health checks and monitoring integration")
+    u.logger.info("Graceful shutdown and resource cleanup")
+    u.logger.info("Production-grade logging and statistics")
 
 
 if __name__ == "__main__":
-    main()
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        handlers=[
+            logging.StreamHandler(),
+            logging.FileHandler("flext_target_oracle.log"),
+        ],
+    )
+    try:
+        main()
+    finally:
+        logging.shutdown()

@@ -13,8 +13,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated, override
 
-from flext_meltano import m, u
-from flext_target_oracle import c, e, t
+from flext_meltano import u
+from flext_target_oracle import c, e, m, t
 
 
 class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
