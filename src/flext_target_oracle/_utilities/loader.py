@@ -71,8 +71,6 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     @staticmethod
     def _normalize_log_value(value: t.Scalar) -> t.JsonValue:
         """Normalize logging payloads into scalar or string values."""
-        if isinstance(value, t.PRIMITIVES_TYPES):
-            return value
         return str(value)
 
     @staticmethod
