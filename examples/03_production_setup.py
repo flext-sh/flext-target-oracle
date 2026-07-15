@@ -170,7 +170,7 @@ class ProductionTargetManager:
 
     def __init__(self, settings: FlextTargetOracleSettings) -> None:
         """Initialize production target manager with validated settings."""
-        settings = settings
+        self._settings = settings
         self.target: FlextTargetOracle | None = None
         self.shutdown_requested = False
         signal.signal(signal.SIGINT, self._signal_handler)
@@ -272,7 +272,7 @@ class ProductionTargetManager:
                 f"Configuration validation failed: {validation_result.error}",
             )
         u.logger.info("Creating Oracle target instance")
-        self.target = FlextTargetOracle(settings)
+        self.target = FlextTargetOracle(self._settings)
         u.logger.info("Testing Oracle database connectivity")
         connection_result = self.target.test_connection()
         if connection_result.failure:
