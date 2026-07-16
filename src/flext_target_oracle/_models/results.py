@@ -73,7 +73,7 @@ class FlextTargetOracleModelsResults:
                 validate_default=True,
             ),
         ] = u.Field(
-            default_factory=lambda: m.Meltano.SingerStateMessage(
+            default_factory=lambda: p.Meltano.SingerStateMessage(
                 type="STATE",
                 value={},
             ),

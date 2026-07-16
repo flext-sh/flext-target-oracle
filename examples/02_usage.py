@@ -11,7 +11,7 @@ from collections.abc import (
 )
 from pathlib import Path
 
-from flext_core import t
+from flext_core import p, t
 from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m
 
 
@@ -19,7 +19,7 @@ def load_config() -> t.JsonMapping:
     """Load configuration from file."""
     config_path = Path("settings.json")
     content = config_path.read_text(encoding="utf-8")
-    adapter: m.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)
+    adapter: p.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)
     config: t.JsonMapping = adapter.validate_json(content)
     return config
 
@@ -27,7 +27,7 @@ def load_config() -> t.JsonMapping:
 def load_singer_messages() -> t.SequenceOf[t.JsonMapping]:
     """Load Singer messages from JSONL file."""
     data_path = Path("singer_data.jsonl")
-    adapter: m.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)
+    adapter: p.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)
     with data_path.open(encoding="utf-8") as f:
         return [adapter.validate_json(line) for line in f if line.strip()]
 

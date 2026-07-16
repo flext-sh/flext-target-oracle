@@ -56,8 +56,8 @@ class FlextTargetOracleSchemaService:
 
     def ensure_table_exists(
         self,
-        stream: m.TargetOracle.SingerStreamModel,
-        schema_message: m.Meltano.SingerSchemaMessage,
+        stream: p.TargetOracle.SingerStreamModel,
+        schema_message: p.Meltano.SingerSchemaMessage,
     ) -> p.Result[None]:
         """Validate table identity before external DDL orchestration."""
         _ = schema_message
@@ -87,7 +87,7 @@ class FlextTargetOracleBatchService:
     def add_record(
         self,
         stream_name: str,
-        record_message: m.Meltano.SingerRecordMessage,
+        record_message: p.Meltano.SingerRecordMessage,
     ) -> p.Result[None]:
         """Append a record to a stream buffer."""
         self._batches[stream_name].append(record_message)
@@ -127,8 +127,8 @@ class FlextTargetOracleRecordService:
 
     def transform_record(
         self,
-        record_message: m.Meltano.SingerRecordMessage,
-        stream: m.TargetOracle.SingerStreamModel,
+        record_message: p.Meltano.SingerRecordMessage,
+        stream: p.TargetOracle.SingerStreamModel,
     ) -> p.Result[p.Meltano.SingerRecordMessage]:
         """Apply stream-level mappings and ignored-column filtering."""
         transformed: t.MutableJsonMapping = {}
@@ -149,8 +149,8 @@ class FlextTargetOracleRecordService:
 
     def validate_record(
         self,
-        record_message: m.Meltano.SingerRecordMessage,
-        schema_message: m.Meltano.SingerSchemaMessage,
+        record_message: p.Meltano.SingerRecordMessage,
+        schema_message: p.Meltano.SingerSchemaMessage,
     ) -> p.Result[None]:
         """Validate record payload against current schema contract."""
         _ = record_message

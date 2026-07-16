@@ -208,7 +208,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         stream_mappings: t.StrMapping,
         key_columns: t.StrSequence,
         json_storage_enabled: bool,
-        type_mapping: m.DbOracle.TypeMapping,
+        type_mapping: p.DbOracle.TypeMapping,
     ) -> None:
         """Append one mapped Oracle column when the Singer field is persisted."""
         if source_name in ignored_columns:

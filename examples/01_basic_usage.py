@@ -77,7 +77,7 @@ def create_sample_schema_message() -> p.Meltano.SingerSchemaMessage:
       t.JsonMapping: Singer SCHEMA message for users table
 
     """
-    schema_message: m.Meltano.SingerSchemaMessage = (
+    schema_message: p.Meltano.SingerSchemaMessage = (
         m.Meltano.SingerSchemaMessage.model_validate({
             "type": "SCHEMA",
             "stream": "users",
@@ -149,7 +149,7 @@ def create_sample_state_message() -> p.Meltano.SingerStateMessage:
       t.JsonMapping: Singer STATE message with bookmark information
 
     """
-    state_message: m.Meltano.SingerStateMessage = (
+    state_message: p.Meltano.SingerStateMessage = (
         m.Meltano.SingerStateMessage.model_validate({
             "type": "STATE",
             "value": {

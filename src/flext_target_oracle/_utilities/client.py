@@ -21,7 +21,7 @@ class FlextTargetOracle:
         """Create target with validated settings and loader dependencies."""
         self.loader = FlextTargetOracleLoader(settings)
         self.schemas: MutableMapping[str, m.Meltano.SingerSchemaMessage] = {}
-        self.state_message: m.Meltano.SingerStateMessage = m.Meltano.SingerStateMessage(
+        self.state_message: p.Meltano.SingerStateMessage = m.Meltano.SingerStateMessage(
             type="STATE",
             value={},
         )
@@ -182,7 +182,7 @@ class FlextTargetOracle:
 
     def process_singer_message(
         self,
-        message: m.Meltano.SingerSchemaMessage
+        message: p.Meltano.SingerSchemaMessage
         | m.Meltano.SingerRecordMessage
         | m.Meltano.SingerStateMessage
         | m.Meltano.SingerActivateVersionMessage,
@@ -246,7 +246,7 @@ class FlextTargetOracle:
 
     def _handle_activate_version(
         self,
-        activate_message: m.Meltano.SingerActivateVersionMessage,
+        activate_message: p.Meltano.SingerActivateVersionMessage,
     ) -> p.Result[bool]:
         self.logger.info(
             "ACTIVATE_VERSION received for Oracle target",
@@ -257,7 +257,7 @@ class FlextTargetOracle:
 
     def _handle_record(
         self,
-        record_message: m.Meltano.SingerRecordMessage,
+        record_message: p.Meltano.SingerRecordMessage,
     ) -> p.Result[bool]:
         load_result = self.loader.load_record(
             record_message.stream,
@@ -269,7 +269,7 @@ class FlextTargetOracle:
 
     def _handle_schema(
         self,
-        schema_message: m.Meltano.SingerSchemaMessage,
+        schema_message: p.Meltano.SingerSchemaMessage,
     ) -> p.Result[bool]:
         stream_name = schema_message.stream
         schema = schema_message.schema_definition
@@ -285,7 +285,7 @@ class FlextTargetOracle:
 
     def _handle_state(
         self,
-        state_message: m.Meltano.SingerStateMessage,
+        state_message: p.Meltano.SingerStateMessage,
     ) -> p.Result[bool]:
         self.state_message = state_message
         return r[bool].ok(True)

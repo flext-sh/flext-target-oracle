@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from typing import ClassVar
 
 from flext_meltano import p, u
-from flext_target_oracle import c, t
+from flext_target_oracle import c, p, t
 from flext_target_oracle._utilities.errors import (
     FlextTargetOracleErrorMetadata,
     FlextTargetOracleExceptions as e,
