@@ -37,6 +37,7 @@ theme:
         icon: material/weather-sunny
         name: Switch to light mode
 
+
 plugins:
   - search
   - autorefs
@@ -62,6 +63,8 @@ plugins:
   - git-revision-date-localized:
       enable_creation_date: true
       type: date
+      exclude:
+        - api-reference/generated/**
   - mermaid2
   - redirects
   - minify:
