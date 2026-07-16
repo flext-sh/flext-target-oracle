@@ -26,9 +26,9 @@ class FlextTargetOracle:
             value={},
         )
 
-    def discover_catalog(self) -> p.Result[m.Meltano.SingerCatalog]:
+    def discover_catalog(self) -> p.Result[p.Meltano.SingerCatalog]:
         """Return Singer-style catalog for known schemas."""
-        catalog_entries: list[m.Meltano.SingerCatalogEntry] = []
+        catalog_entries: list[p.Meltano.SingerCatalogEntry] = []
         for stream_name, schema_message in self.schemas.items():
             entry_result = u.Meltano.build_catalog_entry(
                 stream_name=stream_name,
@@ -36,7 +36,7 @@ class FlextTargetOracle:
                 key_properties=schema_message.key_properties,
             )
             if entry_result.failure:
-                return r[m.Meltano.SingerCatalog].fail(
+                return r[p.Meltano.SingerCatalog].fail(
                     entry_result.error
                     or f"Failed to build Singer catalog entry for {stream_name}",
                 )
@@ -62,32 +62,32 @@ class FlextTargetOracle:
                     },
                 ),
             )
-        return r[m.Meltano.SingerCatalog].ok(
+        return r[p.Meltano.SingerCatalog].ok(
             m.Meltano.SingerCatalog(type="CATALOG", streams=catalog_entries),
         )
 
     def execute(
         self,
         payload: str | None = None,
-    ) -> p.Result[m.TargetOracle.ExecuteResult]:
+    ) -> p.Result[p.TargetOracle.ExecuteResult]:
         """Execute readiness check or process one Singer JSON line."""
         if payload is not None:
             payload_result = self._execute_payload(payload)
             if payload_result.failure:
-                return r[m.TargetOracle.ExecuteResult].fail(
+                return r[p.TargetOracle.ExecuteResult].fail(
                     payload_result.error or "Singer payload execution failed",
                 )
             return self._ready_result()
         connection_result = self.loader.test_connection()
         if connection_result.failure:
-            return r[m.TargetOracle.ExecuteResult].fail(
+            return r[p.TargetOracle.ExecuteResult].fail(
                 connection_result.error or "Connection test failed",
             )
         return self._ready_result()
 
-    def _ready_result(self) -> p.Result[m.TargetOracle.ExecuteResult]:
+    def _ready_result(self) -> p.Result[p.TargetOracle.ExecuteResult]:
         """Return the canonical execute result payload."""
-        return r[m.TargetOracle.ExecuteResult].ok(
+        return r[p.TargetOracle.ExecuteResult].ok(
             m.TargetOracle.ExecuteResult(
                 name="flext-target-oracle",
                 status="ready",
@@ -145,18 +145,18 @@ class FlextTargetOracle:
         msg_type = str(raw.get("type", ""))
         if msg_type == c.Meltano.SingerMessageType.SCHEMA.value:
             schema_message = m.Meltano.SingerSchemaMessage.model_validate(raw)
-            return r[m.Meltano.SingerSchemaMessage].ok(schema_message)
+            return r[p.Meltano.SingerSchemaMessage].ok(schema_message)
         if msg_type == c.Meltano.SingerMessageType.RECORD.value:
             record_message = m.Meltano.SingerRecordMessage.model_validate(raw)
-            return r[m.Meltano.SingerRecordMessage].ok(record_message)
+            return r[p.Meltano.SingerRecordMessage].ok(record_message)
         if msg_type == c.Meltano.SingerMessageType.STATE.value:
             state_message = m.Meltano.SingerStateMessage.model_validate(raw)
-            return r[m.Meltano.SingerStateMessage].ok(state_message)
+            return r[p.Meltano.SingerStateMessage].ok(state_message)
         if msg_type == c.Meltano.SingerMessageType.ACTIVATE_VERSION.value:
             activate_message = m.Meltano.SingerActivateVersionMessage.model_validate(
                 raw,
             )
-            return r[m.Meltano.SingerActivateVersionMessage].ok(activate_message)
+            return r[p.Meltano.SingerActivateVersionMessage].ok(activate_message)
         return r[
             m.Meltano.SingerSchemaMessage
             | m.Meltano.SingerRecordMessage
@@ -164,11 +164,11 @@ class FlextTargetOracle:
             | m.Meltano.SingerActivateVersionMessage
         ].fail(f"Unsupported Singer message type: {msg_type}")
 
-    def finalize(self) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
+    def finalize(self) -> p.Result[p.TargetOracle.LoaderFinalizeResult]:
         """Flush remaining batches and return loader statistics."""
         return self.loader.finalize_all_streams()
 
-    def get_implementation_metrics(self) -> m.TargetOracle.ImplementationMetrics:
+    def get_implementation_metrics(self) -> p.TargetOracle.ImplementationMetrics:
         """Return static target metrics."""
         return m.TargetOracle.ImplementationMetrics(
             streams_configured=len(self.schemas),
@@ -207,22 +207,22 @@ class FlextTargetOracle:
             | m.Meltano.SingerStateMessage
             | m.Meltano.SingerActivateVersionMessage
         ],
-    ) -> p.Result[m.TargetOracle.ProcessingSummary]:
+    ) -> p.Result[p.TargetOracle.ProcessingSummary]:
         """Process SCHEMA/RECORD/STATE Singer messages."""
         processed = 0
         for message in messages:
             result = self.process_singer_message(message)
             if result.failure:
-                return r[m.TargetOracle.ProcessingSummary].fail(
+                return r[p.TargetOracle.ProcessingSummary].fail(
                     result.error or "Message processing failed",
                 )
             processed += 1
         finalize_result = self.loader.finalize_all_streams()
         if finalize_result.failure:
-            return r[m.TargetOracle.ProcessingSummary].fail(
+            return r[p.TargetOracle.ProcessingSummary].fail(
                 finalize_result.error or "Finalize failed",
             )
-        return r[m.TargetOracle.ProcessingSummary].ok(
+        return r[p.TargetOracle.ProcessingSummary].ok(
             m.TargetOracle.ProcessingSummary(
                 messages_processed=processed,
                 streams=list(self.schemas.keys()),

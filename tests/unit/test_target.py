@@ -47,7 +47,7 @@ def target(mock_oracle_api: Mock) -> FlextTargetOracle:
         client.loader,
         "finalize_all_streams",
         Mock(
-            return_value=r[m.TargetOracle.LoaderFinalizeResult].ok(
+            return_value=r[p.TargetOracle.LoaderFinalizeResult].ok(
                 m.TargetOracle.LoaderFinalizeResult.model_validate({
                     "total_records": 0,
                     "streams_processed": 0,

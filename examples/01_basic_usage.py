@@ -70,7 +70,7 @@ def create_configuration() -> FlextTargetOracleSettings:
     return settings
 
 
-def create_sample_schema_message() -> m.Meltano.SingerSchemaMessage:
+def create_sample_schema_message() -> p.Meltano.SingerSchemaMessage:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
@@ -98,7 +98,7 @@ def create_sample_schema_message() -> m.Meltano.SingerSchemaMessage:
     return schema_message
 
 
-def create_sample_record_messages() -> t.SequenceOf[m.Meltano.SingerRecordMessage]:
+def create_sample_record_messages() -> t.SequenceOf[p.Meltano.SingerRecordMessage]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
@@ -142,7 +142,7 @@ def create_sample_record_messages() -> t.SequenceOf[m.Meltano.SingerRecordMessag
     ]
 
 
-def create_sample_state_message() -> m.Meltano.SingerStateMessage:
+def create_sample_state_message() -> p.Meltano.SingerStateMessage:
     """Create sample Singer STATE message for demonstration.
 
     Returns:

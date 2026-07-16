@@ -22,9 +22,9 @@ class FlextTargetOracleConnectionService:
         """Run default connection validation operation."""
         return self.test_connection()
 
-    def get_connection_info(self) -> p.Result[m.TargetOracle.OracleConnectionModel]:
+    def get_connection_info(self) -> p.Result[p.TargetOracle.OracleConnectionModel]:
         """Return normalized connection model."""
-        return r[m.TargetOracle.OracleConnectionModel].ok(
+        return r[p.TargetOracle.OracleConnectionModel].ok(
             m.TargetOracle.OracleConnectionModel(
                 host=settings.TargetOracle.oracle_host,
                 port=settings.TargetOracle.oracle_port,
@@ -80,7 +80,7 @@ class FlextTargetOracleBatchService:
     ) -> None:
         """Initialize batch storage and required dependencies."""
         self.oracle_api = oracle_api
-        self._batches: defaultdict[str, list[m.Meltano.SingerRecordMessage]] = (
+        self._batches: defaultdict[str, list[p.Meltano.SingerRecordMessage]] = (
             defaultdict(list)
         )
 
@@ -93,11 +93,11 @@ class FlextTargetOracleBatchService:
         self._batches[stream_name].append(record_message)
         return r[None].ok(None)
 
-    def execute(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
+    def execute(self) -> p.Result[p.TargetOracle.LoadStatisticsModel]:
         """Run default batch flush operation."""
         return self.flush_all_batches()
 
-    def flush_all_batches(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
+    def flush_all_batches(self) -> p.Result[p.TargetOracle.LoadStatisticsModel]:
         """Summarize and clear all in-memory batch buffers."""
         total = sum(len(records) for records in self._batches.values())
         stats = m.TargetOracle.LoadStatisticsModel(
@@ -107,11 +107,11 @@ class FlextTargetOracleBatchService:
             failed_records=0,
             batches_processed=len(self._batches),
         ).finalize()
-        return r[m.TargetOracle.LoadStatisticsModel].ok(stats)
+        return r[p.TargetOracle.LoadStatisticsModel].ok(stats)
 
     def flush_batch(self, stream_name: str) -> p.Result[None]:
         """Clear buffered records for a specific stream."""
-        self._batches[stream_name] = list[m.Meltano.SingerRecordMessage]()
+        self._batches[stream_name] = list[p.Meltano.SingerRecordMessage]()
         return r[None].ok(None)
 
 
@@ -129,7 +129,7 @@ class FlextTargetOracleRecordService:
         self,
         record_message: m.Meltano.SingerRecordMessage,
         stream: m.TargetOracle.SingerStreamModel,
-    ) -> p.Result[m.Meltano.SingerRecordMessage]:
+    ) -> p.Result[p.Meltano.SingerRecordMessage]:
         """Apply stream-level mappings and ignored-column filtering."""
         transformed: t.MutableJsonMapping = {}
         for key, value in record_message.record.items():
@@ -137,7 +137,7 @@ class FlextTargetOracleRecordService:
                 continue
             mapped_key = stream.column_mappings.get(key) or key
             transformed[mapped_key] = value
-        return r[m.Meltano.SingerRecordMessage].ok(
+        return r[p.Meltano.SingerRecordMessage].ok(
             m.Meltano.SingerRecordMessage.model_validate({
                 "type": "RECORD",
                 "stream": record_message.stream,

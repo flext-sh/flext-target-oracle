@@ -36,7 +36,7 @@ def _query_rows(
     oracle_engine: FlextDbOracleApi,
     sql: str,
     params: t.JsonMapping | None = None,
-) -> t.SequenceOf[m.Dict]:
+) -> t.SequenceOf[p.Dict]:
     normalized_params = None if params is None else m.ConfigMap(root=dict(params))
     query_result = oracle_engine.oracle_services.execute_query(sql, normalized_params)
     tm.ok(query_result)

@@ -72,7 +72,7 @@ class FlextTargetOracleProtocolsBase:
 
         def execute_batch_target(
             self,
-            operations: t.SequenceOf[m.Meltano.SingerRecordMessage],
+            operations: t.SequenceOf[p.Meltano.SingerRecordMessage],
         ) -> p.Result[Sequence[bool]]:
             """Execute batch of Oracle operations."""
             ...
@@ -84,7 +84,7 @@ class FlextTargetOracleProtocolsBase:
         def transform_record_target(
             self,
             record: m.Meltano.SingerRecordMessage,
-        ) -> p.Result[m.Meltano.SingerRecordMessage]:
+        ) -> p.Result[p.Meltano.SingerRecordMessage]:
             """Transform Singer record for Oracle."""
             ...
 
@@ -139,7 +139,7 @@ class FlextTargetOracleProtocolsBase:
 
         def get_connection_info(
             self,
-        ) -> p.Result[m.TargetOracle.OracleConnectionConfig]:
+        ) -> p.Result[p.TargetOracle.OracleConnectionConfig]:
             """Return the effective Oracle connection information."""
             ...
 
@@ -171,7 +171,7 @@ class FlextTargetOracleProtocolsBase:
             """Queue one record for batch processing."""
             ...
 
-        def flush_all_batches(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
+        def flush_all_batches(self) -> p.Result[p.TargetOracle.LoadStatisticsModel]:
             """Flush all queued batches and return aggregated stats."""
             ...
 
@@ -183,7 +183,7 @@ class FlextTargetOracleProtocolsBase:
             self,
             record_message: m.Meltano.SingerRecordMessage,
             stream: m.TargetOracle.SingerStreamModel,
-        ) -> p.Result[m.Meltano.SingerRecordMessage]:
+        ) -> p.Result[p.Meltano.SingerRecordMessage]:
             """Transform one Singer record into Oracle-ready payload."""
             ...
 

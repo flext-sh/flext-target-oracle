@@ -53,7 +53,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ] = u.PrivateAttr(
         default_factory=_default_record_buffers,
     )
-    _stream_columns: dict[str, tuple[m.DbOracle.Column, ...]] = u.PrivateAttr(
+    _stream_columns: dict[str, tuple[p.DbOracle.Column, ...]] = u.PrivateAttr(
         default_factory=dict,
     )
     _stream_field_mappings: t.MutableStrPairTupleMapping = u.PrivateAttr(
@@ -103,7 +103,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         stream_name: str,
         schema: t.JsonMapping,
         key_properties: t.StrSequence | None,
-    ) -> p.Result[tuple[m.DbOracle.Column, ...]]:
+    ) -> p.Result[tuple[p.DbOracle.Column, ...]]:
         """Build and cache Oracle column metadata for one Singer stream."""
         try:
             return self._loader_columns_unchecked(
@@ -112,7 +112,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 key_properties,
             )
         except c.ValidationError as exc:
-            return r[tuple[m.DbOracle.Column, ...]].fail(
+            return r[tuple[p.DbOracle.Column, ...]].fail(
                 f"Invalid Singer schema for {stream_name}: {exc}",
             )
 
@@ -121,7 +121,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         stream_name: str,
         schema: t.JsonMapping,
         key_properties: t.StrSequence | None,
-    ) -> p.Result[tuple[m.DbOracle.Column, ...]]:
+    ) -> p.Result[tuple[p.DbOracle.Column, ...]]:
         """Build Oracle column metadata after validation has been delegated."""
         properties_value = schema.get("properties", {})
         properties = (
@@ -136,7 +136,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             normalized_schema,
         )
         if type_mapping_result.failure:
-            return r[tuple[m.DbOracle.Column, ...]].fail(
+            return r[tuple[p.DbOracle.Column, ...]].fail(
                 type_mapping_result.error or "Failed to map Singer schema to Oracle",
             )
         stream_mappings = t.TargetOracle.STR_MAP_ADAPTER.validate_python(
@@ -155,7 +155,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             c.TargetOracle.STORAGE_MODE_HYBRID,
         }
         field_mappings: t.MutableStrPairSequence = []
-        columns: list[m.DbOracle.Column] = []
+        columns: list[p.DbOracle.Column] = []
         for source_name, definition_value in properties.items():
             self._append_schema_column(
                 columns,
@@ -182,7 +182,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         self._stream_columns[stream_name] = cached_columns
         self._stream_field_mappings[stream_name] = tuple(field_mappings)
         self._stream_key_columns[stream_name] = key_columns
-        return r[tuple[m.DbOracle.Column, ...]].ok(cached_columns)
+        return r[tuple[p.DbOracle.Column, ...]].ok(cached_columns)
 
     @staticmethod
     def _schema_field_type(definition: t.JsonMapping) -> str:
@@ -199,7 +199,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
 
     def _append_schema_column(
         self,
-        columns: list[m.DbOracle.Column],
+        columns: list[p.DbOracle.Column],
         field_mappings: t.MutableStrPairSequence,
         *,
         source_name: str,
@@ -237,7 +237,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         )
 
     @staticmethod
-    def _sdc_columns() -> tuple[m.DbOracle.Column, m.DbOracle.Column]:
+    def _sdc_columns() -> tuple[p.DbOracle.Column, m.DbOracle.Column]:
         """Return owner-managed SDC audit columns."""
         return (
             m.DbOracle.Column(
@@ -256,8 +256,8 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
 
     def _ordered_columns(
         self,
-        columns: list[m.DbOracle.Column],
-    ) -> list[m.DbOracle.Column]:
+        columns: list[p.DbOracle.Column],
+    ) -> list[p.DbOracle.Column]:
         """Apply configured column ordering."""
         if self.target_config.TargetOracle.column_ordering != "alphabetical":
             return columns
@@ -563,20 +563,20 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             "schema": self.target_config.TargetOracle.default_target_schema,
         })
 
-    def finalize_all_streams(self) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
+    def finalize_all_streams(self) -> p.Result[p.TargetOracle.LoaderFinalizeResult]:
         """Finalize all streams and return stats using standardized models."""
         try:
             return self._finalize_all_streams_unchecked()
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             self.log_error("Failed to finalize streams", error=str(exc))
-            return r[m.TargetOracle.LoaderFinalizeResult].fail_op(
+            return r[p.TargetOracle.LoaderFinalizeResult].fail_op(
                 "finalize streams",
                 exc,
             )
 
     def _finalize_all_streams_unchecked(
         self,
-    ) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
+    ) -> p.Result[p.TargetOracle.LoaderFinalizeResult]:
         """Finalize streams after exception handling has been delegated."""
         started_at = str(u.now())
         records_failed = 0
@@ -601,7 +601,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 stream: len(records) for stream, records in self.record_buffers.items()
             },
         )
-        return r[m.TargetOracle.LoaderFinalizeResult].ok(finalize_result)
+        return r[p.TargetOracle.LoaderFinalizeResult].ok(finalize_result)
 
     def insert_records(
         self,
