@@ -20,7 +20,7 @@ from flext_db_oracle import FlextDbOracleApi
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
-from tests import c, m, t
+from tests import c, m, p, t
 
 pytestmark = pytest.mark.integration
 

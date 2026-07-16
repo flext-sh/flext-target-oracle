@@ -25,8 +25,15 @@ from __future__ import annotations
 import logging
 import os
 
-from flext_cli import u as cli_u
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m, r, t, u
+from flext_target_oracle import (
+    FlextTargetOracle,
+    FlextTargetOracleSettings,
+    m,
+    p,
+    r,
+    t,
+    u,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = u.fetch_logger(__name__)
@@ -34,7 +41,7 @@ logger = u.fetch_logger(__name__)
 
 def _json_text(value: t.JsonValue) -> str:
     """Serialize JSON-compatible example payloads through the CLI facade."""
-    serialized: str = cli_u.Cli.json_dumps(value).unwrap()
+    serialized: str = u.Cli.json_dumps(value).unwrap()
     return serialized
 
 

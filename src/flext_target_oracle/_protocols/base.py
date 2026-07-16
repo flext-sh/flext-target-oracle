@@ -12,7 +12,7 @@ from collections.abc import (
 from typing import Protocol, runtime_checkable
 
 from flext_meltano import p
-from flext_target_oracle import p, t
+from flext_target_oracle import t
 
 
 class FlextTargetOracleProtocolsBase:

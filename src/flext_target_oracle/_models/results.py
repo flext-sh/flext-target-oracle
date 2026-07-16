@@ -7,7 +7,7 @@ from typing import Annotated, Literal, Self
 
 # NOTE (multi-agent): mro-rn88 — source `u` from flext_meltano (external, cycle-safe),
 # not the own package facade, to avoid the models→utilities→client circular import.
-from flext_meltano import m, t, u
+from flext_meltano import m, p, t, u
 
 
 def _default_buffer_status() -> t.MappingKV[str, int]:
