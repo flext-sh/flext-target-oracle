@@ -21,16 +21,16 @@ classifiers = [
   "Typing :: Typed",
 ]
 dependencies = [
-    "click>=8.3.3",
-    "flext-cli @ git+https://github.com/flext-sh/flext-cli.git@0.12.0-dev",
-    "flext-core @ git+https://github.com/flext-sh/flext-core.git@0.12.0-dev",
-    "flext-db-oracle @ git+https://github.com/flext-sh/flext-db-oracle.git@0.12.0-dev",
-    "flext-meltano @ git+https://github.com/flext-sh/flext-meltano.git@0.12.0-dev",
-    "pydantic-core>=2.46.3",
-    "pydantic-settings>=2.14.0",
-    "pydantic>=2.13.3",
-    "pyyaml>=6.0.3",
-    "rich>=14,<15",
+  "click>=8.3.3",
+  "flext-cli @ git+https://github.com/flext-sh/flext-cli.git@0.12.0-dev",
+  "flext-core @ git+https://github.com/flext-sh/flext-core.git@0.12.0-dev",
+  "flext-db-oracle @ git+https://github.com/flext-sh/flext-db-oracle.git@0.12.0-dev",
+  "flext-meltano @ git+https://github.com/flext-sh/flext-meltano.git@0.12.0-dev",
+  "pydantic-core>=2.46.3",
+  "pydantic-settings>=2.14.0",
+  "pydantic>=2.13.3",
+  "pyyaml>=6.0.3",
+  "rich>=14,<15",
 ]
 description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
 keywords = [
@@ -228,7 +228,6 @@ project-excludes = [
   "**/typings/**",
   "**/vendor/**",
   "**/venv/**",
-  ".flext-deps/**",
   ".venv/**",
   "typings/**",
   "vendor/**",
@@ -238,16 +237,10 @@ python-interpreter-path = "../.venv/bin/python"
 python-version = "3.13"
 search-path = [
   ".",
-  "../flext-cli/examples",
   "../flext-cli/src",
-  "../flext-core/examples",
-  "../flext-core/scripts",
   "../flext-core/src",
-  "../flext-db-oracle/examples",
   "../flext-db-oracle/src",
   "../flext-infra/src",
-  "../flext-infra/tmp_flow_test",
-  "../flext-meltano/examples",
   "../flext-meltano/src",
   "../flext-tests/src",
   "src",
