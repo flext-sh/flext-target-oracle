@@ -9,12 +9,11 @@ from collections.abc import (
 from unittest.mock import Mock
 
 import pytest
-from flext_tests import r, tm
+from flext_tests import tm
 
-from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
-from tests import m, t
+from tests import m, p, r, t, u
 
 
 @pytest.mark.performance
@@ -93,7 +92,7 @@ class TestsFlextTargetOraclePerformance:
             "stream": "perf_stream",
             "schema": {
                 "type": "object",
-                "properties": cli_u.Cli.json_dumps({
+                "properties": u.Cli.json_dumps({
                     "id": {"type": "integer"},
                 }).unwrap(),
             },
