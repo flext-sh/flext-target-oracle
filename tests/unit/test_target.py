@@ -130,9 +130,9 @@ class TestsFlextTargetOracleTarget:
         tm.ok(target.process_singer_message(record_message))
         tm.ok(target.process_singer_message(state_message))
         state_value = target.state_message.value
-        tm.that(state_value, is_=dict)
-        bookmarks_obj: t.JsonValue | None = state_value.get("bookmarks")
-        tm.that(bookmarks_obj, is_=dict)
+        assert isinstance(state_value, dict)
+        bookmarks_obj = state_value.get("bookmarks")
+        assert isinstance(bookmarks_obj, dict)
         tm.that(bookmarks_obj.get("users"), eq=1)
 
     def test_process_singer_messages_flushes_loader(
