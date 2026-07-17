@@ -3,7 +3,7 @@
 # flext-target-oracle API Overview
 
 - Package: `flext_target_oracle`
-- Version: `0.12.0`
+- Version: `0.20.0`
 - Description: FLEXT Target Oracle - Singer Target for Oracle Database Data Loading
 - Doc summary: Flext Target Oracle package.
 - Classifiers: `Development Status :: 3 - Alpha`, `Intended Audience :: Developers`, `Operating System :: OS Independent`, `Programming Language :: Python :: 3 :: Only`, `Programming Language :: Python :: 3.13`, `Topic :: Database` (+3 more)
