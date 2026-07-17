@@ -1,6 +1,7 @@
-# AUTO-GENERATED FILE — Regenerate with: make gen
-"""Models package."""
+"""flext-target-oracle private config/setting models package."""
 
 from __future__ import annotations
 
-__all__: tuple[str, ...] = ()
+from .config import FlextTargetOracleConfigModels
+
+__all__: tuple[str, ...] = ("FlextTargetOracleConfigModels",)
