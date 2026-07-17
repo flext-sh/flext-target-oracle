@@ -8,9 +8,9 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import os
-from collections.abc import Generator
 from pathlib import Path
 from time import monotonic, sleep
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -23,6 +23,9 @@ from flext_db_oracle import (
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 from tests import c, m, t
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 reset_settings = _shared_reset_settings
 

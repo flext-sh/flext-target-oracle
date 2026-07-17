@@ -7,9 +7,10 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import re
-from typing import ClassVar, Final
+from typing import TYPE_CHECKING, ClassVar, Final
 
-from flext_target_oracle import t
+if TYPE_CHECKING:
+    from flext_target_oracle import t
 
 
 class FlextTargetOracleConstantsBase:

@@ -6,13 +6,15 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from collections.abc import (
-    Sequence,
-)
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
-from flext_meltano import p
-from flext_target_oracle import t
+if TYPE_CHECKING:
+    from collections.abc import (
+        Sequence,
+    )
+
+    from flext_meltano import p
+    from flext_target_oracle import t
 
 
 class FlextTargetOracleProtocolsBase:
