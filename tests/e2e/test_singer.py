@@ -10,7 +10,7 @@ from flext_tests import r, tm
 from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
-from tests import m, t
+from tests import m
 
 
 @pytest.mark.e2e
@@ -92,9 +92,9 @@ class TestsFlextTargetOracleSinger:
         tm.ok(finalize_result)
         tm.that(target.schemas, has="orders")
         state_value = target.state_message.value
-        tm.that(state_value, is_=dict)
-        bookmarks_obj: t.JsonValue | None = state_value.get("bookmarks")
-        tm.that(bookmarks_obj, is_=dict)
-        orders_obj: t.JsonValue | None = bookmarks_obj.get("orders")
-        tm.that(orders_obj, is_=dict)
+        assert isinstance(state_value, dict)
+        bookmarks_obj = state_value.get("bookmarks")
+        assert isinstance(bookmarks_obj, dict)
+        orders_obj = bookmarks_obj.get("orders")
+        assert isinstance(orders_obj, dict)
         tm.that(orders_obj.get("version"), eq=1)

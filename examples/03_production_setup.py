@@ -31,9 +31,9 @@ from flext_target_oracle import (
 
 type SingerMessage = (
     m.Meltano.SingerSchemaMessage
-    | m.Meltano.SingerRecordMessage
-    | m.Meltano.SingerStateMessage
-    | m.Meltano.SingerActivateVersionMessage
+    | p.Meltano.SingerRecordMessage
+    | p.Meltano.SingerStateMessage
+    | p.Meltano.SingerActivateVersionMessage
 )
 
 

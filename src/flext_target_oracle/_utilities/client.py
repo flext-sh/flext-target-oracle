@@ -116,9 +116,9 @@ class FlextTargetOracle:
         payload: str,
     ) -> p.Result[
         m.Meltano.SingerSchemaMessage
-        | m.Meltano.SingerRecordMessage
-        | m.Meltano.SingerStateMessage
-        | m.Meltano.SingerActivateVersionMessage
+        | p.Meltano.SingerRecordMessage
+        | p.Meltano.SingerStateMessage
+        | p.Meltano.SingerActivateVersionMessage
     ]:
         """Parse one Singer JSON payload into its Pydantic message model."""
         try:
@@ -127,9 +127,9 @@ class FlextTargetOracle:
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             return r[
                 m.Meltano.SingerSchemaMessage
-                | m.Meltano.SingerRecordMessage
-                | m.Meltano.SingerStateMessage
-                | m.Meltano.SingerActivateVersionMessage
+                | p.Meltano.SingerRecordMessage
+                | p.Meltano.SingerStateMessage
+                | p.Meltano.SingerActivateVersionMessage
             ].fail(f"Invalid Singer payload: {exc}")
 
     def _parse_singer_mapping(
@@ -137,9 +137,9 @@ class FlextTargetOracle:
         raw: t.JsonMapping,
     ) -> p.Result[
         m.Meltano.SingerSchemaMessage
-        | m.Meltano.SingerRecordMessage
-        | m.Meltano.SingerStateMessage
-        | m.Meltano.SingerActivateVersionMessage
+        | p.Meltano.SingerRecordMessage
+        | p.Meltano.SingerStateMessage
+        | p.Meltano.SingerActivateVersionMessage
     ]:
         """Parse one Singer mapping into its concrete message model."""
         msg_type = str(raw.get("type", ""))
@@ -159,9 +159,9 @@ class FlextTargetOracle:
             return r[p.Meltano.SingerActivateVersionMessage].ok(activate_message)
         return r[
             m.Meltano.SingerSchemaMessage
-            | m.Meltano.SingerRecordMessage
-            | m.Meltano.SingerStateMessage
-            | m.Meltano.SingerActivateVersionMessage
+            | p.Meltano.SingerRecordMessage
+            | p.Meltano.SingerStateMessage
+            | p.Meltano.SingerActivateVersionMessage
         ].fail(f"Unsupported Singer message type: {msg_type}")
 
     def finalize(self) -> p.Result[p.TargetOracle.LoaderFinalizeResult]:
@@ -183,9 +183,9 @@ class FlextTargetOracle:
     def process_singer_message(
         self,
         message: p.Meltano.SingerSchemaMessage
-        | m.Meltano.SingerRecordMessage
-        | m.Meltano.SingerStateMessage
-        | m.Meltano.SingerActivateVersionMessage,
+        | p.Meltano.SingerRecordMessage
+        | p.Meltano.SingerStateMessage
+        | p.Meltano.SingerActivateVersionMessage,
     ) -> p.Result[bool]:
         """Process a single Singer message."""
         match message:
@@ -203,9 +203,9 @@ class FlextTargetOracle:
         self,
         messages: t.SequenceOf[
             m.Meltano.SingerSchemaMessage
-            | m.Meltano.SingerRecordMessage
-            | m.Meltano.SingerStateMessage
-            | m.Meltano.SingerActivateVersionMessage
+            | p.Meltano.SingerRecordMessage
+            | p.Meltano.SingerStateMessage
+            | p.Meltano.SingerActivateVersionMessage
         ],
     ) -> p.Result[p.TargetOracle.ProcessingSummary]:
         """Process SCHEMA/RECORD/STATE Singer messages."""

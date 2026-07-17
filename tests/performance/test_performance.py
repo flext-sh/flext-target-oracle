@@ -67,9 +67,9 @@ class TestsFlextTargetOraclePerformance:
         target = self._target()
         messages: t.SequenceOf[
             m.Meltano.SingerSchemaMessage
-            | m.Meltano.SingerRecordMessage
-            | m.Meltano.SingerStateMessage
-            | m.Meltano.SingerActivateVersionMessage
+            | p.Meltano.SingerRecordMessage
+            | p.Meltano.SingerStateMessage
+            | p.Meltano.SingerActivateVersionMessage
         ] = [
             m.Meltano.SingerStateMessage.model_validate({
                 "type": "STATE",
