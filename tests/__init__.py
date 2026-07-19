@@ -48,7 +48,7 @@ if TYPE_CHECKING:
     )
     from tests.protocols import (
         TestsFlextTargetOracleProtocols as TestsFlextTargetOracleProtocols,
-        p,
+        p as p,
     )
     from tests.settings import (
         TestsFlextTargetOracleSettings as TestsFlextTargetOracleSettings,
@@ -71,7 +71,7 @@ if TYPE_CHECKING:
     )
     from tests.utilities import (
         TestsFlextTargetOracleUtilities as TestsFlextTargetOracleUtilities,
-        u,
+        u as u,
     )
 _LAZY_IMPORTS = merge_lazy_imports(
     (
