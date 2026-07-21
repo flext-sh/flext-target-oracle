@@ -9,9 +9,7 @@ from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, settings,
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 
 if TYPE_CHECKING:
-    from collections.abc import (
-        MutableMapping,
-    )
+    from collections.abc import MutableMapping
 
 
 class FlextTargetOracle:

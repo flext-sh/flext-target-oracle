@@ -28,7 +28,7 @@ class FlextTargetOracleConfig(FlextMeltanoConfig):
     )
 
     @cached_property
-    def TargetOracle(self) -> FlextTargetOracleConfigModels.TargetOracle:  # noqa: N802
+    def TargetOracle(self) -> FlextTargetOracleConfigModels.TargetOracle:
         """Validated ``TargetOracle`` business-rule config namespace."""
         root = FlextTargetOracleConfigModels.Root.model_validate(
             dict(self.model_extra or {}),

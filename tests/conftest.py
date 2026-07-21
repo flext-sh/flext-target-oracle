@@ -16,10 +16,7 @@ from unittest.mock import MagicMock, Mock
 import pytest
 from flext_tests import reset_settings as _shared_reset_settings, tk, tm
 
-from flext_db_oracle import (
-    FlextDbOracleApi,
-    FlextDbOracleSettings,
-)
+from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 from tests import c, m, t

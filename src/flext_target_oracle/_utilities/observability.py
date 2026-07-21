@@ -13,9 +13,7 @@ from flext_target_oracle._utilities.errors import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import (
-        Generator,
-    )
+    from collections.abc import Generator
 
 
 class FlextTargetOracleUtilitiesObservability:

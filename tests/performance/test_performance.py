@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import time
-from collections.abc import (
-    Mapping,
-)
+from collections.abc import Mapping
 from unittest.mock import Mock
 
 import pytest

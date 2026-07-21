@@ -11,10 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import json
-from collections.abc import (
-    Mapping,
-    Sequence,
-)
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from operator import itemgetter
 from typing import ClassVar, override
