@@ -13,9 +13,7 @@ from flext_target_oracle._utilities.errors import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import (
-        Generator,
-    )
+    from collections.abc import Generator
 
 
 class FlextTargetOracleUtilitiesObservability:
@@ -25,10 +23,7 @@ class FlextTargetOracleUtilitiesObservability:
 
     @staticmethod
     def target_oracle_connection_authentication_failed(
-        *,
-        username: str,
-        oracle_service: str,
-        error_code: str | None = None,
+        *, username: str, oracle_service: str, error_code: str | None = None
     ) -> e.AuthenticationError:
         """Build an authentication failure error with service context."""
         FlextTargetOracleUtilitiesObservability.logger.error(
@@ -41,10 +36,7 @@ class FlextTargetOracleUtilitiesObservability:
             f"Oracle authentication failed for {username} on {oracle_service}",
             metadata=FlextTargetOracleErrorMetadata(
                 code=error_code or c.ErrorCode.AUTHENTICATION_ERROR,
-                context={
-                    "user": username,
-                    "oracle_service": oracle_service,
-                },
+                context={"user": username, "oracle_service": oracle_service},
                 correlation_id=None,
             ),
         )
@@ -77,10 +69,7 @@ class FlextTargetOracleUtilitiesObservability:
 
     @staticmethod
     def target_oracle_singer_record_processing_failed(
-        *,
-        stream_name: str,
-        record_count: int,
-        failed_records: int,
+        *, stream_name: str, record_count: int, failed_records: int
     ) -> e.ProcessingError:
         """Build a Singer record processing failure."""
         FlextTargetOracleUtilitiesObservability.logger.error(
@@ -148,19 +137,18 @@ class FlextTargetOracleUtilitiesObservability:
     @staticmethod
     @contextmanager
     def target_oracle_monitor_query_performance(
-        table_name: str,
-        operation: str = "SELECT",
+        table_name: str, operation: str = "SELECT"
     ) -> Generator[t.StrMapping]:
         """Yield a mutable context while timing a query operation."""
         FlextTargetOracleUtilitiesObservability.logger.debug(
-            "Starting query performance monitor",
+            "Starting query performance monitor"
         )
         context_data = {"table_name": table_name, "operation": operation}
         try:
             yield context_data
         finally:
             FlextTargetOracleUtilitiesObservability.logger.debug(
-                "Finished query performance monitor",
+                "Finished query performance monitor"
             )
 
     @staticmethod

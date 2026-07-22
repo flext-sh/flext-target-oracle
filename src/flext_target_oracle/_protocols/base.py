@@ -9,9 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 if TYPE_CHECKING:
-    from collections.abc import (
-        Sequence,
-    )
+    from collections.abc import Sequence
 
     from flext_meltano import p
     from flext_target_oracle import m, t
@@ -39,8 +37,7 @@ class FlextTargetOracleProtocolsBase:
         """Protocol for Oracle target operations."""
 
         def process_record(
-            self,
-            record: m.Meltano.SingerRecordMessage,
+            self, record: m.Meltano.SingerRecordMessage
         ) -> p.Result[bool]:
             """Process a Singer record for Oracle target."""
             ...
@@ -50,8 +47,7 @@ class FlextTargetOracleProtocolsBase:
         """Protocol for Oracle connection management."""
 
         def connect_target(
-            self,
-            settings: m.TargetOracle.OracleConnectionConfig,
+            self, settings: m.TargetOracle.OracleConnectionConfig
         ) -> p.Result[bool]:
             """Connect to Oracle database."""
             ...
@@ -61,9 +57,7 @@ class FlextTargetOracleProtocolsBase:
         """Protocol for Oracle schema management."""
 
         def create_table_from_schema(
-            self,
-            table_name: str,
-            schema_message: m.Meltano.SingerSchemaMessage,
+            self, table_name: str, schema_message: m.Meltano.SingerSchemaMessage
         ) -> p.Result[bool]:
             """Create Oracle table from schema."""
             ...
@@ -73,8 +67,7 @@ class FlextTargetOracleProtocolsBase:
         """Protocol for Oracle batch operations."""
 
         def execute_batch_target(
-            self,
-            operations: t.SequenceOf[m.Meltano.SingerRecordMessage],
+            self, operations: t.SequenceOf[m.Meltano.SingerRecordMessage]
         ) -> p.Result[Sequence[bool]]:
             """Execute batch of Oracle operations."""
             ...
@@ -84,8 +77,7 @@ class FlextTargetOracleProtocolsBase:
         """Protocol for Oracle record processing."""
 
         def transform_record_target(
-            self,
-            record: m.Meltano.SingerRecordMessage,
+            self, record: m.Meltano.SingerRecordMessage
         ) -> p.Result[m.Meltano.SingerRecordMessage]:
             """Transform Singer record for Oracle."""
             ...
@@ -95,8 +87,7 @@ class FlextTargetOracleProtocolsBase:
         """Protocol for Singer message handling."""
 
         def process_message_target(
-            self,
-            message: m.Meltano.SingerRecordMessage,
+            self, message: m.Meltano.SingerRecordMessage
         ) -> p.Result[bool]:
             """Process Singer message."""
             ...
@@ -105,10 +96,7 @@ class FlextTargetOracleProtocolsBase:
     class Optimization(Protocol):
         """Protocol for Oracle performance optimization."""
 
-        def optimize_batch_size_target(
-            self,
-            record_count: int,
-        ) -> p.Result[int]:
+        def optimize_batch_size_target(self, record_count: int) -> p.Result[int]:
             """Optimize batch size for Oracle operations."""
             ...
 
@@ -117,8 +105,7 @@ class FlextTargetOracleProtocolsBase:
         """Protocol for Oracle security operations."""
 
         def validate_target_credentials(
-            self,
-            settings: m.TargetOracle.OracleConnectionConfig,
+            self, settings: m.TargetOracle.OracleConnectionConfig
         ) -> p.Result[bool]:
             """Validate Oracle credentials."""
             ...
@@ -127,10 +114,7 @@ class FlextTargetOracleProtocolsBase:
     class Monitoring(Protocol):
         """Protocol for Oracle loading monitoring."""
 
-        def track_progress(
-            self,
-            records: int,
-        ) -> p.Result[bool]:
+        def track_progress(self, records: int) -> p.Result[bool]:
             """Track progress of Oracle loading operations."""
             ...
 
@@ -166,9 +150,7 @@ class FlextTargetOracleProtocolsBase:
         """Contract for Oracle batch services."""
 
         def add_record(
-            self,
-            stream_name: str,
-            record_message: m.Meltano.SingerRecordMessage,
+            self, stream_name: str, record_message: m.Meltano.SingerRecordMessage
         ) -> p.Result[None]:
             """Queue one record for batch processing."""
             ...

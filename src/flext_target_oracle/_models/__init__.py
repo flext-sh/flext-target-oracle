@@ -20,19 +20,12 @@ if TYPE_CHECKING:
     from flext_target_oracle._models.singer import (
         FlextTargetOracleModelsSinger as FlextTargetOracleModelsSinger,
     )
-_LAZY_IMPORTS = build_lazy_import_map(
-    {
-        ".commands": ("FlextTargetOracleModelsCommands",),
-        ".results": ("FlextTargetOracleModelsResults",),
-        ".settings": ("FlextTargetOracleModelsSettings",),
-        ".singer": ("FlextTargetOracleModelsSinger",),
-    },
-)
+_LAZY_IMPORTS = build_lazy_import_map({
+    ".commands": ("FlextTargetOracleModelsCommands",),
+    ".results": ("FlextTargetOracleModelsResults",),
+    ".settings": ("FlextTargetOracleModelsSettings",),
+    ".singer": ("FlextTargetOracleModelsSinger",),
+})
 
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    publish_all=False,
-)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, publish_all=False)

@@ -22,16 +22,10 @@ class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
 
     code: Annotated[str, u.Field(description="Canonical error code")]
     context: Annotated[
-        t.JsonMapping | None,
-        u.Field(
-            description="Structured error context",
-        ),
+        t.JsonMapping | None, u.Field(description="Structured error context")
     ] = None
     correlation_id: Annotated[
-        str | None,
-        u.Field(
-            description="Cross-service correlation identifier",
-        ),
+        str | None, u.Field(description="Cross-service correlation identifier")
     ] = None
 
 

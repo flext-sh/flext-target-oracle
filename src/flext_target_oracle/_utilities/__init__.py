@@ -30,29 +30,19 @@ if TYPE_CHECKING:
         FlextTargetOracleRecordService as FlextTargetOracleRecordService,
         FlextTargetOracleSchemaService as FlextTargetOracleSchemaService,
     )
-_LAZY_IMPORTS = build_lazy_import_map(
-    {
-        ".base": ("FlextTargetOracleUtilitiesBase",),
-        ".client": ("FlextTargetOracle",),
-        ".errors": (
-            "FlextTargetOracleErrorMetadata",
-            "FlextTargetOracleExceptions",
-        ),
-        ".loader": ("FlextTargetOracleLoader",),
-        ".observability": ("FlextTargetOracleUtilitiesObservability",),
-        ".services": (
-            "FlextTargetOracleBatchService",
-            "FlextTargetOracleConnectionService",
-            "FlextTargetOracleRecordService",
-            "FlextTargetOracleSchemaService",
-        ),
-    },
-)
+_LAZY_IMPORTS = build_lazy_import_map({
+    ".base": ("FlextTargetOracleUtilitiesBase",),
+    ".client": ("FlextTargetOracle",),
+    ".errors": ("FlextTargetOracleErrorMetadata", "FlextTargetOracleExceptions"),
+    ".loader": ("FlextTargetOracleLoader",),
+    ".observability": ("FlextTargetOracleUtilitiesObservability",),
+    ".services": (
+        "FlextTargetOracleBatchService",
+        "FlextTargetOracleConnectionService",
+        "FlextTargetOracleRecordService",
+        "FlextTargetOracleSchemaService",
+    ),
+})
 
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    publish_all=False,
-)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, publish_all=False)

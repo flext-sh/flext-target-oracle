@@ -29,10 +29,7 @@ class FlextTargetOracleModelsCommands:
             u.Field(description="Stable identifier for the target metadata command"),
         ] = "cmd_oracle_about"
         format: Annotated[
-            str,
-            u.Field(
-                description="Output format for about command response",
-            ),
+            str, u.Field(description="Output format for about command response")
         ] = "json"
 
     class OracleTargetLoadCommand(m.Command):
@@ -48,15 +45,11 @@ class FlextTargetOracleModelsCommands:
         ] = "cmd_oracle_load"
         config_file: Annotated[
             str | None,
-            u.Field(
-                description="Path to JSON configuration file for target settings",
-            ),
+            u.Field(description="Path to JSON configuration file for target settings"),
         ] = None
         state_file: Annotated[
             str | None,
-            u.Field(
-                description="Path to Singer state file for incremental loads",
-            ),
+            u.Field(description="Path to Singer state file for incremental loads"),
         ] = None
 
     class OracleTargetValidateCommand(m.Command):
@@ -72,7 +65,5 @@ class FlextTargetOracleModelsCommands:
         ] = "cmd_oracle_validate"
         config_file: Annotated[
             str | None,
-            u.Field(
-                description="Path to JSON configuration file to validate",
-            ),
+            u.Field(description="Path to JSON configuration file to validate"),
         ] = None

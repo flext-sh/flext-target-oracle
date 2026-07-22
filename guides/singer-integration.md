@@ -508,10 +508,7 @@ class TestSingerIntegration:
         schema_msg = {
             "type": "SCHEMA",
             "stream": "test_stream",
-            "schema": {
-                "type": "object",
-                "properties": {"id": {"type": "integer"}},
-            },
+            "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
         }
 
         result = target.process_singer_message(schema_msg)

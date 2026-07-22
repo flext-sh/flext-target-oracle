@@ -15,15 +15,12 @@ class FlextTargetOracleModelsSinger:
         """Singer stream mapping to Oracle table with column configuration."""
 
         stream_name: Annotated[
-            str,
-            u.Field(..., description="Singer stream name", validate_default=True),
+            str, u.Field(..., description="Singer stream name", validate_default=True)
         ]
         table_name: Annotated[
             str,
             u.Field(
-                ...,
-                description="Oracle destination table name",
-                validate_default=True,
+                ..., description="Oracle destination table name", validate_default=True
             ),
         ]
         ignored_columns: Annotated[

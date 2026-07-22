@@ -11,16 +11,7 @@ if TYPE_CHECKING:
     from flext_target_oracle._constants.base import (
         FlextTargetOracleConstantsBase as FlextTargetOracleConstantsBase,
     )
-_LAZY_IMPORTS = build_lazy_import_map(
-    {
-        ".base": ("FlextTargetOracleConstantsBase",),
-    },
-)
+_LAZY_IMPORTS = build_lazy_import_map({".base": ("FlextTargetOracleConstantsBase",)})
 
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    publish_all=False,
-)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, publish_all=False)

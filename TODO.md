@@ -177,12 +177,8 @@ ______________________________________________________________________
 
 ```python notest
 # src/flext_target_oracle/loader.py linhas ~226-232
-parameterized_sql = sql.replace(
-    ":data",
-    f"'{param['data']}'",
-).replace(
-    ":extracted_at",
-    f"'{param['extracted_at']}'",
+parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
+    ":extracted_at", f"'{param['extracted_at']}'"
 )
 ```
 

@@ -206,10 +206,7 @@ Add new fields to `FlextOracleTargetSettings`:
 
 ```python notest
 class FlextOracleTargetSettings(m.BaseModel):
-    my_new_option: bool = u.Field(
-        default=False,
-        description="Enable my new feature",
-    )
+    my_new_option: bool = u.Field(default=False, description="Enable my new feature")
 ```
 
 ### 2. New Functionality
@@ -240,10 +237,7 @@ For new DDL/DML operations:
 
 ```python notest
 def process_record(
-    self,
-    stream_name: str,
-    record: FlextTypes.Dict,
-    schema: FlextTypes.Dict,
+    self, stream_name: str, record: FlextTypes.Dict, schema: FlextTypes.Dict
 ) -> p.Result[bool]:
     """Process a single record for insertion.
 

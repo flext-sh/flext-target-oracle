@@ -580,10 +580,7 @@ class TestNewFeature:
 
     @pytest.mark.parametrize(
         "input_value,expected",
-        [
-            ("valid_input", "expected_output"),
-            ("another_input", "another_output"),
-        ],
+        [("valid_input", "expected_output"), ("another_input", "another_output")],
     )
     def test_parametrized(self, input_value, expected):
         """Test multiple input scenarios."""

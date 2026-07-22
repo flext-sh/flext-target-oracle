@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from flext_tests import tm
-
 from flext_target_oracle import FlextTargetOracleSettings
+from flext_tests import tm
 from tests import c
 from tests.base import s
 
@@ -22,7 +21,7 @@ class TestsFlextTargetOracleConfig:
                 "oracle_service_name": "XE",
                 "oracle_user": "test_user",
                 "oracle_password": "test_pass",
-            },
+            }
         })
         target = config.TargetOracle
         tm.that(target.oracle_host, eq="localhost")
@@ -58,7 +57,7 @@ class TestsFlextTargetOracleConfig:
                 "transaction_timeout": 120,
                 "parallel_degree": 4,
                 "use_bulk_operations": True,
-            },
+            }
         })
         target = config.TargetOracle
         tm.that(target.oracle_host, eq="localhost")
@@ -81,7 +80,7 @@ class TestsFlextTargetOracleConfig:
                 "oracle_password": "test",
                 "table_prefix": "stg_",
                 "table_suffix": "_tbl",
-            },
+            }
         })
         target = config.TargetOracle
         tm.that(target.table_prefix, eq="stg_")
@@ -96,7 +95,7 @@ class TestsFlextTargetOracleConfig:
                 "oracle_password": "test",
                 "batch_size": 100,
                 "commit_interval": 200,
-            },
+            }
         })
         target = config.TargetOracle
         tm.that(target.batch_size, eq=100)

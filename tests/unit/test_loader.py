@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
-from flext_tests import r, tm
 
 from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+from flext_tests import r, tm
 from tests import m
 
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ def loader_config() -> FlextTargetOracleSettings:
             "default_target_schema": "TEST_SCHEMA",
             "batch_size": 2,
             "use_bulk_operations": True,
-        },
+        }
     })
 
 
@@ -40,8 +40,7 @@ class TestsFlextTargetOracleLoader:
     """Behavior contract for test_loader."""
 
     def test_loader_execute_returns_ready_payload(
-        self,
-        loader_config: FlextTargetOracleSettings,
+        self, loader_config: FlextTargetOracleSettings
     ) -> None:
         """execute() should return a typed readiness payload."""
         loader = FlextTargetOracleLoader(loader_config)
@@ -49,8 +48,7 @@ class TestsFlextTargetOracleLoader:
         tm.that(result.success, is_=bool)
 
     def test_load_record_buffers_and_finalize(
-        self,
-        loader_config: FlextTargetOracleSettings,
+        self, loader_config: FlextTargetOracleSettings
     ) -> None:
         """load_record should buffer valid records and finalize returns model."""
         loader = FlextTargetOracleLoader(loader_config)
@@ -63,8 +61,7 @@ class TestsFlextTargetOracleLoader:
         assert finalize_result.value.streams_processed >= 0
 
     def test_ensure_table_exists_returns_result(
-        self,
-        loader_config: FlextTargetOracleSettings,
+        self, loader_config: FlextTargetOracleSettings
     ) -> None:
         """ensure_table_exists should always return FlextResult[bool]."""
         loader = FlextTargetOracleLoader(loader_config)
@@ -74,22 +71,19 @@ class TestsFlextTargetOracleLoader:
             "schema": {
                 "type": "object",
                 "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"},
+                    "id": {"type": "integer"}
                 }).unwrap(),
             },
             "key_properties": ["id"],
         }
         validated = m.Meltano.SingerSchemaMessage.model_validate(schema_message)
         result = loader.ensure_table_exists(
-            "users",
-            validated.schema_definition,
-            validated.key_properties,
+            "users", validated.schema_definition, validated.key_properties
         )
         tm.that(result.success, is_=bool)
 
     def test_flush_batch_uses_db_oracle_owned_sql_builders(
-        self,
-        loader_config: FlextTargetOracleSettings,
+        self, loader_config: FlextTargetOracleSettings
     ) -> None:
         """Flush should delegate INSERT SQL building and batching to db-oracle."""
         loader = FlextTargetOracleLoader(loader_config)
@@ -105,15 +99,13 @@ class TestsFlextTargetOracleLoader:
         mock_api.__enter__.return_value = mock_api
         mock_api.__exit__.return_value = None
         mock_services.build_insert_statement.return_value = r[str].ok(
-            "INSERT INTO TEST_SCHEMA.USERS (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:DATA, :_SDC_EXTRACTED_AT, :_SDC_LOADED_AT)",
+            "INSERT INTO TEST_SCHEMA.USERS (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:DATA, :_SDC_EXTRACTED_AT, :_SDC_LOADED_AT)"
         )
         object.__setattr__(loader, "_oracle_api", mock_api)
         loader._stream_columns["users"] = (
             m.DbOracle.Column(name="DATA", data_type="VARCHAR2(255)", nullable=True),
             m.DbOracle.Column(
-                name="_SDC_EXTRACTED_AT",
-                data_type="TIMESTAMP",
-                nullable=True,
+                name="_SDC_EXTRACTED_AT", data_type="TIMESTAMP", nullable=True
             ),
             m.DbOracle.Column(
                 name="_SDC_LOADED_AT",

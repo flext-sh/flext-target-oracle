@@ -2,15 +2,11 @@
 
 from __future__ import annotations
 
+from flext_target_oracle import FlextTargetOracleSettings
 from flext_tests import FlextTestsSettings
 
-from flext_target_oracle import FlextTargetOracleSettings
 
-
-class TestsFlextTargetOracleSettings(
-    FlextTargetOracleSettings,
-    FlextTestsSettings,
-):
+class TestsFlextTargetOracleSettings(FlextTargetOracleSettings, FlextTestsSettings):
     """Target Oracle settings extended with the shared test namespace."""
 
 

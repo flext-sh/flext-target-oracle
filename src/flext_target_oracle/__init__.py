@@ -52,48 +52,17 @@ if TYPE_CHECKING:
         FlextTargetOracleUtilities as FlextTargetOracleUtilities,
         u,
     )
-_LAZY_IMPORTS = build_lazy_import_map(
-    {
-        "._settings": ("FlextTargetOracleSettings", "settings"),
-        ".api": (
-            "FlextTargetOracleService",
-            "target_oracle",
-        ),
-        ".cli": (
-            "FlextTargetOracleCli",
-            "main",
-        ),
-        ".constants": (
-            "FlextTargetOracleConstants",
-            "c",
-        ),
-        ".models": (
-            "FlextTargetOracleModels",
-            "m",
-        ),
-        ".protocols": (
-            "FlextTargetOracleProtocols",
-            "p",
-        ),
-        ".typings": (
-            "FlextTargetOracleTypes",
-            "t",
-        ),
-        ".utilities": (
-            "FlextTargetOracle",
-            "FlextTargetOracleUtilities",
-            "u",
-        ),
-        "flext_db_oracle": (
-            "d",
-            "e",
-            "h",
-            "r",
-            "s",
-            "x",
-        ),
-    },
-)
+_LAZY_IMPORTS = build_lazy_import_map({
+    "._settings": ("FlextTargetOracleSettings", "settings"),
+    ".api": ("FlextTargetOracleService", "target_oracle"),
+    ".cli": ("FlextTargetOracleCli", "main"),
+    ".constants": ("FlextTargetOracleConstants", "c"),
+    ".models": ("FlextTargetOracleModels", "m"),
+    ".protocols": ("FlextTargetOracleProtocols", "p"),
+    ".typings": ("FlextTargetOracleTypes", "t"),
+    ".utilities": ("FlextTargetOracle", "FlextTargetOracleUtilities", "u"),
+    "flext_db_oracle": ("d", "e", "h", "r", "s", "x"),
+})
 
 
 __all__: tuple[str, ...] = (
@@ -131,9 +100,4 @@ __all__: tuple[str, ...] = (
 )
 
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    public_exports=__all__,
-)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)

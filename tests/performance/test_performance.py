@@ -3,18 +3,16 @@
 from __future__ import annotations
 
 import time
-from collections.abc import (
-    Mapping,
-)
+from collections.abc import Mapping
 from typing import TYPE_CHECKING
 from unittest.mock import Mock
 
 import pytest
-from flext_tests import r, tm
 
 from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
+from flext_tests import r, tm
 from tests import m
 
 if TYPE_CHECKING:
@@ -43,16 +41,16 @@ class TestsFlextTargetOraclePerformance:
         mock_oracle_api.fetch_tables.return_value = r[list[str]].ok(empty_tables)
         mock_oracle_api.execute_sql.return_value = r[bool].ok(value=True)
         type_mapping = m.DbOracle.TypeMapping.model_validate({
-            "mapping": {"id": "NUMBER"},
+            "mapping": {"id": "NUMBER"}
         })
         mock_oracle_api.oracle_services.map_singer_schema.return_value = r[
             m.DbOracle.TypeMapping
         ].ok(type_mapping)
         mock_oracle_api.oracle_services.create_table_ddl.return_value = r[str].ok(
-            "CREATE TABLE perf_stream (id NUMBER)",
+            "CREATE TABLE perf_stream (id NUMBER)"
         )
         mock_oracle_api.oracle_services.build_insert_statement.return_value = r[str].ok(
-            "INSERT INTO perf_stream (id) VALUES (:id)",
+            "INSERT INTO perf_stream (id) VALUES (:id)"
         )
         mock_oracle_api.execute_statement.return_value = r[int].ok(1)
         mock_oracle_api.execute_many.return_value = r[int].ok(1)
@@ -98,7 +96,7 @@ class TestsFlextTargetOraclePerformance:
             "schema": {
                 "type": "object",
                 "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"},
+                    "id": {"type": "integer"}
                 }).unwrap(),
             },
             "key_properties": ["id"],
@@ -106,11 +104,11 @@ class TestsFlextTargetOraclePerformance:
         record = {"type": "RECORD", "stream": "perf_stream", "record": {"id": 1}}
         tm.ok(
             target.process_singer_message(
-                m.Meltano.SingerSchemaMessage.model_validate(schema),
+                m.Meltano.SingerSchemaMessage.model_validate(schema)
             )
         )
         tm.ok(
             target.process_singer_message(
-                m.Meltano.SingerRecordMessage.model_validate(record),
+                m.Meltano.SingerRecordMessage.model_validate(record)
             )
         )
