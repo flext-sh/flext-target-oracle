@@ -136,7 +136,7 @@ class TestsFlextTargetOracleOracle:
         simple_schema: t.JsonValue,
     ) -> None:
         """Test merge mode for updating existing records."""
-        oracle_config = oracle_config.clone(sdc_mode="merge")
+        oracle_config = oracle_config.clone(TargetOracle={"sdc_mode": "merge"})
         loader = FlextTargetOracleLoader(oracle_config)
         connect_result = loader.connect()
         tm.ok(connect_result)
@@ -170,7 +170,10 @@ class TestsFlextTargetOracleOracle:
     ) -> None:
         """Test bulk insert with large dataset."""
         oracle_config = oracle_config.clone(
-            load_method=c.TargetOracle.LOAD_METHOD_BULK_INSERT, batch_size=1000
+            TargetOracle={
+                "load_method": c.TargetOracle.LOAD_METHOD_BULK_INSERT,
+                "batch_size": 1000,
+            }
         )
         loader = FlextTargetOracleLoader(oracle_config)
         tm.ok(loader.connect())
@@ -214,9 +217,11 @@ class TestsFlextTargetOracleOracle:
         nested_schema: t.JsonValue,
     ) -> None:
         """Test JSON storage mode with nested data."""
-        oracle_config = oracle_config.clone()
         oracle_config = oracle_config.clone(
-            storage_mode="json", json_column_name="json_data"
+            TargetOracle={
+                "storage_mode": "json",
+                "json_column_name": "json_data",
+            }
         )
         loader = FlextTargetOracleLoader(oracle_config)
         tm.ok(loader.connect())
@@ -271,13 +276,15 @@ class TestsFlextTargetOracleOracle:
     ) -> None:
         """Test column ordering in created tables."""
         oracle_config = oracle_config.clone(
-            column_ordering="alphabetical",
-            column_order_rules={
-                "primary_keys": 1,
-                "regular_columns": 2,
-                "audit_columns": 3,
-                "sdc_columns": 4,
-            },
+            TargetOracle={
+                "column_ordering": "alphabetical",
+                "column_order_rules": {
+                    "primary_keys": 1,
+                    "regular_columns": 2,
+                    "audit_columns": 3,
+                    "sdc_columns": 4,
+                },
+            }
         )
         loader = FlextTargetOracleLoader(oracle_config)
         tm.ok(loader.connect())
@@ -326,7 +333,9 @@ class TestsFlextTargetOracleOracle:
         simple_schema: t.JsonValue,
     ) -> None:
         """Test truncate table before loading data."""
-        oracle_config = oracle_config.clone(truncate_before_load=True)
+        oracle_config = oracle_config.clone(
+            TargetOracle={"truncate_before_load": True}
+        )
         loader = FlextTargetOracleLoader(oracle_config)
         tm.ok(loader.connect())
         stream_name = "test_truncate"
@@ -356,18 +365,20 @@ class TestsFlextTargetOracleOracle:
         simple_schema: t.JsonValue,
     ) -> None:
         """Test creation of custom indexes."""
-        oracle_config = oracle_config.model_copy(
-            update={
-                "custom_indexes": {
-                    "test_indexes": (
+        oracle_config = oracle_config.clone(
+            TargetOracle={
+                "custom_indexes": t.json_value_adapter()
+                .dump_json({
+                    "test_indexes": [
                         {
                             "name": "IDX_EMAIL_UNIQUE",
                             "columns": ["EMAIL"],
                             "unique": True,
                         },
                         {"columns": ["NAME", "CREATED_AT"]},
-                    )
-                }
+                    ]
+                })
+                .decode("utf-8"),
             }
         )
         loader = FlextTargetOracleLoader(oracle_config)
@@ -427,8 +438,14 @@ class TestsFlextTargetOracleOracle:
     ) -> None:
         """Test column mapping and filtering features."""
         oracle_config = oracle_config.clone(
-            column_mappings={"users": {"name": "full_name", "email": "email_address"}},
-            ignored_columns=["password", "internal_id"],
+            TargetOracle={
+                "column_mappings": t.json_value_adapter()
+                .dump_json({
+                    "users": {"name": "full_name", "email": "email_address"}
+                })
+                .decode("utf-8"),
+                "ignored_columns": ["password", "internal_id"],
+            }
         )
         target = FlextTargetOracle(settings=oracle_config)
         target.initialize()

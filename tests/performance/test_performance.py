@@ -5,68 +5,42 @@ from __future__ import annotations
 import time
 from collections.abc import Mapping
 from typing import TYPE_CHECKING
-from unittest.mock import Mock
 
 import pytest
 
 from flext_cli import u as cli_u
-from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
-from flext_tests import r, tm
+from flext_tests import tm
 from tests import m
 
 if TYPE_CHECKING:
+    from flext_target_oracle import FlextTargetOracleSettings
     from tests import t
 
 
 @pytest.mark.performance
+@pytest.mark.integration
 class TestsFlextTargetOraclePerformance:
     """Keep fast checks for throughput-sensitive code paths."""
 
-    def _target(self) -> FlextTargetOracle:
-        settings = FlextTargetOracleSettings.model_validate({
-            "oracle_host": "localhost",
-            "oracle_service_name": "XE",
-            "oracle_user": "test",
-            "oracle_password": "test",
-            "batch_size": 5000,
-            "use_bulk_operations": True,
-        })
-        target = FlextTargetOracle(settings=settings)
-        mock_oracle_api = Mock()
-        mock_oracle_api.__enter__ = Mock(return_value=mock_oracle_api)
-        mock_oracle_api.__exit__ = Mock(return_value=None)
-        empty_tables: list[str] = []
-        mock_oracle_api.get_tables.return_value = r[list[str]].ok(empty_tables)
-        mock_oracle_api.fetch_tables.return_value = r[list[str]].ok(empty_tables)
-        mock_oracle_api.execute_sql.return_value = r[bool].ok(value=True)
-        type_mapping = m.DbOracle.TypeMapping.model_validate({
-            "mapping": {"id": "NUMBER"}
-        })
-        mock_oracle_api.oracle_services.map_singer_schema.return_value = r[
-            m.DbOracle.TypeMapping
-        ].ok(type_mapping)
-        mock_oracle_api.oracle_services.create_table_ddl.return_value = r[str].ok(
-            "CREATE TABLE perf_stream (id NUMBER)"
-        )
-        mock_oracle_api.oracle_services.build_insert_statement.return_value = r[str].ok(
-            "INSERT INTO perf_stream (id) VALUES (:id)"
-        )
-        mock_oracle_api.execute_statement.return_value = r[int].ok(1)
-        mock_oracle_api.execute_many.return_value = r[int].ok(1)
-        object.__setattr__(target.loader, "_oracle_api", mock_oracle_api)
-        return target
+    @staticmethod
+    def _target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle:
+        return FlextTargetOracle(settings=oracle_config)
 
-    def test_execute_readiness_is_constant_time(self) -> None:
-        target = self._target()
+    def test_execute_readiness_is_constant_time(
+        self, oracle_config: FlextTargetOracleSettings
+    ) -> None:
+        target = self._target(oracle_config)
         start = time.perf_counter()
         result = target.execute()
         elapsed = time.perf_counter() - start
         tm.ok(result)
-        assert elapsed < 0.05
+        assert elapsed < 1.0
 
-    def test_message_processing_scales_linearly_for_state_updates(self) -> None:
-        target = self._target()
+    def test_message_processing_scales_linearly_for_state_updates(
+        self, oracle_config: FlextTargetOracleSettings
+    ) -> None:
+        target = self._target(oracle_config)
         messages: t.SequenceOf[
             m.Meltano.SingerSchemaMessage
             | m.Meltano.SingerRecordMessage
@@ -88,8 +62,10 @@ class TestsFlextTargetOraclePerformance:
         tm.that(state_value.get("offset"), eq=1999)
         assert elapsed < 2.0
 
-    def test_schema_and_record_processing_has_no_json_reparse_loop(self) -> None:
-        target = self._target()
+    def test_schema_and_record_processing_has_no_json_reparse_loop(
+        self, oracle_config: FlextTargetOracleSettings
+    ) -> None:
+        target = self._target(oracle_config)
         schema = {
             "type": "SCHEMA",
             "stream": "perf_stream",

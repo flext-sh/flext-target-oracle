@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 from time import monotonic, sleep
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, Mock
+
 
 import pytest
 
@@ -79,19 +79,36 @@ def shared_oracle_container(docker_control: tk) -> str:
     os.environ["TEST_ORACLE_USER"] = "flext_test"
     os.environ["TEST_ORACLE_PASSWORD"] = "flext_test_password"
     admin_settings = FlextDbOracleSettings.model_validate({
-        "host": os.environ["TEST_ORACLE_HOST"],
-        "port": int(os.environ["TEST_ORACLE_PORT"]),
-        "service_name": os.environ["TEST_ORACLE_SERVICE"],
-        "username": "system",
-        "password": "flext_oracle_test",
+        "DbOracle": {
+            "host": os.environ["TEST_ORACLE_HOST"],
+            "port": int(os.environ["TEST_ORACLE_PORT"]),
+            "service_name": os.environ["TEST_ORACLE_SERVICE"],
+            "username": "system",
+            "password": "flext_oracle_test",
+        }
     })
     oracle_settings = FlextDbOracleSettings.model_validate({
-        "host": os.environ["TEST_ORACLE_HOST"],
-        "port": int(os.environ["TEST_ORACLE_PORT"]),
-        "service_name": os.environ["TEST_ORACLE_SERVICE"],
-        "username": os.environ["TEST_ORACLE_USER"],
-        "password": os.environ["TEST_ORACLE_PASSWORD"],
+        "DbOracle": {
+            "host": os.environ["TEST_ORACLE_HOST"],
+            "port": int(os.environ["TEST_ORACLE_PORT"]),
+            "service_name": os.environ["TEST_ORACLE_SERVICE"],
+            "username": os.environ["TEST_ORACLE_USER"],
+            "password": os.environ["TEST_ORACLE_PASSWORD"],
+        }
     })
+    # Fast path: on a warm shared container the flext_test user already exists
+    # (provisioned by the flext-db-oracle suite). Verify readiness with a direct
+    # application-user connection before falling back to admin provisioning, so
+    # first-test setup stays well under the per-test timeout.
+    ready_api = FlextDbOracleApi(oracle_settings)
+    ready_connect = ready_api.connect()
+    if ready_connect.success:
+        ready_health = ready_api.oracle_services.execute_query(
+            'SELECT 1 AS "health" FROM DUAL'
+        )
+        _ = ready_api.disconnect()
+        if ready_health.success:
+            return container_name
     deadline = monotonic() + 180
     last_error = "Oracle application user is not ready yet"
     while monotonic() < deadline:
@@ -155,15 +172,17 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
     _ = shared_oracle_container
     api = FlextDbOracleApi(
         FlextDbOracleSettings.model_validate({
+            "DbOracle": {
             "host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
-            "port": int(
+                "port": int(
                 os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT))
-            ),
-            "service_name": os.getenv(
-                "TEST_ORACLE_SERVICE", c.TargetOracle.Tests.ORACLE_SERVICE
-            ),
+                ),
+                "service_name": os.getenv(
+                    "TEST_ORACLE_SERVICE", c.TargetOracle.Tests.ORACLE_SERVICE
+                ),
             "username": os.getenv("TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA),
-            "password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
+                "password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
+            }
         })
     )
     connect_result = api.connect()
@@ -201,51 +220,24 @@ def oracle_config(
     """Create Oracle target configuration for tests."""
     _ = (shared_oracle_container, isolate_target_oracle_env)
     return FlextTargetOracleSettings.model_validate({
+        "TargetOracle": {
         "oracle_host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
-        "oracle_port": int(
-            os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT))
-        ),
-        "oracle_service_name": os.getenv(
-            "TEST_ORACLE_SERVICE", c.TargetOracle.Tests.ORACLE_SERVICE
-        ),
+            "oracle_port": int(
+                os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT))
+            ),
+            "oracle_service_name": os.getenv(
+                "TEST_ORACLE_SERVICE", c.TargetOracle.Tests.ORACLE_SERVICE
+            ),
         "oracle_user": os.getenv("TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA),
-        "oracle_password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
-        "default_target_schema": c.TargetOracle.Tests.TEST_SCHEMA,
-        "batch_size": 1000,
-        "table_prefix": "",
-        "table_suffix": "",
-        "use_bulk_operations": True,
-        "parallel_degree": 1,
+            "oracle_password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
+            "default_target_schema": c.TargetOracle.Tests.TEST_SCHEMA,
+            "batch_size": 1000,
+            "table_prefix": "",
+            "table_suffix": "",
+            "use_bulk_operations": True,
+            "parallel_degree": 1,
+        }
     })
-
-
-_MOCK_API_OK_RETURNS: t.MappingKV[str, t.JsonValue] = {
-    "connect": None,
-    "disconnect": None,
-    "get_tables": [],
-    "fetch_tables": [],
-    "create_table_ddl": "CREATE TABLE...",
-    "execute_ddl": None,
-    "execute_dml": None,
-    "execute_query": [],
-    "execute_statement": None,
-    "execute_many": None,
-    "execute_sql": True,
-}
-
-
-@pytest.fixture
-def mock_oracle_api() -> Mock:
-    """Create mocked FlextDbOracleApi with success-shaped return values."""
-    mock_api = Mock()
-    mock_api.__enter__ = Mock(return_value=mock_api)
-    mock_api.__exit__ = Mock(return_value=None)
-    for method, value in _MOCK_API_OK_RETURNS.items():
-        getattr(mock_api, method).return_value = MagicMock(
-            success=True, failure=False, value=value
-        )
-    mock_api.connection = MagicMock()
-    return mock_api
 
 
 @pytest.fixture

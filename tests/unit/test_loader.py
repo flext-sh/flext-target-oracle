@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock
 
 import pytest
 
 from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
-from flext_tests import r, tm
+from flext_tests import tm
 from tests import m
 
 if TYPE_CHECKING:
+    from flext_db_oracle import FlextDbOracleApi
+
     from tests import t
 
 
@@ -82,48 +83,46 @@ class TestsFlextTargetOracleLoader:
         )
         tm.that(result.success, is_=bool)
 
-    def test_flush_batch_uses_db_oracle_owned_sql_builders(
-        self, loader_config: FlextTargetOracleSettings
+    @pytest.mark.integration
+    def test_flush_batch_persists_records_to_real_oracle(
+        self,
+        oracle_config: FlextTargetOracleSettings,
+        oracle_engine: FlextDbOracleApi,
     ) -> None:
-        """Flush should delegate INSERT SQL building and batching to db-oracle."""
-        loader = FlextTargetOracleLoader(loader_config)
-        # NOTE (multi-agent): mro-rn88 — ADR-005 inlined table-name building into the loader
-        # (dead settings.get_table_name removed); derive the expected name the same way.
-        prefix = loader.target_config.TargetOracle.table_prefix
-        suffix = loader.target_config.TargetOracle.table_suffix
-        table_name = f"{prefix}users{suffix}".upper()
-        mock_api = MagicMock()
-        mock_services = MagicMock()
-        mock_api.oracle_services = mock_services
-        mock_api.execute_many.return_value = r[int].ok(2)
-        mock_api.__enter__.return_value = mock_api
-        mock_api.__exit__.return_value = None
-        mock_services.build_insert_statement.return_value = r[str].ok(
-            "INSERT INTO TEST_SCHEMA.USERS (DATA, _SDC_EXTRACTED_AT, _SDC_LOADED_AT) VALUES (:DATA, :_SDC_EXTRACTED_AT, :_SDC_LOADED_AT)"
+        """Flush should build and execute INSERTs against the real database."""
+        loader = FlextTargetOracleLoader(oracle_config)
+        tm.ok(loader.connect())
+        stream_name = "loader_flush"
+        schema_message = {
+            "type": "SCHEMA",
+            "stream": stream_name,
+            "schema": {
+                "type": "object",
+                "properties": cli_u.Cli.json_dumps({
+                    "id": {"type": "integer"},
+                    "name": {"type": "string"},
+                }).unwrap(),
+            },
+            "key_properties": ["id"],
+        }
+        validated = m.Meltano.SingerSchemaMessage.model_validate(schema_message)
+        tm.ok(
+            loader.ensure_table_exists(
+                stream_name,
+                validated.schema_definition,
+                validated.key_properties,
+            )
         )
-        object.__setattr__(loader, "_oracle_api", mock_api)
-        loader._stream_columns["users"] = (
-            m.DbOracle.Column(name="DATA", data_type="VARCHAR2(255)", nullable=True),
-            m.DbOracle.Column(
-                name="_SDC_EXTRACTED_AT", data_type="TIMESTAMP", nullable=True
-            ),
-            m.DbOracle.Column(
-                name="_SDC_LOADED_AT",
-                data_type="TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
-                nullable=True,
-            ),
+        tm.ok(loader.load_record(stream_name, {"id": 1, "name": "Alice"}))
+        tm.ok(loader.load_record(stream_name, {"id": 2, "name": "Bob"}))
+        tm.ok(loader.finalize_all_streams())
+        table_name = (
+            f"{loader.target_config.TargetOracle.table_prefix}"
+            f"{stream_name}"
+            f"{loader.target_config.TargetOracle.table_suffix}"
+        ).upper()
+        count_result = oracle_engine.oracle_services.execute_query(
+            f'SELECT COUNT(*) AS "count" FROM {table_name}'
         )
-        loader.record_buffers["users"] = [
-            {"id": 1, "name": "Alice"},
-            {"id": 2, "name": "Bob"},
-        ]
-
-        result = loader._flush_batch("users")
-
-        tm.ok(result)
-        mock_services.build_insert_statement.assert_called_once_with(
-            table_name,
-            ["DATA", "_SDC_EXTRACTED_AT", "_SDC_LOADED_AT"],
-            schema="TEST_SCHEMA",
-        )
-        mock_api.execute_many.assert_called_once()
+        tm.ok(count_result)
+        tm.that(int(str(count_result.value[0].root["count"])), eq=2)

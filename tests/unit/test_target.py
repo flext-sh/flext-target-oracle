@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from unittest.mock import Mock
-
 import pytest
 
 from flext_cli import u as cli_u
@@ -11,55 +9,20 @@ from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
 from flext_target_oracle._utilities.errors import FlextTargetOracleExceptions
 from flext_target_oracle.api import FlextTargetOracleService
-from flext_tests import r, tm
+from flext_tests import tm
 from tests import m, t
 
 
 @pytest.fixture
-def target(mock_oracle_api: Mock) -> FlextTargetOracle:
-    """Create target with mocked loader."""
-    settings = FlextTargetOracleSettings.model_validate({
-        "oracle_host": "localhost",
-        "oracle_service_name": "XE",
-        "oracle_user": "test",
-        "oracle_password": "test",
-        "default_target_schema": "TEST_SCHEMA",
-        "batch_size": 200,
-        "commit_interval": 100,
-    })
-    client = FlextTargetOracle(settings=settings)
-    object.__setattr__(
-        client.loader, "test_connection", Mock(return_value=r[bool].ok(value=True))
-    )
-    object.__setattr__(
-        client.loader, "ensure_table_exists", Mock(return_value=r[bool].ok(value=True))
-    )
-    object.__setattr__(
-        client.loader, "load_record", Mock(return_value=r[bool].ok(value=True))
-    )
-    object.__setattr__(
-        client.loader,
-        "finalize_all_streams",
-        Mock(
-            return_value=r[m.TargetOracle.LoaderFinalizeResult].ok(
-                m.TargetOracle.LoaderFinalizeResult.model_validate({
-                    "total_records": 0,
-                    "streams_processed": 0,
-                    "loading_operation": {
-                        "stream_name": "users",
-                        "started_at": "",
-                        "completed_at": "",
-                        "records_loaded": 0,
-                        "records_failed": 0,
-                    },
-                })
-            )
-        ),
-    )
-    return client
+def target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle:
+    """Create a target bound to the real Oracle container (no mocks)."""
+    return FlextTargetOracle(settings=oracle_config)
 
 
+@pytest.mark.integration
 class TestsFlextTargetOracleTarget:
+    """Behavioral contract for the Oracle target against the real container."""
+
     def test_initialize_and_connection(self, target: FlextTargetOracle) -> None:
         tm.ok(target.initialize())
         tm.ok(target.test_connection())
@@ -192,13 +155,22 @@ class TestsFlextTargetOracleTarget:
     def test_write_record_inserts_oracle_record(
         self, target: FlextTargetOracle
     ) -> None:
-        mocked_load_record = Mock(return_value=r[bool].ok(value=True))
-        object.__setattr__(target.loader, "load_record", mocked_load_record)
+        schema_message = m.Meltano.SingerSchemaMessage.model_validate({
+            "type": "SCHEMA",
+            "stream": "users",
+            "schema": {
+                "type": "object",
+                "properties": cli_u.Cli.json_dumps({
+                    "id": {"type": "integer"}
+                }).unwrap(),
+            },
+            "key_properties": ["id"],
+        })
+        tm.ok(target.process_singer_message(schema_message))
         result = target.write_record(
             t
             .json_value_adapter()
             .dump_json({"type": "RECORD", "stream": "users", "record": {"id": 1}})
             .decode("utf-8")
         )
-        mocked_load_record.assert_called_once_with("users", {"id": 1})
         tm.ok(result)
