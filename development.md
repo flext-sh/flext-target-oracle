@@ -180,7 +180,9 @@ make test                   # Must maintain 90%+ coverage
 
 #### Code Style Guidelines
 
-```python notest
+```python
+from __future__ import annotations
+
 # ✅ GOOD: FLEXT patterns
 from flext_cli import u
 from flext_core import FlextSettings
@@ -223,7 +225,8 @@ class BadConfig:
 
 ### r Railway Pattern
 
-```python notest
+```python
+from __future__ import annotations
 # ✅ All operations return r
 def process_record(record: dict) -> p.Result[bool]:
     """Process a single record with proper error handling."""
@@ -260,7 +263,10 @@ def process_batch(records: t.SequenceOf[m.Dict]) -> p.Result[Stats]:
 
 ### Configuration Patterns
 
-```python notest
+```python
+from __future__ import annotations
+
+
 # ✅ m.Value with domain validation
 class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business rule validation."""
@@ -286,7 +292,9 @@ class FlextOracleTargetSettings(m.Value):
 
 ### Logging Patterns
 
-```python notest
+```python
+from __future__ import annotations
+
 # ✅ Structured logging with context
 from flext_cli import u
 from flext_core import FlextSettings
@@ -332,7 +340,7 @@ def process_with_logging(stream_name: str, batch_size: int):
 
 ### Database Connection Testing
 
-```python notest # Test Oracle connectivity manually
+```python # Test Oracle connectivity manually
 from flext_target_oracle import FlextOracleTargetSettings
 from flext_target_oracle import FlextOracleTargetLoader
 
@@ -360,7 +368,10 @@ with loader.oracle_api as connected_api:
 
 ### Table Management Development
 
-```python notest
+```python
+from __future__ import annotations
+
+
 # Test table creation and schema evolution
 def test_table_management():
     """Test table operations during development."""
@@ -424,7 +435,7 @@ u.Cli.print('Config created successfully')
 
 #### 2. Import Errors
 
-```python notest
+```python
 # ❌ Common import issue
 from flext_target_oracle import something_that_doesnt_exist
 
@@ -442,7 +453,7 @@ python -c "from flext_target_oracle import *; u.Cli.print(dir())"
 
 #### 3. Configuration Validation Errors
 
-```python notest
+```python
 # ❌ Invalid configuration
 settings = FlextOracleTargetSettings(
     oracle_host="",  # Empty host will fail validation
@@ -473,7 +484,7 @@ except c.ValidationError as e:
 
 #### 1. Enhanced Logging
 
-```python notest
+```python
 # Enable debug logging for development
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -496,7 +507,9 @@ make shell
 
 #### 3. Performance Profiling
 
-```python notest
+```python
+from __future__ import annotations
+
 # Profile batch processing performance
 import cProfile
 import pstats
@@ -524,7 +537,9 @@ def profile_batch_processing():
 
 #### Unit Test Template
 
-```python notest
+```python
+from __future__ import annotations
+
 """Test template for new functionality."""
 
 import pytest
@@ -570,7 +585,9 @@ class TestNewFeature:
 
 #### Integration Test Template
 
-```python notest
+```python
+from __future__ import annotations
+
 """Integration test template."""
 
 import pytest
@@ -606,7 +623,10 @@ class TestOracleIntegration:
 
 ### Test Data Management
 
-```python notest
+```python
+from __future__ import annotations
+
+
 # Test fixtures for consistent test data
 @pytest.fixture
 def sample_schema():
@@ -634,7 +654,9 @@ def sample_records():
 
 ### Batch Size Optimization
 
-```python notest
+```python
+from __future__ import annotations
+
 # Test different batch sizes for optimal performance
 import time
 from typing import List
@@ -681,7 +703,8 @@ def benchmark_batch_sizes(records: List[m.Dict]):
 
 ### Memory Usage Monitoring
 
-```python notest
+```python
+from __future__ import annotations
 import psutil
 import os
 

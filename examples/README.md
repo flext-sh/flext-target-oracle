@@ -107,7 +107,7 @@ python examples/performance_tuning.py
 
 All examples demonstrate railway-oriented programming with r patterns:
 
-```python notest
+```python
 result = target.process_singer_message(message)
 if result.is_failure:
     logger.error(f"Processing failed: {result.error}")
@@ -118,7 +118,7 @@ if result.is_failure:
 
 Type-safe configuration with domain validation:
 
-```python notest
+```python
 settings = FlextOracleTargetSettings(
     oracle_host="localhost",
     oracle_service="XE",
@@ -135,7 +135,7 @@ if validation_result.is_failure:
 
 Integration with FLEXT core patterns and flext-db-oracle:
 
-```python notest
+```python
 from flext_cli import u
 from flext_core import FlextSettings
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetSettings

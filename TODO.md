@@ -60,7 +60,7 @@
 
 **Próximos Passos**:
 
-```python notest
+```python
 # 1. Remover exceções duplicadas de __init__.py
 # 2. Manter apenas exceptions.py como fonte única
 # 3. Atualizar imports em todos os módulos
@@ -81,7 +81,7 @@ ______________________________________________________________________
 
 **Código Problemático**:
 
-```python notest
+```python
 # src/flext_target_oracle/loader.py linha ~233
 result = connected_api.execute_ddl(parameterized_sql)  # INSERT não é DDL!
 ```
@@ -95,7 +95,7 @@ result = connected_api.execute_ddl(parameterized_sql)  # INSERT não é DDL!
 
 **Solução Necessária**:
 
-```python notest
+```python
 # Trocar para método correto E resolver SQL injection
 result = connected_api.execute_dml(sql, param)  # Usar parameterized query
 ```
@@ -154,7 +154,8 @@ ______________________________________________________________________
 
 **Solução**:
 
-```python notest
+```python
+from __future__ import annotations
 class FlextOracleTarget(Target):
     def _test_connection(self) -> bool:
         return self._test_connection_impl()
@@ -175,7 +176,7 @@ ______________________________________________________________________
 
 **Código Problemático**:
 
-```python notest
+```python
 # src/flext_target_oracle/loader.py linhas ~226-232
 parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
     ":extracted_at", f"'{param['extracted_at']}'"
@@ -192,7 +193,7 @@ parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
 
 **Solução Urgente Necessária**:
 
-```python notest
+```python
 # SUBSTITUIR string replacement por prepared statements
 result = connected_api.execute_dml(sql, param)
 ```
@@ -212,7 +213,7 @@ ______________________________________________________________________
 
 **Solução**:
 
-```python notest
+```python
 with self.oracle_api as connected_api:
     with connected_api.begin_transaction():
         # operações do batch
@@ -227,7 +228,7 @@ ______________________________________________________________________
 
 **Código Problemático**:
 
-```python notest
+```python
 def ensure_table_exists(...)  # Não precisa ser
 def _create_table(...)        # Não precisa ser
 ```
@@ -256,7 +257,8 @@ ______________________________________________________________________
 
 **Solução**:
 
-```python notest
+```python
+from __future__ import annotations
 def _evolve_table_schema(self, table_name: str, new_schema: dict):
     # Implementar ALTER TABLE baseado em diff de schema
 ```
@@ -271,7 +273,8 @@ ______________________________________________________________________
 
 **Solução**:
 
-```python notest
+```python
+from __future__ import annotations
 class OracleConnectionFactory:
     @staticmethod
     def create_api(settings: FlextOracleTargetSettings) -> FlextDbOracleApi:
@@ -286,7 +289,7 @@ ______________________________________________________________________
 
 **Solução**:
 
-```python notest
+```python
 logger.info(
     "Batch loaded",
     extra={
@@ -324,7 +327,8 @@ ______________________________________________________________________
 
 **Solução**:
 
-```python notest
+```python
+from __future__ import annotations
 @pytest.fixture
 def oracle_connection():
     # Fixture para conexão Oracle real em testes de integração

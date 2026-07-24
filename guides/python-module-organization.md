@@ -72,7 +72,7 @@ ______________________________________________________________________
 
 ### **Current Implementation Structure**
 
-```python notest
+```python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Public API gateway & exports
 ├── settings.py                # ⚙️ m.Value configuration patterns
@@ -87,7 +87,9 @@ src/flext_target_oracle/
 
 ##### **`__init__.py` - Public API Gateway**
 
-```python notest
+```python
+from __future__ import annotations
+
 """FLEXT Target Oracle - Public API exports following ecosystem standards."""
 
 # FLEXT Core pattern re-exports for convenience
@@ -130,7 +132,7 @@ __all__: t.StringList = [
 
 **Recommended Structure**:
 
-```python notest
+```python
 """FLEXT Target Oracle - Clean public API."""
 
 # Import all from respective modules
@@ -155,7 +157,8 @@ __version__ = "0.9.9"
 
 ##### **`settings.py` - Configuration with Domain Validation**
 
-```python notest
+```python
+from __future__ import annotations
 """Oracle target configuration using FLEXT Value patterns."""
 
 from flext_cli import u
@@ -216,7 +219,9 @@ class FlextOracleTargetSettings(m.Value):
 
 ##### **`target.py` - Singer Protocol Implementation**
 
-```python notest
+```python
+from __future__ import annotations
+
 """Singer Target implementation using flext-meltano base patterns."""
 
 from flext_cli import u
@@ -251,7 +256,10 @@ class FlextOracleTarget(Target):
 
 **Required Singer SDK Methods**:
 
-```python notest
+```python
+from __future__ import annotations
+
+
 class FlextOracleTarget(Target):
     """Singer-compliant Oracle target."""
 
@@ -269,7 +277,9 @@ class FlextOracleTarget(Target):
 
 ##### **`loader.py` - Oracle Data Loading Operations**
 
-```python notest
+```python
+from __future__ import annotations
+
 """Oracle data loading using flext-db-oracle integration."""
 
 from flext_cli import u
@@ -301,7 +311,7 @@ class FlextOracleTargetLoader:
 
 **Security Issue Example**:
 
-```python notest
+```python
 # ❌ CURRENT - Security vulnerability
 parameterized_sql = sql.replace(":data", f"'{param['data']}'")
 result = connected_api.execute_ddl(parameterized_sql)
@@ -312,7 +322,9 @@ result = connected_api.execute_dml(sql, param)
 
 ##### **`exceptions.py` - Domain Error Hierarchy**
 
-```python notest
+```python
+from __future__ import annotations
+
 """Oracle target exceptions following FLEXT error patterns."""
 
 from flext_core import FlextTargetError
@@ -354,7 +366,7 @@ ______________________________________________________________________
 
 ### **Ideal Structure for Singer Targets**
 
-```python notest
+```python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean public API exports
 ├── settings/                  # ⚙️ Configuration module
@@ -383,7 +395,7 @@ src/flext_target_oracle/
 
 For simple Singer targets, the current flat structure is acceptable with fixes:
 
-```python notest
+```python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean exports (fixed)
 ├── settings.py                # ⚙️ Enhanced configuration
@@ -398,7 +410,10 @@ ______________________________________________________________________
 
 ### **r Railway Pattern Usage**
 
-```python notest
+```python
+from __future__ import annotations
+
+
 # ✅ CORRECT - Railway-oriented programming throughout
 def process_record(self, stream_name: str, record_data: dict) -> p.Result[bool]:
     """Process single record with proper error handling."""
@@ -421,7 +436,8 @@ def process_record_bad(self, stream_name: str, record_data: dict) -> None:
 
 ### **m.Value Configuration Pattern**
 
-```python notest
+```python
+from __future__ import annotations
 # ✅ CORRECT - Comprehensive validation with domain rules
 class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business validation."""
@@ -460,7 +476,9 @@ class BadConfig:
 
 ### **Structured Logging Pattern**
 
-```python notest
+```python
+from __future__ import annotations
+
 # ✅ CORRECT - Structured logging with context
 from flext_cli import u
 from flext_core import FlextSettings
@@ -534,7 +552,7 @@ ______________________________________________________________________
 
 ### **Dependency Direction (Clean Architecture)**
 
-```python notest
+```python
 # ✅ CORRECT - Dependencies flow inward
 ┌─────────────────────────────┐
 │     target.py               │  # Application Layer
@@ -565,7 +583,7 @@ from flext_db_oracle import FlextDbOracleApi
 
 ### **External Dependency Integration**
 
-```python notest
+```python
 # ✅ CORRECT - FLEXT ecosystem integration
 from flext_cli import u
 from flext_core import FlextSettings
@@ -592,7 +610,7 @@ ______________________________________________________________________
 
 ### **Test Structure Mirroring Source**
 
-```python notest
+```python
 tests/
 ├── unit/                           # Unit tests (isolated)
 │   ├── test_config.py             # Tests settings.py
@@ -618,7 +636,9 @@ tests/
 
 ### **Test Pattern Examples**
 
-```python notest
+```python
+from __future__ import annotations
+
 # tests/unit/test_config.py
 """Unit tests for configuration validation."""
 
@@ -670,7 +690,9 @@ class TestFlextOracleTargetSettings:
         assert result.success or "connection" in result.error.lower()
 ```
 
-```python notest
+```python
+from __future__ import annotations
+
 # tests/integration/test_singer_compliance.py
 """Singer protocol compliance tests."""
 
@@ -738,9 +760,11 @@ ______________________________________________________________________
 
 ### **Type Annotation Requirements**
 
-```python notest
+```python
+from __future__ import annotations
+
 # ✅ COMPLETE type annotations for all public methods
-from typing import Dict, List, Optional, Union
+from collections.abc import Callable
 
 from flext_cli import u
 from flext_core import FlextSettings
@@ -751,19 +775,13 @@ def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
 
 
 def load_records(
-    self, stream_name: str, records: List[m.Dict]
-) -> p.Result[Dict[str, Union[int, str]]]:
+    self, stream_name: str, records: list[m.Dict]
+) -> p.Result[dict[str, int | str]]:
     """Load records with specific return type."""
 
 
 # ✅ Generic type usage for reusable patterns
-from typing import TypeVar, Generic
-
-T = TypeVar("T")
-U = TypeVar("U")
-
-
-def map_result(result: p.Result[T], func: Callable[[T], U]) -> p.Result[U]:
+def map_result[T, U](result: p.Result[T], func: Callable[[T], U]) -> p.Result[U]:
     """Generic result mapping with type safety."""
     if result.success:
         return r[bool].ok(func(result.value))
@@ -777,7 +795,10 @@ def process_message(self, message):  # Missing types
 
 ### **Documentation Standards**
 
-```python notest
+```python
+from __future__ import annotations
+
+
 def ensure_table_exists(self, stream_name: str, schema: m.Dict) -> p.Result[bool]:
     """
     Ensure Oracle table exists for Singer stream with proper schema.
@@ -822,7 +843,9 @@ ______________________________________________________________________
 
 ### **Cross-Project Import Standards**
 
-```python notest
+```python
+from __future__ import annotations
+
 # ✅ STANDARD - Ecosystem imports following established patterns
 from flext_cli import u
 from flext_core import FlextSettings
@@ -851,7 +874,9 @@ class OracleTargetResult[T]:  # Creates ecosystem fragmentation
 
 ### **Configuration Ecosystem Integration**
 
-```python notest
+```python
+from __future__ import annotations
+
 # ✅ CORRECT - Hierarchical configuration following ecosystem patterns
 from flext_cli import u
 from flext_core import FlextSettings
@@ -904,7 +929,10 @@ ______________________________________________________________________
 
 ### **Version Migration Strategy**
 
-```python notest
+```python
+from __future__ import annotations
+
+
 # Version 0.9.9 → 0.9.9 Migration Plan
 class TargetMigration_0_9_to_1_0:
     """Migration from current structure to production-ready 0.9.9."""
@@ -930,10 +958,18 @@ class TargetMigration_0_9_to_1_0:
 
 ### **Backward Compatibility Strategy**
 
-```python notest
+```python
+from __future__ import annotations
+
 # Maintain backward compatibility during migration
+from dataclasses import dataclass
 from warnings import warn
-from typing import Dict, Optional
+
+
+@dataclass
+class Record:
+    stream: str
+    data: dict
 
 
 def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
@@ -1032,7 +1068,7 @@ ______________________________________________________________________
 
 **Module Extensions**:
 
-```python notest
+```python
 src/flext_target_oracle/
 ├── settings/
 │   ├── environments.py     # Environment-specific configurations
