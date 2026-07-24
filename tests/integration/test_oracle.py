@@ -12,33 +12,33 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import time
+from typing import TYPE_CHECKING
 
 import pytest
 
-from flext_db_oracle import FlextDbOracleApi
-from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
 from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
-from tests.constants import c
-from tests.models import m
-from tests.typings import t
+from flext_tests import tm
+from tests import c, m, t
+
+if TYPE_CHECKING:
+    from flext_db_oracle import FlextDbOracleApi
+    from flext_target_oracle import FlextTargetOracleSettings
+
+pytestmark = pytest.mark.integration
 
 
-def _schema_parts(
-    message: t.JsonValue,
-) -> t.Pair[t.JsonMapping, t.SequenceOf[str]]:
+def _schema_parts(message: t.JsonValue) -> t.Pair[t.JsonMapping, t.SequenceOf[str]]:
     schema_message = m.Meltano.SingerSchemaMessage.model_validate(message)
     return (schema_message.schema_definition, schema_message.key_properties)
 
 
 def _query_rows(
-    oracle_engine: FlextDbOracleApi,
-    sql: str,
-    params: t.JsonMapping | None = None,
+    oracle_engine: FlextDbOracleApi, sql: str, params: t.JsonMapping | None = None
 ) -> t.SequenceOf[m.Dict]:
     normalized_params = None if params is None else m.ConfigMap(root=dict(params))
     query_result = oracle_engine.oracle_services.execute_query(sql, normalized_params)
-    assert query_result.success, query_result.error
+    tm.ok(query_result)
     return query_result.value
 
 
@@ -71,14 +71,14 @@ class TestsFlextTargetOracleOracle:
         table_res = oracle_loader.ensure_table_exists(
             stream_name, schema_dict, key_props
         )
-        assert table_res.success
+        tm.ok(table_res)
         table_count = _query_scalar(
             oracle_engine,
             'SELECT COUNT(*) AS "count" FROM user_tables WHERE table_name = :table_name',
             "count",
             {"table_name": "TEST_USERS"},
         )
-        assert int(table_count) == 1
+        tm.that(int(table_count), eq=1)
         column_rows = _query_rows(
             oracle_engine,
             'SELECT column_name AS "column_name", data_type AS "data_type" FROM user_tab_columns WHERE table_name = :table_name ORDER BY column_id',
@@ -88,11 +88,11 @@ class TestsFlextTargetOracleOracle:
             str(row.root["column_name"]): str(row.root["data_type"])
             for row in column_rows
         }
-        assert "ID" in columns
-        assert "NAME" in columns
-        assert "EMAIL" in columns
-        assert "_SDC_EXTRACTED_AT" in columns
-        assert "_SDC_LOADED_AT" in columns
+        tm.that(columns, has="ID")
+        tm.that(columns, has="NAME")
+        tm.that(columns, has="EMAIL")
+        tm.that(columns, has="_SDC_EXTRACTED_AT")
+        tm.that(columns, has="_SDC_LOADED_AT")
 
     @pytest.mark.usefixtures("clean_database")
     def test_insert_and_retrieve_data(
@@ -107,28 +107,26 @@ class TestsFlextTargetOracleOracle:
         create_res = oracle_loader.ensure_table_exists(
             stream_name, schema_dict, key_props
         )
-        assert create_res.success
+        tm.ok(create_res)
         records: t.SequenceOf[t.JsonMapping] = [
             {"id": 1, "name": "John Doe", "email": "john@example.com"},
             {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
         ]
         result = oracle_loader.insert_records(stream_name, records)
-        assert result.success
+        tm.ok(result)
         rows = _query_rows(
             oracle_engine,
             'SELECT id AS "id", name AS "name", email AS "email" FROM test_insert ORDER BY id',
         )
-        assert len(rows) == 2
-        assert rows[0].root == {
-            "id": "1",
-            "name": "John Doe",
-            "email": "john@example.com",
-        }
-        assert rows[1].root == {
-            "id": "2",
-            "name": "Jane Smith",
-            "email": "jane@example.com",
-        }
+        tm.that(len(rows), eq=2)
+        tm.that(
+            rows[0].root,
+            eq={"id": "1", "name": "John Doe", "email": "john@example.com"},
+        )
+        tm.that(
+            rows[1].root,
+            eq={"id": "2", "name": "Jane Smith", "email": "jane@example.com"},
+        )
 
     @pytest.mark.usefixtures("clean_database")
     def test_merge_mode_updates(
@@ -138,33 +136,33 @@ class TestsFlextTargetOracleOracle:
         simple_schema: t.JsonValue,
     ) -> None:
         """Test merge mode for updating existing records."""
-        oracle_config = oracle_config.clone(sdc_mode="merge")
+        oracle_config = oracle_config.clone(TargetOracle={"sdc_mode": "merge"})
         loader = FlextTargetOracleLoader(oracle_config)
         connect_result = loader.connect()
-        assert connect_result.success
+        tm.ok(connect_result)
         stream_name = "test_merge"
         schema_dict, key_props = _schema_parts(simple_schema)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
-        assert table_res.success
+        tm.ok(table_res)
         initial_records: t.SequenceOf[t.JsonMapping] = [
             {"id": 1, "name": "Original Name", "email": "original@example.com"}
         ]
         insert_result = loader.insert_records(stream_name, initial_records)
-        assert insert_result.success
+        tm.ok(insert_result)
         updated_records: t.SequenceOf[t.JsonMapping] = [
             {"id": 1, "name": "Updated Name", "email": "updated@example.com"}
         ]
         result = loader.insert_records(stream_name, updated_records)
-        assert result.success
+        tm.ok(result)
         rows = _query_rows(
             oracle_engine,
             'SELECT name AS "name", email AS "email" FROM test_merge WHERE id = 1',
         )
         assert rows
-        assert rows[0].root["name"] == "Updated Name"
-        assert rows[0].root["email"] == "updated@example.com"
+        tm.that(rows[0].root["name"], eq="Updated Name")
+        tm.that(rows[0].root["email"], eq="updated@example.com")
         disconnect_result = loader.disconnect()
-        assert disconnect_result.success
+        tm.ok(disconnect_result)
 
     @pytest.mark.usefixtures("clean_database")
     def test_bulk_insert_performance(
@@ -172,11 +170,13 @@ class TestsFlextTargetOracleOracle:
     ) -> None:
         """Test bulk insert with large dataset."""
         oracle_config = oracle_config.clone(
-            load_method=c.TargetOracle.LOAD_METHOD_BULK_INSERT,
-            batch_size=1000,
+            TargetOracle={
+                "load_method": c.TargetOracle.LOAD_METHOD_BULK_INSERT,
+                "batch_size": 1000,
+            }
         )
         loader = FlextTargetOracleLoader(oracle_config)
-        assert loader.connect().success
+        tm.ok(loader.connect())
         stream_name = "test_bulk"
         schema_message: t.JsonValue = {
             "type": "SCHEMA",
@@ -193,7 +193,7 @@ class TestsFlextTargetOracleOracle:
         }
         schema_dict, key_props = _schema_parts(schema_message)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
-        assert table_res.success
+        tm.ok(table_res)
         records: t.SequenceOf[t.JsonMapping] = [
             {"id": i, "data": f"Bulk test data {i}", "value": i * 1.5}
             for i in range(5000)
@@ -201,15 +201,13 @@ class TestsFlextTargetOracleOracle:
         start_time = time.time()
         result = loader.insert_records(stream_name, records)
         elapsed = time.time() - start_time
-        assert result.success
+        tm.ok(result)
         count = _query_scalar(
-            oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM test_bulk',
-            "count",
+            oracle_engine, 'SELECT COUNT(*) AS "count" FROM test_bulk', "count"
         )
-        assert int(count) == 5000
+        tm.that(int(count), eq=5000)
         assert elapsed < 10.0
-        assert loader.disconnect().success
+        tm.ok(loader.disconnect())
 
     @pytest.mark.usefixtures("clean_database")
     def test_json_storage_mode(
@@ -219,17 +217,15 @@ class TestsFlextTargetOracleOracle:
         nested_schema: t.JsonValue,
     ) -> None:
         """Test JSON storage mode with nested data."""
-        oracle_config = oracle_config.clone()
         oracle_config = oracle_config.clone(
-            storage_mode="json",
-            json_column_name="json_data",
+            TargetOracle={"storage_mode": "json", "json_column_name": "json_data"}
         )
         loader = FlextTargetOracleLoader(oracle_config)
-        assert loader.connect().success
+        tm.ok(loader.connect())
         stream_name = "test_json"
         schema_dict, key_props = _schema_parts(nested_schema)
         create_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
-        assert create_res.success
+        tm.ok(create_res)
         record = {
             "id": 1,
             "customer": {
@@ -249,7 +245,7 @@ class TestsFlextTargetOracleOracle:
         }
         typed_record = t.json_mapping_adapter().validate_python(record)
         insert_res = loader.insert_records(stream_name, [typed_record])
-        assert insert_res.success
+        tm.ok(insert_res)
         json_str = _query_scalar(
             oracle_engine,
             'SELECT json_data AS "json_data" FROM test_json WHERE id = 1',
@@ -259,36 +255,36 @@ class TestsFlextTargetOracleOracle:
         customer = stored_data.get("customer")
         customer_data = t.json_mapping_adapter().validate_python(customer)
         customer_name = customer_data.get("name")
-        assert customer_name == "Acme Corp"
+        tm.that(customer_name, eq="Acme Corp")
         customer_address = customer_data.get("address")
         customer_address_data = t.json_mapping_adapter().validate_python(
             customer_address
         )
         customer_city = customer_address_data.get("city")
-        assert customer_city == "objecttown"
+        tm.that(customer_city, eq="objecttown")
         items = stored_data.get("items")
         items_data = t.Tests.CONTAINER_MAPPING_SEQUENCE_ADAPTER.validate_python(items)
-        assert len(items_data) == 2
-        assert loader.disconnect().success
+        tm.that(len(items_data), eq=2)
+        tm.ok(loader.disconnect())
 
     @pytest.mark.usefixtures("clean_database")
     def test_column_ordering(
-        self,
-        oracle_config: FlextTargetOracleSettings,
-        oracle_engine: FlextDbOracleApi,
+        self, oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi
     ) -> None:
         """Test column ordering in created tables."""
         oracle_config = oracle_config.clone(
-            column_ordering="alphabetical",
-            column_order_rules={
-                "primary_keys": 1,
-                "regular_columns": 2,
-                "audit_columns": 3,
-                "sdc_columns": 4,
-            },
+            TargetOracle={
+                "column_ordering": "alphabetical",
+                "column_order_rules": {
+                    "primary_keys": 1,
+                    "regular_columns": 2,
+                    "audit_columns": 3,
+                    "sdc_columns": 4,
+                },
+            }
         )
         loader = FlextTargetOracleLoader(oracle_config)
-        assert loader.connect().success
+        tm.ok(loader.connect())
         stream_name = "test_ordering"
         schema_message: t.JsonValue = {
             "type": "SCHEMA",
@@ -307,24 +303,24 @@ class TestsFlextTargetOracleOracle:
         }
         schema_dict, key_props = _schema_parts(schema_message)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
-        assert table_res.success
+        tm.ok(table_res)
         column_rows = _query_rows(
             oracle_engine,
             'SELECT column_name AS "column_name", column_id AS "column_id" FROM user_tab_columns WHERE table_name = :table_name ORDER BY column_id',
             {"table_name": "TEST_ORDERING"},
         )
         columns = [str(row.root["column_name"]) for row in column_rows]
-        assert columns[0] == "ID"
+        tm.that(columns[0], eq="ID")
         regular_start = 1
-        assert columns[regular_start] == "ALPHA_FIELD"
-        assert columns[regular_start + 1] == "ZEBRA_FIELD"
+        tm.that(columns[regular_start], eq="ALPHA_FIELD")
+        tm.that(columns[regular_start + 1], eq="ZEBRA_FIELD")
         audit_cols = [
             column for column in columns if column in {"CREATED_AT", "UPDATED_AT"}
         ]
-        assert len(audit_cols) == 2
+        tm.that(len(audit_cols), eq=2)
         sdc_cols = [column for column in columns if column.startswith("_SDC_")]
         assert all(columns.index(sdc) > columns.index("UPDATED_AT") for sdc in sdc_cols)
-        assert loader.disconnect().success
+        tm.ok(loader.disconnect())
 
     @pytest.mark.usefixtures("clean_database")
     def test_truncate_before_load(
@@ -334,31 +330,27 @@ class TestsFlextTargetOracleOracle:
         simple_schema: t.JsonValue,
     ) -> None:
         """Test truncate table before loading data."""
-        oracle_config = oracle_config.clone(truncate_before_load=True)
+        oracle_config = oracle_config.clone(TargetOracle={"truncate_before_load": True})
         loader = FlextTargetOracleLoader(oracle_config)
-        assert loader.connect().success
+        tm.ok(loader.connect())
         stream_name = "test_truncate"
         schema_dict, key_props = _schema_parts(simple_schema)
         create_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
-        assert create_res.success
+        tm.ok(create_res)
         insert_initial = loader.insert_records(
             stream_name, [{"id": 1, "name": "Initial"}]
         )
-        assert insert_initial.success
+        tm.ok(insert_initial)
         count = _query_scalar(
-            oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM test_truncate',
-            "count",
+            oracle_engine, 'SELECT COUNT(*) AS "count" FROM test_truncate', "count"
         )
-        assert int(count) == 1
+        tm.that(int(count), eq=1)
         loader.ensure_table_exists(stream_name, schema_dict, key_props)
         count = _query_scalar(
-            oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM test_truncate',
-            "count",
+            oracle_engine, 'SELECT COUNT(*) AS "count" FROM test_truncate', "count"
         )
-        assert int(count) == 0
-        assert loader.disconnect().success
+        tm.that(int(count), eq=0)
+        tm.ok(loader.disconnect())
 
     @pytest.mark.usefixtures("clean_database")
     def test_custom_indexes(
@@ -368,22 +360,25 @@ class TestsFlextTargetOracleOracle:
         simple_schema: t.JsonValue,
     ) -> None:
         """Test creation of custom indexes."""
-        oracle_config = oracle_config.model_copy(
-            update={
-                "custom_indexes": {
-                    "test_indexes": (
+        oracle_config = oracle_config.clone(
+            TargetOracle={
+                "custom_indexes": t
+                .json_value_adapter()
+                .dump_json({
+                    "test_indexes": [
                         {
                             "name": "IDX_EMAIL_UNIQUE",
                             "columns": ["EMAIL"],
                             "unique": True,
                         },
                         {"columns": ["NAME", "CREATED_AT"]},
-                    )
-                }
+                    ]
+                })
+                .decode("utf-8")
             }
         )
         loader = FlextTargetOracleLoader(oracle_config)
-        assert loader.connect().success
+        tm.ok(loader.connect())
         stream_name = "test_indexes"
         schema_dict, key_props = _schema_parts(simple_schema)
         loader.ensure_table_exists(stream_name, schema_dict, key_props)
@@ -396,13 +391,13 @@ class TestsFlextTargetOracleOracle:
             str(row.root["index_name"]): str(row.root["uniqueness"])
             for row in index_rows
         }
-        assert "IDX_EMAIL_UNIQUE" in indexes
-        assert indexes["IDX_EMAIL_UNIQUE"] == "UNIQUE"
+        tm.that(indexes, has="IDX_EMAIL_UNIQUE")
+        tm.that(indexes["IDX_EMAIL_UNIQUE"], eq="UNIQUE")
         composite_indexes = [
             index_name for index_name in indexes if "NAME" in index_name
         ]
         assert len(composite_indexes) > 0
-        assert loader.disconnect().success
+        tm.ok(loader.disconnect())
 
     """End-to-end tests using the full FlextTargetOracle."""
 
@@ -416,35 +411,36 @@ class TestsFlextTargetOracleOracle:
         """Test complete Singer workflow: schema -> records -> state."""
         target = FlextTargetOracle(settings=oracle_config)
         init_result = target.initialize()
-        assert init_result.success
+        tm.ok(init_result)
         for message in singer_messages:
             result = target.execute(
                 t.json_value_adapter().dump_json(message).decode("utf-8")
             )
-            assert result.success
+            tm.ok(result)
         table_count = _query_scalar(
             oracle_engine,
             "SELECT COUNT(*) AS \"count\" FROM user_tables WHERE table_name = 'USERS'",
             "count",
         )
-        assert int(table_count) == 1
+        tm.that(int(table_count), eq=1)
         data_count = _query_scalar(
-            oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM users',
-            "count",
+            oracle_engine, 'SELECT COUNT(*) AS "count" FROM users', "count"
         )
         assert int(data_count) > 0
 
     @pytest.mark.usefixtures("clean_database")
     def test_column_mapping_and_filtering(
-        self,
-        oracle_config: FlextTargetOracleSettings,
-        oracle_engine: FlextDbOracleApi,
+        self, oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi
     ) -> None:
         """Test column mapping and filtering features."""
         oracle_config = oracle_config.clone(
-            column_mappings={"users": {"name": "full_name", "email": "email_address"}},
-            ignored_columns=["password", "internal_id"],
+            TargetOracle={
+                "column_mappings": t
+                .json_value_adapter()
+                .dump_json({"users": {"name": "full_name", "email": "email_address"}})
+                .decode("utf-8"),
+                "ignored_columns": ["password", "internal_id"],
+            }
         )
         target = FlextTargetOracle(settings=oracle_config)
         target.initialize()
@@ -491,14 +487,14 @@ class TestsFlextTargetOracleOracle:
             "SELECT column_name AS \"column_name\" FROM user_tab_columns WHERE table_name = 'USERS'",
         )
         columns = [str(row.root["column_name"]) for row in column_rows]
-        assert "FULL_NAME" in columns
-        assert "EMAIL_ADDRESS" in columns
-        assert "PASSWORD" not in columns
-        assert "INTERNAL_ID" not in columns
+        tm.that(columns, has="FULL_NAME")
+        tm.that(columns, has="EMAIL_ADDRESS")
+        tm.that(columns, lacks="PASSWORD")
+        tm.that(columns, lacks="INTERNAL_ID")
         rows = _query_rows(
             oracle_engine,
             'SELECT full_name AS "full_name", email_address AS "email_address" FROM users WHERE id = 1',
         )
         assert rows
-        assert rows[0].root["full_name"] == "John Doe"
-        assert rows[0].root["email_address"] == "john@example.com"
+        tm.that(rows[0].root["full_name"], eq="John Doe")
+        tm.that(rows[0].root["email_address"], eq="john@example.com")

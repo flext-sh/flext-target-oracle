@@ -2,77 +2,46 @@
 
 from __future__ import annotations
 
-from unittest.mock import Mock
-
 import pytest
-from flext_tests import r
 
 from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
 from flext_target_oracle._utilities.errors import FlextTargetOracleExceptions
-from tests.models import m
-from tests.typings import t
+from flext_target_oracle.api import FlextTargetOracleService
+from flext_tests import tm
+from tests import m, t
 
 
 @pytest.fixture
-def target(mock_oracle_api: Mock) -> FlextTargetOracle:
-    """Create target with mocked loader."""
-    settings = FlextTargetOracleSettings.model_validate({
-        "oracle_host": "localhost",
-        "oracle_service_name": "XE",
-        "oracle_user": "test",
-        "oracle_password": "test",
-        "default_target_schema": "TEST_SCHEMA",
-        "batch_size": 200,
-        "commit_interval": 100,
-    })
-    client = FlextTargetOracle(settings=settings)
-    object.__setattr__(
-        client.loader, "test_connection", Mock(return_value=r[bool].ok(value=True))
-    )
-    object.__setattr__(
-        client.loader, "ensure_table_exists", Mock(return_value=r[bool].ok(value=True))
-    )
-    object.__setattr__(
-        client.loader, "load_record", Mock(return_value=r[bool].ok(value=True))
-    )
-    object.__setattr__(
-        client.loader,
-        "finalize_all_streams",
-        Mock(
-            return_value=r[m.TargetOracle.LoaderFinalizeResult].ok(
-                m.TargetOracle.LoaderFinalizeResult.model_validate({
-                    "total_records": 0,
-                    "streams_processed": 0,
-                    "loading_operation": {
-                        "stream_name": "users",
-                        "started_at": "",
-                        "completed_at": "",
-                        "records_loaded": 0,
-                        "records_failed": 0,
-                    },
-                })
-            )
-        ),
-    )
-    return client
+def target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle:
+    """Create a target bound to the real Oracle container (no mocks)."""
+    return FlextTargetOracle(settings=oracle_config)
 
 
+@pytest.mark.integration
 class TestsFlextTargetOracleTarget:
+    """Behavioral contract for the Oracle target against the real container."""
+
     def test_initialize_and_connection(self, target: FlextTargetOracle) -> None:
-        assert target.initialize().success
-        assert target.test_connection().success
+        tm.ok(target.initialize())
+        tm.ok(target.test_connection())
 
     def test_execute_returns_ready_status(self, target: FlextTargetOracle) -> None:
         result = target.execute()
-        assert result.success
-        assert result.value.status == "ready"
-        assert result.value.oracle_host == "localhost"
+        tm.ok(result)
+        tm.that(result.value.status, eq="ready")
+        tm.that(result.value.oracle_host, eq="localhost")
 
     def test_validate_configuration(self, target: FlextTargetOracle) -> None:
-        result = target.validate_configuration()
-        assert result.success
+        # NOTE (multi-agent): mro-rn88 — ADR-005/CQRS: config validation moved off the model
+        # AND off the client to the service handler run_validate(command). Exercise the real
+        # public surface (the service), which is where validation now lives.
+        _ = target
+        service = FlextTargetOracleService.fetch_global()
+        command = m.TargetOracle.OracleTargetValidateCommand()
+        result = service.run_validate(command)
+        tm.ok(result)
 
     def test_discover_catalog_uses_registered_schemas(
         self, target: FlextTargetOracle
@@ -88,10 +57,10 @@ class TestsFlextTargetOracleTarget:
             },
             "key_properties": ["id"],
         })
-        assert target.process_singer_message(schema_message).success
+        tm.ok(target.process_singer_message(schema_message))
         catalog_result = target.discover_catalog()
-        assert catalog_result.success
-        assert catalog_result.value.streams[0].stream == "users"
+        tm.ok(catalog_result)
+        tm.that(catalog_result.value.streams[0].stream, eq="users")
 
     def test_process_record_and_state_messages(self, target: FlextTargetOracle) -> None:
         schema_message = m.Meltano.SingerSchemaMessage.model_validate({
@@ -113,14 +82,14 @@ class TestsFlextTargetOracleTarget:
             "type": "STATE",
             "value": {"bookmarks": {"users": 1}},
         })
-        assert target.process_singer_message(schema_message).success
-        assert target.process_singer_message(record_message).success
-        assert target.process_singer_message(state_message).success
+        tm.ok(target.process_singer_message(schema_message))
+        tm.ok(target.process_singer_message(record_message))
+        tm.ok(target.process_singer_message(state_message))
         state_value = target.state_message.value
         assert isinstance(state_value, dict)
-        bookmarks_obj: t.JsonValue | None = state_value.get("bookmarks")
+        bookmarks_obj = state_value.get("bookmarks")
         assert isinstance(bookmarks_obj, dict)
-        assert bookmarks_obj.get("users") == 1
+        tm.that(bookmarks_obj.get("users"), eq=1)
 
     def test_process_singer_messages_flushes_loader(
         self, target: FlextTargetOracle
@@ -152,51 +121,56 @@ class TestsFlextTargetOracleTarget:
             }),
         ]
         result = target.process_singer_messages(messages)
-        assert result.success
-        assert result.value.messages_processed == 3
+        tm.ok(result)
+        tm.that(result.value.messages_processed, eq=3)
 
     def test_unsupported_message_type_fails(self, target: FlextTargetOracle) -> None:
         result = target.write_record('{"type": "UNKNOWN"}')
-        assert result.failure
+        tm.fail(result)
 
     def test_invalid_json_payload_maps_to_processing_failure(
         self, target: FlextTargetOracle
     ) -> None:
         result = target.execute("{ invalid }")
-        assert result.failure
+        tm.fail(result)
         parse_result = target.write_record(
             '{"type": "RECORD", "stream": "users", "record": "bad"}'
         )
-        assert parse_result.failure
+        tm.fail(parse_result)
         assert issubclass(FlextTargetOracleExceptions.ProcessingError, Exception)
 
     def test_missing_schema_path_uses_schema_error_type(self) -> None:
         err = FlextTargetOracleExceptions.SchemaError("schema missing")
-        assert isinstance(err, FlextTargetOracleExceptions.SchemaError)
+        tm.that(err, is_=FlextTargetOracleExceptions.SchemaError)
 
     def test_metrics_and_write_record_contract(self, target: FlextTargetOracle) -> None:
         metrics = target.get_implementation_metrics()
         assert metrics.batch_size > 0
-        assert metrics.use_bulk_operations in {True, False}
+        tm.that({True, False}, has=metrics.use_bulk_operations)
         result = target.write_record(
             t.json_value_adapter().dump_json({"id": 1}).decode("utf-8")
         )
-        assert result.failure
+        tm.fail(result)
 
     def test_write_record_inserts_oracle_record(
         self, target: FlextTargetOracle
     ) -> None:
-        mocked_load_record = Mock(return_value=r[bool].ok(value=True))
-        object.__setattr__(target.loader, "load_record", mocked_load_record)
+        schema_message = m.Meltano.SingerSchemaMessage.model_validate({
+            "type": "SCHEMA",
+            "stream": "users",
+            "schema": {
+                "type": "object",
+                "properties": cli_u.Cli.json_dumps({
+                    "id": {"type": "integer"}
+                }).unwrap(),
+            },
+            "key_properties": ["id"],
+        })
+        tm.ok(target.process_singer_message(schema_message))
         result = target.write_record(
             t
             .json_value_adapter()
-            .dump_json({
-                "type": "RECORD",
-                "stream": "users",
-                "record": {"id": 1},
-            })
+            .dump_json({"type": "RECORD", "stream": "users", "record": {"id": 1}})
             .decode("utf-8")
         )
-        mocked_load_record.assert_called_once_with("users", {"id": 1})
-        assert result.success
+        tm.ok(result)

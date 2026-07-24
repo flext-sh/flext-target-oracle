@@ -3,21 +3,19 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
-from flext_db_oracle import FlextDbOracleApi
-from flext_target_oracle import FlextTargetOracleSettings, e, m, p, r, t
+from flext_target_oracle import FlextTargetOracleSettings, e, m, p, r, settings, t
+
+if TYPE_CHECKING:
+    from flext_db_oracle import FlextDbOracleApi
 
 
 class FlextTargetOracleConnectionService:
     """Minimal Oracle connection service implements ConnectionService protocol."""
 
-    def __init__(
-        self,
-        settings: FlextTargetOracleSettings,
-        oracle_api: FlextDbOracleApi,
-    ) -> None:
+    def __init__(self, oracle_api: FlextDbOracleApi) -> None:
         """Store configuration and Oracle API dependency."""
-        self.settings = settings
         self.oracle_api = oracle_api
 
     def execute(self) -> p.Result[None]:
@@ -27,13 +25,19 @@ class FlextTargetOracleConnectionService:
     def get_connection_info(self) -> p.Result[m.TargetOracle.OracleConnectionModel]:
         """Return normalized connection model."""
         return r[m.TargetOracle.OracleConnectionModel].ok(
-            self.settings.get_oracle_config(),
+            m.TargetOracle.OracleConnectionModel(
+                host=settings.TargetOracle.oracle_host,
+                port=settings.TargetOracle.oracle_port,
+                service_name=settings.TargetOracle.oracle_service_name,
+                username=settings.TargetOracle.oracle_user,
+                password=settings.TargetOracle.oracle_password,
+            )
         )
 
     def test_connection(self) -> p.Result[None]:
         """Check Oracle access by listing schema tables."""
         tables_result = self.oracle_api.fetch_tables(
-            schema=self.settings.default_target_schema,
+            schema=settings.TargetOracle.default_target_schema
         )
         if tables_result.failure:
             return r[None].fail(tables_result.error or "Connection test failed")
@@ -43,13 +47,8 @@ class FlextTargetOracleConnectionService:
 class FlextTargetOracleSchemaService:
     """Minimal schema management service implements SchemaService protocol."""
 
-    def __init__(
-        self,
-        settings: FlextTargetOracleSettings,
-        oracle_api: FlextDbOracleApi,
-    ) -> None:
+    def __init__(self, oracle_api: FlextDbOracleApi) -> None:
         """Store schema service dependencies."""
-        self.settings = settings
         self.oracle_api = oracle_api
 
     def ensure_table_exists(
@@ -72,22 +71,15 @@ class FlextTargetOracleSchemaService:
 class FlextTargetOracleBatchService:
     """Minimal batching service implements BatchService protocol."""
 
-    def __init__(
-        self,
-        settings: FlextTargetOracleSettings,
-        oracle_api: FlextDbOracleApi,
-    ) -> None:
+    def __init__(self, oracle_api: FlextDbOracleApi) -> None:
         """Initialize batch storage and required dependencies."""
-        self.settings = settings
         self.oracle_api = oracle_api
         self._batches: defaultdict[str, list[m.Meltano.SingerRecordMessage]] = (
             defaultdict(list)
         )
 
     def add_record(
-        self,
-        stream_name: str,
-        record_message: m.Meltano.SingerRecordMessage,
+        self, stream_name: str, record_message: m.Meltano.SingerRecordMessage
     ) -> p.Result[None]:
         """Append a record to a stream buffer."""
         self._batches[stream_name].append(record_message)
@@ -120,7 +112,6 @@ class FlextTargetOracleRecordService:
 
     def __init__(self, settings: FlextTargetOracleSettings) -> None:
         """Store record service configuration."""
-        self.settings = settings
 
     def execute(self) -> p.Result[None]:
         """Run record-service readiness check."""
@@ -145,7 +136,7 @@ class FlextTargetOracleRecordService:
                 "record": transformed,
                 "time_extracted": record_message.time_extracted,
                 "version": record_message.version,
-            }),
+            })
         )
 
     def validate_record(

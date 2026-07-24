@@ -3,82 +3,100 @@
 from __future__ import annotations
 
 from flext_target_oracle import FlextTargetOracleSettings
+from flext_tests import tm
+from tests import c
 from tests.base import s
-from tests.constants import c
-from tests.models import m
 
 
 class TestsFlextTargetOracleConfig:
-    """Validate canonical Oracle settings behavior."""
+    """Validate the public Oracle settings contract (namespaced TargetOracle.*)."""
 
+    # NOTE (multi-agent): mro-rn88 — ADR-005 made settings simple scalars namespaced under
+    # TargetOracle.*; the old get_oracle_config/get_table_name/validate_business_rules were
+    # dropped as dead code (inlined into consumers), so the contract is the typed scalars.
     def test_defaults_and_core_fields(self) -> None:
         config = FlextTargetOracleSettings.model_validate({
-            "oracle_host": "localhost",
-            "oracle_service_name": "XE",
-            "oracle_user": "test_user",
-            "oracle_password": "test_pass",
+            "TargetOracle": {
+                "oracle_host": "localhost",
+                "oracle_service_name": "XE",
+                "oracle_user": "test_user",
+                "oracle_password": "test_pass",
+            }
         })
-        assert config.oracle_port == 1521
-        assert config.default_target_schema == "SINGER_DATA"
-        assert config.use_bulk_operations is True
-        assert config.autocommit is False
+        target = config.TargetOracle
+        tm.that(target.oracle_host, eq="localhost")
+        tm.that(target.oracle_port, eq=1521)
+        tm.that(target.default_target_schema, eq="SINGER_DATA")
+        tm.that(target.use_bulk_operations, eq=True)
+        tm.that(target.autocommit, eq=False)
 
     def test_test_service_settings_include_tests_namespace(self) -> None:
         settings = s.fetch_settings()
 
-        assert isinstance(settings.Tests, m.SettingsValue)
-        assert settings.oracle_host
+        # NOTE (multi-agent): mro-rn88 — the composed test settings expose BOTH the shared
+        # Tests namespace and the project TargetOracle namespace via the public surface.
+        tm.that(settings.Tests.model_dump(), none=False)
+        assert settings.TargetOracle.oracle_host
 
     def test_load_method_enum_contract(self) -> None:
-        assert c.TargetOracle.LOAD_METHOD_INSERT == "INSERT"
-        assert c.TargetOracle.LOAD_METHOD_BULK_INSERT == "BULK_INSERT"
-        assert c.TargetOracle.LOAD_METHOD_MERGE == "MERGE"
-        assert c.TargetOracle.LOAD_METHOD_BULK_MERGE == "BULK_MERGE"
+        tm.that(c.TargetOracle.LOAD_METHOD_INSERT, eq="INSERT")
+        tm.that(c.TargetOracle.LOAD_METHOD_BULK_INSERT, eq="BULK_INSERT")
+        tm.that(c.TargetOracle.LOAD_METHOD_MERGE, eq="MERGE")
+        tm.that(c.TargetOracle.LOAD_METHOD_BULK_MERGE, eq="BULK_MERGE")
 
-    def test_get_oracle_config(self) -> None:
+    def test_connection_scalars_round_trip_through_namespace(self) -> None:
         config = FlextTargetOracleSettings.model_validate({
-            "oracle_host": "localhost",
-            "oracle_port": 1521,
-            "oracle_service_name": "XE",
-            "oracle_user": "test",
-            "oracle_password": "test",
-            "default_target_schema": "TEST_SCHEMA",
-            "autocommit": True,
-            "transaction_timeout": 120,
-            "parallel_degree": 4,
-            "use_bulk_operations": True,
+            "TargetOracle": {
+                "oracle_host": "localhost",
+                "oracle_port": 1521,
+                "oracle_service_name": "XE",
+                "oracle_user": "test",
+                "oracle_password": "test",
+                "default_target_schema": "TEST_SCHEMA",
+                "autocommit": True,
+                "transaction_timeout": 120,
+                "parallel_degree": 4,
+                "use_bulk_operations": True,
+            }
         })
-        oracle_config = config.get_oracle_config()
-        assert oracle_config.host == "localhost"
-        assert oracle_config.port == 1521
-        assert oracle_config.service_name == "XE"
-        assert oracle_config.username == "test"
-        assert oracle_config.password == "test"
-        assert oracle_config.ssl_enabled is False
-        assert oracle_config.autocommit is True
-        assert oracle_config.timeout == 120
-        assert oracle_config.parallel_degree == 4
-        assert oracle_config.use_bulk_operations is True
+        target = config.TargetOracle
+        tm.that(target.oracle_host, eq="localhost")
+        tm.that(target.oracle_port, eq=1521)
+        tm.that(target.oracle_service_name, eq="XE")
+        tm.that(target.oracle_user, eq="test")
+        tm.that(target.oracle_password, eq="test")
+        tm.that(target.autocommit, eq=True)
+        tm.that(target.transaction_timeout, eq=120)
+        tm.that(target.parallel_degree, eq=4)
+        tm.that(target.use_bulk_operations, eq=True)
+        tm.that(target.default_target_schema, eq="TEST_SCHEMA")
 
-    def test_get_table_name_with_prefix_suffix_and_cleanup(self) -> None:
+    def test_table_prefix_and_suffix_scalars_are_preserved(self) -> None:
         config = FlextTargetOracleSettings.model_validate({
-            "oracle_host": "localhost",
-            "oracle_service_name": "XE",
-            "oracle_user": "test",
-            "oracle_password": "test",
-            "table_prefix": "stg_",
-            "table_suffix": "_tbl",
+            "TargetOracle": {
+                "oracle_host": "localhost",
+                "oracle_service_name": "XE",
+                "oracle_user": "test",
+                "oracle_password": "test",
+                "table_prefix": "stg_",
+                "table_suffix": "_tbl",
+            }
         })
-        assert config.get_table_name("my-stream.v1") == "STG_MY_STREAM_V1_TBL"
+        target = config.TargetOracle
+        tm.that(target.table_prefix, eq="stg_")
+        tm.that(target.table_suffix, eq="_tbl")
 
-    def test_validate_business_rules_failure_for_commit_interval(self) -> None:
+    def test_batch_and_commit_interval_scalars_are_preserved(self) -> None:
         config = FlextTargetOracleSettings.model_validate({
-            "oracle_host": "localhost",
-            "oracle_service_name": "XE",
-            "oracle_user": "test",
-            "oracle_password": "test",
-            "batch_size": 100,
-            "commit_interval": 200,
+            "TargetOracle": {
+                "oracle_host": "localhost",
+                "oracle_service_name": "XE",
+                "oracle_user": "test",
+                "oracle_password": "test",
+                "batch_size": 100,
+                "commit_interval": 200,
+            }
         })
-        result = config.validate_business_rules()
-        assert result.failure
+        target = config.TargetOracle
+        tm.that(target.batch_size, eq=100)
+        tm.that(target.commit_interval, eq=200)

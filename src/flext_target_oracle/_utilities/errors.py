@@ -13,12 +13,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Annotated, override
 
-from flext_core import FlextExceptionsBase
-from flext_target_oracle import e
-from flext_target_oracle.constants import c
-from flext_target_oracle.models import m
-from flext_target_oracle.typings import t
-from flext_target_oracle.utilities import u
+from flext_meltano import u
+from flext_target_oracle import c, e, m, t
 
 
 class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
@@ -26,16 +22,10 @@ class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
 
     code: Annotated[str, u.Field(description="Canonical error code")]
     context: Annotated[
-        t.JsonMapping | None,
-        u.Field(
-            description="Structured error context",
-        ),
+        t.JsonMapping | None, u.Field(description="Structured error context")
     ] = None
     correlation_id: Annotated[
-        str | None,
-        u.Field(
-            description="Cross-service correlation identifier",
-        ),
+        str | None, u.Field(description="Cross-service correlation identifier")
     ] = None
 
 
@@ -66,7 +56,7 @@ class FlextTargetOracleExceptions(e):
         })
         return resolved, ctx
 
-    class Error(FlextExceptionsBase.BaseError):
+    class Error(e.BaseError):
         """Oracle Target main error - inherits from base error."""
 
     class ConfigurationError(e.ConfigurationError):

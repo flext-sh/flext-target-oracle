@@ -1,0 +1,3 @@
+TargetOracle:
+  name: flext-target-oracle
+  version: "0.12.0-dev"

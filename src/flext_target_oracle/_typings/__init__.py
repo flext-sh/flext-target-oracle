@@ -11,16 +11,7 @@ if TYPE_CHECKING:
     from flext_target_oracle._typings.base import (
         FlextTargetOracleTypesBase as FlextTargetOracleTypesBase,
     )
-_LAZY_IMPORTS = build_lazy_import_map(
-    {
-        ".base": ("FlextTargetOracleTypesBase",),
-    },
-)
+_LAZY_IMPORTS = build_lazy_import_map({".base": ("FlextTargetOracleTypesBase",)})
 
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    publish_all=False,
-)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, publish_all=False)

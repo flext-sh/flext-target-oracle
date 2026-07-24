@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_tests import s as tests_s
-
 from flext_target_oracle import m
+from flext_tests import s as tests_s
 from tests.settings import TestsFlextTargetOracleSettings
 
 
@@ -17,6 +16,8 @@ class TestsFlextTargetOracleServiceBase(tests_s):
     @override
     def fetch_settings(cls) -> TestsFlextTargetOracleSettings:
         """Return the typed target Oracle+Tests settings singleton."""
+        # NOTE (multi-agent): mro-rn88 — settings-fallout left this body empty (returned
+        # None); return the composed Tests+TargetOracle singleton the base must deliver.
         return TestsFlextTargetOracleSettings.fetch_global()
 
     @classmethod

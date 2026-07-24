@@ -1,6 +1,7 @@
 """Utility helpers for Oracle Singer target integration."""
 
 from __future__ import annotations
+from flext_target_oracle._utilities.client import FlextTargetOracle
 
 from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import u
@@ -20,4 +21,5 @@ class FlextTargetOracleUtilities(u, FlextDbOracleUtilities):
 
 
 u = FlextTargetOracleUtilities
-__all__: list[str] = ["FlextTargetOracleUtilities", "u"]
+
+__all__: list[str] = ["FlextTargetOracle", "FlextTargetOracleUtilities", "u"]

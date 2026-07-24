@@ -9,7 +9,7 @@ docs_dir: docs
 site_dir: .reports/docs/site
 
 exclude_docs: |
-  README.md
+  /README.md
 
 theme:
   name: material
@@ -37,6 +37,7 @@ theme:
         icon: material/weather-sunny
         name: Switch to light mode
 
+
 plugins:
   - search
   - autorefs
@@ -59,6 +60,15 @@ plugins:
             separate_signature: true
             merge_init_into_class: true
             docstring_section_style: spacy
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+      exclude:
+        - api-reference/generated/**
+  - mermaid2
+  - redirects
+  - minify:
+      minify_html: true
 
 markdown_extensions:
   - attr_list

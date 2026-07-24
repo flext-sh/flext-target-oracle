@@ -2,59 +2,32 @@
 
 from __future__ import annotations
 
-from unittest.mock import Mock
+from typing import TYPE_CHECKING
 
 import pytest
-from flext_tests import r
 
 from flext_cli import u as cli_u
-from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle._utilities.client import FlextTargetOracle
-from tests.models import m
-from tests.typings import t
+from flext_tests import tm
+from tests import m
+
+if TYPE_CHECKING:
+    from flext_target_oracle import FlextTargetOracleSettings
 
 
 @pytest.mark.e2e
+@pytest.mark.integration
 class TestsFlextTargetOracleSinger:
-    """Validate SCHEMA -> RECORD -> STATE happy path."""
+    """Validate SCHEMA -> RECORD -> STATE happy path against real Oracle."""
 
-    def _target(self) -> FlextTargetOracle:
-        settings = FlextTargetOracleSettings.model_validate({
-            "oracle_host": "localhost",
-            "oracle_service_name": "XE",
-            "oracle_user": "test",
-            "oracle_password": "test",
-        })
-        target = FlextTargetOracle(settings=settings)
-        mock_oracle_api = Mock()
-        mock_oracle_api.__enter__ = Mock(return_value=mock_oracle_api)
-        mock_oracle_api.__exit__ = Mock(return_value=None)
-        empty_tables: list[str] = []
-        mock_oracle_api.get_tables.return_value = r[list[str]].ok(empty_tables)
-        mock_oracle_api.fetch_tables.return_value = r[list[str]].ok(empty_tables)
-        mock_oracle_api.execute_sql.return_value = r[bool].ok(value=True)
-        type_mapping = m.DbOracle.TypeMapping.model_validate({
-            "mapping": {
-                "amount": "NUMBER",
-                "id": "NUMBER",
-            },
-        })
-        mock_oracle_api.oracle_services.map_singer_schema.return_value = r[
-            m.DbOracle.TypeMapping
-        ].ok(type_mapping)
-        mock_oracle_api.oracle_services.create_table_ddl.return_value = r[str].ok(
-            "CREATE TABLE orders (id NUMBER, amount NUMBER)",
-        )
-        mock_oracle_api.oracle_services.build_insert_statement.return_value = r[str].ok(
-            "INSERT INTO orders (id, amount) VALUES (:id, :amount)",
-        )
-        mock_oracle_api.execute_statement.return_value = r[int].ok(1)
-        mock_oracle_api.execute_many.return_value = r[int].ok(1)
-        object.__setattr__(target.loader, "_oracle_api", mock_oracle_api)
-        return target
+    @staticmethod
+    def _target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle:
+        return FlextTargetOracle(settings=oracle_config)
 
-    def test_complete_singer_flow(self) -> None:
-        target = self._target()
+    def test_complete_singer_flow(
+        self, oracle_config: FlextTargetOracleSettings
+    ) -> None:
+        target = self._target(oracle_config)
         schema = {
             "type": "SCHEMA",
             "stream": "orders",
@@ -73,23 +46,29 @@ class TestsFlextTargetOracleSinger:
             "record": {"id": 1, "amount": 10.5},
         }
         state = {"type": "STATE", "value": {"bookmarks": {"orders": {"version": 1}}}}
-        assert target.execute().success
-        assert target.process_singer_message(
-            m.Meltano.SingerSchemaMessage.model_validate(schema)
-        ).success
-        assert target.process_singer_message(
-            m.Meltano.SingerRecordMessage.model_validate(record)
-        ).success
-        assert target.process_singer_message(
-            m.Meltano.SingerStateMessage.model_validate(state)
-        ).success
+        tm.ok(target.execute())
+        tm.ok(
+            target.process_singer_message(
+                m.Meltano.SingerSchemaMessage.model_validate(schema)
+            )
+        )
+        tm.ok(
+            target.process_singer_message(
+                m.Meltano.SingerRecordMessage.model_validate(record)
+            )
+        )
+        tm.ok(
+            target.process_singer_message(
+                m.Meltano.SingerStateMessage.model_validate(state)
+            )
+        )
         finalize_result = target.finalize()
-        assert finalize_result.success
-        assert "orders" in target.schemas
+        tm.ok(finalize_result)
+        tm.that(target.schemas, has="orders")
         state_value = target.state_message.value
         assert isinstance(state_value, dict)
-        bookmarks_obj: t.JsonValue | None = state_value.get("bookmarks")
+        bookmarks_obj = state_value.get("bookmarks")
         assert isinstance(bookmarks_obj, dict)
-        orders_obj: t.JsonValue | None = bookmarks_obj.get("orders")
+        orders_obj = bookmarks_obj.get("orders")
         assert isinstance(orders_obj, dict)
-        assert orders_obj.get("version") == 1
+        tm.that(orders_obj.get("version"), eq=1)
