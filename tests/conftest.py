@@ -345,7 +345,12 @@ _PATH_MARKERS: t.MappingKV[str, t.StrSequence] = {
 
 def pytest_collection_modifyitems(items: t.SequenceOf[pytest.Item]) -> None:
     """Add markers to test items based on their location."""
+    tests_dir = Path(__file__).resolve().parent
     for item in items:
+        # Only apply environment isolation to real test items under tests/;
+        # markdown-doc code blocks live in README/guides and do not need it.
+        if not str(item.fspath).startswith(str(tests_dir)):
+            continue
         item.add_marker(pytest.mark.usefixtures("isolate_target_oracle_env"))
         fspath = str(item.fspath)
         for path_key, markers in _PATH_MARKERS.items():
