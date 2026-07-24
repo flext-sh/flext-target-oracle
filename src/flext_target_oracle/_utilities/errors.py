@@ -62,7 +62,7 @@ class FlextTargetOracleExceptions(e):
     class ConfigurationError(e.ConfigurationError):
         """Oracle configuration error using flext-core foundation."""
 
-    class OracleConnectionError(e.ConnectionError):
+    class OracleConnectionError(e.FlextConnectionError):
         """Oracle connection error with Oracle-specific context."""
 
         @override
@@ -141,7 +141,7 @@ class FlextTargetOracleExceptions(e):
             operation_val = ctx.get("operation")
             self.operation = str(operation_val) if operation_val is not None else None
 
-    class OracleTimeoutError(e.TimeoutError):
+    class OracleTimeoutError(e.FlextTimeoutError):
         """Oracle timeout error using flext-core foundation."""
 
     class SchemaError(ValidationError):
