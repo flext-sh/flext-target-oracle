@@ -2,24 +2,25 @@
 
 <!-- TOC START -->
 
-- [Quick Navigation](#quick-navigation)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Environment Setup](#environment-setup)
-- [Examples Overview](#examples-overview)
-  - [1. Basic Usage](#1-basic-usage)
-  - [2. Meltano Integration](#2-meltano-integration)
-  - [3. Production Setup](#3-production-setup)
-  - [4. Performance Tuning](#4-performance-tuning)
-  - [5. Error Handling](#5-error-handling)
-- [Running Examples](#running-examples)
-- [Common Patterns](#common-patterns)
-  - [r Error Handling](#flextresult-error-handling)
-  - [Configuration Management](#configuration-management)
-  - [FLEXT Ecosystem Integration](#flext-ecosystem-integration)
-- [Testing Examples](#testing-examples)
-- [Contributing Examples](#contributing-examples)
-- [Security Notes](#security-notes)
+- [FLEXT Target Oracle - Practical Examples](#flext-target-oracle---practical-examples)
+  - [Quick Navigation](#quick-navigation)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Environment Setup](#environment-setup)
+  - [Examples Overview](#examples-overview)
+    - [1. Basic Usage](#1-basic-usage)
+    - [2. Meltano Integration](#2-meltano-integration)
+    - [3. Production Setup](#3-production-setup)
+    - [4. Performance Tuning](#4-performance-tuning)
+    - [5. Error Handling](#5-error-handling)
+  - [Running Examples](#running-examples)
+  - [Common Patterns](#common-patterns)
+    - [r Error Handling](#r-error-handling)
+    - [Configuration Management](#configuration-management)
+    - [FLEXT Ecosystem Integration](#flext-ecosystem-integration)
+  - [Testing Examples](#testing-examples)
+  - [Contributing Examples](#contributing-examples)
+  - [Security Notes](#security-notes)
 
 <!-- TOC END -->
 
@@ -135,25 +136,8 @@ if validation_result.is_failure:
 Integration with FLEXT core patterns and flext-db-oracle:
 
 ```python notest
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 from flext_target_oracle import FlextOracleTarget, FlextOracleTargetSettings
 
 logger = u.fetch_logger(__name__)

@@ -1,42 +1,52 @@
 # Python Module Organization & Semantic Patterns
 
 <!-- TOC START -->
-- [🏗️ **Module Architecture Overview**](#module-architecture-overview)
-  - [**Core Design Principles**](#core-design-principles)
-- [📁 **Current Module Structure & Analysis**](#current-module-structure-analysis)
-  - [**Current Implementation Structure**](#current-implementation-structure)
-  - [**Module Responsibilities Analysis**](#module-responsibilities-analysis)
-- [🎯 **Recommended Module Architecture**](#recommended-module-architecture)
-  - [**Ideal Structure for Singer Targets**](#ideal-structure-for-singer-targets)
-  - [**Simplified Structure (Current Approach)**](#simplified-structure-current-approach)
-- [📋 **FLEXT Pattern Implementation Standards**](#flext-pattern-implementation-standards)
-  - [**r Railway Pattern Usage**](#r-railway-pattern-usage)
-  - [**m.Value Configuration Pattern**](#mvalue-configuration-pattern)
-  - [**Structured Logging Pattern**](#structured-logging-pattern)
-- [🔧 **Module Dependency Patterns**](#module-dependency-patterns)
-  - [**Dependency Direction (Clean Architecture)**](#dependency-direction-clean-architecture)
-  - [**External Dependency Integration**](#external-dependency-integration)
-- [🧪 **Testing Module Organization**](#testing-module-organization)
-  - [**Test Structure Mirroring Source**](#test-structure-mirroring-source)
-  - [**Test Pattern Examples**](#test-pattern-examples)
-- [📏 **Code Quality Standards**](#code-quality-standards)
-  - [**Type Annotation Requirements**](#type-annotation-requirements)
-  - [**Documentation Standards**](#documentation-standards)
-- [🌐 **FLEXT Ecosystem Integration Patterns**](#flext-ecosystem-integration-patterns)
-  - [**Cross-Project Import Standards**](#cross-project-import-standards)
-  - [**Configuration Ecosystem Integration**](#configuration-ecosystem-integration)
-- [🔄 **Migration & Evolution Patterns**](#migration-evolution-patterns)
-  - [**Version Migration Strategy**](#version-migration-strategy)
-  - [**Backward Compatibility Strategy**](#backward-compatibility-strategy)
-- [📋 **Module Development Checklist**](#module-development-checklist)
-  - [**Pre-Development Checklist**](#pre-development-checklist)
-  - [**Development Standards Checklist**](#development-standards-checklist)
-  - [**Quality Gate Checklist**](#quality-gate-checklist)
-  - [**Ecosystem Integration Checklist**](#ecosystem-integration-checklist)
-- [🚀 **Future Evolution Roadmap**](#future-evolution-roadmap)
-  - [**Version 0.9.9 (Current)**](#version-099-current)
-  - [**Version 1.1.0 (Enhanced Features)**](#version-110-enhanced-features)
-  - [**Version 0.9.9 (Next Generation)**](#version-099-next-generation)
+- [Python Module Organization \& Semantic Patterns](#python-module-organization--semantic-patterns)
+  - [🏗️ **Module Architecture Overview**](#️-module-architecture-overview)
+    - [**Core Design Principles**](#core-design-principles)
+  - [📁 **Current Module Structure \& Analysis**](#-current-module-structure--analysis)
+    - [**Current Implementation Structure**](#current-implementation-structure)
+    - [**Module Responsibilities Analysis**](#module-responsibilities-analysis)
+      - [**Foundation Layer**](#foundation-layer)
+        - [**`__init__.py` - Public API Gateway**](#__init__py---public-api-gateway)
+      - [**Domain Configuration Layer**](#domain-configuration-layer)
+        - [**`settings.py` - Configuration with Domain Validation**](#settingspy---configuration-with-domain-validation)
+      - [**Application Layer**](#application-layer)
+        - [**`target.py` - Singer Protocol Implementation**](#targetpy---singer-protocol-implementation)
+      - [**Infrastructure Layer**](#infrastructure-layer)
+        - [**`loader.py` - Oracle Data Loading Operations**](#loaderpy---oracle-data-loading-operations)
+        - [**`exceptions.py` - Domain Error Hierarchy**](#exceptionspy---domain-error-hierarchy)
+  - [🎯 **Recommended Module Architecture**](#-recommended-module-architecture)
+    - [**Ideal Structure for Singer Targets**](#ideal-structure-for-singer-targets)
+    - [**Simplified Structure (Current Approach)**](#simplified-structure-current-approach)
+  - [📋 **FLEXT Pattern Implementation Standards**](#-flext-pattern-implementation-standards)
+    - [**r Railway Pattern Usage**](#r-railway-pattern-usage)
+    - [**m.Value Configuration Pattern**](#mvalue-configuration-pattern)
+    - [**Structured Logging Pattern**](#structured-logging-pattern)
+  - [🔧 **Module Dependency Patterns**](#-module-dependency-patterns)
+    - [**Dependency Direction (Clean Architecture)**](#dependency-direction-clean-architecture)
+    - [**External Dependency Integration**](#external-dependency-integration)
+  - [🧪 **Testing Module Organization**](#-testing-module-organization)
+    - [**Test Structure Mirroring Source**](#test-structure-mirroring-source)
+    - [**Test Pattern Examples**](#test-pattern-examples)
+  - [📏 **Code Quality Standards**](#-code-quality-standards)
+    - [**Type Annotation Requirements**](#type-annotation-requirements)
+    - [**Documentation Standards**](#documentation-standards)
+  - [🌐 **FLEXT Ecosystem Integration Patterns**](#-flext-ecosystem-integration-patterns)
+    - [**Cross-Project Import Standards**](#cross-project-import-standards)
+    - [**Configuration Ecosystem Integration**](#configuration-ecosystem-integration)
+  - [🔄 **Migration \& Evolution Patterns**](#-migration--evolution-patterns)
+    - [**Version Migration Strategy**](#version-migration-strategy)
+    - [**Backward Compatibility Strategy**](#backward-compatibility-strategy)
+  - [📋 **Module Development Checklist**](#-module-development-checklist)
+    - [**Pre-Development Checklist**](#pre-development-checklist)
+    - [**Development Standards Checklist**](#development-standards-checklist)
+    - [**Quality Gate Checklist**](#quality-gate-checklist)
+    - [**Ecosystem Integration Checklist**](#ecosystem-integration-checklist)
+  - [🚀 **Future Evolution Roadmap**](#-future-evolution-roadmap)
+    - [**Version 0.9.9 (Current)**](#version-099-current)
+    - [**Version 1.1.0 (Enhanced Features)**](#version-110-enhanced-features)
+    - [**Version 0.9.9 (Next Generation)**](#version-099-next-generation)
 <!-- TOC END -->
 
 **FLEXT Target Oracle - Module Architecture Following FLEXT Ecosystem Standards**
@@ -81,25 +91,8 @@ src/flext_target_oracle/
 """FLEXT Target Oracle - Public API exports following ecosystem standards."""
 
 # FLEXT Core pattern re-exports for convenience
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 from flext_target_oracle import FlextOracleTargetSettings, LoadMethod
 from flext_target_oracle import FlextOracleTarget
 
@@ -152,25 +145,8 @@ from flext_target_oracle import (
 )
 
 # FLEXT core re-exports for convenience
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 
 __version__ = "0.9.9"
 ```
@@ -182,25 +158,8 @@ __version__ = "0.9.9"
 ```python notest
 """Oracle target configuration using FLEXT Value patterns."""
 
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 from pydantic import u.Field, u.field_validator
 from enum import StrEnum, unique
 
@@ -260,25 +219,8 @@ class FlextOracleTargetSettings(m.Value):
 ```python notest
 """Singer Target implementation using flext-meltano base patterns."""
 
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 from flext_meltano import Target
 
 
@@ -330,25 +272,8 @@ class FlextOracleTarget(Target):
 ```python notest
 """Oracle data loading using flext-db-oracle integration."""
 
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 
 
@@ -537,25 +462,8 @@ class BadConfig:
 
 ```python notest
 # ✅ CORRECT - Structured logging with context
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 
 logger = u.fetch_logger(__name__)
 
@@ -645,44 +553,10 @@ ______________________________________________________________________
 # Application layer imports
 from flext_target_oracle import FlextOracleTargetSettings
 from flext_target_oracle import FlextOracleTargetLoader
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 from flext_db_oracle import FlextDbOracleApi
 
 # ❌ INCORRECT - Circular dependencies
@@ -693,25 +567,8 @@ from flext_db_oracle import FlextDbOracleApi
 
 ```python notest
 # ✅ CORRECT - FLEXT ecosystem integration
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 from flext_meltano import Target  # Singer SDK integration layer
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from pydantic import u.Field, u.field_validator  # Third-party validation
@@ -885,25 +742,8 @@ ______________________________________________________________________
 # ✅ COMPLETE type annotations for all public methods
 from typing import Dict, List, Optional, Union
 
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 
 
 def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
@@ -984,25 +824,8 @@ ______________________________________________________________________
 
 ```python notest
 # ✅ STANDARD - Ecosystem imports following established patterns
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 from flext_meltano import Target, Record  # Singer SDK integration layer
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_observability import metrics, tracing  # Future integration
@@ -1030,25 +853,8 @@ class OracleTargetResult[T]:  # Creates ecosystem fragmentation
 
 ```python notest
 # ✅ CORRECT - Hierarchical configuration following ecosystem patterns
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 
 
 class OracleConnectionSettings(FlextSettings):

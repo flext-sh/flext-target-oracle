@@ -7,39 +7,40 @@
 > Project profile: `flext-target-oracle`
 
 <!-- TOC START -->
-- [Overview](#overview)
-- [Test Structure](#test-structure)
-- [Test Categories](#test-categories)
-  - [Unit Tests](#unit-tests)
-  - [Integration Tests](#integration-tests)
-  - [End-to-End Tests](#end-to-end-tests)
-- [Test Markers](#test-markers)
-- [Running Tests](#running-tests)
-  - [Basic Test Execution](#basic-test-execution)
-  - [Coverage Analysis](#coverage-analysis)
-  - [Parallel Test Execution](#parallel-test-execution)
-- [Test Fixtures](#test-fixtures)
-  - [Pytest Fixtures](#pytest-fixtures)
-  - [Using Fixtures](#using-fixtures)
-- [Mocking and Stubbing](#mocking-and-stubbing)
-  - [Unit Test Mocking](#unit-test-mocking)
-  - [Integration Test Stubbing](#integration-test-stubbing)
-- [Performance Testing](#performance-testing)
-  - [Load Testing](#load-testing)
-  - [Memory Testing](#memory-testing)
-- [Test Data Management](#test-data-management)
-  - [Test Fixtures Directory](#test-fixtures-directory)
-  - [Loading Test Data](#loading-test-data)
-- [Continuous Integration](#continuous-integration)
-  - [GitHub Actions Workflow](#github-actions-workflow)
-- [Best Practices](#best-practices)
-  - [1. Test Naming](#1-test-naming)
-  - [2. Test Organization](#2-test-organization)
-  - [3. Assertion Quality](#3-assertion-quality)
-  - [4. Test Independence](#4-test-independence)
-- [Troubleshooting](#troubleshooting)
-  - [Common Test Issues](#common-test-issues)
-- [Resources](#resources)
+- [flext-target-oracle - FLEXT Testing Guide](#flext-target-oracle---flext-testing-guide)
+  - [Overview](#overview)
+  - [Test Structure](#test-structure)
+  - [Test Categories](#test-categories)
+    - [Unit Tests](#unit-tests)
+    - [Integration Tests](#integration-tests)
+    - [End-to-End Tests](#end-to-end-tests)
+  - [Test Markers](#test-markers)
+  - [Running Tests](#running-tests)
+    - [Basic Test Execution](#basic-test-execution)
+    - [Coverage Analysis](#coverage-analysis)
+    - [Parallel Test Execution](#parallel-test-execution)
+  - [Test Fixtures](#test-fixtures)
+    - [Pytest Fixtures](#pytest-fixtures)
+    - [Using Fixtures](#using-fixtures)
+  - [Mocking and Stubbing](#mocking-and-stubbing)
+    - [Unit Test Mocking](#unit-test-mocking)
+    - [Integration Test Stubbing](#integration-test-stubbing)
+  - [Performance Testing](#performance-testing)
+    - [Load Testing](#load-testing)
+    - [Memory Testing](#memory-testing)
+  - [Test Data Management](#test-data-management)
+    - [Test Fixtures Directory](#test-fixtures-directory)
+    - [Loading Test Data](#loading-test-data)
+  - [Continuous Integration](#continuous-integration)
+    - [GitHub Actions Workflow](#github-actions-workflow)
+  - [Best Practices](#best-practices)
+    - [1. Test Naming](#1-test-naming)
+    - [2. Test Organization](#2-test-organization)
+    - [3. Assertion Quality](#3-assertion-quality)
+    - [4. Test Independence](#4-test-independence)
+  - [Troubleshooting](#troubleshooting)
+    - [Common Test Issues](#common-test-issues)
+  - [Resources](#resources)
 <!-- TOC END -->
 
 This guide covers testing strategies, best practices, and procedures for FLEXT applications and libraries.
@@ -75,25 +76,8 @@ Test individual functions and classes in isolation:
 
 ```python notest
 import pytest
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 from flext_ldif import ldif
 
 
@@ -127,25 +111,8 @@ Test component interactions and workflows:
 
 ```python notest
 import pytest
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 from flext_ldif import ldif, FlextLdifSettings
 
 
@@ -356,25 +323,8 @@ def test_file_migration(ldif_service, temp_directories):
 
 ```python notest
 from unittest.mock import Mock, patch
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 
 
 def test_with_mocked_dependency():
@@ -395,25 +345,8 @@ def test_with_mocked_dependency():
 
 ```python notest
 from unittest.mock import Mock
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 
 
 def test_with_stubbed_service():

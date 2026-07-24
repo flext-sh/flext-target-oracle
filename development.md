@@ -1,34 +1,48 @@
 # Development Guide
 
 <!-- TOC START -->
-- [Quick Start](#quick-start)
-  - [Prerequisites](#prerequisites)
-  - [Environment Setup](#environment-setup)
-  - [Verify Installation](#verify-installation)
-- [Development Workflow](#development-workflow)
-  - [Daily Development Commands](#daily-development-commands)
-  - [Testing Workflow](#testing-workflow)
-  - [Code Quality Standards](#code-quality-standards)
-- [FLEXT Pattern Implementation](#flext-pattern-implementation)
-  - [r Railway Pattern](#r-railway-pattern)
-  - [Configuration Patterns](#configuration-patterns)
-  - [Logging Patterns](#logging-patterns)
-- [Oracle Integration Development](#oracle-integration-development)
-  - [Database Connection Testing](#database-connection-testing)
-  - [Table Management Development](#table-management-development)
-- [Debugging and Troubleshooting](#debugging-and-troubleshooting)
-  - [Common Development Issues](#common-development-issues)
-  - [Debugging Tools](#debugging-tools)
-- [Testing Development](#testing-development)
-  - [Writing New Tests](#writing-new-tests)
-  - [Test Data Management](#test-data-management)
-- [Performance Development](#performance-development)
-  - [Batch Size Optimization](#batch-size-optimization)
-  - [Memory Usage Monitoring](#memory-usage-monitoring)
-- [Contributing Guidelines](#contributing-guidelines)
-  - [Pull Request Checklist](#pull-request-checklist)
-  - [Commit Message Format](#commit-message-format)
-  - [Review Process](#review-process)
+- [Development Guide](#development-guide)
+  - [Quick Start](#quick-start)
+    - [Prerequisites](#prerequisites)
+    - [Environment Setup](#environment-setup)
+    - [Verify Installation](#verify-installation)
+  - [Development Workflow](#development-workflow)
+    - [Daily Development Commands](#daily-development-commands)
+    - [Testing Workflow](#testing-workflow)
+      - [Unit Testing (No External Dependencies)](#unit-testing-no-external-dependencies)
+      - [Integration Testing (Requires Oracle)](#integration-testing-requires-oracle)
+      - [Performance Testing](#performance-testing)
+    - [Code Quality Standards](#code-quality-standards)
+      - [Zero Tolerance Quality Gates](#zero-tolerance-quality-gates)
+      - [Code Style Guidelines](#code-style-guidelines)
+  - [FLEXT Pattern Implementation](#flext-pattern-implementation)
+    - [r Railway Pattern](#r-railway-pattern)
+    - [Configuration Patterns](#configuration-patterns)
+    - [Logging Patterns](#logging-patterns)
+  - [Oracle Integration Development](#oracle-integration-development)
+    - [Database Connection Testing](#database-connection-testing)
+    - [Table Management Development](#table-management-development)
+  - [Debugging and Troubleshooting](#debugging-and-troubleshooting)
+    - [Common Development Issues](#common-development-issues)
+      - [1. Oracle Connection Issues](#1-oracle-connection-issues)
+      - [2. Import Errors](#2-import-errors)
+      - [3. Configuration Validation Errors](#3-configuration-validation-errors)
+    - [Debugging Tools](#debugging-tools)
+      - [1. Enhanced Logging](#1-enhanced-logging)
+      - [2. Interactive Development](#2-interactive-development)
+      - [3. Performance Profiling](#3-performance-profiling)
+  - [Testing Development](#testing-development)
+    - [Writing New Tests](#writing-new-tests)
+      - [Unit Test Template](#unit-test-template)
+      - [Integration Test Template](#integration-test-template)
+    - [Test Data Management](#test-data-management)
+  - [Performance Development](#performance-development)
+    - [Batch Size Optimization](#batch-size-optimization)
+    - [Memory Usage Monitoring](#memory-usage-monitoring)
+  - [Contributing Guidelines](#contributing-guidelines)
+    - [Pull Request Checklist](#pull-request-checklist)
+    - [Commit Message Format](#commit-message-format)
+    - [Review Process](#review-process)
 <!-- TOC END -->
 
 **FLEXT Target Oracle - Developer Documentation**
@@ -168,25 +182,8 @@ make test                   # Must maintain 90%+ coverage
 
 ```python notest
 # ✅ GOOD: FLEXT patterns
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 
 
 def operation() -> p.Result[Data]:
@@ -291,25 +288,8 @@ class FlextOracleTargetSettings(m.Value):
 
 ```python notest
 # ✅ Structured logging with context
-from flext_core import FlextBus
+from flext_cli import u
 from flext_core import FlextSettings
-from flext_core import FlextConstants
-from flext_core import FlextContainer
-from flext_core import FlextContext
-from flext_core import d
-from flext_core import FlextDispatcher
-from flext_core import e
-from flext_core import h
-from flext_core import x
-from flext_core import FlextModels
-from flext_core import FlextProcessors
-from flext_core import p
-from flext_core import FlextRegistry
-from flext_core import r, p
-from flext_core import u
-from flext_core import s
-from flext_core import t
-from flext_core import u
 
 logger = u.fetch_logger(__name__)
 
