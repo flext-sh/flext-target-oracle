@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 from flext_target_oracle._utilities.client import FlextTargetOracle
+from flext_target_oracle._utilities.errors import FlextTargetOracleExceptions
+from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
 
 from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import u
@@ -22,4 +24,10 @@ class FlextTargetOracleUtilities(u, FlextDbOracleUtilities):
 
 u = FlextTargetOracleUtilities
 
-__all__: list[str] = ["FlextTargetOracle", "FlextTargetOracleUtilities", "u"]
+__all__: list[str] = [
+    "FlextTargetOracle",
+    "FlextTargetOracleExceptions",
+    "FlextTargetOracleLoader",
+    "FlextTargetOracleUtilities",
+    "u",
+]

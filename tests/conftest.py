@@ -8,6 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import os
+import secrets
 from pathlib import Path
 from time import monotonic, sleep
 from typing import TYPE_CHECKING
@@ -17,7 +18,7 @@ import pytest
 
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_target_oracle import FlextTargetOracleSettings
-from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+from flext_target_oracle.utilities import FlextTargetOracleLoader
 from flext_tests import reset_settings as _shared_reset_settings, tk, tm
 from tests import c, m
 
@@ -27,6 +28,8 @@ if TYPE_CHECKING:
     from tests import t
 
 reset_settings = _shared_reset_settings
+
+_ORACLE_TEST_PASSWORD = secrets.token_hex(16)
 
 
 def pytest_configure(config: pytest.Config) -> None:
@@ -77,7 +80,7 @@ def shared_oracle_container(docker_control: tk) -> str:
     os.environ["TEST_ORACLE_PORT"] = str(resolved_port)
     os.environ["TEST_ORACLE_SERVICE"] = "FLEXTDB"
     os.environ["TEST_ORACLE_USER"] = "flext_test"
-    os.environ["TEST_ORACLE_PASSWORD"] = "flext_test_password"
+    os.environ["TEST_ORACLE_PASSWORD"] = _ORACLE_TEST_PASSWORD
     admin_settings = FlextDbOracleSettings.model_validate({
         "DbOracle": {
             "host": os.environ["TEST_ORACLE_HOST"],
@@ -129,12 +132,12 @@ def shared_oracle_container(docker_control: tk) -> str:
                 user_exists = user_count > 0
                 if not user_exists:
                     create_user_result = admin_api.execute_sql(
-                        "CREATE USER flext_test IDENTIFIED BY flext_test_password"
+                        f"CREATE USER flext_test IDENTIFIED BY {_ORACLE_TEST_PASSWORD}"
                     )
                     if create_user_result.failure:
                         last_error = create_user_result.error or last_error
                 alter_user_result = admin_api.execute_sql(
-                    "ALTER USER flext_test IDENTIFIED BY flext_test_password ACCOUNT UNLOCK"
+                    f"ALTER USER flext_test IDENTIFIED BY {_ORACLE_TEST_PASSWORD} ACCOUNT UNLOCK"
                 )
                 if alter_user_result.failure:
                     last_error = alter_user_result.error or last_error
@@ -183,7 +186,7 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
                 "username": os.getenv(
                     "TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA
                 ),
-                "password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
+                "password": os.getenv("TEST_ORACLE_PASSWORD", _ORACLE_TEST_PASSWORD),
             }
         })
     )
@@ -235,7 +238,7 @@ def oracle_config(
             "oracle_user": os.getenv(
                 "TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA
             ),
-            "oracle_password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
+            "oracle_password": os.getenv("TEST_ORACLE_PASSWORD", _ORACLE_TEST_PASSWORD),
             "default_target_schema": c.TargetOracle.Tests.TEST_SCHEMA,
             "batch_size": 1000,
             "table_prefix": "",

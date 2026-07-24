@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from flext_cli import u as cli_u
-from flext_target_oracle._utilities.client import FlextTargetOracle
+from flext_target_oracle.utilities import FlextTargetOracle
 from flext_tests import tm
 from tests import m
 
