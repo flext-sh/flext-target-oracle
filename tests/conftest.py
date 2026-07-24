@@ -173,14 +173,16 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
     api = FlextDbOracleApi(
         FlextDbOracleSettings.model_validate({
             "DbOracle": {
-            "host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
+                "host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
                 "port": int(
-                os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT))
+                    os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT))
                 ),
                 "service_name": os.getenv(
                     "TEST_ORACLE_SERVICE", c.TargetOracle.Tests.ORACLE_SERVICE
                 ),
-            "username": os.getenv("TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA),
+                "username": os.getenv(
+                    "TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA
+                ),
                 "password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
             }
         })
@@ -221,14 +223,18 @@ def oracle_config(
     _ = (shared_oracle_container, isolate_target_oracle_env)
     return FlextTargetOracleSettings.model_validate({
         "TargetOracle": {
-        "oracle_host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
+            "oracle_host": os.getenv(
+                "TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST
+            ),
             "oracle_port": int(
                 os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT))
             ),
             "oracle_service_name": os.getenv(
                 "TEST_ORACLE_SERVICE", c.TargetOracle.Tests.ORACLE_SERVICE
             ),
-        "oracle_user": os.getenv("TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA),
+            "oracle_user": os.getenv(
+                "TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA
+            ),
             "oracle_password": os.getenv("TEST_ORACLE_PASSWORD", "test_password"),
             "default_target_schema": c.TargetOracle.Tests.TEST_SCHEMA,
             "batch_size": 1000,

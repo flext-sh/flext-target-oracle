@@ -574,7 +574,7 @@ def test_singer_tap_integration():
             message = json.loads(line)
             result = target.process_singer_message(message)
             if result.failure:
-                print(f"Message processing failed: {result.error}")
+                u.Cli.print(f"Message processing failed: {result.error}")
                 break
         except json.JSONDecodeError:
             continue

@@ -373,9 +373,9 @@ loader = FlextOracleTargetLoader(settings)
 with loader.oracle_api as connected_api:
     tables_result = connected_api.get_tables("TEST_SCHEMA")
     if tables_result.success:
-        print(f"Connected! Found {len(tables_result.value)} tables")
+        u.Cli.print(f"Connected! Found {len(tables_result.value)} tables")
     else:
-        print(f"Connection failed: {tables_result.error}")
+        u.Cli.print(f"Connection failed: {tables_result.error}")
 ```
 
 ### Table Management Development
@@ -398,7 +398,7 @@ def test_table_management():
     # Ensure table exists
     result = loader.ensure_table_exists("test_stream", schema)
     if result.failure:
-        print(f"Table creation failed: {result.error}")
+        u.Cli.print(f"Table creation failed: {result.error}")
         return
 
     # Test record insertion
@@ -406,9 +406,9 @@ def test_table_management():
 
     result = loader.load_record("test_stream", test_record)
     if result.success:
-        print("Record loaded successfully")
+        u.Cli.print("Record loaded successfully")
     else:
-        print(f"Record loading failed: {result.error}")
+        u.Cli.print(f"Record loading failed: {result.error}")
 ```
 
 ## Debugging and Troubleshooting
@@ -438,7 +438,7 @@ settings = FlextOracleTargetSettings(
     oracle_password='oracle'
 )
 loader = FlextOracleTargetLoader(settings)
-print('Config created successfully')
+u.Cli.print('Config created successfully')
 "
 ```
 
@@ -457,7 +457,7 @@ from flext_target_oracle import (
 )
 
 # ✅ Debug imports
-python -c "from flext_target_oracle import *; print(dir())"
+python -c "from flext_target_oracle import *; u.Cli.print(dir())"
 ```
 
 #### 3. Configuration Validation Errors
@@ -483,10 +483,10 @@ try:
     # Test domain rules
     validation_result = settings.validate_domain_rules()
     if validation_result.failure:
-        print(f"Validation failed: {validation_result.error}")
+        u.Cli.print(f"Validation failed: {validation_result.error}")
 
 except c.ValidationError as e:
-    print(f"Configuration error: {e}")
+    u.Cli.print(f"Configuration error: {e}")
 ```
 
 ### Debugging Tools
@@ -694,7 +694,9 @@ def benchmark_batch_sizes(records: List[m.Dict]):
 
     # Print results
     for batch_size, stats in results.items():
-        print(f"Batch size {batch_size}: {stats['records_per_second']:.1f} records/sec")
+        u.Cli.print(
+            f"Batch size {batch_size}: {stats['records_per_second']:.1f} records/sec"
+        )
 ```
 
 ### Memory Usage Monitoring
@@ -712,12 +714,12 @@ def monitor_memory_usage():
     def get_memory_mb():
         return process.memory_info().rss / 1024 / 1024
 
-    print(f"Initial memory: {get_memory_mb():.1f} MB")
+    u.Cli.print(f"Initial memory: {get_memory_mb():.1f} MB")
 
     # Your processing code here
     # ...
 
-    print(f"Final memory: {get_memory_mb():.1f} MB")
+    u.Cli.print(f"Final memory: {get_memory_mb():.1f} MB")
 ```
 
 ## Contributing Guidelines

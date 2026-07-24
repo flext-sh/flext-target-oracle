@@ -612,12 +612,12 @@ def process_batch(self, stream_name: str, records: list) -> p.Result[bool]:
 
 # ❌ INCORRECT - Unstructured logging
 def process_batch_bad(self, stream_name: str, records: list):
-    print(f"Processing {len(records)} records")  # Not structured
+    u.Cli.print(f"Processing {len(records)} records")  # Not structured
     try:
         # Process records
         pass
     except Exception as e:
-        print(f"Error: {e}")  # No context
+        u.Cli.print(f"Error: {e}")  # No context
 ```
 
 ______________________________________________________________________
@@ -964,9 +964,9 @@ def ensure_table_exists(self, stream_name: str, schema: m.Dict) -> p.Result[bool
         ... }
         >>> result = loader.ensure_table_exists("users", schema)
         >>> if result.success:
-        ...     print("Table ready for loading")
+        ...     u.Cli.print("Table ready for loading")
         ... else:
-        ...     print(f"Table creation failed: {result.error}")
+        ...     u.Cli.print(f"Table creation failed: {result.error}")
 
     Note:
         This method creates tables with a simplified JSON storage approach

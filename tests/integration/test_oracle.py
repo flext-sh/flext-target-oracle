@@ -218,10 +218,7 @@ class TestsFlextTargetOracleOracle:
     ) -> None:
         """Test JSON storage mode with nested data."""
         oracle_config = oracle_config.clone(
-            TargetOracle={
-                "storage_mode": "json",
-                "json_column_name": "json_data",
-            }
+            TargetOracle={"storage_mode": "json", "json_column_name": "json_data"}
         )
         loader = FlextTargetOracleLoader(oracle_config)
         tm.ok(loader.connect())
@@ -333,9 +330,7 @@ class TestsFlextTargetOracleOracle:
         simple_schema: t.JsonValue,
     ) -> None:
         """Test truncate table before loading data."""
-        oracle_config = oracle_config.clone(
-            TargetOracle={"truncate_before_load": True}
-        )
+        oracle_config = oracle_config.clone(TargetOracle={"truncate_before_load": True})
         loader = FlextTargetOracleLoader(oracle_config)
         tm.ok(loader.connect())
         stream_name = "test_truncate"
@@ -367,7 +362,8 @@ class TestsFlextTargetOracleOracle:
         """Test creation of custom indexes."""
         oracle_config = oracle_config.clone(
             TargetOracle={
-                "custom_indexes": t.json_value_adapter()
+                "custom_indexes": t
+                .json_value_adapter()
                 .dump_json({
                     "test_indexes": [
                         {
@@ -378,7 +374,7 @@ class TestsFlextTargetOracleOracle:
                         {"columns": ["NAME", "CREATED_AT"]},
                     ]
                 })
-                .decode("utf-8"),
+                .decode("utf-8")
             }
         )
         loader = FlextTargetOracleLoader(oracle_config)
@@ -439,10 +435,9 @@ class TestsFlextTargetOracleOracle:
         """Test column mapping and filtering features."""
         oracle_config = oracle_config.clone(
             TargetOracle={
-                "column_mappings": t.json_value_adapter()
-                .dump_json({
-                    "users": {"name": "full_name", "email": "email_address"}
-                })
+                "column_mappings": t
+                .json_value_adapter()
+                .dump_json({"users": {"name": "full_name", "email": "email_address"}})
                 .decode("utf-8"),
                 "ignored_columns": ["password", "internal_id"],
             }
