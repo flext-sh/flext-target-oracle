@@ -15,7 +15,8 @@ echo -e "${BLUE}=====================================${NC}"
 
 # Check if Oracle is running
 echo -e "${YELLOW}Checking Oracle container...${NC}"
-if ! docker ps | grep -q "flext-oracle-test"; then
+docker_ps_output=$(docker ps) || true
+if ! grep -q "flext-oracle-test" <<< "${docker_ps_output}"; then
 	echo -e "${YELLOW}Starting Oracle container...${NC}"
 	cd .. && make oracle-start && cd examples
 fi
