@@ -23,9 +23,7 @@ class FlextTargetOracleSettings(FlextSettings):
     """Oracle Singer target settings; fields under ``settings.TargetOracle.*``."""
 
     model_config = SettingsConfigDict(
-        env_prefix="FLEXT_TARGET_ORACLE_",
-        env_nested_delimiter="__",
-        extra="ignore",
+        env_prefix="FLEXT_TARGET_ORACLE_", env_nested_delimiter="__", extra="ignore"
     )
 
     class _TargetOracle(BaseModel):
@@ -91,8 +89,7 @@ class FlextTargetOracleSettings(FlextSettings):
             ),
         ]
         ignored_columns: Annotated[
-            list[str],
-            Field(default_factory=list, description="Ignored columns"),
+            list[str], Field(default_factory=list, description="Ignored columns")
         ]
         custom_indexes: Annotated[
             str,

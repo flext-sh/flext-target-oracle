@@ -19,7 +19,7 @@ class FlextTargetOracleConstantsBase:
     # === Regex authority for the TargetOracle domain ===
     QUALIFIED_IDENTIFIER_PATTERN: Final[str] = r"[A-Za-z_][A-Za-z0-9_$.]*"
     QUALIFIED_IDENTIFIER_RE: ClassVar[t.RegexPattern] = re.compile(
-        QUALIFIED_IDENTIFIER_PATTERN,
+        QUALIFIED_IDENTIFIER_PATTERN
     )
 
     # LoadMethods

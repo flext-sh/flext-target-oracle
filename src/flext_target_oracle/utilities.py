@@ -14,8 +14,7 @@ class FlextTargetOracleUtilities(u, FlextDbOracleUtilities):
     """Focused utility namespace used by Oracle target modules."""
 
     class TargetOracle(
-        FlextTargetOracleUtilitiesObservability,
-        FlextTargetOracleUtilitiesBase,
+        FlextTargetOracleUtilitiesObservability, FlextTargetOracleUtilitiesBase
     ):
         """Oracle target utility namespace."""
 

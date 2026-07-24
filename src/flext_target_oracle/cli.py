@@ -37,17 +37,11 @@ class FlextTargetOracleCli:
         # hands it to the service handler; execution no longer lives on the model.
         service = FlextTargetOracleService.fetch_global()
         if command_name == "validate":
-            return service.run_validate(
-                m.TargetOracle.OracleTargetValidateCommand(),
-            )
+            return service.run_validate(m.TargetOracle.OracleTargetValidateCommand())
         if command_name == "load":
-            return service.run_load(
-                m.TargetOracle.OracleTargetLoadCommand(),
-            )
+            return service.run_load(m.TargetOracle.OracleTargetLoadCommand())
         if command_name == "about":
-            return service.run_about(
-                m.TargetOracle.OracleTargetAboutCommand(),
-            )
+            return service.run_about(m.TargetOracle.OracleTargetAboutCommand())
         return r[str].fail(f"Unknown command: {command_name}")
 
     def _get_help_text(self) -> str:

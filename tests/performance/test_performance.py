@@ -36,16 +36,16 @@ class TestsFlextTargetOraclePerformance:
         mock_oracle_api.fetch_tables.return_value = r[list[str]].ok(empty_tables)
         mock_oracle_api.execute_sql.return_value = r[bool].ok(value=True)
         type_mapping = m.DbOracle.TypeMapping.model_validate({
-            "mapping": {"id": "NUMBER"},
+            "mapping": {"id": "NUMBER"}
         })
         mock_oracle_api.oracle_services.map_singer_schema.return_value = r[
             m.DbOracle.TypeMapping
         ].ok(type_mapping)
         mock_oracle_api.oracle_services.create_table_ddl.return_value = r[str].ok(
-            "CREATE TABLE perf_stream (id NUMBER)",
+            "CREATE TABLE perf_stream (id NUMBER)"
         )
         mock_oracle_api.oracle_services.build_insert_statement.return_value = r[str].ok(
-            "INSERT INTO perf_stream (id) VALUES (:id)",
+            "INSERT INTO perf_stream (id) VALUES (:id)"
         )
         mock_oracle_api.execute_statement.return_value = r[int].ok(1)
         mock_oracle_api.execute_many.return_value = r[int].ok(1)
@@ -90,20 +90,18 @@ class TestsFlextTargetOraclePerformance:
             "stream": "perf_stream",
             "schema": {
                 "type": "object",
-                "properties": u.Cli.json_dumps({
-                    "id": {"type": "integer"},
-                }).unwrap(),
+                "properties": u.Cli.json_dumps({"id": {"type": "integer"}}).unwrap(),
             },
             "key_properties": ["id"],
         }
         record = {"type": "RECORD", "stream": "perf_stream", "record": {"id": 1}}
         tm.ok(
             target.process_singer_message(
-                m.Meltano.SingerSchemaMessage.model_validate(schema),
+                m.Meltano.SingerSchemaMessage.model_validate(schema)
             )
         )
         tm.ok(
             target.process_singer_message(
-                m.Meltano.SingerRecordMessage.model_validate(record),
+                m.Meltano.SingerRecordMessage.model_validate(record)
             )
         )

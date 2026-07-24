@@ -14,10 +14,7 @@ if TYPE_CHECKING:
 class FlextTargetOracleConnectionService:
     """Minimal Oracle connection service implements ConnectionService protocol."""
 
-    def __init__(
-        self,
-        oracle_api: FlextDbOracleApi,
-    ) -> None:
+    def __init__(self, oracle_api: FlextDbOracleApi) -> None:
         """Store configuration and Oracle API dependency."""
         self.oracle_api = oracle_api
 
@@ -34,13 +31,13 @@ class FlextTargetOracleConnectionService:
                 service_name=settings.TargetOracle.oracle_service_name,
                 username=settings.TargetOracle.oracle_user,
                 password=settings.TargetOracle.oracle_password,
-            ),
+            )
         )
 
     def test_connection(self) -> p.Result[None]:
         """Check Oracle access by listing schema tables."""
         tables_result = self.oracle_api.fetch_tables(
-            schema=settings.TargetOracle.default_target_schema,
+            schema=settings.TargetOracle.default_target_schema
         )
         if tables_result.failure:
             return r[None].fail(tables_result.error or "Connection test failed")
@@ -50,10 +47,7 @@ class FlextTargetOracleConnectionService:
 class FlextTargetOracleSchemaService:
     """Minimal schema management service implements SchemaService protocol."""
 
-    def __init__(
-        self,
-        oracle_api: FlextDbOracleApi,
-    ) -> None:
+    def __init__(self, oracle_api: FlextDbOracleApi) -> None:
         """Store schema service dependencies."""
         self.oracle_api = oracle_api
 
@@ -77,10 +71,7 @@ class FlextTargetOracleSchemaService:
 class FlextTargetOracleBatchService:
     """Minimal batching service implements BatchService protocol."""
 
-    def __init__(
-        self,
-        oracle_api: FlextDbOracleApi,
-    ) -> None:
+    def __init__(self, oracle_api: FlextDbOracleApi) -> None:
         """Initialize batch storage and required dependencies."""
         self.oracle_api = oracle_api
         self._batches: defaultdict[str, list[p.Meltano.SingerRecordMessage]] = (
@@ -88,9 +79,7 @@ class FlextTargetOracleBatchService:
         )
 
     def add_record(
-        self,
-        stream_name: str,
-        record_message: p.Meltano.SingerRecordMessage,
+        self, stream_name: str, record_message: p.Meltano.SingerRecordMessage
     ) -> p.Result[None]:
         """Append a record to a stream buffer."""
         self._batches[stream_name].append(record_message)
@@ -147,7 +136,7 @@ class FlextTargetOracleRecordService:
                 "record": transformed,
                 "time_extracted": record_message.time_extracted,
                 "version": record_message.version,
-            }),
+            })
         )
 
     def validate_record(

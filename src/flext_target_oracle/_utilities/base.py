@@ -27,14 +27,10 @@ class FlextTargetOracleUtilitiesBase:
         settings_cls = settings_module.FlextTargetOracleSettings
 
         if config_file is None:
-            return result_type.ok(
-                settings_cls.model_validate({}),
-            )
+            return result_type.ok(settings_cls.model_validate({}))
         config_path = Path(config_file)
         if not config_path.exists():
-            return result_type.fail(
-                f"Configuration file not found: {config_file}",
-            )
+            return result_type.fail(f"Configuration file not found: {config_file}")
         try:
             content = config_path.read_text(encoding=c.DEFAULT_ENCODING)
             settings = settings_cls.model_validate_json(content)

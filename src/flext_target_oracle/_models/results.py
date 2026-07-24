@@ -22,16 +22,11 @@ class FlextTargetOracleModelsResults:
         """Target execute readiness payload."""
 
         name: Annotated[
-            str,
-            u.Field(..., description="Target package name", validate_default=True),
+            str, u.Field(..., description="Target package name", validate_default=True)
         ]
         status: Annotated[
             Literal["ready"],
-            u.Field(
-                ...,
-                description="Target readiness status",
-                validate_default=True,
-            ),
+            u.Field(..., description="Target readiness status", validate_default=True),
         ] = "ready"
         oracle_host: Annotated[
             str,
@@ -40,9 +35,7 @@ class FlextTargetOracleModelsResults:
         oracle_service: Annotated[
             str,
             u.Field(
-                ...,
-                description="Configured Oracle service name",
-                validate_default=True,
+                ..., description="Configured Oracle service name", validate_default=True
             ),
         ]
 
@@ -74,8 +67,7 @@ class FlextTargetOracleModelsResults:
             ),
         ] = u.Field(
             default_factory=lambda: p.Meltano.SingerStateMessage(
-                type="STATE",
-                value={},
+                type="STATE", value={}
             ),
             validate_default=True,
         )
@@ -86,17 +78,13 @@ class FlextTargetOracleModelsResults:
         stream_name: Annotated[
             str,
             u.Field(
-                ...,
-                description="Logical stream identifier",
-                validate_default=True,
+                ..., description="Logical stream identifier", validate_default=True
             ),
         ]
         started_at: Annotated[
             str,
             u.Field(
-                ...,
-                description="Load operation start timestamp",
-                validate_default=True,
+                ..., description="Load operation start timestamp", validate_default=True
             ),
         ]
         completed_at: Annotated[
@@ -126,18 +114,12 @@ class FlextTargetOracleModelsResults:
         streams_processed: Annotated[
             t.NonNegativeInt,
             u.Field(
-                ...,
-                description="Number of processed streams",
-                validate_default=True,
+                ..., description="Number of processed streams", validate_default=True
             ),
         ]
         status: Annotated[
             Literal["completed"],
-            u.Field(
-                ...,
-                description="Finalization status",
-                validate_default=True,
-            ),
+            u.Field(..., description="Finalization status", validate_default=True),
         ] = "completed"
         loading_operation: FlextTargetOracleModelsResults.LoaderOperation = u.Field(
             ...,
@@ -159,9 +141,7 @@ class FlextTargetOracleModelsResults:
         streams_configured: Annotated[
             t.NonNegativeInt,
             u.Field(
-                ...,
-                description="Number of configured streams",
-                validate_default=True,
+                ..., description="Number of configured streams", validate_default=True
             ),
         ]
         batch_size: Annotated[
@@ -181,16 +161,11 @@ class FlextTargetOracleModelsResults:
         """Statistics for data load operation."""
 
         stream_name: Annotated[
-            str,
-            u.Field(..., description="Stream identifier", validate_default=True),
+            str, u.Field(..., description="Stream identifier", validate_default=True)
         ]
         total_records_processed: Annotated[
             t.NonNegativeInt,
-            u.Field(
-                ...,
-                description="Total processed records",
-                validate_default=True,
-            ),
+            u.Field(..., description="Total processed records", validate_default=True),
         ]
         successful_records: Annotated[
             t.NonNegativeInt,

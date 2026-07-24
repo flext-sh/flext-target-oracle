@@ -74,65 +74,29 @@ if TYPE_CHECKING:
         u as u,
     )
 _LAZY_IMPORTS = merge_lazy_imports(
-    (
-        ".e2e",
-        ".integration",
-        ".performance",
-        ".unit",
-    ),
-    build_lazy_import_map(
-        {
-            ".base": (
-                "TestsFlextTargetOracleServiceBase",
-                "s",
-            ),
-            ".conftest": ("conftest",),
-            ".constants": (
-                "TestsFlextTargetOracleConstants",
-                "c",
-            ),
-            ".e2e": ("e2e",),
-            ".e2e.test_singer": ("TestsFlextTargetOracleSinger",),
-            ".integration": ("integration",),
-            ".integration.test_oracle": ("TestsFlextTargetOracleOracle",),
-            ".models": (
-                "TestsFlextTargetOracleModels",
-                "m",
-            ),
-            ".performance": ("performance",),
-            ".performance.test_performance": ("TestsFlextTargetOraclePerformance",),
-            ".protocols": (
-                "TestsFlextTargetOracleProtocols",
-                "p",
-            ),
-            ".settings": ("TestsFlextTargetOracleSettings",),
-            ".typings": (
-                "TestsFlextTargetOracleTypes",
-                "t",
-            ),
-            ".unit": ("unit",),
-            ".unit.test_config": ("TestsFlextTargetOracleConfig",),
-            ".unit.test_loader": ("TestsFlextTargetOracleLoader",),
-            ".unit.test_module_governance": ("TestsFlextTargetOracleModuleGovernance",),
-            ".unit.test_target": ("TestsFlextTargetOracleTarget",),
-            ".utilities": (
-                "TestsFlextTargetOracleUtilities",
-                "u",
-            ),
-            "flext_tests": (
-                "d",
-                "e",
-                "h",
-                "r",
-                "td",
-                "tf",
-                "tk",
-                "tm",
-                "tv",
-                "x",
-            ),
-        },
-    ),
+    (".e2e", ".integration", ".performance", ".unit"),
+    build_lazy_import_map({
+        ".base": ("TestsFlextTargetOracleServiceBase", "s"),
+        ".conftest": ("conftest",),
+        ".constants": ("TestsFlextTargetOracleConstants", "c"),
+        ".e2e": ("e2e",),
+        ".e2e.test_singer": ("TestsFlextTargetOracleSinger",),
+        ".integration": ("integration",),
+        ".integration.test_oracle": ("TestsFlextTargetOracleOracle",),
+        ".models": ("TestsFlextTargetOracleModels", "m"),
+        ".performance": ("performance",),
+        ".performance.test_performance": ("TestsFlextTargetOraclePerformance",),
+        ".protocols": ("TestsFlextTargetOracleProtocols", "p"),
+        ".settings": ("TestsFlextTargetOracleSettings",),
+        ".typings": ("TestsFlextTargetOracleTypes", "t"),
+        ".unit": ("unit",),
+        ".unit.test_config": ("TestsFlextTargetOracleConfig",),
+        ".unit.test_loader": ("TestsFlextTargetOracleLoader",),
+        ".unit.test_module_governance": ("TestsFlextTargetOracleModuleGovernance",),
+        ".unit.test_target": ("TestsFlextTargetOracleTarget",),
+        ".utilities": ("TestsFlextTargetOracleUtilities", "u"),
+        "flext_tests": ("d", "e", "h", "r", "td", "tf", "tk", "tm", "tv", "x"),
+    }),
     exclude_names=(
         "cleanup_submodule_namespace",
         "install_lazy_exports",
@@ -156,9 +120,4 @@ _LAZY_IMPORTS = merge_lazy_imports(
 )
 
 
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    publish_all=False,
-)
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, publish_all=False)

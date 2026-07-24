@@ -69,10 +69,10 @@ def create_configuration() -> FlextTargetOracleSettings:
             "batch_size": 100,
             "use_bulk_operations": True,
             "transaction_timeout": 30,
-        },
+        }
     })
     logger.info(
-        f"Configuration created: {settings.TargetOracle.oracle_host}:{settings.TargetOracle.oracle_port}/{settings.TargetOracle.oracle_service_name}",
+        f"Configuration created: {settings.TargetOracle.oracle_host}:{settings.TargetOracle.oracle_port}/{settings.TargetOracle.oracle_service_name}"
     )
     return settings
 
@@ -161,8 +161,8 @@ def create_sample_state_message() -> p.Meltano.SingerStateMessage:
             "type": "STATE",
             "value": {
                 "bookmarks": {
-                    "users": {"last_id": 3, "last_updated": "2025-01-01T12:00:00Z"},
-                },
+                    "users": {"last_id": 3, "last_updated": "2025-01-01T12:00:00Z"}
+                }
             },
         })
     )
@@ -248,7 +248,7 @@ def demonstrate_error_handling() -> None:
                 "oracle_service_name": "XE",
                 "oracle_user": os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
                 "oracle_password": os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
-            },
+            }
         })
         validation_result = r[bool].ok(value=True)
         if validation_result.failure:

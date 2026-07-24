@@ -22,16 +22,11 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     """Orchestrator for target-oracle. Loader-based, not Singer sink."""
 
     target_name: Annotated[
-        t.NonEmptyStr,
-        u.Field(description="Canonical Singer target identifier."),
+        t.NonEmptyStr, u.Field(description="Canonical Singer target identifier.")
     ] = "target-oracle"
 
     @override
-    def create_sink(
-        self,
-        stream_name: str,
-        schema: t.JsonMapping,
-    ) -> Never:
+    def create_sink(self, stream_name: str, schema: t.JsonMapping) -> Never:
         """Not supported — use FlextTargetOracleLoader directly."""
         msg = "target-oracle uses Loader pattern, not Singer sink"
         raise TypeError(msg)
@@ -40,8 +35,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     # service (a flext-core FlextService via MRO) owns execution. Behavior moved here
     # out of the model layer to respect the c→t→p→m→u order and SRP.
     def run_about(
-        self,
-        command: p.TargetOracle.OracleTargetAboutCommand,
+        self, command: p.TargetOracle.OracleTargetAboutCommand
     ) -> p.Result[str]:
         """Return target metadata for the about command message."""
         payload: t.StrMapping = {
@@ -52,14 +46,11 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         if command.format == c.TargetOracle.OUTPUT_FORMAT_TEXT:
             return r[str].ok("flext-target-oracle")
         return r[str].ok(
-            t.TargetOracle.STR_MAP_ADAPTER.dump_json(payload).decode(
-                c.DEFAULT_ENCODING,
-            ),
+            t.TargetOracle.STR_MAP_ADAPTER.dump_json(payload).decode(c.DEFAULT_ENCODING)
         )
 
     def run_load(
-        self,
-        command: p.TargetOracle.OracleTargetLoadCommand,
+        self, command: p.TargetOracle.OracleTargetLoadCommand
     ) -> p.Result[str]:
         """Initialize the target for loading from a load command message."""
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
@@ -69,14 +60,13 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         return r[str].ok("load_ready")
 
     def run_validate(
-        self,
-        command: p.TargetOracle.OracleTargetValidateCommand,
+        self, command: p.TargetOracle.OracleTargetValidateCommand
     ) -> p.Result[str]:
         """Validate target configuration from a validate command message."""
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
             return r[str].fail(
-                settings_result.error or "Configuration validation failed",
+                settings_result.error or "Configuration validation failed"
             )
         settings: p.TargetOracle.OracleSettingsProtocol = settings_result.value
         validation_result = (
@@ -92,7 +82,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         )
         if validation_result.failure:
             return r[str].fail(
-                validation_result.error or "Configuration validation failed",
+                validation_result.error or "Configuration validation failed"
             )
         return r[str].ok("validation_ok")
 

@@ -23,15 +23,13 @@ from flext_target_oracle._models.config import FlextTargetOracleConfigModels
 class FlextTargetOracleConfig(FlextMeltanoConfig):
     """TargetOracle config auto-loaded from ``config/*.yaml`` and validated via models."""
 
-    CONFIG_DIR: ClassVar[str] = str(
-        Path(__file__).resolve().parents[2] / "config",
-    )
+    CONFIG_DIR: ClassVar[str] = str(Path(__file__).resolve().parents[2] / "config")
 
     @cached_property
     def TargetOracle(self) -> FlextTargetOracleConfigModels.TargetOracle:
         """Validated ``TargetOracle`` business-rule config namespace."""
         root = FlextTargetOracleConfigModels.Root.model_validate(
-            dict(self.model_extra or {}),
+            dict(self.model_extra or {})
         )
         return root.TargetOracle
 

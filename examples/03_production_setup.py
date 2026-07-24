@@ -146,7 +146,7 @@ class ProductionConfig:
                 "batch_size": batch_size,
                 "use_bulk_operations": True,
                 "transaction_timeout": connection_timeout,
-            },
+            }
         })
         u.logger.info(
             "Production configuration created: %s:%s/%s",
@@ -155,14 +155,10 @@ class ProductionConfig:
             oracle_service,
         )
         u.logger.info(
-            "Target schema: %s, Batch size: %s",
-            default_target_schema,
-            batch_size,
+            "Target schema: %s, Batch size: %s", default_target_schema, batch_size
         )
         u.logger.info(
-            "Load method: %s, Connection timeout: %ss",
-            load_method,
-            connection_timeout,
+            "Load method: %s, Connection timeout: %ss", load_method, connection_timeout
         )
         return settings
 
@@ -204,8 +200,7 @@ class ProductionTargetManager:
             return r[t.JsonMapping].fail(f"Health check error: {e}")
 
     def _health_check_status(
-        self,
-        health_status: HealthStatus,
+        self, health_status: HealthStatus
     ) -> p.Result[t.JsonMapping]:
         """Build a health status result for the current target."""
         checks = health_status.checks
@@ -271,7 +266,7 @@ class ProductionTargetManager:
         validation_result = r[bool].ok(value=True)
         if validation_result.failure:
             return r[bool].fail(
-                f"Configuration validation failed: {validation_result.error}",
+                f"Configuration validation failed: {validation_result.error}"
             )
         u.logger.info("Creating Oracle target instance")
         self.target = FlextTargetOracle(self._settings)
@@ -283,8 +278,7 @@ class ProductionTargetManager:
         return r[bool].ok(value=True)
 
     def process_singer_stream(
-        self,
-        messages: t.SequenceOf[SingerMessage],
+        self, messages: t.SequenceOf[SingerMessage]
     ) -> p.Result[t.JsonMapping]:
         """Process complete Singer message stream with comprehensive error handling.
 
@@ -316,9 +310,7 @@ class ProductionTargetManager:
             return r[t.JsonMapping].fail(f"Stream processing error: {e}")
 
     def _process_singer_stream_checked(
-        self,
-        messages: t.SequenceOf[SingerMessage],
-        stats: ProcessingStats,
+        self, messages: t.SequenceOf[SingerMessage], stats: ProcessingStats
     ) -> p.Result[t.JsonMapping]:
         """Process a Singer stream after the public exception boundary."""
         for index, message in enumerate(messages):
@@ -330,11 +322,7 @@ class ProductionTargetManager:
         return r[t.JsonMapping].ok(stats.model_dump())
 
     def _process_singer_message(
-        self,
-        index: int,
-        total: int,
-        message: SingerMessage,
-        stats: ProcessingStats,
+        self, index: int, total: int, message: SingerMessage, stats: ProcessingStats
     ) -> None:
         """Process one Singer message and update counters."""
         message_type = self._message_type(message)
@@ -601,8 +589,8 @@ def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
                         base_date + datetime.timedelta(hours=100)
                     ).isoformat()
                     + "Z",
-                },
-            },
+                }
+            }
         },
     })
     messages.append(state_message)
@@ -617,8 +605,7 @@ def main() -> None:
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     if missing_vars:
         u.logger.error(
-            "Missing required environment variables: %s",
-            ", ".join(missing_vars),
+            "Missing required environment variables: %s", ", ".join(missing_vars)
         )
         u.logger.error("Please set the following environment variables:")
         for var in required_vars:
