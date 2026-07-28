@@ -6,8 +6,8 @@ import pytest
 
 from flext_cli import u as cli_u
 from flext_target_oracle import FlextTargetOracleSettings
-from flext_target_oracle.utilities import FlextTargetOracle, FlextTargetOracleExceptions
 from flext_target_oracle.api import FlextTargetOracleService
+from flext_target_oracle.utilities import FlextTargetOracle, FlextTargetOracleExceptions
 from flext_tests import tm
 from tests import m, t
 

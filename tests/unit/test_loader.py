@@ -14,7 +14,6 @@ from tests import m
 
 if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleApi
-
     from tests import t
 
 
