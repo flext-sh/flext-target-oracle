@@ -29,7 +29,7 @@ dependencies = [
   "pydantic-core>=2.46.3",
   "pydantic-settings>=2.14.0",
   "pyyaml>=6.0.3",
-  "rich>=14,<14.4",
+  "rich>=14,<15.1",
 ]
 description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
 keywords = [
