@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     from .typings import FlextTargetOracleTypes as FlextTargetOracleTypes
 
     t: type[FlextTargetOracleTypes]
+    from .utilities import FlextTargetOracle as FlextTargetOracle
     from .utilities import FlextTargetOracleUtilities as FlextTargetOracleUtilities
 
     u: type[FlextTargetOracleUtilities]
@@ -57,7 +58,7 @@ _LAZY_MODULES: dict[str, tuple[str, ...]] = {
     ".models": ("FlextTargetOracleModels", "m"),
     ".protocols": ("FlextTargetOracleProtocols", "p"),
     ".typings": ("FlextTargetOracleTypes", "t"),
-    ".utilities": ("FlextTargetOracleUtilities", "u"),
+    ".utilities": ("FlextTargetOracle", "FlextTargetOracleUtilities", "u"),
     "flext_db_oracle": ("d", "e", "h", "r", "s", "x"),
 }
 
@@ -70,6 +71,7 @@ _LAZY_IMPORTS = build_lazy_import_map(
 )
 
 _PUBLIC_EXPORTS: tuple[str, ...] = (
+    "FlextTargetOracle",
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
