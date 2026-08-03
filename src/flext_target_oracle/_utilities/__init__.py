@@ -1,5 +1,5 @@
-# AUTO-GENERATED FILE — Regenerate with: make gen
-"""Utilities package."""
+# @generated AUTO-GENERATED FILE — Regenerate with: make gen
+"""Flext Target Oracle. Utilities package."""
 
 from __future__ import annotations
 
@@ -8,59 +8,60 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_target_oracle._utilities.base import (
-        FlextTargetOracleUtilitiesBase as FlextTargetOracleUtilitiesBase,
-    )
-    from flext_target_oracle._utilities.cli import (
-        FlextTargetOracleCliService as FlextTargetOracleCliService,
-        main as main,
-    )
-    from flext_target_oracle._utilities.client import (
-        FlextTargetOracle as FlextTargetOracle,
-    )
-    from flext_target_oracle._utilities.errors import (
-        FlextTargetOracleErrorMetadata as FlextTargetOracleErrorMetadata,
-        FlextTargetOracleExceptions as FlextTargetOracleExceptions,
-    )
-    from flext_target_oracle._utilities.loader import (
-        FlextTargetOracleLoader as FlextTargetOracleLoader,
-    )
-    from flext_target_oracle._utilities.observability import (
+    from .base import FlextTargetOracleUtilitiesBase as FlextTargetOracleUtilitiesBase
+    from .client import FlextTargetOracle as FlextTargetOracle
+    from .errors import FlextTargetOracleErrorMetadata as FlextTargetOracleErrorMetadata
+    from .errors import FlextTargetOracleExceptions as FlextTargetOracleExceptions
+    from .loader import FlextTargetOracleLoader as FlextTargetOracleLoader
+    from .observability import (
         FlextTargetOracleUtilitiesObservability as FlextTargetOracleUtilitiesObservability,
     )
-    from flext_target_oracle._utilities.services import (
-        FlextTargetOracleBatchService as FlextTargetOracleBatchService,
+    from .services import FlextTargetOracleBatchService as FlextTargetOracleBatchService
+    from .services import (
         FlextTargetOracleConnectionService as FlextTargetOracleConnectionService,
+    )
+    from .services import (
         FlextTargetOracleRecordService as FlextTargetOracleRecordService,
+    )
+    from .services import (
         FlextTargetOracleSchemaService as FlextTargetOracleSchemaService,
     )
+
+_LAZY_MODULES: dict[str, tuple[str, ...]] = {
+    ".base": ("FlextTargetOracleUtilitiesBase",),
+    ".client": ("FlextTargetOracle",),
+    ".errors": ("FlextTargetOracleErrorMetadata", "FlextTargetOracleExceptions"),
+    ".loader": ("FlextTargetOracleLoader",),
+    ".observability": ("FlextTargetOracleUtilitiesObservability",),
+    ".services": (
+        "FlextTargetOracleBatchService",
+        "FlextTargetOracleConnectionService",
+        "FlextTargetOracleRecordService",
+        "FlextTargetOracleSchemaService",
+    ),
+}
+
+
+_LAZY_ALIAS_GROUPS: dict[str, tuple[tuple[str, str], ...]] = {}
+
+
 _LAZY_IMPORTS = build_lazy_import_map(
-    {
-        ".base": ("FlextTargetOracleUtilitiesBase",),
-        ".cli": (
-            "FlextTargetOracleCliService",
-            "main",
-        ),
-        ".client": ("FlextTargetOracle",),
-        ".errors": (
-            "FlextTargetOracleErrorMetadata",
-            "FlextTargetOracleExceptions",
-        ),
-        ".loader": ("FlextTargetOracleLoader",),
-        ".observability": ("FlextTargetOracleUtilitiesObservability",),
-        ".services": (
-            "FlextTargetOracleBatchService",
-            "FlextTargetOracleConnectionService",
-            "FlextTargetOracleRecordService",
-            "FlextTargetOracleSchemaService",
-        ),
-    },
+    _LAZY_MODULES, alias_groups=_LAZY_ALIAS_GROUPS, sort_keys=False
 )
 
-
-install_lazy_exports(
-    __name__,
-    globals(),
-    _LAZY_IMPORTS,
-    publish_all=False,
+_PUBLIC_EXPORTS: tuple[str, ...] = (
+    "FlextTargetOracle",
+    "FlextTargetOracleBatchService",
+    "FlextTargetOracleConnectionService",
+    "FlextTargetOracleErrorMetadata",
+    "FlextTargetOracleExceptions",
+    "FlextTargetOracleLoader",
+    "FlextTargetOracleRecordService",
+    "FlextTargetOracleSchemaService",
+    "FlextTargetOracleUtilitiesBase",
+    "FlextTargetOracleUtilitiesObservability",
 )
+
+__all__: tuple[str, ...] = tuple(_PUBLIC_EXPORTS)
+
+install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)

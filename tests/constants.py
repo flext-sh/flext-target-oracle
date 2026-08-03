@@ -8,9 +8,8 @@ from __future__ import annotations
 
 from typing import Final
 
-from flext_tests import FlextTestsConstants
-
 from flext_target_oracle import FlextTargetOracleConstants
+from flext_tests import FlextTestsConstants
 
 
 class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsConstants):
@@ -30,7 +29,7 @@ class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsCons
             SRC_DIR: Final[str] = "src"
             PACKAGE_DIR: Final[str] = "flext_target_oracle"
             ALLOWED_MODULE_FUNCTIONS: Final[dict[str, frozenset[str]]] = {
-                "_utilities/cli.py": frozenset({"main"}),
+                "_utilities/cli.py": frozenset({"main"})
             }
 
 

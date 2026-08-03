@@ -10,10 +10,7 @@ from flext_target_oracle._models.settings import FlextTargetOracleModelsSettings
 from flext_target_oracle._models.singer import FlextTargetOracleModelsSinger
 
 
-class FlextTargetOracleModels(
-    FlextMeltanoModels,
-    FlextDbOracleModels,
-):
+class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
     """Complete models for Oracle target operations extending FlextModels."""
 
     class TargetOracle(

@@ -14,20 +14,28 @@ class FlextTargetOracleModelsSinger:
     class SingerStreamModel(m.ArbitraryTypesModel):
         """Singer stream mapping to Oracle table with column configuration."""
 
-        stream_name: Annotated[str, u.Field(description="Singer stream name")]
+        stream_name: Annotated[
+            str, u.Field(..., description="Singer stream name", validate_default=True)
+        ]
         table_name: Annotated[
             str,
-            u.Field(description="Oracle destination table name"),
+            u.Field(
+                ..., description="Oracle destination table name", validate_default=True
+            ),
         ]
         ignored_columns: Annotated[
             t.StrSequence,
             u.Field(
+                ...,
                 description="Columns ignored during record transformation",
+                validate_default=True,
             ),
-        ] = u.Field(default_factory=tuple)
+        ] = u.Field(default_factory=tuple, validate_default=True)
         column_mappings: Annotated[
             t.StrMapping,
             u.Field(
+                ...,
                 description="Singer column to Oracle column mapping",
+                validate_default=True,
             ),
-        ] = u.Field(default_factory=lambda: MappingProxyType({}))
+        ] = u.Field(default_factory=lambda: MappingProxyType({}), validate_default=True)
