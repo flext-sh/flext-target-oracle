@@ -322,7 +322,7 @@ exclude = [
   ".venv",
   "vendor",
 ]
-extraPaths = [".", "src"]
+extraPaths = ["src", "."]
 include = ["examples", "src", "tests"]
 pythonPlatform = "Linux"
 pythonVersion = "3.13"
