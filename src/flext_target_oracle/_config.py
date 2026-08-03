@@ -10,15 +10,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict
-
-from flext_meltano import FlextMeltanoConfig
+from flext_meltano import FlextMeltanoConfig, m
 
 
-class _TargetOracleNamespace(BaseModel):
+class _TargetOracleNamespace(m.BaseModel):
     """Open, frozen namespace exposing every ``config/*.yaml`` domain model-less."""
 
-    model_config = ConfigDict(extra="allow", frozen=True)
+    model_config = m.ConfigDict(extra="allow", frozen=True)
 
 
 class FlextTargetOracleConfig(FlextMeltanoConfig):
