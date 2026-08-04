@@ -63,9 +63,7 @@
 ```python
 # 1. Remover exceções duplicadas de __init__.py
 # 2. Manter apenas exceptions.py como fonte única
-# 3. Atualizar imports em todos os módulos
-```
-
+# 3. Atualizar imports em todos os módulos```
 **Arquivos Afetados**:
 
 - `src/flext_target_oracle/__init__.py` - **remover exceções**
@@ -83,9 +81,7 @@ ______________________________________________________________________
 
 ```python
 # src/flext_target_oracle/loader.py linha ~233
-result = connected_api.execute_ddl(parameterized_sql)  # INSERT não é DDL!
-```
-
+result = connected_api.execute_ddl(parameterized_sql)  # INSERT não é DDL!```
 **Progresso Atual**:
 
 - ✅ **Documentação**: loader.py agora tem docstrings completos com avisos de segurança
@@ -97,9 +93,7 @@ result = connected_api.execute_ddl(parameterized_sql)  # INSERT não é DDL!
 
 ```python
 # Trocar para método correto E resolver SQL injection
-result = connected_api.execute_dml(sql, param)  # Usar parameterized query
-```
-
+result = connected_api.execute_dml(sql, param)  # Usar parameterized query```
 **Arquivo Afetado**:
 
 - `src/flext_target_oracle/loader.py:233` - **CRÍTICO: implementar correção**
@@ -161,9 +155,7 @@ class FlextOracleTarget(Target):
         return self._test_connection_impl()
 
     def _write_record(self, record: Record) -> None:
-        # Implementar método Singer padrão
-```
-
+        # Implementar método Singer padrão```
 ______________________________________________________________________
 
 ## ⚠️ PROBLEMAS DE IMPLEMENTAÇÃO
@@ -180,9 +172,7 @@ ______________________________________________________________________
 # src/flext_target_oracle/loader.py linhas ~226-232
 parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
     ":extracted_at", f"'{param['extracted_at']}'"
-)
-```
-
+)```
 **Progresso Atual**:
 
 - ✅ **Documentação**: Vulnerabilidade claramente documentada com aviso de segurança
@@ -195,9 +185,7 @@ parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
 
 ```python
 # SUBSTITUIR string replacement por prepared statements
-result = connected_api.execute_dml(sql, param)
-```
-
+result = connected_api.execute_dml(sql, param)```
 **Status de Produção**: 🛑 **BLOQUEADO** - Não deployer em produção até correção
 
 ______________________________________________________________________
@@ -214,12 +202,9 @@ ______________________________________________________________________
 **Solução**:
 
 ```python
-with self.oracle_api as connected_api:
-    with connected_api.begin_transaction():
-        # operações do batch
-        connected_api.commit()
-```
-
+with self.oracle_api as connected_api, connected_api.begin_transaction():
+    # operações do batch
+    connected_api.commit()```
 ______________________________________________________________________
 
 ### 7. **CONFIGURAÇÃO MAL PROJETADA** - PRIORIDADE MÉDIA
@@ -230,9 +215,7 @@ ______________________________________________________________________
 
 ```python
 def ensure_table_exists(...)  # Não precisa ser
-def _create_table(...)        # Não precisa ser
-```
-
+def _create_table(...)        # Não precisa ser```
 **Impacto**:
 
 - Overhead desnecessário
@@ -260,9 +243,7 @@ ______________________________________________________________________
 ```python
 from __future__ import annotations
 def _evolve_table_schema(self, table_name: str, new_schema: dict):
-    # Implementar ALTER TABLE baseado em diff de schema
-```
-
+    # Implementar ALTER TABLE baseado em diff de schema```
 ______________________________________________________________________
 
 ## 🔧 MELHORIAS DE ARQUITETURA
@@ -278,9 +259,7 @@ from __future__ import annotations
 class OracleConnectionFactory:
     @staticmethod
     def create_api(settings: FlextOracleTargetSettings) -> FlextDbOracleApi:
-        # Factory para criação de conexões
-```
-
+        # Factory para criação de conexões```
 ______________________________________________________________________
 
 ### 10. **LOGGING INADEQUADO** - PRIORIDADE BAIXA
@@ -298,9 +277,7 @@ logger.info(
         "table_name": table_name,
         "batch_id": batch_id,
     },
-)
-```
-
+)```
 ______________________________________________________________________
 
 ## 📊 PROBLEMAS DE TESTES
@@ -335,9 +312,7 @@ def oracle_connection():
 
 @pytest.fixture
 def malicious_data():
-    # Fixture para testar SQL injection
-```
-
+    # Fixture para testar SQL injection```
 ______________________________________________________________________
 
 ## ✅ PROGRESSO REAL REALIZADO (2025-08-04)

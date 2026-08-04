@@ -1,48 +1,34 @@
 # Development Guide
 
 <!-- TOC START -->
-- [Development Guide](#development-guide)
-  - [Quick Start](#quick-start)
-    - [Prerequisites](#prerequisites)
-    - [Environment Setup](#environment-setup)
-    - [Verify Installation](#verify-installation)
-  - [Development Workflow](#development-workflow)
-    - [Daily Development Commands](#daily-development-commands)
-    - [Testing Workflow](#testing-workflow)
-      - [Unit Testing (No External Dependencies)](#unit-testing-no-external-dependencies)
-      - [Integration Testing (Requires Oracle)](#integration-testing-requires-oracle)
-      - [Performance Testing](#performance-testing)
-    - [Code Quality Standards](#code-quality-standards)
-      - [Zero Tolerance Quality Gates](#zero-tolerance-quality-gates)
-      - [Code Style Guidelines](#code-style-guidelines)
-  - [FLEXT Pattern Implementation](#flext-pattern-implementation)
-    - [r Railway Pattern](#r-railway-pattern)
-    - [Configuration Patterns](#configuration-patterns)
-    - [Logging Patterns](#logging-patterns)
-  - [Oracle Integration Development](#oracle-integration-development)
-    - [Database Connection Testing](#database-connection-testing)
-    - [Table Management Development](#table-management-development)
-  - [Debugging and Troubleshooting](#debugging-and-troubleshooting)
-    - [Common Development Issues](#common-development-issues)
-      - [1. Oracle Connection Issues](#1-oracle-connection-issues)
-      - [2. Import Errors](#2-import-errors)
-      - [3. Configuration Validation Errors](#3-configuration-validation-errors)
-    - [Debugging Tools](#debugging-tools)
-      - [1. Enhanced Logging](#1-enhanced-logging)
-      - [2. Interactive Development](#2-interactive-development)
-      - [3. Performance Profiling](#3-performance-profiling)
-  - [Testing Development](#testing-development)
-    - [Writing New Tests](#writing-new-tests)
-      - [Unit Test Template](#unit-test-template)
-      - [Integration Test Template](#integration-test-template)
-    - [Test Data Management](#test-data-management)
-  - [Performance Development](#performance-development)
-    - [Batch Size Optimization](#batch-size-optimization)
-    - [Memory Usage Monitoring](#memory-usage-monitoring)
-  - [Contributing Guidelines](#contributing-guidelines)
-    - [Pull Request Checklist](#pull-request-checklist)
-    - [Commit Message Format](#commit-message-format)
-    - [Review Process](#review-process)
+- [Quick Start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Environment Setup](#environment-setup)
+  - [Verify Installation](#verify-installation)
+- [Development Workflow](#development-workflow)
+  - [Daily Development Commands](#daily-development-commands)
+  - [Testing Workflow](#testing-workflow)
+  - [Code Quality Standards](#code-quality-standards)
+- [FLEXT Pattern Implementation](#flext-pattern-implementation)
+  - [r Railway Pattern](#r-railway-pattern)
+  - [Configuration Patterns](#configuration-patterns)
+  - [Logging Patterns](#logging-patterns)
+- [Oracle Integration Development](#oracle-integration-development)
+  - [Database Connection Testing](#database-connection-testing)
+  - [Table Management Development](#table-management-development)
+- [Debugging and Troubleshooting](#debugging-and-troubleshooting)
+  - [Common Development Issues](#common-development-issues)
+  - [Debugging Tools](#debugging-tools)
+- [Testing Development](#testing-development)
+  - [Writing New Tests](#writing-new-tests)
+  - [Test Data Management](#test-data-management)
+- [Performance Development](#performance-development)
+  - [Batch Size Optimization](#batch-size-optimization)
+  - [Memory Usage Monitoring](#memory-usage-monitoring)
+- [Contributing Guidelines](#contributing-guidelines)
+  - [Pull Request Checklist](#pull-request-checklist)
+  - [Commit Message Format](#commit-message-format)
+  - [Review Process](#review-process)
 <!-- TOC END -->
 
 **FLEXT Target Oracle - Developer Documentation**
@@ -185,7 +171,6 @@ from __future__ import annotations
 
 # ✅ GOOD: FLEXT patterns
 from flext_cli import u
-from flext_core import FlextSettings
 
 
 def operation() -> p.Result[Data]:
@@ -218,9 +203,7 @@ def bad_operation():
 # ❌ AVOID: Unvalidated configuration
 class BadConfig:
     def __init__(self, field):
-        self.field = field  # No validation!
-```
-
+        self.field = field  # No validation!```
 ## FLEXT Pattern Implementation
 
 ### r Railway Pattern
@@ -258,9 +241,7 @@ def process_batch(records: t.SequenceOf[m.Dict]) -> p.Result[Stats]:
 
         stats.increment()
 
-    return r[bool].ok(stats)
-```
-
+    return r[bool].ok(stats)```
 ### Configuration Patterns
 
 ```python
@@ -287,9 +268,7 @@ class FlextOracleTargetSettings(m.Value):
     def validate_domain_rules(self) -> p.Result[bool]:
         """Validate business rules using Chain of Responsibility."""
         validator = ConfigurationValidator()
-        return validator.validate(self)
-```
-
+        return validator.validate(self)```
 ### Logging Patterns
 
 ```python
@@ -297,14 +276,12 @@ from __future__ import annotations
 
 # ✅ Structured logging with context
 from flext_cli import u
-from flext_core import FlextSettings
 
 logger = u.fetch_logger(__name__)
 
 
 def process_with_logging(stream_name: str, batch_size: int):
     """Example of proper logging with context."""
-
     # Structured logging with extra context
     logger.info(
         "Starting batch processing",
@@ -333,9 +310,7 @@ def process_with_logging(stream_name: str, batch_size: int):
             "Batch processing failed",
             extra={"stream_name": stream_name, "error_type": type(e).__name__},
         )
-        raise
-```
-
+        raise```
 ## Oracle Integration Development
 
 ### Database Connection Testing
@@ -375,7 +350,6 @@ from __future__ import annotations
 # Test table creation and schema evolution
 def test_table_management():
     """Test table operations during development."""
-
     # Schema definition
     schema = {
         "type": "object",
@@ -399,9 +373,7 @@ def test_table_management():
     if result.success:
         u.Cli.print("Record loaded successfully")
     else:
-        u.Cli.print(f"Record loading failed: {result.error}")
-```
-
+        u.Cli.print(f"Record loading failed: {result.error}")```
 ## Debugging and Troubleshooting
 
 ### Common Development Issues
@@ -448,9 +420,7 @@ from flext_target_oracle import (
 )
 
 # ✅ Debug imports
-python -c "from flext_target_oracle import *; u.Cli.print(dir())"
-```
-
+python -c "from flext_target_oracle import *; u.Cli.print(dir())"```
 #### 3. Configuration Validation Errors
 
 ```python
@@ -477,9 +447,7 @@ try:
         u.Cli.print(f"Validation failed: {validation_result.error}")
 
 except c.ValidationError as e:
-    u.Cli.print(f"Configuration error: {e}")
-```
-
+    u.Cli.print(f"Configuration error: {e}")```
 ### Debugging Tools
 
 #### 1. Enhanced Logging
@@ -490,9 +458,7 @@ logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
-# FLEXT modules will automatically use debug logging
-```
-
+# FLEXT modules will automatically use debug logging```
 #### 2. Interactive Development
 
 ```bash
@@ -517,7 +483,6 @@ import pstats
 
 def profile_batch_processing():
     """Profile batch processing for performance optimization."""
-
     pr = cProfile.Profile()
     pr.enable()
 
@@ -528,9 +493,7 @@ def profile_batch_processing():
 
     stats = pstats.Stats(pr)
     stats.sort_stats("cumulative")
-    stats.print_stats(20)  # Top 20 functions by time
-```
-
+    stats.print_stats(20)  # Top 20 functions by time```
 ## Testing Development
 
 ### Writing New Tests
@@ -543,7 +506,7 @@ from __future__ import annotations
 """Test template for new functionality."""
 
 import pytest
-from flext_target_oracle import FlextOracleTargetSettings, r
+from flext_target_oracle import FlextOracleTargetSettings
 
 
 class TestNewFeature:
@@ -580,9 +543,7 @@ class TestNewFeature:
     def test_parametrized(self, input_value, expected):
         """Test multiple input scenarios."""
         result = operation(input_value)
-        assert result == expected
-```
-
+        assert result == expected```
 #### Integration Test Template
 
 ```python
@@ -618,9 +579,7 @@ class TestOracleIntegration:
         # Finalization
         stats_result = oracle_target.finalize()
         assert stats_result.success
-        assert stats_result.value["total_records"] > 0
-```
-
+        assert stats_result.value["total_records"] > 0```
 ### Test Data Management
 
 ```python
@@ -647,9 +606,7 @@ def sample_records():
     return [
         {"id": 1, "name": "John Doe", "email": "john@example.com"},
         {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
-    ]
-```
-
+    ]```
 ## Performance Development
 
 ### Batch Size Optimization
@@ -659,12 +616,10 @@ from __future__ import annotations
 
 # Test different batch sizes for optimal performance
 import time
-from typing import List
 
 
-def benchmark_batch_sizes(records: List[m.Dict]):
+def benchmark_batch_sizes(records: list[m.Dict]):
     """Benchmark different batch sizes."""
-
     batch_sizes = [100, 500, 1000, 2000, 5000]
     results = {}
 
@@ -698,9 +653,7 @@ def benchmark_batch_sizes(records: List[m.Dict]):
     for batch_size, stats in results.items():
         u.Cli.print(
             f"Batch size {batch_size}: {stats['records_per_second']:.1f} records/sec"
-        )
-```
-
+        )```
 ### Memory Usage Monitoring
 
 ```python
@@ -711,7 +664,6 @@ import os
 
 def monitor_memory_usage():
     """Monitor memory usage during processing."""
-
     process = psutil.Process(os.getpid())
 
     def get_memory_mb():
@@ -722,9 +674,7 @@ def monitor_memory_usage():
     # Your processing code here
     # ...
 
-    u.Cli.print(f"Final memory: {get_memory_mb():.1f} MB")
-```
-
+    u.Cli.print(f"Final memory: {get_memory_mb():.1f} MB")```
 ## Contributing Guidelines
 
 ### Pull Request Checklist

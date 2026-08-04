@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, assert_never
+from typing import TYPE_CHECKING, ClassVar
 
 from flext_meltano import u
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, settings, t
@@ -193,8 +193,6 @@ class FlextTargetOracle:
                 return self._handle_state(state_message)
             case m.Meltano.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
-            case _ as unreachable:
-                assert_never(unreachable)
 
     def process_singer_messages(
         self,

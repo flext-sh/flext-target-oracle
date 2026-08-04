@@ -1,8 +1,12 @@
 <!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
-# flext_target_oracle.api
+# flext_target_oracle
 
-::: flext_target_oracle.api
+<!-- TOC START -->
+- No sections found
+<!-- TOC END -->
+
+::: flext_target_oracle
     options:
       show_root_heading: true
       show_root_full_path: false

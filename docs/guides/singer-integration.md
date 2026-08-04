@@ -73,9 +73,7 @@ def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
     if result.success:
         logger.info(f"Schema processed for stream: {stream_name}")
 
-    return result
-```
-
+    return result```
 #### RECORD Messages
 
 ```json
@@ -105,9 +103,7 @@ def _handle_record(self, message: m.Dict) -> p.Result[bool]:
     if not isinstance(stream_name, str) or not isinstance(record_data, dict):
         return r[bool].fail("Record message missing stream or data")
 
-    return self._loader.load_record(stream_name, record_data)
-```
-
+    return self._loader.load_record(stream_name, record_data)```
 #### STATE Messages
 
 ```json
@@ -131,9 +127,7 @@ def _handle_state(self, message: m.Dict) -> p.Result[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
     logger.debug("State message received - forwarding to Meltano")
-    return r[bool].| ok(value=True)
-```
-
+    return r[bool].| ok(value=True)```
 ## Current Implementation Status
 
 ### ✅ Implemented Features
@@ -166,9 +160,7 @@ def _handle_state(self, message: m.Dict) -> p.Result[bool]:
 from __future__ import annotations
 # ❌ Custom method - not Singer SDK compliant
 def process_singer_message(self, message: dict) -> p.Result[bool]:
-    # Custom message processing
-```
-
+    # Custom message processing```
 **Required Singer SDK Methods**:
 
 ```python
@@ -190,9 +182,7 @@ class FlextOracleTarget(Target):
 
     def _write_records(self, records: List[Record]) -> None:
         """Write batch of records - Singer SDK requirement."""
-        # Batch processing implementation
-```
-
+        # Batch processing implementation```
 ## Meltano Integration
 
 ### Configuration Schema
@@ -365,9 +355,7 @@ settings = FlextOracleTargetSettings(
 # - Buffer management per stream
 # - Automatic flushing when batch size reached
 # - Final flush on stream completion
-# - Error handling and rollback
-```
-
+# - Error handling and rollback```
 ## Performance Optimization
 
 ### Batch Size Tuning
@@ -402,9 +390,7 @@ def benchmark_batch_performance():
         duration = time.time() - start_time
         results[batch_size] = duration
 
-    return results
-```
-
+    return results```
 ### Oracle-Specific Optimizations
 
 ```python
@@ -423,9 +409,7 @@ settings = FlextOracleTargetSettings(
 # - Parallel processing
 # - Compression
 # - Partitioning
-# - Direct path loading
-```
-
+# - Direct path loading```
 ## Error Handling and Reliability
 
 ### r Error Patterns
@@ -437,7 +421,6 @@ from __future__ import annotations
 # Consistent error handling with r
 def process_with_error_handling():
     """Example of proper error handling in Singer context."""
-
     # Schema processing
     schema_result = target.process_singer_message(schema_msg)
     if schema_result.failure:
@@ -459,9 +442,7 @@ def process_with_error_handling():
 
     # Finalization
     final_result = target.finalize()
-    return final_result
-```
-
+    return final_result```
 ### Transaction Management
 
 ```python
@@ -501,9 +482,7 @@ def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[boo
 
     except Exception as e:
         # Transaction automatically rolled back
-        return r[bool].fail(f"Batch insert failed: {e}")
-```
-
+        return r[bool].fail(f"Batch insert failed: {e}")```
 ## Testing Singer Integration
 
 ### Unit Testing Singer Messages
@@ -559,9 +538,7 @@ class TestSingerIntegration:
 
         result = target.process_singer_message(invalid_msg)
         assert result.failure
-        assert "Unknown message type" in result.error
-```
-
+        assert "Unknown message type" in result.error```
 ### Integration Testing with Singer Ecosystem
 
 ```python
@@ -573,7 +550,6 @@ import json
 
 def test_singer_tap_integration():
     """Test integration with actual Singer tap."""
-
     # Run Singer tap to generate messages
     process = create_subprocess_exec(
         "tap-csv",
@@ -603,9 +579,7 @@ def test_singer_tap_integration():
     final_result = target.finalize()
     assert final_result.success
 
-    process.wait()
-```
-
+    process.wait()```
 ## Compliance Roadmap
 
 ### Version 0.9.9 Requirements
