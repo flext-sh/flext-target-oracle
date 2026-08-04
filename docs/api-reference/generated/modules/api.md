@@ -1,10 +1,10 @@
-<!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
-
 # flext_target_oracle.api
 
 <!-- TOC START -->
 - No sections found
 <!-- TOC END -->
+
+<!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
 ::: flext_target_oracle.api
     options:
