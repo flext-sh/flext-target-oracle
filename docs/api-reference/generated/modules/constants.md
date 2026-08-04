@@ -1,10 +1,10 @@
-<!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
-
 # flext_target_oracle.constants
 
 <!-- TOC START -->
 - No sections found
 <!-- TOC END -->
+
+<!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
 ::: flext_target_oracle.constants
     options:
