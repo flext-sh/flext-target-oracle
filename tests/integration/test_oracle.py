@@ -18,7 +18,7 @@ import pytest
 
 from flext_target_oracle.utilities import FlextTargetOracle, FlextTargetOracleLoader
 from flext_tests import tm
-from tests import c, m, t
+from tests import c, m, p, t
 
 if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleApi
@@ -36,9 +36,11 @@ def _query_rows(
     oracle_engine: FlextDbOracleApi, sql: str, params: t.JsonMapping | None = None
 ) -> t.SequenceOf[m.Dict]:
     normalized_params = None if params is None else m.ConfigMap(root=dict(params))
-    query_result = oracle_engine.oracle_services.execute_query(sql, normalized_params)
-    tm.ok(query_result)
-    return query_result.value
+    query_result: p.Result[t.SequenceOf[m.Dict]] = (
+        oracle_engine.oracle_services.execute_query(sql, normalized_params)
+    )
+    rows: t.SequenceOf[m.Dict] = tm.ok(query_result)
+    return rows
 
 
 def _query_scalar(

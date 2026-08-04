@@ -193,7 +193,8 @@ class FlextTargetOracle:
                 return self._handle_state(state_message)
             case m.Meltano.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
-        assert_never(message)
+            case _ as unreachable:
+                assert_never(unreachable)
 
     def process_singer_messages(
         self,
