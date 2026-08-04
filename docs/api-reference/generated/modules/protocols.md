@@ -2,6 +2,10 @@
 
 # flext_target_oracle.protocols
 
+<!-- TOC START -->
+- No sections found
+<!-- TOC END -->
+
 ::: flext_target_oracle.protocols
     options:
       show_root_heading: true
