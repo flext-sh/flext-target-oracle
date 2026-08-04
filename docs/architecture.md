@@ -1,38 +1,37 @@
 # Architecture Guide
 
 <!-- TOC START -->
-- [Architecture Guide](#architecture-guide)
-  - [Overview](#overview)
-  - [Architecture Principles](#architecture-principles)
-    - [FLEXT Core Integration](#flext-core-integration)
-    - [Clean Architecture Layers](#clean-architecture-layers)
-  - [Component Architecture](#component-architecture)
-    - [1. FlextOracleTarget (Application Layer)](#1-flextoracletarget-application-layer)
-    - [2. FlextOracleTargetSettings (Domain Layer)](#2-flextoracletargetsettings-domain-layer)
-    - [3. FlextOracleTargetLoader (Infrastructure Layer)](#3-flextoracletargetloader-infrastructure-layer)
-  - [Data Flow Architecture](#data-flow-architecture)
-    - [Singer Message Processing Flow](#singer-message-processing-flow)
-    - [Error Handling Flow](#error-handling-flow)
-  - [Performance Architecture](#performance-architecture)
-    - [Batch Processing Strategy](#batch-processing-strategy)
-    - [Connection Management](#connection-management)
-    - [Memory Management](#memory-management)
-  - [Security Architecture](#security-architecture)
-    - [Current Security Measures](#current-security-measures)
-    - [Security Issues (TO BE ADDRESSED)](#security-issues-to-be-addressed)
-  - [Testing Architecture](#testing-architecture)
-    - [Test Structure](#test-structure)
-    - [Test Patterns](#test-patterns)
-  - [Integration Architecture](#integration-architecture)
-    - [FLEXT Ecosystem Integration](#flext-ecosystem-integration)
-    - [Configuration Integration](#configuration-integration)
-  - [Deployment Architecture](#deployment-architecture)
-    - [Production Deployment Patterns](#production-deployment-patterns)
-    - [Monitoring and Observability](#monitoring-and-observability)
-  - [Future Architecture Considerations](#future-architecture-considerations)
-    - [Planned Improvements](#planned-improvements)
-    - [Scalability Considerations](#scalability-considerations)
-  - [Related Documentation](#related-documentation)
+- [Overview](#overview)
+- [Architecture Principles](#architecture-principles)
+  - [FLEXT Core Integration](#flext-core-integration)
+  - [Clean Architecture Layers](#clean-architecture-layers)
+- [Component Architecture](#component-architecture)
+  - [1. FlextOracleTarget (Application Layer)](#1-flextoracletarget-application-layer)
+  - [2. FlextOracleTargetSettings (Domain Layer)](#2-flextoracletargetsettings-domain-layer)
+  - [3. FlextOracleTargetLoader (Infrastructure Layer)](#3-flextoracletargetloader-infrastructure-layer)
+- [Data Flow Architecture](#data-flow-architecture)
+  - [Singer Message Processing Flow](#singer-message-processing-flow)
+  - [Error Handling Flow](#error-handling-flow)
+- [Performance Architecture](#performance-architecture)
+  - [Batch Processing Strategy](#batch-processing-strategy)
+  - [Connection Management](#connection-management)
+  - [Memory Management](#memory-management)
+- [Security Architecture](#security-architecture)
+  - [Current Security Measures](#current-security-measures)
+  - [Security Issues (TO BE ADDRESSED)](#security-issues-to-be-addressed)
+- [Testing Architecture](#testing-architecture)
+  - [Test Structure](#test-structure)
+  - [Test Patterns](#test-patterns)
+- [Integration Architecture](#integration-architecture)
+  - [FLEXT Ecosystem Integration](#flext-ecosystem-integration)
+  - [Configuration Integration](#configuration-integration)
+- [Deployment Architecture](#deployment-architecture)
+  - [Production Deployment Patterns](#production-deployment-patterns)
+  - [Monitoring and Observability](#monitoring-and-observability)
+- [Future Architecture Considerations](#future-architecture-considerations)
+  - [Planned Improvements](#planned-improvements)
+  - [Scalability Considerations](#scalability-considerations)
+- [Related Documentation](#related-documentation)
 <!-- TOC END -->
 
 **FLEXT Target Oracle - Technical Architecture Documentation**
@@ -56,9 +55,7 @@ from flext_core import FlextSettings
 # Configuration with domain validation
 class FlextOracleTargetSettings(m.Value):
     def validate_domain_rules(self) -> p.Result[bool]:
-        # Chain of Responsibility validation pattern
-```
-
+        # Chain of Responsibility validation pattern```
 ### Clean Architecture Layers
 
 ```
@@ -129,9 +126,7 @@ class FlextOracleTarget(Target):
     def _handle_state(self, message: dict) -> p.Result[bool]
 
     # Lifecycle management
-    def finalize(self) -> p.Result[m.Dict]
-```
-
+    def finalize(self) -> p.Result[m.Dict]```
 **Key Patterns**:
 
 - **r Railway Pattern**: All operations return `r<T>`
@@ -164,9 +159,7 @@ class FlextOracleTargetSettings(m.Value):
     connection_timeout: int = 30
 
     def validate_domain_rules(self) -> p.Result[bool]:
-        """Chain of Responsibility validation pattern."""
-```
-
+        """Chain of Responsibility validation pattern."""```
 **Key Patterns**:
 
 - **Value Object Pattern**: Immutable, validated configuration
@@ -192,9 +185,7 @@ class FlextOracleTargetLoader:
 
     # Data loading with batching
     def load_record(self, stream_name: str, record_data: dict) -> p.Result[bool]
-    def finalize_all_streams(self) -> p.Result[m.Dict]
-```
-
+    def finalize_all_streams(self) -> p.Result[m.Dict]```
 **Key Patterns**:
 
 - **Batch Processing**: Configurable batch sizes for performance
@@ -303,9 +294,7 @@ class BatchProcessor:
         if len(buffer) >= self._batch_size:
             return self._flush_batch(stream)
 
-        return r[bool].| ok(value=True)
-```
-
+        return r[bool].| ok(value=True)```
 ### Connection Management
 
 ```python
@@ -313,9 +302,7 @@ class BatchProcessor:
 with self.oracle_api as connected_api:
     # All operations within connection context
     result = connected_api.execute_dml(sql, params)
-    # Connection automatically closed
-```
-
+    # Connection automatically closed```
 ### Memory Management
 
 - **Streaming Processing**: Records processed one at a time, not loaded into memory
@@ -339,16 +326,12 @@ with self.oracle_api as connected_api:
 ```python
 # SECURITY RISK - Manual string replacement
 parameterized_sql = sql.replace(":data", f"'{param['data']}'")
-result = connected_api.execute_ddl(parameterized_sql)
-```
-
+result = connected_api.execute_ddl(parameterized_sql)```
 **Required Fix**:
 
 ```python
 # SECURE - Use proper parameterized queries
-result = connected_api.execute_dml(sql, param)
-```
-
+result = connected_api.execute_dml(sql, param)```
 ## Testing Architecture
 
 ### Test Structure
@@ -384,9 +367,7 @@ def test_operation_success():
 def test_operation_failure():
     result = operation_with_error()
     assert result.failure
-    assert "expected error" in result.error
-```
-
+    assert "expected error" in result.error```
 ## Integration Architecture
 
 ### FLEXT Ecosystem Integration
@@ -435,9 +416,7 @@ oracle_config = settings.get_oracle_config()
 api = FlextDbOracleApi(oracle_config)
 
 # flext-meltano integration
-target = FlextOracleTarget(settings)
-```
-
+target = FlextOracleTarget(settings)```
 ## Deployment Architecture
 
 ### Production Deployment Patterns
@@ -488,9 +467,7 @@ logger.info(
 
 # Metrics integration
 metrics.counter("oracle_target.records_processed").inc(count)
-metrics.histogram("oracle_target.batch_duration").observe(duration)
-```
-
+metrics.histogram("oracle_target.batch_duration").observe(duration)```
 ## Future Architecture Considerations
 
 ### Planned Improvements
@@ -519,10 +496,10 @@ ______________________________________________________________________
 
 **Across Projects**:
 
-- [flext-core Foundation](https://github.com/organization/flext/tree/main/flext-core/docs/architecture/overview.md) - Clean architecture and CQRS patterns
-- [flext-core Service Patterns](https://github.com/organization/flext/tree/main/flext-core/docs/guides/service-patterns.md) - Service patterns and dependency injection
-- [flext-db-oracle Integration](https://github.com/organization/flext/tree/main/flext-db-oracle/AGENTS.md) - Oracle database integration
-- [flext-meltano Pipelines](https://github.com/organization/flext/tree/main/flext-meltano/AGENTS.md) - Data integration and ELT orchestration
+- [flext-core Foundation](https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-core/docs/architecture/overview.md) - Clean architecture and CQRS patterns
+- [flext-core Service Patterns](https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-core/docs/guides/service-patterns.md) - Service patterns and dependency injection
+- [flext-db-oracle Integration](https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-db-oracle/AGENTS.md) - Oracle database integration
+- [flext-meltano Pipelines](https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-meltano/AGENTS.md) - Data integration and ELT orchestration
 
 **External Resources**:
 
