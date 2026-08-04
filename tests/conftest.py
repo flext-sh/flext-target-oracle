@@ -111,7 +111,9 @@ def shared_oracle_container(docker_control: tk) -> str:
         _ = ready_api.disconnect()
         if ready_health.success:
             return container_name
-    deadline = monotonic() + 180
+    # Probe budget must stay below pytest case-timeout (30s) so unavailable
+    # Oracle becomes a skip, never a pytest-timeout setup ERROR.
+    deadline = monotonic() + 8
     last_error = "Oracle application user is not ready yet"
     while monotonic() < deadline:
         admin_api = FlextDbOracleApi(admin_settings)

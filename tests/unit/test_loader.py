@@ -83,6 +83,7 @@ class TestsFlextTargetOracleLoader:
         tm.that(result.success, is_=bool)
 
     @pytest.mark.integration
+    @pytest.mark.docker
     def test_flush_batch_persists_records_to_real_oracle(
         self, oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi
     ) -> None:

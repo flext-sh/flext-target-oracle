@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleApi
     from flext_target_oracle import FlextTargetOracleSettings
 
-pytestmark = pytest.mark.integration
+pytestmark = [pytest.mark.integration, pytest.mark.docker]
 
 
 def _schema_parts(message: t.JsonValue) -> t.Pair[t.JsonMapping, t.SequenceOf[str]]:

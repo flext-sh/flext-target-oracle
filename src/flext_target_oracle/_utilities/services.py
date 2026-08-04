@@ -18,7 +18,7 @@ class FlextTargetOracleConnectionService:
         """Store configuration and Oracle API dependency."""
         self.oracle_api = oracle_api
 
-    def execute(self) -> p.Result[None]:
+    def execute(self) -> p.Result[bool]:
         """Run default connection validation operation."""
         return self.test_connection()
 
@@ -34,14 +34,14 @@ class FlextTargetOracleConnectionService:
             )
         )
 
-    def test_connection(self) -> p.Result[None]:
+    def test_connection(self) -> p.Result[bool]:
         """Check Oracle access by listing schema tables."""
         tables_result = self.oracle_api.fetch_tables(
             schema=settings.TargetOracle.default_target_schema
         )
         if tables_result.failure:
-            return r[None].fail(tables_result.error or "Connection test failed")
-        return r[None].ok(None)
+            return r[bool].fail(tables_result.error or "Connection test failed")
+        return r[bool].ok(True)
 
 
 class FlextTargetOracleSchemaService:
@@ -55,17 +55,17 @@ class FlextTargetOracleSchemaService:
         self,
         stream: m.TargetOracle.SingerStreamModel,
         schema_message: m.Meltano.SingerSchemaMessage,
-    ) -> p.Result[None]:
+    ) -> p.Result[bool]:
         """Validate table identity before external DDL orchestration."""
         _ = schema_message
         table_name = stream.table_name
         if not table_name:
             return e.fail_validation("table_name", error="invalid")
-        return r[None].ok(None)
+        return r[bool].ok(True)
 
-    def execute(self) -> p.Result[None]:
+    def execute(self) -> p.Result[bool]:
         """Run service health operation."""
-        return r[None].ok(None)
+        return r[bool].ok(True)
 
 
 class FlextTargetOracleBatchService:
@@ -80,10 +80,10 @@ class FlextTargetOracleBatchService:
 
     def add_record(
         self, stream_name: str, record_message: m.Meltano.SingerRecordMessage
-    ) -> p.Result[None]:
+    ) -> p.Result[bool]:
         """Append a record to a stream buffer."""
         self._batches[stream_name].append(record_message)
-        return r[None].ok(None)
+        return r[bool].ok(True)
 
     def execute(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
         """Run default batch flush operation."""
@@ -101,10 +101,10 @@ class FlextTargetOracleBatchService:
         ).finalize()
         return r[m.TargetOracle.LoadStatisticsModel].ok(stats)
 
-    def flush_batch(self, stream_name: str) -> p.Result[None]:
+    def flush_batch(self, stream_name: str) -> p.Result[bool]:
         """Clear buffered records for a specific stream."""
         self._batches[stream_name] = list[m.Meltano.SingerRecordMessage]()
-        return r[None].ok(None)
+        return r[bool].ok(True)
 
 
 class FlextTargetOracleRecordService:
@@ -113,9 +113,9 @@ class FlextTargetOracleRecordService:
     def __init__(self, settings: FlextTargetOracleSettings) -> None:
         """Store record service configuration."""
 
-    def execute(self) -> p.Result[None]:
+    def execute(self) -> p.Result[bool]:
         """Run record-service readiness check."""
-        return r[None].ok(None)
+        return r[bool].ok(True)
 
     def transform_record(
         self,
@@ -143,11 +143,11 @@ class FlextTargetOracleRecordService:
         self,
         record_message: m.Meltano.SingerRecordMessage,
         schema_message: m.Meltano.SingerSchemaMessage,
-    ) -> p.Result[None]:
+    ) -> p.Result[bool]:
         """Validate record payload against current schema contract."""
         _ = record_message
         _ = schema_message
-        return r[None].ok(None)
+        return r[bool].ok(True)
 
 
 __all__: list[str] = [

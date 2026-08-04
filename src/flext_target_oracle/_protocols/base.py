@@ -129,7 +129,7 @@ class FlextTargetOracleProtocolsBase:
             """Return the effective Oracle connection information."""
             ...
 
-        def test_connection(self) -> p.Result[None]:
+        def test_connection(self) -> p.Result[bool]:
             """Validate Oracle connectivity."""
             ...
 
@@ -141,7 +141,7 @@ class FlextTargetOracleProtocolsBase:
             self,
             stream: m.TargetOracle.SingerStreamModel,
             schema_message: m.Meltano.SingerSchemaMessage,
-        ) -> p.Result[None]:
+        ) -> p.Result[bool]:
             """Ensure destination table exists for a stream."""
             ...
 
@@ -151,7 +151,7 @@ class FlextTargetOracleProtocolsBase:
 
         def add_record(
             self, stream_name: str, record_message: m.Meltano.SingerRecordMessage
-        ) -> p.Result[None]:
+        ) -> p.Result[bool]:
             """Queue one record for batch processing."""
             ...
 
