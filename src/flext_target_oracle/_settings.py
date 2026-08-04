@@ -56,8 +56,12 @@ class FlextTargetOracleSettings(FlextSettings):
         parallel_degree: Annotated[
             int, m.Field(default=1, ge=1, description="Oracle parallel degree")
         ]
-        table_prefix: Annotated[str, m.Field(default="", description="Table name prefix")]
-        table_suffix: Annotated[str, m.Field(default="", description="Table name suffix")]
+        table_prefix: Annotated[
+            str, m.Field(default="", description="Table name prefix")
+        ]
+        table_suffix: Annotated[
+            str, m.Field(default="", description="Table name suffix")
+        ]
         load_method: Annotated[
             str, m.Field(default="INSERT", description="Oracle load strategy")
         ]
