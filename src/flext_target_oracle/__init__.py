@@ -35,9 +35,10 @@ if TYPE_CHECKING:
     from .constants import FlextTargetOracleConstants as FlextTargetOracleConstants
 
     c: type[FlextTargetOracleConstants]
-    from .models import FlextTargetOracleModels as FlextTargetOracleModels
-
-    m: type[FlextTargetOracleModels]
+    from .models import (
+        FlextTargetOracleModels as FlextTargetOracleModels,
+        FlextTargetOracleModels as m,
+    )
     from .protocols import FlextTargetOracleProtocols as FlextTargetOracleProtocols
 
     p: type[FlextTargetOracleProtocols]
