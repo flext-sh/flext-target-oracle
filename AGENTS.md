@@ -35,6 +35,8 @@ src/flext_target_oracle/
 - **CQRS:** command `_models` are data-only DTOs; **execution belongs to services/handlers**, never `execute()` on a model.
 - Uses a loader pattern, not a Singer sink — `create_sink` intentionally raises.
 - Oracle settings namespaced (`settings.DbOracle.*`).
+- Config/settings canonical pattern: ADR-012.
+- Codemod governance (ast-grep + make mod): ADR-014.
 
 ## Commands
 
