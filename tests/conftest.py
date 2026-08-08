@@ -200,7 +200,15 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
         _ = disconnect_result
         pytest.skip(health_result.error or "Oracle health check failed")
     yield api
-    disconnect_result = api.disconnect()
+    # Teardown must not turn a lost connection into an ERROR. When Oracle drops
+    # mid-test the socket is already gone, so disconnect raises
+    # ConnectionResetError from the driver and pytest reports the whole test as
+    # errored even though the test itself skipped or passed. Losing a connection
+    # that is already dead is not a teardown failure.
+    try:
+        disconnect_result = api.disconnect()
+    except OSError:
+        return
     _ = disconnect_result
 
 
@@ -332,7 +340,12 @@ def oracle_loader(
     if connect_result.failure:
         pytest.skip(connect_result.error or "Oracle loader could not connect")
     yield loader
-    disconnect_result = loader.disconnect()
+    # Same contract as the api fixture: a connection already dropped by the server
+    # must not surface as a teardown ERROR.
+    try:
+        disconnect_result = loader.disconnect()
+    except OSError:
+        return
     _ = disconnect_result
 
 
