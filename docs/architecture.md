@@ -4,7 +4,7 @@
 - [Overview](#overview)
 - [Architecture Principles](#architecture-principles)
   - [FLEXT Core Integration](#flext-core-integration)
-  - [Clean Architecture Layers](#clean-architecture-layers)
+  - [Clean Architecture Layers```](#clean-architecture-layers)
 - [Component Architecture](#component-architecture)
   - [1. FlextOracleTarget (Application Layer)](#1-flextoracletarget-application-layer)
   - [2. FlextOracleTargetSettings (Domain Layer)](#2-flextoracletargetsettings-domain-layer)
@@ -20,7 +20,7 @@
   - [Current Security Measures](#current-security-measures)
   - [Security Issues (TO BE ADDRESSED)](#security-issues-to-be-addressed)
 - [Testing Architecture](#testing-architecture)
-  - [Test Structure](#test-structure)
+  - [Test Structure```](#test-structure)
   - [Test Patterns](#test-patterns)
 - [Integration Architecture](#integration-architecture)
   - [FLEXT Ecosystem Integration](#flext-ecosystem-integration)
@@ -56,9 +56,7 @@ from flext_core import FlextSettings
 class FlextOracleTargetSettings(m.Value):
     def validate_domain_rules(self) -> p.Result[bool]:
         # Chain of Responsibility validation pattern```
-### Clean Architecture Layers
-
-```
+### Clean Architecture Layers```
 ┌─────────────────────────────────────────────────┐
 │                 Presentation Layer              │
 │   ┌─────────────────────────────────────────┐   │
@@ -105,9 +103,7 @@ class FlextOracleTargetSettings(m.Value):
 │   │   • Connection management              │   │
 │   │   • SQL execution                      │   │
 │   └─────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────┘
-```
-
+└─────────────────────────────────────────────────┘```
 ## Component Architecture
 
 ### 1. FlextOracleTarget (Application Layer)
@@ -252,9 +248,7 @@ sequenceDiagram
     end
 
     FL-->>FT: p.Result[Statistics]
-    FT-->>ST: Final statistics
-```
-
+    FT-->>ST: Final statistics```
 ### Error Handling Flow
 
 ```mermaid
@@ -269,9 +263,7 @@ flowchart TD
     G -->|No| I[Propagate to Singer]
     H --> B
     I --> J[Singer Error Handling]
-    C --> K[Operation Complete]
-```
-
+    C --> K[Operation Complete]```
 ## Performance Architecture
 
 ### Batch Processing Strategy
@@ -334,9 +326,7 @@ result = connected_api.execute_ddl(parameterized_sql)```
 result = connected_api.execute_dml(sql, param)```
 ## Testing Architecture
 
-### Test Structure
-
-```
+### Test Structure```
 tests/
 ├── unit/                    # Fast, isolated tests
 │   ├── test_config.py      # Configuration validation
@@ -348,9 +338,7 @@ tests/
 ├── performance/            # Performance benchmarks
 │   └── test_batch_performance.py
 └── security/               # Security validation
-    └── test_sql_injection.py
-```
-
+    └── test_sql_injection.py```
 ### Test Patterns
 
 ```python
@@ -401,9 +389,7 @@ graph TB
 
     SINGER --> FTO
     FTL --> ORACLE
-    MELTANO --> FTO
-```
-
+    MELTANO --> FTO```
 ### Configuration Integration
 
 ```python
@@ -448,9 +434,7 @@ networks:
   flext-network:
     external: true
   oracle-network:
-    external: true
-```
-
+    external: true```
 ### Monitoring and Observability
 
 ```python
