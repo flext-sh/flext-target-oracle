@@ -342,8 +342,6 @@ reportUnusedFunction = "error"
 reportUnusedImport = "error"
 reportUnusedVariable = "error"
 typeCheckingMode = "strict"
-venv = ".venv"
-venvPath = ".."
 
 [[tool.pyright.executionEnvironments]]
 extraPaths = ["src"]
