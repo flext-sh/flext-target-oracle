@@ -27,7 +27,7 @@
   - [Memory Usage Monitoring](#memory-usage-monitoring)
 - [Contributing Guidelines](#contributing-guidelines)
   - [Pull Request Checklist](#pull-request-checklist)
-  - [Commit Message Format](#commit-message-format)
+  - [Commit Message Format```](#commit-message-format)
   - [Review Process](#review-process)
 <!-- TOC END -->
 
@@ -338,9 +338,7 @@ with loader.oracle_api as connected_api:
     if tables_result.success:
         u.Cli.print(f"Connected! Found {len(tables_result.value)} tables")
     else:
-        u.Cli.print(f"Connection failed: {tables_result.error}")
-```
-
+        u.Cli.print(f"Connection failed: {tables_result.error}")```
 ### Table Management Development
 
 ```python
@@ -402,9 +400,7 @@ settings = FlextOracleTargetSettings(
 )
 loader = FlextOracleTargetLoader(settings)
 u.Cli.print('Config created successfully')
-"
-```
-
+"```
 #### 2. Import Errors
 
 ```python
@@ -468,9 +464,7 @@ make shell
 # In shell:
 >>> from flext_target_oracle import *
 >>> settings = FlextOracleTargetSettings(...)
->>> # Interactive testing
-```
-
+>>> # Interactive testing```
 #### 3. Performance Profiling
 
 ```python
@@ -688,17 +682,13 @@ Before submitting a pull request:
 - [ ] **FLEXT Patterns**: Follows established FLEXT ecosystem patterns
 - [ ] **Backward Compatibility**: No breaking changes without major version bump
 
-### Commit Message Format
-
-```
+### Commit Message Format```
 type(scope): brief description
 
 Detailed explanation of changes made, why they were necessary,
 and any breaking changes introduced.
 
-Fixes #123
-```
-
+Fixes #123```
 Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `chore`
 
 ### Review Process

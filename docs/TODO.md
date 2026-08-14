@@ -111,9 +111,7 @@ dependencies = [
     # Core dependencies
     "pydantic>=2.11.0",
     # NOTE: Removed singer-sdk direct dependency - use flext-meltano instead
-]
-```
-
+]```
 **Impacto**:
 
 - Dependência implícita através de flext-meltano
@@ -126,9 +124,7 @@ dependencies = [
 dependencies = [
     "pydantic>=2.11.0",
     "singer-sdk>=0.39.0",  # Adicionar dependência explícita
-]
-```
-
+]```
 ______________________________________________________________________
 
 ### 4. **IMPLEMENTAÇÃO INCOMPLETA DE SINGER TARGET** - PRIORIDADE ALTA

@@ -86,9 +86,7 @@ def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
     "email": "john@example.com"
   },
   "time_extracted": "2025-08-04T10:00:00.000000Z"
-}
-```
-
+}```
 **Implementation**:
 
 ```python
@@ -116,9 +114,7 @@ def _handle_record(self, message: m.Dict) -> p.Result[bool]:
       }
     }
   }
-}
-```
-
+}```
 **Implementation**:
 
 ```python
@@ -252,9 +248,7 @@ targets:
         label: Connection Timeout
         kind: integer
         default: 30
-        description: Connection timeout in seconds
-```
-
+        description: Connection timeout in seconds```
 ### Meltano Execution
 
 ```bash
@@ -272,9 +266,7 @@ meltano invoke target-oracle --about
 meltano invoke target-oracle --test
 
 # Run ELT pipeline
-meltano run tap-csv target-oracle
-```
-
+meltano run tap-csv target-oracle```
 ## Data Loading Patterns
 
 ### Table Creation Strategy
