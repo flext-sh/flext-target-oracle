@@ -269,9 +269,10 @@ class ProductionTargetManager:
                 f"Configuration validation failed: {validation_result.error}"
             )
         u.logger.info("Creating Oracle target instance")
-        self.target = FlextTargetOracle(self.settings)
+        target = FlextTargetOracle(self.settings)
+        self.target = target
         u.logger.info("Testing Oracle database connectivity")
-        connection_result = self.target.test_connection()
+        connection_result = target.test_connection()
         if connection_result.failure:
             return r[bool].fail("Oracle connectivity test failed")
         u.logger.info("Production target initialized successfully")
