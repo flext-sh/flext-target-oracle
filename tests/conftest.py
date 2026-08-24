@@ -13,7 +13,6 @@ from pathlib import Path
 from time import monotonic, sleep
 from typing import TYPE_CHECKING
 
-
 import pytest
 
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
