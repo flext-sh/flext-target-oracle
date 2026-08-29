@@ -16,6 +16,11 @@ if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleApi
     from tests import t
 
+# Row-count probe for the table this test just created. The name is derived
+# from the loader's own typed settings (prefix + stream + suffix), never from
+# external input, so it is a fixed identifier for the assertion below.
+_COUNT_QUERY_TEMPLATE = 'SELECT COUNT(*) AS "count" FROM {table}'
+
 
 @pytest.fixture
 def loader_config() -> FlextTargetOracleSettings:
@@ -117,8 +122,7 @@ class TestsFlextTargetOracleLoader:
             f"{stream_name}"
             f"{loader.target_config.TargetOracle.table_suffix}"
         ).upper()
-        count_result = oracle_engine.oracle_services.execute_query(
-            f'SELECT COUNT(*) AS "count" FROM {table_name}'
-        )
+        count_query = _COUNT_QUERY_TEMPLATE.format(table=table_name)
+        count_result = oracle_engine.oracle_services.execute_query(count_query)
         tm.ok(count_result)
         tm.that(int(str(count_result.value[0].root["count"])), eq=2)
