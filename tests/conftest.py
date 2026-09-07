@@ -54,7 +54,7 @@ def isolate_target_oracle_env(
 def docker_control() -> tk:
     """Provide Docker control instance for tests."""
     return tk.shared(
-        "flext-oracle-db-test", workspace_root=Path(__file__).resolve().parents[2]
+        "flext-oracle-db-test", repository_root=Path(__file__).resolve().parents[2]
     )
 
 
