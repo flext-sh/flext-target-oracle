@@ -35,10 +35,7 @@ class FlextTargetOracle:
                 key_properties=schema_message.key_properties,
             )
             if entry_result.failure:
-                return r[m.Meltano.SingerCatalog].fail(
-                    entry_result.error
-                    or f"Failed to build Singer catalog entry for {stream_name}"
-                )
+                return r[m.Meltano.SingerCatalog].from_failure(entry_result)
             catalog_entries.append(
                 entry_result.value.model_copy(
                     update={
@@ -72,15 +69,11 @@ class FlextTargetOracle:
         if payload is not None:
             payload_result = self._execute_payload(payload)
             if payload_result.failure:
-                return r[m.TargetOracle.ExecuteResult].fail(
-                    payload_result.error or "Singer payload execution failed"
-                )
+                return r[m.TargetOracle.ExecuteResult].from_failure(payload_result)
             return self._ready_result()
         connection_result = self.loader.test_connection()
         if connection_result.failure:
-            return r[m.TargetOracle.ExecuteResult].fail(
-                connection_result.error or "Connection test failed"
-            )
+            return r[m.TargetOracle.ExecuteResult].from_failure(connection_result)
         return self._ready_result()
 
     def _ready_result(self) -> p.Result[m.TargetOracle.ExecuteResult]:
@@ -98,15 +91,15 @@ class FlextTargetOracle:
         """Parse and process one Singer JSON line."""
         message_result = self._parse_singer_payload(payload)
         if message_result.failure:
-            return r[bool].fail(message_result.error or "Invalid Singer payload")
+            return r[bool].from_failure(message_result)
         message = message_result.value
         process_result = self.process_singer_message(message)
         if process_result.failure:
-            return r[bool].fail(process_result.error or "Singer message failed")
+            return r[bool].from_failure(process_result)
         if isinstance(message, m.Meltano.SingerRecordMessage):
             finalize_result = self.loader.finalize_all_streams()
             if finalize_result.failure:
-                return r[bool].fail(finalize_result.error or "Finalize failed")
+                return r[bool].from_failure(finalize_result)
         return r[bool].ok(True)
 
     def _parse_singer_payload(
@@ -208,15 +201,11 @@ class FlextTargetOracle:
         for message in messages:
             result = self.process_singer_message(message)
             if result.failure:
-                return r[m.TargetOracle.ProcessingSummary].fail(
-                    result.error or "Message processing failed"
-                )
+                return r[m.TargetOracle.ProcessingSummary].from_failure(result)
             processed += 1
         finalize_result = self.loader.finalize_all_streams()
         if finalize_result.failure:
-            return r[m.TargetOracle.ProcessingSummary].fail(
-                finalize_result.error or "Finalize failed"
-            )
+            return r[m.TargetOracle.ProcessingSummary].from_failure(finalize_result)
         return r[m.TargetOracle.ProcessingSummary].ok(
             m.TargetOracle.ProcessingSummary(
                 messages_processed=processed,
@@ -235,7 +224,7 @@ class FlextTargetOracle:
             payload = m.Meltano.SingerRecordMessage.model_validate_json(record_data)
             return self.loader.load_record(payload.stream, payload.record)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
-            return r[bool].fail(f"Invalid record payload: {exc}")
+            return r[bool].fail(f"Invalid record payload: {exc}", exception=exc)
 
     def _handle_activate_version(
         self, activate_message: m.Meltano.SingerActivateVersionMessage
@@ -254,7 +243,7 @@ class FlextTargetOracle:
             record_message.stream, record_message.record
         )
         if load_result.failure:
-            return r[bool].fail(load_result.error or "Failed to load record")
+            return r[bool].from_failure(load_result)
         return r[bool].ok(True)
 
     def _handle_schema(
@@ -266,7 +255,7 @@ class FlextTargetOracle:
             stream_name, schema, schema_message.key_properties
         )
         if ensure_result.failure:
-            return r[bool].fail(ensure_result.error or "Failed to ensure table")
+            return r[bool].from_failure(ensure_result)
         self.schemas[stream_name] = schema_message
         return r[bool].ok(True)
 
