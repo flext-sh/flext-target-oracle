@@ -83,4 +83,6 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         return r[str].ok("validation_ok")
 
 
-__all__: list[str] = ["FlextTargetOracleService"]
+target_oracle = FlextTargetOracleService
+
+__all__: list[str] = ["FlextTargetOracleService", "target_oracle"]

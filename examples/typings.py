@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_core import FlextTargetOracleTypes
+from flext_target_oracle import FlextTargetOracleTypes
 
 
 class ExamplesFlextTargetOracleTypes(FlextTargetOracleTypes):

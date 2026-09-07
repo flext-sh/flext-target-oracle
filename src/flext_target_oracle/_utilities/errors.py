@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Annotated, override
 
 from flext_meltano import u
-from flext_target_oracle import c, e, m, t
+from flext_target_oracle import c, e, m, p, t
 
 
 class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
@@ -56,13 +56,13 @@ class FlextTargetOracleExceptions(e):
         })
         return resolved, ctx
 
-    class Error(e.BaseError):
+    class Error(e.Error):
         """Oracle Target main error - inherits from base error."""
 
     class ConfigurationError(e.ConfigurationError):
         """Oracle configuration error using flext-core foundation."""
 
-    class OracleConnectionError(e.FlextConnectionError):
+    class OracleConnectionError(e.OracleConnectionError):
         """Oracle connection error with Oracle-specific context."""
 
         @override
@@ -70,13 +70,17 @@ class FlextTargetOracleExceptions(e):
             self,
             message: str,
             *,
-            metadata: FlextTargetOracleErrorMetadata | None = None,
-            **kwargs: t.JsonPayload,
+            metadata: p.HasModelDump | t.JsonValue | None = None,
+            **kwargs: t.JsonValue,
         ) -> None:
             """Initialize connection error with Oracle-specific context."""
             _, ctx = FlextTargetOracleExceptions._build_context(
                 default_code=c.ErrorCode.CONNECTION_ERROR,
-                metadata=metadata,
+                metadata=(
+                    metadata
+                    if isinstance(metadata, FlextTargetOracleErrorMetadata)
+                    else None
+                ),
                 kwargs=kwargs,
             )
             super().__init__(message=message)
@@ -95,13 +99,17 @@ class FlextTargetOracleExceptions(e):
             self,
             message: str,
             *,
-            metadata: FlextTargetOracleErrorMetadata | None = None,
-            **kwargs: t.JsonPayload,
+            metadata: p.HasModelDump | t.JsonValue | None = None,
+            **kwargs: t.JsonValue,
         ) -> None:
             """Initialize authentication error with Oracle-specific context."""
             resolved, ctx = FlextTargetOracleExceptions._build_context(
                 default_code=c.ErrorCode.AUTHENTICATION_ERROR,
-                metadata=metadata,
+                metadata=(
+                    metadata
+                    if isinstance(metadata, FlextTargetOracleErrorMetadata)
+                    else None
+                ),
                 kwargs=kwargs,
             )
             super().__init__(
@@ -117,7 +125,7 @@ class FlextTargetOracleExceptions(e):
             )
             self.wallet_location = ctx.get("wallet_location")
 
-    class ProcessingError(Error):
+    class ProcessingError(Error, e.ProcessingError):
         """Oracle processing error with Oracle-specific context."""
 
         @override
@@ -125,13 +133,17 @@ class FlextTargetOracleExceptions(e):
             self,
             message: str,
             *,
-            metadata: FlextTargetOracleErrorMetadata | None = None,
-            **kwargs: t.JsonPayload,
+            metadata: p.HasModelDump | t.JsonValue | None = None,
+            **kwargs: t.JsonValue,
         ) -> None:
             """Initialize processing error with Oracle-specific context."""
             _, ctx = FlextTargetOracleExceptions._build_context(
                 default_code=c.ErrorCode.PROCESSING_ERROR,
-                metadata=metadata,
+                metadata=(
+                    metadata
+                    if isinstance(metadata, FlextTargetOracleErrorMetadata)
+                    else None
+                ),
                 kwargs=kwargs,
             )
             super().__init__(message=message)
@@ -141,7 +153,7 @@ class FlextTargetOracleExceptions(e):
             operation_val = ctx.get("operation")
             self.operation = str(operation_val) if operation_val is not None else None
 
-    class OracleTimeoutError(e.FlextTimeoutError):
+    class OracleTimeoutError(e.OracleTimeoutError):
         """Oracle timeout error using flext-core foundation."""
 
     class SchemaError(ValidationError):
@@ -152,13 +164,17 @@ class FlextTargetOracleExceptions(e):
             self,
             message: str,
             *,
-            metadata: FlextTargetOracleErrorMetadata | None = None,
-            **kwargs: t.JsonPayload,
+            metadata: p.HasModelDump | t.JsonValue | None = None,
+            **kwargs: t.JsonValue,
         ) -> None:
             """Initialize schema error with Oracle-specific context."""
             resolved, ctx = FlextTargetOracleExceptions._build_context(
                 default_code=c.ErrorCode.VALIDATION_ERROR,
-                metadata=metadata,
+                metadata=(
+                    metadata
+                    if isinstance(metadata, FlextTargetOracleErrorMetadata)
+                    else None
+                ),
                 kwargs=kwargs,
             )
             super().__init__(

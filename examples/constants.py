@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_core import FlextTargetOracleConstants
+from flext_target_oracle import FlextTargetOracleConstants
 
 
 class ExamplesFlextTargetOracleConstants(FlextTargetOracleConstants):

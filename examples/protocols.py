@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from flext_core import FlextTargetOracleProtocols
+from flext_target_oracle import FlextTargetOracleProtocols
 
 
 class ExamplesFlextTargetOracleProtocols(FlextTargetOracleProtocols):
