@@ -251,8 +251,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return column.name
 
         primary_columns = sorted(
-            [column for column in columns if column.primary_key],
-            key=by_name,
+            [column for column in columns if column.primary_key], key=by_name
         )
         sdc_columns = sorted(
             [column for column in columns if column.name.startswith("_SDC_")],
