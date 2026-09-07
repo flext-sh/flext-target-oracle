@@ -29,25 +29,37 @@ class FlextTargetOracleModelsSettings:
             ..., description="Oracle database password", validate_default=True
         )
         timeout: t.PositiveInt = u.Field(
-            ..., description="Connection timeout in seconds", validate_default=True
+            default=30,
+            description="Connection timeout in seconds",
+            validate_default=True,
         )
         pool_min: t.PositiveInt = u.Field(
-            ..., description="Oracle connection pool minimum", validate_default=True
+            default=2,
+            description="Oracle connection pool minimum",
+            validate_default=True,
         )
         pool_max: t.PositiveInt = u.Field(
-            ..., description="Oracle connection pool maximum", validate_default=True
+            default=20,
+            description="Oracle connection pool maximum",
+            validate_default=True,
         )
         pool_increment: t.PositiveInt = u.Field(
-            ..., description="Oracle connection pool increment", validate_default=True
+            default=1,
+            description="Oracle connection pool increment",
+            validate_default=True,
         )
         encoding: str = u.Field(
-            ..., description="Oracle connection encoding", validate_default=True
+            default="UTF-8",
+            description="Oracle connection encoding",
+            validate_default=True,
         )
         ssl_enabled: bool = u.Field(
-            ..., description="Whether SSL is enabled", validate_default=True
+            default=False, description="Whether SSL is enabled", validate_default=True
         )
         autocommit: bool = u.Field(
-            ..., description="Whether autocommit is enabled", validate_default=True
+            default=False,
+            description="Whether autocommit is enabled",
+            validate_default=True,
         )
         use_bulk_operations: Annotated[
             bool,

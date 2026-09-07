@@ -3,13 +3,14 @@
 
 from __future__ import annotations
 
-from types import MappingProxyType
 from typing import TYPE_CHECKING
+
+from types import MappingProxyType
 
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_core import (
+    from flext_target_oracle import (
         FlextTargetOracleConstants,
         FlextTargetOracleConstants as c,
         d,
@@ -57,7 +58,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".protocols": ("ExamplesFlextTargetOracleProtocols",),
             ".typings": ("ExamplesFlextTargetOracleTypes",),
             ".utilities": ("ExamplesFlextTargetOracleUtilities",),
-            "flext_core": (
+            "flext_target_oracle": (
                 "FlextTargetOracleConstants",
                 "c",
                 "d",

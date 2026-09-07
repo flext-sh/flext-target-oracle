@@ -246,13 +246,17 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             "sdc_columns": 4,
         }
         order_rules.update(self.target_config.TargetOracle.column_order_rules)
+
+        def by_name(column: m.DbOracle.Column) -> str:
+            return column.name
+
         primary_columns = sorted(
             [column for column in columns if column.primary_key],
-            key=lambda column: column.name,
+            key=by_name,
         )
         sdc_columns = sorted(
             [column for column in columns if column.name.startswith("_SDC_")],
-            key=lambda column: column.name,
+            key=by_name,
         )
         primary_names = frozenset(column.name for column in primary_columns)
         sdc_names = frozenset(column.name for column in sdc_columns)
@@ -267,7 +271,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                     or column.name.endswith("_AT")
                 )
             ],
-            key=lambda column: column.name,
+            key=by_name,
         )
         audit_names = frozenset(column.name for column in audit_columns)
         regular_columns = sorted(
@@ -278,7 +282,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 and column.name not in sdc_names
                 and column.name not in audit_names
             ],
-            key=lambda column: column.name,
+            key=by_name,
         )
         grouped_columns = {
             "primary_keys": primary_columns,
