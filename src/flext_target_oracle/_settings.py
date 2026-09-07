@@ -15,7 +15,8 @@ from typing import TYPE_CHECKING, Annotated
 
 from pydantic_settings import SettingsConfigDict
 
-from flext_core import FlextSettings, m
+from flext_core import FlextSettings
+from flext_target_oracle import m
 
 
 class FlextTargetOracleSettings(FlextSettings):

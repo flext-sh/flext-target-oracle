@@ -197,7 +197,7 @@ class ProductionTargetManager:
             u.logger.exception("Health check failed")
             health_status.status = "unhealthy"
             health_status.error = str(e)
-            return r[t.JsonMapping].fail(f"Health check error: {e}")
+            return r[t.JsonMapping].fail(f"Health check error: {e}", exception=e)
 
     def _health_check_status(
         self, health_status: HealthStatus
@@ -258,7 +258,7 @@ class ProductionTargetManager:
             ImportError,
         ) as e:
             u.logger.exception("Failed to initialize production target")
-            return r[bool].fail(f"Initialization error: {e}")
+            return r[bool].fail(f"Initialization error: {e}", exception=e)
 
     def _initialize_checked(self) -> p.Result[bool]:
         """Initialize target after the public exception boundary."""
@@ -307,7 +307,7 @@ class ProductionTargetManager:
             u.logger.exception("Unexpected error during stream processing")
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
-            return r[t.JsonMapping].fail(f"Stream processing error: {e}")
+            return r[t.JsonMapping].fail(f"Stream processing error: {e}", exception=e)
 
     def _process_singer_stream_checked(
         self, messages: t.SequenceOf[SingerMessage], stats: ProcessingStats
@@ -403,7 +403,7 @@ class ProductionTargetManager:
             ImportError,
         ) as e:
             u.logger.exception("Error during shutdown")
-            return r[bool].fail(f"Shutdown error: {e}")
+            return r[bool].fail(f"Shutdown error: {e}", exception=e)
 
     def _shutdown_checked(self) -> p.Result[bool]:
         """Shutdown target after the public exception boundary."""

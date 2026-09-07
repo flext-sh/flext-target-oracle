@@ -55,7 +55,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         """Initialize the target for loading from a load command message."""
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
-            return r[str].fail(settings_result.error or "Invalid settings")
+            return r[str].from_failure(settings_result)
         _ = command.state_file
         return r[str].ok("load_ready")
 
@@ -65,9 +65,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         """Validate target configuration from a validate command message."""
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
-            return r[str].fail(
-                settings_result.error or "Configuration validation failed"
-            )
+            return r[str].from_failure(settings_result)
         settings: p.TargetOracle.OracleSettingsProtocol = settings_result.value
         validation_result = (
             r[bool].fail("oracle_host is required")
@@ -81,9 +79,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
             else r[bool].ok(True)
         )
         if validation_result.failure:
-            return r[str].fail(
-                validation_result.error or "Configuration validation failed"
-            )
+            return r[str].from_failure(validation_result)
         return r[str].ok("validation_ok")
 
 

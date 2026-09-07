@@ -18,15 +18,13 @@ import pytest
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle.utilities import FlextTargetOracleLoader
-from flext_tests import reset_settings as _shared_reset_settings, tk, tm
+from flext_tests import tk, tm
 from tests import c, m
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
     from tests import t
-
-reset_settings = _shared_reset_settings
 
 _ORACLE_TEST_PASSWORD = secrets.token_hex(16)
 
@@ -54,7 +52,7 @@ def isolate_target_oracle_env(
 def docker_control() -> tk:
     """Provide Docker control instance for tests."""
     return tk.shared(
-        "flext-oracle-db-test", workspace_root=Path(__file__).resolve().parents[2]
+        "flext-oracle-db-test", repository_root=Path(__file__).resolve().parents[2]
     )
 
 
