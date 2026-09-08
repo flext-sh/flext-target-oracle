@@ -12,12 +12,7 @@ if TYPE_CHECKING:
     from flext_target_oracle import FlextTargetOracleConstants
     from flext_tests import FlextTestsConstants, d, e, h, r, td, tf, tk, tm, tv, x
 
-    from . import (
-        e2e as e2e,
-        integration as integration,
-        performance as performance,
-        unit as unit,
-    )
+    from . import e2e, integration, performance, unit
     from .base import (
         TestsFlextTargetOracleServiceBase,
         TestsFlextTargetOracleServiceBase as s,
