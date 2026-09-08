@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleTypes
 from flext_meltano import t as meltano_t
-from flext_target_oracle._typings.base import FlextTargetOracleTypesBase
+
+from ._typings.base import FlextTargetOracleTypesBase
 
 
 class FlextTargetOracleTypes(meltano_t, FlextDbOracleTypes):

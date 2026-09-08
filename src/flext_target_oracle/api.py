@@ -1,6 +1,5 @@
 """FLEXT service orchestrator for target-oracle.
 
-from flext_target_oracle import u
 Thin facade — all infrastructure from ``FlextMeltanoTargetServiceBase`` via MRO.
 Oracle sink creation requires FlextTargetOracleLoader integration.
 
@@ -83,6 +82,6 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         return r[str].ok("validation_ok")
 
 
-target_oracle = FlextTargetOracleService
+target_oracle: FlextTargetOracleService = FlextTargetOracleService.fetch_global()
 
 __all__: list[str] = ["FlextTargetOracleService", "target_oracle"]
