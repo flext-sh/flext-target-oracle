@@ -32,7 +32,7 @@ Preencha **Decisão**: `corrigir` / `falso-positivo` (registrar em `.snyk`) / `r
        93          "DbOracle": {
 ```
 
-**Decisão**: 
+**Decisão**:
 
 ### 2 · ⚪ LOW · Use of Hardcoded Passwords
 **Local**: `tests/integration/test_oracle.py:476` · **CWE**: -
@@ -49,5 +49,4 @@ Preencha **Decisão**: `corrigir` / `falso-positivo` (registrar em `.snyk`) / `r
       480          record_msg_value: t.JsonValue = t.json_value_adapter().validate_python(
 ```
 
-**Decisão**: 
-
+**Decisão**:
