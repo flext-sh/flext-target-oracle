@@ -6,6 +6,7 @@ import sys
 from typing import ClassVar
 
 from flext_cli import cli
+
 from flext_target_oracle import m, p, r, t, u
 from flext_target_oracle.api import FlextTargetOracleService
 

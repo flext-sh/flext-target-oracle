@@ -8,8 +8,9 @@ from __future__ import annotations
 
 from typing import Final
 
-from flext_target_oracle import FlextTargetOracleConstants
 from flext_tests import FlextTestsConstants
+
+from flext_target_oracle import FlextTargetOracleConstants
 
 
 class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsConstants):

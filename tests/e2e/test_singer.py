@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-
 from flext_cli import u as cli_u
-from flext_target_oracle.utilities import FlextTargetOracle
 from flext_tests import tm
+
+from flext_target_oracle.utilities import FlextTargetOracle
 from tests import m
 
 if TYPE_CHECKING:

@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from flext_meltano import p
+
     from flext_target_oracle import m, t
 
 

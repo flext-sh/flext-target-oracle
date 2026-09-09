@@ -13,6 +13,7 @@ from __future__ import annotations
 from typing import Annotated
 
 from flext_meltano import u
+
 from flext_target_oracle import e, m, t
 
 

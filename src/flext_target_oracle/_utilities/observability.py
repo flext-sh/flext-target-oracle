@@ -6,6 +6,7 @@ from contextlib import contextmanager
 from typing import TYPE_CHECKING, ClassVar
 
 from flext_meltano import p, u
+
 from flext_target_oracle import c, t
 
 from .errors import FlextTargetOracleErrorMetadata, FlextTargetOracleExceptions as e

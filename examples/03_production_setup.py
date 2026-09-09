@@ -17,6 +17,7 @@ from datetime import UTC
 from typing import TYPE_CHECKING, cast
 
 from flext_cli import u as cli_u
+
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleSettings,

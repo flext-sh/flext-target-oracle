@@ -14,11 +14,11 @@ from time import monotonic, sleep
 from typing import TYPE_CHECKING
 
 import pytest
-
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
+from flext_tests import tk, tm
+
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle.utilities import FlextTargetOracleLoader
-from flext_tests import tk, tm
 from tests import c, m
 
 if TYPE_CHECKING:
