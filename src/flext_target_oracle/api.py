@@ -1,6 +1,5 @@
 """FLEXT service orchestrator for target-oracle.
 
-from flext_target_oracle import u
 Thin facade — all infrastructure from ``FlextMeltanoTargetServiceBase`` via MRO.
 Oracle sink creation requires FlextTargetOracleLoader integration.
 
@@ -15,6 +14,7 @@ from typing import Annotated, Never, override
 from flext_meltano.services.consumer_bases.target_service_base import (
     FlextMeltanoTargetServiceBase,
 )
+
 from flext_target_oracle import c, m, p, r, t, u
 
 
@@ -55,7 +55,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         """Initialize the target for loading from a load command message."""
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
-            return r[str].fail(settings_result.error or "Invalid settings")
+            return r[str].from_failure(settings_result)
         _ = command.state_file
         return r[str].ok("load_ready")
 
@@ -65,9 +65,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         """Validate target configuration from a validate command message."""
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
-            return r[str].fail(
-                settings_result.error or "Configuration validation failed"
-            )
+            return r[str].from_failure(settings_result)
         settings: p.TargetOracle.OracleSettingsProtocol = settings_result.value
         validation_result = (
             r[bool].fail("oracle_host is required")
@@ -81,12 +79,10 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
             else r[bool].ok(True)
         )
         if validation_result.failure:
-            return r[str].fail(
-                validation_result.error or "Configuration validation failed"
-            )
+            return r[str].from_failure(validation_result)
         return r[str].ok("validation_ok")
 
 
-target_oracle = FlextTargetOracleService
+target_oracle: FlextTargetOracleService = FlextTargetOracleService.fetch_global()
 
 __all__: list[str] = ["FlextTargetOracleService", "target_oracle"]

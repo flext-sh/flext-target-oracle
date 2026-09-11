@@ -40,7 +40,7 @@ class FlextTargetOracleConnectionService:
             schema=settings.TargetOracle.default_target_schema
         )
         if tables_result.failure:
-            return r[bool].fail(tables_result.error or "Connection test failed")
+            return r[bool].from_failure(tables_result)
         return r[bool].ok(True)
 
 

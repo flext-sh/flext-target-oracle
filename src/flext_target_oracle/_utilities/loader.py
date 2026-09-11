@@ -18,8 +18,10 @@ from typing import ClassVar, override
 
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_meltano import FlextMeltanoServiceBase, u
+
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t
-from flext_target_oracle._utilities.errors import FlextTargetOracleExceptions as e
+
+from .errors import FlextTargetOracleExceptions as e
 
 
 class FlextTargetOracleLoader(FlextMeltanoServiceBase):
@@ -118,9 +120,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             normalized_schema
         )
         if type_mapping_result.failure:
-            return r[tuple[m.DbOracle.Column, ...]].fail(
-                type_mapping_result.error or "Failed to map Singer schema to Oracle"
-            )
+            return r[tuple[m.DbOracle.Column, ...]].from_failure(type_mapping_result)
         stream_mappings = t.TargetOracle.STR_MAP_ADAPTER.validate_python(
             json.loads(self.target_config.TargetOracle.column_mappings or "{}").get(
                 stream_name, {}
@@ -248,13 +248,16 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             "sdc_columns": 4,
         }
         order_rules.update(self.target_config.TargetOracle.column_order_rules)
+
+        def by_name(column: m.DbOracle.Column) -> str:
+            return column.name
+
         primary_columns = sorted(
-            [column for column in columns if column.primary_key],
-            key=lambda column: column.name,
+            [column for column in columns if column.primary_key], key=by_name
         )
         sdc_columns = sorted(
             [column for column in columns if column.name.startswith("_SDC_")],
-            key=lambda column: column.name,
+            key=by_name,
         )
         primary_names = frozenset(column.name for column in primary_columns)
         sdc_names = frozenset(column.name for column in sdc_columns)
@@ -269,7 +272,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                     or column.name.endswith("_AT")
                 )
             ],
-            key=lambda column: column.name,
+            key=by_name,
         )
         audit_names = frozenset(column.name for column in audit_columns)
         regular_columns = sorted(
@@ -280,7 +283,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 and column.name not in sdc_names
                 and column.name not in audit_names
             ],
-            key=lambda column: column.name,
+            key=by_name,
         )
         grouped_columns = {
             "primary_keys": primary_columns,
@@ -403,9 +406,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             stream_name, schema, key_properties
         )
         if stream_columns_result.failure:
-            return r[bool].fail(
-                stream_columns_result.error or "Failed to derive Oracle columns"
-            )
+            return r[bool].from_failure(stream_columns_result)
         with self.oracle_api as connected_api:
             tables_result = connected_api.fetch_tables(
                 schema=self.target_config.TargetOracle.default_target_schema
@@ -462,7 +463,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         ).get(stream_name, ()):
             index_columns_result = self._custom_index_columns(raw_index, stream_name)
             if index_columns_result.failure:
-                return r[bool].fail(index_columns_result.error or "Invalid index")
+                return r[bool].from_failure(index_columns_result)
             raw_index_name = raw_index.get("name") or raw_index.get("index_name")
             index_name = str(
                 raw_index_name or f"{table_name}_{index_columns_result.value[0]}_IDX"
@@ -727,9 +728,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 stream_name, records, loaded_at
             )
             if params_result.failure:
-                return r[bool].fail(
-                    params_result.error or "Failed to build insert parameters"
-                )
+                return r[bool].from_failure(params_result)
             merge_result = self._delete_merge_rows(
                 connected_api, stream_name, table_name, schema_name, params_result.value
             )
@@ -753,9 +752,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 stream_name, record, loaded_at
             )
             if params_result.failure:
-                return r[list[t.JsonMapping]].fail(
-                    params_result.error or "Failed to build insert parameters"
-                )
+                return r[list[t.JsonMapping]].from_failure(params_result)
             params_list.append(params_result.value)
         return r[list[t.JsonMapping]].ok(params_list)
 

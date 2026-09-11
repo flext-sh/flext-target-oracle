@@ -15,13 +15,14 @@ import time
 from typing import TYPE_CHECKING
 
 import pytest
+from flext_tests import tm
 
 from flext_target_oracle.utilities import FlextTargetOracle, FlextTargetOracleLoader
-from flext_tests import tm
 from tests import c, m, p, t
 
 if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleApi
+
     from flext_target_oracle import FlextTargetOracleSettings
 
 pytestmark = [pytest.mark.integration, pytest.mark.docker]
