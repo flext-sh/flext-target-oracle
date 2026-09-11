@@ -26,7 +26,7 @@ dependencies = [
   "pydantic>=2.13.5",
   "pydantic-settings>=2.15.0",
   "pyyaml>=6.0.3",
-  "structlog>=25.5.0",
+  "structlog>=25.5.0,<26",
   "typing-extensions>=4.16.0",
 ]
 description = "FLEXT Target Oracle - Singer Target for Oracle Database Data Loading"
