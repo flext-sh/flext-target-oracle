@@ -32,13 +32,13 @@ class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
 class FlextTargetOracleExceptions(e):
     """Oracle Target exceptions using flext-core SOURCE OF TRUTH."""
 
-    class Error(e.Error):
+    class Error(e.BaseError):
         """Oracle Target main error - inherits from base error."""
 
     class ConfigurationError(e.ConfigurationError):
         """Oracle configuration error using flext-core foundation."""
 
-    class OracleConnectionError(e.OracleConnectionError):
+    class OracleConnectionError(e.FlextConnectionError):
         """Oracle connection error with Oracle-specific context."""
 
     class ValidationError(e.ValidationError):
@@ -47,10 +47,10 @@ class FlextTargetOracleExceptions(e):
     class AuthenticationError(e.AuthenticationError):
         """Oracle authentication error with Oracle-specific context."""
 
-    class ProcessingError(e.ProcessingError):
+    class ProcessingError(e.OperationError):
         """Oracle processing error with Oracle-specific context."""
 
-    class OracleTimeoutError(e.OracleTimeoutError):
+    class OracleTimeoutError(e.FlextTimeoutError):
         """Oracle timeout error using flext-core foundation."""
 
     class SchemaError(ValidationError):
