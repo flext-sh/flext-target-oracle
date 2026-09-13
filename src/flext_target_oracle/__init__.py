@@ -32,14 +32,12 @@ if TYPE_CHECKING:
     from .protocols import FlextTargetOracleProtocols, FlextTargetOracleProtocols as p
     from .typings import FlextTargetOracleTypes, FlextTargetOracleTypes as t
     from .utilities import (
-        FlextTargetOracle,
         FlextTargetOracleExceptions,
         FlextTargetOracleUtilities,
         FlextTargetOracleUtilities as u,
     )
 __all__: tuple[str, ...] = (
     "FlextDbOracleConstants",
-    "FlextTargetOracle",
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
@@ -87,7 +85,6 @@ _LAZY_IMPORTS = MappingProxyType(
             ".protocols": ("FlextTargetOracleProtocols", "p"),
             ".typings": ("FlextTargetOracleTypes", "t"),
             ".utilities": (
-                "FlextTargetOracle",
                 "FlextTargetOracleExceptions",
                 "FlextTargetOracleUtilities",
                 "u",
