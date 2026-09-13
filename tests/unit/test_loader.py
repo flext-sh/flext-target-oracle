@@ -81,6 +81,7 @@ class TestsFlextTargetOracleLoader:
                 }).unwrap(),
             },
             "key_properties": ["id"],
+            "intermediate_encodings": ["utf8"],
         }
         validated = m.Meltano.SingerSchemaMessage.model_validate(schema_message)
         result = loader.ensure_table_exists(
