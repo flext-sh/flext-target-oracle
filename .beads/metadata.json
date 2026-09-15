@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "flext_target_oracle",
+  "project_id": "e78a33ad-54dd-4662-87d4-312c057b8b3b"
+}
