@@ -14,7 +14,11 @@ from typing import Annotated
 
 from flext_meltano import u
 
-from flext_target_oracle import e, m, t
+from flext_core import e as core_e
+from flext_target_oracle import m, t
+
+# Oracle Target exceptions inherit directly from the flext-core SOURCE OF TRUTH;
+# nesting under the db-oracle facade would shadow its typed init signatures.
 
 
 class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
@@ -29,28 +33,28 @@ class FlextTargetOracleErrorMetadata(m.FlexibleInternalModel):
     ] = None
 
 
-class FlextTargetOracleExceptions(e):
+class FlextTargetOracleExceptions(core_e):
     """Oracle Target exceptions using flext-core SOURCE OF TRUTH."""
 
-    class Error(e.BaseError):
+    class Error(core_e.BaseError):
         """Oracle Target main error - inherits from base error."""
 
-    class ConfigurationError(e.ConfigurationError):
+    class ConfigurationError(core_e.ConfigurationError):
         """Oracle configuration error using flext-core foundation."""
 
-    class OracleConnectionError(e.FlextConnectionError):
+    class OracleConnectionError(core_e.FlextConnectionError):
         """Oracle connection error with Oracle-specific context."""
 
-    class ValidationError(e.ValidationError):
+    class ValidationError(core_e.ValidationError):
         """Oracle validation error using flext-core foundation."""
 
-    class AuthenticationError(e.AuthenticationError):
+    class AuthenticationError(core_e.AuthenticationError):
         """Oracle authentication error with Oracle-specific context."""
 
-    class ProcessingError(e.OperationError):
+    class ProcessingError(core_e.OperationError):
         """Oracle processing error with Oracle-specific context."""
 
-    class OracleTimeoutError(e.FlextTimeoutError):
+    class OracleTimeoutError(core_e.FlextTimeoutError):
         """Oracle timeout error using flext-core foundation."""
 
     class SchemaError(ValidationError):
