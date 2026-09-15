@@ -133,27 +133,28 @@ class FlextTargetOracle:
         | m.Meltano.SingerActivateVersionMessage
     ]:
         """Parse one Singer mapping into its concrete message model."""
-        msg_type = str(raw.get("type", ""))
-        if msg_type == c.Meltano.SingerMessageType.SCHEMA.value:
-            schema_message = m.Meltano.SingerSchemaMessage.model_validate(raw)
-            return r[m.Meltano.SingerSchemaMessage].ok(schema_message)
-        if msg_type == c.Meltano.SingerMessageType.RECORD.value:
-            record_message = m.Meltano.SingerRecordMessage.model_validate(raw)
-            return r[m.Meltano.SingerRecordMessage].ok(record_message)
-        if msg_type == c.Meltano.SingerMessageType.STATE.value:
-            state_message = m.Meltano.SingerStateMessage.model_validate(raw)
-            return r[m.Meltano.SingerStateMessage].ok(state_message)
-        if msg_type == c.Meltano.SingerMessageType.ACTIVATE_VERSION.value:
-            activate_message = m.Meltano.SingerActivateVersionMessage.model_validate(
-                raw
-            )
-            return r[m.Meltano.SingerActivateVersionMessage].ok(activate_message)
-        return r[
+        result_type = r[
             m.Meltano.SingerSchemaMessage
             | m.Meltano.SingerRecordMessage
             | m.Meltano.SingerStateMessage
             | m.Meltano.SingerActivateVersionMessage
-        ].fail(f"Unsupported Singer message type: {msg_type}")
+        ]
+        msg_type = str(raw.get("type", ""))
+        if msg_type == c.Meltano.SingerMessageType.SCHEMA.value:
+            schema_message = m.Meltano.SingerSchemaMessage.model_validate(raw)
+            return result_type.ok(schema_message)
+        if msg_type == c.Meltano.SingerMessageType.RECORD.value:
+            record_message = m.Meltano.SingerRecordMessage.model_validate(raw)
+            return result_type.ok(record_message)
+        if msg_type == c.Meltano.SingerMessageType.STATE.value:
+            state_message = m.Meltano.SingerStateMessage.model_validate(raw)
+            return result_type.ok(state_message)
+        if msg_type == c.Meltano.SingerMessageType.ACTIVATE_VERSION.value:
+            activate_message = m.Meltano.SingerActivateVersionMessage.model_validate(
+                raw
+            )
+            return result_type.ok(activate_message)
+        return result_type.fail(f"Unsupported Singer message type: {msg_type}")
 
     def finalize(self) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
         """Flush remaining batches and return loader statistics."""
