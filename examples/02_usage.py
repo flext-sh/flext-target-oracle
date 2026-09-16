@@ -9,7 +9,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from pathlib import Path
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings, m, t
+from flext_target_oracle import FlextTargetOracleSettings, m, t
+from flext_target_oracle.utilities import FlextTargetOracle
 
 
 def load_config() -> t.JsonMapping:
