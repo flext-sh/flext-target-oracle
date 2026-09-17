@@ -63,7 +63,7 @@ Thank you for your interest in contributing to FLEXT Target Oracle! This documen
    ```bash
    make dev-setup
    # or
-   poetry install --all-extras
+   make setup --all-extras
    pip install -r requirements-test.txt
    ```
 
