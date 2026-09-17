@@ -922,18 +922,18 @@ ______________________________________________________________________
 
 ### **Development Standards Checklist**
 
-- [ ] **Type Annotations**: 100% type coverage with strict MyPy compliance
-- [ ] **Error Handling**: All operations return r for railway-oriented programming
+- [ ] **Development Standards Checklist**
+
+- [ ] **Type Annotations**: 100% type coverage with strict typing compliance
+- [ ] **Error Handling**: All operations return r[T] for railway-oriented programming
 - [ ] **Logging**: Structured logging with appropriate context and correlation IDs
 - [ ] **Documentation**: Comprehensive docstrings with examples and business context
-- [ ] **Testing**: 90%+ coverage with unit, integration, and security tests
 
 ### **Quality Gate Checklist**
 
-- [ ] **Linting**: `make lint` passes with zero warnings (Ruff all rules)
-- [ ] **Type Checking**: `make type-check` passes with strict MyPy
-- [ ] **Security**: `make security` passes (Bandit + pip-audit + detect-secrets)
-- [ ] **Testing**: `make test` passes with 90%+ coverage
+- [ ] **Code Quality**: `make check` passes (lint + type + security, zero warnings)
+- [ ] **Testing**: `make test` passes with coverage standards met
+- [ ] **Formatting**: `make fmt` keeps code consistently formatted
 - [ ] **Integration**: Works with existing FLEXT ecosystem projects
 - [ ] **Performance**: No regressions in batch processing or connection management
 
