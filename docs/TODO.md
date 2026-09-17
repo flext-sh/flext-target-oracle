@@ -1,6 +1,7 @@
 # TODO - Status dos Desvios e Melhorias do Projeto
 
 <!-- TOC START -->
+
 - [🚨 DESVIOS CRÍTICOS DE ARQUITETURA](#desvios-crticos-de-arquitetura)
   - [1. **DUPLICAÇÃO DE EXCEÇÕES** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE](#1-duplicao-de-excees-documentado-implementao-pendente)
   - [2. **USO INCORRETO DE execute_ddl PARA DML** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE](#2-uso-incorreto-de-executeddl-para-dml-documentado-implementao-pendente)
@@ -33,7 +34,7 @@
   - [**Métricas de Qualidade Documentação**](#mtricas-de-qualidade-documentao)
   - [**Status de Produção Realista**](#status-de-produo-realista)
   - [**Próxima Fase Necessária**](#prxima-fase-necessria)
-<!-- TOC END -->
+  <!-- TOC END -->
 
 **Data da Análise**: 2025-08-04\
 **Versão**: 0.9.9\
@@ -60,7 +61,7 @@
 
 **Próximos Passos**:
 
-```python
+````python
 # 1. Remover exceções duplicadas de __init__.py
 # 2. Manter apenas exceptions.py como fonte única
 # 3. Atualizar imports em todos os módulos```
@@ -447,3 +448,4 @@ ______________________________________________________________________
 **Progresso Realizado**: Documentação enterprise-grade completa\
 **Próximo Milestone**: Implementação das correções críticas\
 **Próxima Revisão**: 2025-08-11
+````

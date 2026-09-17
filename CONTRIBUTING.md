@@ -331,6 +331,6 @@ test: add performance benchmarks
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
 
-______________________________________________________________________
+---
 
 Thank you for contributing to FLEXT Target Oracle! 🎯🐘

@@ -1,6 +1,7 @@
 # Development Guide
 
 <!-- TOC START -->
+
 - [Quick Start](#quick-start)
   - [Prerequisites](#prerequisites)
   - [Environment Setup](#environment-setup)
@@ -29,7 +30,7 @@
   - [Pull Request Checklist](#pull-request-checklist)
   - [Commit Message Format```](#commit-message-format)
   - [Review Process](#review-process)
-<!-- TOC END -->
+  <!-- TOC END -->
 
 **FLEXT Target Oracle - Developer Documentation**
 
@@ -166,7 +167,7 @@ make test                   # Must maintain 90%+ coverage
 
 #### Code Style Guidelines
 
-```python
+````python
 from __future__ import annotations
 
 # ✅ GOOD: FLEXT patterns
@@ -704,3 +705,4 @@ ______________________________________________________________________
 **Document Version**: 1.0\
 **Last Updated**: 2025-08-04\
 **Next Review**: 2025-08-11
+````

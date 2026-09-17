@@ -1,6 +1,7 @@
 # Singer SDK Integration Guide
 
 <!-- TOC START -->
+
 - [Overview](#overview)
 - [Singer Protocol Implementation](#singer-protocol-implementation)
   - [Message Types Supported](#message-types-supported)
@@ -27,7 +28,7 @@
   - [Version 0.9.9 Requirements](#version-099-requirements)
   - [Version 1.1.0 Enhancements](#version-110-enhancements)
   - [Version 1.2.0 Advanced Features](#version-120-advanced-features)
-<!-- TOC END -->
+  <!-- TOC END -->
 
 **FLEXT Target Oracle - Singer Protocol Compliance Documentation**
 
@@ -59,7 +60,7 @@ FLEXT Target Oracle implements the Singer specification for data integration, pr
 
 **Implementation**:
 
-```python
+````python
 from __future__ import annotations
 
 
@@ -281,7 +282,7 @@ CREATE TABLE "SCHEMA"."STREAM_NAME" (
     "_SDC_BATCHED_AT" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Batch processing time
     "_SDC_SEQUENCE" NUMBER DEFAULT 0          -- Record sequence number
 )
-```
+````
 
 **Benefits**:
 
@@ -334,7 +335,7 @@ sequenceDiagram
 
 ### Batch Processing Configuration
 
-```python
+````python
 # Configure batch processing for optimal performance
 settings = FlextOracleTargetSettings(
     # ... connection settings
@@ -613,3 +614,4 @@ ______________________________________________________________________
 **Last Updated**: 2025-08-04
 **Singer Specification**: [hub.meltano.com/singer/spec](https://hub.meltano.com/singer/spec)
 **Next Review**: 2025-08-11
+````

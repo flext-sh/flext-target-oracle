@@ -1,6 +1,7 @@
 # Python Module Organization & Semantic Patterns
 
 <!-- TOC START -->
+
 - [🏗️ **Module Architecture Overview**](#module-architecture-overview)
   - [**Core Design Principles**](#core-design-principles)
 - [📁 **Current Module Structure & Analysis**](#current-module-structure-analysis)
@@ -37,11 +38,11 @@
   - [**Version 0.9.9 (Current)**](#version-099-current)
   - [**Version 1.1.0 (Enhanced Features)**](#version-110-enhanced-features)
   - [**Version 0.9.9 (Next Generation)**](#version-099-next-generation)
-<!-- TOC END -->
+  <!-- TOC END -->
 
 **FLEXT Target Oracle - Module Architecture Following FLEXT Ecosystem Standards**
 
-______________________________________________________________________
+---
 
 ## 🏗️ **Module Architecture Overview**
 
@@ -56,13 +57,13 @@ FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for
 1. **Railway-Oriented Programming**: p.Result[T] threading through all operations
 1. **Ecosystem Consistency**: Patterns align with broader FLEXT ecosystem
 
-______________________________________________________________________
+---
 
 ## 📁 **Current Module Structure & Analysis**
 
 ### **Current Implementation Structure**
 
-```python
+````python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Public API gateway & exports
 ├── settings.py                # ⚙️ m.Value configuration patterns
@@ -1006,3 +1007,4 @@ ______________________________________________________________________
 **Target Audience**: FLEXT ecosystem developers working on Singer targets
 **Scope**: Python module organization for Oracle target implementation
 **Compliance**: FLEXT ecosystem standards and Singer specification requirements
+````

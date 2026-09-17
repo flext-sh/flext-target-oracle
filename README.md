@@ -1,6 +1,7 @@
 # flext-target-oracle
 
 <!-- TOC START -->
+
 - [Purpose](#purpose)
 - [Module Map](#module-map)
 - [Collection Rules](#collection-rules)
@@ -8,6 +9,7 @@
 - [Integration Points](#integration-points)
 - [Quality Gates](#quality-gates)
 - [Governance Pointer](#governance-pointer)
+
 <!-- TOC END -->
 
 <!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
@@ -25,11 +27,11 @@ FLEXT Target Oracle - Singer Target for Oracle Database Data Loading
 ## Module Map
 
 ::: flext_target_oracle
-    options:
-      members: false
-      show_root_heading: false
-      show_root_toc_entry: false
-      show_source: false
+options:
+members: false
+show_root_heading: false
+show_root_toc_entry: false
+show_source: false
 
 ## Collection Rules
 

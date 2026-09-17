@@ -1,6 +1,7 @@
 # Architecture Guide
 
 <!-- TOC START -->
+
 - [Overview](#overview)
 - [Architecture Principles](#architecture-principles)
   - [FLEXT Core Integration](#flext-core-integration)
@@ -32,6 +33,7 @@
   - [Planned Improvements](#planned-improvements)
   - [Scalability Considerations](#scalability-considerations)
 - [Related Documentation](#related-documentation)
+
 <!-- TOC END -->
 
 **FLEXT Target Oracle - Technical Architecture Documentation**
@@ -46,7 +48,7 @@ FLEXT Target Oracle implements a layered architecture following Clean Architectu
 
 The target is built on foundational FLEXT patterns:
 
-```python
+````python
 from __future__ import annotations
 # r Railway Pattern - Consistent error handling
 from flext_cli import u
@@ -495,3 +497,4 @@ ______________________________________________________________________
 **Document Version**: 1.0\
 **Last Updated**: 2025-08-04\
 **Next Review**: 2025-08-11
+````

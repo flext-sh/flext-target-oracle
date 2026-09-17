@@ -6,9 +6,9 @@ Gerado do scan Snyk (dump 2026-08-06). Bead: `mro-26ga`
 
 **2 achados** — critical 0, high 0, medium 0, low 2
 
-| categoria | achados |
-|---|---|
-| Use of Hardcoded Passwords | 2 |
+| categoria                  | achados |
+| -------------------------- | ------- |
+| Use of Hardcoded Passwords | 2       |
 
 ## Como usar este documento
 
@@ -18,6 +18,7 @@ Preencha **Decisão**: `corrigir` / `falso-positivo` (registrar em `.snyk`) / `r
 ## Achados
 
 ### 1 · ⚪ LOW · Use of Hardcoded Passwords
+
 **Local**: `tests/conftest.py:89` · **CWE**: -
 
 ```python
@@ -35,6 +36,7 @@ Preencha **Decisão**: `corrigir` / `falso-positivo` (registrar em `.snyk`) / `r
 **Decisão**:
 
 ### 2 · ⚪ LOW · Use of Hardcoded Passwords
+
 **Local**: `tests/integration/test_oracle.py:476` · **CWE**: -
 
 ```python
