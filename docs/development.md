@@ -9,8 +9,6 @@
   - [Daily Development Commands](#daily-development-commands)
   - [Testing Workflow](#testing-workflow)
   - [Code Quality Standards](#code-quality-standards)
-- [FLEXT Pattern Implementation](#flext-pattern-implementation)
-  - [r Railway Pattern](#r-railway-pattern)
   - [Configuration Patterns](#configuration-patterns)
   - [Logging Patterns](#logging-patterns)
 - [Oracle Integration Development](#oracle-integration-development)
@@ -248,8 +246,6 @@ from __future__ import annotations
 
 import logging
 
-from flext_core import u
-
 logger = logging.getLogger(__name__)
 
 
@@ -291,8 +287,8 @@ def process_with_logging(stream_name: str, batch_size: int):
 
 ```python
 # Test Oracle connectivity manually
-from flext_target_oracle import FlextOracleTargetLoader
 from flext_core import u
+from flext_target_oracle import FlextOracleTargetLoader
 
 # Create test configuration
 loader = FlextOracleTargetLoader(...)
@@ -447,6 +443,7 @@ from __future__ import annotations
 """Test template for new functionality."""
 
 import pytest
+
 from flext_target_oracle import FlextTargetOracleLoader
 
 
@@ -494,6 +491,7 @@ from __future__ import annotations
 """Integration test template."""
 
 import pytest
+
 from flext_target_oracle import FlextTargetOracleLoader
 
 
@@ -549,8 +547,8 @@ from __future__ import annotations
 # Test different batch sizes for optimal performance
 import time
 
-from flext_target_oracle import FlextTargetOracleLoader
 from flext_core import m
+from flext_target_oracle import FlextTargetOracleLoader
 
 
 def benchmark_batch_sizes(records: list[m.Dict]):
@@ -583,8 +581,10 @@ def benchmark_batch_sizes(records: list[m.Dict]):
 
 ```python
 from __future__ import annotations
-import psutil
+
 import os
+
+import psutil
 
 
 def monitor_memory_usage():
