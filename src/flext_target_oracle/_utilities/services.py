@@ -9,150 +9,141 @@ from flext_target_oracle import FlextTargetOracleSettings, e, m, p, r, settings,
 
 if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleApi
+class FlextTargetOracleUtilitiesServices:
+    """Canonical namespace owner."""
+    
+    class FlextTargetOracleConnectionService:
+        """Minimal Oracle connection service implements ConnectionService protocol."""
 
+        def __init__(self, oracle_api: FlextDbOracleApi) -> None:
+            """Store configuration and Oracle API dependency."""
+            self.oracle_api = oracle_api
 
-class FlextTargetOracleConnectionService:
-    """Minimal Oracle connection service implements ConnectionService protocol."""
+        def execute(self) -> p.Result[bool]:
+            """Run default connection validation operation."""
+            return self.test_connection()
 
-    def __init__(self, oracle_api: FlextDbOracleApi) -> None:
-        """Store configuration and Oracle API dependency."""
-        self.oracle_api = oracle_api
-
-    def execute(self) -> p.Result[bool]:
-        """Run default connection validation operation."""
-        return self.test_connection()
-
-    def get_connection_info(self) -> p.Result[m.TargetOracle.OracleConnectionModel]:
-        """Return normalized connection model."""
-        return r[m.TargetOracle.OracleConnectionModel].ok(
-            m.TargetOracle.OracleConnectionModel(
-                host=settings.TargetOracle.oracle_host,
-                port=settings.TargetOracle.oracle_port,
-                service_name=settings.TargetOracle.oracle_service_name,
-                username=settings.TargetOracle.oracle_user,
-                password=settings.TargetOracle.oracle_password,
+        def get_connection_info(self) -> p.Result[m.TargetOracle.OracleConnectionModel]:
+            """Return normalized connection model."""
+            return r[m.TargetOracle.OracleConnectionModel].ok(
+                m.TargetOracle.OracleConnectionModel(
+                    host=settings.TargetOracle.oracle_host,
+                    port=settings.TargetOracle.oracle_port,
+                    service_name=settings.TargetOracle.oracle_service_name,
+                    username=settings.TargetOracle.oracle_user,
+                    password=settings.TargetOracle.oracle_password,
+                )
             )
-        )
 
-    def test_connection(self) -> p.Result[bool]:
-        """Check Oracle access by listing schema tables."""
-        tables_result = self.oracle_api.fetch_tables(
-            schema=settings.TargetOracle.default_target_schema
-        )
-        if tables_result.failure:
-            return r[bool].from_failure(tables_result)
-        return r[bool].ok(True)
+        def test_connection(self) -> p.Result[bool]:
+            """Check Oracle access by listing schema tables."""
+            tables_result = self.oracle_api.fetch_tables(
+                schema=settings.TargetOracle.default_target_schema
+            )
+            if tables_result.failure:
+                return r[bool].from_failure(tables_result)
+            return r[bool].ok(True)
+    
+    class FlextTargetOracleSchemaService:
+        """Minimal schema management service implements SchemaService protocol."""
 
+        def __init__(self, oracle_api: FlextDbOracleApi) -> None:
+            """Store schema service dependencies."""
+            self.oracle_api = oracle_api
 
-class FlextTargetOracleSchemaService:
-    """Minimal schema management service implements SchemaService protocol."""
+        def ensure_table_exists(
+            self,
+            stream: m.TargetOracle.SingerStreamModel,
+            schema_message: m.Meltano.SingerSchemaMessage,
+        ) -> p.Result[bool]:
+            """Validate table identity before external DDL orchestration."""
+            _ = schema_message
+            table_name = stream.table_name
+            if not table_name:
+                return e.fail_validation("table_name", error="invalid")
+            return r[bool].ok(True)
 
-    def __init__(self, oracle_api: FlextDbOracleApi) -> None:
-        """Store schema service dependencies."""
-        self.oracle_api = oracle_api
+        def execute(self) -> p.Result[bool]:
+            """Run service health operation."""
+            return r[bool].ok(True)
+    
+    class FlextTargetOracleBatchService:
+        """Minimal batching service implements BatchService protocol."""
 
-    def ensure_table_exists(
-        self,
-        stream: m.TargetOracle.SingerStreamModel,
-        schema_message: m.Meltano.SingerSchemaMessage,
-    ) -> p.Result[bool]:
-        """Validate table identity before external DDL orchestration."""
-        _ = schema_message
-        table_name = stream.table_name
-        if not table_name:
-            return e.fail_validation("table_name", error="invalid")
-        return r[bool].ok(True)
+        def __init__(self, oracle_api: FlextDbOracleApi) -> None:
+            """Initialize batch storage and required dependencies."""
+            self.oracle_api = oracle_api
+            self._batches: defaultdict[str, list[m.Meltano.SingerRecordMessage]] = (
+                defaultdict(list)
+            )
 
-    def execute(self) -> p.Result[bool]:
-        """Run service health operation."""
-        return r[bool].ok(True)
+        def add_record(
+            self, stream_name: str, record_message: m.Meltano.SingerRecordMessage
+        ) -> p.Result[bool]:
+            """Append a record to a stream buffer."""
+            self._batches[stream_name].append(record_message)
+            return r[bool].ok(True)
 
+        def execute(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
+            """Run default batch flush operation."""
+            return self.flush_all_batches()
 
-class FlextTargetOracleBatchService:
-    """Minimal batching service implements BatchService protocol."""
+        def flush_all_batches(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
+            """Summarize and clear all in-memory batch buffers."""
+            total = sum(len(records) for records in self._batches.values())
+            stats = m.TargetOracle.LoadStatisticsModel(
+                stream_name="__ALL_STREAMS__",
+                total_records_processed=total,
+                successful_records=total,
+                failed_records=0,
+                batches_processed=len(self._batches),
+            ).finalize()
+            return r[m.TargetOracle.LoadStatisticsModel].ok(stats)
 
-    def __init__(self, oracle_api: FlextDbOracleApi) -> None:
-        """Initialize batch storage and required dependencies."""
-        self.oracle_api = oracle_api
-        self._batches: defaultdict[str, list[m.Meltano.SingerRecordMessage]] = (
-            defaultdict(list)
-        )
+        def flush_batch(self, stream_name: str) -> p.Result[bool]:
+            """Clear buffered records for a specific stream."""
+            self._batches[stream_name] = list[m.Meltano.SingerRecordMessage]()
+            return r[bool].ok(True)
+    
+    class FlextTargetOracleRecordService:
+        """Record validation and transformation service implements RecordService protocol."""
 
-    def add_record(
-        self, stream_name: str, record_message: m.Meltano.SingerRecordMessage
-    ) -> p.Result[bool]:
-        """Append a record to a stream buffer."""
-        self._batches[stream_name].append(record_message)
-        return r[bool].ok(True)
+        def __init__(self, settings: FlextTargetOracleSettings) -> None:
+            """Store record service configuration."""
 
-    def execute(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
-        """Run default batch flush operation."""
-        return self.flush_all_batches()
+        def execute(self) -> p.Result[bool]:
+            """Run record-service readiness check."""
+            return r[bool].ok(True)
 
-    def flush_all_batches(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
-        """Summarize and clear all in-memory batch buffers."""
-        total = sum(len(records) for records in self._batches.values())
-        stats = m.TargetOracle.LoadStatisticsModel(
-            stream_name="__ALL_STREAMS__",
-            total_records_processed=total,
-            successful_records=total,
-            failed_records=0,
-            batches_processed=len(self._batches),
-        ).finalize()
-        return r[m.TargetOracle.LoadStatisticsModel].ok(stats)
+        def transform_record(
+            self,
+            record_message: m.Meltano.SingerRecordMessage,
+            stream: m.TargetOracle.SingerStreamModel,
+        ) -> p.Result[m.Meltano.SingerRecordMessage]:
+            """Apply stream-level mappings and ignored-column filtering."""
+            transformed: t.MutableJsonMapping = {}
+            for key, value in record_message.record.items():
+                if key in stream.ignored_columns:
+                    continue
+                mapped_key = stream.column_mappings.get(key) or key
+                transformed[mapped_key] = value
+            return r[m.Meltano.SingerRecordMessage].ok(
+                m.Meltano.SingerRecordMessage.model_validate({
+                    "type": "RECORD",
+                    "stream": record_message.stream,
+                    "record": transformed,
+                    "time_extracted": record_message.time_extracted,
+                    "version": record_message.version,
+                })
+            )
 
-    def flush_batch(self, stream_name: str) -> p.Result[bool]:
-        """Clear buffered records for a specific stream."""
-        self._batches[stream_name] = list[m.Meltano.SingerRecordMessage]()
-        return r[bool].ok(True)
-
-
-class FlextTargetOracleRecordService:
-    """Record validation and transformation service implements RecordService protocol."""
-
-    def __init__(self, settings: FlextTargetOracleSettings) -> None:
-        """Store record service configuration."""
-
-    def execute(self) -> p.Result[bool]:
-        """Run record-service readiness check."""
-        return r[bool].ok(True)
-
-    def transform_record(
-        self,
-        record_message: m.Meltano.SingerRecordMessage,
-        stream: m.TargetOracle.SingerStreamModel,
-    ) -> p.Result[m.Meltano.SingerRecordMessage]:
-        """Apply stream-level mappings and ignored-column filtering."""
-        transformed: t.MutableJsonMapping = {}
-        for key, value in record_message.record.items():
-            if key in stream.ignored_columns:
-                continue
-            mapped_key = stream.column_mappings.get(key) or key
-            transformed[mapped_key] = value
-        return r[m.Meltano.SingerRecordMessage].ok(
-            m.Meltano.SingerRecordMessage.model_validate({
-                "type": "RECORD",
-                "stream": record_message.stream,
-                "record": transformed,
-                "time_extracted": record_message.time_extracted,
-                "version": record_message.version,
-            })
-        )
-
-    def validate_record(
-        self,
-        record_message: m.Meltano.SingerRecordMessage,
-        schema_message: m.Meltano.SingerSchemaMessage,
-    ) -> p.Result[bool]:
-        """Validate record payload against current schema contract."""
-        _ = record_message
-        _ = schema_message
-        return r[bool].ok(True)
-
-
-__all__: list[str] = [
-    "FlextTargetOracleBatchService",
-    "FlextTargetOracleConnectionService",
-    "FlextTargetOracleRecordService",
-    "FlextTargetOracleSchemaService",
-]
+        def validate_record(
+            self,
+            record_message: m.Meltano.SingerRecordMessage,
+            schema_message: m.Meltano.SingerSchemaMessage,
+        ) -> p.Result[bool]:
+            """Validate record payload against current schema contract."""
+            _ = record_message
+            _ = schema_message
+            return r[bool].ok(True)
+__all__: list[str] = ["FlextTargetOracleUtilitiesServices"]

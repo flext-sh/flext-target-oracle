@@ -14,23 +14,15 @@ if TYPE_CHECKING:
     from .errors import FlextTargetOracleErrorMetadata, FlextTargetOracleExceptions
     from .loader import FlextTargetOracleLoader
     from .observability import FlextTargetOracleUtilitiesObservability
-    from .services import (
-        FlextTargetOracleBatchService,
-        FlextTargetOracleConnectionService,
-        FlextTargetOracleRecordService,
-        FlextTargetOracleSchemaService,
-    )
+    from .services import FlextTargetOracleUtilitiesServices
 __all__: tuple[str, ...] = (
     "FlextTargetOracle",
-    "FlextTargetOracleBatchService",
-    "FlextTargetOracleConnectionService",
     "FlextTargetOracleErrorMetadata",
     "FlextTargetOracleExceptions",
     "FlextTargetOracleLoader",
-    "FlextTargetOracleRecordService",
-    "FlextTargetOracleSchemaService",
     "FlextTargetOracleUtilitiesBase",
     "FlextTargetOracleUtilitiesObservability",
+    "FlextTargetOracleUtilitiesServices",
 )
 
 _LAZY_IMPORTS = MappingProxyType(
@@ -44,12 +36,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ),
             ".loader": ("FlextTargetOracleLoader",),
             ".observability": ("FlextTargetOracleUtilitiesObservability",),
-            ".services": (
-                "FlextTargetOracleBatchService",
-                "FlextTargetOracleConnectionService",
-                "FlextTargetOracleRecordService",
-                "FlextTargetOracleSchemaService",
-            ),
+            ".services": ("FlextTargetOracleUtilitiesServices",),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
