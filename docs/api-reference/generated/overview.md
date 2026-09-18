@@ -9,7 +9,7 @@
 <!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
 - Package: `flext_target_oracle`
-- Version: `0.12.0rc0`
+- Version: `0.12.0`
 - Description: FLEXT Target Oracle - Singer Target for Oracle Database Data Loading
 - Doc summary: Flext Target Oracle package.
 - Classifiers: `Development Status :: 3 - Alpha`, `Intended Audience :: Developers`,
