@@ -84,7 +84,7 @@ def shared_oracle_container(docker_control: tk) -> str:
             "port": int(os.environ["TEST_ORACLE_PORT"]),
             "service_name": os.environ["TEST_ORACLE_SERVICE"],
             "username": "system",
-            "password": "flext_oracle_test",
+            "password": _ORACLE_TEST_PASSWORD,
         }
     })
     oracle_settings = FlextDbOracleSettings.model_validate({

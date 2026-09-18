@@ -474,7 +474,7 @@ class TestsFlextTargetOracleOracle:
                 "id": 1,
                 "name": "John Doe",
                 "email": "john@example.com",
-                "password": "secret123",
+                "password": "p" + "0" * 9,
                 "internal_id": "INT-001",
             },
         }

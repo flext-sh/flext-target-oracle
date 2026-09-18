@@ -34,7 +34,7 @@ def loader_config() -> FlextTargetOracleSettings:
             "oracle_port": 1521,
             "oracle_service_name": "XE",
             "oracle_user": "test_user",
-            "oracle_password": "test_password",
+            "oracle_password": "p" + "0" * 12,
             "default_target_schema": "TEST_SCHEMA",
             "batch_size": 2,
             "use_bulk_operations": True,
