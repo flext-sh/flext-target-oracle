@@ -23,13 +23,14 @@ fi
 
 # Create example settings
 echo -e "${BLUE}Creating example configuration...${NC}"
+ORACLE_DEMO_PASSWORD="${ORACLE_DEMO_PASSWORD:-<demo>}"
 cat >settings.json <<EOF
 {
     "oracle_host": "localhost",
     "oracle_port": 1521,
     "oracle_service": "XE",
     "oracle_user": "FLEXT_TEST",
-    "oracle_password": "test_password",
+    "oracle_password": "${ORACLE_DEMO_PASSWORD}",
     "default_target_schema": "FLEXT_TEST",
     "batch_size": 1000,
     "load_method": "bulk_insert",
