@@ -33,7 +33,9 @@
 
 <!-- TOC END -->
 
-This directory contains the comprehensive test suite for the FLEXT Oracle Target, organized following pytest best practices with automatic Oracle Docker container management.
+This directory contains the comprehensive test suite for the FLEXT Oracle Target,
+organized following pytest best practices with automatic Oracle Docker container
+management.
 
 ## 📁 Test Structure
 

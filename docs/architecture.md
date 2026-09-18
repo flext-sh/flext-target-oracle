@@ -40,7 +40,10 @@
 
 ## Overview
 
-FLEXT Target Oracle implements a layered architecture following Clean Architecture principles, integrated with FLEXT ecosystem patterns and Singer specification compliance. This document provides detailed architectural guidance for developers working with the target.
+FLEXT Target Oracle implements a layered architecture following Clean Architecture
+principles, integrated with FLEXT ecosystem patterns and Singer specification
+compliance. This document provides detailed architectural guidance for developers
+working with the target.
 
 ## Architecture Principles
 

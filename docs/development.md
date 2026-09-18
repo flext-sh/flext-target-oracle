@@ -63,9 +63,9 @@ poetry run pre-commit install
 
 ```bash
 # Run basic health checks
-make check                    # Lint + type check
-make test-unit               # Unit tests only (no Oracle required)
-make diagnose                # System diagnostics
+make check     # Lint + type check
+make test-unit # Unit tests only (no Oracle required)
+make diagnose  # System diagnostics
 
 # Expected output:
 # ✅ All quality gates pass
@@ -79,19 +79,19 @@ make diagnose                # System diagnostics
 
 ```bash
 # Essential quality gates (run before every commit)
-make val                 # Complete validation pipeline
-make check                   # Quick validation (lint + type)
-make test                    # Full test suite with coverage
+make val   # Complete validation pipeline
+make check # Quick validation (lint + type)
+make test  # Full test suite with coverage
 
 # Code maintenance
-make format                  # Auto-format with ruff
-make fix                     # Auto-fix linting issues
-make clean                   # Remove build artifacts
+make format # Auto-format with ruff
+make fix    # Auto-fix linting issues
+make clean  # Remove build artifacts
 
 # Development utilities
-make shell                   # Open Python shell with project context
-make deps-show              # Show dependency tree
-make diagnose               # Project health check
+make shell     # Open Python shell with project context
+make deps-show # Show dependency tree
+make diagnose  # Project health check
 ```
 
 ### Testing Workflow
@@ -153,16 +153,16 @@ All code must pass these checks before commit:
 
 ```bash
 # Linting (ALL Ruff rules enabled)
-make lint                    # Must pass with zero warnings
+make lint # Must pass with zero warnings
 
 # Type checking (Strict MyPy mode)
-make type-check             # Must pass with zero errors
+make type-check # Must pass with zero errors
 
 # Security scanning
-make security               # Bandit + pip-audit must pass
+make security # Bandit + pip-audit must pass
 
 # Test coverage
-make test                   # Must maintain 90%+ coverage
+make test # Must maintain 90%+ coverage
 ```
 
 #### Code Style Guidelines

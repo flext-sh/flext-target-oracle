@@ -38,7 +38,8 @@
 
 <!-- TOC END -->
 
-Thank you for your interest in contributing to FLEXT Target Oracle! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to FLEXT Target Oracle! This document
+provides guidelines and instructions for contributing to the project.
 
 ## 🏗️ Development Setup
 
@@ -76,8 +77,8 @@ Thank you for your interest in contributing to FLEXT Target Oracle! This documen
 1. **Run tests to verify setup:**
 
    ```bash
-   make test-unit  # Unit tests (no Docker required)
-   make test       # All tests (requires Oracle)
+   make test-unit # Unit tests (no Docker required)
+   make test      # All tests (requires Oracle)
    ```
 
 ## 🧪 Testing
@@ -101,7 +102,7 @@ make test
 # Specific test categories
 make test-unit        # Unit tests only
 make test-integration # Integration tests
-make test-e2e        # End-to-end tests
+make test-e2e         # End-to-end tests
 
 # With coverage
 make coverage
@@ -329,7 +330,8 @@ test: add performance benchmarks
 
 ## 📄 License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing, you agree that your contributions will be licensed under the MIT
+License.
 
 ---
 

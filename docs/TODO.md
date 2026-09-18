@@ -45,7 +45,8 @@
 
 ### 1. **DUPLICAÇÃO DE EXCEÇÕES** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE
 
-**Status**: 📝 **DOCUMENTAÇÃO COMPLETA** - Hierarquia de exceções documentada com padrões FLEXT · 1.0.0 Release Preparation
+**Status**: 📝 **DOCUMENTAÇÃO COMPLETA** - Hierarquia de exceções documentada com
+padrões FLEXT · 1.0.0 Release Preparation
 
 **Problema**: Exceções definidas em dois locais diferentes:
 

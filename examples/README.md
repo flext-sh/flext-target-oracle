@@ -78,11 +78,13 @@ Complete Meltano project setup with target configuration and pipeline execution.
 
 ### 3. Production Setup
 
-Enterprise-grade configuration with comprehensive error handling, monitoring, and security considerations.
+Enterprise-grade configuration with comprehensive error handling, monitoring, and
+security considerations.
 
 ### 4. Performance Tuning
 
-Optimization techniques for high-volume data loading with batch tuning and connection management.
+Optimization techniques for high-volume data loading with batch tuning and connection
+management.
 
 ### 5. Error Handling
 
@@ -163,8 +165,8 @@ pytest examples/tests/ -m integration
 
 ## Security Notes
 
-⚠️ **Important**: These examples include placeholder credentials for demonstration purposes.
-**Never** use default credentials in production environments.
+⚠️ **Important**: These examples include placeholder credentials for demonstration
+purposes. **Never** use default credentials in production environments.
 
 - Use environment variables for sensitive configuration
 - Implement proper credential management
@@ -173,4 +175,5 @@ pytest examples/tests/ -m integration
 
 ---
 
-**Next Steps**: Start with [Basic Usage](basic_usage.py) for a simple introduction to FLEXT Target Oracle.
+**Next Steps**: Start with [Basic Usage](basic_usage.py) for a simple introduction to
+FLEXT Target Oracle.

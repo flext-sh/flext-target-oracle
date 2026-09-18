@@ -34,7 +34,9 @@
 
 ## Overview
 
-FLEXT Target Oracle implements the Singer specification for data integration, providing standardized data loading capabilities for Oracle databases. This document details the Singer protocol implementation, compliance status, and integration patterns.
+FLEXT Target Oracle implements the Singer specification for data integration, providing
+standardized data loading capabilities for Oracle databases. This document details the
+Singer protocol implementation, compliance status, and integration patterns.
 
 ## Singer Protocol Implementation
 

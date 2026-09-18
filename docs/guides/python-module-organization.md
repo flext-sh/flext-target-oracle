@@ -46,7 +46,10 @@
 
 ## 🏗️ **Module Architecture Overview**
 
-FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for Singer target implementation while maintaining full compliance with FLEXT ecosystem patterns. This structure serves as a reference for Singer target implementations within the 32-project FLEXT ecosystem.
+FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for Singer
+target implementation while maintaining full compliance with FLEXT ecosystem patterns.
+This structure serves as a reference for Singer target implementations within the
+32-project FLEXT ecosystem.
 
 ### **Core Design Principles**
 
