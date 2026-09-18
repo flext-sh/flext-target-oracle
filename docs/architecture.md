@@ -481,14 +481,16 @@ ______________________________________________________________________
 
 - [Getting Started](getting-started.md) - Installation and basic usage
 - [API Reference](api-reference.md) - Complete API documentation
-- [Examples](https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-target-oracle/examples/) - Working code examples
+- [Examples](https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-target-oracle/examples/)
+  Working code examples
 
 **Across Projects**:
 
-- [flext-core Foundation](https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-core/docs/architecture/overview.md) - Clean architecture and CQRS patterns
-- [flext-core Service Patterns](https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-core/docs/guides/service-patterns.md) - Service patterns and dependency injection
-- [flext-db-oracle Integration](https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-db-oracle/AGENTS.md) - Oracle database integration
-- [flext-meltano Pipelines](https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-meltano/AGENTS.md) - Data integration and ELT orchestration
+- [flext-core Foundation][flext-core-overview] - Clean architecture and CQRS patterns
+- [flext-core Service Patterns][flext-core-service-patterns] - Service patterns and
+  dependency injection
+- [flext-db-oracle Integration][flext-db-oracle-agents] - Oracle database integration
+- [flext-meltano Pipelines][flext-meltano-agents] - Data integration and ELT orchestration
 
 **External Resources**:
 
@@ -496,6 +498,11 @@ ______________________________________________________________________
 - [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
 
 ______________________________________________________________________
+
+[flext-core-overview]: https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-core/docs/architecture/overview.md
+[flext-core-service-patterns]: https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-core/docs/guides/service-patterns.md
+[flext-db-oracle-agents]: https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-db-oracle/AGENTS.md
+[flext-meltano-agents]: https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-meltano/AGENTS.md
 
 **Document Version**: 1.0\
 **Last Updated**: 2025-08-04\

@@ -22,7 +22,7 @@ em `.snyk`) / `risco-aceito` (com prazo).
 
 **Local**: `tests/conftest.py:89` · **CWE**: -
 
-```python
+```python notest
        85              "host": os.environ["TEST_ORACLE_HOST"],
        86              "port": int(os.environ["TEST_ORACLE_PORT"]),
        87              "service_name": os.environ["TEST_ORACLE_SERVICE"],
@@ -40,7 +40,7 @@ em `.snyk`) / `risco-aceito` (com prazo).
 
 **Local**: `tests/integration/test_oracle.py:476` · **CWE**: -
 
-```python
+```python notest
       472              "record": {
       473                  "id": 1,
       474                  "name": "John Doe",

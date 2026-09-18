@@ -62,7 +62,7 @@ Singer protocol implementation, compliance status, and integration patterns.
 
 **Implementation**:
 
-````python
+```python
 from __future__ import annotations
 
 
@@ -76,7 +76,9 @@ def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
     if result.success:
         logger.info(f"Schema processed for stream: {stream_name}")
 
-    return result```
+    return result
+```
+
 #### RECORD Messages
 
 ```json
@@ -89,7 +91,9 @@ def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
     "email": "john@example.com"
   },
   "time_extracted": "2025-08-04T10:00:00.000000Z"
-}```
+}
+```
+
 **Implementation**:
 
 ```python
@@ -104,7 +108,9 @@ def _handle_record(self, message: m.Dict) -> p.Result[bool]:
     if not isinstance(stream_name, str) or not isinstance(record_data, dict):
         return r[bool].fail("Record message missing stream or data")
 
-    return self._loader.load_record(stream_name, record_data)```
+    return self._loader.load_record(stream_name, record_data)
+```
+
 #### STATE Messages
 
 ```json
@@ -117,22 +123,26 @@ def _handle_record(self, message: m.Dict) -> p.Result[bool]:
       }
     }
   }
-}```
+}
+```
+
 **Implementation**:
 
-```python
+```python notest
 from __future__ import annotations
 def _handle_state(self, message: m.Dict) -> p.Result[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
     logger.debug("State message received - forwarding to Meltano")
-    return r[bool].| ok(value=True)```
+    return r[bool].| ok(value=True)
+```
+
 ## Current Implementation Status
 
 ### ✅ Implemented Features
 
-| Feature                  | Status     | Implementation              |
-| ------------------------ | ---------- | --------------------------- |
+| Feature                  | Status      | Implementation              |
+| ------------------------ | ----------- | --------------------------- |
 | SCHEMA message handling  | ✅ Complete | `_handle_schema()`          |
 | RECORD message handling  | ✅ Complete | `_handle_record()`          |
 | STATE message handling   | ✅ Complete | `_handle_state()`           |
@@ -143,7 +153,8 @@ def _handle_state(self, message: m.Dict) -> p.Result[bool]:
 
 ### ❌ Missing Singer SDK Compliance
 
-> ⚠️ **Critical Issue**: Missing standard Singer Target methods required for full SDK compliance
+> ⚠️ **Critical Issue**: Missing standard Singer Target methods required for full SDK
+> compliance
 
 | Missing Method           | Priority | Singer SDK Requirement         |
 | ------------------------ | -------- | ------------------------------ |
@@ -155,11 +166,13 @@ def _handle_state(self, message: m.Dict) -> p.Result[bool]:
 
 **Current Non-Standard Implementation**:
 
-```python
+```python notest
 from __future__ import annotations
 # ❌ Custom method - not Singer SDK compliant
 def process_singer_message(self, message: dict) -> p.Result[bool]:
-    # Custom message processing```
+    # Custom message processing
+```
+
 **Required Singer SDK Methods**:
 
 ```python
@@ -181,7 +194,9 @@ class FlextOracleTarget(Target):
 
     def _write_records(self, records: List[Record]) -> None:
         """Write batch of records - Singer SDK requirement."""
-        # Batch processing implementation```
+        # Batch processing implementation
+```
+
 ## Meltano Integration
 
 ### Configuration Schema
@@ -251,7 +266,9 @@ targets:
         label: Connection Timeout
         kind: integer
         default: 30
-        description: Connection timeout in seconds```
+        description: Connection timeout in seconds
+```
+
 ### Meltano Execution
 
 ```bash
@@ -269,7 +286,9 @@ meltano invoke target-oracle --about
 meltano invoke target-oracle --test
 
 # Run ELT pipeline
-meltano run tap-csv target-oracle```
+meltano run tap-csv target-oracle
+```
+
 ## Data Loading Patterns
 
 ### Table Creation Strategy
@@ -284,7 +303,7 @@ CREATE TABLE "SCHEMA"."STREAM_NAME" (
     "_SDC_BATCHED_AT" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Batch processing time
     "_SDC_SEQUENCE" NUMBER DEFAULT 0          -- Record sequence number
 )
-````
+```
 
 **Benefits**:
 
@@ -337,7 +356,7 @@ sequenceDiagram
 
 ### Batch Processing Configuration
 
-````python
+```python
 # Configure batch processing for optimal performance
 settings = FlextOracleTargetSettings(
     # ... connection settings
@@ -350,7 +369,9 @@ settings = FlextOracleTargetSettings(
 # - Buffer management per stream
 # - Automatic flushing when batch size reached
 # - Final flush on stream completion
-# - Error handling and rollback```
+# - Error handling and rollback
+```
+
 ## Performance Optimization
 
 ### Batch Size Tuning
@@ -385,7 +406,9 @@ def benchmark_batch_performance():
         duration = time.time() - start_time
         results[batch_size] = duration
 
-    return results```
+    return results
+```
+
 ### Oracle-Specific Optimizations
 
 ```python
@@ -404,7 +427,9 @@ settings = FlextOracleTargetSettings(
 # - Parallel processing
 # - Compression
 # - Partitioning
-# - Direct path loading```
+# - Direct path loading
+```
+
 ## Error Handling and Reliability
 
 ### r Error Patterns
@@ -437,10 +462,12 @@ def process_with_error_handling():
 
     # Finalization
     final_result = target.finalize()
-    return final_result```
+    return final_result
+```
+
 ### Transaction Management
 
-```python
+```python notest
 from __future__ import annotations
 # Current implementation (needs improvement)
 def _insert_batch(self, table_name: str, records: list) -> p.Result[bool]:
@@ -477,7 +504,9 @@ def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[boo
 
     except Exception as e:
         # Transaction automatically rolled back
-        return r[bool].fail(f"Batch insert failed: {e}")```
+        return r[bool].fail(f"Batch insert failed: {e}")
+```
+
 ## Testing Singer Integration
 
 ### Unit Testing Singer Messages
@@ -533,7 +562,9 @@ class TestSingerIntegration:
 
         result = target.process_singer_message(invalid_msg)
         assert result.failure
-        assert "Unknown message type" in result.error```
+        assert "Unknown message type" in result.error
+```
+
 ### Integration Testing with Singer Ecosystem
 
 ```python
@@ -574,7 +605,9 @@ def test_singer_tap_integration():
     final_result = target.finalize()
     assert final_result.success
 
-    process.wait()```
+    process.wait()
+```
+
 ## Compliance Roadmap
 
 ### Version 0.9.9 Requirements
@@ -610,10 +643,8 @@ def test_singer_tap_integration():
   - [ ] Retry policies
   - [ ] Circuit breaker patterns
 
-______________________________________________________________________
+---
 
-**Document Version**: 1.0
-**Last Updated**: 2025-08-04
-**Singer Specification**: [hub.meltano.com/singer/spec](https://hub.meltano.com/singer/spec)
-**Next Review**: 2025-08-11
-````
+**Document Version**: 1.0 **Last Updated**: 2025-08-04 **Singer Specification**:
+[hub.meltano.com/singer/spec](https://hub.meltano.com/singer/spec) **Next Review**:
+2025-08-11

@@ -66,13 +66,15 @@ This structure serves as a reference for Singer target implementations within th
 
 ### **Current Implementation Structure**
 
-````python
+```python notest
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Public API gateway & exports
 ├── settings.py                # ⚙️ m.Value configuration patterns
 ├── target.py                # 🎯 Singer Target implementation
 ├── loader.py                # 🔧 Oracle data loading operations
-└── exceptions.py            # 🚨 Domain-specific error hierarchy```
+└── exceptions.py            # 🚨 Domain-specific error hierarchy
+```
+
 ### **Module Responsibilities Analysis**
 
 #### **Foundation Layer**
@@ -112,7 +114,9 @@ __all__: t.StringList = [
     "FlextTargetOracle",
     "TargetOracle",
     "__version__",
-]```
+]
+```
+
 **Current Issues**:
 
 - ❌ **Exception Duplication**: Exceptions defined here AND in exceptions.py
@@ -127,12 +131,14 @@ __all__: t.StringList = [
 
 # FLEXT core re-exports for convenience
 
-__version__ = "0.9.9"```
+__version__ = "0.9.9"
+```
+
 #### **Domain Configuration Layer**
 
 ##### **`settings.py` - Configuration with Domain Validation**
 
-```python
+```python notest
 from __future__ import annotations
 """Oracle target configuration using FLEXT Value patterns."""
 
@@ -176,7 +182,9 @@ class FlextOracleTargetSettings(m.Value):
 
     def validate_domain_rules(self) -> p.Result[bool]:
         """Validate business rules using Chain of Responsibility pattern."""
-        # Implementation using validator chain pattern```
+        # Implementation using validator chain pattern
+```
+
 **Strengths**:
 
 - ✅ **m.Value Integration**: Proper use of FLEXT core patterns
@@ -185,7 +193,8 @@ class FlextOracleTargetSettings(m.Value):
 
 **Areas for Improvement**:
 
-- 🔄 **Configuration Composition**: Could benefit from hierarchical configuration patterns
+- 🔄 **Configuration Composition**: Could benefit from hierarchical configuration
+  patterns
 - 🔄 **Environment Integration**: Enhanced environment variable support
 
 #### **Application Layer**
@@ -216,7 +225,9 @@ class FlextOracleTarget(Target):
         """Handle RECORD messages with batched loading."""
 
     def finalize(self) -> p.Result[m.Dict]:
-        """Finalize streams and return statistics."""```
+        """Finalize streams and return statistics."""
+```
+
 **Current Issues**:
 
 - ❌ **Singer SDK Compliance**: Missing standard Singer Target methods
@@ -239,7 +250,9 @@ class FlextOracleTarget(Target):
         """Standard Singer record writing method."""
 
     def _write_records(self, records: List[Record]) -> None:
-        """Standard Singer batch writing method."""```
+        """Standard Singer batch writing method."""
+```
+
 #### **Infrastructure Layer**
 
 ##### **`loader.py` - Oracle Data Loading Operations**
@@ -263,7 +276,9 @@ class FlextOracleTargetLoader:
         """Load record with batching and error handling."""
 
     def finalize_all_streams(self) -> p.Result[m.Dict]:
-        """Finalize all streams and return statistics."""```
+        """Finalize all streams and return statistics."""
+```
+
 **Current Issues**:
 
 - ❌ **SQL Injection Risk**: Manual SQL construction with string replacement
@@ -278,7 +293,9 @@ parameterized_sql = sql.replace(":data", f"'{param['data']}'")
 result = connected_api.execute_ddl(parameterized_sql)
 
 # ✅ REQUIRED - Secure parameterized query
-result = connected_api.execute_dml(sql, param)```
+result = connected_api.execute_dml(sql, param)
+```
+
 ##### **`exceptions.py` - Domain Error Hierarchy**
 
 ```python
@@ -312,18 +329,20 @@ class FlextOracleTargetAuthenticationError(FlextOracleTargetError): ...
 class FlextOracleTargetSchemaError(FlextOracleTargetError): ...
 
 
-class FlextOracleTargetProcessingError(FlextOracleTargetError): ...```
+class FlextOracleTargetProcessingError(FlextOracleTargetError): ...
+```
+
 **Current Issue**:
 
 - ❌ **Duplication**: Same exceptions defined in `__init__.py`
 
-______________________________________________________________________
+---
 
 ## 🎯 **Recommended Module Architecture**
 
 ### **Ideal Structure for Singer Targets**
 
-```python
+```python notest
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean public API exports
 ├── settings/                  # ⚙️ Configuration module
@@ -345,19 +364,23 @@ src/flext_target_oracle/
 │   ├── loader.py           # Oracle data loading operations
 │   ├── repository.py       # Data persistence (if needed)
 │   └── adapters.py         # External service adapters
-└── exceptions.py           # 🚨 Complete error hierarchy```
+└── exceptions.py           # 🚨 Complete error hierarchy
+```
+
 ### **Simplified Structure (Current Approach)**
 
 For simple Singer targets, the current flat structure is acceptable with fixes:
 
-```python
+```python notest
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean exports (fixed)
 ├── settings.py                # ⚙️ Enhanced configuration
 ├── target.py                # 🎯 Singer-compliant implementation (fixed)
 ├── loader.py                # 🔧 Secure data loading (fixed)
-└── exceptions.py            # 🚨 Single source of exceptions (fixed)```
-______________________________________________________________________
+└── exceptions.py            # 🚨 Single source of exceptions (fixed)
+```
+
+---
 
 ## 📋 **FLEXT Pattern Implementation Standards**
 
@@ -371,8 +394,7 @@ from __future__ import annotations
 def process_record(self, stream_name: str, record_data: dict) -> p.Result[bool]:
     """Process single record with proper error handling."""
     return (
-        self
-        ._validate_record(record_data)
+        self._validate_record(record_data)
         .flat_map(lambda valid_data: self._add_to_batch(stream_name, valid_data))
         .flat_map(lambda _: self._flush_if_needed(stream_name))
     )
@@ -384,10 +406,12 @@ def process_record_bad(self, stream_name: str, record_data: dict) -> None:
         raise ValueError("Record cannot be empty")  # Breaks railway pattern
 
     self._add_to_batch(stream_name, record_data)
-    self._flush_if_needed(stream_name)```
+    self._flush_if_needed(stream_name)
+```
+
 ### **m.Value Configuration Pattern**
 
-```python
+```python notest
 from __future__ import annotations
 # ✅ CORRECT - Comprehensive validation with domain rules
 class FlextOracleTargetSettings(m.Value):
@@ -422,7 +446,9 @@ class FlextOracleTargetSettings(m.Value):
 @dataclass
 class BadConfig:
     oracle_host: str
-    batch_size: int  # No validation, could be negative```
+    batch_size: int  # No validation, could be negative
+```
+
 ### **Structured Logging Pattern**
 
 ```python
@@ -490,14 +516,16 @@ def process_batch_bad(self, stream_name: str, records: list):
         # Process records
         pass
     except Exception as e:
-        u.Cli.print(f"Error: {e}")  # No context```
-______________________________________________________________________
+        u.Cli.print(f"Error: {e}")  # No context
+```
+
+---
 
 ## 🔧 **Module Dependency Patterns**
 
 ### **Dependency Direction (Clean Architecture)**
 
-```python
+```python notest
 # ✅ CORRECT - Dependencies flow inward
 ┌─────────────────────────────┐
 │     target.py               │  # Application Layer
@@ -523,10 +551,12 @@ from flext_core import FlextSettings
 from flext_db_oracle import FlextDbOracleApi
 
 # ❌ INCORRECT - Circular dependencies
-# loader.py importing from target.py would be circular```
+# loader.py importing from target.py would be circular
+```
+
 ### **External Dependency Integration**
 
-```python
+```python notest
 # ✅ CORRECT - FLEXT ecosystem integration
 from flext_cli import u
 from flext_core import FlextSettings
@@ -544,14 +574,16 @@ from typing import Dict, List
 from singer_sdk import Target  # Should use flext-meltano instead
 
 # ❌ INCORRECT - Missing FLEXT dependency
-import cx_Oracle  # Should use flext-db-oracle abstraction```
-______________________________________________________________________
+import cx_Oracle  # Should use flext-db-oracle abstraction
+```
+
+---
 
 ## 🧪 **Testing Module Organization**
 
 ### **Test Structure Mirroring Source**
 
-```python
+```python notest
 tests/
 ├── unit/                           # Unit tests (isolated)
 │   ├── test_config.py             # Tests settings.py
@@ -572,7 +604,9 @@ tests/
 └── fixtures/                      # Test data and setup
     ├── oracle_schemas.py          # Test schema definitions
     ├── singer_messages.py         # Sample Singer messages
-    └── test_data.py               # Test datasets```
+    └── test_data.py               # Test datasets
+```
+
 ### **Test Pattern Examples**
 
 ```python
@@ -626,7 +660,9 @@ class TestFlextOracleTargetSettings:
 
         result = settings.validate_domain_rules()
         # In real test, this would validate connectivity, permissions, etc.
-        assert result.success or "connection" in result.error.lower()```
+        assert result.success or "connection" in result.error.lower()
+```
+
 ```python
 from __future__ import annotations
 
@@ -686,8 +722,10 @@ class TestSingerCompliance:
         # Finalization
         stats_result = oracle_target.finalize()
         assert stats_result.success, f"Finalization failed: {stats_result.error}"
-        assert stats_result.value["total_records"] == 5```
-______________________________________________________________________
+        assert stats_result.value["total_records"] == 5
+```
+
+---
 
 ## 📏 **Code Quality Standards**
 
@@ -720,7 +758,9 @@ def map_result[T, U](result: p.Result[T], func: Callable[[T], U]) -> p.Result[U]
 
 # ❌ MISSING type annotations (forbidden)
 def process_message(self, message):  # Missing types
-    return self.handle_message(message)```
+    return self.handle_message(message)
+```
+
 ### **Documentation Standards**
 
 ```python
@@ -762,8 +802,10 @@ def ensure_table_exists(self, stream_name: str, schema: m.Dict) -> p.Result[bool
         consider extending this method or using schema evolution patterns.
 
     """
-    # Implementation details...```
-______________________________________________________________________
+    # Implementation details...
+```
+
+---
 
 ## 🌐 **FLEXT Ecosystem Integration Patterns**
 
@@ -790,7 +832,9 @@ def sync_data_cross_system() -> p.Result[SyncStats]:
 class OracleTargetResult[T]:  # Creates ecosystem fragmentation
     """Custom result type - avoid this pattern."""
 
-    pass```
+    pass
+```
+
 ### **Configuration Ecosystem Integration**
 
 ```python
@@ -839,8 +883,10 @@ class FlextOracleTargetSettings(FlextSettings):
     load_method: LoadMethod = LoadMethod.INSERT
 
     class Config:
-        env_nested_delimiter = "__"  # ORACLE__HOST, OBSERVABILITY__ENABLE_METRICS```
-______________________________________________________________________
+        env_nested_delimiter = "__"  # ORACLE__HOST, OBSERVABILITY__ENABLE_METRICS
+```
+
+---
 
 ## 🔄 **Migration & Evolution Patterns**
 
@@ -870,7 +916,9 @@ class TargetMigration_0_9_to_1_0:
         """Fix SQL injection vulnerabilities."""
         # 1. Replace manual SQL construction with parameterized queries
         # 2. Add input validation and sanitization
-        # 3. Implement proper transaction management```
+        # 3. Implement proper transaction management
+```
+
 ### **Backward Compatibility Strategy**
 
 ```python
@@ -911,8 +959,10 @@ def _write_record(self, record: Record) -> None:
     message = {"type": "RECORD", "stream": record.stream, "record": record.data}
     result = self._handle_message_legacy(message)
     if result.failure:
-        raise RuntimeError(result.error)  # Singer SDK expects exceptions```
-______________________________________________________________________
+        raise RuntimeError(result.error)  # Singer SDK expects exceptions
+```
+
+---
 
 ## 📋 **Module Development Checklist**
 
@@ -949,7 +999,7 @@ ______________________________________________________________________
 - [ ] **Error Handling**: Consistent error patterns across ecosystem
 - [ ] **Documentation**: Follows ecosystem documentation standards
 
-______________________________________________________________________
+---
 
 ## 🚀 **Future Evolution Roadmap**
 
@@ -980,7 +1030,7 @@ ______________________________________________________________________
 
 **Module Extensions**:
 
-```python
+```python notest
 src/flext_target_oracle/
 ├── settings/
 │   ├── environments.py     # Environment-specific configurations
@@ -993,7 +1043,9 @@ src/flext_target_oracle/
 └── advanced/
     ├── compression.py      # Oracle compression features
     ├── partitioning.py     # Table partitioning strategies
-    └── parallel.py         # Parallel processing optimization```
+    └── parallel.py         # Parallel processing optimization
+```
+
 ### **Version 0.9.9 (Next Generation)**
 
 **Module Architecture Evolution**:
@@ -1003,11 +1055,9 @@ src/flext_target_oracle/
 - 🔮 **Stream Processing**: Real-time data processing capabilities
 - 🔮 **Cloud-Native**: Kubernetes-native deployment patterns
 
-______________________________________________________________________
+---
 
-**Document Version**: 1.0
-**Last Updated**: 2025-08-04
-**Target Audience**: FLEXT ecosystem developers working on Singer targets
-**Scope**: Python module organization for Oracle target implementation
-**Compliance**: FLEXT ecosystem standards and Singer specification requirements
-````
+**Document Version**: 1.0 **Last Updated**: 2025-08-04 **Target Audience**: FLEXT
+ecosystem developers working on Singer targets **Scope**: Python module organization for
+Oracle target implementation **Compliance**: FLEXT ecosystem standards and Singer
+specification requirements

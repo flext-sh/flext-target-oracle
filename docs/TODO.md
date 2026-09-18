@@ -62,20 +62,23 @@ padrões FLEXT · 1.0.0 Release Preparation
 
 **Próximos Passos**:
 
-````python
+```python
 # 1. Remover exceções duplicadas de __init__.py
 # 2. Manter apenas exceptions.py como fonte única
-# 3. Atualizar imports em todos os módulos```
+# 3. Atualizar imports em todos os módulos
+```
+
 **Arquivos Afetados**:
 
 - `src/flext_target_oracle/__init__.py` - **remover exceções**
 - `src/flext_target_oracle/exceptions.py` - **manter como fonte única**
 
-______________________________________________________________________
+---
 
 ### 2. **USO INCORRETO DE execute_ddl PARA DML** - ⚠️ DOCUMENTADO, IMPLEMENTAÇÃO PENDENTE
 
-**Status**: 📝 **DOCUMENTADO** - Código documentado, mas problema persiste · 1.0.0 Release Preparation
+**Status**: 📝 **DOCUMENTADO** - Código documentado, mas problema persiste · 1.0.0
+Release Preparation
 
 **Problema**: Uso de `execute_ddl()` para operações INSERT (loader.py:233)
 
@@ -83,7 +86,9 @@ ______________________________________________________________________
 
 ```python
 # src/flext_target_oracle/loader.py linha ~233
-result = connected_api.execute_ddl(parameterized_sql)  # INSERT não é DDL!```
+result = connected_api.execute_ddl(parameterized_sql)  # INSERT não é DDL!
+```
+
 **Progresso Atual**:
 
 - ✅ **Documentação**: loader.py agora tem docstrings completos com avisos de segurança
@@ -95,12 +100,14 @@ result = connected_api.execute_ddl(parameterized_sql)  # INSERT não é DDL!```
 
 ```python
 # Trocar para método correto E resolver SQL injection
-result = connected_api.execute_dml(sql, param)  # Usar parameterized query```
+result = connected_api.execute_dml(sql, param)  # Usar parameterized query
+```
+
 **Arquivo Afetado**:
 
 - `src/flext_target_oracle/loader.py:233` - **CRÍTICO: implementar correção**
 
-______________________________________________________________________
+---
 
 ### 3. **FALTA DE DEPENDÊNCIA SINGER SDK** - PRIORIDADE ALTA
 
@@ -113,7 +120,9 @@ dependencies = [
     # Core dependencies
     "pydantic>=2.11.0",
     # NOTE: Removed singer-sdk direct dependency - use flext-meltano instead
-]```
+]
+```
+
 **Impacto**:
 
 - Dependência implícita através de flext-meltano
@@ -126,8 +135,10 @@ dependencies = [
 dependencies = [
     "pydantic>=2.11.0",
     "singer-sdk>=0.39.0",  # Adicionar dependência explícita
-]```
-______________________________________________________________________
+]
+```
+
+---
 
 ### 4. **IMPLEMENTAÇÃO INCOMPLETA DE SINGER TARGET** - PRIORIDADE ALTA
 
@@ -146,21 +157,24 @@ ______________________________________________________________________
 
 **Solução**:
 
-```python
+```python notest
 from __future__ import annotations
 class FlextOracleTarget(Target):
     def _test_connection(self) -> bool:
         return self._test_connection_impl()
 
     def _write_record(self, record: Record) -> None:
-        # Implementar método Singer padrão```
-______________________________________________________________________
+        # Implementar método Singer padrão
+```
+
+---
 
 ## ⚠️ PROBLEMAS DE IMPLEMENTAÇÃO
 
 ### 5. **SQL INJECTION RISK** - 🚨 **CRÍTICO - DOCUMENTADO MAS NÃO RESOLVIDO**
 
-**Status**: 📝 **DOCUMENTAÇÃO ATUALIZADA** - Vulnerabilidade claramente identificada e documentada · 1.0.0 Release Preparation
+**Status**: 📝 **DOCUMENTAÇÃO ATUALIZADA** - Vulnerabilidade claramente identificada e
+documentada · 1.0.0 Release Preparation
 
 **Problema**: Construção manual de SQL com string replace (loader.py:226-232)
 
@@ -170,7 +184,9 @@ ______________________________________________________________________
 # src/flext_target_oracle/loader.py linhas ~226-232
 parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
     ":extracted_at", f"'{param['extracted_at']}'"
-)```
+)
+```
+
 **Progresso Atual**:
 
 - ✅ **Documentação**: Vulnerabilidade claramente documentada com aviso de segurança
@@ -183,10 +199,12 @@ parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
 
 ```python
 # SUBSTITUIR string replacement por prepared statements
-result = connected_api.execute_dml(sql, param)```
+result = connected_api.execute_dml(sql, param)
+```
+
 **Status de Produção**: 🛑 **BLOQUEADO** - Não deployer em produção até correção
 
-______________________________________________________________________
+---
 
 ### 6. **MANEJO INADEQUADO DE TRANSAÇÕES** - PRIORIDADE MÉDIA
 
@@ -202,8 +220,10 @@ ______________________________________________________________________
 ```python
 with self.oracle_api as connected_api, connected_api.begin_transaction():
     # operações do batch
-    connected_api.commit()```
-______________________________________________________________________
+    connected_api.commit()
+```
+
+---
 
 ### 7. **CONFIGURAÇÃO MAL PROJETADA** - PRIORIDADE MÉDIA
 
@@ -211,9 +231,11 @@ ______________________________________________________________________
 
 **Código Problemático**:
 
-```python
+```python notest
 def ensure_table_exists(...)  # Não precisa ser
-def _create_table(...)        # Não precisa ser```
+def _create_table(...)        # Não precisa ser
+```
+
 **Impacto**:
 
 - Overhead desnecessário
@@ -225,7 +247,7 @@ def _create_table(...)        # Não precisa ser```
 - Tornar métodos síncronos onde apropriado
 - Manter apenas onde necessário
 
-______________________________________________________________________
+---
 
 ### 8. **SCHEMA EVOLUTION NÃO IMPLEMENTADO** - PRIORIDADE MÉDIA
 
@@ -238,11 +260,13 @@ ______________________________________________________________________
 
 **Solução**:
 
-```python
+```python notest
 from __future__ import annotations
 def _evolve_table_schema(self, table_name: str, new_schema: dict):
-    # Implementar ALTER TABLE baseado em diff de schema```
-______________________________________________________________________
+    # Implementar ALTER TABLE baseado em diff de schema
+```
+
+---
 
 ## 🔧 MELHORIAS DE ARQUITETURA
 
@@ -252,13 +276,15 @@ ______________________________________________________________________
 
 **Solução**:
 
-```python
+```python notest
 from __future__ import annotations
 class OracleConnectionFactory:
     @staticmethod
     def create_api(settings: FlextOracleTargetSettings) -> FlextDbOracleApi:
-        # Factory para criação de conexões```
-______________________________________________________________________
+        # Factory para criação de conexões
+```
+
+---
 
 ### 10. **LOGGING INADEQUADO** - PRIORIDADE BAIXA
 
@@ -275,8 +301,10 @@ logger.info(
         "table_name": table_name,
         "batch_id": batch_id,
     },
-)```
-______________________________________________________________________
+)
+```
+
+---
 
 ## 📊 PROBLEMAS DE TESTES
 
@@ -294,7 +322,7 @@ ______________________________________________________________________
 - `tests/unit/test_sql_injection.py`
 - `tests/performance/test_batch_performance.py`
 
-______________________________________________________________________
+---
 
 ### 12. **FIXTURES DESATUALIZADAS** - PRIORIDADE BAIXA
 
@@ -302,7 +330,7 @@ ______________________________________________________________________
 
 **Solução**:
 
-```python
+```python notest
 from __future__ import annotations
 @pytest.fixture
 def oracle_connection():
@@ -310,8 +338,10 @@ def oracle_connection():
 
 @pytest.fixture
 def malicious_data():
-    # Fixture para testar SQL injection```
-______________________________________________________________________
+    # Fixture para testar SQL injection
+```
+
+---
 
 ## ✅ PROGRESSO REAL REALIZADO (2025-08-04)
 
@@ -319,11 +349,15 @@ ______________________________________________________________________
 
 #### **Módulos Python Atualizados**
 
-- ✅ **src/flext_target_oracle/**init**.py**: Docstring completo com ecosystem integration
-- ✅ **src/flext_target_oracle/settings.py**: Docstrings comprehensive com validation patterns
+- ✅ **src/flext_target_oracle/**init**.py**: Docstring completo com ecosystem
+  integration
+- ✅ **src/flext_target_oracle/settings.py**: Docstrings comprehensive com validation
+  patterns
 - ✅ **src/flext_target_oracle/target.py**: Singer Target documentation completa
-- ✅ **src/flext_target_oracle/loader.py**: Infrastructure documentation com security warnings
-- ✅ **src/flext_target_oracle/exceptions.py**: Exception hierarchy completa com FLEXT patterns
+- ✅ **src/flext_target_oracle/loader.py**: Infrastructure documentation com security
+  warnings
+- ✅ **src/flext_target_oracle/exceptions.py**: Exception hierarchy completa com FLEXT
+  patterns
 
 #### **Estrutura de Documentação Criada**
 
@@ -386,7 +420,7 @@ ______________________________________________________________________
 1. 🔧 **Performance optimization** para batches
 1. 🔧 **Monitoring integration** avançado
 
-______________________________________________________________________
+---
 
 ## 📖 REFERÊNCIAS TÉCNICAS
 
@@ -406,7 +440,7 @@ ______________________________________________________________________
 - OWASP SQL Injection Prevention
 - Oracle Secure Coding Practices
 
-______________________________________________________________________
+---
 
 ## 🎯 MÉTRICAS REAIS DE PROGRESSO
 
@@ -443,10 +477,9 @@ ______________________________________________________________________
 - 📊 **Testes de integração** (validação das correções)
 - 🚀 **Release v1.0.0** (produção-ready)
 
-______________________________________________________________________
+---
 
 **Última Atualização**: 2025-08-04 18:00\
 **Progresso Realizado**: Documentação enterprise-grade completa\
 **Próximo Milestone**: Implementação das correções críticas\
 **Próxima Revisão**: 2025-08-11
-````
