@@ -12,7 +12,7 @@ from flext_meltano import m, t, u
 
 def _default_buffer_status() -> t.MappingKV[str, int]:
     """Return an immutable empty buffer-status mapping."""
-    return MappingProxyType({})
+    return MappingProxyType[str, int]({})
 
 
 class FlextTargetOracleModelsResults:
