@@ -13,8 +13,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated
 
-from pydantic_settings import SettingsConfigDict
-
 from flext_core import FlextSettings
 from flext_target_oracle import m
 
@@ -22,7 +20,7 @@ from flext_target_oracle import m
 class FlextTargetOracleSettings(FlextSettings):
     """Oracle Singer target settings; fields under ``settings.TargetOracle.*``."""
 
-    model_config = SettingsConfigDict(
+    model_config = m.SettingsConfigDict(
         env_prefix="FLEXT_TARGET_ORACLE_", env_nested_delimiter="__", extra="ignore"
     )
 
