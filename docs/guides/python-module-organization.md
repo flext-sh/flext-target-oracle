@@ -394,8 +394,7 @@ from __future__ import annotations
 def process_record(self, stream_name: str, record_data: dict) -> p.Result[bool]:
     """Process single record with proper error handling."""
     return (
-        self
-        ._validate_record(record_data)
+        self._validate_record(record_data)
         .flat_map(lambda valid_data: self._add_to_batch(stream_name, valid_data))
         .flat_map(lambda _: self._flush_if_needed(stream_name))
     )
