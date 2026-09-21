@@ -9,9 +9,11 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_db_oracle import e, s
-
     from flext_core import d, h, r, x
+<<<<<<< HEAD
+=======
+    from flext_db_oracle import e, s
+>>>>>>> refs/remotes/origin/0.12.0-dev
     from flext_target_oracle import FlextTargetOracleConstants
 
     from .constants import (
