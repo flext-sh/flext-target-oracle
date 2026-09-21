@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Self
+from typing import Annotated, Self
 
 from flext_meltano import FlextMeltanoConfig, m
 
@@ -47,7 +47,10 @@ class FlextTargetOracleConfig(FlextSettings, FlextMeltanoConfig):
 
     __hash__ = object.__hash__
 
-    TargetOracle: _TargetOracleNamespace = _TargetOracleNamespace()
+    TargetOracle: Annotated[
+        _TargetOracleNamespace,
+        m.Field(description="Open namespace exposing ``config/*.yaml`` under ``TargetOracle``."),
+    ] = _TargetOracleNamespace()
 
 
 config: FlextTargetOracleConfig = FlextTargetOracleConfig.fetch_global()
