@@ -1,7 +1,7 @@
-"""Oracle Target Exception Hierarchy - Using flext-core SOURCE OF TRUTH.
+"""Oracle Target exceptions through the typed core exception facade.
 
-Direct usage of flext-core exception classes without duplication or factories.
-Oracle-specific exceptions inherit directly from flext-core bases.
+Target-specific exceptions preserve core constructor contracts and structured
+metadata for the target's observability boundary.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
