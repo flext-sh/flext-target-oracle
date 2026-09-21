@@ -9,11 +9,7 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_core import d, h, r, x
-<<<<<<< HEAD
-=======
-    from flext_db_oracle import e, s
->>>>>>> refs/remotes/origin/0.12.0-dev
+    from flext_db_oracle import d, e, h, r, s, x
     from flext_target_oracle import FlextTargetOracleConstants
 
     from .constants import (
@@ -64,8 +60,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".protocols": ("ExamplesFlextTargetOracleProtocols", "p"),
             ".typings": ("ExamplesFlextTargetOracleTypes", "t"),
             ".utilities": ("ExamplesFlextTargetOracleUtilities", "u"),
-            "flext_core": ("d", "h", "r", "x"),
-            "flext_db_oracle": ("e", "s"),
+            "flext_db_oracle": ("d", "e", "h", "r", "s", "x"),
             "flext_target_oracle": ("FlextTargetOracleConstants",),
         }),
         alias_groups=MappingProxyType({}),

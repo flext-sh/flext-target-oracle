@@ -49,7 +49,9 @@ class FlextTargetOracleConfig(FlextSettings, FlextMeltanoConfig):
 
     TargetOracle: Annotated[
         _TargetOracleNamespace,
-        m.Field(description="Open namespace exposing ``config/*.yaml`` under ``TargetOracle``."),
+        m.Field(
+            description="Open namespace exposing ``config/*.yaml`` under ``TargetOracle``."
+        ),
     ] = _TargetOracleNamespace()
 
 
