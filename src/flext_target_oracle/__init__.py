@@ -22,6 +22,7 @@ from .__version__ import (
 if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleConstants, d, e, h, r, s, x
 
+    from .__version__ import FlextTargetOracleVersion
     from ._config import FlextTargetOracleConfig, config
     from ._settings import FlextTargetOracleSettings, settings
     from .api import FlextTargetOracleService, target_oracle
@@ -31,22 +32,27 @@ if TYPE_CHECKING:
     from .protocols import FlextTargetOracleProtocols, FlextTargetOracleProtocols as p
     from .typings import FlextTargetOracleTypes, FlextTargetOracleTypes as t
     from .utilities import (
+        FlextTargetOracle,
         FlextTargetOracleExceptions,
+        FlextTargetOracleLoader,
         FlextTargetOracleUtilities,
         FlextTargetOracleUtilities as u,
     )
 __all__: tuple[str, ...] = (
     "FlextDbOracleConstants",
+    "FlextTargetOracle",
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
     "FlextTargetOracleExceptions",
+    "FlextTargetOracleLoader",
     "FlextTargetOracleModels",
     "FlextTargetOracleProtocols",
     "FlextTargetOracleService",
     "FlextTargetOracleSettings",
     "FlextTargetOracleTypes",
     "FlextTargetOracleUtilities",
+    "FlextTargetOracleVersion",
     "__author__",
     "__author_email__",
     "__description__",
@@ -75,6 +81,7 @@ __all__: tuple[str, ...] = (
 _LAZY_IMPORTS = MappingProxyType(
     build_lazy_import_map(
         MappingProxyType({
+            ".__version__": ("FlextTargetOracleVersion",),
             "._config": ("FlextTargetOracleConfig", "config"),
             "._settings": ("FlextTargetOracleSettings", "settings"),
             ".api": ("FlextTargetOracleService", "target_oracle"),
@@ -84,7 +91,9 @@ _LAZY_IMPORTS = MappingProxyType(
             ".protocols": ("FlextTargetOracleProtocols", "p"),
             ".typings": ("FlextTargetOracleTypes", "t"),
             ".utilities": (
+                "FlextTargetOracle",
                 "FlextTargetOracleExceptions",
+                "FlextTargetOracleLoader",
                 "FlextTargetOracleUtilities",
                 "u",
             ),
