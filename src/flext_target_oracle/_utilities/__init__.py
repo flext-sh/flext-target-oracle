@@ -16,13 +16,8 @@ if TYPE_CHECKING:
     from .observability import FlextTargetOracleUtilitiesObservability
     from .services import Utilities
 __all__: tuple[str, ...] = (
-    "FlextTargetOracle",
-    "FlextTargetOracleErrorMetadata",
-    "FlextTargetOracleExceptions",
-    "FlextTargetOracleLoader",
-    "FlextTargetOracleUtilitiesBase",
-    "FlextTargetOracleUtilitiesObservability",
-    "Utilities",
+    "FlextTargetOracle", "FlextTargetOracleErrorMetadata", "FlextTargetOracleExceptions", "FlextTargetOracleLoader",
+    "FlextTargetOracleUtilitiesBase", "FlextTargetOracleUtilitiesObservability", "Utilities",
 )
 
 _LAZY_IMPORTS = MappingProxyType(
@@ -31,8 +26,7 @@ _LAZY_IMPORTS = MappingProxyType(
             ".base": ("FlextTargetOracleUtilitiesBase",),
             ".client": ("FlextTargetOracle",),
             ".errors": (
-                "FlextTargetOracleErrorMetadata",
-                "FlextTargetOracleExceptions",
+                "FlextTargetOracleErrorMetadata", "FlextTargetOracleExceptions",
             ),
             ".loader": ("FlextTargetOracleLoader",),
             ".observability": ("FlextTargetOracleUtilitiesObservability",),

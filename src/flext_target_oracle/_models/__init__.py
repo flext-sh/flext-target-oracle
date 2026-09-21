@@ -14,10 +14,7 @@ if TYPE_CHECKING:
     from .settings import FlextTargetOracleModelsSettings
     from .singer import FlextTargetOracleModelsSinger
 __all__: tuple[str, ...] = (
-    "FlextTargetOracleModelsCommands",
-    "FlextTargetOracleModelsResults",
-    "FlextTargetOracleModelsSettings",
-    "FlextTargetOracleModelsSinger",
+    "FlextTargetOracleModelsCommands", "FlextTargetOracleModelsResults", "FlextTargetOracleModelsSettings", "FlextTargetOracleModelsSinger",
 )
 
 _LAZY_IMPORTS = MappingProxyType(
