@@ -64,7 +64,7 @@ provides guidelines and instructions for contributing to the project.
    ```bash
    make dev-setup
    # or
-   poetry install --all-extras
+   make setup --all-extras
    pip install -r requirements-test.txt
    ```
 

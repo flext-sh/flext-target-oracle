@@ -1,44 +1,43 @@
 # Python Module Organization & Semantic Patterns
 
 <!-- TOC START -->
-
-- [🏗️ **Module Architecture Overview**](#module-architecture-overview)
-  - [**Core Design Principles**](#core-design-principles)
-- [📁 **Current Module Structure & Analysis**](#current-module-structure-analysis)
-  - [**Current Implementation Structure**](#current-implementation-structure)
-  - [**Module Responsibilities Analysis**](#module-responsibilities-analysis)
-- [🎯 **Recommended Module Architecture**](#recommended-module-architecture)
-  - [**Ideal Structure for Singer Targets**](#ideal-structure-for-singer-targets)
-  - [**Simplified Structure (Current Approach)**](#simplified-structure-current-approach)
-- [📋 **FLEXT Pattern Implementation Standards**](#flext-pattern-implementation-standards)
-  - [**r Railway Pattern Usage**](#r-railway-pattern-usage)
-  - [**m.Value Configuration Pattern**](#mvalue-configuration-pattern)
-  - [**Structured Logging Pattern**](#structured-logging-pattern)
-- [🔧 **Module Dependency Patterns**](#module-dependency-patterns)
-  - [**Dependency Direction (Clean Architecture)**](#dependency-direction-clean-architecture)
-  - [**External Dependency Integration**](#external-dependency-integration)
-- [🧪 **Testing Module Organization**](#testing-module-organization)
-  - [**Test Structure Mirroring Source**](#test-structure-mirroring-source)
-  - [**Test Pattern Examples**](#test-pattern-examples)
-- [📏 **Code Quality Standards**](#code-quality-standards)
-  - [**Type Annotation Requirements**](#type-annotation-requirements)
-  - [**Documentation Standards**](#documentation-standards)
-- [🌐 **FLEXT Ecosystem Integration Patterns**](#flext-ecosystem-integration-patterns)
-  - [**Cross-Project Import Standards**](#cross-project-import-standards)
-  - [**Configuration Ecosystem Integration**](#configuration-ecosystem-integration)
-- [🔄 **Migration & Evolution Patterns**](#migration-evolution-patterns)
-  - [**Version Migration Strategy**](#version-migration-strategy)
-  - [**Backward Compatibility Strategy**](#backward-compatibility-strategy)
-- [📋 **Module Development Checklist**](#module-development-checklist)
-  - [**Pre-Development Checklist**](#pre-development-checklist)
-  - [**Development Standards Checklist**](#development-standards-checklist)
-  - [**Quality Gate Checklist**](#quality-gate-checklist)
-  - [**Ecosystem Integration Checklist**](#ecosystem-integration-checklist)
-- [🚀 **Future Evolution Roadmap**](#future-evolution-roadmap)
-  - [**Version 0.9.9 (Current)**](#version-099-current)
-  - [**Version 1.1.0 (Enhanced Features)**](#version-110-enhanced-features)
-  - [**Version 0.9.9 (Next Generation)**](#version-099-next-generation)
-  <!-- TOC END -->
+- [🏗️ Module Architecture Overview](#module-architecture-overview)
+  - [Core Design Principles](#core-design-principles)
+- [📁 Current Module Structure & Analysis](#current-module-structure-analysis)
+  - [Current Implementation Structure](#current-implementation-structure)
+  - [Module Responsibilities Analysis](#module-responsibilities-analysis)
+- [🎯 Recommended Module Architecture](#recommended-module-architecture)
+  - [Ideal Structure for Singer Targets](#ideal-structure-for-singer-targets)
+  - [Simplified Structure (Current Approach)](#simplified-structure-current-approach)
+- [📋 FLEXT Pattern Implementation Standards](#flext-pattern-implementation-standards)
+  - [r Railway Pattern Usage](#r-railway-pattern-usage)
+  - [m.Value Configuration Pattern](#mvalue-configuration-pattern)
+  - [Structured Logging Pattern](#structured-logging-pattern)
+- [🔧 Module Dependency Patterns](#module-dependency-patterns)
+  - [Dependency Direction (Clean Architecture)](#dependency-direction-clean-architecture)
+  - [External Dependency Integration](#external-dependency-integration)
+- [🧪 Testing Module Organization](#testing-module-organization)
+  - [Test Structure Mirroring Source](#test-structure-mirroring-source)
+  - [Test Pattern Examples](#test-pattern-examples)
+- [📏 Code Quality Standards](#code-quality-standards)
+  - [Type Annotation Requirements](#type-annotation-requirements)
+  - [Documentation Standards](#documentation-standards)
+- [🌐 FLEXT Ecosystem Integration Patterns](#flext-ecosystem-integration-patterns)
+  - [Cross-Project Import Standards](#cross-project-import-standards)
+  - [Configuration Ecosystem Integration](#configuration-ecosystem-integration)
+- [🔄 Migration & Evolution Patterns](#migration-evolution-patterns)
+  - [Version Migration Strategy](#version-migration-strategy)
+  - [Backward Compatibility Strategy](#backward-compatibility-strategy)
+- [📋 Module Development Checklist](#module-development-checklist)
+  - [Pre-Development Checklist](#pre-development-checklist)
+  - [Development Standards Checklist](#development-standards-checklist)
+  - [Quality Gate Checklist](#quality-gate-checklist)
+  - [Ecosystem Integration Checklist](#ecosystem-integration-checklist)
+- [🚀 Future Evolution Roadmap](#future-evolution-roadmap)
+  - [Version 0.9.9 (Current)](#version-099-current)
+  - [Version 1.1.0 (Enhanced Features)](#version-110-enhanced-features)
+  - [Version 0.9.9 (Next Generation)](#version-099-next-generation)
+<!-- TOC END -->
 
 **FLEXT Target Oracle - Module Architecture Following FLEXT Ecosystem Standards**
 
@@ -976,18 +975,18 @@ def _write_record(self, record: Record) -> None:
 
 ### **Development Standards Checklist**
 
-- [ ] **Type Annotations**: 100% type coverage with strict MyPy compliance
-- [ ] **Error Handling**: All operations return r for railway-oriented programming
+- [ ] **Development Standards Checklist**
+
+- [ ] **Type Annotations**: 100% type coverage with strict typing compliance
+- [ ] **Error Handling**: All operations return r[T] for railway-oriented programming
 - [ ] **Logging**: Structured logging with appropriate context and correlation IDs
 - [ ] **Documentation**: Comprehensive docstrings with examples and business context
-- [ ] **Testing**: 90%+ coverage with unit, integration, and security tests
 
 ### **Quality Gate Checklist**
 
-- [ ] **Linting**: `make lint` passes with zero warnings (Ruff all rules)
-- [ ] **Type Checking**: `make type-check` passes with strict MyPy
-- [ ] **Security**: `make security` passes (Bandit + pip-audit + detect-secrets)
-- [ ] **Testing**: `make test` passes with 90%+ coverage
+- [ ] **Code Quality**: `make check` passes (lint + type + security, zero warnings)
+- [ ] **Testing**: `make test` passes with coverage standards met
+- [ ] **Formatting**: `make fmt` keeps code consistently formatted
 - [ ] **Integration**: Works with existing FLEXT ecosystem projects
 - [ ] **Performance**: No regressions in batch processing or connection management
 

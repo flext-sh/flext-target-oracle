@@ -48,8 +48,9 @@ src/flext_target_oracle/
 ## Commands
 
 ```bash
-make check PROJECT=flext-target-oracle
-make test PROJECT=flext-target-oracle # tests/{unit,integration,e2e,performance}
+make setup
+make check
+make test
 ```
 
 <!-- AIHUB-AGENTS-SCOPE-LOCAL-END -->
