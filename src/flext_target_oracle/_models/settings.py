@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import Annotated, Self
 
-from flext_core import FlextSettings
 from flext_meltano import m, t, u
+
+from flext_core import FlextSettings
 
 
 class FlextTargetOracleModelsSettings(FlextSettings):
