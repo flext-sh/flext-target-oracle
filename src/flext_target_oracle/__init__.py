@@ -9,18 +9,12 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 from .__version__ import (
-    __author__ as __author__,
-    __author_email__ as __author_email__,
-    __description__ as __description__,
-    __license__ as __license__,
-    __title__ as __title__,
-    __url__ as __url__,
-    __version__ as __version__,
-    __version_info__ as __version_info__,
+    __author__ as __author__, __author_email__ as __author_email__, __description__ as __description__, __license__ as __license__,
+    __title__ as __title__, __url__ as __url__, __version__ as __version__, __version_info__ as __version_info__,
 )
 
 if TYPE_CHECKING:
-    from flext_db_oracle import FlextDbOracleConstants, d, e, h, r, s, x
+    from flext_db_oracle import d, e, h, r, s, x
 
     from .__version__ import FlextTargetOracleVersion
     from ._config import FlextTargetOracleConfig, config
@@ -32,50 +26,19 @@ if TYPE_CHECKING:
     from .protocols import FlextTargetOracleProtocols, FlextTargetOracleProtocols as p
     from .typings import FlextTargetOracleTypes, FlextTargetOracleTypes as t
     from .utilities import (
-        FlextTargetOracle,
-        FlextTargetOracleExceptions,
-        FlextTargetOracleLoader,
-        FlextTargetOracleUtilities,
+        FlextTargetOracle, FlextTargetOracleExceptions, FlextTargetOracleLoader, FlextTargetOracleUtilities,
         FlextTargetOracleUtilities as u,
     )
 __all__: tuple[str, ...] = (
-    "FlextDbOracleConstants",
-    "FlextTargetOracle",
-    "FlextTargetOracleCli",
-    "FlextTargetOracleConfig",
-    "FlextTargetOracleConstants",
-    "FlextTargetOracleExceptions",
-    "FlextTargetOracleLoader",
-    "FlextTargetOracleModels",
-    "FlextTargetOracleProtocols",
-    "FlextTargetOracleService",
-    "FlextTargetOracleSettings",
-    "FlextTargetOracleTypes",
-    "FlextTargetOracleUtilities",
-    "FlextTargetOracleVersion",
-    "__author__",
-    "__author_email__",
-    "__description__",
-    "__license__",
-    "__title__",
-    "__url__",
-    "__version__",
-    "__version_info__",
-    "c",
-    "config",
-    "d",
-    "e",
-    "h",
-    "m",
-    "main",
-    "p",
-    "r",
-    "s",
-    "settings",
-    "t",
-    "target_oracle",
-    "u",
-    "x",
+    "FlextTargetOracle", "FlextTargetOracleCli", "FlextTargetOracleConfig", "FlextTargetOracleConstants",
+    "FlextTargetOracleExceptions", "FlextTargetOracleLoader", "FlextTargetOracleModels", "FlextTargetOracleProtocols",
+    "FlextTargetOracleService", "FlextTargetOracleSettings", "FlextTargetOracleTypes", "FlextTargetOracleUtilities",
+    "FlextTargetOracleVersion", "__author__", "__author_email__", "__description__",
+    "__license__", "__title__", "__url__", "__version__",
+    "__version_info__", "c", "config", "d",
+    "e", "h", "m", "main",
+    "p", "r", "s", "settings",
+    "t", "target_oracle", "u", "x",
 )
 
 _LAZY_IMPORTS = MappingProxyType(
@@ -91,13 +54,10 @@ _LAZY_IMPORTS = MappingProxyType(
             ".protocols": ("FlextTargetOracleProtocols", "p"),
             ".typings": ("FlextTargetOracleTypes", "t"),
             ".utilities": (
-                "FlextTargetOracle",
-                "FlextTargetOracleExceptions",
-                "FlextTargetOracleLoader",
-                "FlextTargetOracleUtilities",
-                "u",
+                "FlextTargetOracle", "FlextTargetOracleExceptions",
+                "FlextTargetOracleLoader", "FlextTargetOracleUtilities", "u",
             ),
-            "flext_db_oracle": ("FlextDbOracleConstants", "d", "e", "h", "r", "s", "x"),
+            "flext_db_oracle": ("d", "e", "h", "r", "s", "x"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,

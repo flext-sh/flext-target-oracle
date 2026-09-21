@@ -11,57 +11,22 @@ from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 if TYPE_CHECKING:
     from flext_tests import c, d, e, h, m, p, r, s, t, td, tf, tk, tm, tv, u, x
 
-    from .test_config import TestsFlextTargetOracleConfig
-    from .test_loader import TestsFlextTargetOracleLoader
     from .test_module_governance import TestsFlextTargetOracleModuleGovernance
-    from .test_target import TestsFlextTargetOracleTarget
 __all__: tuple[str, ...] = (
-    "TestsFlextTargetOracleConfig",
-    "TestsFlextTargetOracleLoader",
-    "TestsFlextTargetOracleModuleGovernance",
-    "TestsFlextTargetOracleTarget",
-    "c",
-    "d",
-    "e",
-    "h",
-    "m",
-    "p",
-    "r",
-    "s",
-    "t",
-    "td",
-    "tf",
-    "tk",
-    "tm",
-    "tv",
-    "u",
+    "TestsFlextTargetOracleModuleGovernance", "c", "d", "e",
+    "h", "m", "p", "r",
+    "s", "t", "td", "tf",
+    "tk", "tm", "tv", "u",
     "x",
 )
 
 _LAZY_IMPORTS = MappingProxyType(
     build_lazy_import_map(
         MappingProxyType({
-            ".test_config": ("TestsFlextTargetOracleConfig",),
-            ".test_loader": ("TestsFlextTargetOracleLoader",),
             ".test_module_governance": ("TestsFlextTargetOracleModuleGovernance",),
-            ".test_target": ("TestsFlextTargetOracleTarget",),
             "flext_tests": (
-                "c",
-                "d",
-                "e",
-                "h",
-                "m",
-                "p",
-                "r",
-                "s",
-                "t",
-                "td",
-                "tf",
-                "tk",
-                "tm",
-                "tv",
-                "u",
-                "x",
+                "c", "d", "e", "h", "m", "p", "r", "s", "t", "td", "tf", "tk", "tm",
+                "tv", "u", "x",
             ),
         }),
         alias_groups=MappingProxyType({}),
