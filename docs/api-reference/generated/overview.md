@@ -12,22 +12,24 @@
 - Version: `0.12.0`
 - Description: FLEXT Target Oracle - Singer Target for Oracle Database Data Loading
 - Doc summary: Flext Target Oracle package.
-- Classifiers: `Development Status :: 3 - Alpha`, `Intended Audience :: Developers`,
-  `Operating System :: OS Independent`, `Programming Language :: Python :: 3 :: Only`,
-  `Programming Language :: Python :: 3.13`, `Topic :: Database` (+3 more)
+- Classifiers: Development Status :: 3 - Alpha, Intended Audience :: Developers,
+  Operating System :: OS Independent, Programming Language :: Python :: 3 :: Only,
+  Programming Language :: Python :: 3.13, Topic :: Database, Topic :: Software
+  Development :: Libraries :: Python Modules, Topic :: System :: Archiving, Typing ::
+  Typed
 - Project class: `integration`
 - Keywords: `data-loading`, `database`, `enterprise`, `etl`, `flext`, `library`,
   `oracle`, `typed`
-- Main facades: `FlextTargetOracleCli`, `FlextTargetOracleConfig`,
+- Main facades: `FlextTargetOracle`, `FlextTargetOracleCli`, `FlextTargetOracleConfig`,
   `FlextTargetOracleConstants`, `FlextTargetOracleExceptions`,
-  `FlextTargetOracleModels`, `FlextTargetOracleProtocols`, `FlextTargetOracleService`,
-  `FlextTargetOracleSettings` (+2 more)
+  `FlextTargetOracleLoader`, `FlextTargetOracleModels`, `FlextTargetOracleProtocols` (+5
+  more)
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
-- Public symbol exports: `FlextTargetOracleCli`, `FlextTargetOracleConfig`,
-  `FlextTargetOracleConstants`, `FlextTargetOracleExceptions`,
-  `FlextTargetOracleModels`, `FlextTargetOracleProtocols`, `FlextTargetOracleService`,
-  `FlextTargetOracleSettings`, `FlextTargetOracleTypes`, `FlextTargetOracleUtilities`
-  (+4 more)
+- Public symbol exports: `FlextTargetOracle`, `FlextTargetOracleCli`,
+  `FlextTargetOracleConfig`, `FlextTargetOracleConstants`,
+  `FlextTargetOracleExceptions`, `FlextTargetOracleLoader`, `FlextTargetOracleModels`,
+  `FlextTargetOracleProtocols`, `FlextTargetOracleService`, `FlextTargetOracleSettings`
+  (+7 more)
 - Exported module shortcuts: _none_
 - Generated module pages: `7`
 

@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import Annotated, Self
 
-from flext_core import FlextSettings
 from flext_meltano import m, t, u
+
+from flext_core import FlextSettings
 
 
 class FlextTargetOracleModelsSettings(FlextSettings):
@@ -20,6 +21,7 @@ class FlextTargetOracleModelsSettings(FlextSettings):
     # settings singleton/validation machinery cannot leak into instantiated
     # facade composites (e.g. the ``u`` logging facade).
     def __new__(cls, *args: object, **kwargs: object) -> Self:
+        _ = args, kwargs
         return object.__new__(cls)
 
     def __init__(self, *args: object, **kwargs: object) -> None:
