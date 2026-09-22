@@ -10,8 +10,6 @@
   - [Daily Development Commands](#daily-development-commands)
   - [Testing Workflow](#testing-workflow)
   - [Code Quality Standards](#code-quality-standards)
-- [FLEXT Pattern Implementation](#flext-pattern-implementation)
-  - [r Railway Pattern](#r-railway-pattern)
   - [Configuration Patterns](#configuration-patterns)
   - [Logging Patterns](#logging-patterns)
 - [Oracle Integration Development](#oracle-integration-development)
@@ -39,7 +37,6 @@
 ### Prerequisites
 
 - **Python 3.13+**: Required for compatibility with FLEXT ecosystem
-- **Poetry**: Dependency management and packaging
 - **Oracle Database**: 11g+ for testing (Docker container recommended)
 - **Git**: Version control
 
@@ -52,25 +49,20 @@ cd flext-target-oracle
 
 # Complete development setup
 make setup                    # Installs dependencies + pre-commit hooks
-make val                 # Verify setup with full quality gates
-
-# Alternative: Manual setup
-poetry install --with dev,test,docs
-poetry run pre-commit install
+make check                    # Verify setup with full quality gates
 ```
 
 ### Verify Installation
 
 ```bash
 # Run basic health checks
-make check     # Lint + type check
-make test-unit # Unit tests only (no Oracle required)
-make diagnose  # System diagnostics
+make check                    # Lint + type check
+make test                     # Full test suite
 
 # Expected output:
 # ✅ All quality gates pass
-# ✅ All unit tests pass
-# ✅ Python 3.13+, Poetry detected
+# ✅ All tests pass
+# ✅ Python 3.13+
 ```
 
 ## Development Workflow
@@ -79,37 +71,25 @@ make diagnose  # System diagnostics
 
 ```bash
 # Essential quality gates (run before every commit)
-make val   # Complete validation pipeline
-make check # Quick validation (lint + type)
-make test  # Full test suite with coverage
-
-# Code maintenance
-make format # Auto-format with ruff
-make fix    # Auto-fix linting issues
-make clean  # Remove build artifacts
-
-# Development utilities
-make shell     # Open Python shell with project context
-make deps-show # Show dependency tree
-make diagnose  # Project health check
+make check               # Complete validation pipeline (lint + type + security)
+make fmt                 # Format code with ruff
+make fix                 # Auto-fix linting issues
+make clean               # Remove build artifacts
 ```
 
 ### Testing Workflow
 
-#### Unit Testing (No External Dependencies)
+#### Test Suite
 
 ```bash
-# Run unit tests only
-make test-unit
+# Run tests
+make test
 
 # Run specific test file
 pytest tests/test_config.py -v
 
 # Run specific test method
 pytest tests/test_target.py::test_target_initialization -v
-
-# Run with coverage for specific module
-pytest tests/test_config.py --cov=src/flext_target_oracle/settings --cov-report=term-missing
 ```
 
 #### Integration Testing (Requires Oracle)
@@ -125,7 +105,7 @@ docker run -d --name oracle-test \
 docker logs -f oracle-test
 
 # Run integration tests
-make test-integration
+make test
 
 # Or run specific integration tests
 pytest tests/integration/ -v -m integration
@@ -134,15 +114,8 @@ pytest tests/integration/ -v -m integration
 #### Performance Testing
 
 ```bash
-# Run performance benchmarks
-make oracle-performance
-
-# Run specific benchmark
-pytest tests/performance/ --benchmark-only --benchmark-sort=mean
-
-# Test different batch sizes
-BATCH_SIZE=1000 pytest tests/performance/test_batch_performance.py
-BATCH_SIZE=5000 pytest tests/performance/test_batch_performance.py
+# Benchmark using the test suite
+pytest tests/performance/ -v
 ```
 
 ### Code Quality Standards
@@ -152,17 +125,17 @@ BATCH_SIZE=5000 pytest tests/performance/test_batch_performance.py
 All code must pass these checks before commit:
 
 ```bash
-# Linting (ALL Ruff rules enabled)
-make lint # Must pass with zero warnings
+# Linting (ruff)
+make check                # Must pass with zero warnings
 
-# Type checking (Strict MyPy mode)
-make type-check # Must pass with zero errors
+# Type checking (pyrefly + pyright + mypy)
+make check                # Must pass with zero errors
 
 # Security scanning
-make security # Bandit + pip-audit must pass
+make check                # Security gates included
 
 # Test coverage
-make test # Must maintain 90%+ coverage
+make test                 # Must maintain coverage standards
 ```
 
 #### Code Style Guidelines
@@ -211,46 +184,43 @@ class BadConfig:
 
 ```python
 from __future__ import annotations
-# ✅ All operations return r
+
+from flext_core import r, p, m, t, u
+
+
+# ✅ All operations return r[T]
 def process_record(record: dict) -> p.Result[bool]:
     """Process a single record with proper error handling."""
-    try:
-        # Validate input
-        if not record:
-            return r[bool].fail("Record cannot be empty")
+    if not record:
+        return r[bool].fail("Record cannot be empty")
 
-        # Process record
-        result = some_operation(record)
-        if result.failure:
-            return result  # Propagate failure
+    result = some_operation(record)
+    if result.failure:
+        return result  # Propagate failure
 
-        return r[bool].| ok(value=True)
+    return r[bool].ok(value=True)
 
-    except Exception as e:
-        logger.exception("Record processing failed")
-        return r[bool].fail(f"Processing failed: {e}")
 
-# ✅ Chain r operations
-def process_batch(records: t.SequenceOf[m.Dict]) -> p.Result[Stats]:
+# ✅ Chain r[T] operations
+def process_batch(records: list[m.Dict]) -> p.Result[bool]:
     """Process batch of records with early termination on failure."""
-    stats = Stats()
-
     for record in records:
         result = process_record(record)
         if result.failure:
             return r[bool].fail(f"Batch failed on record: {result.error}")
 
-        stats.increment()
-
-    return r[bool].ok(stats)```
+    return r[bool].ok(value=True)
+```
 ### Configuration Patterns
 
 ```python
 from __future__ import annotations
 
+from flext_core import m, p, u
+
 
 # ✅ m.Value with domain validation
-class FlextOracleTargetSettings(m.Value):
+class FlextTargetOracleSettings(m.Value):
     """Type-safe configuration with business rule validation."""
 
     # Required fields with clear validation
@@ -267,18 +237,18 @@ class FlextOracleTargetSettings(m.Value):
 
     # Domain rule validation
     def validate_domain_rules(self) -> p.Result[bool]:
-        """Validate business rules using Chain of Responsibility."""
+        """Validate business rules using a validator."""
         validator = ConfigurationValidator()
-        return validator.validate(self)```
+        return validator.validate(self)
+```
 ### Logging Patterns
 
 ```python
 from __future__ import annotations
 
-# ✅ Structured logging with context
-from flext_cli import u
+import logging
 
-logger = u.fetch_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def process_with_logging(stream_name: str, batch_size: int):
@@ -311,35 +281,27 @@ def process_with_logging(stream_name: str, batch_size: int):
             "Batch processing failed",
             extra={"stream_name": stream_name, "error_type": type(e).__name__},
         )
-        raise```
+        raise
+```
 ## Oracle Integration Development
 
 ### Database Connection Testing
 
-```python # Test Oracle connectivity manually
-from flext_target_oracle import FlextOracleTargetSettings
+```python
+# Test Oracle connectivity manually
+from flext_core import u
 from flext_target_oracle import FlextOracleTargetLoader
 
 # Create test configuration
-settings = FlextOracleTargetSettings(
-    oracle_host="localhost",
-    oracle_port=10521,
-    oracle_service="XE",
-    oracle_user="system",
-    oracle_password="oracle",
-    default_target_schema="TEST_SCHEMA",
-)
+loader = FlextOracleTargetLoader(...)
 
-# Test connection
-loader = FlextOracleTargetLoader(settings)
-
-# Verify with context manager
-with loader.oracle_api as connected_api:
-    tables_result = connected_api.get_tables("TEST_SCHEMA")
-    if tables_result.success:
-        u.Cli.print(f"Connected! Found {len(tables_result.value)} tables")
-    else:
-        u.Cli.print(f"Connection failed: {tables_result.error}")```
+# Verify connection
+result = loader.test_connection()
+if result.success:
+    u.Cli.print("Connected successfully")
+else:
+    u.Cli.print(f"Connection failed: {result.error}")
+```
 ### Table Management Development
 
 ```python
@@ -352,11 +314,7 @@ def test_table_management():
     # Schema definition
     schema = {
         "type": "object",
-        "properties": {
-            "id": {"type": "integer"},
-            "name": {"type": "string"},
-            "created_at": {"type": "string", "format": "date-time"},
-        },
+        "properties": {"id": {"type": "integer"}, "name": {"type": "string"}},
     }
 
     # Ensure table exists
@@ -366,13 +324,14 @@ def test_table_management():
         return
 
     # Test record insertion
-    test_record = {"id": 1, "name": "Test Record", "created_at": "2025-08-04T10:00:00Z"}
+    test_record = {"id": 1, "name": "Test Record"}
 
     result = loader.load_record("test_stream", test_record)
     if result.success:
         u.Cli.print("Record loaded successfully")
     else:
-        u.Cli.print(f"Record loading failed: {result.error}")```
+        u.Cli.print(f"Record loading failed: {result.error}")
+```
 ## Debugging and Troubleshooting
 
 ### Common Development Issues
@@ -381,27 +340,18 @@ def test_table_management():
 
 ```bash
 # Check Oracle container status
-docker ps | grep oracle
+docker ps -a --filter oracle
 docker logs oracle-test
-
-# Test connectivity
-make oracle-connect
 
 # Debug with Python
 PYTHONPATH=src python -c "
-from flext_target_oracle import FlextOracleTargetSettings
-from flext_target_oracle import FlextOracleTargetLoader
+from flext_target_oracle import FlextTargetOracleLoader
+import logging
 logging.basicConfig(level=logging.DEBUG)
-settings = FlextOracleTargetSettings(
-    oracle_host='localhost',
-    oracle_port=10521,
-    oracle_service='XE',
-    oracle_user='system',
-    oracle_password='oracle'
-)
-loader = FlextOracleTargetLoader(settings)
+loader = FlextTargetOracleLoader(...)
 u.Cli.print('Config created successfully')
-"```
+"
+```
 #### 2. Import Errors
 
 ```python
@@ -410,41 +360,31 @@ from flext_target_oracle import something_that_doesnt_exist
 
 # ✅ Check available imports
 from flext_target_oracle import (
-    FlextOracleTarget,
-    FlextOracleTargetSettings,
-    LoadMethod,
-    r  # Re-exported from flext-core
+    FlextTargetOracleLoader,
+    FlextTargetOracleService,
+    r,  # Re-exported from flext-core
 )
 
 # ✅ Debug imports
-python -c "from flext_target_oracle import *; u.Cli.print(dir())"```
+python -c "from flext_target_oracle import *; u.Cli.print(dir())"
+```
 #### 3. Configuration Validation Errors
 
 ```python
 # ❌ Invalid configuration
-settings = FlextOracleTargetSettings(
-    oracle_host="",  # Empty host will fail validation
-    oracle_port=70000,  # Port too high
-    batch_size=-1,  # Negative batch size
-)
-
-# ✅ Valid configuration with proper validation
 try:
-    settings = FlextOracleTargetSettings(
-        oracle_host="localhost",
-        oracle_port=1521,
-        oracle_service="XE",
-        oracle_user="system",
-        oracle_password="oracle",
-    )
+    loader = FlextTargetOracleLoader(...)  # Invalid config will raise
+except Exception as e:
+    u.Cli.print(f"Configuration error: {e}")
 
-    # Test domain rules
-    validation_result = settings.validate_domain_rules()
-    if validation_result.failure:
-        u.Cli.print(f"Validation failed: {validation_result.error}")
+# ✅ Valid configuration
+loader = FlextTargetOracleLoader(...)
 
-except c.ValidationError as e:
-    u.Cli.print(f"Configuration error: {e}")```
+# Test connection
+result = loader.test_connection()
+if result.failure:
+    u.Cli.print(f"Validation failed: {result.error}")
+```
 ### Debugging Tools
 
 #### 1. Enhanced Logging
@@ -460,12 +400,12 @@ logging.basicConfig(
 
 ```bash
 # Open Python shell with project context
-make shell
+python -m flext_core.tools.cli
 
 # In shell:
 >>> from flext_target_oracle import *
->>> settings = FlextOracleTargetSettings(...)
->>> # Interactive testing```
+>>> # Interactive testing
+```
 #### 3. Performance Profiling
 
 ```python
@@ -488,7 +428,8 @@ def profile_batch_processing():
 
     stats = pstats.Stats(pr)
     stats.sort_stats("cumulative")
-    stats.print_stats(20)  # Top 20 functions by time```
+    stats.print_stats(20)  # Top 20 functions by time
+```
 ## Testing Development
 
 ### Writing New Tests
@@ -501,7 +442,8 @@ from __future__ import annotations
 """Test template for new functionality."""
 
 import pytest
-from flext_target_oracle import FlextOracleTargetSettings
+
+from flext_target_oracle import FlextTargetOracleLoader
 
 
 class TestNewFeature:
@@ -510,10 +452,10 @@ class TestNewFeature:
     def test_success_case(self):
         """Test successful operation."""
         # Arrange
-        settings = FlextOracleTargetSettings(...)
+        loader = FlextTargetOracleLoader(...)
 
         # Act
-        result = new_feature_operation(settings)
+        result = new_feature_operation(loader)
 
         # Assert
         assert result.success
@@ -522,10 +464,10 @@ class TestNewFeature:
     def test_failure_case(self):
         """Test failure handling."""
         # Arrange
-        invalid_config = FlextOracleTargetSettings(...)
+        invalid_loader = FlextTargetOracleLoader(...)
 
         # Act
-        result = new_feature_operation(invalid_config)
+        result = new_feature_operation(invalid_loader)
 
         # Assert
         assert result.failure
@@ -538,7 +480,8 @@ class TestNewFeature:
     def test_parametrized(self, input_value, expected):
         """Test multiple input scenarios."""
         result = operation(input_value)
-        assert result == expected```
+        assert result == expected
+```
 #### Integration Test Template
 
 ```python
@@ -547,34 +490,24 @@ from __future__ import annotations
 """Integration test template."""
 
 import pytest
-from flext_target_oracle import FlextOracleTarget
+
+from flext_target_oracle import FlextTargetOracleLoader
 
 
-@pytest.mark.integration
 class TestOracleIntegration:
     """Integration tests requiring Oracle database."""
 
     @pytest.fixture
-    def oracle_target(self, sample_config):
-        """Create target with Oracle connection."""
-        return FlextOracleTarget(sample_config)
+    def oracle_loader(self, sample_config):
+        """Create loader with Oracle connection."""
+        return FlextTargetOracleLoader(...)
 
-    def test_end_to_end_processing(self, oracle_target):
+    def test_end_to_end_processing(self, oracle_loader):
         """Test complete Singer message processing."""
-        # Schema message
-        schema_msg = {...}
-        result = oracle_target.process_singer_message(schema_msg)
+        # Load record
+        result = oracle_loader.load_record("test_stream", {...})
         assert result.success
-
-        # Record messages
-        record_msg = {...}
-        result = oracle_target.process_singer_message(record_msg)
-        assert result.success
-
-        # Finalization
-        stats_result = oracle_target.finalize()
-        assert stats_result.success
-        assert stats_result.value["total_records"] > 0```
+```
 ### Test Data Management
 
 ```python
@@ -601,7 +534,8 @@ def sample_records():
     return [
         {"id": 1, "name": "John Doe", "email": "john@example.com"},
         {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
-    ]```
+    ]
+```
 ## Performance Development
 
 ### Batch Size Optimization
@@ -612,6 +546,9 @@ from __future__ import annotations
 # Test different batch sizes for optimal performance
 import time
 
+from flext_core import m
+from flext_target_oracle import FlextTargetOracleLoader
+
 
 def benchmark_batch_sizes(records: list[m.Dict]):
     """Benchmark different batch sizes."""
@@ -619,24 +556,13 @@ def benchmark_batch_sizes(records: list[m.Dict]):
     results = {}
 
     for batch_size in batch_sizes:
-        settings = FlextOracleTargetSettings(
-            # ... other settings
-            batch_size=batch_size
-        )
-
-        target = FlextOracleTarget(settings)
+        loader = FlextTargetOracleLoader(...)
 
         start_time = time.time()
 
         # Process all records
         for record in records:
-            target.process_singer_message({
-                "type": "RECORD",
-                "stream": "test_stream",
-                "record": record,
-            })
-
-        target.finalize()
+            loader.load_record("test_stream", record)
 
         duration = time.time() - start_time
         results[batch_size] = {
@@ -648,13 +574,16 @@ def benchmark_batch_sizes(records: list[m.Dict]):
     for batch_size, stats in results.items():
         u.Cli.print(
             f"Batch size {batch_size}: {stats['records_per_second']:.1f} records/sec"
-        )```
+        )
+```
 ### Memory Usage Monitoring
 
 ```python
 from __future__ import annotations
-import psutil
+
 import os
+
+import psutil
 
 
 def monitor_memory_usage():
@@ -669,14 +598,15 @@ def monitor_memory_usage():
     # Your processing code here
     # ...
 
-    u.Cli.print(f"Final memory: {get_memory_mb():.1f} MB")```
+    u.Cli.print(f"Final memory: {get_memory_mb():.1f} MB")
+```
 ## Contributing Guidelines
 
 ### Pull Request Checklist
 
 Before submitting a pull request:
 
-- [ ] **Code Quality**: `make val` passes with zero issues
+- [ ] **Code Quality**: `make check` passes with zero issues
 - [ ] **Tests**: All existing tests pass, new tests added for new functionality
 - [ ] **Documentation**: Updated relevant documentation (architecture, API)
 - [ ] **Security**: No new security vulnerabilities introduced
