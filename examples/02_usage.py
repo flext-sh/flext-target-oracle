@@ -43,14 +43,14 @@ def main() -> None:
     target = FlextTargetOracle(settings)
     connection_result = target.test_connection()
     if connection_result.failure:
-        return
+        raise SystemExit(1)
     messages = load_singer_messages()
     adapter: m.TypeAdapter[OracleMessage] = m.TypeAdapter(OracleMessage)
     for raw_message in messages:
         message: OracleMessage = adapter.validate_python(raw_message)
         result: p.Result[bool] = target.process_singer_message(message)
         if result.failure:
-            return
+            raise SystemExit(1)
 
 
 if __name__ == "__main__":
