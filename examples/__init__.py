@@ -12,44 +12,50 @@ if TYPE_CHECKING:
     from flext_cli import cli
     from flext_db_oracle import db_oracle, e
     from flext_meltano import meltano, s
-    from pydantic_core import from_json, to_json, to_jsonable_python
 
-    from .constants import (
-        ExamplesFlextTargetOracleConstants,
-        ExamplesFlextTargetOracleConstants as c,
+    from flext_core import (
+        core,
+        d,
+        h,
+        lazy,
+        lazy_attribute,
+        normalize_lazy_imports,
+        r,
+        x,
     )
-    from .models import (
-        ExamplesFlextTargetOracleModels,
-        ExamplesFlextTargetOracleModels as m,
-    )
-    from .protocols import (
-        ExamplesFlextTargetOracleProtocols,
-        ExamplesFlextTargetOracleProtocols as p,
-    )
-    from .typings import (
-        ExamplesFlextTargetOracleTypes,
-        ExamplesFlextTargetOracleTypes as t,
-    )
-    from .utilities import (
-        ExamplesFlextTargetOracleUtilities,
-        ExamplesFlextTargetOracleUtilities as u,
-    )
+    from flext_target_oracle import c, config, m, main, p, settings, t, target_oracle, u
+
+    from .constants import ExamplesFlextTargetOracleConstants
+    from .models import ExamplesFlextTargetOracleModels
+    from .protocols import ExamplesFlextTargetOracleProtocols
+    from .typings import ExamplesFlextTargetOracleTypes
+    from .utilities import ExamplesFlextTargetOracleUtilities
 __all__: tuple[str, ...] = (
     "ExamplesFlextTargetOracleConstants",
     "ExamplesFlextTargetOracleModels",
     "ExamplesFlextTargetOracleProtocols",
     "ExamplesFlextTargetOracleTypes",
     "ExamplesFlextTargetOracleUtilities",
-    "FlextTargetOracleConstants",
     "c",
+    "cli",
+    "config",
+    "core",
     "d",
+    "db_oracle",
     "e",
     "h",
+    "lazy",
+    "lazy_attribute",
     "m",
+    "main",
+    "meltano",
+    "normalize_lazy_imports",
     "p",
     "r",
     "s",
+    "settings",
     "t",
+    "target_oracle",
     "u",
     "x",
 )
@@ -86,7 +92,6 @@ _LAZY_IMPORTS = MappingProxyType(
                 "target_oracle",
                 "u",
             ),
-            "pydantic_core": ("from_json", "to_json", "to_jsonable_python"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,

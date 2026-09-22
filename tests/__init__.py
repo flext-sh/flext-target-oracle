@@ -9,9 +9,25 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_tests import FlextTestsConstants, d, e, h, r, td, tf, tk, tm, tv, x
+    from flext_cli import cli
+    from flext_db_oracle import db_oracle, e
+    from flext_meltano import meltano
+    from flext_tests import (
+        active_rules,
+        api,
+        discover_repository_root,
+        install_local_packages,
+        load_infra_report,
+        split_csv,
+        td,
+        tf,
+        tk,
+        tm,
+        tv,
+    )
 
-    from flext_target_oracle import FlextTargetOracleConstants
+    from flext_core import core, d, h, lazy_attribute, r, x
+    from flext_target_oracle import config, main, settings, target_oracle
 
     from . import e2e, integration, performance, unit
     from .base import (
@@ -34,8 +50,6 @@ if TYPE_CHECKING:
         TestsFlextTargetOracleUtilities as u,
     )
 __all__: tuple[str, ...] = (
-    "FlextTargetOracleConstants",
-    "FlextTestsConstants",
     "TestsFlextTargetOracleConstants",
     "TestsFlextTargetOracleModels",
     "TestsFlextTargetOracleProtocols",
@@ -43,18 +57,33 @@ __all__: tuple[str, ...] = (
     "TestsFlextTargetOracleSettings",
     "TestsFlextTargetOracleTypes",
     "TestsFlextTargetOracleUtilities",
+    "active_rules",
+    "api",
     "c",
+    "cli",
+    "config",
+    "core",
     "d",
+    "db_oracle",
+    "discover_repository_root",
     "e",
     "e2e",
     "h",
+    "install_local_packages",
     "integration",
+    "lazy_attribute",
+    "load_infra_report",
     "m",
+    "main",
+    "meltano",
     "p",
     "performance",
     "r",
     "s",
+    "settings",
+    "split_csv",
     "t",
+    "target_oracle",
     "td",
     "tf",
     "tk",
@@ -79,19 +108,23 @@ _LAZY_IMPORTS = MappingProxyType(
             ".typings": ("TestsFlextTargetOracleTypes", "t"),
             ".unit": ("unit",),
             ".utilities": ("TestsFlextTargetOracleUtilities", "u"),
-            "flext_target_oracle": ("FlextTargetOracleConstants",),
+            "flext_cli": ("cli",),
+            "flext_core": ("core", "d", "h", "lazy_attribute", "r", "x"),
+            "flext_db_oracle": ("db_oracle", "e"),
+            "flext_meltano": ("meltano",),
+            "flext_target_oracle": ("config", "main", "settings", "target_oracle"),
             "flext_tests": (
-                "FlextTestsConstants",
-                "d",
-                "e",
-                "h",
-                "r",
+                "active_rules",
+                "api",
+                "discover_repository_root",
+                "install_local_packages",
+                "load_infra_report",
+                "split_csv",
                 "td",
                 "tf",
                 "tk",
                 "tm",
                 "tv",
-                "x",
             ),
         }),
         alias_groups=MappingProxyType({}),
