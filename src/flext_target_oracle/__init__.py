@@ -20,38 +20,33 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_db_oracle import d, e, h, r, s, x
+    from flext_cli import cli
+    from flext_db_oracle import db_oracle, e
+    from flext_meltano import meltano, s
+    from pydantic_core import from_json, to_json, to_jsonable_python
 
-    from .__version__ import FlextTargetOracleVersion
+    from flext_core import core, d, h, lazy_attribute, r, x
+
     from ._config import FlextTargetOracleConfig, config
     from ._settings import FlextTargetOracleSettings, settings
     from .api import FlextTargetOracleService, target_oracle
     from .cli import FlextTargetOracleCli, main
     from .constants import FlextTargetOracleConstants, FlextTargetOracleConstants as c
-    from .models import FlextTargetOracleModels, FlextTargetOracleModels as m
+    from .models import FlextTargetOracleModels, m
     from .protocols import FlextTargetOracleProtocols, FlextTargetOracleProtocols as p
     from .typings import FlextTargetOracleTypes, FlextTargetOracleTypes as t
-    from .utilities import (
-        FlextTargetOracle,
-        FlextTargetOracleExceptions,
-        FlextTargetOracleLoader,
-        FlextTargetOracleUtilities,
-        FlextTargetOracleUtilities as u,
-    )
+    from .utilities import FlextTargetOracleExceptions, FlextTargetOracleUtilities, u
 __all__: tuple[str, ...] = (
-    "FlextTargetOracle",
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
     "FlextTargetOracleExceptions",
-    "FlextTargetOracleLoader",
     "FlextTargetOracleModels",
     "FlextTargetOracleProtocols",
     "FlextTargetOracleService",
     "FlextTargetOracleSettings",
     "FlextTargetOracleTypes",
     "FlextTargetOracleUtilities",
-    "FlextTargetOracleVersion",
     "__author__",
     "__author_email__",
     "__description__",
@@ -61,18 +56,26 @@ __all__: tuple[str, ...] = (
     "__version__",
     "__version_info__",
     "c",
+    "cli",
     "config",
+    "core",
     "d",
+    "db_oracle",
     "e",
+    "from_json",
     "h",
+    "lazy_attribute",
     "m",
     "main",
+    "meltano",
     "p",
     "r",
     "s",
     "settings",
     "t",
     "target_oracle",
+    "to_json",
+    "to_jsonable_python",
     "u",
     "x",
 )
@@ -80,7 +83,6 @@ __all__: tuple[str, ...] = (
 _LAZY_IMPORTS = MappingProxyType(
     build_lazy_import_map(
         MappingProxyType({
-            ".__version__": ("FlextTargetOracleVersion",),
             "._config": ("FlextTargetOracleConfig", "config"),
             "._settings": ("FlextTargetOracleSettings", "settings"),
             ".api": ("FlextTargetOracleService", "target_oracle"),
@@ -90,13 +92,15 @@ _LAZY_IMPORTS = MappingProxyType(
             ".protocols": ("FlextTargetOracleProtocols", "p"),
             ".typings": ("FlextTargetOracleTypes", "t"),
             ".utilities": (
-                "FlextTargetOracle",
                 "FlextTargetOracleExceptions",
-                "FlextTargetOracleLoader",
                 "FlextTargetOracleUtilities",
                 "u",
             ),
-            "flext_db_oracle": ("d", "e", "h", "r", "s", "x"),
+            "flext_cli": ("cli",),
+            "flext_core": ("core", "d", "h", "lazy_attribute", "r", "x"),
+            "flext_db_oracle": ("db_oracle", "e"),
+            "flext_meltano": ("meltano", "s"),
+            "pydantic_core": ("from_json", "to_json", "to_jsonable_python"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
