@@ -38,7 +38,8 @@
   - [Version 0.9.9 (Current)](#version-099-current)
   - [Version 1.1.0 (Enhanced Features)](#version-110-enhanced-features)
   - [Version 0.9.9 (Next Generation)](#version-099-next-generation)
-  <!-- TOC END -->
+
+<!-- TOC END -->
 
 **FLEXT Target Oracle - Module Architecture Following FLEXT Ecosystem Standards**
 
@@ -66,7 +67,7 @@ This structure serves as a reference for Singer target implementations within th
 
 ### **Current Implementation Structure**
 
-```python notest
+```{.python .notest}
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Public API gateway & exports
 ├── settings.py                # ⚙️ m.Value configuration patterns
@@ -87,8 +88,7 @@ from __future__ import annotations
 """FLEXT Target Oracle - Public API exports following ecosystem standards."""
 
 # FLEXT Core pattern re-exports for convenience
-from flext_target_oracle import FlextOracleTargetSettings, LoadMethod
-from flext_target_oracle import FlextOracleTarget
+from flext_target_oracle import FlextOracleTarget, FlextOracleTargetSettings, LoadMethod
 
 
 # Exception hierarchy (consolidated from duplicated sources)
@@ -138,7 +138,7 @@ __version__ = "0.9.9"
 
 ##### **`settings.py` - Configuration with Domain Validation**
 
-```python notest
+```{.python .notest}
 from __future__ import annotations
 """Oracle target configuration using FLEXT Value patterns."""
 
@@ -342,7 +342,7 @@ class FlextOracleTargetProcessingError(FlextOracleTargetError): ...
 
 ### **Ideal Structure for Singer Targets**
 
-```python notest
+```{.python .notest}
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean public API exports
 ├── settings/                  # ⚙️ Configuration module
@@ -371,7 +371,7 @@ src/flext_target_oracle/
 
 For simple Singer targets, the current flat structure is acceptable with fixes:
 
-```python notest
+```{.python .notest}
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean exports (fixed)
 ├── settings.py                # ⚙️ Enhanced configuration
@@ -412,7 +412,7 @@ def process_record_bad(self, stream_name: str, record_data: dict) -> None:
 
 ### **m.Value Configuration Pattern**
 
-```python notest
+```{.python .notest}
 from __future__ import annotations
 # ✅ CORRECT - Comprehensive validation with domain rules
 class FlextOracleTargetSettings(m.Value):
@@ -526,7 +526,7 @@ def process_batch_bad(self, stream_name: str, records: list):
 
 ### **Dependency Direction (Clean Architecture)**
 
-```python notest
+```{.python .notest}
 # ✅ CORRECT - Dependencies flow inward
 ┌─────────────────────────────┐
 │     target.py               │  # Application Layer
@@ -557,7 +557,7 @@ from flext_db_oracle import FlextDbOracleApi
 
 ### **External Dependency Integration**
 
-```python notest
+```{.python .notest}
 # ✅ CORRECT - FLEXT ecosystem integration
 from flext_cli import u
 from flext_core import FlextSettings
@@ -584,7 +584,7 @@ import cx_Oracle  # Should use flext-db-oracle abstraction
 
 ### **Test Structure Mirroring Source**
 
-```python notest
+```{.python .notest}
 tests/
 ├── unit/                           # Unit tests (isolated)
 │   ├── test_config.py             # Tests settings.py
@@ -617,8 +617,9 @@ from __future__ import annotations
 """Unit tests for configuration validation."""
 
 import pytest
-from flext_target_oracle import FlextOracleTargetSettings, LoadMethod
 from pydantic import ValidationError
+
+from flext_target_oracle import FlextOracleTargetSettings, LoadMethod
 
 
 class TestFlextOracleTargetSettings:
@@ -832,8 +833,6 @@ def sync_data_cross_system() -> p.Result[SyncStats]:
 # ❌ INCORRECT - Custom result types break ecosystem consistency
 class OracleTargetResult[T]:  # Creates ecosystem fragmentation
     """Custom result type - avoid this pattern."""
-
-    pass
 ```
 
 ### **Configuration Ecosystem Integration**
@@ -1031,7 +1030,7 @@ def _write_record(self, record: Record) -> None:
 
 **Module Extensions**:
 
-```python notest
+```{.python .notest}
 src/flext_target_oracle/
 ├── settings/
 │   ├── environments.py     # Environment-specific configurations

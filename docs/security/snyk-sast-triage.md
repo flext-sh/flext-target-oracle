@@ -7,7 +7,8 @@
 - [Achados](#achados)
   - [1 · ⚪ LOW · Use of Hardcoded Passwords](#1-low-use-of-hardcoded-passwords)
   - [2 · ⚪ LOW · Use of Hardcoded Passwords](#2-low-use-of-hardcoded-passwords)
-  <!-- TOC END -->
+
+<!-- TOC END -->
 
 Gerado do scan Snyk (dump 2026-08-06). Bead: `mro-26ga`
 
@@ -31,7 +32,7 @@ em `.snyk`) / `risco-aceito` (com prazo).
 
 **Local**: `tests/conftest.py:89` · **CWE**: -
 
-```python notest
+```{.python .notest}
        85              "host": os.environ["TEST_ORACLE_HOST"],
        86              "port": int(os.environ["TEST_ORACLE_PORT"]),
        87              "service_name": os.environ["TEST_ORACLE_SERVICE"],
@@ -49,7 +50,7 @@ em `.snyk`) / `risco-aceito` (com prazo).
 
 **Local**: `tests/integration/test_oracle.py:476` · **CWE**: -
 
-```python notest
+```{.python .notest}
       472              "record": {
       473                  "id": 1,
       474                  "name": "John Doe",

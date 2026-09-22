@@ -5,34 +5,6 @@
 - [Overview](#overview)
 - [Architecture Principles](#architecture-principles)
   - [FLEXT Core Integration](#flext-core-integration)
-  - [Clean Architecture Layers```](#clean-architecture-layers)
-- [Component Architecture](#component-architecture)
-  - [1. FlextOracleTarget (Application Layer)](#1-flextoracletarget-application-layer)
-  - [2. FlextOracleTargetSettings (Domain Layer)](#2-flextoracletargetsettings-domain-layer)
-  - [3. FlextOracleTargetLoader (Infrastructure Layer)](#3-flextoracletargetloader-infrastructure-layer)
-- [Data Flow Architecture](#data-flow-architecture)
-  - [Singer Message Processing Flow](#singer-message-processing-flow)
-  - [Error Handling Flow](#error-handling-flow)
-- [Performance Architecture](#performance-architecture)
-  - [Batch Processing Strategy](#batch-processing-strategy)
-  - [Connection Management](#connection-management)
-  - [Memory Management](#memory-management)
-- [Security Architecture](#security-architecture)
-  - [Current Security Measures](#current-security-measures)
-  - [Security Issues (TO BE ADDRESSED)](#security-issues-to-be-addressed)
-- [Testing Architecture](#testing-architecture)
-  - [Test Structure```](#test-structure)
-  - [Test Patterns](#test-patterns)
-- [Integration Architecture](#integration-architecture)
-  - [FLEXT Ecosystem Integration](#flext-ecosystem-integration)
-  - [Configuration Integration](#configuration-integration)
-- [Deployment Architecture](#deployment-architecture)
-  - [Production Deployment Patterns](#production-deployment-patterns)
-  - [Monitoring and Observability](#monitoring-and-observability)
-- [Future Architecture Considerations](#future-architecture-considerations)
-  - [Planned Improvements](#planned-improvements)
-  - [Scalability Considerations](#scalability-considerations)
-- [Related Documentation](#related-documentation)
 
 <!-- TOC END -->
 
@@ -60,8 +32,10 @@ from flext_core import FlextSettings
 # Configuration with domain validation
 class FlextOracleTargetSettings(m.Value):
     def validate_domain_rules(self) -> p.Result[bool]:
-        # Chain of Responsibility validation pattern```
-### Clean Architecture Layers```
+        # Chain of Responsibility validation pattern
+        ```
+### Clean Architecture Layers
+```
 ┌─────────────────────────────────────────────────┐
 │                 Presentation Layer              │
 │   ┌─────────────────────────────────────────┐   │
@@ -108,7 +82,8 @@ class FlextOracleTargetSettings(m.Value):
 │   │   • Connection management              │   │
 │   │   • SQL execution                      │   │
 │   └─────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────┘```
+└─────────────────────────────────────────────────┘
+```
 ## Component Architecture
 
 ### 1. FlextOracleTarget (Application Layer)
@@ -127,7 +102,8 @@ class FlextOracleTarget(Target):
     def _handle_state(self, message: dict) -> p.Result[bool]
 
     # Lifecycle management
-    def finalize(self) -> p.Result[m.Dict]```
+    def finalize(self) -> p.Result[m.Dict]
+    ```
 **Key Patterns**:
 
 - **r Railway Pattern**: All operations return `r<T>`
@@ -160,7 +136,8 @@ class FlextOracleTargetSettings(m.Value):
     connection_timeout: int = 30
 
     def validate_domain_rules(self) -> p.Result[bool]:
-        """Chain of Responsibility validation pattern."""```
+        """Chain of Responsibility validation pattern."""
+        ```
 **Key Patterns**:
 
 - **Value Object Pattern**: Immutable, validated configuration
@@ -186,7 +163,8 @@ class FlextOracleTargetLoader:
 
     # Data loading with batching
     def load_record(self, stream_name: str, record_data: dict) -> p.Result[bool]
-    def finalize_all_streams(self) -> p.Result[m.Dict]```
+    def finalize_all_streams(self) -> p.Result[m.Dict]
+    ```
 **Key Patterns**:
 
 - **Batch Processing**: Configurable batch sizes for performance
@@ -253,7 +231,8 @@ sequenceDiagram
     end
 
     FL-->>FT: p.Result[Statistics]
-    FT-->>ST: Final statistics```
+    FT-->>ST: Final statistics
+    ```
 ### Error Handling Flow
 
 ```mermaid
@@ -268,7 +247,8 @@ flowchart TD
     G -->|No| I[Propagate to Singer]
     H --> B
     I --> J[Singer Error Handling]
-    C --> K[Operation Complete]```
+    C --> K[Operation Complete]
+    ```
 ## Performance Architecture
 
 ### Batch Processing Strategy
@@ -291,7 +271,8 @@ class BatchProcessor:
         if len(buffer) >= self._batch_size:
             return self._flush_batch(stream)
 
-        return r[bool].| ok(value=True)```
+        return r[bool].| ok(value=True)
+        ```
 ### Connection Management
 
 ```python
@@ -299,7 +280,8 @@ class BatchProcessor:
 with self.oracle_api as connected_api:
     # All operations within connection context
     result = connected_api.execute_dml(sql, params)
-    # Connection automatically closed```
+    # Connection automatically closed
+    ```
 ### Memory Management
 
 - **Streaming Processing**: Records processed one at a time, not loaded into memory
@@ -323,15 +305,18 @@ with self.oracle_api as connected_api:
 ```python
 # SECURITY RISK - Manual string replacement
 parameterized_sql = sql.replace(":data", f"'{param['data']}'")
-result = connected_api.execute_ddl(parameterized_sql)```
+result = connected_api.execute_ddl(parameterized_sql)
+```
 **Required Fix**:
 
 ```python
 # SECURE - Use proper parameterized queries
-result = connected_api.execute_dml(sql, param)```
+result = connected_api.execute_dml(sql, param)
+```
 ## Testing Architecture
 
-### Test Structure```
+### Test Structure
+```
 tests/
 ├── unit/                    # Fast, isolated tests
 │   ├── test_config.py      # Configuration validation
@@ -343,7 +328,8 @@ tests/
 ├── performance/            # Performance benchmarks
 │   └── test_batch_performance.py
 └── security/               # Security validation
-    └── test_sql_injection.py```
+    └── test_sql_injection.py
+    ```
 ### Test Patterns
 
 ```python
@@ -360,7 +346,8 @@ def test_operation_success():
 def test_operation_failure():
     result = operation_with_error()
     assert result.failure
-    assert "expected error" in result.error```
+    assert "expected error" in result.error
+    ```
 ## Integration Architecture
 
 ### FLEXT Ecosystem Integration
@@ -394,7 +381,8 @@ graph TB
 
     SINGER --> FTO
     FTL --> ORACLE
-    MELTANO --> FTO```
+    MELTANO --> FTO
+    ```
 ### Configuration Integration
 
 ```python
@@ -407,7 +395,8 @@ oracle_config = settings.get_oracle_config()
 api = FlextDbOracleApi(oracle_config)
 
 # flext-meltano integration
-target = FlextOracleTarget(settings)```
+target = FlextOracleTarget(settings)
+```
 ## Deployment Architecture
 
 ### Production Deployment Patterns
@@ -439,7 +428,8 @@ networks:
   flext-network:
     external: true
   oracle-network:
-    external: true```
+    external: true
+    ```
 ### Monitoring and Observability
 
 ```python
@@ -456,7 +446,8 @@ logger.info(
 
 # Metrics integration
 metrics.counter("oracle_target.records_processed").inc(count)
-metrics.histogram("oracle_target.batch_duration").observe(duration)```
+metrics.histogram("oracle_target.batch_duration").observe(duration)
+```
 ## Future Architecture Considerations
 
 ### Planned Improvements
