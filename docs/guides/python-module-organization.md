@@ -1,6 +1,7 @@
 # Python Module Organization & Semantic Patterns
 
 <!-- TOC START -->
+
 - [🏗️ Module Architecture Overview](#module-architecture-overview)
   - [Core Design Principles](#core-design-principles)
 - [📁 Current Module Structure & Analysis](#current-module-structure-analysis)
@@ -37,7 +38,7 @@
   - [Version 0.9.9 (Current)](#version-099-current)
   - [Version 1.1.0 (Enhanced Features)](#version-110-enhanced-features)
   - [Version 0.9.9 (Next Generation)](#version-099-next-generation)
-<!-- TOC END -->
+  <!-- TOC END -->
 
 **FLEXT Target Oracle - Module Architecture Following FLEXT Ecosystem Standards**
 
