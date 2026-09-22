@@ -9,10 +9,17 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
+<<<<<<< HEAD
     from flext_cli import cli
     from flext_db_oracle import db_oracle, e
     from flext_meltano import meltano, s
     from pydantic_core import from_json, to_json, to_jsonable_python
+=======
+    from flext_db_oracle import e, s
+
+    from flext_core import d, h, r, x
+    from flext_target_oracle import FlextTargetOracleConstants
+>>>>>>> origin/0.12.0-dev
 
     from flext_core import (
         core,
@@ -67,6 +74,7 @@ __all__: tuple[str, ...] = (
 _LAZY_IMPORTS = MappingProxyType(
     build_lazy_import_map(
         MappingProxyType({
+<<<<<<< HEAD
             ".constants": ("ExamplesFlextTargetOracleConstants",),
             ".models": ("ExamplesFlextTargetOracleModels",),
             ".protocols": ("ExamplesFlextTargetOracleProtocols",),
@@ -97,6 +105,16 @@ _LAZY_IMPORTS = MappingProxyType(
                 "u",
             ),
             "pydantic_core": ("from_json", "to_json", "to_jsonable_python"),
+=======
+            ".constants": ("ExamplesFlextTargetOracleConstants", "c"),
+            ".models": ("ExamplesFlextTargetOracleModels", "m"),
+            ".protocols": ("ExamplesFlextTargetOracleProtocols", "p"),
+            ".typings": ("ExamplesFlextTargetOracleTypes", "t"),
+            ".utilities": ("ExamplesFlextTargetOracleUtilities", "u"),
+            "flext_core": ("d", "h", "r", "x"),
+            "flext_db_oracle": ("e", "s"),
+            "flext_target_oracle": ("FlextTargetOracleConstants",),
+>>>>>>> origin/0.12.0-dev
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
