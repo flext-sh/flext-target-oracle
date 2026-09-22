@@ -441,7 +441,7 @@ def _demonstrate_production_setup_checked() -> None:
     init_result = manager.initialize()
     if init_result.failure:
         u.logger.error("Production initialization failed: %s", init_result.error)
-        return
+        raise SystemExit(1)
     u.logger.info("Step 3: Performing initial health check")
     _log_health_result(manager.health_check())
     u.logger.info("Step 4: Creating sample production data stream")
@@ -458,7 +458,8 @@ def _log_health_result(health_result: p.Result[t.JsonMapping]) -> None:
     """Log the initial health check result."""
     if health_result.failure:
         u.logger.warning("Health check failed: %s", health_result.error)
-        return
+        msg = f"Health check failed: {health_result.error}"
+        raise RuntimeError(msg)
     health_data = health_result.value
     u.logger.info(
         "Health check status", status=str(health_data.get("status", "unknown"))
@@ -478,7 +479,8 @@ def _log_processing_result(processing_result: p.Result[t.JsonMapping]) -> None:
     """Log production stream processing result details."""
     if processing_result.failure:
         u.logger.error("Production processing failed: %s", processing_result.error)
-        return
+        msg = f"Production processing failed: {processing_result.error}"
+        raise RuntimeError(msg)
     stats = processing_result.value
     u.logger.info("=== Production Processing Statistics ===")
     u.logger.info(
