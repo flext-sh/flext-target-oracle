@@ -23,7 +23,7 @@ class _TargetOracleNamespace(m.BaseModel):
     model_config = m.ConfigDict(extra="allow", frozen=True)
 
 
-class FlextTargetOracleConfig(FlextSettings, FlextMeltanoConfig):
+class FlextTargetOracleConfig(FlextMeltanoConfig):
     """TargetOracle config auto-loaded model-less from ``config/*.yaml``.
 
     MRO carries ``FlextSettings`` FIRST (ENFORCE-042); the class stays a frozen,
