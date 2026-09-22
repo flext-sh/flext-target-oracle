@@ -9,10 +9,9 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_cli import cli
-    from flext_db_oracle import db_oracle, e
-    from flext_meltano import meltano, s
-    from pydantic_core import from_json, to_json, to_jsonable_python
+    from flext_db_oracle import d, e, h, r, s, x
+
+    from flext_target_oracle import FlextTargetOracleConstants
 
     from flext_core import (
         core,
@@ -67,36 +66,13 @@ __all__: tuple[str, ...] = (
 _LAZY_IMPORTS = MappingProxyType(
     build_lazy_import_map(
         MappingProxyType({
-            ".constants": ("ExamplesFlextTargetOracleConstants",),
-            ".models": ("ExamplesFlextTargetOracleModels",),
-            ".protocols": ("ExamplesFlextTargetOracleProtocols",),
-            ".typings": ("ExamplesFlextTargetOracleTypes",),
-            ".utilities": ("ExamplesFlextTargetOracleUtilities",),
-            "flext_cli": ("cli",),
-            "flext_core": (
-                "core",
-                "d",
-                "h",
-                "lazy",
-                "lazy_attribute",
-                "normalize_lazy_imports",
-                "r",
-                "x",
-            ),
-            "flext_db_oracle": ("db_oracle", "e"),
-            "flext_meltano": ("meltano", "s"),
-            "flext_target_oracle": (
-                "c",
-                "config",
-                "m",
-                "main",
-                "p",
-                "settings",
-                "t",
-                "target_oracle",
-                "u",
-            ),
-            "pydantic_core": ("from_json", "to_json", "to_jsonable_python"),
+            ".constants": ("ExamplesFlextTargetOracleConstants", "c"),
+            ".models": ("ExamplesFlextTargetOracleModels", "m"),
+            ".protocols": ("ExamplesFlextTargetOracleProtocols", "p"),
+            ".typings": ("ExamplesFlextTargetOracleTypes", "t"),
+            ".utilities": ("ExamplesFlextTargetOracleUtilities", "u"),
+            "flext_db_oracle": ("d", "e", "h", "r", "s", "x"),
+            "flext_target_oracle": ("FlextTargetOracleConstants",),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
