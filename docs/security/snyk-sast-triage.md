@@ -1,12 +1,13 @@
 # Triagem Snyk Code (SAST) — flext-sh/flext-target-oracle
 
 <!-- TOC START -->
+
 - [Resumo](#resumo)
 - [Como usar este documento](#como-usar-este-documento)
 - [Achados](#achados)
   - [1 · ⚪ LOW · Use of Hardcoded Passwords](#1-low-use-of-hardcoded-passwords)
   - [2 · ⚪ LOW · Use of Hardcoded Passwords](#2-low-use-of-hardcoded-passwords)
-<!-- TOC END -->
+  <!-- TOC END -->
 
 Gerado do scan Snyk (dump 2026-08-06). Bead: `mro-26ga`
 

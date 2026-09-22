@@ -187,6 +187,7 @@ from __future__ import annotations
 
 from flext_core import r, p, m, t, u
 
+
 # ✅ All operations return r[T]
 def process_record(record: dict) -> p.Result[bool]:
     """Process a single record with proper error handling."""
@@ -313,10 +314,7 @@ def test_table_management():
     # Schema definition
     schema = {
         "type": "object",
-        "properties": {
-            "id": {"type": "integer"},
-            "name": {"type": "string"},
-        },
+        "properties": {"id": {"type": "integer"}, "name": {"type": "string"}},
     }
 
     # Ensure table exists
