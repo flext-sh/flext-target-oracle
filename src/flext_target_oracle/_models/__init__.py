@@ -13,6 +13,8 @@ if TYPE_CHECKING:
     from .results import FlextTargetOracleModelsResults
     from .settings import FlextTargetOracleModelsSettings
     from .singer import FlextTargetOracleModelsSinger
+
+
 __all__: tuple[str, ...] = (
     "FlextTargetOracleModelsCommands",
     "FlextTargetOracleModelsResults",
