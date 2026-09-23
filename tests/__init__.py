@@ -9,28 +9,9 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_db_oracle import db_oracle, e
-    from flext_meltano import meltano
-    from flext_tests import (
-        api,
-        cli,
-        core,
-        d,
-        h,
-        install_local_packages,
-        lazy_attribute,
-        load_infra_report,
-        r,
-        services,
-        td,
-        tf,
-        tk,
-        tm,
-        tv,
-        x,
-    )
+    from flext_tests import api, td, tf, tk, tm, tv
 
-    from flext_target_oracle import config, main, settings, target_oracle
+    from flext_target_oracle import d, e, h, r, x
 
     from . import e2e, integration, performance, unit
     from .base import (
@@ -64,29 +45,17 @@ __all__: tuple[str, ...] = (
     "TestsFlextTargetOracleUtilities",
     "api",
     "c",
-    "cli",
-    "config",
-    "core",
     "d",
-    "db_oracle",
     "e",
     "e2e",
     "h",
-    "install_local_packages",
     "integration",
-    "lazy_attribute",
-    "load_infra_report",
     "m",
-    "main",
-    "meltano",
     "p",
     "performance",
     "r",
     "s",
-    "services",
-    "settings",
     "t",
-    "target_oracle",
     "td",
     "tf",
     "tk",
@@ -111,27 +80,8 @@ _LAZY_IMPORTS = MappingProxyType(
             ".typings": ("TestsFlextTargetOracleTypes", "t"),
             ".unit": ("unit",),
             ".utilities": ("TestsFlextTargetOracleUtilities", "u"),
-            "flext_db_oracle": ("db_oracle", "e"),
-            "flext_meltano": ("meltano",),
-            "flext_target_oracle": ("config", "main", "settings", "target_oracle"),
-            "flext_tests": (
-                "api",
-                "cli",
-                "core",
-                "d",
-                "h",
-                "install_local_packages",
-                "lazy_attribute",
-                "load_infra_report",
-                "r",
-                "services",
-                "td",
-                "tf",
-                "tk",
-                "tm",
-                "tv",
-                "x",
-            ),
+            "flext_target_oracle": ("d", "e", "h", "r", "x"),
+            "flext_tests": ("api", "td", "tf", "tk", "tm", "tv"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
