@@ -189,6 +189,10 @@ class FlextTargetOracle:
                 return self._handle_state(state_message)
             case m.Meltano.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
+            case _:
+                return r[bool].fail(
+                    f"Unsupported Singer message type: {type(message).__name__}"
+                )
 
     def process_singer_messages(
         self,
