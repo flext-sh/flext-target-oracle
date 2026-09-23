@@ -10,7 +10,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import json
 from collections.abc import Mapping, Sequence
 from datetime import datetime
 from operator import itemgetter
@@ -121,10 +120,19 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         )
         if type_mapping_result.failure:
             return r[tuple[m.DbOracle.Column, ...]].from_failure(type_mapping_result)
-        stream_mappings = t.TargetOracle.STR_MAP_ADAPTER.validate_python(
-            json.loads(self.target_config.TargetOracle.column_mappings or "{}").get(
-                stream_name, {}
+        column_mappings_result = u.Cli.json_loads(
+            self.target_config.TargetOracle.column_mappings or "{}"
+        )
+        if column_mappings_result.failure:
+            return r[tuple[m.DbOracle.Column, ...]].fail(
+                f"Invalid column mappings for {stream_name}: "
+                f"{column_mappings_result.error}"
             )
+        column_mappings = t.json_mapping_adapter().validate_python(
+            column_mappings_result.value
+        )
+        stream_mappings = t.TargetOracle.STR_MAP_ADAPTER.validate_python(
+            column_mappings.get(stream_name, {})
         )
         ignored_columns = frozenset(self.target_config.TargetOracle.ignored_columns)
         key_columns = tuple(
@@ -458,9 +466,20 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         self, connected_api: FlextDbOracleApi, stream_name: str, table_name: str
     ) -> p.Result[bool]:
         """Create configured custom indexes for a stream table."""
-        for raw_index in json.loads(
+        custom_indexes_result = u.Cli.json_loads(
             self.target_config.TargetOracle.custom_indexes or "{}"
-        ).get(stream_name, ()):
+        )
+        if custom_indexes_result.failure:
+            return r[bool].fail(
+                f"Invalid custom indexes configuration: {custom_indexes_result.error}"
+            )
+        custom_indexes = t.json_mapping_adapter().validate_python(
+            custom_indexes_result.value
+        )
+        stream_indexes = t.json_mapping_sequence_adapter().validate_python(
+            custom_indexes.get(stream_name, ())
+        )
+        for raw_index in stream_indexes:
             index_columns_result = self._custom_index_columns(raw_index, stream_name)
             if index_columns_result.failure:
                 return r[bool].from_failure(index_columns_result)

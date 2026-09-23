@@ -13,6 +13,23 @@ from .loader import FlextTargetOracleLoader
 if TYPE_CHECKING:
     from collections.abc import MutableMapping
 
+# NOTE (pyright): a raw four-member union of chained facade attribute
+# lookups (`m.Meltano.SingerXMessage | ...`) resolves to "Unknown" when
+# it only ever appears as a deferred string annotation (every annotation
+# in this module, per `from __future__ import annotations`). pyright's
+# evaluator cannot resolve that specific shape and silently gives up,
+# which then makes `match` on the parameter/return value spuriously
+# non-exhaustive (`reportMatchNotExhaustive`). Binding the union once as
+# a plain (non-`TypeAlias`, non-PEP-695 `type`) module attribute forces
+# eager evaluation at definition time; both of those alternatives are
+# themselves lazily evaluated and reproduce the same "Unknown" failure.
+_SingerMessage = (
+    m.Meltano.SingerSchemaMessage
+    | m.Meltano.SingerRecordMessage
+    | m.Meltano.SingerStateMessage
+    | m.Meltano.SingerActivateVersionMessage
+)
+
 
 class FlextTargetOracle:
     """Singer target client that coordinates schema and record loading."""
@@ -104,41 +121,19 @@ class FlextTargetOracle:
                 return r[bool].from_failure(finalize_result)
         return r[bool].ok(True)
 
-    def _parse_singer_payload(
-        self, payload: str
-    ) -> p.Result[
-        m.Meltano.SingerSchemaMessage
-        | m.Meltano.SingerRecordMessage
-        | m.Meltano.SingerStateMessage
-        | m.Meltano.SingerActivateVersionMessage
-    ]:
+    def _parse_singer_payload(self, payload: str) -> p.Result[_SingerMessage]:
         """Parse one Singer JSON payload into its Pydantic message model."""
         try:
             raw = t.json_mapping_adapter().validate_json(payload)
             return self._parse_singer_mapping(raw)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
-            return r[
-                m.Meltano.SingerSchemaMessage
-                | m.Meltano.SingerRecordMessage
-                | m.Meltano.SingerStateMessage
-                | m.Meltano.SingerActivateVersionMessage
-            ].fail(f"Invalid Singer payload: {exc}")
+            return r[_SingerMessage].fail(
+                f"Invalid Singer payload: {exc}", exception=exc
+            )
 
-    def _parse_singer_mapping(
-        self, raw: t.JsonMapping
-    ) -> p.Result[
-        m.Meltano.SingerSchemaMessage
-        | m.Meltano.SingerRecordMessage
-        | m.Meltano.SingerStateMessage
-        | m.Meltano.SingerActivateVersionMessage
-    ]:
+    def _parse_singer_mapping(self, raw: t.JsonMapping) -> p.Result[_SingerMessage]:
         """Parse one Singer mapping into its concrete message model."""
-        result_type = r[
-            m.Meltano.SingerSchemaMessage
-            | m.Meltano.SingerRecordMessage
-            | m.Meltano.SingerStateMessage
-            | m.Meltano.SingerActivateVersionMessage
-        ]
+        result_type = r[_SingerMessage]
         msg_type = str(raw.get("type", ""))
         if msg_type == c.Meltano.SingerMessageType.SCHEMA.value:
             schema_message = m.Meltano.SingerSchemaMessage.model_validate(raw)
@@ -172,13 +167,7 @@ class FlextTargetOracle:
         """Initialize target by validating connectivity."""
         return self.loader.test_connection()
 
-    def process_singer_message(
-        self,
-        message: m.Meltano.SingerSchemaMessage
-        | m.Meltano.SingerRecordMessage
-        | m.Meltano.SingerStateMessage
-        | m.Meltano.SingerActivateVersionMessage,
-    ) -> p.Result[bool]:
+    def process_singer_message(self, message: _SingerMessage) -> p.Result[bool]:
         """Process a single Singer message."""
         match message:
             case m.Meltano.SingerSchemaMessage() as schema_message:
@@ -191,13 +180,7 @@ class FlextTargetOracle:
                 return self._handle_activate_version(activate_message)
 
     def process_singer_messages(
-        self,
-        messages: t.SequenceOf[
-            m.Meltano.SingerSchemaMessage
-            | m.Meltano.SingerRecordMessage
-            | m.Meltano.SingerStateMessage
-            | m.Meltano.SingerActivateVersionMessage
-        ],
+        self, messages: t.SequenceOf[_SingerMessage]
     ) -> p.Result[m.TargetOracle.ProcessingSummary]:
         """Process SCHEMA/RECORD/STATE Singer messages."""
         processed = 0
