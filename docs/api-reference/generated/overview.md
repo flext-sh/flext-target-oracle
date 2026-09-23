@@ -20,16 +20,16 @@
 - Project class: `integration`
 - Keywords: `data-loading`, `database`, `enterprise`, `etl`, `flext`, `library`,
   `oracle`, `typed`
-- Main facades: `FlextTargetOracle`, `FlextTargetOracleCli`, `FlextTargetOracleConfig`,
+- Main facades: `FlextTargetOracleCli`, `FlextTargetOracleConfig`,
   `FlextTargetOracleConstants`, `FlextTargetOracleExceptions`,
-  `FlextTargetOracleLoader`, `FlextTargetOracleModels`, `FlextTargetOracleProtocols` (+5
-  more)
+  `FlextTargetOracleModels`, `FlextTargetOracleProtocols`, `FlextTargetOracleService`,
+  `FlextTargetOracleSettings` (+2 more)
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
-- Public symbol exports: `FlextTargetOracle`, `FlextTargetOracleCli`,
-  `FlextTargetOracleConfig`, `FlextTargetOracleConstants`,
-  `FlextTargetOracleExceptions`, `FlextTargetOracleLoader`, `FlextTargetOracleModels`,
-  `FlextTargetOracleProtocols`, `FlextTargetOracleService`, `FlextTargetOracleSettings`
-  (+7 more)
+- Public symbol exports: `FlextTargetOracleCli`, `FlextTargetOracleConfig`,
+  `FlextTargetOracleConstants`, `FlextTargetOracleExceptions`,
+  `FlextTargetOracleModels`, `FlextTargetOracleProtocols`, `FlextTargetOracleService`,
+  `FlextTargetOracleSettings`, `FlextTargetOracleTypes`, `FlextTargetOracleUtilities`
+  (+4 more)
 - Exported module shortcuts: _none_
 - Generated module pages: `7`
 
