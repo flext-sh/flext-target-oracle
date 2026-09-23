@@ -35,6 +35,8 @@ if TYPE_CHECKING:
     from .protocols import FlextTargetOracleProtocols, FlextTargetOracleProtocols as p
     from .typings import FlextTargetOracleTypes, FlextTargetOracleTypes as t
     from .utilities import FlextTargetOracleExceptions, FlextTargetOracleUtilities, u
+
+
 __all__: tuple[str, ...] = (
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",

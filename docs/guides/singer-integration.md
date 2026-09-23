@@ -5,6 +5,14 @@
 - [Overview](#overview)
 - [Singer Protocol Implementation](#singer-protocol-implementation)
   - [Message Types Supported](#message-types-supported)
+- [Current Implementation Status](#current-implementation-status)
+  - [✅ Implemented Features](#implemented-features)
+  - [❌ Missing Singer SDK Compliance](#missing-singer-sdk-compliance)
+- [Meltano Integration](#meltano-integration)
+  - [Configuration Schema](#configuration-schema)
+  - [Meltano Execution](#meltano-execution)
+- [Data Loading Patterns](#data-loading-patterns)
+  - [Table Creation Strategy](#table-creation-strategy)
   - [Record Processing Flow](#record-processing-flow)
   - [Batch Processing Configuration](#batch-processing-configuration)
 - [Performance Optimization](#performance-optimization)
@@ -20,7 +28,8 @@
   - [Version 0.9.9 Requirements](#version-099-requirements)
   - [Version 1.1.0 Enhancements](#version-110-enhancements)
   - [Version 1.2.0 Advanced Features](#version-120-advanced-features)
-  <!-- TOC END -->
+
+<!-- TOC END -->
 
 **FLEXT Target Oracle - Singer Protocol Compliance Documentation**
 
@@ -120,7 +129,7 @@ def _handle_record(self, message: m.Dict) -> p.Result[bool]:
 
 **Implementation**:
 
-```python notest
+```{.python .notest}
 from __future__ import annotations
 def _handle_state(self, message: m.Dict) -> p.Result[bool]:
     """Handle STATE message - forwarded to orchestrator."""
@@ -158,7 +167,7 @@ def _handle_state(self, message: m.Dict) -> p.Result[bool]:
 
 **Current Non-Standard Implementation**:
 
-```python notest
+```{.python .notest}
 from __future__ import annotations
 # ❌ Custom method - not Singer SDK compliant
 def process_singer_message(self, message: dict) -> p.Result[bool]:
@@ -459,7 +468,7 @@ def process_with_error_handling():
 
 ### Transaction Management
 
-```python notest
+```{.python .notest}
 from __future__ import annotations
 # Current implementation (needs improvement)
 def _insert_batch(self, table_name: str, records: list) -> p.Result[bool]:
@@ -505,7 +514,9 @@ def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[boo
 
 ```python
 from __future__ import annotations
+
 import pytest
+
 from flext_target_oracle import FlextOracleTarget
 
 

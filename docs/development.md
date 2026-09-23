@@ -10,25 +10,8 @@
   - [Daily Development Commands](#daily-development-commands)
   - [Testing Workflow](#testing-workflow)
   - [Code Quality Standards](#code-quality-standards)
-  - [Configuration Patterns](#configuration-patterns)
-  - [Logging Patterns](#logging-patterns)
-- [Oracle Integration Development](#oracle-integration-development)
-  - [Database Connection Testing](#database-connection-testing)
-  - [Table Management Development](#table-management-development)
-- [Debugging and Troubleshooting](#debugging-and-troubleshooting)
-  - [Common Development Issues](#common-development-issues)
-  - [Debugging Tools](#debugging-tools)
-- [Testing Development](#testing-development)
-  - [Writing New Tests](#writing-new-tests)
-  - [Test Data Management](#test-data-management)
-- [Performance Development](#performance-development)
-  - [Batch Size Optimization](#batch-size-optimization)
-  - [Memory Usage Monitoring](#memory-usage-monitoring)
-- [Contributing Guidelines](#contributing-guidelines)
-  - [Pull Request Checklist](#pull-request-checklist)
-  - [Commit Message Format```](#commit-message-format)
-  - [Review Process](#review-process)
-  <!-- TOC END -->
+
+<!-- TOC END -->
 
 **FLEXT Target Oracle - Developer Documentation**
 
@@ -177,7 +160,8 @@ def bad_operation():
 # ❌ AVOID: Unvalidated configuration
 class BadConfig:
     def __init__(self, field):
-        self.field = field  # No validation!```
+        self.field = field  # No validation!
+        ```
 ## FLEXT Pattern Implementation
 
 ### r Railway Pattern
@@ -185,7 +169,7 @@ class BadConfig:
 ```python
 from __future__ import annotations
 
-from flext_core import r, p, m, t, u
+from flext_core import m, p, r
 
 
 # ✅ All operations return r[T]
@@ -395,7 +379,8 @@ logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 
-# FLEXT modules will automatically use debug logging```
+# FLEXT modules will automatically use debug logging
+```
 #### 2. Interactive Development
 
 ```bash
@@ -613,13 +598,15 @@ Before submitting a pull request:
 - [ ] **FLEXT Patterns**: Follows established FLEXT ecosystem patterns
 - [ ] **Backward Compatibility**: No breaking changes without major version bump
 
-### Commit Message Format```
+### Commit Message Format
+```
 type(scope): brief description
 
 Detailed explanation of changes made, why they were necessary,
 and any breaking changes introduced.
 
-Fixes #123```
+Fixes #123
+```
 Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `chore`
 
 ### Review Process
