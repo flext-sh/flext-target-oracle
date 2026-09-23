@@ -9,20 +9,20 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_cli import cli
     from flext_db_oracle import db_oracle, e
-    from flext_meltano import meltano, s
-
-    from flext_core import (
+    from flext_meltano import (
+        cli,
         core,
         d,
         h,
-        lazy,
         lazy_attribute,
-        normalize_lazy_imports,
+        meltano,
         r,
+        s,
+        services,
         x,
     )
+
     from flext_target_oracle import c, config, m, main, p, settings, t, target_oracle, u
 
     from .constants import ExamplesFlextTargetOracleConstants
@@ -46,15 +46,14 @@ __all__: tuple[str, ...] = (
     "db_oracle",
     "e",
     "h",
-    "lazy",
     "lazy_attribute",
     "m",
     "main",
     "meltano",
-    "normalize_lazy_imports",
     "p",
     "r",
     "s",
+    "services",
     "settings",
     "t",
     "target_oracle",
@@ -70,19 +69,19 @@ _LAZY_IMPORTS = MappingProxyType(
             ".protocols": ("ExamplesFlextTargetOracleProtocols",),
             ".typings": ("ExamplesFlextTargetOracleTypes",),
             ".utilities": ("ExamplesFlextTargetOracleUtilities",),
-            "flext_cli": ("cli",),
-            "flext_core": (
+            "flext_db_oracle": ("db_oracle", "e"),
+            "flext_meltano": (
+                "cli",
                 "core",
                 "d",
                 "h",
-                "lazy",
                 "lazy_attribute",
-                "normalize_lazy_imports",
+                "meltano",
                 "r",
+                "s",
+                "services",
                 "x",
             ),
-            "flext_db_oracle": ("db_oracle", "e"),
-            "flext_meltano": ("meltano", "s"),
             "flext_target_oracle": (
                 "c",
                 "config",
