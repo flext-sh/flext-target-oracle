@@ -20,11 +20,8 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_cli import cli
-    from flext_db_oracle import db_oracle, e
-    from flext_meltano import meltano, s
-
-    from flext_core import core, d, h, lazy_attribute, r, x
+    from flext_db_oracle import e
+    from flext_meltano import d, h, r, s, x
 
     from ._config import FlextTargetOracleConfig, config
     from ._settings import FlextTargetOracleSettings, settings
@@ -34,14 +31,22 @@ if TYPE_CHECKING:
     from .models import FlextTargetOracleModels, m
     from .protocols import FlextTargetOracleProtocols, FlextTargetOracleProtocols as p
     from .typings import FlextTargetOracleTypes, FlextTargetOracleTypes as t
-    from .utilities import FlextTargetOracleExceptions, FlextTargetOracleUtilities, u
+    from .utilities import (
+        FlextTargetOracle,
+        FlextTargetOracleExceptions,
+        FlextTargetOracleLoader,
+        FlextTargetOracleUtilities,
+        u,
+    )
 
 
 __all__: tuple[str, ...] = (
+    "FlextTargetOracle",
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
     "FlextTargetOracleExceptions",
+    "FlextTargetOracleLoader",
     "FlextTargetOracleModels",
     "FlextTargetOracleProtocols",
     "FlextTargetOracleService",
@@ -57,17 +62,12 @@ __all__: tuple[str, ...] = (
     "__version__",
     "__version_info__",
     "c",
-    "cli",
     "config",
-    "core",
     "d",
-    "db_oracle",
     "e",
     "h",
-    "lazy_attribute",
     "m",
     "main",
-    "meltano",
     "p",
     "r",
     "s",
@@ -90,14 +90,14 @@ _LAZY_IMPORTS = MappingProxyType(
             ".protocols": ("FlextTargetOracleProtocols", "p"),
             ".typings": ("FlextTargetOracleTypes", "t"),
             ".utilities": (
+                "FlextTargetOracle",
                 "FlextTargetOracleExceptions",
+                "FlextTargetOracleLoader",
                 "FlextTargetOracleUtilities",
                 "u",
             ),
-            "flext_cli": ("cli",),
-            "flext_core": ("core", "d", "h", "lazy_attribute", "r", "x"),
-            "flext_db_oracle": ("db_oracle", "e"),
-            "flext_meltano": ("meltano", "s"),
+            "flext_db_oracle": ("e",),
+            "flext_meltano": ("d", "h", "r", "s", "x"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
