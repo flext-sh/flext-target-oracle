@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_tests import s as tests_s
+from flext_tests import FlextTestsServiceBase
 
 from flext_target_oracle import m
 from tests.settings import TestsFlextTargetOracleSettings
 
 
-class TestsFlextTargetOracleServiceBase(tests_s):
+class TestsFlextTargetOracleServiceBase(FlextTestsServiceBase):
     """Target Oracle test service base with source and test settings namespaces."""
 
     @classmethod

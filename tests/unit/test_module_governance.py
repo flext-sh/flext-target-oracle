@@ -8,12 +8,12 @@ directive.
 
 from __future__ import annotations
 
-from flext_tests.utilities import ModuleGovernanceMixin
+from flext_tests import FlextTestsModuleGovernanceMixin
 
 from tests import c, m
 
 
-class TestsFlextTargetOracleModuleGovernance(ModuleGovernanceMixin):
+class TestsFlextTargetOracleModuleGovernance(FlextTestsModuleGovernanceMixin):
     """Behavior contract for test_module_governance."""
 
     _test_file = __file__
@@ -29,6 +29,3 @@ class TestsFlextTargetOracleModuleGovernance(ModuleGovernanceMixin):
         assert not hasattr(m.TargetOracle, "SingerCatalogMetadata")
         assert not hasattr(m.TargetOracle, "SingerCatalogEntry")
         assert not hasattr(m.TargetOracle, "SingerCatalog")
-
-
-__all__: list[str] = ["TestsFlextTargetOracleModuleGovernance"]
