@@ -25,7 +25,7 @@ class FlextTargetOracleCli:
         """Convert a CLI result into process exit semantics."""
         if result.failure:
             self.logger.error(result.error or "Command failed")
-            return 1
+            raise SystemExit(1)
         self.logger.info(result.value)
         return 0
 
