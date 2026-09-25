@@ -20,36 +20,33 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_db_oracle import db_oracle, e
-    from flext_meltano import (
-        cli,
-        core,
-        d,
-        h,
-        lazy_attribute,
-        meltano,
-        r,
-        s,
-        services,
-        x,
-    )
+    from flext_db_oracle import e
+    from flext_meltano import d, h, r, s, x
 
     from ._config import FlextTargetOracleConfig, config
     from ._settings import FlextTargetOracleSettings, settings
     from .api import FlextTargetOracleService, target_oracle
     from .cli import FlextTargetOracleCli, main
     from .constants import FlextTargetOracleConstants, FlextTargetOracleConstants as c
-    from .models import FlextTargetOracleModels, m
+    from .models import FlextTargetOracleModels, FlextTargetOracleModels as m
     from .protocols import FlextTargetOracleProtocols, FlextTargetOracleProtocols as p
     from .typings import FlextTargetOracleTypes, FlextTargetOracleTypes as t
-    from .utilities import FlextTargetOracleExceptions, FlextTargetOracleUtilities, u
+    from .utilities import (
+        FlextTargetOracle,
+        FlextTargetOracleExceptions,
+        FlextTargetOracleLoader,
+        FlextTargetOracleUtilities,
+        FlextTargetOracleUtilities as u,
+    )
 
 
 __all__: tuple[str, ...] = (
+    "FlextTargetOracle",
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
     "FlextTargetOracleExceptions",
+    "FlextTargetOracleLoader",
     "FlextTargetOracleModels",
     "FlextTargetOracleProtocols",
     "FlextTargetOracleService",
@@ -65,21 +62,15 @@ __all__: tuple[str, ...] = (
     "__version__",
     "__version_info__",
     "c",
-    "cli",
     "config",
-    "core",
     "d",
-    "db_oracle",
     "e",
     "h",
-    "lazy_attribute",
     "m",
     "main",
-    "meltano",
     "p",
     "r",
     "s",
-    "services",
     "settings",
     "t",
     "target_oracle",
@@ -99,23 +90,14 @@ _LAZY_IMPORTS = MappingProxyType(
             ".protocols": ("FlextTargetOracleProtocols", "p"),
             ".typings": ("FlextTargetOracleTypes", "t"),
             ".utilities": (
+                "FlextTargetOracle",
                 "FlextTargetOracleExceptions",
+                "FlextTargetOracleLoader",
                 "FlextTargetOracleUtilities",
                 "u",
             ),
-            "flext_db_oracle": ("db_oracle", "e"),
-            "flext_meltano": (
-                "cli",
-                "core",
-                "d",
-                "h",
-                "lazy_attribute",
-                "meltano",
-                "r",
-                "s",
-                "services",
-                "x",
-            ),
+            "flext_db_oracle": ("e",),
+            "flext_meltano": ("d", "h", "r", "s", "x"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,

@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from flext_db_oracle import p as _db_oracle_p
-from flext_meltano import p as _p
+from flext_db_oracle import FlextDbOracleProtocols
+from flext_meltano import FlextMeltanoProtocols
 
 from ._protocols.base import FlextTargetOracleProtocolsBase
 
 
-class FlextTargetOracleProtocols(_p, _db_oracle_p):
+class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
     """Oracle target protocol facade."""
 
     class TargetOracle(FlextTargetOracleProtocolsBase):
