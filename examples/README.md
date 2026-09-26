@@ -110,9 +110,11 @@ python examples/performance_tuning.py
 All examples demonstrate railway-oriented programming with r patterns:
 
 ```python
-result = target.process_singer_message(message)
-if result.is_failure:
-    logger.error(f"Processing failed: {result.error}")
+def handle_message(target, message):
+    result = target.process_singer_message(message)
+    if result.is_failure:
+        logger.error(f"Processing failed: {result.error}")
+        return result
     return result
 ```
 
