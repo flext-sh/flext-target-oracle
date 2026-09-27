@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from flext_db_oracle import m as _db_oracle_m
-from flext_meltano import m
+from flext_db_oracle import FlextDbOracleModels
+from flext_meltano import FlextMeltanoModels
 
 from ._models.commands import FlextTargetOracleModelsCommands
 from ._models.results import FlextTargetOracleModelsResults
@@ -11,7 +11,7 @@ from ._models.settings import FlextTargetOracleModelsSettings
 from ._models.singer import FlextTargetOracleModelsSinger
 
 
-class FlextTargetOracleModels(m, _db_oracle_m):
+class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
     """Complete models for Oracle target operations extending FlextModels."""
 
     class TargetOracle(
