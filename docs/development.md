@@ -348,7 +348,9 @@ from flext_target_oracle import (
     FlextTargetOracleService,
     r,  # Re-exported from flext-core
 )
+```
 
+```bash
 # ✅ Debug imports
 python -c "from flext_target_oracle import *; u.Cli.print(dir())"
 ```
