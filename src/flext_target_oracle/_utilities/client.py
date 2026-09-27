@@ -122,7 +122,7 @@ class FlextTargetOracle:
                 | m.Meltano.SingerRecordMessage
                 | m.Meltano.SingerStateMessage
                 | m.Meltano.SingerActivateVersionMessage
-            ].fail(f"Invalid Singer payload: {exc}")
+            ].fail(f"Invalid Singer payload: {exc}", exception=exc)
 
     def _parse_singer_mapping(
         self, raw: t.JsonMapping
