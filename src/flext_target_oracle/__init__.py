@@ -20,14 +20,15 @@ from .__version__ import (
 )
 
 if TYPE_CHECKING:
-    from flext_meltano import d, e, h, r, s, x
+    from flext_db_oracle import e
+    from flext_meltano import d, h, r, s, x
 
     from ._config import FlextTargetOracleConfig, config
     from ._settings import FlextTargetOracleSettings, settings
     from .api import FlextTargetOracleService, target_oracle
     from .cli import FlextTargetOracleCli, main
     from .constants import FlextTargetOracleConstants, FlextTargetOracleConstants as c
-    from .models import FlextTargetOracleModels, m
+    from .models import FlextTargetOracleModels, FlextTargetOracleModels as m
     from .protocols import FlextTargetOracleProtocols, FlextTargetOracleProtocols as p
     from .typings import FlextTargetOracleTypes, FlextTargetOracleTypes as t
     from .utilities import (
@@ -35,7 +36,7 @@ if TYPE_CHECKING:
         FlextTargetOracleExceptions,
         FlextTargetOracleLoader,
         FlextTargetOracleUtilities,
-        u,
+        FlextTargetOracleUtilities as u,
     )
 
 
@@ -95,7 +96,8 @@ _LAZY_IMPORTS = MappingProxyType(
                 "FlextTargetOracleUtilities",
                 "u",
             ),
-            "flext_meltano": ("d", "e", "h", "r", "s", "x"),
+            "flext_db_oracle": ("e",),
+            "flext_meltano": ("d", "h", "r", "s", "x"),
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,

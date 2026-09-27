@@ -8,7 +8,8 @@ from typing import ClassVar
 from flext_cli import cli
 
 from flext_target_oracle import m, p, r, t, u
-from flext_target_oracle.api import FlextTargetOracleService
+
+from .api import FlextTargetOracleService
 
 
 class FlextTargetOracleCli:
@@ -24,7 +25,7 @@ class FlextTargetOracleCli:
         """Convert a CLI result into process exit semantics."""
         if result.failure:
             self.logger.error(result.error or "Command failed")
-            return 1
+            raise SystemExit(1)
         self.logger.info(result.value)
         return 0
 

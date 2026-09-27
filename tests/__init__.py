@@ -9,9 +9,10 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import build_lazy_import_map, install_lazy_exports
 
 if TYPE_CHECKING:
+    from flext_db_oracle import e
     from flext_tests import api, td, tf, tk, tm, tv
 
-    from flext_target_oracle import d, e, h, r, x
+    from flext_target_oracle import d, h, r, x
 
     from . import e2e, integration, performance, unit
     from .base import (
@@ -80,7 +81,8 @@ _LAZY_IMPORTS = MappingProxyType(
             ".typings": ("TestsFlextTargetOracleTypes", "t"),
             ".unit": ("unit",),
             ".utilities": ("TestsFlextTargetOracleUtilities", "u"),
-            "flext_target_oracle": ("d", "e", "h", "r", "x"),
+            "flext_db_oracle": ("e",),
+            "flext_target_oracle": ("d", "h", "r", "x"),
             "flext_tests": ("api", "td", "tf", "tk", "tm", "tv"),
         }),
         alias_groups=MappingProxyType({}),
