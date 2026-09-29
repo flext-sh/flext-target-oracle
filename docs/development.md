@@ -340,14 +340,8 @@ u.Cli.print('Config created successfully')
 
 ```python
 # ❌ Common import issue
-from flext_target_oracle import something_that_doesnt_exist
 
 # ✅ Check available imports
-from flext_target_oracle import (
-    FlextTargetOracleLoader,
-    FlextTargetOracleService,
-    r,  # Re-exported from flext-core
-)
 ```
 
 ```bash

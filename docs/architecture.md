@@ -5,6 +5,34 @@
 - [Overview](#overview)
 - [Architecture Principles](#architecture-principles)
   - [FLEXT Core Integration](#flext-core-integration)
+  - [Clean Architecture Layers](#clean-architecture-layers)
+- [Component Architecture](#component-architecture)
+  - [1. FlextOracleTarget (Application Layer)](#1-flextoracletarget-application-layer)
+  - [2. FlextOracleTargetSettings (Domain Layer)](#2-flextoracletargetsettings-domain-layer)
+  - [3. FlextOracleTargetLoader (Infrastructure Layer)](#3-flextoracletargetloader-infrastructure-layer)
+- [Data Flow Architecture](#data-flow-architecture)
+  - [Singer Message Processing Flow](#singer-message-processing-flow)
+  - [Error Handling Flow](#error-handling-flow)
+- [Performance Architecture](#performance-architecture)
+  - [Batch Processing Strategy](#batch-processing-strategy)
+  - [Connection Management](#connection-management)
+  - [Memory Management](#memory-management)
+- [Security Architecture](#security-architecture)
+  - [Current Security Measures](#current-security-measures)
+  - [Security Issues (TO BE ADDRESSED)](#security-issues-to-be-addressed)
+- [Testing Architecture](#testing-architecture)
+  - [Test Structure](#test-structure)
+  - [Test Patterns](#test-patterns)
+- [Integration Architecture](#integration-architecture)
+  - [FLEXT Ecosystem Integration](#flext-ecosystem-integration)
+  - [Configuration Integration](#configuration-integration)
+- [Deployment Architecture](#deployment-architecture)
+  - [Production Deployment Patterns](#production-deployment-patterns)
+  - [Monitoring and Observability](#monitoring-and-observability)
+- [Future Architecture Considerations](#future-architecture-considerations)
+  - [Planned Improvements](#planned-improvements)
+  - [Scalability Considerations](#scalability-considerations)
+- [Related Documentation](#related-documentation)
 
 <!-- TOC END -->
 
@@ -27,8 +55,6 @@ The target is built on foundational FLEXT patterns:
 from __future__ import annotations
 
 # r Railway Pattern - Consistent error handling
-from flext_cli import u
-from flext_core import FlextSettings
 
 
 # Configuration with domain validation
