@@ -190,6 +190,7 @@ class FlextTargetOracleProtocolsBase:
         table_suffix: str
         use_bulk_operations: bool
 
+    @runtime_checkable
     class OracleSettingsProtocol(Protocol):
         """Protocol for Oracle settings used by command classes."""
 
