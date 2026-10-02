@@ -525,7 +525,7 @@ metrics.histogram("oracle_target.batch_duration").observe(duration)
 **Within Project**:
 
 - [Getting Started](getting-started.md) - Installation and basic usage
-- [API Reference](api-reference.md) - Complete API documentation
+- [API Reference](https://flext-sh.github.io/flext-target-oracle/) - Complete API documentation
 - [Examples](https://github.com/flext-sh/flext/tree/0.12.0-dev/flext-target-oracle/examples/)
   Working code examples
 

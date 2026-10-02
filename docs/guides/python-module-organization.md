@@ -842,6 +842,7 @@ from __future__ import annotations
 
 # ✅ CORRECT - Hierarchical configuration following ecosystem patterns
 from flext_cli import u
+
 from flext_core import FlextSettings
 
 
