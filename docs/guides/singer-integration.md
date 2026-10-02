@@ -63,7 +63,7 @@ Singer protocol implementation, compliance status, and integration patterns.
 
 **Implementation**:
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -97,7 +97,7 @@ def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
 
 **Implementation**:
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -176,7 +176,7 @@ def process_singer_message(self, message: dict) -> p.Result[bool]:
 
 **Required Singer SDK Methods**:
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -357,7 +357,7 @@ sequenceDiagram
 
 ### Batch Processing Configuration
 
-```python
+```text
 # Configure batch processing for optimal performance
 settings = FlextOracleTargetSettings(
     # ... connection settings
@@ -383,7 +383,7 @@ settings = FlextOracleTargetSettings(
 | 1000-2000  | Standard workloads           | Optimal     | Medium       |
 | 5000-10000 | Large datasets, bulk loading | Best        | High         |
 
-```python
+```text
 from __future__ import annotations
 
 # Performance testing different batch sizes
@@ -412,7 +412,7 @@ def benchmark_batch_performance():
 
 ### Oracle-Specific Optimizations
 
-```python
+```text
 # Oracle performance configuration
 settings = FlextOracleTargetSettings(
     # Connection optimization
@@ -435,7 +435,7 @@ settings = FlextOracleTargetSettings(
 
 ### r Error Patterns
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -512,7 +512,7 @@ def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[boo
 
 ### Unit Testing Singer Messages
 
-```python
+```text
 from __future__ import annotations
 
 import pytest
@@ -570,7 +570,7 @@ class TestSingerIntegration:
 
 ### Integration Testing with Singer Ecosystem
 
-```python
+```text
 from __future__ import annotations
 
 # Test with actual Singer tap output ()
