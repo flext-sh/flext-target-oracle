@@ -51,7 +51,7 @@ working with the target.
 
 The target is built on foundational FLEXT patterns:
 
-```python
+```text
 from __future__ import annotations
 
 # r Railway Pattern - Consistent error handling
@@ -122,7 +122,7 @@ class FlextOracleTargetSettings(m.Value):
 
 **Responsibility**: Singer protocol implementation and message orchestration
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -149,7 +149,7 @@ class FlextOracleTarget(Target):
 
 **Responsibility**: Configuration management with domain validation
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -184,7 +184,7 @@ class FlextOracleTargetSettings(m.Value):
 
 **Responsibility**: Oracle-specific data loading operations
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -294,7 +294,7 @@ flowchart TD
 
 ### Batch Processing Strategy
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -319,7 +319,7 @@ class BatchProcessor:
 
 ### Connection Management
 
-```python
+```text
 # Context manager pattern ensures resource cleanup
 with self.oracle_api as connected_api:
     # All operations within connection context
@@ -347,7 +347,7 @@ with self.oracle_api as connected_api:
 
 **Current Problematic Code**:
 
-```python
+```text
 # SECURITY RISK - Manual string replacement
 parameterized_sql = sql.replace(":data", f"'{param['data']}'")
 result = connected_api.execute_ddl(parameterized_sql)
@@ -355,7 +355,7 @@ result = connected_api.execute_ddl(parameterized_sql)
 
 **Required Fix**:
 
-```python
+```text
 # SECURE - Use proper parameterized queries
 result = connected_api.execute_dml(sql, param)
 ```
@@ -381,7 +381,7 @@ tests/
 
 ### Test Patterns
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -436,7 +436,7 @@ graph TB
 
 ### Configuration Integration
 
-```python
+```text
 # flext-core patterns
 settings = FlextOracleTargetSettings(...)
 validation_result = settings.validate_domain_rules()
@@ -485,7 +485,7 @@ networks:
 
 ### Monitoring and Observability
 
-```python
+```text
 # Structured logging with correlation IDs
 logger = u.fetch_logger(__name__)
 logger.info(
