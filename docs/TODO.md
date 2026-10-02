@@ -63,7 +63,7 @@ padrões FLEXT · 1.0.0 Release Preparation
 
 **Próximos Passos**:
 
-```python
+```text
 # 1. Remover exceções duplicadas de __init__.py
 # 2. Manter apenas exceptions.py como fonte única
 # 3. Atualizar imports em todos os módulos
@@ -85,7 +85,7 @@ Release Preparation
 
 **Código Problemático**:
 
-```python
+```text
 # src/flext_target_oracle/loader.py linha ~233
 result = connected_api.execute_ddl(parameterized_sql)  # INSERT não é DDL!
 ```
@@ -99,7 +99,7 @@ result = connected_api.execute_ddl(parameterized_sql)  # INSERT não é DDL!
 
 **Solução Necessária**:
 
-```python
+```text
 # Trocar para método correto E resolver SQL injection
 result = connected_api.execute_dml(sql, param)  # Usar parameterized query
 ```
@@ -181,7 +181,7 @@ documentada · 1.0.0 Release Preparation
 
 **Código Problemático**:
 
-```python
+```text
 # src/flext_target_oracle/loader.py linhas ~226-232
 parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
     ":extracted_at", f"'{param['extracted_at']}'"
@@ -198,7 +198,7 @@ parameterized_sql = sql.replace(":data", f"'{param['data']}'").replace(
 
 **Solução Urgente Necessária**:
 
-```python
+```text
 # SUBSTITUIR string replacement por prepared statements
 result = connected_api.execute_dml(sql, param)
 ```
@@ -218,7 +218,7 @@ result = connected_api.execute_dml(sql, param)
 
 **Solução**:
 
-```python
+```text
 with self.oracle_api as connected_api, connected_api.begin_transaction():
     # operações do batch
     connected_api.commit()
@@ -293,7 +293,7 @@ class OracleConnectionFactory:
 
 **Solução**:
 
-```python
+```text
 logger.info(
     "Batch loaded",
     extra={
