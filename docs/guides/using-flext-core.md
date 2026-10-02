@@ -50,7 +50,7 @@ The examples below import only the aliases they consume from `flext_core`.
 Use `r[T]` to construct explicit success or domain-failure results. Do not convert
 unexpected runtime exceptions into success or ad-hoc error dictionaries.
 
-```python
+```text
 from __future__ import annotations
 
 from math import isclose
@@ -71,7 +71,7 @@ assert safe_divide(10, 0).failure
 
 ## Settings
 
-```python
+```text
 from flext_core import FlextSettings
 
 settings = FlextSettings.fetch_global()
@@ -80,7 +80,7 @@ assert isinstance(settings.model_dump(), dict)
 
 Subprojects extend `FlextSettings` with their own `env_prefix`:
 
-```python
+```text
 from flext_core import FlextSettings, m
 
 
@@ -90,7 +90,7 @@ class GreetingSettings(FlextSettings):
 
 ## Container
 
-```python
+```text
 from flext_core import FlextContainer, p
 
 container = FlextContainer()
@@ -103,7 +103,7 @@ assert resolved.value == "ready"
 
 ## Logging
 
-```python
+```text
 from flext_core import u
 
 logger = u.fetch_logger(__name__)
@@ -112,7 +112,7 @@ logger.info("user.created", user_id=42)
 
 ## Service runtime
 
-```python
+```text
 from typing import override
 
 from flext_core import p, r, s

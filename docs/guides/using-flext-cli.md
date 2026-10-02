@@ -49,7 +49,7 @@ Import the aliases used by each example from the public `flext_cli` package root
 
 Import the existing settings class; do not redefine it:
 
-```python
+```text
 from flext_cli import FlextCliSettings
 
 settings = FlextCliSettings.fetch_global()
@@ -59,7 +59,7 @@ assert settings is FlextCliSettings.fetch_global()
 If you need a project-specific subclass, extend `FlextSettings` (or `FlextCliSettings`)
 with `m.SettingsConfigDict`:
 
-```python
+```text
 from flext_core import FlextSettings, m
 
 
@@ -69,7 +69,7 @@ class FlextApiSettings(FlextSettings):
 
 ## Model-driven command
 
-```python
+```text
 from __future__ import annotations
 
 from flext_cli import FlextCliCli, FlextCliSettings, m, t
@@ -109,7 +109,7 @@ Use `FlextCliCli.invoke_app` with the adapter-owned application, not Typer's `Cl
 directly. This independent example constructs and invokes a real model-backed command;
 handlers return their value but do not automatically print it.
 
-```python
+```text
 from flext_cli import FlextCliCli, m
 
 
@@ -149,7 +149,7 @@ with direct printing and process termination. Register the model-backed command 
 the public facade as shown above. A corrected handler consumes its declared input model
 and returns its value:
 
-```python
+```text
 from flext_cli import m
 
 
