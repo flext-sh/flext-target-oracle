@@ -1,0 +1,32 @@
+TargetOracle:
+  defaults:
+    port: 1521
+    max_port: 65535
+    target_schema: "SINGER_DATA"
+    batch_size: 1000
+    commit_interval: 1000
+    transaction_timeout: 30
+    parallel_degree: 1
+    load_method: "INSERT"
+    storage_mode: "flattened"
+    json_column_name: "DATA"
+    truncate_before_load: false
+    use_bulk_operations: true
+    autocommit: false
+  pool:
+    min: 5
+    max: 20
+  load_methods:
+    - INSERT
+    - MERGE
+    - BULK_INSERT
+    - BULK_MERGE
+  storage_modes:
+    - flattened
+    - json
+    - hybrid
+  command_types:
+    validate_command: "oracle_target_validate"
+    load_command: "oracle_target_load"
+    about_command: "oracle_target_about"
+  output_format: "text"
