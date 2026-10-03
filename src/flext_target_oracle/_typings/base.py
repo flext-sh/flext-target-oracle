@@ -6,14 +6,14 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_meltano import m, t
+from flext_meltano import p, t
 
 
 class FlextTargetOracleTypesBase:
     """TargetOracle domain types namespace."""
 
-    FLAT_CONTAINER_MAP_ADAPTER: m.TypeAdapter[t.JsonMapping] = t.json_mapping_adapter()
-    STR_MAP_ADAPTER: m.TypeAdapter[t.StrMapping] = t.str_mapping_adapter()
+    FLAT_CONTAINER_MAP_ADAPTER: p.TypeAdapter[t.JsonMapping] = t.json_mapping_adapter()
+    STR_MAP_ADAPTER: p.TypeAdapter[t.StrMapping] = t.str_mapping_adapter()
 
 
 __all__: list[str] = ["FlextTargetOracleTypesBase"]

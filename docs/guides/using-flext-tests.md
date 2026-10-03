@@ -61,12 +61,11 @@ With the settings plugin loaded, its `pytest_runtest_setup` and
 `pytest_runtest_teardown` hooks perform automatic isolation. The two explicit fixtures
 above are not declared with `autouse=True`.
 
-```python
+```text
 from __future__ import annotations
 
-from flext_tests import FlextTestsSettings
-
 from flext_core import FlextSettings
+from flext_tests import FlextTestsSettings
 
 
 def test_settings_isolation(settings: FlextTestsSettings) -> None:
@@ -79,10 +78,9 @@ def test_settings_isolation(settings: FlextTestsSettings) -> None:
 
 When a fixture is not enough:
 
-```python
-from flext_tests import FlextTestsSettings
-
+```text
 from flext_core import FlextContainer, FlextSettings
+from flext_tests import FlextTestsSettings
 
 FlextSettings.reset_for_testing()
 FlextTestsSettings.reset_for_testing()
@@ -93,7 +91,7 @@ FlextContainer.reset_for_testing()
 
 Use the `r` alias instead of importing from `returns` directly:
 
-```python
+```text
 from math import isclose
 
 from flext_tests import p, r
@@ -133,7 +131,8 @@ not add a `WHAT` selector or duplicate the dispatcher in a test helper.
 
 Tests for this contract exercise the generated public commands and observable artifacts.
 They do not reproduce command metadata or assert private routing implementation. See
-ADR-004 for the canonical decision.
+ADR-004 for the
+canonical decision.
 
 ## Bad practices
 
@@ -144,7 +143,7 @@ exercise the public `r` facade used by the production consumer.
 For a standalone test without the settings plugin, keep the reset on both sides of the
 mutation, including assertion failure:
 
-```python
+```text
 from flext_core import FlextSettings
 
 
