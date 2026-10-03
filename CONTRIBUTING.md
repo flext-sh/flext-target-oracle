@@ -38,7 +38,8 @@
 
 <!-- TOC END -->
 
-Thank you for your interest in contributing to FLEXT Target Oracle! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to FLEXT Target Oracle! This document
+provides guidelines and instructions for contributing to the project.
 
 ## 🏗️ Development Setup
 
@@ -63,7 +64,7 @@ Thank you for your interest in contributing to FLEXT Target Oracle! This documen
    ```bash
    make dev-setup
    # or
-   poetry install --all-extras
+   make setup --all-extras
    pip install -r requirements-test.txt
    ```
 
@@ -76,8 +77,8 @@ Thank you for your interest in contributing to FLEXT Target Oracle! This documen
 1. **Run tests to verify setup:**
 
    ```bash
-   make test-unit  # Unit tests (no Docker required)
-   make test       # All tests (requires Oracle)
+   make test-unit # Unit tests (no Docker required)
+   make test      # All tests (requires Oracle)
    ```
 
 ## 🧪 Testing
@@ -101,7 +102,7 @@ make test
 # Specific test categories
 make test-unit        # Unit tests only
 make test-integration # Integration tests
-make test-e2e        # End-to-end tests
+make test-e2e         # End-to-end tests
 
 # With coverage
 make coverage
@@ -114,7 +115,7 @@ pytest tests/unit/test_loader.py::TestOracleLoaderConnection::test_connect_succe
 
 1. **Unit Tests**: Mock all external dependencies
 
-   ```python notest
+   ```python
    @pytest.mark.unit
    def test_feature(mock_oracle_api):
        # Test isolated functionality
@@ -122,7 +123,7 @@ pytest tests/unit/test_loader.py::TestOracleLoaderConnection::test_connect_succe
 
 1. **Integration Tests**: Use real Oracle database
 
-   ```python notest
+   ```python
    @pytest.mark.integration
    @pytest.mark.oracle
    def test_database_operation(oracle_loader, oracle_engine):
@@ -204,12 +205,12 @@ pre-commit install
 
 Add new fields to `FlextOracleTargetSettings`:
 
-```python notest
+```python
+from __future__ import annotations
+
+
 class FlextOracleTargetSettings(m.BaseModel):
-    my_new_option: bool = u.Field(
-        default=False,
-        description="Enable my new feature",
-    )
+    my_new_option: bool = u.Field(default=False, description="Enable my new feature")
 ```
 
 ### 2. New Functionality
@@ -238,12 +239,12 @@ For new DDL/DML operations:
 
 ### Documentation Style
 
-```python notest
+```python
+from __future__ import annotations
+
+
 def process_record(
-    self,
-    stream_name: str,
-    record: FlextTypes.Dict,
-    schema: FlextTypes.Dict,
+    self, stream_name: str, record: FlextTypes.Dict, schema: FlextTypes.Dict
 ) -> p.Result[bool]:
     """Process a single record for insertion.
 
@@ -329,8 +330,9 @@ test: add performance benchmarks
 
 ## 📄 License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing, you agree that your contributions will be licensed under the MIT
+License.
 
-______________________________________________________________________
+---
 
 Thank you for contributing to FLEXT Target Oracle! 🎯🐘

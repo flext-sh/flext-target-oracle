@@ -1,10 +1,8 @@
-"""FlextTargetOracleConfig — frozen, validated config singleton for flext-target-oracle.
+"""FlextTargetOracleConfig — frozen config singleton for flext-target-oracle (ADR-005 §7).
 
-Every ``config/*.yaml`` file is auto-discovered and deep-merged at first
-``fetch_global`` call (model-less, ``extra="allow"`` at the FlextMeltanoConfig base).
-The flat YAML is then validated into the pure-Pydantic ``_models.config``
-shapes and exposed as typed domain objects under ``config.TargetOracle`` — never a
-model-less dict subscript.
+Model-less: business rules live in ``config/*.yaml`` under the ``TargetOracle:`` key and
+are exposed through the open ``config.TargetOracle`` namespace (``extra="allow"``), with
+no per-domain model. Access is ``config.TargetOracle.<domain>[<key>...]``.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -12,26 +10,44 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from functools import cached_property
-from pathlib import Path
-from typing import ClassVar
+from typing import Annotated, Self
 
-from flext_meltano import FlextMeltanoConfig
-from flext_target_oracle._models.config import FlextTargetOracleConfigModels
+from flext_meltano import FlextMeltanoConfig, m
+
+
+class _TargetOracleNamespace(m.BaseModel):
+    """Open, frozen namespace exposing every ``config/*.yaml`` domain model-less."""
+
+    model_config = m.ConfigDict(extra="allow", frozen=True)
 
 
 class FlextTargetOracleConfig(FlextMeltanoConfig):
-    """TargetOracle config auto-loaded from ``config/*.yaml`` and validated via models."""
+    """TargetOracle config auto-loaded model-less from ``config/*.yaml``.
 
-    CONFIG_DIR: ClassVar[str] = str(Path(__file__).resolve().parents[2] / "config")
+    MRO carries ``FlextSettings`` FIRST (ENFORCE-042); the class stays a frozen,
+    YAML-validated config singleton.
+    """
 
-    @cached_property
-    def TargetOracle(self) -> FlextTargetOracleConfigModels.TargetOracle:
-        """Validated ``TargetOracle`` business-rule config namespace."""
-        root = FlextTargetOracleConfigModels.Root.model_validate(
-            dict(self.model_extra or {})
-        )
-        return root.TargetOracle
+    # ENFORCE-042 namespace-holder contract: ``FlextSettings`` contributes
+    # namespacing only — instance machinery stays plain object semantics so the
+    # settings singleton ``__new__`` cannot leak into the config singleton.
+    # The inherited pydantic ``__init__`` still runs the frozen, YAML-validated
+    # construction, and the inherited pydantic ``__setattr__`` keeps the frozen
+    # guard.
+    def __new__(cls, *args: object, **kwargs: object) -> Self:
+        _ = args, kwargs
+        return object.__new__(cls)
+
+    __eq__ = object.__eq__
+
+    __hash__ = object.__hash__
+
+    TargetOracle: Annotated[
+        _TargetOracleNamespace,
+        m.Field(
+            description="Open namespace exposing ``config/*.yaml`` under ``TargetOracle``."
+        ),
+    ] = _TargetOracleNamespace()
 
 
 config: FlextTargetOracleConfig = FlextTargetOracleConfig.fetch_global()

@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, assert_never
+from typing import TYPE_CHECKING, ClassVar
 
 from flext_meltano import u
+
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, settings, t
-from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+
+from .loader import FlextTargetOracleLoader
 
 if TYPE_CHECKING:
     from collections.abc import MutableMapping
@@ -21,13 +23,13 @@ class FlextTargetOracle:
         """Create target with validated settings and loader dependencies."""
         self.loader = FlextTargetOracleLoader(settings)
         self.schemas: MutableMapping[str, m.Meltano.SingerSchemaMessage] = {}
-        self.state_message: p.Meltano.SingerStateMessage = m.Meltano.SingerStateMessage(
+        self.state_message: m.Meltano.SingerStateMessage = m.Meltano.SingerStateMessage(
             type="STATE", value={}
         )
 
-    def discover_catalog(self) -> p.Result[p.Meltano.SingerCatalog]:
+    def discover_catalog(self) -> p.Result[m.Meltano.SingerCatalog]:
         """Return Singer-style catalog for known schemas."""
-        catalog_entries: list[p.Meltano.SingerCatalogEntry] = []
+        catalog_entries: list[m.Meltano.SingerCatalogEntry] = []
         for stream_name, schema_message in self.schemas.items():
             entry_result = u.Meltano.build_catalog_entry(
                 stream_name=stream_name,
@@ -35,10 +37,7 @@ class FlextTargetOracle:
                 key_properties=schema_message.key_properties,
             )
             if entry_result.failure:
-                return r[p.Meltano.SingerCatalog].fail(
-                    entry_result.error
-                    or f"Failed to build Singer catalog entry for {stream_name}"
-                )
+                return r[m.Meltano.SingerCatalog].from_failure(entry_result)
             catalog_entries.append(
                 entry_result.value.model_copy(
                     update={
@@ -61,31 +60,27 @@ class FlextTargetOracle:
                     }
                 )
             )
-        return r[p.Meltano.SingerCatalog].ok(
+        return r[m.Meltano.SingerCatalog].ok(
             m.Meltano.SingerCatalog(type="CATALOG", streams=catalog_entries)
         )
 
     def execute(
         self, payload: str | None = None
-    ) -> p.Result[p.TargetOracle.ExecuteResult]:
+    ) -> p.Result[m.TargetOracle.ExecuteResult]:
         """Execute readiness check or process one Singer JSON line."""
         if payload is not None:
             payload_result = self._execute_payload(payload)
             if payload_result.failure:
-                return r[p.TargetOracle.ExecuteResult].fail(
-                    payload_result.error or "Singer payload execution failed"
-                )
+                return r[m.TargetOracle.ExecuteResult].from_failure(payload_result)
             return self._ready_result()
         connection_result = self.loader.test_connection()
         if connection_result.failure:
-            return r[p.TargetOracle.ExecuteResult].fail(
-                connection_result.error or "Connection test failed"
-            )
+            return r[m.TargetOracle.ExecuteResult].from_failure(connection_result)
         return self._ready_result()
 
-    def _ready_result(self) -> p.Result[p.TargetOracle.ExecuteResult]:
+    def _ready_result(self) -> p.Result[m.TargetOracle.ExecuteResult]:
         """Return the canonical execute result payload."""
-        return r[p.TargetOracle.ExecuteResult].ok(
+        return r[m.TargetOracle.ExecuteResult].ok(
             m.TargetOracle.ExecuteResult(
                 name="flext-target-oracle",
                 status="ready",
@@ -98,24 +93,24 @@ class FlextTargetOracle:
         """Parse and process one Singer JSON line."""
         message_result = self._parse_singer_payload(payload)
         if message_result.failure:
-            return r[bool].fail(message_result.error or "Invalid Singer payload")
+            return r[bool].from_failure(message_result)
         message = message_result.value
         process_result = self.process_singer_message(message)
         if process_result.failure:
-            return r[bool].fail(process_result.error or "Singer message failed")
+            return r[bool].from_failure(process_result)
         if isinstance(message, m.Meltano.SingerRecordMessage):
             finalize_result = self.loader.finalize_all_streams()
             if finalize_result.failure:
-                return r[bool].fail(finalize_result.error or "Finalize failed")
+                return r[bool].from_failure(finalize_result)
         return r[bool].ok(True)
 
     def _parse_singer_payload(
         self, payload: str
     ) -> p.Result[
         m.Meltano.SingerSchemaMessage
-        | p.Meltano.SingerRecordMessage
-        | p.Meltano.SingerStateMessage
-        | p.Meltano.SingerActivateVersionMessage
+        | m.Meltano.SingerRecordMessage
+        | m.Meltano.SingerStateMessage
+        | m.Meltano.SingerActivateVersionMessage
     ]:
         """Parse one Singer JSON payload into its Pydantic message model."""
         try:
@@ -124,47 +119,48 @@ class FlextTargetOracle:
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             return r[
                 m.Meltano.SingerSchemaMessage
-                | p.Meltano.SingerRecordMessage
-                | p.Meltano.SingerStateMessage
-                | p.Meltano.SingerActivateVersionMessage
-            ].fail(f"Invalid Singer payload: {exc}")
+                | m.Meltano.SingerRecordMessage
+                | m.Meltano.SingerStateMessage
+                | m.Meltano.SingerActivateVersionMessage
+            ].fail(f"Invalid Singer payload: {exc}", exception=exc)
 
     def _parse_singer_mapping(
         self, raw: t.JsonMapping
     ) -> p.Result[
         m.Meltano.SingerSchemaMessage
-        | p.Meltano.SingerRecordMessage
-        | p.Meltano.SingerStateMessage
-        | p.Meltano.SingerActivateVersionMessage
+        | m.Meltano.SingerRecordMessage
+        | m.Meltano.SingerStateMessage
+        | m.Meltano.SingerActivateVersionMessage
     ]:
         """Parse one Singer mapping into its concrete message model."""
+        result_type = r[
+            m.Meltano.SingerSchemaMessage
+            | m.Meltano.SingerRecordMessage
+            | m.Meltano.SingerStateMessage
+            | m.Meltano.SingerActivateVersionMessage
+        ]
         msg_type = str(raw.get("type", ""))
         if msg_type == c.Meltano.SingerMessageType.SCHEMA.value:
             schema_message = m.Meltano.SingerSchemaMessage.model_validate(raw)
-            return r[p.Meltano.SingerSchemaMessage].ok(schema_message)
+            return result_type.ok(schema_message)
         if msg_type == c.Meltano.SingerMessageType.RECORD.value:
             record_message = m.Meltano.SingerRecordMessage.model_validate(raw)
-            return r[p.Meltano.SingerRecordMessage].ok(record_message)
+            return result_type.ok(record_message)
         if msg_type == c.Meltano.SingerMessageType.STATE.value:
             state_message = m.Meltano.SingerStateMessage.model_validate(raw)
-            return r[p.Meltano.SingerStateMessage].ok(state_message)
+            return result_type.ok(state_message)
         if msg_type == c.Meltano.SingerMessageType.ACTIVATE_VERSION.value:
             activate_message = m.Meltano.SingerActivateVersionMessage.model_validate(
                 raw
             )
-            return r[p.Meltano.SingerActivateVersionMessage].ok(activate_message)
-        return r[
-            m.Meltano.SingerSchemaMessage
-            | p.Meltano.SingerRecordMessage
-            | p.Meltano.SingerStateMessage
-            | p.Meltano.SingerActivateVersionMessage
-        ].fail(f"Unsupported Singer message type: {msg_type}")
+            return result_type.ok(activate_message)
+        return result_type.fail(f"Unsupported Singer message type: {msg_type}")
 
-    def finalize(self) -> p.Result[p.TargetOracle.LoaderFinalizeResult]:
+    def finalize(self) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
         """Flush remaining batches and return loader statistics."""
         return self.loader.finalize_all_streams()
 
-    def get_implementation_metrics(self) -> p.TargetOracle.ImplementationMetrics:
+    def get_implementation_metrics(self) -> m.TargetOracle.ImplementationMetrics:
         """Return static target metrics."""
         return m.TargetOracle.ImplementationMetrics(
             streams_configured=len(self.schemas),
@@ -178,10 +174,10 @@ class FlextTargetOracle:
 
     def process_singer_message(
         self,
-        message: p.Meltano.SingerSchemaMessage
-        | p.Meltano.SingerRecordMessage
-        | p.Meltano.SingerStateMessage
-        | p.Meltano.SingerActivateVersionMessage,
+        message: m.Meltano.SingerSchemaMessage
+        | m.Meltano.SingerRecordMessage
+        | m.Meltano.SingerStateMessage
+        | m.Meltano.SingerActivateVersionMessage,
     ) -> p.Result[bool]:
         """Process a single Singer message."""
         match message:
@@ -193,32 +189,31 @@ class FlextTargetOracle:
                 return self._handle_state(state_message)
             case m.Meltano.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
-        assert_never(message)
+            case _:
+                return r[bool].fail(
+                    f"Unsupported Singer message type: {type(message).__name__}"
+                )
 
     def process_singer_messages(
         self,
         messages: t.SequenceOf[
             m.Meltano.SingerSchemaMessage
-            | p.Meltano.SingerRecordMessage
-            | p.Meltano.SingerStateMessage
-            | p.Meltano.SingerActivateVersionMessage
+            | m.Meltano.SingerRecordMessage
+            | m.Meltano.SingerStateMessage
+            | m.Meltano.SingerActivateVersionMessage
         ],
-    ) -> p.Result[p.TargetOracle.ProcessingSummary]:
+    ) -> p.Result[m.TargetOracle.ProcessingSummary]:
         """Process SCHEMA/RECORD/STATE Singer messages."""
         processed = 0
         for message in messages:
             result = self.process_singer_message(message)
             if result.failure:
-                return r[p.TargetOracle.ProcessingSummary].fail(
-                    result.error or "Message processing failed"
-                )
+                return r[m.TargetOracle.ProcessingSummary].from_failure(result)
             processed += 1
         finalize_result = self.loader.finalize_all_streams()
         if finalize_result.failure:
-            return r[p.TargetOracle.ProcessingSummary].fail(
-                finalize_result.error or "Finalize failed"
-            )
-        return r[p.TargetOracle.ProcessingSummary].ok(
+            return r[m.TargetOracle.ProcessingSummary].from_failure(finalize_result)
+        return r[m.TargetOracle.ProcessingSummary].ok(
             m.TargetOracle.ProcessingSummary(
                 messages_processed=processed,
                 streams=list(self.schemas.keys()),
@@ -236,10 +231,10 @@ class FlextTargetOracle:
             payload = m.Meltano.SingerRecordMessage.model_validate_json(record_data)
             return self.loader.load_record(payload.stream, payload.record)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
-            return r[bool].fail(f"Invalid record payload: {exc}")
+            return r[bool].fail(f"Invalid record payload: {exc}", exception=exc)
 
     def _handle_activate_version(
-        self, activate_message: p.Meltano.SingerActivateVersionMessage
+        self, activate_message: m.Meltano.SingerActivateVersionMessage
     ) -> p.Result[bool]:
         self.logger.info(
             "ACTIVATE_VERSION received for Oracle target",
@@ -249,17 +244,17 @@ class FlextTargetOracle:
         return r[bool].ok(True)
 
     def _handle_record(
-        self, record_message: p.Meltano.SingerRecordMessage
+        self, record_message: m.Meltano.SingerRecordMessage
     ) -> p.Result[bool]:
         load_result = self.loader.load_record(
             record_message.stream, record_message.record
         )
         if load_result.failure:
-            return r[bool].fail(load_result.error or "Failed to load record")
+            return r[bool].from_failure(load_result)
         return r[bool].ok(True)
 
     def _handle_schema(
-        self, schema_message: p.Meltano.SingerSchemaMessage
+        self, schema_message: m.Meltano.SingerSchemaMessage
     ) -> p.Result[bool]:
         stream_name = schema_message.stream
         schema = schema_message.schema_definition
@@ -267,12 +262,12 @@ class FlextTargetOracle:
             stream_name, schema, schema_message.key_properties
         )
         if ensure_result.failure:
-            return r[bool].fail(ensure_result.error or "Failed to ensure table")
+            return r[bool].from_failure(ensure_result)
         self.schemas[stream_name] = schema_message
         return r[bool].ok(True)
 
     def _handle_state(
-        self, state_message: p.Meltano.SingerStateMessage
+        self, state_message: m.Meltano.SingerStateMessage
     ) -> p.Result[bool]:
         self.state_message = state_message
         return r[bool].ok(True)

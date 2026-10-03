@@ -38,4 +38,7 @@ class FlextTargetOracleModelsSinger:
                 description="Singer column to Oracle column mapping",
                 validate_default=True,
             ),
-        ] = u.Field(default_factory=lambda: MappingProxyType({}), validate_default=True)
+        ] = u.Field(
+            default_factory=lambda: MappingProxyType[str, str]({}),
+            validate_default=True,
+        )

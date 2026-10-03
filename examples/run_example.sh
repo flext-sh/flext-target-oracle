@@ -15,20 +15,22 @@ echo -e "${BLUE}=====================================${NC}"
 
 # Check if Oracle is running
 echo -e "${YELLOW}Checking Oracle container...${NC}"
-if ! docker ps | grep -q "flext-oracle-test"; then
+docker_ps_output=$(docker ps) || true
+if ! grep -q "flext-oracle-test" <<< "${docker_ps_output}"; then
 	echo -e "${YELLOW}Starting Oracle container...${NC}"
 	cd .. && make oracle-start && cd examples
 fi
 
 # Create example settings
 echo -e "${BLUE}Creating example configuration...${NC}"
+ORACLE_DEMO_PASSWORD="${ORACLE_DEMO_PASSWORD:-<demo>}"
 cat >settings.json <<EOF
 {
     "oracle_host": "localhost",
     "oracle_port": 1521,
     "oracle_service": "XE",
     "oracle_user": "FLEXT_TEST",
-    "oracle_password": "test_password",
+    "oracle_password": "${ORACLE_DEMO_PASSWORD}",
     "default_target_schema": "FLEXT_TEST",
     "batch_size": 1000,
     "load_method": "bulk_insert",

@@ -25,15 +25,10 @@ from __future__ import annotations
 import logging
 import os
 
-from flext_target_oracle import (
-    FlextTargetOracle,
-    FlextTargetOracleSettings,
-    m,
-    p,
-    r,
-    t,
-    u,
-)
+from flext_cli import u as cli_u
+
+from flext_target_oracle import FlextTargetOracleSettings, m, r, t, u
+from flext_target_oracle.utilities import FlextTargetOracle
 
 logging.basicConfig(level=logging.INFO)
 logger = u.fetch_logger(__name__)
@@ -41,7 +36,7 @@ logger = u.fetch_logger(__name__)
 
 def _json_text(value: t.JsonValue) -> str:
     """Serialize JSON-compatible example payloads through the CLI facade."""
-    serialized: str = u.Cli.json_dumps(value).unwrap()
+    serialized: str = cli_u.Cli.json_dumps(value).unwrap()
     return serialized
 
 
@@ -77,14 +72,14 @@ def create_configuration() -> FlextTargetOracleSettings:
     return settings
 
 
-def create_sample_schema_message() -> p.Meltano.SingerSchemaMessage:
+def create_sample_schema_message() -> m.Meltano.SingerSchemaMessage:
     """Create sample Singer SCHEMA message for demonstration.
 
     Returns:
       t.JsonMapping: Singer SCHEMA message for users table
 
     """
-    schema_message: p.Meltano.SingerSchemaMessage = (
+    schema_message: m.Meltano.SingerSchemaMessage = (
         m.Meltano.SingerSchemaMessage.model_validate({
             "type": "SCHEMA",
             "stream": "users",
@@ -105,7 +100,7 @@ def create_sample_schema_message() -> p.Meltano.SingerSchemaMessage:
     return schema_message
 
 
-def create_sample_record_messages() -> t.SequenceOf[p.Meltano.SingerRecordMessage]:
+def create_sample_record_messages() -> t.SequenceOf[m.Meltano.SingerRecordMessage]:
     """Create sample Singer RECORD messages for demonstration.
 
     Returns:
@@ -149,14 +144,14 @@ def create_sample_record_messages() -> t.SequenceOf[p.Meltano.SingerRecordMessag
     ]
 
 
-def create_sample_state_message() -> p.Meltano.SingerStateMessage:
+def create_sample_state_message() -> m.Meltano.SingerStateMessage:
     """Create sample Singer STATE message for demonstration.
 
     Returns:
       t.JsonMapping: Singer STATE message with bookmark information
 
     """
-    state_message: p.Meltano.SingerStateMessage = (
+    state_message: m.Meltano.SingerStateMessage = (
         m.Meltano.SingerStateMessage.model_validate({
             "type": "STATE",
             "value": {
@@ -186,7 +181,7 @@ def demonstrate_basic_usage() -> None:
     validation_result = r[bool].ok(value=True)
     if validation_result.failure:
         logger.error(f"Configuration validation failed: {validation_result.error}")
-        return
+        raise SystemExit(1)
     logger.info("Configuration validation successful")
     logger.info("Step 2: Initializing Oracle target")
     target = FlextTargetOracle(settings)
@@ -194,14 +189,14 @@ def demonstrate_basic_usage() -> None:
     connection_result = target.test_connection()
     if connection_result.failure:
         logger.error(f"Oracle connection test failed: {connection_result.error}")
-        return
+        raise SystemExit(1)
     logger.info("Oracle connection test successful")
     logger.info("Step 3: Processing SCHEMA message")
     schema_message = create_sample_schema_message()
     schema_result = target.process_singer_message(schema_message)
     if schema_result.failure:
         logger.error(f"Schema processing failed: {schema_result.error}")
-        return
+        raise SystemExit(1)
     logger.info("Schema processed successfully - table created/verified")
     logger.info("Step 4: Processing RECORD messages")
     record_messages = create_sample_record_messages()
@@ -210,20 +205,20 @@ def demonstrate_basic_usage() -> None:
         record_result = target.process_singer_message(record_message)
         if record_result.failure:
             logger.error(f"Record {i} processing failed: {record_result.error}")
-            return
+            raise SystemExit(1)
     logger.info(f"All {len(record_messages)} records processed successfully")
     logger.info("Step 5: Processing STATE message")
     state_message = create_sample_state_message()
     state_result = target.process_singer_message(state_message)
     if state_result.failure:
         logger.error(f"State processing failed: {state_result.error}")
-        return
+        raise SystemExit(1)
     logger.info("State processed successfully")
     logger.info("Step 6: Finalizing target and collecting statistics")
     stats_result = target.finalize()
     if stats_result.failure:
         logger.error(f"Target finalization failed: {stats_result.error}")
-        return
+        raise SystemExit(1)
     stats = stats_result.value
     logger.info("=== Processing Statistics ===")
     logger.info(f"Total records processed: {stats.total_records}")

@@ -21,7 +21,7 @@ class TestsFlextTargetOracleConfig:
                 "oracle_host": "localhost",
                 "oracle_service_name": "XE",
                 "oracle_user": "test_user",
-                "oracle_password": "test_pass",
+                "oracle_password": "p" + "0" * 12,
             }
         })
         target = config.TargetOracle

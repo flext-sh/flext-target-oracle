@@ -7,12 +7,12 @@ from typing import Annotated, Literal, Self
 
 # NOTE (multi-agent): mro-rn88 — source `u` from flext_meltano (external, cycle-safe),
 # not the own package facade, to avoid the models→utilities→client circular import.
-from flext_meltano import m, p, t, u
+from flext_meltano import m, t, u
 
 
 def _default_buffer_status() -> t.MappingKV[str, int]:
     """Return an immutable empty buffer-status mapping."""
-    return MappingProxyType({})
+    return MappingProxyType[str, int]({})
 
 
 class FlextTargetOracleModelsResults:
@@ -66,7 +66,7 @@ class FlextTargetOracleModelsResults:
                 validate_default=True,
             ),
         ] = u.Field(
-            default_factory=lambda: p.Meltano.SingerStateMessage(
+            default_factory=lambda: m.Meltano.SingerStateMessage(
                 type="STATE", value={}
             ),
             validate_default=True,

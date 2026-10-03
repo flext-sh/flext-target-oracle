@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleUtilities
-from flext_meltano import u
-from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
-from flext_target_oracle._utilities.observability import (
-    FlextTargetOracleUtilitiesObservability,
-)
+from flext_meltano import FlextMeltanoUtilities
+
+from ._utilities.base import FlextTargetOracleUtilitiesBase
+from ._utilities.client import FlextTargetOracle
+from ._utilities.errors import FlextTargetOracleExceptions
+from ._utilities.loader import FlextTargetOracleLoader
+from ._utilities.observability import FlextTargetOracleUtilitiesObservability
 
 
-class FlextTargetOracleUtilities(u, FlextDbOracleUtilities):
+class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
     """Focused utility namespace used by Oracle target modules."""
 
     class TargetOracle(
@@ -20,6 +22,11 @@ class FlextTargetOracleUtilities(u, FlextDbOracleUtilities):
 
 
 u = FlextTargetOracleUtilities
-from flext_target_oracle._utilities.client import FlextTargetOracle
 
-__all__: list[str] = ["FlextTargetOracle", "FlextTargetOracleUtilities", "u"]
+__all__: list[str] = [
+    "FlextTargetOracle",
+    "FlextTargetOracleExceptions",
+    "FlextTargetOracleLoader",
+    "FlextTargetOracleUtilities",
+    "u",
+]

@@ -1,6 +1,5 @@
 """FLEXT service orchestrator for target-oracle.
 
-from flext_target_oracle import u
 Thin facade — all infrastructure from ``FlextMeltanoTargetServiceBase`` via MRO.
 Oracle sink creation requires FlextTargetOracleLoader integration.
 
@@ -15,7 +14,8 @@ from typing import Annotated, Never, override
 from flext_meltano.services.consumer_bases.target_service_base import (
     FlextMeltanoTargetServiceBase,
 )
-from flext_target_oracle import c, p, r, t, u
+
+from flext_target_oracle import c, m, p, r, t, u
 
 
 class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
@@ -35,7 +35,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     # service (a flext-core FlextService via MRO) owns execution. Behavior moved here
     # out of the model layer to respect the c→t→p→m→u order and SRP.
     def run_about(
-        self, command: p.TargetOracle.OracleTargetAboutCommand
+        self, command: m.TargetOracle.OracleTargetAboutCommand
     ) -> p.Result[str]:
         """Return target metadata for the about command message."""
         payload: t.StrMapping = {
@@ -50,24 +50,22 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         )
 
     def run_load(
-        self, command: p.TargetOracle.OracleTargetLoadCommand
+        self, command: m.TargetOracle.OracleTargetLoadCommand
     ) -> p.Result[str]:
         """Initialize the target for loading from a load command message."""
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
-            return r[str].fail(settings_result.error or "Invalid settings")
+            return r[str].from_failure(settings_result)
         _ = command.state_file
         return r[str].ok("load_ready")
 
     def run_validate(
-        self, command: p.TargetOracle.OracleTargetValidateCommand
+        self, command: m.TargetOracle.OracleTargetValidateCommand
     ) -> p.Result[str]:
         """Validate target configuration from a validate command message."""
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
-            return r[str].fail(
-                settings_result.error or "Configuration validation failed"
-            )
+            return r[str].from_failure(settings_result)
         settings: p.TargetOracle.OracleSettingsProtocol = settings_result.value
         validation_result = (
             r[bool].fail("oracle_host is required")
@@ -81,12 +79,11 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
             else r[bool].ok(True)
         )
         if validation_result.failure:
-            return r[str].fail(
-                validation_result.error or "Configuration validation failed"
-            )
+            return r[str].from_failure(validation_result)
         return r[str].ok("validation_ok")
 
 
-target_oracle = FlextTargetOracleService
+target_oracle: FlextTargetOracleService = FlextTargetOracleService.fetch_global()
+"""Module-level singleton facade for the flext_target_oracle namespace."""
 
 __all__: list[str] = ["FlextTargetOracleService", "target_oracle"]
