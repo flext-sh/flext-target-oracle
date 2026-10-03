@@ -31,7 +31,6 @@ class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsCons
             PACKAGE_DIR: Final[str] = "flext_target_oracle"
             ALLOWED_MODULE_FUNCTIONS: Final[dict[str, frozenset[str]]] = {
                 "cli.py": frozenset({"main"}),
-                "_models/results.py": frozenset({"_default_buffer_status"}),
             }
 
 
