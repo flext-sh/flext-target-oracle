@@ -65,6 +65,8 @@ class FlextTargetOracleUtilities:
 
 FlextTargetOracleErrorMetadata = FlextTargetOracleUtilities.ErrorMetadata
 FlextTargetOracleExceptions = FlextTargetOracleUtilities.Exceptions
+"""Namespace of the target-oracle exception types re-exported from the
+shared flext-meltano error hierarchy."""
 
 __all__: t.StrSequence = (
     "FlextTargetOracleErrorMetadata",
