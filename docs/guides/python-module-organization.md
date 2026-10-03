@@ -82,7 +82,7 @@ src/flext_target_oracle/
 
 ##### **`__init__.py` - Public API Gateway**
 
-```python
+```text
 from __future__ import annotations
 
 """FLEXT Target Oracle - Public API exports following ecosystem standards."""
@@ -124,7 +124,7 @@ __all__: t.StringList = [
 
 **Recommended Structure**:
 
-```python
+```text
 """FLEXT Target Oracle - Clean public API."""
 
 # Import all from respective modules
@@ -201,7 +201,7 @@ class FlextOracleTargetSettings(m.Value):
 
 ##### **`target.py` - Singer Protocol Implementation**
 
-```python
+```text
 from __future__ import annotations
 
 """Singer Target implementation using flext-meltano base patterns."""
@@ -236,7 +236,7 @@ class FlextOracleTarget(Target):
 
 **Required Singer SDK Methods**:
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -257,7 +257,7 @@ class FlextOracleTarget(Target):
 
 ##### **`loader.py` - Oracle Data Loading Operations**
 
-```python
+```text
 from __future__ import annotations
 
 """Oracle data loading using flext-db-oracle integration."""
@@ -287,7 +287,7 @@ class FlextOracleTargetLoader:
 
 **Security Issue Example**:
 
-```python
+```text
 # ❌ CURRENT - Security vulnerability
 parameterized_sql = sql.replace(":data", f"'{param['data']}'")
 result = connected_api.execute_ddl(parameterized_sql)
@@ -298,7 +298,7 @@ result = connected_api.execute_dml(sql, param)
 
 ##### **`exceptions.py` - Domain Error Hierarchy**
 
-```python
+```text
 from __future__ import annotations
 
 """Oracle target exceptions following FLEXT error patterns."""
@@ -386,7 +386,7 @@ src/flext_target_oracle/
 
 ### **r Railway Pattern Usage**
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -452,7 +452,7 @@ class BadConfig:
 
 ### **Structured Logging Pattern**
 
-```python
+```text
 from __future__ import annotations
 
 # ✅ CORRECT - Structured logging with context
@@ -610,7 +610,7 @@ tests/
 
 ### **Test Pattern Examples**
 
-```python
+```text
 from __future__ import annotations
 
 # tests/unit/test_config.py
@@ -665,7 +665,7 @@ class TestFlextOracleTargetSettings:
         assert result.success or "connection" in result.error.lower()
 ```
 
-```python
+```text
 from __future__ import annotations
 
 # tests/integration/test_singer_compliance.py
@@ -733,7 +733,7 @@ class TestSingerCompliance:
 
 ### **Type Annotation Requirements**
 
-```python
+```text
 from __future__ import annotations
 
 # ✅ COMPLETE type annotations for all public methods
@@ -765,7 +765,7 @@ def process_message(self, message):  # Missing types
 
 ### **Documentation Standards**
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -813,7 +813,7 @@ def ensure_table_exists(self, stream_name: str, schema: m.Dict) -> p.Result[bool
 
 ### **Cross-Project Import Standards**
 
-```python
+```text
 from __future__ import annotations
 
 # ✅ STANDARD - Ecosystem imports following established patterns
@@ -837,11 +837,12 @@ class OracleTargetResult[T]:  # Creates ecosystem fragmentation
 
 ### **Configuration Ecosystem Integration**
 
-```python
+```text
 from __future__ import annotations
 
 # ✅ CORRECT - Hierarchical configuration following ecosystem patterns
 from flext_cli import u
+
 from flext_core import FlextSettings
 
 
@@ -892,7 +893,7 @@ class FlextOracleTargetSettings(FlextSettings):
 
 ### **Version Migration Strategy**
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -921,7 +922,7 @@ class TargetMigration_0_9_to_1_0:
 
 ### **Backward Compatibility Strategy**
 
-```python
+```text
 from __future__ import annotations
 
 # Maintain backward compatibility during migration

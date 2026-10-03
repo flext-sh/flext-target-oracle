@@ -166,7 +166,7 @@ class BadConfig:
 
 ### r Railway Pattern
 
-```python
+```text
 from __future__ import annotations
 
 from flext_core import m, p, r
@@ -197,7 +197,7 @@ def process_batch(records: list[m.Dict]) -> p.Result[bool]:
 ```
 ### Configuration Patterns
 
-```python
+```text
 from __future__ import annotations
 
 from flext_core import m, p, u
@@ -227,7 +227,7 @@ class FlextTargetOracleSettings(m.Value):
 ```
 ### Logging Patterns
 
-```python
+```text
 from __future__ import annotations
 
 import logging
@@ -271,7 +271,7 @@ def process_with_logging(stream_name: str, batch_size: int):
 
 ### Database Connection Testing
 
-```python
+```text
 # Test Oracle connectivity manually
 from flext_core import u
 from flext_target_oracle import FlextOracleTargetLoader
@@ -288,7 +288,7 @@ else:
 ```
 ### Table Management Development
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -338,7 +338,7 @@ u.Cli.print('Config created successfully')
 ```
 #### 2. Import Errors
 
-```python
+```text
 # ❌ Common import issue
 
 # ✅ Check available imports
@@ -350,7 +350,7 @@ python -c "from flext_target_oracle import *; u.Cli.print(dir())"
 ```
 #### 3. Configuration Validation Errors
 
-```python
+```text
 # ❌ Invalid configuration
 try:
     loader = FlextTargetOracleLoader(...)  # Invalid config will raise
@@ -369,7 +369,7 @@ if result.failure:
 
 #### 1. Enhanced Logging
 
-```python
+```text
 # Enable debug logging for development
 logging.basicConfig(
     level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -389,7 +389,7 @@ python -m flext_core.tools.cli
 ```
 #### 3. Performance Profiling
 
-```python
+```text
 from __future__ import annotations
 
 # Profile batch processing performance
@@ -417,7 +417,7 @@ def profile_batch_processing():
 
 #### Unit Test Template
 
-```python
+```text
 from __future__ import annotations
 
 """Test template for new functionality."""
@@ -465,7 +465,7 @@ class TestNewFeature:
 ```
 #### Integration Test Template
 
-```python
+```text
 from __future__ import annotations
 
 """Integration test template."""
@@ -491,7 +491,7 @@ class TestOracleIntegration:
 ```
 ### Test Data Management
 
-```python
+```text
 from __future__ import annotations
 
 
@@ -521,7 +521,7 @@ def sample_records():
 
 ### Batch Size Optimization
 
-```python
+```text
 from __future__ import annotations
 
 # Test different batch sizes for optimal performance
@@ -559,7 +559,7 @@ def benchmark_batch_sizes(records: list[m.Dict]):
 ```
 ### Memory Usage Monitoring
 
-```python
+```text
 from __future__ import annotations
 
 import os

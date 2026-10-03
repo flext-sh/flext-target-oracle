@@ -84,5 +84,6 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
 
 
 target_oracle: FlextTargetOracleService = FlextTargetOracleService.fetch_global()
+"""Module-level singleton facade for the flext_target_oracle namespace."""
 
 __all__: list[str] = ["FlextTargetOracleService", "target_oracle"]
