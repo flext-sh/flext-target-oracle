@@ -97,7 +97,9 @@ class TestsFlextTargetOracleLoader:
         }
         validated = m.Meltano.SingerSchemaMessage.model_validate(schema_message)
         result = loader.ensure_table_exists(
-            "users", validated.schema_definition, validated.key_properties,
+            "users",
+            validated.schema_definition,
+            validated.key_properties,
         )
         tm.that(result.success, is_=bool)
 
@@ -105,7 +107,8 @@ class TestsFlextTargetOracleLoader:
     @pytest.mark.integration
     @pytest.mark.docker
     def test_flush_batch_persists_records_to_real_oracle(
-        oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi,
+        oracle_config: FlextTargetOracleSettings,
+        oracle_engine: FlextDbOracleApi,
     ) -> None:
         """Flush should build and execute INSERTs against the real database."""
         loader = FlextTargetOracleLoader(oracle_config)
@@ -126,7 +129,9 @@ class TestsFlextTargetOracleLoader:
         validated = m.Meltano.SingerSchemaMessage.model_validate(schema_message)
         tm.ok(
             loader.ensure_table_exists(
-                stream_name, validated.schema_definition, validated.key_properties,
+                stream_name,
+                validated.schema_definition,
+                validated.key_properties,
             ),
         )
         tm.ok(loader.load_record(stream_name, {"id": 1, "name": "Alice"}))

@@ -56,7 +56,8 @@ def docker_control() -> tk:
         The resulting ``tk``.
     """
     return tk.shared(
-        "flext-oracle-db-test", repository_root=Path(__file__).resolve().parents[2],
+        "flext-oracle-db-test",
+        repository_root=Path(__file__).resolve().parents[2],
     )
 
 
@@ -189,13 +190,18 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
             "DbOracle": {
                 "host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
                 "port": int(
-                    os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT)),
+                    os.getenv(
+                        "TEST_ORACLE_PORT",
+                        str(c.TargetOracle.Tests.ORACLE_PORT),
+                    ),
                 ),
                 "service_name": os.getenv(
-                    "TEST_ORACLE_SERVICE", c.TargetOracle.Tests.ORACLE_SERVICE,
+                    "TEST_ORACLE_SERVICE",
+                    c.TargetOracle.Tests.ORACLE_SERVICE,
                 ),
                 "username": os.getenv(
-                    "TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA,
+                    "TEST_ORACLE_USER",
+                    c.TargetOracle.Tests.TEST_SCHEMA,
                 ),
                 "password": os.getenv("TEST_ORACLE_PASSWORD", _ORACLE_TEST_PASSWORD),
             },
@@ -239,7 +245,8 @@ def clean_database(oracle_engine: FlextDbOracleApi) -> None:
 
 @pytest.fixture
 def oracle_config(
-    shared_oracle_container: str, isolate_target_oracle_env: None,
+    shared_oracle_container: str,
+    isolate_target_oracle_env: None,
 ) -> FlextTargetOracleSettings:
     """Create Oracle target configuration for tests.
 
@@ -250,16 +257,19 @@ def oracle_config(
     return FlextTargetOracleSettings.model_validate({
         "TargetOracle": {
             "oracle_host": os.getenv(
-                "TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST,
+                "TEST_ORACLE_HOST",
+                c.TargetOracle.Tests.ORACLE_HOST,
             ),
             "oracle_port": int(
                 os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT)),
             ),
             "oracle_service_name": os.getenv(
-                "TEST_ORACLE_SERVICE", c.TargetOracle.Tests.ORACLE_SERVICE,
+                "TEST_ORACLE_SERVICE",
+                c.TargetOracle.Tests.ORACLE_SERVICE,
             ),
             "oracle_user": os.getenv(
-                "TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA,
+                "TEST_ORACLE_USER",
+                c.TargetOracle.Tests.TEST_SCHEMA,
             ),
             "oracle_password": os.getenv("TEST_ORACLE_PASSWORD", _ORACLE_TEST_PASSWORD),
             "default_target_schema": c.TargetOracle.Tests.TEST_SCHEMA,
@@ -353,7 +363,8 @@ def singer_messages() -> t.SequenceOf[t.JsonValue]:
 
 @pytest.fixture
 def oracle_loader(
-    oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi,
+    oracle_config: FlextTargetOracleSettings,
+    oracle_engine: FlextDbOracleApi,
 ) -> Generator[FlextTargetOracleLoader]:
     """Provide a connected FlextTargetOracleLoader instance.
 

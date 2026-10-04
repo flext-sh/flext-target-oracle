@@ -34,7 +34,9 @@ def _schema_parts(message: t.JsonValue) -> t.Pair[t.JsonMapping, t.SequenceOf[st
 
 
 def _query_rows(
-    oracle_engine: FlextDbOracleApi, sql: str, params: t.JsonMapping | None = None,
+    oracle_engine: FlextDbOracleApi,
+    sql: str,
+    params: t.JsonMapping | None = None,
 ) -> t.SequenceOf[m.Dict]:
     normalized_params = None if params is None else m.ConfigMap(root=dict(params))
     query_result: p.Result[t.SequenceOf[m.Dict]] = (
@@ -71,7 +73,9 @@ class TestsFlextTargetOracleOracle:
         stream_name = "test_users"
         schema_dict, key_props = _schema_parts(simple_schema)
         table_res = oracle_loader.ensure_table_exists(
-            stream_name, schema_dict, key_props,
+            stream_name,
+            schema_dict,
+            key_props,
         )
         tm.ok(table_res)
         table_count = _query_scalar(
@@ -107,7 +111,9 @@ class TestsFlextTargetOracleOracle:
         stream_name = "test_insert"
         schema_dict, key_props = _schema_parts(simple_schema)
         create_res = oracle_loader.ensure_table_exists(
-            stream_name, schema_dict, key_props,
+            stream_name,
+            schema_dict,
+            key_props,
         )
         tm.ok(create_res)
         records: t.SequenceOf[t.JsonMapping] = [
@@ -169,7 +175,8 @@ class TestsFlextTargetOracleOracle:
     @staticmethod
     @pytest.mark.usefixtures("clean_database")
     def test_bulk_insert_performance(
-        oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi,
+        oracle_config: FlextTargetOracleSettings,
+        oracle_engine: FlextDbOracleApi,
     ) -> None:
         """Test bulk insert with large dataset."""
         oracle_config = oracle_config.clone(
@@ -206,7 +213,9 @@ class TestsFlextTargetOracleOracle:
         elapsed = time.time() - start_time
         tm.ok(result)
         count = _query_scalar(
-            oracle_engine, 'SELECT COUNT(*) AS "count" FROM test_bulk', "count",
+            oracle_engine,
+            'SELECT COUNT(*) AS "count" FROM test_bulk',
+            "count",
         )
         tm.that(int(count), eq=5000)
         assert elapsed < 10.0
@@ -273,7 +282,8 @@ class TestsFlextTargetOracleOracle:
     @staticmethod
     @pytest.mark.usefixtures("clean_database")
     def test_column_ordering(
-        oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi,
+        oracle_config: FlextTargetOracleSettings,
+        oracle_engine: FlextDbOracleApi,
     ) -> None:
         """Test column ordering in created tables."""
         oracle_config = oracle_config.clone(
@@ -342,16 +352,21 @@ class TestsFlextTargetOracleOracle:
         create_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         tm.ok(create_res)
         insert_initial = loader.insert_records(
-            stream_name, [{"id": 1, "name": "Initial"}],
+            stream_name,
+            [{"id": 1, "name": "Initial"}],
         )
         tm.ok(insert_initial)
         count = _query_scalar(
-            oracle_engine, 'SELECT COUNT(*) AS "count" FROM test_truncate', "count",
+            oracle_engine,
+            'SELECT COUNT(*) AS "count" FROM test_truncate',
+            "count",
         )
         tm.that(int(count), eq=1)
         loader.ensure_table_exists(stream_name, schema_dict, key_props)
         count = _query_scalar(
-            oracle_engine, 'SELECT COUNT(*) AS "count" FROM test_truncate', "count",
+            oracle_engine,
+            'SELECT COUNT(*) AS "count" FROM test_truncate',
+            "count",
         )
         tm.that(int(count), eq=0)
         tm.ok(loader.disconnect())
@@ -428,14 +443,17 @@ class TestsFlextTargetOracleOracle:
         )
         tm.that(int(table_count), eq=1)
         data_count = _query_scalar(
-            oracle_engine, 'SELECT COUNT(*) AS "count" FROM users', "count",
+            oracle_engine,
+            'SELECT COUNT(*) AS "count" FROM users',
+            "count",
         )
         assert int(data_count) > 0
 
     @staticmethod
     @pytest.mark.usefixtures("clean_database")
     def test_column_mapping_and_filtering(
-        oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi,
+        oracle_config: FlextTargetOracleSettings,
+        oracle_engine: FlextDbOracleApi,
     ) -> None:
         """Test column mapping and filtering features."""
         oracle_config = oracle_config.clone(

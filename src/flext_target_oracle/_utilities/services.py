@@ -103,7 +103,9 @@ class Utilities:
             )
 
         def add_record(
-            self, stream_name: str, record_message: m.Meltano.SingerRecordMessage,
+            self,
+            stream_name: str,
+            record_message: m.Meltano.SingerRecordMessage,
         ) -> p.Result[bool]:
             """Append a record to a stream buffer.
 

@@ -23,7 +23,9 @@ class FlextTargetOracleConfigModels:
 
         port: int = Field(ge=1, le=65535, description="Default Oracle listener port.")
         max_port: int = Field(
-            ge=1, le=65535, description="Maximum valid Oracle listener port.",
+            ge=1,
+            le=65535,
+            description="Maximum valid Oracle listener port.",
         )
         target_schema: str = Field(
             description="Default target schema for Singer loads.",
@@ -31,7 +33,8 @@ class FlextTargetOracleConfigModels:
         batch_size: int = Field(ge=1, description="Batch size for loading.")
         commit_interval: int = Field(ge=1, description="Commit interval in rows.")
         transaction_timeout: int = Field(
-            ge=1, description="Transaction timeout in seconds.",
+            ge=1,
+            description="Transaction timeout in seconds.",
         )
         parallel_degree: int = Field(ge=1, description="Oracle parallel degree.")
         load_method: str = Field(description="Default Oracle load strategy.")

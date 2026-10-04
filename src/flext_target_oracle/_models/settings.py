@@ -43,19 +43,29 @@ class FlextTargetOracleModelsSettings(FlextSettings):
         """Oracle connection configuration payload."""
 
         host: str = u.Field(
-            ..., description="Oracle database host", validate_default=True,
+            ...,
+            description="Oracle database host",
+            validate_default=True,
         )
         port: t.PortNumber = u.Field(
-            ..., description="Oracle database port", validate_default=True,
+            ...,
+            description="Oracle database port",
+            validate_default=True,
         )
         service_name: str = u.Field(
-            ..., description="Oracle service name", validate_default=True,
+            ...,
+            description="Oracle service name",
+            validate_default=True,
         )
         username: str = u.Field(
-            ..., description="Oracle database username", validate_default=True,
+            ...,
+            description="Oracle database username",
+            validate_default=True,
         )
         password: str = u.Field(
-            ..., description="Oracle database password", validate_default=True,
+            ...,
+            description="Oracle database password",
+            validate_default=True,
         )
         timeout: t.PositiveInt = u.Field(
             default=30,
@@ -83,7 +93,9 @@ class FlextTargetOracleModelsSettings(FlextSettings):
             validate_default=True,
         )
         ssl_enabled: bool = u.Field(
-            default=False, description="Whether SSL is enabled", validate_default=True,
+            default=False,
+            description="Whether SSL is enabled",
+            validate_default=True,
         )
         autocommit: bool = u.Field(
             default=False,
@@ -114,17 +126,27 @@ class FlextTargetOracleModelsSettings(FlextSettings):
         """Target runtime configuration payload."""
 
         default_target_schema: str = u.Field(
-            ..., description="Default Oracle target schema", validate_default=True,
+            ...,
+            description="Default Oracle target schema",
+            validate_default=True,
         )
         use_bulk_operations: bool = u.Field(
-            ..., description="Whether bulk loading is enabled", validate_default=True,
+            ...,
+            description="Whether bulk loading is enabled",
+            validate_default=True,
         )
         batch_size: t.BatchSize = u.Field(
-            ..., description="Target batch size", validate_default=True,
+            ...,
+            description="Target batch size",
+            validate_default=True,
         )
         table_prefix: str = u.Field(
-            ..., description="Target table name prefix", validate_default=True,
+            ...,
+            description="Target table name prefix",
+            validate_default=True,
         )
         table_suffix: str = u.Field(
-            ..., description="Target table name suffix", validate_default=True,
+            ...,
+            description="Target table name suffix",
+            validate_default=True,
         )

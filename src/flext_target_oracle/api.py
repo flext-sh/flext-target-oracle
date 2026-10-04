@@ -22,7 +22,8 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     """Orchestrator for target-oracle. Loader-based, not Singer sink."""
 
     target_name: Annotated[
-        t.NonEmptyStr, u.Field(description="Canonical Singer target identifier."),
+        t.NonEmptyStr,
+        u.Field(description="Canonical Singer target identifier."),
     ] = "target-oracle"
 
     @override
@@ -51,7 +52,9 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         if command.format == c.TargetOracle.OUTPUT_FORMAT_TEXT:
             return r[str].ok("flext-target-oracle")
         return r[str].ok(
-            t.TargetOracle.STR_MAP_ADAPTER.dump_json(payload).decode(c.DEFAULT_ENCODING),
+            t.TargetOracle.STR_MAP_ADAPTER.dump_json(payload).decode(
+                c.DEFAULT_ENCODING,
+            ),
         )
 
     @staticmethod

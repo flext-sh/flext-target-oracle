@@ -33,7 +33,8 @@ class TestsFlextTargetOraclePerformance:
         return FlextTargetOracle(settings=oracle_config)
 
     def test_execute_readiness_is_constant_time(
-        self, oracle_config: FlextTargetOracleSettings,
+        self,
+        oracle_config: FlextTargetOracleSettings,
     ) -> None:
         """Test execute readiness is constant time."""
         target = self._target(oracle_config)
@@ -44,7 +45,8 @@ class TestsFlextTargetOraclePerformance:
         assert elapsed < 1.0
 
     def test_message_processing_scales_linearly_for_state_updates(
-        self, oracle_config: FlextTargetOracleSettings,
+        self,
+        oracle_config: FlextTargetOracleSettings,
     ) -> None:
         """Test message processing scales linearly for state updates."""
         target = self._target(oracle_config)
@@ -70,7 +72,8 @@ class TestsFlextTargetOraclePerformance:
         assert elapsed < 2.0
 
     def test_schema_and_record_processing_has_no_json_reparse_loop(
-        self, oracle_config: FlextTargetOracleSettings,
+        self,
+        oracle_config: FlextTargetOracleSettings,
     ) -> None:
         """Test schema and record processing has no json reparse loop."""
         target = self._target(oracle_config)

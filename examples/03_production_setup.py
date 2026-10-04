@@ -155,10 +155,14 @@ class ProductionConfig:
             oracle_service,
         )
         u.logger.info(
-            "Target schema: %s, Batch size: %s", default_target_schema, batch_size,
+            "Target schema: %s, Batch size: %s",
+            default_target_schema,
+            batch_size,
         )
         u.logger.info(
-            "Load method: %s, Connection timeout: %ss", load_method, connection_timeout,
+            "Load method: %s, Connection timeout: %ss",
+            load_method,
+            connection_timeout,
         )
         return settings
 
@@ -200,7 +204,8 @@ class ProductionTargetManager:
             return r[t.JsonMapping].fail(f"Health check error: {e}", exception=e)
 
     def _health_check_status(
-        self, health_status: HealthStatus,
+        self,
+        health_status: HealthStatus,
     ) -> p.Result[t.JsonMapping]:
         """Build a health status result for the current target.
 
@@ -286,7 +291,8 @@ class ProductionTargetManager:
         return r[bool].ok(value=True)
 
     def process_singer_stream(
-        self, messages: t.SequenceOf[SingerMessage],
+        self,
+        messages: t.SequenceOf[SingerMessage],
     ) -> p.Result[t.JsonMapping]:
         """Process complete Singer message stream with comprehensive error handling.
 
@@ -318,7 +324,9 @@ class ProductionTargetManager:
             return r[t.JsonMapping].fail(f"Stream processing error: {e}", exception=e)
 
     def _process_singer_stream_checked(
-        self, messages: t.SequenceOf[SingerMessage], stats: ProcessingStats,
+        self,
+        messages: t.SequenceOf[SingerMessage],
+        stats: ProcessingStats,
     ) -> p.Result[t.JsonMapping]:
         """Process a Singer stream after the public exception boundary.
 
@@ -334,7 +342,11 @@ class ProductionTargetManager:
         return r[t.JsonMapping].ok(stats.model_dump())
 
     def _process_singer_message(
-        self, index: int, total: int, message: SingerMessage, stats: ProcessingStats,
+        self,
+        index: int,
+        total: int,
+        message: SingerMessage,
+        stats: ProcessingStats,
     ) -> None:
         """Process one Singer message and update counters."""
         message_type = self._message_type(message)
@@ -392,7 +404,8 @@ class ProductionTargetManager:
         processing_duration = stats.processing_end_time - stats.processing_start_time
         stats.processing_duration_seconds = processing_duration
         u.logger.info(
-            "Stream processing completed in %.2f seconds", processing_duration,
+            "Stream processing completed in %.2f seconds",
+            processing_duration,
         )
 
     def shutdown(self) -> p.Result[bool]:
@@ -510,7 +523,8 @@ def _log_health_result(health_result: p.Result[t.JsonMapping]) -> None:
         raise RuntimeError(msg)
     health_data = health_result.value
     u.logger.info(
-        "Health check status", status=str(health_data.get("status", "unknown")),
+        "Health check status",
+        status=str(health_data.get("status", "unknown")),
     )
     checks_obj: t.JsonValue = health_data.get("checks")
     checks: t.JsonMapping = (
@@ -657,7 +671,8 @@ def main() -> None:
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     if missing_vars:
         u.logger.error(
-            "Missing required environment variables: %s", ", ".join(missing_vars),
+            "Missing required environment variables: %s",
+            ", ".join(missing_vars),
         )
         u.logger.error("Please set the following environment variables:")
         for var in required_vars:

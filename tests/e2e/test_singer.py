@@ -30,7 +30,8 @@ class TestsFlextTargetOracleSinger:
         return FlextTargetOracle(settings=oracle_config)
 
     def test_complete_singer_flow(
-        self, oracle_config: FlextTargetOracleSettings,
+        self,
+        oracle_config: FlextTargetOracleSettings,
     ) -> None:
         """Test complete singer flow."""
         target = self._target(oracle_config)
