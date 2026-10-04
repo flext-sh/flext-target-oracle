@@ -13,8 +13,8 @@ from flext_tests import tm
 
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle.api import FlextTargetOracleService
-from flext_target_oracle.utilities import FlextTargetOracle, FlextTargetOracleExceptions
-from tests import m, t
+from flext_target_oracle.utilities import FlextTargetOracle
+from tests import m, t, u
 
 
 @pytest.fixture
@@ -161,13 +161,15 @@ class TestsFlextTargetOracleTarget:
             '{"type": "RECORD", "stream": "users", "record": "bad"}',
         )
         tm.fail(parse_result)
-        assert issubclass(FlextTargetOracleExceptions.ProcessingError, Exception)
+        exceptions = u.TargetOracle.FlextTargetOracleExceptions
+        assert issubclass(exceptions.ProcessingError, Exception)
 
     @staticmethod
     def test_missing_schema_path_uses_schema_error_type() -> None:
         """Test missing schema path uses schema error type."""
-        err = FlextTargetOracleExceptions.SchemaError("schema missing")
-        tm.that(err, is_=FlextTargetOracleExceptions.SchemaError)
+        exceptions = u.TargetOracle.FlextTargetOracleExceptions
+        err = exceptions.SchemaError("schema missing")
+        tm.that(err, is_=exceptions.SchemaError)
 
     @staticmethod
     def test_metrics_and_write_record_contract(target: FlextTargetOracle) -> None:

@@ -24,6 +24,7 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
 
     class TargetOracle(
         FlextTargetOracleUtilitiesObservability,
+        FlextTargetOracleUtilitiesErrors,
         FlextTargetOracleUtilitiesBase,
     ):
         """Oracle target utility namespace."""
@@ -33,7 +34,6 @@ u = FlextTargetOracleUtilities
 
 __all__: list[str] = [
     "FlextTargetOracle",
-    "FlextTargetOracleExceptions",
     "FlextTargetOracleLoader",
     "FlextTargetOracleUtilities",
     "u",
