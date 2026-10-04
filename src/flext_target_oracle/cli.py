@@ -1,4 +1,9 @@
-"""CLI orchestration for Oracle target."""
+"""CLI orchestration for Oracle target.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+src/flext_target_oracle/cli
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -8,8 +13,7 @@ from typing import ClassVar
 from flext_cli import cli
 
 from flext_target_oracle import m, p, r, t, u
-
-from .api import FlextTargetOracleService
+from flext_target_oracle.api import FlextTargetOracleService
 
 
 class FlextTargetOracleCli:
@@ -17,12 +21,24 @@ class FlextTargetOracleCli:
 
     logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
-    def execute(self) -> p.Result[str]:
-        """Service readiness probe."""
+    @staticmethod
+    def execute() -> p.Result[str]:
+        """Service readiness probe.
+
+        Returns:
+            The resulting ``p.Result[str]``.
+        """
         return r[str].ok("CLI ready")
 
     def finalize_cli_result(self, result: p.Result[str]) -> int:
-        """Convert a CLI result into process exit semantics."""
+        """Convert a CLI result into process exit semantics.
+
+        Returns:
+            The resulting ``int``.
+
+        Raises:
+            SystemExit: If ``result.failure``.
+        """
         if result.failure:
             self.logger.error(result.error or "Command failed")
             raise SystemExit(1)
@@ -30,7 +46,11 @@ class FlextTargetOracleCli:
         return 0
 
     def run_cli(self, args: t.StrSequence | None = None) -> p.Result[str]:
-        """Dispatch CLI args to the appropriate command."""
+        """Dispatch CLI args to the appropriate command.
+
+        Returns:
+            The resulting ``p.Result[str]``.
+        """
         argv = args if args is not None else sys.argv[1:]
         if not argv or argv[0] in {"help", "-h", "--help"}:
             return r[str].ok(self._get_help_text())
@@ -46,13 +66,18 @@ class FlextTargetOracleCli:
             return service.run_about(m.TargetOracle.OracleTargetAboutCommand())
         return r[str].fail(f"Unknown command: {command_name}")
 
-    def _get_help_text(self) -> str:
+    @staticmethod
+    def _get_help_text() -> str:
         """Return text help for target CLI usage."""
         return "Usage: target-oracle [validate|load|about]\n  validate  validate settings and connection\n  load      initialize target for loading\n  about     show project information"
 
 
 def main() -> int:
-    """Run the Oracle target CLI entrypoint."""
+    """Run the Oracle target CLI entrypoint.
+
+    Returns:
+        The resulting ``int``.
+    """
     cli_service = FlextTargetOracleCli()
     return cli_service.finalize_cli_result(cli_service.run_cli())
 

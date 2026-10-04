@@ -1,11 +1,16 @@
-"""Target Oracle type facade."""
+"""Target Oracle type facade.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+src/flext_target_oracle/typings
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleTypes
 from flext_meltano import FlextMeltanoTypes
 
-from ._typings.base import FlextTargetOracleTypesBase
+from flext_target_oracle._typings.base import FlextTargetOracleTypesBase
 
 
 class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):

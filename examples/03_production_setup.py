@@ -4,6 +4,9 @@ This example demonstrates production-ready configuration and deployment patterns
 for FLEXT Target Oracle, including comprehensive error handling, monitoring,
 security considerations, and performance optimization.
 
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+examples/03_production_setup
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
@@ -33,7 +36,11 @@ type SingerMessage = (
 
 
 def _json_text(value: t.JsonValue) -> str:
-    """Serialize JSON-compatible example payloads through the CLI facade."""
+    """Serialize JSON-compatible example payloads through the CLI facade.
+
+    Returns:
+        The resulting ``str``.
+    """
     serialized: str = cli_u.Cli.json_dumps(value).unwrap()
     return serialized
 
@@ -139,7 +146,7 @@ class ProductionConfig:
                 "batch_size": batch_size,
                 "use_bulk_operations": True,
                 "transaction_timeout": connection_timeout,
-            }
+            },
         })
         u.logger.info(
             "Production configuration created: %s:%s/%s",
@@ -148,10 +155,10 @@ class ProductionConfig:
             oracle_service,
         )
         u.logger.info(
-            "Target schema: %s, Batch size: %s", default_target_schema, batch_size
+            "Target schema: %s, Batch size: %s", default_target_schema, batch_size,
         )
         u.logger.info(
-            "Load method: %s, Connection timeout: %ss", load_method, connection_timeout
+            "Load method: %s, Connection timeout: %ss", load_method, connection_timeout,
         )
         return settings
 
@@ -193,9 +200,13 @@ class ProductionTargetManager:
             return r[t.JsonMapping].fail(f"Health check error: {e}", exception=e)
 
     def _health_check_status(
-        self, health_status: HealthStatus
+        self, health_status: HealthStatus,
     ) -> p.Result[t.JsonMapping]:
-        """Build a health status result for the current target."""
+        """Build a health status result for the current target.
+
+        Returns:
+            The resulting ``p.Result[t.JsonMapping]``.
+        """
         checks = health_status.checks
         if not self.target:
             health_status.status = "unhealthy"
@@ -254,12 +265,16 @@ class ProductionTargetManager:
             return r[bool].fail(f"Initialization error: {e}", exception=e)
 
     def _initialize_checked(self) -> p.Result[bool]:
-        """Initialize target after the public exception boundary."""
+        """Initialize target after the public exception boundary.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         u.logger.info("Validating configuration domain rules")
         validation_result = r[bool].ok(value=True)
         if validation_result.failure:
             return r[bool].fail(
-                f"Configuration validation failed: {validation_result.error}"
+                f"Configuration validation failed: {validation_result.error}",
             )
         u.logger.info("Creating Oracle target instance")
         self.target = FlextTargetOracle(self._settings)
@@ -271,7 +286,7 @@ class ProductionTargetManager:
         return r[bool].ok(value=True)
 
     def process_singer_stream(
-        self, messages: t.SequenceOf[SingerMessage]
+        self, messages: t.SequenceOf[SingerMessage],
     ) -> p.Result[t.JsonMapping]:
         """Process complete Singer message stream with comprehensive error handling.
 
@@ -303,9 +318,13 @@ class ProductionTargetManager:
             return r[t.JsonMapping].fail(f"Stream processing error: {e}", exception=e)
 
     def _process_singer_stream_checked(
-        self, messages: t.SequenceOf[SingerMessage], stats: ProcessingStats
+        self, messages: t.SequenceOf[SingerMessage], stats: ProcessingStats,
     ) -> p.Result[t.JsonMapping]:
-        """Process a Singer stream after the public exception boundary."""
+        """Process a Singer stream after the public exception boundary.
+
+        Returns:
+            The resulting ``p.Result[t.JsonMapping]``.
+        """
         for index, message in enumerate(messages):
             if self.shutdown_requested:
                 u.logger.info("Shutdown requested, stopping message processing")
@@ -315,7 +334,7 @@ class ProductionTargetManager:
         return r[t.JsonMapping].ok(stats.model_dump())
 
     def _process_singer_message(
-        self, index: int, total: int, message: SingerMessage, stats: ProcessingStats
+        self, index: int, total: int, message: SingerMessage, stats: ProcessingStats,
     ) -> None:
         """Process one Singer message and update counters."""
         message_type = self._message_type(message)
@@ -373,7 +392,7 @@ class ProductionTargetManager:
         processing_duration = stats.processing_end_time - stats.processing_start_time
         stats.processing_duration_seconds = processing_duration
         u.logger.info(
-            "Stream processing completed in %.2f seconds", processing_duration
+            "Stream processing completed in %.2f seconds", processing_duration,
         )
 
     def shutdown(self) -> p.Result[bool]:
@@ -399,7 +418,11 @@ class ProductionTargetManager:
             return r[bool].fail(f"Shutdown error: {e}", exception=e)
 
     def _shutdown_checked(self) -> p.Result[bool]:
-        """Shutdown target after the public exception boundary."""
+        """Shutdown target after the public exception boundary.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         if self.target:
             u.logger.info("Finalizing pending operations")
             self.target.finalize()
@@ -415,7 +438,24 @@ class ProductionTargetManager:
 
 
 def demonstrate_production_setup() -> None:
-    """Demonstrate production setup and processing patterns."""
+    """Demonstrate production setup and processing patterns.
+
+    Raises:
+        AttributeError: If a ``(ValueError, TypeError, KeyError, AttributeError,
+            OSError, RuntimeError, ImportError)`` is caught.
+        ImportError: If a ``(ValueError, TypeError, KeyError, AttributeError, OSError,
+            RuntimeError, ImportError)`` is caught.
+        KeyError: If a ``(ValueError, TypeError, KeyError, AttributeError, OSError,
+            RuntimeError, ImportError)`` is caught.
+        OSError: If a ``(ValueError, TypeError, KeyError, AttributeError, OSError,
+            RuntimeError, ImportError)`` is caught.
+        RuntimeError: If a ``(ValueError, TypeError, KeyError, AttributeError, OSError,
+            RuntimeError, ImportError)`` is caught.
+        TypeError: If a ``(ValueError, TypeError, KeyError, AttributeError, OSError,
+            RuntimeError, ImportError)`` is caught.
+        ValueError: If a ``(ValueError, TypeError, KeyError, AttributeError, OSError,
+            RuntimeError, ImportError)`` is caught.
+    """
     u.logger.info("Starting production setup demonstration")
     try:
         _demonstrate_production_setup_checked()
@@ -433,7 +473,11 @@ def demonstrate_production_setup() -> None:
 
 
 def _demonstrate_production_setup_checked() -> None:
-    """Run the production demonstration after the public exception boundary."""
+    """Run the production demonstration after the public exception boundary.
+
+    Raises:
+        SystemExit: If ``init_result.failure``.
+    """
     u.logger.info("Step 1: Creating production configuration")
     settings = ProductionConfig.create_from_environment()
     u.logger.info("Step 2: Initializing production target manager")
@@ -455,14 +499,18 @@ def _demonstrate_production_setup_checked() -> None:
 
 
 def _log_health_result(health_result: p.Result[t.JsonMapping]) -> None:
-    """Log the initial health check result."""
+    """Log the initial health check result.
+
+    Raises:
+        RuntimeError: If Health check failed.
+    """
     if health_result.failure:
         u.logger.warning("Health check failed: %s", health_result.error)
         msg = f"Health check failed: {health_result.error}"
         raise RuntimeError(msg)
     health_data = health_result.value
     u.logger.info(
-        "Health check status", status=str(health_data.get("status", "unknown"))
+        "Health check status", status=str(health_data.get("status", "unknown")),
     )
     checks_obj: t.JsonValue = health_data.get("checks")
     checks: t.JsonMapping = (
@@ -476,7 +524,11 @@ def _log_health_result(health_result: p.Result[t.JsonMapping]) -> None:
 
 
 def _log_processing_result(processing_result: p.Result[t.JsonMapping]) -> None:
-    """Log production stream processing result details."""
+    """Log production stream processing result details.
+
+    Raises:
+        RuntimeError: If Production processing failed.
+    """
     if processing_result.failure:
         u.logger.error("Production processing failed: %s", processing_result.error)
         msg = f"Production processing failed: {processing_result.error}"
@@ -584,8 +636,8 @@ def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
                         base_date + datetime.timedelta(hours=100)
                     ).isoformat()
                     + "Z",
-                }
-            }
+                },
+            },
         },
     })
     messages.append(state_message)
@@ -593,14 +645,19 @@ def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
 
 
 def main() -> None:
-    """Run the production setup example."""
+    """Run the production setup example.
+
+    Raises:
+        SystemExit: If ``missing_vars``; or if a ``(ValueError, TypeError, KeyError,
+            AttributeError, OSError, RuntimeError, ImportError)`` is caught.
+    """
     u.logger.info("FLEXT Target Oracle - Production Setup Example")
     u.logger.info("=" * 60)
     required_vars = ["ORACLE_HOST", "ORACLE_SERVICE", "ORACLE_USER", "ORACLE_PASSWORD"]
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     if missing_vars:
         u.logger.error(
-            "Missing required environment variables: %s", ", ".join(missing_vars)
+            "Missing required environment variables: %s", ", ".join(missing_vars),
         )
         u.logger.error("Please set the following environment variables:")
         for var in required_vars:

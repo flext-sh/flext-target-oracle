@@ -1,4 +1,9 @@
-"""Focused service objects used by Oracle target components."""
+"""Focused service objects used by Oracle target components.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+src/flext_target_oracle/_utilities/services
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -22,10 +27,15 @@ class Utilities:
             self.oracle_api = oracle_api
 
         def execute(self) -> p.Result[bool]:
-            """Run default connection validation operation."""
+            """Run default connection validation operation.
+
+            Returns:
+                The resulting ``p.Result[bool]``.
+            """
             return self.test_connection()
 
-        def get_connection_info(self) -> p.Result[m.TargetOracle.OracleConnectionModel]:
+        @staticmethod
+        def get_connection_info() -> p.Result[m.TargetOracle.OracleConnectionModel]:
             """Return normalized connection model."""
             return r[m.TargetOracle.OracleConnectionModel].ok(
                 m.TargetOracle.OracleConnectionModel(
@@ -34,13 +44,17 @@ class Utilities:
                     service_name=settings.TargetOracle.oracle_service_name,
                     username=settings.TargetOracle.oracle_user,
                     password=settings.TargetOracle.oracle_password,
-                )
+                ),
             )
 
         def test_connection(self) -> p.Result[bool]:
-            """Check Oracle access by listing schema tables."""
+            """Check Oracle access by listing schema tables.
+
+            Returns:
+                The resulting ``p.Result[bool]``.
+            """
             tables_result = self.oracle_api.fetch_tables(
-                schema=settings.TargetOracle.default_target_schema
+                schema=settings.TargetOracle.default_target_schema,
             )
             if tables_result.failure:
                 return r[bool].from_failure(tables_result)
@@ -53,20 +67,29 @@ class Utilities:
             """Store schema service dependencies."""
             self.oracle_api = oracle_api
 
+        @staticmethod
         def ensure_table_exists(
-            self,
             stream: m.TargetOracle.SingerStreamModel,
             schema_message: m.Meltano.SingerSchemaMessage,
         ) -> p.Result[bool]:
-            """Validate table identity before external DDL orchestration."""
+            """Validate table identity before external DDL orchestration.
+
+            Returns:
+                The resulting ``p.Result[bool]``.
+            """
             _ = schema_message
             table_name = stream.table_name
             if not table_name:
                 return e.fail_validation("table_name", error="invalid")
             return r[bool].ok(True)
 
-        def execute(self) -> p.Result[bool]:
-            """Run service health operation."""
+        @staticmethod
+        def execute() -> p.Result[bool]:
+            """Run service health operation.
+
+            Returns:
+                The resulting ``p.Result[bool]``.
+            """
             return r[bool].ok(True)
 
     class FlextTargetOracleBatchService:
@@ -80,18 +103,30 @@ class Utilities:
             )
 
         def add_record(
-            self, stream_name: str, record_message: m.Meltano.SingerRecordMessage
+            self, stream_name: str, record_message: m.Meltano.SingerRecordMessage,
         ) -> p.Result[bool]:
-            """Append a record to a stream buffer."""
+            """Append a record to a stream buffer.
+
+            Returns:
+                The resulting ``p.Result[bool]``.
+            """
             self._batches[stream_name].append(record_message)
             return r[bool].ok(True)
 
         def execute(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
-            """Run default batch flush operation."""
+            """Run default batch flush operation.
+
+            Returns:
+                The resulting ``p.Result[m.TargetOracle.LoadStatisticsModel]``.
+            """
             return self.flush_all_batches()
 
         def flush_all_batches(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
-            """Summarize and clear all in-memory batch buffers."""
+            """Summarize and clear all in-memory batch buffers.
+
+            Returns:
+                The resulting ``p.Result[m.TargetOracle.LoadStatisticsModel]``.
+            """
             total = sum(len(records) for records in self._batches.values())
             stats = m.TargetOracle.LoadStatisticsModel(
                 stream_name="__ALL_STREAMS__",
@@ -103,7 +138,11 @@ class Utilities:
             return r[m.TargetOracle.LoadStatisticsModel].ok(stats)
 
         def flush_batch(self, stream_name: str) -> p.Result[bool]:
-            """Clear buffered records for a specific stream."""
+            """Clear buffered records for a specific stream.
+
+            Returns:
+                The resulting ``p.Result[bool]``.
+            """
             self._batches[stream_name] = list[m.Meltano.SingerRecordMessage]()
             return r[bool].ok(True)
 
@@ -113,16 +152,25 @@ class Utilities:
         def __init__(self, settings: FlextTargetOracleSettings) -> None:
             """Store record service configuration."""
 
-        def execute(self) -> p.Result[bool]:
-            """Run record-service readiness check."""
+        @staticmethod
+        def execute() -> p.Result[bool]:
+            """Run record-service readiness check.
+
+            Returns:
+                The resulting ``p.Result[bool]``.
+            """
             return r[bool].ok(True)
 
+        @staticmethod
         def transform_record(
-            self,
             record_message: m.Meltano.SingerRecordMessage,
             stream: m.TargetOracle.SingerStreamModel,
         ) -> p.Result[m.Meltano.SingerRecordMessage]:
-            """Apply stream-level mappings and ignored-column filtering."""
+            """Apply stream-level mappings and ignored-column filtering.
+
+            Returns:
+                The resulting ``p.Result[m.Meltano.SingerRecordMessage]``.
+            """
             transformed: t.MutableJsonMapping = {}
             for key, value in record_message.record.items():
                 if key in stream.ignored_columns:
@@ -136,15 +184,19 @@ class Utilities:
                     "record": transformed,
                     "time_extracted": record_message.time_extracted,
                     "version": record_message.version,
-                })
+                }),
             )
 
+        @staticmethod
         def validate_record(
-            self,
             record_message: m.Meltano.SingerRecordMessage,
             schema_message: m.Meltano.SingerSchemaMessage,
         ) -> p.Result[bool]:
-            """Validate record payload against current schema contract."""
+            """Validate record payload against current schema contract.
+
+            Returns:
+                The resulting ``p.Result[bool]``.
+            """
             _ = record_message
             _ = schema_message
             return r[bool].ok(True)

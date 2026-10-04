@@ -1,4 +1,9 @@
-"""Utility functions for flexttargetoracle."""
+"""Utility functions for flexttargetoracle.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+examples/utilities
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 

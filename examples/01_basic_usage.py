@@ -18,6 +18,10 @@ Prerequisites:
 
 Usage:
     python examples/basic_usage.py
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+examples/01_basic_usage
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
@@ -35,7 +39,11 @@ logger = u.fetch_logger(__name__)
 
 
 def _json_text(value: t.JsonValue) -> str:
-    """Serialize JSON-compatible example payloads through the CLI facade."""
+    """Serialize JSON-compatible example payloads through the CLI facade.
+
+    Returns:
+        The resulting ``str``.
+    """
     serialized: str = cli_u.Cli.json_dumps(value).unwrap()
     return serialized
 
@@ -64,10 +72,10 @@ def create_configuration() -> FlextTargetOracleSettings:
             "batch_size": 100,
             "use_bulk_operations": True,
             "transaction_timeout": 30,
-        }
+        },
     })
     logger.info(
-        f"Configuration created: {settings.TargetOracle.oracle_host}:{settings.TargetOracle.oracle_port}/{settings.TargetOracle.oracle_service_name}"
+        f"Configuration created: {settings.TargetOracle.oracle_host}:{settings.TargetOracle.oracle_port}/{settings.TargetOracle.oracle_service_name}",
     )
     return settings
 
@@ -156,8 +164,8 @@ def create_sample_state_message() -> m.Meltano.SingerStateMessage:
             "type": "STATE",
             "value": {
                 "bookmarks": {
-                    "users": {"last_id": 3, "last_updated": "2025-01-01T12:00:00Z"}
-                }
+                    "users": {"last_id": 3, "last_updated": "2025-01-01T12:00:00Z"},
+                },
             },
         })
     )
@@ -173,6 +181,12 @@ def demonstrate_basic_usage() -> None:
     3. Singer message processing (SCHEMA, RECORD, STATE)
     4. Error handling with r patterns
     5. Statistics collection and reporting
+
+    Raises:
+        SystemExit: If ``validation_result.failure``; or if
+            ``connection_result.failure``; or if ``schema_result.failure``; or if
+            ``state_result.failure``; or if ``stats_result.failure``; or if
+            ``record_result.failure``.
     """
     logger.info("Starting FLEXT Target Oracle basic usage demonstration")
     logger.info("Step 1: Creating configuration")
@@ -243,7 +257,7 @@ def demonstrate_error_handling() -> None:
                 "oracle_service_name": "XE",
                 "oracle_user": os.getenv("FLEXT_EXAMPLE_ORACLE_USER", "test"),
                 "oracle_password": os.getenv("FLEXT_EXAMPLE_ORACLE_PASSWORD", ""),
-            }
+            },
         })
         validation_result = r[bool].ok(value=True)
         if validation_result.failure:

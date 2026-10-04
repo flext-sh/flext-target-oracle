@@ -1,14 +1,19 @@
-"""Models for Oracle target operations."""
+"""Models for Oracle target operations.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+src/flext_target_oracle/models
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
 from flext_db_oracle import FlextDbOracleModels
 from flext_meltano import FlextMeltanoModels
 
-from ._models.commands import FlextTargetOracleModelsCommands
-from ._models.results import FlextTargetOracleModelsResults
-from ._models.settings import FlextTargetOracleModelsSettings
-from ._models.singer import FlextTargetOracleModelsSinger
+from flext_target_oracle._models.commands import FlextTargetOracleModelsCommands
+from flext_target_oracle._models.results import FlextTargetOracleModelsResults
+from flext_target_oracle._models.settings import FlextTargetOracleModelsSettings
+from flext_target_oracle._models.singer import FlextTargetOracleModelsSinger
 
 
 class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):

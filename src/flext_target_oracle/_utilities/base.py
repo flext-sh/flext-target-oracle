@@ -19,7 +19,11 @@ class FlextTargetOracleUtilitiesBase:
     def load_target_settings(
         config_file: str | None,
     ) -> p.Result[p.TargetOracle.OracleSettingsProtocol]:
-        """Load settings from JSON file or environment defaults."""
+        """Load settings from JSON file or environment defaults.
+
+        Returns:
+            The resulting ``p.Result[p.TargetOracle.OracleSettingsProtocol]``.
+        """
         result_type: type[r[p.TargetOracle.OracleSettingsProtocol]] = r[
             p.TargetOracle.OracleSettingsProtocol
         ]

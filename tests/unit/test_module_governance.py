@@ -4,6 +4,10 @@ Uses ``importlib`` + ``inspect`` to walk the live module objects rather
 than parsing Python source via ``ast`` — keeping the test free of
 ``import ast`` and aligned with the workspace ``regex/ast-from-constants``
 directive.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+tests/unit/test_module_governance
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
@@ -19,7 +23,9 @@ class TestsFlextTargetOracleModuleGovernance(FlextTestsModuleGovernanceMixin):
     _test_file = __file__
     _tests_config = c.TargetOracle.Tests
 
-    def test_target_oracle_namespace_does_not_wrap_meltano_singer_models(self) -> None:
+    @staticmethod
+    def test_target_oracle_namespace_does_not_wrap_meltano_singer_models() -> None:
+        """Test target oracle namespace does not wrap meltano singer models."""
         assert hasattr(m.TargetOracle, "SingerStreamModel")
         assert not hasattr(m.TargetOracle, "Meltano")
         assert not hasattr(m.TargetOracle, "SingerSchemaMessage")

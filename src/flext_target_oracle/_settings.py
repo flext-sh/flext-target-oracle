@@ -21,63 +21,63 @@ class FlextTargetOracleSettings(FlextSettings):
     """Oracle Singer target settings; fields under ``settings.TargetOracle.*``."""
 
     model_config = m.SettingsConfigDict(
-        env_prefix="FLEXT_TARGET_ORACLE_", env_nested_delimiter="__", extra="ignore"
+        env_prefix="FLEXT_TARGET_ORACLE_", env_nested_delimiter="__", extra="ignore",
     )
 
     class _TargetOracle(m.BaseModel):
         """Namespaced Oracle target settings."""
 
         oracle_host: Annotated[
-            str, m.Field(default="localhost", description="Oracle host")
+            str, m.Field(default="localhost", description="Oracle host"),
         ]
         oracle_port: Annotated[
-            int, m.Field(default=1521, ge=1, le=65535, description="Oracle port")
+            int, m.Field(default=1521, ge=1, le=65535, description="Oracle port"),
         ]
         oracle_service_name: Annotated[
-            str, m.Field(default="XEPDB1", description="Oracle service/SID")
+            str, m.Field(default="XEPDB1", description="Oracle service/SID"),
         ]
         oracle_user: Annotated[str, m.Field(default="", description="Oracle username")]
         oracle_password: Annotated[
-            str, m.Field(default="", description="Oracle password")
+            str, m.Field(default="", description="Oracle password"),
         ]
         default_target_schema: Annotated[
-            str, m.Field(default="SINGER_DATA", description="Default target schema")
+            str, m.Field(default="SINGER_DATA", description="Default target schema"),
         ]
         batch_size: Annotated[
-            int, m.Field(default=1000, ge=1, description="Batch size for loading")
+            int, m.Field(default=1000, ge=1, description="Batch size for loading"),
         ]
         commit_interval: Annotated[
-            int, m.Field(default=1000, ge=1, description="Commit interval")
+            int, m.Field(default=1000, ge=1, description="Commit interval"),
         ]
         transaction_timeout: Annotated[
-            int, m.Field(default=30, ge=1, description="Transaction timeout (s)")
+            int, m.Field(default=30, ge=1, description="Transaction timeout (s)"),
         ]
         parallel_degree: Annotated[
-            int, m.Field(default=1, ge=1, description="Oracle parallel degree")
+            int, m.Field(default=1, ge=1, description="Oracle parallel degree"),
         ]
         table_prefix: Annotated[
-            str, m.Field(default="", description="Table name prefix")
+            str, m.Field(default="", description="Table name prefix"),
         ]
         table_suffix: Annotated[
-            str, m.Field(default="", description="Table name suffix")
+            str, m.Field(default="", description="Table name suffix"),
         ]
         load_method: Annotated[
-            str, m.Field(default="INSERT", description="Oracle load strategy")
+            str, m.Field(default="INSERT", description="Oracle load strategy"),
         ]
         sdc_mode: Annotated[
-            str, m.Field(default="insert", description="Singer upsert mode")
+            str, m.Field(default="insert", description="Singer upsert mode"),
         ]
         storage_mode: Annotated[
-            str, m.Field(default="flattened", description="Record storage mode")
+            str, m.Field(default="flattened", description="Record storage mode"),
         ]
         json_column_name: Annotated[
-            str, m.Field(default="DATA", description="JSON payload column")
+            str, m.Field(default="DATA", description="JSON payload column"),
         ]
         truncate_before_load: Annotated[
-            bool, m.Field(default=False, description="Truncate before load")
+            bool, m.Field(default=False, description="Truncate before load"),
         ]
         column_ordering: Annotated[
-            str, m.Field(default="", description="Column ordering strategy")
+            str, m.Field(default="", description="Column ordering strategy"),
         ]
         column_order_rules: Annotated[
             dict[str, int],
@@ -91,19 +91,19 @@ class FlextTargetOracleSettings(FlextSettings):
             ),
         ]
         ignored_columns: Annotated[
-            list[str], m.Field(default_factory=list, description="Ignored columns")
+            list[str], m.Field(default_factory=list, description="Ignored columns"),
         ]
         custom_indexes: Annotated[
             str,
             m.Field(
-                default="{}", description="Per-stream custom index definitions (JSON)"
+                default="{}", description="Per-stream custom index definitions (JSON)",
             ),
         ]
         use_bulk_operations: Annotated[
-            bool, m.Field(default=True, description="Use bulk operations")
+            bool, m.Field(default=True, description="Use bulk operations"),
         ]
         autocommit: Annotated[
-            bool, m.Field(default=False, description="Auto-commit transactions")
+            bool, m.Field(default=False, description="Auto-commit transactions"),
         ]
 
     if TYPE_CHECKING:
