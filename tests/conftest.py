@@ -50,20 +50,29 @@ def isolate_target_oracle_env(
 
 @pytest.fixture(scope="session")
 def docker_control() -> tk:
-    """Provide Docker control instance for tests."""
+    """Provide Docker control instance for tests.
+
+    Returns:
+        The resulting ``tk``.
+    """
     return tk.shared(
-        "flext-oracle-db-test", repository_root=Path(__file__).resolve().parents[2]
+        "flext-oracle-db-test",
+        repository_root=Path(__file__).resolve().parents[2],
     )
 
 
 @pytest.fixture(scope="session")
 def shared_oracle_container(docker_control: tk) -> str:
-    """Manage the Oracle container using tk with auto-start."""
+    """Manage the Oracle container using tk with auto-start.
+
+    Returns:
+        The resulting ``str``.
+    """
     container_name = "flext-oracle-db-test"
     ensure_result = docker_control.execute()
     if ensure_result.failure:
         pytest.skip(
-            ensure_result.error or f"Oracle container {container_name} is unavailable"
+            ensure_result.error or f"Oracle container {container_name} is unavailable",
         )
     resolved_port = next(
         (
@@ -85,7 +94,7 @@ def shared_oracle_container(docker_control: tk) -> str:
             "service_name": os.environ["TEST_ORACLE_SERVICE"],
             "username": "system",
             "password": _ORACLE_TEST_PASSWORD,
-        }
+        },
     })
     oracle_settings = FlextDbOracleSettings.model_validate({
         "DbOracle": {
@@ -94,7 +103,7 @@ def shared_oracle_container(docker_control: tk) -> str:
             "service_name": os.environ["TEST_ORACLE_SERVICE"],
             "username": os.environ["TEST_ORACLE_USER"],
             "password": os.environ["TEST_ORACLE_PASSWORD"],
-        }
+        },
     })
     # Fast path: on a warm shared container the flext_test user already exists
     # (provisioned by the flext-db-oracle suite). Verify readiness with a direct
@@ -104,7 +113,7 @@ def shared_oracle_container(docker_control: tk) -> str:
     ready_connect = ready_api.connect()
     if ready_connect.success:
         ready_health = ready_api.oracle_services.execute_query(
-            'SELECT 1 AS "health" FROM DUAL'
+            'SELECT 1 AS "health" FROM DUAL',
         )
         _ = ready_api.disconnect()
         if ready_health.success:
@@ -131,17 +140,17 @@ def shared_oracle_container(docker_control: tk) -> str:
                 user_exists = user_count > 0
                 if not user_exists:
                     create_user_result = admin_api.execute_sql(
-                        f"CREATE USER flext_test IDENTIFIED BY {_ORACLE_TEST_PASSWORD}"
+                        f"CREATE USER flext_test IDENTIFIED BY {_ORACLE_TEST_PASSWORD}",
                     )
                     if create_user_result.failure:
                         last_error = create_user_result.error or last_error
                 alter_user_result = admin_api.execute_sql(
-                    f"ALTER USER flext_test IDENTIFIED BY {_ORACLE_TEST_PASSWORD} ACCOUNT UNLOCK"
+                    f"ALTER USER flext_test IDENTIFIED BY {_ORACLE_TEST_PASSWORD} ACCOUNT UNLOCK",
                 )
                 if alter_user_result.failure:
                     last_error = alter_user_result.error or last_error
                 grant_result = admin_api.execute_sql(
-                    "GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SEQUENCE, CREATE TABLE, CREATE PROCEDURE, CREATE TRIGGER, UNLIMITED TABLESPACE TO flext_test"
+                    "GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SEQUENCE, CREATE TABLE, CREATE PROCEDURE, CREATE TRIGGER, UNLIMITED TABLESPACE TO flext_test",
                 )
                 if grant_result.failure:
                     last_error = grant_result.error or last_error
@@ -153,7 +162,7 @@ def shared_oracle_container(docker_control: tk) -> str:
             connect_result = api.connect()
             if connect_result.success:
                 health_result = api.oracle_services.execute_query(
-                    'SELECT 1 AS "health" FROM DUAL'
+                    'SELECT 1 AS "health" FROM DUAL',
                 )
                 disconnect_result = api.disconnect()
                 _ = disconnect_result
@@ -170,24 +179,33 @@ def shared_oracle_container(docker_control: tk) -> str:
 
 @pytest.fixture(scope="session")
 def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
-    """Create Oracle database API fixture for integration verification."""
+    """Create Oracle database API fixture for integration verification.
+
+    Yields:
+        Each ``FlextDbOracleApi``.
+    """
     _ = shared_oracle_container
     api = FlextDbOracleApi(
         FlextDbOracleSettings.model_validate({
             "DbOracle": {
                 "host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
                 "port": int(
-                    os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT))
+                    os.getenv(
+                        "TEST_ORACLE_PORT",
+                        str(c.TargetOracle.Tests.ORACLE_PORT),
+                    ),
                 ),
                 "service_name": os.getenv(
-                    "TEST_ORACLE_SERVICE", c.TargetOracle.Tests.ORACLE_SERVICE
+                    "TEST_ORACLE_SERVICE",
+                    c.TargetOracle.Tests.ORACLE_SERVICE,
                 ),
                 "username": os.getenv(
-                    "TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA
+                    "TEST_ORACLE_USER",
+                    c.TargetOracle.Tests.TEST_SCHEMA,
                 ),
                 "password": os.getenv("TEST_ORACLE_PASSWORD", _ORACLE_TEST_PASSWORD),
-            }
-        })
+            },
+        }),
     )
     connect_result = api.connect()
     if connect_result.failure:
@@ -214,36 +232,44 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
 def clean_database(oracle_engine: FlextDbOracleApi) -> None:
     """Clean database before each test."""
     tables_result = oracle_engine.oracle_services.execute_query(
-        'SELECT table_name AS "table_name" FROM user_tables'
+        'SELECT table_name AS "table_name" FROM user_tables',
     )
     tm.ok(tables_result)
     tables = [str(row.root["table_name"]) for row in tables_result.value]
     for table in tables:
         drop_result = oracle_engine.execute_statement(
-            f"DROP TABLE {table} CASCADE CONSTRAINTS"
+            f"DROP TABLE {table} CASCADE CONSTRAINTS",
         )
         tm.ok(drop_result)
 
 
 @pytest.fixture
 def oracle_config(
-    shared_oracle_container: str, isolate_target_oracle_env: None
+    shared_oracle_container: str,
+    isolate_target_oracle_env: None,
 ) -> FlextTargetOracleSettings:
-    """Create Oracle target configuration for tests."""
+    """Create Oracle target configuration for tests.
+
+    Returns:
+        The resulting ``FlextTargetOracleSettings``.
+    """
     _ = (shared_oracle_container, isolate_target_oracle_env)
     return FlextTargetOracleSettings.model_validate({
         "TargetOracle": {
             "oracle_host": os.getenv(
-                "TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST
+                "TEST_ORACLE_HOST",
+                c.TargetOracle.Tests.ORACLE_HOST,
             ),
             "oracle_port": int(
-                os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT))
+                os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT)),
             ),
             "oracle_service_name": os.getenv(
-                "TEST_ORACLE_SERVICE", c.TargetOracle.Tests.ORACLE_SERVICE
+                "TEST_ORACLE_SERVICE",
+                c.TargetOracle.Tests.ORACLE_SERVICE,
             ),
             "oracle_user": os.getenv(
-                "TEST_ORACLE_USER", c.TargetOracle.Tests.TEST_SCHEMA
+                "TEST_ORACLE_USER",
+                c.TargetOracle.Tests.TEST_SCHEMA,
             ),
             "oracle_password": os.getenv("TEST_ORACLE_PASSWORD", _ORACLE_TEST_PASSWORD),
             "default_target_schema": c.TargetOracle.Tests.TEST_SCHEMA,
@@ -252,7 +278,7 @@ def oracle_config(
             "table_suffix": "",
             "use_bulk_operations": True,
             "parallel_degree": 1,
-        }
+        },
     })
 
 
@@ -277,7 +303,11 @@ def simple_schema() -> t.JsonMapping:
 
 @pytest.fixture
 def nested_schema() -> t.JsonMapping:
-    """Nested Singer schema for JSON storage tests."""
+    """Nested Singer schema for JSON storage tests.
+
+    Returns:
+        The resulting ``t.JsonMapping``.
+    """
     return {
         "type": "SCHEMA",
         "stream": "orders",
@@ -296,7 +326,11 @@ def nested_schema() -> t.JsonMapping:
 
 @pytest.fixture
 def singer_messages() -> t.SequenceOf[t.JsonValue]:
-    """Complete Singer message stream for integration workflow tests."""
+    """Complete Singer message stream for integration workflow tests.
+
+    Returns:
+        The resulting ``t.SequenceOf[t.JsonValue]``.
+    """
     schema: t.JsonValue = {
         "type": "SCHEMA",
         "stream": "users",
@@ -329,9 +363,14 @@ def singer_messages() -> t.SequenceOf[t.JsonValue]:
 
 @pytest.fixture
 def oracle_loader(
-    oracle_config: FlextTargetOracleSettings, oracle_engine: FlextDbOracleApi
+    oracle_config: FlextTargetOracleSettings,
+    oracle_engine: FlextDbOracleApi,
 ) -> Generator[FlextTargetOracleLoader]:
-    """Provide a connected FlextTargetOracleLoader instance."""
+    """Provide a connected FlextTargetOracleLoader instance.
+
+    Yields:
+        Each ``FlextTargetOracleLoader``.
+    """
     _ = oracle_engine
     loader = FlextTargetOracleLoader(oracle_config)
     connect_result = loader.connect()

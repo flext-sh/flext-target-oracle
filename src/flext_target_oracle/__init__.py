@@ -1,42 +1,44 @@
 # AUTO-GENERATED FILE — Regenerate with: make gen
-"""Flext Target Oracle package."""
+"""Flext Target Oracle package.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from flext_core.lazy import build_lazy_import_map, install_lazy_exports
-
-from .__version__ import (
-    __author__ as __author__,
-    __author_email__ as __author_email__,
-    __description__ as __description__,
-    __license__ as __license__,
-    __title__ as __title__,
-    __url__ as __url__,
-    __version__ as __version__,
-    __version_info__ as __version_info__,
+from flext_core import build_lazy_import_map, install_lazy_exports
+from flext_target_oracle.__version__ import (
+    __author__,
+    __author_email__,
+    __description__,
+    __license__,
+    __title__,
+    __url__,
+    __version__,
+    __version_info__,
 )
 
 if TYPE_CHECKING:
     from flext_db_oracle import e
     from flext_meltano import d, h, r, s, x
 
-    from ._config import FlextTargetOracleConfig, config
-    from ._settings import FlextTargetOracleSettings, settings
-    from .api import FlextTargetOracleService, target_oracle
-    from .cli import FlextTargetOracleCli, main
-    from .constants import FlextTargetOracleConstants, FlextTargetOracleConstants as c
-    from .models import FlextTargetOracleModels, FlextTargetOracleModels as m
-    from .protocols import FlextTargetOracleProtocols, FlextTargetOracleProtocols as p
-    from .typings import FlextTargetOracleTypes, FlextTargetOracleTypes as t
-    from .utilities import (
+    from flext_target_oracle._config import FlextTargetOracleConfig, config
+    from flext_target_oracle._settings import FlextTargetOracleSettings, settings
+    from flext_target_oracle.api import FlextTargetOracleService, target_oracle
+    from flext_target_oracle.cli import FlextTargetOracleCli, main
+    from flext_target_oracle.constants import FlextTargetOracleConstants, c
+    from flext_target_oracle.models import FlextTargetOracleModels, m
+    from flext_target_oracle.protocols import FlextTargetOracleProtocols, p
+    from flext_target_oracle.typings import FlextTargetOracleTypes, t
+    from flext_target_oracle.utilities import (
         FlextTargetOracle,
-        FlextTargetOracleExceptions,
         FlextTargetOracleLoader,
         FlextTargetOracleUtilities,
-        FlextTargetOracleUtilities as u,
+        u,
     )
 
 
@@ -45,7 +47,6 @@ __all__: tuple[str, ...] = (
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
-    "FlextTargetOracleExceptions",
     "FlextTargetOracleLoader",
     "FlextTargetOracleModels",
     "FlextTargetOracleProtocols",
@@ -91,7 +92,6 @@ _LAZY_IMPORTS = MappingProxyType(
             ".typings": ("FlextTargetOracleTypes", "t"),
             ".utilities": (
                 "FlextTargetOracle",
-                "FlextTargetOracleExceptions",
                 "FlextTargetOracleLoader",
                 "FlextTargetOracleUtilities",
                 "u",
@@ -101,7 +101,7 @@ _LAZY_IMPORTS = MappingProxyType(
         }),
         alias_groups=MappingProxyType({}),
         sort_keys=False,
-    )
+    ),
 )
 
 install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)

@@ -1,4 +1,9 @@
-"""Singer message model specializations for Oracle target."""
+"""Singer message model specializations for Oracle target.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+src/flext_target_oracle/_models/singer
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -15,12 +20,15 @@ class FlextTargetOracleModelsSinger:
         """Singer stream mapping to Oracle table with column configuration."""
 
         stream_name: Annotated[
-            str, u.Field(..., description="Singer stream name", validate_default=True)
+            str,
+            u.Field(..., description="Singer stream name", validate_default=True),
         ]
         table_name: Annotated[
             str,
             u.Field(
-                ..., description="Oracle destination table name", validate_default=True
+                ...,
+                description="Oracle destination table name",
+                validate_default=True,
             ),
         ]
         ignored_columns: Annotated[

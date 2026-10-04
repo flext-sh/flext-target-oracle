@@ -1,4 +1,9 @@
-"""Lean performance-oriented behavior checks for Oracle target."""
+"""Lean performance-oriented behavior checks for Oracle target.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+tests/performance/test_performance
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -28,8 +33,10 @@ class TestsFlextTargetOraclePerformance:
         return FlextTargetOracle(settings=oracle_config)
 
     def test_execute_readiness_is_constant_time(
-        self, oracle_config: FlextTargetOracleSettings
+        self,
+        oracle_config: FlextTargetOracleSettings,
     ) -> None:
+        """Test execute readiness is constant time."""
         target = self._target(oracle_config)
         start = time.perf_counter()
         result = target.execute()
@@ -38,8 +45,10 @@ class TestsFlextTargetOraclePerformance:
         assert elapsed < 1.0
 
     def test_message_processing_scales_linearly_for_state_updates(
-        self, oracle_config: FlextTargetOracleSettings
+        self,
+        oracle_config: FlextTargetOracleSettings,
     ) -> None:
+        """Test message processing scales linearly for state updates."""
         target = self._target(oracle_config)
         messages: t.SequenceOf[
             m.Meltano.SingerSchemaMessage
@@ -63,8 +72,10 @@ class TestsFlextTargetOraclePerformance:
         assert elapsed < 2.0
 
     def test_schema_and_record_processing_has_no_json_reparse_loop(
-        self, oracle_config: FlextTargetOracleSettings
+        self,
+        oracle_config: FlextTargetOracleSettings,
     ) -> None:
+        """Test schema and record processing has no json reparse loop."""
         target = self._target(oracle_config)
         schema = {
             "type": "SCHEMA",
@@ -72,7 +83,7 @@ class TestsFlextTargetOraclePerformance:
             "schema": {
                 "type": "object",
                 "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"}
+                    "id": {"type": "integer"},
                 }).unwrap(),
             },
             "key_properties": ["id"],
@@ -80,11 +91,11 @@ class TestsFlextTargetOraclePerformance:
         record = {"type": "RECORD", "stream": "perf_stream", "record": {"id": 1}}
         tm.ok(
             target.process_singer_message(
-                m.Meltano.SingerSchemaMessage.model_validate(schema)
-            )
+                m.Meltano.SingerSchemaMessage.model_validate(schema),
+            ),
         )
         tm.ok(
             target.process_singer_message(
-                m.Meltano.SingerRecordMessage.model_validate(record)
-            )
+                m.Meltano.SingerRecordMessage.model_validate(record),
+            ),
         )

@@ -22,20 +22,26 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     """Orchestrator for target-oracle. Loader-based, not Singer sink."""
 
     target_name: Annotated[
-        t.NonEmptyStr, u.Field(description="Canonical Singer target identifier.")
+        t.NonEmptyStr,
+        u.Field(description="Canonical Singer target identifier."),
     ] = "target-oracle"
 
     @override
     def create_sink(self, stream_name: str, schema: t.JsonMapping) -> Never:
-        """Not supported — use FlextTargetOracleLoader directly."""
+        """Not supported — use FlextTargetOracleLoader directly.
+
+        Raises:
+            TypeError: If target-oracle uses Loader pattern, not Singer sink.
+        """
         msg = "target-oracle uses Loader pattern, not Singer sink"
         raise TypeError(msg)
 
     # NOTE (multi-agent): mro-rn88 — CQRS handlers: Command models are pure data; the
     # service (a flext-core FlextService via MRO) owns execution. Behavior moved here
     # out of the model layer to respect the c→t→p→m→u order and SRP.
+    @staticmethod
     def run_about(
-        self, command: m.TargetOracle.OracleTargetAboutCommand
+        command: m.TargetOracle.OracleTargetAboutCommand,
     ) -> p.Result[str]:
         """Return target metadata for the about command message."""
         payload: t.StrMapping = {
@@ -46,23 +52,35 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         if command.format == c.TargetOracle.OUTPUT_FORMAT_TEXT:
             return r[str].ok("flext-target-oracle")
         return r[str].ok(
-            t.TargetOracle.STR_MAP_ADAPTER.dump_json(payload).decode(c.DEFAULT_ENCODING)
+            t.TargetOracle.STR_MAP_ADAPTER.dump_json(payload).decode(
+                c.DEFAULT_ENCODING,
+            ),
         )
 
+    @staticmethod
     def run_load(
-        self, command: m.TargetOracle.OracleTargetLoadCommand
+        command: m.TargetOracle.OracleTargetLoadCommand,
     ) -> p.Result[str]:
-        """Initialize the target for loading from a load command message."""
+        """Initialize the target for loading from a load command message.
+
+        Returns:
+            The resulting ``p.Result[str]``.
+        """
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
             return r[str].from_failure(settings_result)
         _ = command.state_file
         return r[str].ok("load_ready")
 
+    @staticmethod
     def run_validate(
-        self, command: m.TargetOracle.OracleTargetValidateCommand
+        command: m.TargetOracle.OracleTargetValidateCommand,
     ) -> p.Result[str]:
-        """Validate target configuration from a validate command message."""
+        """Validate target configuration from a validate command message.
+
+        Returns:
+            The resulting ``p.Result[str]``.
+        """
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
             return r[str].from_failure(settings_result)

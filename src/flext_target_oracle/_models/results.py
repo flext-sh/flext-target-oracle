@@ -1,4 +1,9 @@
-"""Result and payload models for Oracle target operations."""
+"""Result and payload models for Oracle target operations.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+src/flext_target_oracle/_models/results
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -16,7 +21,8 @@ class FlextTargetOracleModelsResults:
         """Target execute readiness payload."""
 
         name: Annotated[
-            str, u.Field(..., description="Target package name", validate_default=True)
+            str,
+            u.Field(..., description="Target package name", validate_default=True),
         ]
         status: Annotated[
             Literal["ready"],
@@ -29,7 +35,9 @@ class FlextTargetOracleModelsResults:
         oracle_service: Annotated[
             str,
             u.Field(
-                ..., description="Configured Oracle service name", validate_default=True
+                ...,
+                description="Configured Oracle service name",
+                validate_default=True,
             ),
         ]
 
@@ -67,13 +75,17 @@ class FlextTargetOracleModelsResults:
         stream_name: Annotated[
             str,
             u.Field(
-                ..., description="Logical stream identifier", validate_default=True
+                ...,
+                description="Logical stream identifier",
+                validate_default=True,
             ),
         ]
         started_at: Annotated[
             str,
             u.Field(
-                ..., description="Load operation start timestamp", validate_default=True
+                ...,
+                description="Load operation start timestamp",
+                validate_default=True,
             ),
         ]
         completed_at: Annotated[
@@ -103,7 +115,9 @@ class FlextTargetOracleModelsResults:
         streams_processed: Annotated[
             t.NonNegativeInt,
             u.Field(
-                ..., description="Number of processed streams", validate_default=True
+                ...,
+                description="Number of processed streams",
+                validate_default=True,
             ),
         ]
         status: Annotated[
@@ -130,7 +144,9 @@ class FlextTargetOracleModelsResults:
         streams_configured: Annotated[
             t.NonNegativeInt,
             u.Field(
-                ..., description="Number of configured streams", validate_default=True
+                ...,
+                description="Number of configured streams",
+                validate_default=True,
             ),
         ]
         batch_size: Annotated[
@@ -150,7 +166,8 @@ class FlextTargetOracleModelsResults:
         """Statistics for data load operation."""
 
         stream_name: Annotated[
-            str, u.Field(..., description="Stream identifier", validate_default=True)
+            str,
+            u.Field(..., description="Stream identifier", validate_default=True),
         ]
         total_records_processed: Annotated[
             t.NonNegativeInt,
@@ -170,5 +187,9 @@ class FlextTargetOracleModelsResults:
         ]
 
         def finalize(self) -> Self:
-            """Finalize statistics and return self."""
+            """Finalize statistics and return self.
+
+            Returns:
+                The resulting ``Self``.
+            """
             return self

@@ -19,8 +19,7 @@ from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_meltano import FlextMeltanoServiceBase, u
 
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t
-
-from .errors import FlextTargetOracleExceptions as e
+from flext_target_oracle._utilities.errors import FlextTargetOracleUtilitiesErrors as e
 
 
 class FlextTargetOracleLoader(FlextMeltanoServiceBase):
@@ -32,7 +31,8 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
 
     @staticmethod
     def _default_record_buffers() -> t.MutableMappingKV[
-        str, t.MutableSequenceOf[t.JsonMapping]
+        str,
+        t.MutableSequenceOf[t.JsonMapping],
     ]:
         """Return an empty typed buffer mapping for loader state."""
         empty_buffers: t.MutableMappingKV[str, t.MutableSequenceOf[t.JsonMapping]] = {}
@@ -45,10 +45,10 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         u.PrivateAttr(default_factory=_default_record_buffers)
     )
     _stream_columns: dict[str, tuple[m.DbOracle.Column, ...]] = u.PrivateAttr(
-        default_factory=dict
+        default_factory=dict,
     )
     _stream_field_mappings: t.MutableStrPairTupleMapping = u.PrivateAttr(
-        default_factory=dict
+        default_factory=dict,
     )
     _stream_key_columns: dict[str, t.StrSequence] = u.PrivateAttr(default_factory=dict)
     _total_records: int = u.PrivateAttr(default_factory=lambda: 0)
@@ -59,12 +59,20 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
 
     @staticmethod
     def _normalize_log_value(value: t.Scalar) -> t.JsonValue:
-        """Normalize logging payloads into scalar or string values."""
+        """Normalize logging payloads into scalar or string values.
+
+        Returns:
+            The resulting ``t.JsonValue``.
+        """
         return str(value)
 
     @staticmethod
     def _oracle_timestamp_text(value: t.JsonValue) -> str:
-        """Normalize timestamp payloads to Oracle TIMESTAMP text."""
+        """Normalize timestamp payloads to Oracle TIMESTAMP text.
+
+        Returns:
+            The resulting ``str``.
+        """
         if isinstance(value, str) and value:
             try:
                 parsed: datetime = datetime.fromisoformat(value)
@@ -76,7 +84,11 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
 
     @classmethod
     def _with_oracle_timestamp_binds(cls, sql: str) -> str:
-        """Wrap owner-managed SDC timestamp binds with Oracle conversion."""
+        """Wrap owner-managed SDC timestamp binds with Oracle conversion.
+
+        Returns:
+            The resulting ``str``.
+        """
         converted_sql = sql
         for column_name in cls._sdc_timestamp_columns:
             converted_sql = converted_sql.replace(
@@ -91,12 +103,16 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         schema: t.JsonMapping,
         key_properties: t.StrSequence | None,
     ) -> p.Result[tuple[m.DbOracle.Column, ...]]:
-        """Build and cache Oracle column metadata for one Singer stream."""
+        """Build and cache Oracle column metadata for one Singer stream.
+
+        Returns:
+            The resulting ``p.Result[tuple[m.DbOracle.Column, ...]]``.
+        """
         try:
             return self._loader_columns_unchecked(stream_name, schema, key_properties)
         except c.ValidationError as exc:
             return r[tuple[m.DbOracle.Column, ...]].fail(
-                f"Invalid Singer schema for {stream_name}: {exc}"
+                f"Invalid Singer schema for {stream_name}: {exc}",
             )
 
     def _loader_columns_unchecked(
@@ -105,7 +121,11 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         schema: t.JsonMapping,
         key_properties: t.StrSequence | None,
     ) -> p.Result[tuple[m.DbOracle.Column, ...]]:
-        """Build Oracle column metadata after validation has been delegated."""
+        """Build Oracle column metadata after validation has been delegated.
+
+        Returns:
+            The resulting ``p.Result[tuple[m.DbOracle.Column, ...]]``.
+        """
         properties_value = schema.get("properties", {})
         properties = (
             t.json_mapping_adapter().validate_json(properties_value)
@@ -113,26 +133,26 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             else t.json_mapping_adapter().validate_python(properties_value)
         )
         normalized_schema = t.json_mapping_adapter().validate_python({
-            "properties": properties
+            "properties": properties,
         })
         type_mapping_result = self.oracle_api.oracle_services.map_singer_schema(
-            normalized_schema
+            normalized_schema,
         )
         if type_mapping_result.failure:
             return r[tuple[m.DbOracle.Column, ...]].from_failure(type_mapping_result)
         column_mappings_result = u.Cli.json_loads(
-            self.target_config.TargetOracle.column_mappings or "{}"
+            self.target_config.TargetOracle.column_mappings or "{}",
         )
         if column_mappings_result.failure:
             return r[tuple[m.DbOracle.Column, ...]].fail(
                 f"Invalid column mappings for {stream_name}: "
-                f"{column_mappings_result.error}"
+                f"{column_mappings_result.error}",
             )
         column_mappings = t.json_mapping_adapter().validate_python(
-            column_mappings_result.value
+            column_mappings_result.value,
         )
         stream_mappings = t.TargetOracle.STR_MAP_ADAPTER.validate_python(
-            column_mappings.get(stream_name, {})
+            column_mappings.get(stream_name, {}),
         )
         ignored_columns = frozenset(self.target_config.TargetOracle.ignored_columns)
         key_columns = tuple(
@@ -164,7 +184,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                     name=self.target_config.TargetOracle.json_column_name.upper(),
                     data_type=c.DbOracle.DataType.CLOB.value,
                     nullable=True,
-                )
+                ),
             )
         columns.extend(self._sdc_columns())
         ordered_columns = self._ordered_columns(columns)
@@ -218,11 +238,12 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             m.DbOracle.Column(
                 name=column_name,
                 data_type=type_mapping.mapping.get(
-                    source_name, c.DbOracle.DEFAULT_VARCHAR_TYPE
+                    source_name,
+                    c.DbOracle.DEFAULT_VARCHAR_TYPE,
                 ),
                 nullable=column_name not in key_columns,
                 primary_key=column_name in key_columns,
-            )
+            ),
         )
 
     @staticmethod
@@ -244,9 +265,14 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         )
 
     def _ordered_columns(
-        self, columns: list[m.DbOracle.Column]
+        self,
+        columns: list[m.DbOracle.Column],
     ) -> list[m.DbOracle.Column]:
-        """Apply configured column ordering."""
+        """Apply configured column ordering.
+
+        Returns:
+            The resulting ``list[m.DbOracle.Column]``.
+        """
         if self.target_config.TargetOracle.column_ordering != "alphabetical":
             return columns
         order_rules = {
@@ -261,7 +287,8 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return column.name
 
         primary_columns = sorted(
-            [column for column in columns if column.primary_key], key=by_name
+            [column for column in columns if column.primary_key],
+            key=by_name,
         )
         sdc_columns = sorted(
             [column for column in columns if column.name.startswith("_SDC_")],
@@ -306,12 +333,16 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         ]
 
     def __init__(self, settings: FlextTargetOracleSettings, **_data: t.Scalar) -> None:
-        """Initialize loader with Oracle API using flext-db-oracle correctly."""
+        """Initialize loader with Oracle API using flext-db-oracle correctly.
+
+        Raises:
+            OracleConnectionError: If Failed to create Oracle API.
+        """
         try:
             self._init_oracle_loader(settings)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             msg = f"Failed to create Oracle API: {exc}"
-            raise e.OracleConnectionError(msg) from exc
+            raise e.FlextTargetOracleExceptions.OracleConnectionError(msg) from exc
 
     def _init_oracle_loader(self, settings: FlextTargetOracleSettings) -> None:
         """Initialize mutable loader state."""
@@ -325,7 +356,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 "service_name": settings.TargetOracle.oracle_service_name,
                 "username": settings.TargetOracle.oracle_user,
                 "password": settings.TargetOracle.oracle_password,
-            }
+            },
         })
         self._target_config = settings
         self._oracle_api = FlextDbOracleApi(oracle_config)
@@ -358,7 +389,10 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         return self._total_records
 
     def _run_connection_operation(
-        self, *, operation_name: str, result: p.TargetOracle.ConnectionOperationResult
+        self,
+        *,
+        operation_name: str,
+        result: p.TargetOracle.ConnectionOperationResult,
     ) -> p.Result[bool]:
         try:
             if result.failure:
@@ -374,15 +408,24 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """Establish connection using underlying FlextDbOracleApi.
 
         Exposed for tests and parity with previous loader helpers.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
         """
         return self._run_connection_operation(
-            operation_name="Connect", result=self.oracle_api.connect()
+            operation_name="Connect",
+            result=self.oracle_api.connect(),
         )
 
     def disconnect(self) -> p.Result[bool]:
-        """Disconnect underlying FlextDbOracleApi (exposed for tests)."""
+        """Disconnect underlying FlextDbOracleApi (exposed for tests).
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         return self._run_connection_operation(
-            operation_name="Disconnect", result=self.oracle_api.disconnect()
+            operation_name="Disconnect",
+            result=self.oracle_api.disconnect(),
         )
 
     def ensure_table_exists(
@@ -391,10 +434,16 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         schema: t.JsonMapping,
         key_properties: t.StrSequence | None = None,
     ) -> p.Result[bool]:
-        """Ensure table exists using flext-db-oracle API with correct table creation."""
+        """Ensure table exists using flext-db-oracle API with correct table creation.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         try:
             return self._ensure_table_exists_unchecked(
-                stream_name, schema, key_properties
+                stream_name,
+                schema,
+                key_properties,
             )
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             self.log_error("Failed to ensure table exists", error=str(exc))
@@ -406,18 +455,24 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         schema: t.JsonMapping,
         key_properties: t.StrSequence | None,
     ) -> p.Result[bool]:
-        """Ensure a table exists after exception handling has been delegated."""
+        """Ensure a table exists after exception handling has been delegated.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         table_name = (
             f"{self.target_config.TargetOracle.table_prefix}{(stream_name).replace(chr(45), chr(95)).replace(chr(46), chr(95))}{self.target_config.TargetOracle.table_suffix}"
         ).upper()
         stream_columns_result = self._loader_columns(
-            stream_name, schema, key_properties
+            stream_name,
+            schema,
+            key_properties,
         )
         if stream_columns_result.failure:
             return r[bool].from_failure(stream_columns_result)
         with self.oracle_api as connected_api:
             tables_result = connected_api.fetch_tables(
-                schema=self.target_config.TargetOracle.default_target_schema
+                schema=self.target_config.TargetOracle.default_target_schema,
             )
             if tables_result.failure:
                 return r[bool].fail(f"Failed to check tables: {tables_result.error}")
@@ -431,13 +486,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             )
             if ddl_result.failure:
                 return r[bool].fail(
-                    f"Failed to build create table SQL: {ddl_result.error}"
+                    f"Failed to build create table SQL: {ddl_result.error}",
                 )
             exec_result = connected_api.execute_sql(ddl_result.value)
             if exec_result.failure:
                 return r[bool].fail(f"Failed to create table: {exec_result.error}")
             index_result = self._create_custom_indexes(
-                connected_api, stream_name, table_name
+                connected_api,
+                stream_name,
+                table_name,
             )
             if index_result.failure:
                 return index_result
@@ -445,9 +502,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return r[bool].ok(value=True)
 
     def _prepare_existing_table(
-        self, connected_api: FlextDbOracleApi, table_name: str
+        self,
+        connected_api: FlextDbOracleApi,
+        table_name: str,
     ) -> p.Result[bool]:
-        """Prepare an existing table before loading records."""
+        """Prepare an existing table before loading records.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         if self.target_config.TargetOracle.truncate_before_load:
             truncate_sql = (
                 f"TRUNCATE TABLE "
@@ -456,28 +519,35 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             truncate_result = connected_api.execute_sql(truncate_sql)
             if truncate_result.failure:
                 return r[bool].fail(
-                    f"Failed to truncate table: {truncate_result.error}"
+                    f"Failed to truncate table: {truncate_result.error}",
                 )
             self.log_info(f"Truncated table {table_name}")
         self.log_info(f"Table {table_name} already exists")
         return r[bool].ok(value=True)
 
     def _create_custom_indexes(
-        self, connected_api: FlextDbOracleApi, stream_name: str, table_name: str
+        self,
+        connected_api: FlextDbOracleApi,
+        stream_name: str,
+        table_name: str,
     ) -> p.Result[bool]:
-        """Create configured custom indexes for a stream table."""
+        """Create configured custom indexes for a stream table.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         custom_indexes_result = u.Cli.json_loads(
-            self.target_config.TargetOracle.custom_indexes or "{}"
+            self.target_config.TargetOracle.custom_indexes or "{}",
         )
         if custom_indexes_result.failure:
             return r[bool].fail(
-                f"Invalid custom indexes configuration: {custom_indexes_result.error}"
+                f"Invalid custom indexes configuration: {custom_indexes_result.error}",
             )
         custom_indexes = t.json_mapping_adapter().validate_python(
-            custom_indexes_result.value
+            custom_indexes_result.value,
         )
         stream_indexes = t.json_mapping_sequence_adapter().validate_python(
-            custom_indexes.get(stream_name, ())
+            custom_indexes.get(stream_name, ()),
         )
         for raw_index in stream_indexes:
             index_columns_result = self._custom_index_columns(raw_index, stream_name)
@@ -485,7 +555,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 return r[bool].from_failure(index_columns_result)
             raw_index_name = raw_index.get("name") or raw_index.get("index_name")
             index_name = str(
-                raw_index_name or f"{table_name}_{index_columns_result.value[0]}_IDX"
+                raw_index_name or f"{table_name}_{index_columns_result.value[0]}_IDX",
             )[:30]
             index_payload = t.json_mapping_adapter().validate_python({
                 "table_name": table_name,
@@ -496,44 +566,54 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             })
             index_sql_result = (
                 connected_api.oracle_services.build_create_index_statement(
-                    index_payload
+                    index_payload,
                 )
             )
             if index_sql_result.failure:
                 return r[bool].fail(
-                    f"Failed to build create index SQL: {index_sql_result.error}"
+                    f"Failed to build create index SQL: {index_sql_result.error}",
                 )
             index_exec_result = connected_api.execute_sql(index_sql_result.value)
             if index_exec_result.failure:
                 return r[bool].fail(
-                    f"Failed to create index: {index_exec_result.error}"
+                    f"Failed to create index: {index_exec_result.error}",
                 )
         return r[bool].ok(value=True)
 
     @staticmethod
     def _custom_index_columns(
-        raw_index: t.JsonMapping, stream_name: str
+        raw_index: t.JsonMapping,
+        stream_name: str,
     ) -> p.Result[list[str]]:
-        """Normalize custom index columns."""
+        """Normalize custom index columns.
+
+        Returns:
+            The resulting ``p.Result[list[str]]``.
+        """
         columns_value = raw_index.get("columns", ())
         if isinstance(columns_value, str) or not isinstance(columns_value, Sequence):
             return r[list[str]].fail(
-                f"Custom index columns must be a sequence for {stream_name}"
+                f"Custom index columns must be a sequence for {stream_name}",
             )
         index_columns = [str(column).upper() for column in columns_value]
         if not index_columns:
             return r[list[str]].fail(
-                f"Custom index requires at least one column for {stream_name}"
+                f"Custom index requires at least one column for {stream_name}",
             )
         return r[list[str]].ok(index_columns)
 
     @override
     def execute(self) -> p.Result[t.JsonMapping]:
-        """Execute domain service - returns connection test result."""
+        """Execute domain service - returns connection test result.
+
+        Returns:
+            The resulting ``p.Result[t.JsonMapping]``.
+        """
         connection_result = self.test_connection()
         if connection_result.failure:
             return r[t.JsonMapping].fail_op(
-                "Oracle connection", connection_result.error
+                "Oracle connection",
+                connection_result.error,
             )
         return r[t.JsonMapping].ok({
             "status": "ready",
@@ -543,19 +623,28 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         })
 
     def finalize_all_streams(self) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
-        """Finalize all streams and return stats using standardized models."""
+        """Finalize all streams and return stats using standardized models.
+
+        Returns:
+            The resulting ``p.Result[m.TargetOracle.LoaderFinalizeResult]``.
+        """
         try:
             return self._finalize_all_streams_unchecked()
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             self.log_error("Failed to finalize streams", error=str(exc))
             return r[m.TargetOracle.LoaderFinalizeResult].fail_op(
-                "finalize streams", exc
+                "finalize streams",
+                exc,
             )
 
     def _finalize_all_streams_unchecked(
         self,
     ) -> p.Result[m.TargetOracle.LoaderFinalizeResult]:
-        """Finalize streams after exception handling has been delegated."""
+        """Finalize streams after exception handling has been delegated.
+
+        Returns:
+            The resulting ``p.Result[m.TargetOracle.LoaderFinalizeResult]``.
+        """
         started_at = str(u.now())
         records_failed = 0
         for stream_name, records in self.record_buffers.items():
@@ -582,11 +671,16 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         return r[m.TargetOracle.LoaderFinalizeResult].ok(finalize_result)
 
     def insert_records(
-        self, stream_name: str, records: t.SequenceOf[t.JsonMapping]
+        self,
+        stream_name: str,
+        records: t.SequenceOf[t.JsonMapping],
     ) -> p.Result[bool]:
         """Insert multiple records - convenience wrapper used by tests.
 
         Appends records to the internal buffer via load_record and flushes the batch.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
         """
         try:
             for record in records:
@@ -599,9 +693,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return r[bool].fail_op("insert records", exc)
 
     def load_record(
-        self, stream_name: str, record_data: t.JsonMapping
+        self,
+        stream_name: str,
+        record_data: t.JsonMapping,
     ) -> p.Result[bool]:
-        """Load record with batching."""
+        """Load record with batching.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         try:
             return self._load_record_unchecked(stream_name, record_data)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
@@ -609,9 +709,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return r[bool].fail_op("load record", exc)
 
     def _load_record_unchecked(
-        self, stream_name: str, record_data: t.JsonMapping
+        self,
+        stream_name: str,
+        record_data: t.JsonMapping,
     ) -> p.Result[bool]:
-        """Load one record after exception handling has been delegated."""
+        """Load one record after exception handling has been delegated.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         if stream_name not in self.record_buffers:
             empty_records: t.MutableSequenceOf[t.JsonMapping] = []
             self.record_buffers[stream_name] = empty_records
@@ -646,11 +752,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         self.logger.info("%s | %s", message, details)
 
     def test_connection(self) -> p.Result[bool]:
-        """Test connection to Oracle database using flext-db-oracle API."""
+        """Test connection to Oracle database using flext-db-oracle API.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         try:
             with self.oracle_api as connected_api:
                 tables_result = connected_api.fetch_tables(
-                    schema=self.target_config.TargetOracle.default_target_schema
+                    schema=self.target_config.TargetOracle.default_target_schema,
                 )
                 if tables_result.failure:
                     return r[bool].fail_op("Connection test", tables_result.error)
@@ -661,26 +771,42 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return r[bool].fail_op("connect to Oracle", exc)
 
     def _build_insert_parameters(
-        self, stream_name: str, record: t.JsonMapping, loaded_at: str
+        self,
+        stream_name: str,
+        record: t.JsonMapping,
+        loaded_at: str,
     ) -> p.Result[t.JsonMapping]:
-        """Normalize one record into the owner-managed insert payload shape."""
+        """Normalize one record into the owner-managed insert payload shape.
+
+        Returns:
+            The resulting ``p.Result[t.JsonMapping]``.
+        """
         try:
             return self._build_insert_parameters_unchecked(
-                stream_name, record, loaded_at
+                stream_name,
+                record,
+                loaded_at,
             )
         except c.ValidationError as exc:
             return r[t.JsonMapping].fail(
-                f"Invalid insert parameters for {stream_name}: {exc}"
+                f"Invalid insert parameters for {stream_name}: {exc}",
             )
 
     def _build_insert_parameters_unchecked(
-        self, stream_name: str, record: t.JsonMapping, loaded_at: str
+        self,
+        stream_name: str,
+        record: t.JsonMapping,
+        loaded_at: str,
     ) -> p.Result[t.JsonMapping]:
-        """Build insert parameters after validation handling has been delegated."""
+        """Build insert parameters after validation handling has been delegated.
+
+        Returns:
+            The resulting ``p.Result[t.JsonMapping]``.
+        """
         stream_columns = self._stream_columns.get(stream_name, ())
         if not stream_columns:
             return r[t.JsonMapping].fail(
-                f"No registered schema for stream {stream_name}"
+                f"No registered schema for stream {stream_name}",
             )
         column_names = frozenset(column.name for column in stream_columns)
         params: t.MutableJsonMapping = {
@@ -689,7 +815,8 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             if not column.name.startswith("_SDC_")
         }
         for source_name, target_name in self._stream_field_mappings.get(
-            stream_name, ()
+            stream_name,
+            (),
         ):
             column_name = target_name.upper()
             if column_name in column_names:
@@ -700,17 +827,21 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         }:
             params[self.target_config.TargetOracle.json_column_name.upper()] = (
                 t.TargetOracle.FLAT_CONTAINER_MAP_ADAPTER.dump_json(record).decode(
-                    c.DEFAULT_ENCODING
+                    c.DEFAULT_ENCODING,
                 )
             )
         params["_SDC_EXTRACTED_AT"] = self._oracle_timestamp_text(
-            record.get("_sdc_extracted_at", loaded_at)
+            record.get("_sdc_extracted_at", loaded_at),
         )
         params["_SDC_LOADED_AT"] = loaded_at
         return r[t.JsonMapping].ok(t.json_mapping_adapter().validate_python(params))
 
     def _flush_batch(self, stream_name: str) -> p.Result[bool]:
-        """Flush batch using flext-db-oracle API exclusively - NO direct SQLAlchemy."""
+        """Flush batch using flext-db-oracle API exclusively - NO direct SQLAlchemy.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         try:
             return self._flush_batch_unchecked(stream_name)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
@@ -718,7 +849,11 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return r[bool].fail_op("flush batch", exc)
 
     def _flush_batch_unchecked(self, stream_name: str) -> p.Result[bool]:
-        """Flush batch after exception handling has been delegated."""
+        """Flush batch after exception handling has been delegated.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         records = self.record_buffers.get(stream_name, [])
         if not records:
             return r[bool].ok(value=True)
@@ -741,15 +876,21 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             )
             if insert_sql_result.failure:
                 return r[bool].fail(
-                    f"Failed to build insert SQL: {insert_sql_result.error}"
+                    f"Failed to build insert SQL: {insert_sql_result.error}",
                 )
             params_result = self._build_batch_parameters(
-                stream_name, records, loaded_at
+                stream_name,
+                records,
+                loaded_at,
             )
             if params_result.failure:
                 return r[bool].from_failure(params_result)
             merge_result = self._delete_merge_rows(
-                connected_api, stream_name, table_name, schema_name, params_result.value
+                connected_api,
+                stream_name,
+                table_name,
+                schema_name,
+                params_result.value,
             )
             if merge_result.failure:
                 return merge_result
@@ -762,13 +903,22 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return r[bool].ok(value=True)
 
     def _build_batch_parameters(
-        self, stream_name: str, records: t.SequenceOf[t.JsonMapping], loaded_at: str
+        self,
+        stream_name: str,
+        records: t.SequenceOf[t.JsonMapping],
+        loaded_at: str,
     ) -> p.Result[list[t.JsonMapping]]:
-        """Build validated insert parameters for buffered records."""
+        """Build validated insert parameters for buffered records.
+
+        Returns:
+            The resulting ``p.Result[list[t.JsonMapping]]``.
+        """
         params_list: list[t.JsonMapping] = []
         for record in records:
             params_result = self._build_insert_parameters(
-                stream_name, record, loaded_at
+                stream_name,
+                record,
+                loaded_at,
             )
             if params_result.failure:
                 return r[list[t.JsonMapping]].from_failure(params_result)
@@ -783,7 +933,11 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         schema_name: str,
         params_list: t.SequenceOf[t.JsonMapping],
     ) -> p.Result[bool]:
-        """Delete existing merge rows before inserting updated records."""
+        """Delete existing merge rows before inserting updated records.
+
+        Returns:
+            The resulting ``p.Result[bool]``.
+        """
         merge_enabled = (
             self.target_config.TargetOracle.sdc_mode.lower()
             == c.TargetOracle.LOAD_METHOD_MERGE.lower()
@@ -794,18 +948,21 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         if not merge_enabled or not key_columns:
             return r[bool].ok(value=True)
         delete_sql_result = connected_api.oracle_services.build_delete_statement(
-            table_name, key_columns, schema=schema_name
+            table_name,
+            key_columns,
+            schema=schema_name,
         )
         if delete_sql_result.failure:
             return r[bool].fail(
-                f"Failed to build merge delete SQL: {delete_sql_result.error}"
+                f"Failed to build merge delete SQL: {delete_sql_result.error}",
             )
         for params in params_list:
             delete_params = t.json_mapping_adapter().validate_python({
                 key: params[key] for key in key_columns
             })
             delete_result = connected_api.execute_sql(
-                delete_sql_result.value, delete_params
+                delete_sql_result.value,
+                delete_params,
             )
             if delete_result.failure:
                 return r[bool].fail_op("Merge delete", delete_result.error)

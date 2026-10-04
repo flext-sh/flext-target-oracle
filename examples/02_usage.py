@@ -2,6 +2,10 @@
 
 This example demonstrates how to use the Oracle target to load
 Singer-formatted data into an Oracle database.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+examples/02_usage
+SPDX-License-Identifier: MIT
 """
 
 from __future__ import annotations
@@ -20,7 +24,11 @@ OracleMessage = (
 
 
 def load_config() -> t.JsonMapping:
-    """Load configuration from file."""
+    """Load configuration from file.
+
+    Returns:
+        The resulting ``t.JsonMapping``.
+    """
     config_path = Path("settings.json")
     content = config_path.read_text(encoding="utf-8")
     adapter: m.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)
@@ -29,7 +37,11 @@ def load_config() -> t.JsonMapping:
 
 
 def load_singer_messages() -> t.SequenceOf[t.JsonMapping]:
-    """Load Singer messages from JSONL file."""
+    """Load Singer messages from JSONL file.
+
+    Returns:
+        The resulting ``t.SequenceOf[t.JsonMapping]``.
+    """
     data_path = Path("singer_data.jsonl")
     adapter: m.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)
     with data_path.open(encoding="utf-8") as f:
@@ -37,7 +49,11 @@ def load_singer_messages() -> t.SequenceOf[t.JsonMapping]:
 
 
 def main() -> None:
-    """Run the example."""
+    """Run the example.
+
+    Raises:
+        SystemExit: If ``connection_result.failure``; or if ``result.failure``.
+    """
     config_dict = load_config()
     settings = FlextTargetOracleSettings.model_validate(config_dict)
     target = FlextTargetOracle(settings)

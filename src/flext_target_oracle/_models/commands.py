@@ -1,4 +1,9 @@
-"""Command models for Oracle target operations."""
+"""Command models for Oracle target operations.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+src/flext_target_oracle/_models/commands
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -30,7 +35,8 @@ class FlextTargetOracleModelsCommands:
             u.Field(description="Stable identifier for the target metadata command"),
         ] = "cmd_oracle_about"
         format: Annotated[
-            str, u.Field(description="Output format for about command response")
+            str,
+            u.Field(description="Output format for about command response"),
         ] = "json"
 
     class OracleTargetLoadCommand(m.Command):

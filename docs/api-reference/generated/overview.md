@@ -9,7 +9,7 @@
 <!-- AUTO-GENERATED — DO NOT EDIT MANUALLY -->
 
 - Package: `flext_target_oracle`
-- Version: `0.20.0`
+- Version: `0.12.0`
 - Description: FLEXT Target Oracle - Singer Target for Oracle Database Data Loading
 - Doc summary: Flext Target Oracle package.
 - Classifiers: Development Status :: 3 - Alpha, Intended Audience :: Developers,
@@ -21,15 +21,13 @@
 - Keywords: `data-loading`, `database`, `enterprise`, `etl`, `flext`, `library`,
   `oracle`, `typed`
 - Main facades: `FlextTargetOracle`, `FlextTargetOracleCli`, `FlextTargetOracleConfig`,
-  `FlextTargetOracleConstants`, `FlextTargetOracleExceptions`,
-  `FlextTargetOracleLoader`, `FlextTargetOracleModels`, `FlextTargetOracleProtocols` (+4
-  more)
+  `FlextTargetOracleConstants`, `FlextTargetOracleLoader`, `FlextTargetOracleModels`,
+  `FlextTargetOracleProtocols`, `FlextTargetOracleService` (+3 more)
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
 - Public symbol exports: `FlextTargetOracle`, `FlextTargetOracleCli`,
-  `FlextTargetOracleConfig`, `FlextTargetOracleConstants`,
-  `FlextTargetOracleExceptions`, `FlextTargetOracleLoader`, `FlextTargetOracleModels`,
-  `FlextTargetOracleProtocols`, `FlextTargetOracleService`, `FlextTargetOracleSettings`
-  (+6 more)
+  `FlextTargetOracleConfig`, `FlextTargetOracleConstants`, `FlextTargetOracleLoader`,
+  `FlextTargetOracleModels`, `FlextTargetOracleProtocols`, `FlextTargetOracleService`,
+  `FlextTargetOracleSettings`, `FlextTargetOracleTypes` (+5 more)
 - Exported module shortcuts: _none_
 - Generated module pages: `7`
 

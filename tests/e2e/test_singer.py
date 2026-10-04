@@ -1,4 +1,9 @@
-"""End-to-end Singer flow checks for canonical target behavior."""
+"""End-to-end Singer flow checks for canonical target behavior.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+tests/e2e/test_singer
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
@@ -25,8 +30,10 @@ class TestsFlextTargetOracleSinger:
         return FlextTargetOracle(settings=oracle_config)
 
     def test_complete_singer_flow(
-        self, oracle_config: FlextTargetOracleSettings
+        self,
+        oracle_config: FlextTargetOracleSettings,
     ) -> None:
+        """Test complete singer flow."""
         target = self._target(oracle_config)
         schema = {
             "type": "SCHEMA",
@@ -49,18 +56,18 @@ class TestsFlextTargetOracleSinger:
         tm.ok(target.execute())
         tm.ok(
             target.process_singer_message(
-                m.Meltano.SingerSchemaMessage.model_validate(schema)
-            )
+                m.Meltano.SingerSchemaMessage.model_validate(schema),
+            ),
         )
         tm.ok(
             target.process_singer_message(
-                m.Meltano.SingerRecordMessage.model_validate(record)
-            )
+                m.Meltano.SingerRecordMessage.model_validate(record),
+            ),
         )
         tm.ok(
             target.process_singer_message(
-                m.Meltano.SingerStateMessage.model_validate(state)
-            )
+                m.Meltano.SingerStateMessage.model_validate(state),
+            ),
         )
         finalize_result = target.finalize()
         tm.ok(finalize_result)

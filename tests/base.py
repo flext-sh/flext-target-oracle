@@ -1,4 +1,9 @@
-"""Service base for flext-target-oracle tests."""
+"""Service base for flext-target-oracle tests.
+
+Copyright (c) 2026 FLEXT Team. All rights reserved.
+tests/base
+SPDX-License-Identifier: MIT
+"""
 
 from __future__ import annotations
 
