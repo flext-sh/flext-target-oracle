@@ -226,6 +226,23 @@ class TestsFlextTargetOracleOracle:
         tm.ok(loader.disconnect())
 
     @staticmethod
+    def _assert_nested_stored_roundtrip(stored_data: t.JsonMapping) -> None:
+        """Assert the nested JSON round-trip preserved customer and items."""
+        customer = stored_data.get("customer")
+        customer_data = t.json_mapping_adapter().validate_python(customer)
+        customer_name = customer_data.get("name")
+        tm.that(customer_name, eq="Acme Corp")
+        customer_address = customer_data.get("address")
+        customer_address_data = t.json_mapping_adapter().validate_python(
+            customer_address,
+        )
+        customer_city = customer_address_data.get("city")
+        tm.that(customer_city, eq="objecttown")
+        items = stored_data.get("items")
+        items_data = t.Tests.CONTAINER_MAPPING_SEQUENCE_ADAPTER.validate_python(items)
+        tm.that(len(items_data), eq=2)
+
+    @staticmethod
     @pytest.mark.usefixtures("clean_database")
     def test_json_storage_mode(
         oracle_config: FlextTargetOracleSettings,
@@ -268,19 +285,7 @@ class TestsFlextTargetOracleOracle:
             "json_data",
         )
         stored_data = t.json_mapping_adapter().validate_json(json_str)
-        customer = stored_data.get("customer")
-        customer_data = t.json_mapping_adapter().validate_python(customer)
-        customer_name = customer_data.get("name")
-        tm.that(customer_name, eq="Acme Corp")
-        customer_address = customer_data.get("address")
-        customer_address_data = t.json_mapping_adapter().validate_python(
-            customer_address,
-        )
-        customer_city = customer_address_data.get("city")
-        tm.that(customer_city, eq="objecttown")
-        items = stored_data.get("items")
-        items_data = t.Tests.CONTAINER_MAPPING_SEQUENCE_ADAPTER.validate_python(items)
-        tm.that(len(items_data), eq=2)
+        TestsTargetOracleIntegration._assert_nested_stored_roundtrip(stored_data)
         tm.ok(loader.disconnect())
 
     @staticmethod

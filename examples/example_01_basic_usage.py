@@ -175,6 +175,33 @@ def create_sample_state_message() -> m.Meltano.SingerStateMessage:
     return state_message
 
 
+def _process_record_messages(
+    target: FlextTargetOracle,
+    record_messages: t.SequenceOf[t.JsonValue],
+) -> None:
+    """Process RECORD messages through the target, failing fast on error.
+
+    Raises:
+        SystemExit: If any record processing fails.
+    """
+    for i, record_message in enumerate(record_messages, 1):
+        logger.info("Processing record %s/%s", i, len(record_messages))
+        record_result = target.process_singer_message(record_message)
+        if record_result.failure:
+            logger.error("Record %s processing failed: %s", i, record_result.error)
+            raise SystemExit(1)
+    logger.info("All %s records processed successfully", len(record_messages))
+
+
+def _log_processing_statistics(stats: object) -> None:
+    """Log the final processing statistics summary."""
+    logger.info("=== Processing Statistics ===")
+    logger.info("Total records processed: %s", stats.total_records)
+    logger.info("Successful records: %s", stats.loading_operation.records_loaded)
+    logger.info("Failed records: %s", stats.loading_operation.records_failed)
+    logger.info("Total batches: %s", stats.streams_processed)
+
+
 def demonstrate_basic_usage() -> None:
     """Demonstrate basic FLEXT Target Oracle usage patterns.
 
@@ -217,13 +244,7 @@ def demonstrate_basic_usage() -> None:
     logger.info("Schema processed successfully - table created/verified")
     logger.info("Step 4: Processing RECORD messages")
     record_messages = create_sample_record_messages()
-    for i, record_message in enumerate(record_messages, 1):
-        logger.info("Processing record %s/%s", i, len(record_messages))
-        record_result = target.process_singer_message(record_message)
-        if record_result.failure:
-            logger.error("Record %s processing failed: %s", i, record_result.error)
-            raise SystemExit(1)
-    logger.info("All %s records processed successfully", len(record_messages))
+    _process_record_messages(target, record_messages)
     logger.info("Step 5: Processing STATE message")
     state_message = create_sample_state_message()
     state_result = target.process_singer_message(state_message)
@@ -236,12 +257,7 @@ def demonstrate_basic_usage() -> None:
     if stats_result.failure:
         logger.error("Target finalization failed: %s", stats_result.error)
         raise SystemExit(1)
-    stats = stats_result.value
-    logger.info("=== Processing Statistics ===")
-    logger.info("Total records processed: %s", stats.total_records)
-    logger.info("Successful records: %s", stats.loading_operation.records_loaded)
-    logger.info("Failed records: %s", stats.loading_operation.records_failed)
-    logger.info("Total batches: %s", stats.streams_processed)
+    _log_processing_statistics(stats_result.value)
     logger.info("Basic usage demonstration completed successfully!")
 
 

@@ -61,6 +61,130 @@ def docker_control() -> tk:
     )
 
 
+def _export_oracle_test_env(container_status: object) -> None:
+    """Export the shared Oracle test environment from container port state."""
+    resolved_port = next(
+        (
+            int(host_port)
+            for container_port, host_port in container_status.ports.items()
+            if container_port.startswith("1521") and host_port.isdigit()
+        ),
+        1522,
+    )
+    os.environ["TEST_ORACLE_HOST"] = "localhost"
+    os.environ["TEST_ORACLE_PORT"] = str(resolved_port)
+    os.environ["TEST_ORACLE_SERVICE"] = "FLEXTDB"
+    os.environ["TEST_ORACLE_USER"] = "flext_test"
+    os.environ["TEST_ORACLE_PASSWORD"] = _ORACLE_TEST_PASSWORD
+
+
+def _oracle_test_settings(username: str) -> FlextDbOracleSettings:
+    """Build typed Oracle settings for one test user from the exported env.
+
+    Returns:
+        The resulting ``FlextDbOracleSettings``.
+
+    """
+    return FlextDbOracleSettings.model_validate({
+        "DbOracle": {
+            "host": os.environ["TEST_ORACLE_HOST"],
+            "port": int(os.environ["TEST_ORACLE_PORT"]),
+            "service_name": os.environ["TEST_ORACLE_SERVICE"],
+            "username": username,
+            "password": _ORACLE_TEST_PASSWORD,
+        },
+    })
+
+
+def _application_user_ready(oracle_settings: FlextDbOracleSettings) -> bool:
+    """Report whether the application user connects and answers a health query.
+
+    Returns:
+        The resulting ``bool``.
+    """
+    api = FlextDbOracleApi(oracle_settings)
+    connect_result = api.connect()
+    if connect_result.failure:
+        return False
+    health_result = api.oracle_services.execute_query(
+        'SELECT 1 AS "health" FROM DUAL',
+    )
+    disconnect_result = api.disconnect()
+    _ = disconnect_result
+    return bool(health_result.success)
+
+
+def _provision_user_account(admin_api: FlextDbOracleApi) -> str | None:
+    """Provision the flext_test user via the admin connection.
+
+    Returns:
+        The resulting failure message, or ``None`` on success.
+    """
+    last_error: str | None = None
+    user_query_result = admin_api.oracle_services.execute_query(
+        'SELECT COUNT(*) AS "count" FROM all_users WHERE username = :username',
+        m.ConfigMap(root={"username": "FLEXT_TEST"}),
+    )
+    if user_query_result.failure:
+        return user_query_result.error or "user probe failed"
+    raw_user_count = user_query_result.value[0].root["count"]
+    user_count = (
+        raw_user_count if isinstance(raw_user_count, int) else int(str(raw_user_count))
+    )
+    if user_count == 0:
+        create_user_result = admin_api.execute_sql(
+            f"CREATE USER flext_test IDENTIFIED BY {_ORACLE_TEST_PASSWORD}",
+        )
+        if create_user_result.failure:
+            last_error = create_user_result.error or last_error
+    alter_user_result = admin_api.execute_sql(
+        f"ALTER USER flext_test IDENTIFIED BY {_ORACLE_TEST_PASSWORD} ACCOUNT UNLOCK",
+    )
+    if alter_user_result.failure:
+        last_error = alter_user_result.error or last_error
+    grant_result = admin_api.execute_sql(
+        "GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SEQUENCE, "
+        "CREATE TABLE, CREATE PROCEDURE, CREATE TRIGGER, "
+        "UNLIMITED TABLESPACE TO flext_test",
+    )
+    if grant_result.failure:
+        last_error = grant_result.error or last_error
+    return last_error
+
+
+def _provision_oracle_test_user(
+    container_name: str,
+    oracle_settings: FlextDbOracleSettings,
+) -> str:
+    """Provision the test user through admin retry, then return the container.
+
+    Returns:
+        The resulting container name.
+    """
+    _ = container_name
+    admin_settings = _oracle_test_settings("system")
+    # Probe budget must stay below pytest case-timeout (30s) so unavailable
+    # Oracle becomes a skip, never a pytest-timeout setup ERROR.
+    deadline = monotonic() + 8
+    last_error = "Oracle application user is not ready yet"
+    while monotonic() < deadline:
+        admin_api = FlextDbOracleApi(admin_settings)
+        admin_connect_result = admin_api.connect()
+        if admin_connect_result.success:
+            provision_error = _provision_user_account(admin_api)
+            if provision_error:
+                last_error = provision_error
+            admin_disconnect_result = admin_api.disconnect()
+            _ = admin_disconnect_result
+            if _application_user_ready(oracle_settings):
+                return container_name
+            last_error = last_error or "application user not ready after provision"
+        else:
+            last_error = admin_connect_result.error or last_error
+        sleep(2)
+    pytest.skip(last_error)
+
+
 @pytest.fixture(scope="session")
 def shared_oracle_container(docker_control: tk) -> str:
     """Manage the Oracle container using tk with auto-start.
@@ -74,41 +198,12 @@ def shared_oracle_container(docker_control: tk) -> str:
         pytest.skip(
             ensure_result.error or f"Oracle container {container_name} is unavailable",
         )
-    resolved_port = next(
-        (
-            int(host_port)
-            for container_port, host_port in ensure_result.value.ports.items()
-            if container_port.startswith("1521") and host_port.isdigit()
-        ),
-        1522,
-    )
-    os.environ["TEST_ORACLE_HOST"] = "localhost"
-    os.environ["TEST_ORACLE_PORT"] = str(resolved_port)
-    os.environ["TEST_ORACLE_SERVICE"] = "FLEXTDB"
-    os.environ["TEST_ORACLE_USER"] = "flext_test"
-    os.environ["TEST_ORACLE_PASSWORD"] = _ORACLE_TEST_PASSWORD
-    admin_settings = FlextDbOracleSettings.model_validate({
-        "DbOracle": {
-            "host": os.environ["TEST_ORACLE_HOST"],
-            "port": int(os.environ["TEST_ORACLE_PORT"]),
-            "service_name": os.environ["TEST_ORACLE_SERVICE"],
-            "username": "system",
-            "password": _ORACLE_TEST_PASSWORD,
-        },
-    })
-    oracle_settings = FlextDbOracleSettings.model_validate({
-        "DbOracle": {
-            "host": os.environ["TEST_ORACLE_HOST"],
-            "port": int(os.environ["TEST_ORACLE_PORT"]),
-            "service_name": os.environ["TEST_ORACLE_SERVICE"],
-            "username": os.environ["TEST_ORACLE_USER"],
-            "password": os.environ["TEST_ORACLE_PASSWORD"],
-        },
-    })
+    _export_oracle_test_env(ensure_result.value)
     # Fast path: on a warm shared container the flext_test user already exists
     # (provisioned by the flext-db-oracle suite). Verify readiness with a direct
     # application-user connection before falling back to admin provisioning, so
     # first-test setup stays well under the per-test timeout.
+    oracle_settings = _oracle_test_settings(os.environ["TEST_ORACLE_USER"])
     ready_api = FlextDbOracleApi(oracle_settings)
     ready_connect = ready_api.connect()
     if ready_connect.success:
@@ -118,66 +213,7 @@ def shared_oracle_container(docker_control: tk) -> str:
         _ = ready_api.disconnect()
         if ready_health.success:
             return container_name
-    # Probe budget must stay below pytest case-timeout (30s) so unavailable
-    # Oracle becomes a skip, never a pytest-timeout setup ERROR.
-    deadline = monotonic() + 8
-    last_error = "Oracle application user is not ready yet"
-    while monotonic() < deadline:
-        admin_api = FlextDbOracleApi(admin_settings)
-        admin_connect_result = admin_api.connect()
-        if admin_connect_result.success:
-            user_query_result = admin_api.oracle_services.execute_query(
-                'SELECT COUNT(*) AS "count" FROM all_users WHERE username = :username',
-                m.ConfigMap(root={"username": "FLEXT_TEST"}),
-            )
-            if user_query_result.success:
-                raw_user_count = user_query_result.value[0].root["count"]
-                user_count = (
-                    raw_user_count
-                    if isinstance(raw_user_count, int)
-                    else int(str(raw_user_count))
-                )
-                user_exists = user_count > 0
-                if not user_exists:
-                    create_user_result = admin_api.execute_sql(
-                        f"CREATE USER flext_test IDENTIFIED BY {_ORACLE_TEST_PASSWORD}",
-                    )
-                    if create_user_result.failure:
-                        last_error = create_user_result.error or last_error
-                alter_user_result = admin_api.execute_sql(
-                    f"ALTER USER flext_test IDENTIFIED BY "
-                    f"{_ORACLE_TEST_PASSWORD} ACCOUNT UNLOCK",
-                )
-                if alter_user_result.failure:
-                    last_error = alter_user_result.error or last_error
-                grant_result = admin_api.execute_sql(
-                    "GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SEQUENCE, "
-                    "CREATE TABLE, CREATE PROCEDURE, CREATE TRIGGER, "
-                    "UNLIMITED TABLESPACE TO flext_test",
-                )
-                if grant_result.failure:
-                    last_error = grant_result.error or last_error
-            else:
-                last_error = user_query_result.error or last_error
-            admin_disconnect_result = admin_api.disconnect()
-            _ = admin_disconnect_result
-            api = FlextDbOracleApi(oracle_settings)
-            connect_result = api.connect()
-            if connect_result.success:
-                health_result = api.oracle_services.execute_query(
-                    'SELECT 1 AS "health" FROM DUAL',
-                )
-                disconnect_result = api.disconnect()
-                _ = disconnect_result
-                if health_result.success:
-                    return container_name
-                last_error = health_result.error or last_error
-            else:
-                last_error = connect_result.error or last_error
-        else:
-            last_error = admin_connect_result.error or last_error
-        sleep(2)
-    pytest.skip(last_error)
+    return _provision_oracle_test_user(container_name, oracle_settings)
 
 
 @pytest.fixture(scope="session")
