@@ -47,8 +47,10 @@ class TestsFlextTargetOracleTarget:
 
     @staticmethod
     def test_validate_configuration(target: FlextTargetOracle) -> None:
-        # NOTE (multi-agent): mro-rn88 — ADR-005/CQRS: config validation moved off the model
-        # AND off the client to the service handler run_validate(command). Exercise the real
+        # NOTE (multi-agent): mro-rn88 — ADR-005/CQRS: config validation moved off
+        # the model
+        # AND off the client to the service handler run_validate(command). Exercise
+        # the real
         # public surface (the service), which is where validation now lives.
         """Test validate configuration."""
         _ = target

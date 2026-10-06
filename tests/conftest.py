@@ -145,12 +145,15 @@ def shared_oracle_container(docker_control: tk) -> str:
                     if create_user_result.failure:
                         last_error = create_user_result.error or last_error
                 alter_user_result = admin_api.execute_sql(
-                    f"ALTER USER flext_test IDENTIFIED BY {_ORACLE_TEST_PASSWORD} ACCOUNT UNLOCK",
+                    f"ALTER USER flext_test IDENTIFIED BY "
+                    f"{_ORACLE_TEST_PASSWORD} ACCOUNT UNLOCK",
                 )
                 if alter_user_result.failure:
                     last_error = alter_user_result.error or last_error
                 grant_result = admin_api.execute_sql(
-                    "GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SEQUENCE, CREATE TABLE, CREATE PROCEDURE, CREATE TRIGGER, UNLIMITED TABLESPACE TO flext_test",
+                    "GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SEQUENCE, "
+                    "CREATE TABLE, CREATE PROCEDURE, CREATE TRIGGER, "
+                    "UNLIMITED TABLESPACE TO flext_test",
                 )
                 if grant_result.failure:
                     last_error = grant_result.error or last_error

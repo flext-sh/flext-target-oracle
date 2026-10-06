@@ -75,7 +75,10 @@ def create_configuration() -> FlextTargetOracleSettings:
         },
     })
     logger.info(
-        f"Configuration created: {settings.TargetOracle.oracle_host}:{settings.TargetOracle.oracle_port}/{settings.TargetOracle.oracle_service_name}",
+        "Configuration created: %s:%s/%s",
+        settings.TargetOracle.oracle_host,
+        settings.TargetOracle.oracle_port,
+        settings.TargetOracle.oracle_service_name,
     )
     return settings
 
@@ -194,7 +197,7 @@ def demonstrate_basic_usage() -> None:
     logger.info("Validating configuration domain rules")
     validation_result = r[bool].ok(value=True)
     if validation_result.failure:
-        logger.error(f"Configuration validation failed: {validation_result.error}")
+        logger.error("Configuration validation failed: %s", validation_result.error)
         raise SystemExit(1)
     logger.info("Configuration validation successful")
     logger.info("Step 2: Initializing Oracle target")
@@ -202,43 +205,43 @@ def demonstrate_basic_usage() -> None:
     logger.info("Testing Oracle connection")
     connection_result = target.test_connection()
     if connection_result.failure:
-        logger.error(f"Oracle connection test failed: {connection_result.error}")
+        logger.error("Oracle connection test failed: %s", connection_result.error)
         raise SystemExit(1)
     logger.info("Oracle connection test successful")
     logger.info("Step 3: Processing SCHEMA message")
     schema_message = create_sample_schema_message()
     schema_result = target.process_singer_message(schema_message)
     if schema_result.failure:
-        logger.error(f"Schema processing failed: {schema_result.error}")
+        logger.error("Schema processing failed: %s", schema_result.error)
         raise SystemExit(1)
     logger.info("Schema processed successfully - table created/verified")
     logger.info("Step 4: Processing RECORD messages")
     record_messages = create_sample_record_messages()
     for i, record_message in enumerate(record_messages, 1):
-        logger.info(f"Processing record {i}/{len(record_messages)}")
+        logger.info("Processing record %s/%s", i, len(record_messages))
         record_result = target.process_singer_message(record_message)
         if record_result.failure:
-            logger.error(f"Record {i} processing failed: {record_result.error}")
+            logger.error("Record %s processing failed: %s", i, record_result.error)
             raise SystemExit(1)
-    logger.info(f"All {len(record_messages)} records processed successfully")
+    logger.info("All %s records processed successfully", len(record_messages))
     logger.info("Step 5: Processing STATE message")
     state_message = create_sample_state_message()
     state_result = target.process_singer_message(state_message)
     if state_result.failure:
-        logger.error(f"State processing failed: {state_result.error}")
+        logger.error("State processing failed: %s", state_result.error)
         raise SystemExit(1)
     logger.info("State processed successfully")
     logger.info("Step 6: Finalizing target and collecting statistics")
     stats_result = target.finalize()
     if stats_result.failure:
-        logger.error(f"Target finalization failed: {stats_result.error}")
+        logger.error("Target finalization failed: %s", stats_result.error)
         raise SystemExit(1)
     stats = stats_result.value
     logger.info("=== Processing Statistics ===")
-    logger.info(f"Total records processed: {stats.total_records}")
-    logger.info(f"Successful records: {stats.loading_operation.records_loaded}")
-    logger.info(f"Failed records: {stats.loading_operation.records_failed}")
-    logger.info(f"Total batches: {stats.streams_processed}")
+    logger.info("Total records processed: %s", stats.total_records)
+    logger.info("Successful records: %s", stats.loading_operation.records_loaded)
+    logger.info("Failed records: %s", stats.loading_operation.records_failed)
+    logger.info("Total batches: %s", stats.streams_processed)
     logger.info("Basic usage demonstration completed successfully!")
 
 
@@ -261,7 +264,7 @@ def demonstrate_error_handling() -> None:
         })
         validation_result = r[bool].ok(value=True)
         if validation_result.failure:
-            logger.info(f"Expected validation error: {validation_result.error}")
+            logger.info("Expected validation error: %s", validation_result.error)
     except (
         ValueError,
         TypeError,
@@ -277,7 +280,7 @@ def demonstrate_error_handling() -> None:
     invalid_message = '{"type": "INVALID", "data": "test"}'
     result = target.write_record(invalid_message)
     if result.failure:
-        logger.info(f"Invalid message handled gracefully: {result.error}")
+        logger.info("Invalid message handled gracefully: %s", result.error)
     logger.info("Error handling demonstration completed")
 
 

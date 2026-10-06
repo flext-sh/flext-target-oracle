@@ -347,7 +347,8 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def _init_oracle_loader(self, settings: FlextTargetOracleSettings) -> None:
         """Initialize mutable loader state."""
         super().__init__()
-        # NOTE (multi-agent): mro-rn88 — FlextDbOracleSettings namespaces its scalars under
+        # NOTE (multi-agent): mro-rn88 — FlextDbOracleSettings namespaces its scalars
+        # under
         # DbOracle.*; a flat dict is dropped by extra="ignore", leaving an empty config.
         oracle_config = FlextDbOracleSettings.model_validate({
             "DbOracle": {
@@ -461,7 +462,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             The resulting ``p.Result[bool]``.
         """
         table_name = (
-            f"{self.target_config.TargetOracle.table_prefix}{(stream_name).replace(chr(45), chr(95)).replace(chr(46), chr(95))}{self.target_config.TargetOracle.table_suffix}"
+            f"{self.target_config.TargetOracle.table_prefix}"
+            f"{(stream_name).replace(chr(45), chr(95)).replace(chr(46), chr(95))}"
+            f"{self.target_config.TargetOracle.table_suffix}"
         ).upper()
         stream_columns_result = self._loader_columns(
             stream_name,
@@ -858,7 +861,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         if not records:
             return r[bool].ok(value=True)
         table_name = (
-            f"{self.target_config.TargetOracle.table_prefix}{(stream_name).replace(chr(45), chr(95)).replace(chr(46), chr(95))}{self.target_config.TargetOracle.table_suffix}"
+            f"{self.target_config.TargetOracle.table_prefix}"
+            f"{(stream_name).replace(chr(45), chr(95)).replace(chr(46), chr(95))}"
+            f"{self.target_config.TargetOracle.table_suffix}"
         ).upper()
         schema_name = self.target_config.TargetOracle.default_target_schema
         full_table_name = f"{schema_name}.{table_name}"

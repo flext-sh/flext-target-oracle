@@ -103,7 +103,10 @@ class FlextTargetOracleUtilitiesObservability:
             failed_records=failed_records,
         )
         return e.FlextTargetOracleExceptions.ProcessingError(
-            f"Record processing failed for {stream_name}: {failed_records}/{record_count}",
+            "Record processing failed for %s: %s/%s",
+            stream_name,
+            failed_records,
+            record_count,
             metadata=FlextTargetOracleUtilitiesErrors.FlextTargetOracleErrorMetadata(
                 code=c.ErrorCode.PROCESSING_ERROR,
                 context={
