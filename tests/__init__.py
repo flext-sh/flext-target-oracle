@@ -10,7 +10,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from flext_core import build_lazy_import_map, install_lazy_exports
+from flext_core import install_lazy_exports
 
 if TYPE_CHECKING:
     from flext_db_oracle import e
@@ -57,27 +57,37 @@ __all__: tuple[str, ...] = (
     "x",
 )
 
-_LAZY_IMPORTS = MappingProxyType(
-    build_lazy_import_map(
-        MappingProxyType({
-            ".base": ("TestsFlextTargetOracleServiceBase", "s"),
-            ".constants": ("TestsFlextTargetOracleConstants", "c"),
-            ".e2e": ("e2e",),
-            ".integration": ("integration",),
-            ".models": ("TestsFlextTargetOracleModels", "m"),
-            ".performance": ("performance",),
-            ".protocols": ("TestsFlextTargetOracleProtocols", "p"),
-            ".settings": ("TestsFlextTargetOracleSettings",),
-            ".typings": ("TestsFlextTargetOracleTypes", "t"),
-            ".unit": ("unit",),
-            ".utilities": ("TestsFlextTargetOracleUtilities", "u"),
-            "flext_db_oracle": ("e",),
-            "flext_target_oracle": ("d", "h", "r", "x"),
-            "flext_tests": ("api", "td", "tf", "tk", "tm"),
-        }),
-        alias_groups=MappingProxyType({}),
-        sort_keys=False,
-    ),
+install_lazy_exports(
+    __name__,
+    globals(),
+    MappingProxyType({
+        "TestsFlextTargetOracleConstants": ".constants",
+        "TestsFlextTargetOracleModels": ".models",
+        "TestsFlextTargetOracleProtocols": ".protocols",
+        "TestsFlextTargetOracleServiceBase": ".base",
+        "TestsFlextTargetOracleSettings": ".settings",
+        "TestsFlextTargetOracleTypes": ".typings",
+        "TestsFlextTargetOracleUtilities": ".utilities",
+        "api": "flext_tests",
+        "c": ".constants",
+        "d": "flext_target_oracle",
+        "e": "flext_db_oracle",
+        "e2e": ".e2e",
+        "h": "flext_target_oracle",
+        "integration": ".integration",
+        "m": ".models",
+        "p": ".protocols",
+        "performance": ".performance",
+        "r": "flext_target_oracle",
+        "s": ".base",
+        "t": ".typings",
+        "td": "flext_tests",
+        "tf": "flext_tests",
+        "tk": "flext_tests",
+        "tm": "flext_tests",
+        "u": ".utilities",
+        "unit": ".unit",
+        "x": "flext_target_oracle",
+    }),
+    public_exports=__all__,
 )
-
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)
