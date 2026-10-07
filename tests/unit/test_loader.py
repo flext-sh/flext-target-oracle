@@ -35,8 +35,10 @@ def loader_config() -> FlextTargetOracleSettings:
     Returns:
         The resulting ``FlextTargetOracleSettings``.
     """
-    # NOTE (multi-agent): mro-rn88 — project fields nest under TargetOracle.*; a flat dict
-    # is dropped by extra="ignore" (so default_target_schema silently fell back to default).
+    # NOTE (multi-agent): mro-rn88 — project fields nest under TargetOracle.*; a flat
+    # dict
+    # is dropped by extra="ignore" (so default_target_schema silently fell back to
+    # default).
     return FlextTargetOracleSettings.model_validate({
         "TargetOracle": {
             "oracle_host": "localhost",

@@ -139,6 +139,9 @@ class FlextTargetOracleSettings(FlextSettings):
 
 
 settings: FlextTargetOracleSettings = FlextTargetOracleSettings.fetch_global()
-"""Pre-instantiated project settings singleton — ``from flext_target_oracle import settings``."""
+"""Pre-instantiated project settings singleton.
+
+Exposed as ``from flext_target_oracle import settings``.
+"""
 
 __all__: list[str] = ["FlextTargetOracleSettings", "settings"]
