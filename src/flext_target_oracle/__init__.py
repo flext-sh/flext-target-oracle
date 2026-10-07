@@ -10,7 +10,7 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from flext_core import build_lazy_import_map, install_lazy_exports
+from flext_core import install_lazy_exports
 from flext_target_oracle.__version__ import (
     __author__,
     __author_email__,
@@ -79,29 +79,36 @@ __all__: tuple[str, ...] = (
     "x",
 )
 
-_LAZY_IMPORTS = MappingProxyType(
-    build_lazy_import_map(
-        MappingProxyType({
-            "._config": ("FlextTargetOracleConfig", "config"),
-            "._settings": ("FlextTargetOracleSettings", "settings"),
-            ".api": ("FlextTargetOracleService", "target_oracle"),
-            ".cli": ("FlextTargetOracleCli", "main"),
-            ".constants": ("FlextTargetOracleConstants", "c"),
-            ".models": ("FlextTargetOracleModels", "m"),
-            ".protocols": ("FlextTargetOracleProtocols", "p"),
-            ".typings": ("FlextTargetOracleTypes", "t"),
-            ".utilities": (
-                "FlextTargetOracle",
-                "FlextTargetOracleLoader",
-                "FlextTargetOracleUtilities",
-                "u",
-            ),
-            "flext_db_oracle": ("e",),
-            "flext_meltano": ("d", "h", "r", "s", "x"),
-        }),
-        alias_groups=MappingProxyType({}),
-        sort_keys=False,
-    ),
+install_lazy_exports(
+    __name__,
+    globals(),
+    MappingProxyType({
+        "FlextTargetOracle": ".utilities",
+        "FlextTargetOracleCli": ".cli",
+        "FlextTargetOracleConfig": "._config",
+        "FlextTargetOracleConstants": ".constants",
+        "FlextTargetOracleLoader": ".utilities",
+        "FlextTargetOracleModels": ".models",
+        "FlextTargetOracleProtocols": ".protocols",
+        "FlextTargetOracleService": ".api",
+        "FlextTargetOracleSettings": "._settings",
+        "FlextTargetOracleTypes": ".typings",
+        "FlextTargetOracleUtilities": ".utilities",
+        "c": ".constants",
+        "config": "._config",
+        "d": "flext_meltano",
+        "e": "flext_db_oracle",
+        "h": "flext_meltano",
+        "m": ".models",
+        "main": ".cli",
+        "p": ".protocols",
+        "r": "flext_meltano",
+        "s": "flext_meltano",
+        "settings": "._settings",
+        "t": ".typings",
+        "target_oracle": ".api",
+        "u": ".utilities",
+        "x": "flext_meltano",
+    }),
+    public_exports=__all__,
 )
-
-install_lazy_exports(__name__, globals(), _LAZY_IMPORTS, public_exports=__all__)
