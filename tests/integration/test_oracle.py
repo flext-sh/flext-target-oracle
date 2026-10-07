@@ -285,7 +285,7 @@ class TestsFlextTargetOracleOracle:
             "json_data",
         )
         stored_data = t.json_mapping_adapter().validate_json(json_str)
-        TestsTargetOracleIntegration._assert_nested_stored_roundtrip(stored_data)
+        TestsFlextTargetOracleOracle._assert_nested_stored_roundtrip(stored_data)
         tm.ok(loader.disconnect())
 
     @staticmethod
