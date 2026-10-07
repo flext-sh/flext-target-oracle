@@ -58,7 +58,9 @@ class FlextTargetOracle:
                                             ).replace(chr(46), chr(95))
                                         }{settings.TargetOracle.table_suffix}"
                                     ).upper(),
-                                    "schema-name": settings.TargetOracle.default_target_schema,
+                                    "schema-name": (
+                                        settings.TargetOracle.default_target_schema
+                                    ),
                                 },
                             ),
                         ],
@@ -117,7 +119,7 @@ class FlextTargetOracle:
             finalize_result = self.loader.finalize_all_streams()
             if finalize_result.failure:
                 return r[bool].from_failure(finalize_result)
-        return r[bool].ok(True)
+        return r[bool].ok(value=True)
 
     def _parse_singer_payload(
         self,
@@ -295,7 +297,7 @@ class FlextTargetOracle:
             stream=activate_message.stream,
             version=activate_message.version,
         )
-        return r[bool].ok(True)
+        return r[bool].ok(value=True)
 
     def _handle_record(
         self,
@@ -307,7 +309,7 @@ class FlextTargetOracle:
         )
         if load_result.failure:
             return r[bool].from_failure(load_result)
-        return r[bool].ok(True)
+        return r[bool].ok(value=True)
 
     def _handle_schema(
         self,
@@ -323,14 +325,14 @@ class FlextTargetOracle:
         if ensure_result.failure:
             return r[bool].from_failure(ensure_result)
         self.schemas[stream_name] = schema_message
-        return r[bool].ok(True)
+        return r[bool].ok(value=True)
 
     def _handle_state(
         self,
         state_message: m.Meltano.SingerStateMessage,
     ) -> p.Result[bool]:
         self.state_message = state_message
-        return r[bool].ok(True)
+        return r[bool].ok(value=True)
 
 
 __all__: list[str] = ["FlextTargetOracle"]

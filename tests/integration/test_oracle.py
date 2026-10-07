@@ -80,14 +80,17 @@ class TestsFlextTargetOracleOracle:
         tm.ok(table_res)
         table_count = _query_scalar(
             oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM user_tables WHERE table_name = :table_name',
+            'SELECT COUNT(*) AS "count" FROM user_tables '
+            "WHERE table_name = :table_name",
             "count",
             {"table_name": "TEST_USERS"},
         )
         tm.that(int(table_count), eq=1)
         column_rows = _query_rows(
             oracle_engine,
-            'SELECT column_name AS "column_name", data_type AS "data_type" FROM user_tab_columns WHERE table_name = :table_name ORDER BY column_id',
+            'SELECT column_name AS "column_name", data_type AS "data_type" '
+            "FROM user_tab_columns WHERE table_name = :table_name "
+            "ORDER BY column_id",
             {"table_name": "TEST_USERS"},
         )
         columns = {
@@ -124,7 +127,8 @@ class TestsFlextTargetOracleOracle:
         tm.ok(result)
         rows = _query_rows(
             oracle_engine,
-            'SELECT id AS "id", name AS "name", email AS "email" FROM test_insert ORDER BY id',
+            'SELECT id AS "id", name AS "name", email AS "email" '
+            "FROM test_insert ORDER BY id",
         )
         tm.that(len(rows), eq=2)
         tm.that(
@@ -222,6 +226,23 @@ class TestsFlextTargetOracleOracle:
         tm.ok(loader.disconnect())
 
     @staticmethod
+    def _assert_nested_stored_roundtrip(stored_data: t.JsonMapping) -> None:
+        """Assert the nested JSON round-trip preserved customer and items."""
+        customer = stored_data.get("customer")
+        customer_data = t.json_mapping_adapter().validate_python(customer)
+        customer_name = customer_data.get("name")
+        tm.that(customer_name, eq="Acme Corp")
+        customer_address = customer_data.get("address")
+        customer_address_data = t.json_mapping_adapter().validate_python(
+            customer_address,
+        )
+        customer_city = customer_address_data.get("city")
+        tm.that(customer_city, eq="objecttown")
+        items = stored_data.get("items")
+        items_data = t.Tests.CONTAINER_MAPPING_SEQUENCE_ADAPTER.validate_python(items)
+        tm.that(len(items_data), eq=2)
+
+    @staticmethod
     @pytest.mark.usefixtures("clean_database")
     def test_json_storage_mode(
         oracle_config: FlextTargetOracleSettings,
@@ -264,19 +285,7 @@ class TestsFlextTargetOracleOracle:
             "json_data",
         )
         stored_data = t.json_mapping_adapter().validate_json(json_str)
-        customer = stored_data.get("customer")
-        customer_data = t.json_mapping_adapter().validate_python(customer)
-        customer_name = customer_data.get("name")
-        tm.that(customer_name, eq="Acme Corp")
-        customer_address = customer_data.get("address")
-        customer_address_data = t.json_mapping_adapter().validate_python(
-            customer_address,
-        )
-        customer_city = customer_address_data.get("city")
-        tm.that(customer_city, eq="objecttown")
-        items = stored_data.get("items")
-        items_data = t.Tests.CONTAINER_MAPPING_SEQUENCE_ADAPTER.validate_python(items)
-        tm.that(len(items_data), eq=2)
+        TestsFlextTargetOracleOracle._assert_nested_stored_roundtrip(stored_data)
         tm.ok(loader.disconnect())
 
     @staticmethod
@@ -320,7 +329,9 @@ class TestsFlextTargetOracleOracle:
         tm.ok(table_res)
         column_rows = _query_rows(
             oracle_engine,
-            'SELECT column_name AS "column_name", column_id AS "column_id" FROM user_tab_columns WHERE table_name = :table_name ORDER BY column_id',
+            'SELECT column_name AS "column_name", column_id AS "column_id" '
+            "FROM user_tab_columns WHERE table_name = :table_name "
+            "ORDER BY column_id",
             {"table_name": "TEST_ORDERING"},
         )
         columns = [str(row.root["column_name"]) for row in column_rows]
@@ -403,7 +414,8 @@ class TestsFlextTargetOracleOracle:
         loader.ensure_table_exists(stream_name, schema_dict, key_props)
         index_rows = _query_rows(
             oracle_engine,
-            'SELECT index_name AS "index_name", uniqueness AS "uniqueness" FROM user_indexes WHERE table_name = :table_name',
+            'SELECT index_name AS "index_name", uniqueness AS "uniqueness" '
+            "FROM user_indexes WHERE table_name = :table_name",
             {"table_name": "TEST_INDEXES"},
         )
         indexes = {
@@ -507,7 +519,8 @@ class TestsFlextTargetOracleOracle:
         )
         column_rows = _query_rows(
             oracle_engine,
-            "SELECT column_name AS \"column_name\" FROM user_tab_columns WHERE table_name = 'USERS'",
+            'SELECT column_name AS "column_name" FROM user_tab_columns '
+            "WHERE table_name = 'USERS'",
         )
         columns = [str(row.root["column_name"]) for row in column_rows]
         tm.that(columns, has="FULL_NAME")
@@ -516,7 +529,8 @@ class TestsFlextTargetOracleOracle:
         tm.that(columns, lacks="INTERNAL_ID")
         rows = _query_rows(
             oracle_engine,
-            'SELECT full_name AS "full_name", email_address AS "email_address" FROM users WHERE id = 1',
+            'SELECT full_name AS "full_name", email_address AS "email_address" '
+            "FROM users WHERE id = 1",
         )
         assert rows
         tm.that(rows[0].root["full_name"], eq="John Doe")

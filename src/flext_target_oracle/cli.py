@@ -55,7 +55,8 @@ class FlextTargetOracleCli:
         if not argv or argv[0] in {"help", "-h", "--help"}:
             return r[str].ok(self._get_help_text())
         command_name = argv[0]
-        # NOTE (multi-agent): mro-rn88 — CQRS: CLI composes the pure-data Command DTO and
+        # NOTE (multi-agent): mro-rn88 — CQRS: CLI composes the pure-data Command DTO
+        # and
         # hands it to the service handler; execution no longer lives on the model.
         service = FlextTargetOracleService.fetch_global()
         if command_name == "validate":
@@ -69,7 +70,12 @@ class FlextTargetOracleCli:
     @staticmethod
     def _get_help_text() -> str:
         """Return text help for target CLI usage."""
-        return "Usage: target-oracle [validate|load|about]\n  validate  validate settings and connection\n  load      initialize target for loading\n  about     show project information"
+        return (
+            "Usage: target-oracle [validate|load|about]\n"
+            "  validate  validate settings and connection\n"
+            "  load      initialize target for loading\n"
+            "  about     show project information"
+        )
 
 
 def main() -> int:

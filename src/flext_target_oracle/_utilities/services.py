@@ -58,7 +58,7 @@ class Utilities:
             )
             if tables_result.failure:
                 return r[bool].from_failure(tables_result)
-            return r[bool].ok(True)
+            return r[bool].ok(value=True)
 
     class FlextTargetOracleSchemaService:
         """Minimal schema management service implements SchemaService protocol."""
@@ -81,7 +81,7 @@ class Utilities:
             table_name = stream.table_name
             if not table_name:
                 return e.fail_validation("table_name", error="invalid")
-            return r[bool].ok(True)
+            return r[bool].ok(value=True)
 
         @staticmethod
         def execute() -> p.Result[bool]:
@@ -90,7 +90,7 @@ class Utilities:
             Returns:
                 The resulting ``p.Result[bool]``.
             """
-            return r[bool].ok(True)
+            return r[bool].ok(value=True)
 
     class FlextTargetOracleBatchService:
         """Minimal batching service implements BatchService protocol."""
@@ -113,7 +113,7 @@ class Utilities:
                 The resulting ``p.Result[bool]``.
             """
             self._batches[stream_name].append(record_message)
-            return r[bool].ok(True)
+            return r[bool].ok(value=True)
 
         def execute(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
             """Run default batch flush operation.
@@ -146,10 +146,10 @@ class Utilities:
                 The resulting ``p.Result[bool]``.
             """
             self._batches[stream_name] = list[m.Meltano.SingerRecordMessage]()
-            return r[bool].ok(True)
+            return r[bool].ok(value=True)
 
     class FlextTargetOracleRecordService:
-        """Record validation and transformation service implements RecordService protocol."""
+        """Record validation and transformation service (RecordService)."""
 
         def __init__(self, settings: FlextTargetOracleSettings) -> None:
             """Store record service configuration."""
@@ -161,7 +161,7 @@ class Utilities:
             Returns:
                 The resulting ``p.Result[bool]``.
             """
-            return r[bool].ok(True)
+            return r[bool].ok(value=True)
 
         @staticmethod
         def transform_record(
@@ -201,7 +201,7 @@ class Utilities:
             """
             _ = record_message
             _ = schema_message
-            return r[bool].ok(True)
+            return r[bool].ok(value=True)
 
 
 __all__: list[str] = ["Utilities"]

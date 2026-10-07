@@ -17,9 +17,12 @@ from tests.base import s
 class TestsFlextTargetOracleConfig:
     """Validate the public Oracle settings contract (namespaced TargetOracle.*)."""
 
-    # NOTE (multi-agent): mro-rn88 — ADR-005 made settings simple scalars namespaced under
-    # TargetOracle.*; the old get_oracle_config/get_table_name/validate_business_rules were
-    # dropped as dead code (inlined into consumers), so the contract is the typed scalars.
+    # NOTE (multi-agent): mro-rn88 — ADR-005 made settings simple scalars namespaced
+    # under
+    # TargetOracle.*; the old
+    # get_oracle_config/get_table_name/validate_business_rules were
+    # dropped as dead code (inlined into consumers), so the contract is the typed
+    # scalars.
     @staticmethod
     def test_defaults_and_core_fields() -> None:
         """Test defaults and core fields."""
@@ -43,7 +46,8 @@ class TestsFlextTargetOracleConfig:
         """Test test service settings include tests namespace."""
         settings = s.fetch_settings()
 
-        # NOTE (multi-agent): mro-rn88 — the composed test settings expose BOTH the shared
+        # NOTE (multi-agent): mro-rn88 — the composed test settings expose BOTH the
+        # shared
         # Tests namespace and the project TargetOracle namespace via the public surface.
         tm.that(settings.Tests.model_dump(), none=False)
         assert settings.TargetOracle.oracle_host

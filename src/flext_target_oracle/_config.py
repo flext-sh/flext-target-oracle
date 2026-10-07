@@ -1,4 +1,6 @@
-"""FlextTargetOracleConfig — frozen config singleton for flext-target-oracle (ADR-005 §7).
+"""FlextTargetOracleConfig — frozen config singleton for flext-target-oracle.
+
+See ADR-005 §7.
 
 Model-less: business rules live in ``config/*.yaml`` under the ``TargetOracle:`` key and
 are exposed through the open ``config.TargetOracle`` namespace (``extra="allow"``), with
@@ -47,12 +49,17 @@ class FlextTargetOracleConfig(FlextMeltanoConfig):
     TargetOracle: Annotated[
         _TargetOracleNamespace,
         m.Field(
-            description="Open namespace exposing ``config/*.yaml`` under ``TargetOracle``.",
+            description=(
+                "Open namespace exposing ``config/*.yaml`` under ``TargetOracle``."
+            ),
         ),
     ] = _TargetOracleNamespace()
 
 
 config: FlextTargetOracleConfig = FlextTargetOracleConfig.fetch_global()
-"""Pre-instantiated frozen config singleton — ``from flext_target_oracle import config``."""
+"""Pre-instantiated frozen config singleton.
+
+Exposed as ``from flext_target_oracle import config``.
+"""
 
 __all__: list[str] = ["FlextTargetOracleConfig", "config"]
