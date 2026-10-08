@@ -12,16 +12,16 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tests import FlextTestsModuleGovernanceMixin
+from flext_tests import u
 
 from tests import c, m
 
 
-class TestsFlextTargetOracleModuleGovernance(FlextTestsModuleGovernanceMixin):
+class TestsFlextTargetOracleModuleGovernance(u.FlextTestsModuleGovernanceMixin):
     """Behavior contract for test_module_governance."""
 
     _test_file = __file__
-    _tests_config = c.TargetOracle.Tests
+    _tests_config = c.TargetOracle.Tests()
 
     @staticmethod
     def test_target_oracle_namespace_does_not_wrap_meltano_singer_models() -> None:

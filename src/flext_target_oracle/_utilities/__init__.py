@@ -20,7 +20,6 @@ if TYPE_CHECKING:
     from flext_target_oracle._utilities.observability import (
         FlextTargetOracleUtilitiesObservability,
     )
-    from flext_target_oracle._utilities.services import Utilities
 
 
 __all__: tuple[str, ...] = (
@@ -29,7 +28,6 @@ __all__: tuple[str, ...] = (
     "FlextTargetOracleUtilitiesBase",
     "FlextTargetOracleUtilitiesErrors",
     "FlextTargetOracleUtilitiesObservability",
-    "Utilities",
 )
 
 install_lazy_exports(
@@ -41,7 +39,6 @@ install_lazy_exports(
         "FlextTargetOracleUtilitiesBase": ".base",
         "FlextTargetOracleUtilitiesErrors": ".errors",
         "FlextTargetOracleUtilitiesObservability": ".observability",
-        "Utilities": ".services",
     }),
     public_exports=__all__,
 )

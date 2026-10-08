@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.performance
 @pytest.mark.integration
+@pytest.mark.docker
 class TestsFlextTargetOraclePerformance:
     """Keep fast checks for throughput-sensitive code paths."""
 

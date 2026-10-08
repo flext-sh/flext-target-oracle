@@ -195,7 +195,7 @@ class FlextTargetOracle:
         """
         return self.loader.finalize_all_streams()
 
-    def get_implementation_metrics(self) -> m.TargetOracle.ImplementationMetrics:
+    def compute_implementation_metrics(self) -> m.TargetOracle.ImplementationMetrics:
         """Return static target metrics."""
         return m.TargetOracle.ImplementationMetrics(
             streams_configured=len(self.schemas),

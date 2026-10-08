@@ -127,61 +127,6 @@ class FlextTargetOracleProtocolsBase:
             """Track progress of Oracle loading operations."""
             ...
 
-    # Canonical MRO facade protocols
-    @runtime_checkable
-    class ConnectionService(Protocol):
-        """Contract for Oracle connection services."""
-
-        def get_connection_info(
-            self,
-        ) -> p.Result[m.TargetOracle.OracleConnectionConfig]:
-            """Return the effective Oracle connection information."""
-            ...
-
-        def test_connection(self) -> p.Result[bool]:
-            """Validate Oracle connectivity."""
-            ...
-
-    @runtime_checkable
-    class SchemaService(Protocol):
-        """Contract for Oracle schema services."""
-
-        def ensure_table_exists(
-            self,
-            stream: m.TargetOracle.SingerStreamModel,
-            schema_message: m.Meltano.SingerSchemaMessage,
-        ) -> p.Result[bool]:
-            """Ensure destination table exists for a stream."""
-            ...
-
-    @runtime_checkable
-    class BatchService(Protocol):
-        """Contract for Oracle batch services."""
-
-        def add_record(
-            self,
-            stream_name: str,
-            record_message: m.Meltano.SingerRecordMessage,
-        ) -> p.Result[bool]:
-            """Queue one record for batch processing."""
-            ...
-
-        def flush_all_batches(self) -> p.Result[m.TargetOracle.LoadStatisticsModel]:
-            """Flush all queued batches and return aggregated stats."""
-            ...
-
-    @runtime_checkable
-    class RecordService(Protocol):
-        """Contract for record transformation services."""
-
-        def transform_record(
-            self,
-            record_message: m.Meltano.SingerRecordMessage,
-            stream: m.TargetOracle.SingerStreamModel,
-        ) -> p.Result[m.Meltano.SingerRecordMessage]:
-            """Transform one Singer record into Oracle-ready payload."""
-            ...
-
     @runtime_checkable
     class OracleTargetGroupProtocol(Protocol):
         """Protocol for the namespaced ``settings.TargetOracle.*`` scalar group."""

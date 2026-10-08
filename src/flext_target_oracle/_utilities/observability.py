@@ -33,7 +33,7 @@ class FlextTargetOracleUtilitiesObservability:
         username: str,
         oracle_service: str,
         error_code: str | None = None,
-    ) -> e.FlextTargetOracleExceptions.AuthenticationError:
+    ) -> e.Exceptions.AuthenticationError:
         """Build an authentication failure error with service context.
 
         Returns:
@@ -45,9 +45,9 @@ class FlextTargetOracleUtilitiesObservability:
             oracle_service=oracle_service,
             error_code=error_code or "",
         )
-        return e.FlextTargetOracleExceptions.AuthenticationError(
+        return e.Exceptions.AuthenticationError(
             f"Oracle authentication failed for {username} on {oracle_service}",
-            metadata=FlextTargetOracleUtilitiesErrors.FlextTargetOracleErrorMetadata(
+            metadata=FlextTargetOracleUtilitiesErrors.ErrorMetadata(
                 code=error_code or c.ErrorCode.AUTHENTICATION_ERROR,
                 context={"user": username, "oracle_service": oracle_service},
                 correlation_id=None,
@@ -60,7 +60,7 @@ class FlextTargetOracleUtilitiesObservability:
         connection_string: str,
         error_code: str | None = None,
         recovery_strategy: str = "retry_with_backoff",
-    ) -> e.FlextTargetOracleExceptions.OracleConnectionError:
+    ) -> e.Exceptions.OracleConnectionError:
         """Build a connection error for unavailable Oracle endpoints.
 
         Returns:
@@ -72,9 +72,9 @@ class FlextTargetOracleUtilitiesObservability:
             error_code=error_code or "",
             recovery_strategy=recovery_strategy,
         )
-        return e.FlextTargetOracleExceptions.OracleConnectionError(
+        return e.Exceptions.OracleConnectionError(
             f"Oracle database unavailable: {connection_string}",
-            metadata=FlextTargetOracleUtilitiesErrors.FlextTargetOracleErrorMetadata(
+            metadata=FlextTargetOracleUtilitiesErrors.ErrorMetadata(
                 code=error_code or c.ErrorCode.CONNECTION_ERROR,
                 context={
                     "connection_string": connection_string,
@@ -90,7 +90,7 @@ class FlextTargetOracleUtilitiesObservability:
         stream_name: str,
         record_count: int,
         failed_records: int,
-    ) -> e.FlextTargetOracleExceptions.ProcessingError:
+    ) -> e.Exceptions.ProcessingError:
         """Build a Singer record processing failure.
 
         Returns:
@@ -102,12 +102,12 @@ class FlextTargetOracleUtilitiesObservability:
             record_count=record_count,
             failed_records=failed_records,
         )
-        return e.FlextTargetOracleExceptions.ProcessingError(
+        return e.Exceptions.ProcessingError(
             "Record processing failed for %s: %s/%s",
             stream_name,
             failed_records,
             record_count,
-            metadata=FlextTargetOracleUtilitiesErrors.FlextTargetOracleErrorMetadata(
+            metadata=FlextTargetOracleUtilitiesErrors.ErrorMetadata(
                 code=c.ErrorCode.PROCESSING_ERROR,
                 context={
                     "stream_name": stream_name,
@@ -124,7 +124,7 @@ class FlextTargetOracleUtilitiesObservability:
         stream_name: str,
         schema_errors: t.StrSequence,
         singer_specification: str = "1.5.0",
-    ) -> e.FlextTargetOracleExceptions.SchemaError:
+    ) -> e.Exceptions.SchemaError:
         """Build a Singer schema validation failure.
 
         Returns:
@@ -137,9 +137,9 @@ class FlextTargetOracleUtilitiesObservability:
             singer_specification=singer_specification,
         )
 
-        return e.FlextTargetOracleExceptions.SchemaError(
+        return e.Exceptions.SchemaError(
             f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
-            metadata=FlextTargetOracleUtilitiesErrors.FlextTargetOracleErrorMetadata(
+            metadata=FlextTargetOracleUtilitiesErrors.ErrorMetadata(
                 code=c.ErrorCode.VALIDATION_ERROR,
                 context={
                     "stream_name": stream_name,

@@ -23,10 +23,10 @@ dependencies = [
   "annotated-types>=0.8.0",
   "beartype>=0.22.9",
   "dependency-injector>=4.49.1",
-  "flext-cli",
-  "flext-core",
-  "flext-db-oracle",
-  "flext-meltano",
+  "flext-cli @ git+https://github.com/flext-sh/flext-cli.git@0.12.0-dev",
+  "flext-core @ git+https://github.com/flext-sh/flext-core.git@0.12.0-dev",
+  "flext-db-oracle @ git+https://github.com/flext-sh/flext-db-oracle.git@0.12.0-dev",
+  "flext-meltano @ git+https://github.com/flext-sh/flext-meltano.git@0.12.0-dev",
   "packaging>=26.3",
   "pydantic>=2.13.5,<3",
   "pydantic-settings>=2.15.0",
@@ -69,14 +69,14 @@ Homepage = "https://github.com/flext-sh/flext"
 
 [dependency-groups]
 codegen = [
-  "flext-infra",
+  "flext-infra @ git+https://github.com/flext-sh/flext-infra.git@0.12.0-dev",
 ]
 dev = [
   "actionlint-py>=1.7.12.24",
   "bandit>=1.9.4",
   "deptry",
   "editables>=0.6",
-  "flext-tests",
+  "flext-tests @ git+https://github.com/flext-sh/flext-tests.git@0.12.0-dev",
   "hypothesis",
   "mkdocs",
   "mkdocs-autorefs",
@@ -433,6 +433,7 @@ ignore = [
   "camelcase-imported-as-lowercase",
   "implicit-namespace-package",
   "missing-required-import",
+  "missing-trailing-comma",
   "runtime-import-in-type-checking-block",
   "typing-only-first-party-import",
   "typing-only-standard-library-import",
@@ -500,6 +501,10 @@ split-on-trailing-comma = false
 [tool.ruff.lint.per-file-ignores]
 "**/__init__.py" = ["line-too-long", "non-empty-init-module", "unused-import"]
 "**/_config.py" = ["invalid-function-name"]
+"**/_utilities/credential.py" = [
+  "subprocess-without-shell-equals-true",
+  "suspicious-subprocess-import",
+]
 "**/bin/**" = [
   "docstring-missing-exception",
   "docstring-missing-returns",
@@ -515,8 +520,17 @@ split-on-trailing-comma = false
   "undocumented-public-method",
   "unused-class-method-argument",
 ]
+"**/bootstrap.py" = [
+  "subprocess-without-shell-equals-true",
+  "suspicious-subprocess-import",
+]
 "**/docx.py" = ["import-outside-top-level"]
 "**/file_test_helpers.py" = ["line-too-long"]
+"**/flext_core/_models/pydantic.py" = [
+  "any-type",
+  "builtin-argument-shadowing",
+  "too-many-arguments",
+]
 "**/flextcliutilitiesfiletesthelpersmixin_part_03.py" = ["line-too-long"]
 "**/framework.py" = ["banned-api", "import-outside-top-level"]
 "**/pptx.py" = ["import-outside-top-level"]
@@ -524,6 +538,7 @@ split-on-trailing-comma = false
 "**/tests/**" = [
   "boolean-positional-value-in-call",
   "compare-to-empty-string",
+  "import-private-name",
   "magic-value-comparison",
   "mutable-class-default",
   "no-self-use",
@@ -598,6 +613,7 @@ split-on-trailing-comma = false
   "typing-only-first-party-import",
 ]
 "tests/**/*.py" = ["assert"]
+"tests/test_snapshot_drill.py" = ["import-private-name"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -619,14 +635,6 @@ line_length = 88
 preserve_quotes = true
 section_whitelines = 1
 whitelines = 1
-
-[tool.uv.sources]
-flext-cli = { workspace = true }
-flext-core = { workspace = true }
-flext-db-oracle = { workspace = true }
-flext-infra = { workspace = true }
-flext-meltano = { workspace = true }
-flext-tests = { workspace = true }
 
 [tool.uv]
 link-mode = "copy"

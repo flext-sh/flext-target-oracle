@@ -38,16 +38,6 @@ logging.basicConfig(level=logging.INFO)
 logger = u.fetch_logger(__name__)
 
 
-def _json_text(value: t.JsonValue) -> str:
-    """Serialize JSON-compatible example payloads through the CLI facade.
-
-    Returns:
-        The resulting ``str``.
-    """
-    serialized: str = cli_u.Cli.json_dumps(value).unwrap()
-    return serialized
-
-
 def create_configuration() -> FlextTargetOracleSettings:
     """Create basic Oracle target configuration.
 
@@ -96,14 +86,14 @@ def create_sample_schema_message() -> m.Meltano.SingerSchemaMessage:
             "stream": "users",
             "schema": {
                 "type": "object",
-                "properties": _json_text({
+                "properties": cli_u.Cli.json_dumps({
                     "id": {"type": "integer"},
                     "name": {"type": "string"},
                     "email": {"type": "string"},
                     "created_at": {"type": "string", "format": "date-time"},
                     "active": {"type": "boolean"},
-                }),
-                "required": _json_text(["id", "name", "email"]),
+                }).unwrap(),
+                "required": cli_u.Cli.json_dumps(["id", "name", "email"]).unwrap(),
             },
             "key_properties": ["id"],
         })
