@@ -17,7 +17,7 @@ import os
 import signal
 import time
 from datetime import UTC
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from flext_cli import u as cli_u
 
@@ -33,6 +33,8 @@ type SingerMessage = (
     | m.Meltano.SingerStateMessage
     | m.Meltano.SingerActivateVersionMessage
 )
+
+logger = u.fetch_logger(__name__)
 
 
 class HealthStatus(m.BaseModel):
@@ -83,7 +85,7 @@ class ProductionConfig:
             LOAD_METHOD: Loading method (default: BULK_INSERT)
 
         """
-        u.logger.info("Creating production configuration from environment")
+        logger.info("Creating production configuration from environment")
         oracle_host = os.getenv("ORACLE_HOST")
         oracle_service = os.getenv("ORACLE_SERVICE")
         oracle_user = os.getenv("ORACLE_USER")
@@ -138,18 +140,18 @@ class ProductionConfig:
                 "transaction_timeout": connection_timeout,
             },
         })
-        u.logger.info(
+        logger.info(
             "Production configuration created: %s:%s/%s",
             oracle_host,
             oracle_port,
             oracle_service,
         )
-        u.logger.info(
+        logger.info(
             "Target schema: %s, Batch size: %s",
             default_target_schema,
             batch_size,
         )
-        u.logger.info(
+        logger.info(
             "Load method: %s, Connection timeout: %ss",
             load_method,
             connection_timeout,
@@ -159,6 +161,8 @@ class ProductionConfig:
 
 class ProductionTargetManager:
     """Production-grade target manager with comprehensive error handling."""
+
+    logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     def __init__(self, settings: FlextTargetOracleSettings) -> None:
         """Initialize production target manager with validated settings."""
@@ -175,7 +179,7 @@ class ProductionTargetManager:
             r with health status and metrics
 
         """
-        u.logger.debug("Performing health check")
+        self.logger.debug("Performing health check")
         health_status = HealthStatus(timestamp=time.time())
         try:
             return self._health_check_status(health_status)
@@ -188,7 +192,7 @@ class ProductionTargetManager:
             RuntimeError,
             ImportError,
         ) as e:
-            u.logger.exception("Health check failed")
+            self.logger.exception("Health check failed")
             health_status.status = "unhealthy"
             health_status.error = str(e)
             return r[t.JsonMapping].fail(f"Health check error: {e}", exception=e)
@@ -211,7 +215,7 @@ class ProductionTargetManager:
             self._record_oracle_connectivity(health_status)
             target_metrics = self.target.compute_implementation_metrics()
             health_status.metrics.update(target_metrics.model_dump())
-        u.logger.debug("Health check completed: %s", health_status.status)
+        self.logger.debug("Health check completed: %s", health_status.status)
         return r[t.JsonMapping].ok(health_status.model_dump())
 
     def _record_oracle_connectivity(self, health_status: HealthStatus) -> None:
@@ -244,7 +248,7 @@ class ProductionTargetManager:
             r[bool]: Success if initialization complete, failure with error details
 
         """
-        u.logger.info("Initializing production Oracle target")
+        self.logger.info("Initializing production Oracle target")
         try:
             return self._initialize_checked()
         except (
@@ -256,7 +260,7 @@ class ProductionTargetManager:
             RuntimeError,
             ImportError,
         ) as e:
-            u.logger.exception("Failed to initialize production target")
+            self.logger.exception("Failed to initialize production target")
             return r[bool].fail(f"Initialization error: {e}", exception=e)
 
     def _initialize_checked(self) -> p.Result[bool]:
@@ -265,19 +269,19 @@ class ProductionTargetManager:
         Returns:
             The resulting ``p.Result[bool]``.
         """
-        u.logger.info("Validating configuration domain rules")
+        self.logger.info("Validating configuration domain rules")
         validation_result = r[bool].ok(value=True)
         if validation_result.failure:
             return r[bool].fail(
                 f"Configuration validation failed: {validation_result.error}",
             )
-        u.logger.info("Creating Oracle target instance")
+        self.logger.info("Creating Oracle target instance")
         self.target = FlextTargetOracle(self._settings)
-        u.logger.info("Testing Oracle database connectivity")
+        self.logger.info("Testing Oracle database connectivity")
         connection_result = self.target.test_connection()
         if connection_result.failure:
             return r[bool].fail("Oracle connectivity test failed")
-        u.logger.info("Production target initialized successfully")
+        self.logger.info("Production target initialized successfully")
         return r[bool].ok(value=True)
 
     def process_singer_stream(
@@ -295,7 +299,7 @@ class ProductionTargetManager:
         """
         if not self.target:
             return r[t.JsonMapping].fail("Target not initialized")
-        u.logger.info("Processing Singer stream with %d messages", len(messages))
+        self.logger.info("Processing Singer stream with %d messages", len(messages))
         stats = ProcessingStats(processing_start_time=time.time())
         try:
             return self._process_singer_stream_checked(messages, stats)
@@ -308,7 +312,7 @@ class ProductionTargetManager:
             RuntimeError,
             ImportError,
         ) as e:
-            u.logger.exception("Unexpected error during stream processing")
+            self.logger.exception("Unexpected error during stream processing")
             stats.processing_end_time = time.time()
             stats.errors_encountered += 1
             return r[t.JsonMapping].fail(f"Stream processing error: {e}", exception=e)
@@ -325,7 +329,7 @@ class ProductionTargetManager:
         """
         for index, message in enumerate(messages):
             if self.shutdown_requested:
-                u.logger.info("Shutdown requested, stopping message processing")
+                self.logger.info("Shutdown requested, stopping message processing")
                 break
             self._process_singer_message(index, len(messages), message, stats)
         self._finalize_processing_stats(stats)
@@ -340,19 +344,23 @@ class ProductionTargetManager:
     ) -> None:
         """Process one Singer message and update counters."""
         message_type = self._message_type(message)
-        u.logger.debug("Processing message %d/%d: %s", index + 1, total, message_type)
+        self.logger.debug(
+            "Processing message %d/%d: %s", index + 1, total, message_type
+        )
         if self.target is None:
             stats.errors_encountered += 1
-            u.logger.error("Target not initialized")
+            self.logger.error("Target not initialized")
             return
         result = self.target.process_singer_message(message)
         if result.success:
             self._record_processed_message(stats, message_type)
         else:
             stats.errors_encountered += 1
-            u.logger.error("Message %d processing failed: %s", index + 1, result.error)
+            self.logger.error(
+                "Message %d processing failed: %s", index + 1, result.error
+            )
         if (index + 1) % 1000 == 0:
-            u.logger.info("Processed %d/%d messages", index + 1, total)
+            self.logger.info("Processed %d/%d messages", index + 1, total)
 
     @staticmethod
     def _message_type(message: SingerMessage) -> str:
@@ -381,19 +389,19 @@ class ProductionTargetManager:
         if self.target is None:
             stats.errors_encountered += 1
             return
-        u.logger.info("Finalizing target operations")
+        self.logger.info("Finalizing target operations")
         finalize_result = self.target.finalize()
         if finalize_result.success:
             final_stats = finalize_result.value
             stats.messages_processed += final_stats.total_records
-            u.logger.info("Target finalization completed successfully")
+            self.logger.info("Target finalization completed successfully")
         else:
-            u.logger.error("Target finalization failed: %s", finalize_result.error)
+            self.logger.error("Target finalization failed: %s", finalize_result.error)
             stats.errors_encountered += 1
         stats.processing_end_time = time.time()
         processing_duration = stats.processing_end_time - stats.processing_start_time
         stats.processing_duration_seconds = processing_duration
-        u.logger.info(
+        self.logger.info(
             "Stream processing completed in %.2f seconds",
             processing_duration,
         )
@@ -405,7 +413,7 @@ class ProductionTargetManager:
             r[bool]: Success if shutdown completed cleanly
 
         """
-        u.logger.info("Starting graceful shutdown")
+        self.logger.info("Starting graceful shutdown")
         try:
             return self._shutdown_checked()
         except (
@@ -417,7 +425,7 @@ class ProductionTargetManager:
             RuntimeError,
             ImportError,
         ) as e:
-            u.logger.exception("Error during shutdown")
+            self.logger.exception("Error during shutdown")
             return r[bool].fail(f"Shutdown error: {e}", exception=e)
 
     def _shutdown_checked(self) -> p.Result[bool]:
@@ -427,16 +435,16 @@ class ProductionTargetManager:
             The resulting ``p.Result[bool]``.
         """
         if self.target:
-            u.logger.info("Finalizing pending operations")
+            self.logger.info("Finalizing pending operations")
             self.target.finalize()
-            u.logger.info("Cleaning up target resources")
+            self.logger.info("Cleaning up target resources")
             self.target = None
-        u.logger.info("Graceful shutdown completed")
+        self.logger.info("Graceful shutdown completed")
         return r[bool].ok(value=True)
 
     def _signal_handler(self, signum: int, _frame: FrameType | None) -> None:
         """Handle shutdown signals gracefully."""
-        u.logger.info("Received signal %d, initiating graceful shutdown", signum)
+        self.logger.info("Received signal %d, initiating graceful shutdown", signum)
         self.shutdown_requested = True
 
 
@@ -459,7 +467,7 @@ def demonstrate_production_setup() -> None:
         ValueError: If a ``(ValueError, TypeError, KeyError, AttributeError, OSError,
             RuntimeError, ImportError)`` is caught.
     """
-    u.logger.info("Starting production setup demonstration")
+    logger.info("Starting production setup demonstration")
     try:
         _demonstrate_production_setup_checked()
     except (
@@ -471,7 +479,7 @@ def demonstrate_production_setup() -> None:
         RuntimeError,
         ImportError,
     ):
-        u.logger.exception("Production demonstration failed")
+        logger.exception("Production demonstration failed")
         raise
 
 
@@ -481,23 +489,23 @@ def _demonstrate_production_setup_checked() -> None:
     Raises:
         SystemExit: If ``init_result.failure``.
     """
-    u.logger.info("Step 1: Creating production configuration")
+    logger.info("Step 1: Creating production configuration")
     settings = ProductionConfig.create_from_environment()
-    u.logger.info("Step 2: Initializing production target manager")
+    logger.info("Step 2: Initializing production target manager")
     manager = ProductionTargetManager(settings)
     init_result = manager.initialize()
     if init_result.failure:
-        u.logger.error("Production initialization failed: %s", init_result.error)
+        logger.error("Production initialization failed: %s", init_result.error)
         raise SystemExit(1)
-    u.logger.info("Step 3: Performing initial health check")
+    logger.info("Step 3: Performing initial health check")
     _log_health_result(manager.health_check())
-    u.logger.info("Step 4: Creating sample production data stream")
+    logger.info("Step 4: Creating sample production data stream")
     messages = create_production_sample_stream()
-    u.logger.info("Step 5: Processing production data stream")
+    logger.info("Step 5: Processing production data stream")
     _log_processing_result(manager.process_singer_stream(messages))
-    u.logger.info("Step 6: Performing final health check")
+    logger.info("Step 6: Performing final health check")
     _log_final_health(manager.health_check())
-    u.logger.info("Step 7: Performing graceful shutdown")
+    logger.info("Step 7: Performing graceful shutdown")
     _log_shutdown_result(manager.shutdown())
 
 
@@ -508,11 +516,11 @@ def _log_health_result(health_result: p.Result[t.JsonMapping]) -> None:
         RuntimeError: If Health check failed.
     """
     if health_result.failure:
-        u.logger.warning("Health check failed: %s", health_result.error)
+        logger.warning("Health check failed: %s", health_result.error)
         msg = f"Health check failed: {health_result.error}"
         raise RuntimeError(msg)
     health_data = health_result.value
-    u.logger.info(
+    logger.info(
         "Health check status",
         status=str(health_data.get("status", "unknown")),
     )
@@ -521,7 +529,7 @@ def _log_health_result(health_result: p.Result[t.JsonMapping]) -> None:
         cast("t.JsonMapping", checks_obj) if isinstance(checks_obj, dict) else {}
     )
     if checks:
-        u.logger.info(
+        logger.info(
             "Oracle connectivity",
             connectivity=str(checks.get("oracle_connectivity", "unknown")),
         )
@@ -534,12 +542,12 @@ def _log_processing_result(processing_result: p.Result[t.JsonMapping]) -> None:
         RuntimeError: If Production processing failed.
     """
     if processing_result.failure:
-        u.logger.error("Production processing failed: %s", processing_result.error)
+        logger.error("Production processing failed: %s", processing_result.error)
         msg = f"Production processing failed: {processing_result.error}"
         raise RuntimeError(msg)
     stats = processing_result.value
-    u.logger.info("=== Production Processing Statistics ===")
-    u.logger.info(
+    logger.info("=== Production Processing Statistics ===")
+    logger.info(
         "Processing stats",
         messages_processed=str(stats.get("messages_processed", 0)),
         records_processed=str(stats.get("records_processed", 0)),
@@ -547,7 +555,7 @@ def _log_processing_result(processing_result: p.Result[t.JsonMapping]) -> None:
         errors_encountered=str(stats.get("errors_encountered", 0)),
     )
     if stats.get("total_records"):
-        u.logger.info(
+        logger.info(
             "Load stats",
             total_records=str(stats.get("total_records", 0)),
             successful_records=str(stats.get("successful_records", 0)),
@@ -558,7 +566,7 @@ def _log_processing_result(processing_result: p.Result[t.JsonMapping]) -> None:
 def _log_final_health(final_health: p.Result[t.JsonMapping]) -> None:
     """Log final health result."""
     if final_health.success:
-        u.logger.info(
+        logger.info(
             "Final health status",
             status=str(final_health.value.get("status", "unknown")),
         )
@@ -567,9 +575,9 @@ def _log_final_health(final_health: p.Result[t.JsonMapping]) -> None:
 def _log_shutdown_result(shutdown_result: p.Result[bool]) -> None:
     """Log shutdown result."""
     if shutdown_result.success:
-        u.logger.info("Production shutdown completed successfully")
+        logger.info("Production shutdown completed successfully")
     else:
-        u.logger.error("Shutdown issues: %s", shutdown_result.error)
+        logger.error("Shutdown issues: %s", shutdown_result.error)
 
 
 def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
@@ -659,23 +667,23 @@ def main() -> None:
         SystemExit: If ``missing_vars``; or if a ``(ValueError, TypeError, KeyError,
             AttributeError, OSError, RuntimeError, ImportError)`` is caught.
     """
-    u.logger.info("FLEXT Target Oracle - Production Setup Example")
-    u.logger.info("=" * 60)
+    logger.info("FLEXT Target Oracle - Production Setup Example")
+    logger.info("=" * 60)
     required_vars = ["ORACLE_HOST", "ORACLE_SERVICE", "ORACLE_USER", "ORACLE_PASSWORD"]
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     if missing_vars:
-        u.logger.error(
+        logger.error(
             "Missing required environment variables: %s",
             ", ".join(missing_vars),
         )
-        u.logger.error("Please set the following environment variables:")
+        logger.error("Please set the following environment variables:")
         for var in required_vars:
-            u.logger.error("  export %s=<value>", var)
+            logger.error("  export %s=<value>", var)
         raise SystemExit(1) from None
     try:
         _run_main_demo()
     except KeyboardInterrupt:
-        u.logger.info("Example interrupted by user")
+        logger.info("Example interrupted by user")
     except (
         ValueError,
         TypeError,
@@ -685,21 +693,21 @@ def main() -> None:
         RuntimeError,
         ImportError,
     ):
-        u.logger.exception("Production setup example failed")
+        logger.exception("Production setup example failed")
         raise SystemExit(1) from None
 
 
 def _run_main_demo() -> None:
     """Run the production demo and completion checklist."""
     demonstrate_production_setup()
-    u.logger.info("\n%s", "=" * 60)
-    u.logger.info("Production setup example completed successfully!")
-    u.logger.info("\nProduction Checklist:")
-    u.logger.info("Environment-based configuration")
-    u.logger.info("Comprehensive validation and error handling")
-    u.logger.info("Health checks and monitoring integration")
-    u.logger.info("Graceful shutdown and resource cleanup")
-    u.logger.info("Production-grade logging and statistics")
+    logger.info("\n%s", "=" * 60)
+    logger.info("Production setup example completed successfully!")
+    logger.info("\nProduction Checklist:")
+    logger.info("Environment-based configuration")
+    logger.info("Comprehensive validation and error handling")
+    logger.info("Health checks and monitoring integration")
+    logger.info("Graceful shutdown and resource cleanup")
+    logger.info("Production-grade logging and statistics")
 
 
 if __name__ == "__main__":

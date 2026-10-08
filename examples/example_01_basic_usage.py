@@ -167,7 +167,7 @@ def create_sample_state_message() -> m.Meltano.SingerStateMessage:
 
 def _process_record_messages(
     target: FlextTargetOracle,
-    record_messages: t.SequenceOf[t.JsonValue],
+    record_messages: t.SequenceOf[m.Meltano.SingerRecordMessage],
 ) -> None:
     """Process RECORD messages through the target, failing fast on error.
 
@@ -183,7 +183,7 @@ def _process_record_messages(
     logger.info("All %s records processed successfully", len(record_messages))
 
 
-def _log_processing_statistics(stats: object) -> None:
+def _log_processing_statistics(stats: m.TargetOracle.LoaderFinalizeResult) -> None:
     """Log the final processing statistics summary."""
     logger.info("=== Processing Statistics ===")
     logger.info("Total records processed: %s", stats.total_records)
