@@ -362,7 +362,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             self._init_oracle_loader(settings)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             msg = f"Failed to create Oracle API: {exc}"
-            raise e.FlextTargetOracleExceptions.OracleConnectionError(msg) from exc
+            raise e.Exceptions.OracleConnectionError(msg) from exc
 
     def _init_oracle_loader(self, settings: FlextTargetOracleSettings) -> None:
         """Initialize mutable loader state."""

@@ -31,12 +31,14 @@ def target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle:
 class TestsFlextTargetOracleTarget:
     """Behavioral contract for the Oracle target against the real container."""
 
+    @pytest.mark.docker
     @staticmethod
     def test_initialize_and_connection(target: FlextTargetOracle) -> None:
         """Test initialize and connection."""
         tm.ok(target.initialize())
         tm.ok(target.test_connection())
 
+    @pytest.mark.docker
     @staticmethod
     def test_execute_returns_ready_status(target: FlextTargetOracle) -> None:
         """Test execute returns ready status."""
@@ -45,6 +47,7 @@ class TestsFlextTargetOracleTarget:
         tm.that(result.value.status, eq="ready")
         tm.that(result.value.oracle_host, eq="localhost")
 
+    @pytest.mark.docker
     @staticmethod
     def test_validate_configuration(target: FlextTargetOracle) -> None:
         # NOTE (multi-agent): mro-rn88 — ADR-005/CQRS: config validation moved off
@@ -59,6 +62,7 @@ class TestsFlextTargetOracleTarget:
         result = service.run_validate(command)
         tm.ok(result)
 
+    @pytest.mark.docker
     @staticmethod
     def test_discover_catalog_uses_registered_schemas(
         target: FlextTargetOracle,
@@ -80,6 +84,7 @@ class TestsFlextTargetOracleTarget:
         tm.ok(catalog_result)
         tm.that(catalog_result.value.streams[0].stream, eq="users")
 
+    @pytest.mark.docker
     @staticmethod
     def test_process_record_and_state_messages(target: FlextTargetOracle) -> None:
         """Test process record and state messages."""
@@ -111,6 +116,7 @@ class TestsFlextTargetOracleTarget:
         assert isinstance(bookmarks_obj, dict)
         tm.that(bookmarks_obj.get("users"), eq=1)
 
+    @pytest.mark.docker
     @staticmethod
     def test_process_singer_messages_flushes_loader(
         target: FlextTargetOracle,
@@ -146,12 +152,14 @@ class TestsFlextTargetOracleTarget:
         tm.ok(result)
         tm.that(result.value.messages_processed, eq=3)
 
+    @pytest.mark.docker
     @staticmethod
     def test_unsupported_message_type_fails(target: FlextTargetOracle) -> None:
         """Test unsupported message type fails."""
         result = target.write_record('{"type": "UNKNOWN"}')
         tm.fail(result)
 
+    @pytest.mark.docker
     @staticmethod
     def test_invalid_json_payload_maps_to_processing_failure(
         target: FlextTargetOracle,
@@ -163,20 +171,21 @@ class TestsFlextTargetOracleTarget:
             '{"type": "RECORD", "stream": "users", "record": "bad"}',
         )
         tm.fail(parse_result)
-        exceptions = u.TargetOracle.FlextTargetOracleExceptions
+        exceptions = u.TargetOracle.Exceptions
         assert issubclass(exceptions.ProcessingError, Exception)
 
     @staticmethod
     def test_missing_schema_path_uses_schema_error_type() -> None:
         """Test missing schema path uses schema error type."""
-        exceptions = u.TargetOracle.FlextTargetOracleExceptions
+        exceptions = u.TargetOracle.Exceptions
         err = exceptions.SchemaError("schema missing")
         tm.that(err, is_=exceptions.SchemaError)
 
+    @pytest.mark.docker
     @staticmethod
     def test_metrics_and_write_record_contract(target: FlextTargetOracle) -> None:
         """Test metrics and write record contract."""
-        metrics = target.get_implementation_metrics()
+        metrics = target.compute_implementation_metrics()
         assert metrics.batch_size > 0
         tm.that({True, False}, has=metrics.use_bulk_operations)
         result = target.write_record(
@@ -184,6 +193,7 @@ class TestsFlextTargetOracleTarget:
         )
         tm.fail(result)
 
+    @pytest.mark.docker
     @staticmethod
     def test_write_record_inserts_oracle_record(
         target: FlextTargetOracle,

@@ -35,16 +35,6 @@ type SingerMessage = (
 )
 
 
-def _json_text(value: t.JsonValue) -> str:
-    """Serialize JSON-compatible example payloads through the CLI facade.
-
-    Returns:
-        The resulting ``str``.
-    """
-    serialized: str = cli_u.Cli.json_dumps(value).unwrap()
-    return serialized
-
-
 class HealthStatus(m.BaseModel):
     """Runtime health snapshot used by health checks."""
 
@@ -219,7 +209,7 @@ class ProductionTargetManager:
         else:
             checks["target_initialized"] = True
             self._record_oracle_connectivity(health_status)
-            target_metrics = self.target.get_implementation_metrics()
+            target_metrics = self.target.compute_implementation_metrics()
             health_status.metrics.update(target_metrics.model_dump())
         u.logger.debug("Health check completed: %s", health_status.status)
         return r[t.JsonMapping].ok(health_status.model_dump())
@@ -595,7 +585,7 @@ def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
         "stream": "customer_orders",
         "schema": {
             "type": "object",
-            "properties": _json_text({
+            "properties": cli_u.Cli.json_dumps({
                 "order_id": {"type": "integer"},
                 "customer_id": {"type": "integer"},
                 "order_date": {"type": "string", "format": "date-time"},
@@ -607,8 +597,12 @@ def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
                 "shipping_address": {"type": "string"},
                 "created_at": {"type": "string", "format": "date-time"},
                 "updated_at": {"type": "string", "format": "date-time"},
-            }),
-            "required": _json_text(["order_id", "customer_id", "order_date"]),
+            }).unwrap(),
+            "required": cli_u.Cli.json_dumps([
+                "order_id",
+                "customer_id",
+                "order_date",
+            ]).unwrap(),
         },
         "key_properties": ["order_id"],
     })

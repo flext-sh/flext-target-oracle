@@ -14,14 +14,12 @@ from flext_core import install_lazy_exports
 
 if TYPE_CHECKING:
     from flext_target_oracle._models.commands import FlextTargetOracleModelsCommands
-    from flext_target_oracle._models.config import FlextTargetOracleConfigModels
     from flext_target_oracle._models.results import FlextTargetOracleModelsResults
     from flext_target_oracle._models.settings import FlextTargetOracleModelsSettings
     from flext_target_oracle._models.singer import FlextTargetOracleModelsSinger
 
 
 __all__: tuple[str, ...] = (
-    "FlextTargetOracleConfigModels",
     "FlextTargetOracleModelsCommands",
     "FlextTargetOracleModelsResults",
     "FlextTargetOracleModelsSettings",
@@ -32,7 +30,6 @@ install_lazy_exports(
     __name__,
     globals(),
     MappingProxyType({
-        "FlextTargetOracleConfigModels": ".config",
         "FlextTargetOracleModelsCommands": ".commands",
         "FlextTargetOracleModelsResults": ".results",
         "FlextTargetOracleModelsSettings": ".settings",
