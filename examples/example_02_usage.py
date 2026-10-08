@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from flext_target_oracle import FlextTargetOracleSettings, m, p, t
+from flext_target_oracle import FlextTargetOracleSettings, m, p, t, u
 from flext_target_oracle.utilities import FlextTargetOracle
 
 OracleMessage = (
@@ -31,7 +31,7 @@ def load_config() -> t.JsonMapping:
     """
     config_path = Path("settings.json")
     content = config_path.read_text(encoding="utf-8")
-    adapter: m.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)
+    adapter: m.TypeAdapter[t.JsonMapping] = t.json_mapping_adapter()
     config: t.JsonMapping = adapter.validate_json(content)
     return config
 
@@ -43,7 +43,7 @@ def load_singer_messages() -> t.SequenceOf[t.JsonMapping]:
         The resulting ``t.SequenceOf[t.JsonMapping]``.
     """
     data_path = Path("singer_data.jsonl")
-    adapter: m.TypeAdapter[t.JsonMapping] = m.TypeAdapter(t.JsonMapping)
+    adapter: m.TypeAdapter[t.JsonMapping] = t.json_mapping_adapter()
     with data_path.open(encoding="utf-8") as f:
         return [adapter.validate_json(line) for line in f if line.strip()]
 
@@ -61,7 +61,7 @@ def main() -> None:
     if connection_result.failure:
         raise SystemExit(1)
     messages = load_singer_messages()
-    adapter: m.TypeAdapter[OracleMessage] = m.TypeAdapter(OracleMessage)
+    adapter: m.TypeAdapter[OracleMessage] = u.type_adapter(OracleMessage)
     for raw_message in messages:
         message: OracleMessage = adapter.validate_python(raw_message)
         result: p.Result[bool] = target.process_singer_message(message)

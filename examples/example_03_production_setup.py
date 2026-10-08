@@ -29,9 +29,9 @@ if TYPE_CHECKING:
 
 type SingerMessage = (
     m.Meltano.SingerSchemaMessage
-    | p.Meltano.SingerRecordMessage
-    | p.Meltano.SingerStateMessage
-    | p.Meltano.SingerActivateVersionMessage
+    | m.Meltano.SingerRecordMessage
+    | m.Meltano.SingerStateMessage
+    | m.Meltano.SingerActivateVersionMessage
 )
 
 

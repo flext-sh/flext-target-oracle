@@ -239,7 +239,7 @@ class TestsFlextTargetOracleOracle:
         customer_city = customer_address_data.get("city")
         tm.that(customer_city, eq="objecttown")
         items = stored_data.get("items")
-        items_data = t.Tests.CONTAINER_MAPPING_SEQUENCE_ADAPTER.validate_python(items)
+        items_data = t.json_mapping_sequence_adapter().validate_python(items)
         tm.that(len(items_data), eq=2)
 
     @staticmethod
