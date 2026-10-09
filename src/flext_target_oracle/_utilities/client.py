@@ -28,7 +28,7 @@ class FlextTargetOracle:
         self.loader = FlextTargetOracleLoader(settings)
         self.schemas: MutableMapping[str, m.Meltano.SingerSchemaMessage] = {}
         self.state_message: m.Meltano.SingerStateMessage = m.Meltano.SingerStateMessage(
-            type="STATE",
+            type=c.Meltano.SingerMessageType.STATE,
             value={},
         )
 
@@ -48,7 +48,7 @@ class FlextTargetOracle:
                     update={
                         "metadata": [
                             m.Meltano.SingerCatalogMetadata(
-                                breadcrumb=[],
+                                breadcrumb=(),
                                 metadata={
                                     "inclusion": "available",
                                     "table-name": (
@@ -68,7 +68,10 @@ class FlextTargetOracle:
                 ),
             )
         return r[m.Meltano.SingerCatalog].ok(
-            m.Meltano.SingerCatalog(type="CATALOG", streams=catalog_entries),
+            m.Meltano.SingerCatalog(
+                type=c.Meltano.SingerMessageType.CATALOG,
+                streams=tuple(catalog_entries),
+            ),
         )
 
     def execute(
