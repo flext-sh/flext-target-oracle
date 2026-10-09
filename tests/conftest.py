@@ -61,7 +61,7 @@ def docker_control() -> tk:
     )
 
 
-def _export_oracle_test_env(container_status: object) -> None:
+def _export_oracle_test_env(container_status: m.Tests.ContainerInfo) -> None:
     """Export the shared Oracle test environment from container port state."""
     resolved_port = next(
         (
@@ -111,7 +111,7 @@ def _application_user_ready(oracle_settings: FlextDbOracleSettings) -> bool:
     )
     disconnect_result = api.disconnect()
     _ = disconnect_result
-    return bool(health_result.success)
+    return health_result.success
 
 
 def _provision_user_account(admin_api: FlextDbOracleApi) -> str | None:
