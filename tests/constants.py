@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import ClassVar, Final
+from typing import Final
 
 from flext_tests import FlextTestsConstants
 
@@ -27,11 +27,11 @@ class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsCons
             ORACLE_SERVICE: Final[str] = "XE"
             TEST_SCHEMA: Final[str] = "FLEXT_TEST"
             PROJECT_ROOT_PARENT_DEPTH: Final[int] = 1
-            # Why: the flext-tests governance protocol declares these as
-            # ClassVar; Final instance-variable declarations would not satisfy
-            # the structural contract consumed by test_module_governance.
-            SRC_DIR: ClassVar[str] = "src"
-            PACKAGE_DIR: ClassVar[str] = "flext_target_oracle"
+            # Why: the flext-tests governance protocol exposes SRC_DIR and
+            # PACKAGE_DIR as read-only properties; plain instance declarations
+            # satisfy that structural contract for both checkers.
+            SRC_DIR: str = "src"
+            PACKAGE_DIR: str = "flext_target_oracle"
             ALLOWED_MODULE_FUNCTIONS: Final[dict[str, frozenset[str]]] = {
                 "cli.py": frozenset({"main"}),
             }

@@ -66,12 +66,14 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         u.PrivateAttr(default_factory=_default_record_buffers)
     )
     _stream_columns: dict[str, tuple[m.DbOracle.Column, ...]] = u.PrivateAttr(
-        default_factory=dict,
+        default_factory=dict[str, tuple[m.DbOracle.Column, ...]],
     )
     _stream_field_mappings: t.MutableStrPairTupleMapping = u.PrivateAttr(
-        default_factory=dict,
+        default_factory=dict[str, t.StrPairTuple],
     )
-    _stream_key_columns: dict[str, t.StrSequence] = u.PrivateAttr(default_factory=dict)
+    _stream_key_columns: dict[str, t.StrSequence] = u.PrivateAttr(
+        default_factory=dict[str, t.StrSequence],
+    )
     _total_records: int = u.PrivateAttr(default_factory=lambda: 0)
     _sdc_timestamp_columns: ClassVar[t.StrSequence] = (
         "_SDC_EXTRACTED_AT",

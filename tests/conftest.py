@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from flext_tests import tk, tm
+from flext_tests import FlextTestsDocker, tk, tm
 
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle.utilities import FlextTargetOracleLoader
@@ -49,11 +49,11 @@ def isolate_target_oracle_env(
 
 
 @pytest.fixture(scope="session")
-def docker_control() -> tk:
+def docker_control() -> FlextTestsDocker:
     """Provide Docker control instance for tests.
 
     Returns:
-        The resulting ``tk``.
+        The resulting ``FlextTestsDocker``.
     """
     return tk.shared(
         "flext-oracle-db-test",
@@ -186,7 +186,7 @@ def _provision_oracle_test_user(
 
 
 @pytest.fixture(scope="session")
-def shared_oracle_container(docker_control: tk) -> str:
+def shared_oracle_container(docker_control: FlextTestsDocker) -> str:
     """Manage the Oracle container using tk with auto-start.
 
     Returns:
