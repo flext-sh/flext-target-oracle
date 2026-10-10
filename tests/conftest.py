@@ -182,7 +182,7 @@ def _provision_oracle_test_user(
         else:
             last_error = admin_connect_result.error or last_error
         sleep(2)
-    pytest.skip(last_error)
+    pytest.fail("Oracle test user provisioning failed after readiness")
 
 
 @pytest.fixture(scope="session")
@@ -195,9 +195,7 @@ def shared_oracle_container(docker_control: FlextTestsDocker) -> str:
     container_name = "flext-oracle-db-test"
     ensure_result = docker_control.execute()
     if ensure_result.failure:
-        pytest.skip(
-            ensure_result.error or f"Oracle container {container_name} is unavailable",
-        )
+        pytest.fail("Oracle container setup failed after readiness")
     _export_oracle_test_env(ensure_result.value)
     # Fast path: on a warm shared container the flext_test user already exists
     # (provisioned by the flext-db-oracle suite). Verify readiness with a direct
@@ -248,12 +246,12 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
     )
     connect_result = api.connect()
     if connect_result.failure:
-        pytest.skip(connect_result.error or "Oracle not available")
+        pytest.fail("Oracle login failed after readiness")
     health_result = api.oracle_services.execute_query('SELECT 1 AS "health" FROM DUAL')
     if health_result.failure:
         disconnect_result = api.disconnect()
         _ = disconnect_result
-        pytest.skip(health_result.error or "Oracle health check failed")
+        pytest.fail("Oracle health check failed after readiness")
     yield api
     # Teardown must not turn a lost connection into an ERROR. When Oracle drops
     # mid-test the socket is already gone, so disconnect raises
@@ -414,7 +412,7 @@ def oracle_loader(
     loader = FlextTargetOracleLoader(oracle_config)
     connect_result = loader.connect()
     if connect_result.failure:
-        pytest.skip(connect_result.error or "Oracle loader could not connect")
+        pytest.fail("Oracle loader login failed after readiness")
     yield loader
     # Same contract as the api fixture: a connection already dropped by the server
     # must not surface as a teardown ERROR.
@@ -427,9 +425,9 @@ def oracle_loader(
 
 _PATH_MARKERS: t.MappingKV[str, t.StrSequence] = {
     "unit": ("unit",),
-    "integration": ("integration", "oracle"),
-    "e2e": ("e2e", "oracle", "slow"),
-    "performance": ("performance", "oracle"),
+    "integration": ("integration",),
+    "e2e": ("e2e", "slow"),
+    "performance": ("performance",),
 }
 
 
@@ -442,6 +440,9 @@ def pytest_collection_modifyitems(items: t.SequenceOf[pytest.Item]) -> None:
         if not str(item.fspath).startswith(str(tests_dir)):
             continue
         item.add_marker(pytest.mark.usefixtures("isolate_target_oracle_env"))
+        if "shared_oracle_container" in item.fixturenames:
+            item.add_marker(pytest.mark.docker)
+            item.add_marker(pytest.mark.oracle)
         fspath = str(item.fspath)
         for path_key, markers in _PATH_MARKERS.items():
             if path_key in fspath:
