@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 import os
 import signal
@@ -615,7 +615,7 @@ def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
         "key_properties": ["order_id"],
     })
     messages.append(schema_message)
-    base_date = datetime.datetime(2025, 1, 1, tzinfo=UTC)
+    base_date = dt.datetime(2025, 1, 1, tzinfo=UTC)
     for i in range(1, 101):
         record_message = m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
@@ -623,8 +623,7 @@ def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
             "record": {
                 "order_id": i,
                 "customer_id": i % 20 + 1,
-                "order_date": (base_date + datetime.timedelta(hours=i)).isoformat()
-                + "Z",
+                "order_date": (base_date + dt.timedelta(hours=i)).isoformat() + "Z",
                 "product_sku": f"SKU-{i % 10 + 1:03d}",
                 "quantity": i % 5 + 1,
                 "unit_price": round(19.99 + i % 100, 2),
@@ -633,10 +632,9 @@ def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
                     i % 4
                 ],
                 "shipping_address": f"{i} Main St, City {i % 10}, State",
-                "created_at": (base_date + datetime.timedelta(hours=i)).isoformat()
-                + "Z",
+                "created_at": (base_date + dt.timedelta(hours=i)).isoformat() + "Z",
                 "updated_at": (
-                    base_date + datetime.timedelta(hours=i, minutes=30)
+                    base_date + dt.timedelta(hours=i, minutes=30)
                 ).isoformat()
                 + "Z",
             },
@@ -648,9 +646,7 @@ def create_production_sample_stream() -> t.SequenceOf[SingerMessage]:
             "bookmarks": {
                 "customer_orders": {
                     "last_order_id": 100,
-                    "last_updated": (
-                        base_date + datetime.timedelta(hours=100)
-                    ).isoformat()
+                    "last_updated": (base_date + dt.timedelta(hours=100)).isoformat()
                     + "Z",
                 },
             },
