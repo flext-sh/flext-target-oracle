@@ -440,7 +440,7 @@ def pytest_collection_modifyitems(items: t.SequenceOf[pytest.Item]) -> None:
         if not str(item.fspath).startswith(str(tests_dir)):
             continue
         item.add_marker(pytest.mark.usefixtures("isolate_target_oracle_env"))
-        if "shared_oracle_container" in item.fixturenames:
+        if "shared_oracle_container" in getattr(item, "fixturenames", ()):
             item.add_marker(pytest.mark.docker)
             item.add_marker(pytest.mark.oracle)
         fspath = str(item.fspath)
