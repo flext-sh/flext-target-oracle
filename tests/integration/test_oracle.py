@@ -228,11 +228,11 @@ class TestsFlextTargetOracleOracle:
     def _assert_nested_stored_roundtrip(stored_data: t.JsonMapping) -> None:
         """Assert the nested JSON round-trip preserved customer and items."""
         customer = stored_data.get("customer")
-        customer_data = t.json_mapping_adapter().validate_python(customer)
+        customer_data = u.json_mapping_adapter().validate_python(customer)
         customer_name = customer_data.get("name")
         tm.that(customer_name, eq="Acme Corp")
         customer_address = customer_data.get("address")
-        customer_address_data = t.json_mapping_adapter().validate_python(
+        customer_address_data = u.json_mapping_adapter().validate_python(
             customer_address,
         )
         customer_city = customer_address_data.get("city")
@@ -275,7 +275,7 @@ class TestsFlextTargetOracleOracle:
             ],
             "total": 349.97,
         }
-        typed_record = t.json_mapping_adapter().validate_python(record)
+        typed_record = u.json_mapping_adapter().validate_python(record)
         insert_res = loader.insert_records(stream_name, [typed_record])
         tm.ok(insert_res)
         json_str = _query_scalar(
@@ -283,7 +283,7 @@ class TestsFlextTargetOracleOracle:
             'SELECT json_data AS "json_data" FROM test_json WHERE id = 1',
             "json_data",
         )
-        stored_data = t.json_mapping_adapter().validate_json(json_str)
+        stored_data = u.json_mapping_adapter().validate_json(json_str)
         TestsFlextTargetOracleOracle._assert_nested_stored_roundtrip(stored_data)
         tm.ok(loader.disconnect())
 

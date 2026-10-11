@@ -31,7 +31,7 @@ def load_config() -> t.JsonMapping:
     """
     config_path = Path("settings.json")
     content = config_path.read_text(encoding="utf-8")
-    adapter: m.TypeAdapter[t.JsonMapping] = t.json_mapping_adapter()
+    adapter: m.TypeAdapter[t.JsonMapping] = u.json_mapping_adapter()
     config: t.JsonMapping = adapter.validate_json(content)
     return config
 
@@ -43,7 +43,7 @@ def load_singer_messages() -> t.SequenceOf[t.JsonMapping]:
         The resulting ``t.SequenceOf[t.JsonMapping]``.
     """
     data_path = Path("singer_data.jsonl")
-    adapter: m.TypeAdapter[t.JsonMapping] = t.json_mapping_adapter()
+    adapter: m.TypeAdapter[t.JsonMapping] = u.json_mapping_adapter()
     with data_path.open(encoding="utf-8") as f:
         return [adapter.validate_json(line) for line in f if line.strip()]
 

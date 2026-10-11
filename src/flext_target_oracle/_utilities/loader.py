@@ -151,11 +151,11 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """
         properties_value = schema.get("properties", {})
         properties = (
-            t.json_mapping_adapter().validate_json(properties_value)
+            u.json_mapping_adapter().validate_json(properties_value)
             if isinstance(properties_value, str)
-            else t.json_mapping_adapter().validate_python(properties_value)
+            else u.json_mapping_adapter().validate_python(properties_value)
         )
-        normalized_schema = t.json_mapping_adapter().validate_python({
+        normalized_schema = u.json_mapping_adapter().validate_python({
             "properties": properties,
         })
         type_mapping_result = self.oracle_api.oracle_services.map_singer_schema(
@@ -171,7 +171,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 f"Invalid column mappings for {stream_name}: "
                 f"{column_mappings_result.error}",
             )
-        column_mappings = t.json_mapping_adapter().validate_python(
+        column_mappings = u.json_mapping_adapter().validate_python(
             column_mappings_result.value,
         )
         stream_mappings = t.TargetOracle.STR_MAP_ADAPTER.validate_python(
@@ -246,9 +246,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         if source_name in plan.ignored_columns:
             return
         definition = (
-            t.json_mapping_adapter().validate_python(definition_value)
+            u.json_mapping_adapter().validate_python(definition_value)
             if isinstance(definition_value, Mapping)
-            else t.json_mapping_adapter().validate_python({})
+            else u.json_mapping_adapter().validate_python({})
         )
         field_type = self._schema_field_type(definition)
         if plan.json_storage_enabled and field_type in {"array", "object"}:
@@ -585,7 +585,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             return r[bool].fail(
                 f"Invalid custom indexes configuration: {custom_indexes_result.error}",
             )
-        custom_indexes = t.json_mapping_adapter().validate_python(
+        custom_indexes = u.json_mapping_adapter().validate_python(
             custom_indexes_result.value,
         )
         stream_indexes = t.json_mapping_sequence_adapter().validate_python(
@@ -599,7 +599,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             index_name = str(
                 raw_index_name or f"{table_name}_{index_columns_result.value[0]}_IDX",
             )[:30]
-            index_payload = t.json_mapping_adapter().validate_python({
+            index_payload = u.json_mapping_adapter().validate_python({
                 "table_name": table_name,
                 "index_name": index_name,
                 "columns": index_columns_result.value,
@@ -876,7 +876,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             record.get("_sdc_extracted_at", loaded_at),
         )
         params["_SDC_LOADED_AT"] = loaded_at
-        return r[t.JsonMapping].ok(t.json_mapping_adapter().validate_python(params))
+        return r[t.JsonMapping].ok(u.json_mapping_adapter().validate_python(params))
 
     def _flush_batch(self, stream_name: str) -> p.Result[bool]:
         """Flush batch using flext-db-oracle API exclusively - NO direct SQLAlchemy.
@@ -1027,7 +1027,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
                 f"Failed to build merge delete SQL: {delete_sql_result.error}",
             )
         for params in params_list:
-            delete_params = t.json_mapping_adapter().validate_python({
+            delete_params = u.json_mapping_adapter().validate_python({
                 key: params[key] for key in key_columns
             })
             delete_result = connected_api.execute_sql(

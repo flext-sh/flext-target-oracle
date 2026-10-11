@@ -141,7 +141,7 @@ class FlextTargetOracle:
                 m.Meltano.SingerActivateVersionMessage]``.
         """
         try:
-            raw = t.json_mapping_adapter().validate_json(payload)
+            raw = u.json_mapping_adapter().validate_json(payload)
             return self._parse_singer_mapping(raw)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             return r[
