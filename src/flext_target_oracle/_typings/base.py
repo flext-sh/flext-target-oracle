@@ -6,7 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_meltano import m, t
+from flext_meltano import m, t, u
 
 
 class FlextTargetOracleTypesBase:
