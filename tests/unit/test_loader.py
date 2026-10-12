@@ -55,12 +55,12 @@ class TestsFlextTargetOracleLoader:
     """Behavior contract for test_loader."""
 
     @staticmethod
-    def test_loader_execute_returns_ready_payload(
+    def test_loader_connection_status_returns_ready_payload(
         loader_config: FlextTargetOracleSettings,
     ) -> None:
-        """execute() should return a typed readiness payload."""
+        """connection_status() should return a typed readiness payload."""
         loader = FlextTargetOracleLoader(loader_config)
-        result = loader.execute()
+        result = loader.connection_status()
         tm.that(result.success, is_=bool)
 
     @staticmethod

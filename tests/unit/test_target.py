@@ -43,7 +43,7 @@ class TestsFlextTargetOracleTarget:
     @staticmethod
     def test_execute_returns_ready_status(target: FlextTargetOracle) -> None:
         """Test execute returns ready status."""
-        result = target.execute()
+        result = target.run()
         tm.ok(result)
         tm.that(result.value.status, eq="ready")
         tm.that(result.value.oracle_host, eq="localhost")
@@ -166,7 +166,7 @@ class TestsFlextTargetOracleTarget:
         target: FlextTargetOracle,
     ) -> None:
         """Test invalid json payload maps to processing failure."""
-        result = target.execute("{ invalid }")
+        result = target.run("{ invalid }")
         tm.fail(result)
         parse_result = target.write_record(
             '{"type": "RECORD", "stream": "users", "record": "bad"}',

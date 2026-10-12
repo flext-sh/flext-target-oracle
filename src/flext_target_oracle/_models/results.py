@@ -124,11 +124,10 @@ class FlextTargetOracleModelsResults:
             Literal["completed"],
             u.Field(..., description="Finalization status", validate_default=True),
         ] = "completed"
-        loading_operation: FlextTargetOracleModelsResults.LoaderOperation = u.Field(
-            ...,
-            description="Aggregated loading operation details",
-            validate_default=True,
-        )
+        loading_operation: Annotated[
+            FlextTargetOracleModelsResults.LoaderOperation,
+            u.Field(description="Aggregated loading operation details"),
+        ]
         buffer_status: Annotated[
             t.MappingKV[str, int],
             u.Field(

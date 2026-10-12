@@ -13,7 +13,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from datetime import datetime
 from operator import itemgetter
-from typing import ClassVar, override
+from typing import ClassVar
 
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_meltano import FlextMeltanoServiceBase, u
@@ -65,13 +65,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     _record_buffers: t.MutableMappingKV[str, t.MutableSequenceOf[t.JsonMapping]] = (
         u.PrivateAttr(default_factory=_default_record_buffers)
     )
-    _stream_columns: dict[str, tuple[m.DbOracle.Column, ...]] = u.PrivateAttr(
-        default_factory=dict[str, tuple[m.DbOracle.Column, ...]],
+    _stream_columns: t.MutableMappingKV[str, t.VariadicTuple[m.DbOracle.Column]] = (
+        u.PrivateAttr(
+            default_factory=dict[str, t.VariadicTuple[m.DbOracle.Column]],
+        )
     )
     _stream_field_mappings: t.MutableStrPairTupleMapping = u.PrivateAttr(
         default_factory=dict[str, t.StrPairTuple],
     )
-    _stream_key_columns: dict[str, t.StrSequence] = u.PrivateAttr(
+    _stream_key_columns: t.MutableMappingKV[str, t.StrSequence] = u.PrivateAttr(
         default_factory=dict[str, t.StrSequence],
     )
     _total_records: int = u.PrivateAttr(default_factory=lambda: 0)
@@ -644,9 +646,8 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             )
         return r[list[str]].ok(index_columns)
 
-    @override
-    def execute(self) -> p.Result[t.JsonMapping]:
-        """Execute domain service - returns connection test result.
+    def connection_status(self) -> p.Result[t.JsonMapping]:
+        """Return the typed connection readiness payload for this target.
 
         Returns:
             The resulting ``p.Result[t.JsonMapping]``.

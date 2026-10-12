@@ -443,7 +443,7 @@ class TestsFlextTargetOracleOracle:
         init_result = target.initialize()
         tm.ok(init_result)
         for message in singer_messages:
-            result = target.execute(
+            result = target.run(
                 u.json_value_adapter().dump_json(message).decode("utf-8"),
             )
             tm.ok(result)
@@ -496,7 +496,7 @@ class TestsFlextTargetOracleOracle:
         schema_msg_value: t.JsonValue = u.json_value_adapter().validate_python(
             schema_msg,
         )
-        target.execute(
+        target.run(
             u.json_value_adapter().dump_json(schema_msg_value).decode("utf-8"),
         )
         record_msg = {
@@ -513,7 +513,7 @@ class TestsFlextTargetOracleOracle:
         record_msg_value: t.JsonValue = u.json_value_adapter().validate_python(
             record_msg,
         )
-        target.execute(
+        target.run(
             u.json_value_adapter().dump_json(record_msg_value).decode("utf-8"),
         )
         column_rows = _query_rows(

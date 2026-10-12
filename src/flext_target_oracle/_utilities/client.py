@@ -74,7 +74,7 @@ class FlextTargetOracle:
             ),
         )
 
-    def execute(
+    def run(
         self,
         payload: str | None = None,
     ) -> p.Result[m.TargetOracle.ExecuteResult]:

@@ -284,6 +284,7 @@ jobs:
             .reports/**/coverage.json
             .reports/check/**/*.sarif
             .reports/check/**/*.md
+            .reports/codegen-plan.json
             .reports/codegen-publication.json
             .reports/codegen-publication/**/*.json
             .reports/tests/**/suite-outcome.json

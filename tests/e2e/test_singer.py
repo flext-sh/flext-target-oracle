@@ -52,7 +52,7 @@ class TestsFlextTargetOracleSinger:
             "record": {"id": 1, "amount": 10.5},
         }
         state = {"type": "STATE", "value": {"bookmarks": {"orders": {"version": 1}}}}
-        tm.ok(target.execute())
+        tm.ok(target.run())
         tm.ok(
             target.process_singer_message(
                 m.Meltano.SingerSchemaMessage.model_validate(schema),

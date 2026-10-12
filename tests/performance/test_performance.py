@@ -39,7 +39,7 @@ class TestsFlextTargetOraclePerformance:
         """Test execute readiness is constant time."""
         target = self._target(oracle_config)
         start = time.perf_counter()
-        result = target.execute()
+        result = target.run()
         elapsed = time.perf_counter() - start
         tm.ok(result)
         assert elapsed < 1.0
