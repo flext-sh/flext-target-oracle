@@ -26,6 +26,8 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
         FlextTargetOracleUtilitiesObservability,
         FlextTargetOracleUtilitiesErrors,
         FlextTargetOracleUtilitiesBase,
+        FlextTargetOracle,
+        FlextTargetOracleLoader,
     ):
         """Oracle target utility namespace."""
 
