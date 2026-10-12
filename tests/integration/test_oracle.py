@@ -16,7 +16,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from flext_target_oracle import FlextTargetOracle, FlextTargetOracleLoader
+from flext_target_oracle import FlextTargetOracle
+from flext_target_oracle.application import FlextTargetOracleLoader
 from tests import c, m, p, t, tm, u
 
 if TYPE_CHECKING:

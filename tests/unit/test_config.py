@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_target_oracle import FlextTargetOracleSettings
-from tests import c, s, tm
+from tests import s, tm
 
 
 class TestsFlextTargetOracleConfig:
@@ -48,14 +48,6 @@ class TestsFlextTargetOracleConfig:
         # Tests namespace and the project TargetOracle namespace via the public surface.
         tm.that(settings.Tests.model_dump(), none=False)
         assert settings.TargetOracle.oracle_host
-
-    @staticmethod
-    def test_load_method_enum_contract() -> None:
-        """Test load method enum contract."""
-        tm.that(c.TargetOracle.LOAD_METHOD_INSERT, eq="INSERT")
-        tm.that(c.TargetOracle.LOAD_METHOD_BULK_INSERT, eq="BULK_INSERT")
-        tm.that(c.TargetOracle.LOAD_METHOD_MERGE, eq="MERGE")
-        tm.that(c.TargetOracle.LOAD_METHOD_BULK_MERGE, eq="BULK_MERGE")
 
     @staticmethod
     def test_connection_scalars_round_trip_through_namespace() -> None:

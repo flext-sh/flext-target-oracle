@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, ClassVar
 from flext_meltano import u
 
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, settings, t
-from flext_target_oracle._utilities import FlextTargetOracleLoader
+from flext_target_oracle.application import FlextTargetOracleLoader
 
 if TYPE_CHECKING:
     from collections.abc import MutableMapping
@@ -235,10 +235,6 @@ class FlextTargetOracle:
                 return self._handle_state(state_message)
             case m.Meltano.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
-            case _:
-                return r[bool].fail(
-                    f"Unsupported Singer message type: {type(message).__name__}",
-                )
 
     def process_singer_messages(
         self,

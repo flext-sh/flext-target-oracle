@@ -84,7 +84,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
             return r[str].from_failure(settings_result)
-        settings: p.TargetOracle.OracleSettingsProtocol = settings_result.value
+        settings = settings_result.value
         validation_result = (
             r[bool].fail("oracle_host is required")
             if not settings.TargetOracle.oracle_host

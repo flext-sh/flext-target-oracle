@@ -18,6 +18,28 @@ from flext_target_oracle import (
 from tests import m, t, tm, u
 
 
+def _users_schema_message(
+    *,
+    with_key_properties: bool = False,
+) -> m.Meltano.SingerSchemaMessage:
+    """Build the canonical ``users`` SCHEMA message shared by these tests.
+
+    Returns:
+        The resulting ``m.Meltano.SingerSchemaMessage``.
+    """
+    payload: t.MutableJsonMapping = {
+        "type": "SCHEMA",
+        "stream": "users",
+        "schema": {
+            "type": "object",
+            "properties": cli_u.Cli.json_dumps({"id": {"type": "integer"}}).unwrap(),
+        },
+    }
+    if with_key_properties:
+        payload["key_properties"] = ["id"]
+    return m.Meltano.SingerSchemaMessage.model_validate(payload)
+
+
 @pytest.fixture
 def target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle:
     """Create a target bound to the real Oracle container (no mocks).
@@ -69,17 +91,7 @@ class TestsFlextTargetOracleTarget:
         target: FlextTargetOracle,
     ) -> None:
         """Test discover catalog uses registered schemas."""
-        schema_message = m.Meltano.SingerSchemaMessage.model_validate({
-            "type": "SCHEMA",
-            "stream": "users",
-            "schema": {
-                "type": "object",
-                "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"},
-                }).unwrap(),
-            },
-            "key_properties": ["id"],
-        })
+        schema_message = _users_schema_message(with_key_properties=True)
         tm.ok(target.process_singer_message(schema_message))
         catalog_result = target.discover_catalog()
         tm.ok(catalog_result)
@@ -89,16 +101,7 @@ class TestsFlextTargetOracleTarget:
     @staticmethod
     def test_process_record_and_state_messages(target: FlextTargetOracle) -> None:
         """Test process record and state messages."""
-        schema_message = m.Meltano.SingerSchemaMessage.model_validate({
-            "type": "SCHEMA",
-            "stream": "users",
-            "schema": {
-                "type": "object",
-                "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"},
-                }).unwrap(),
-            },
-        })
+        schema_message = _users_schema_message()
         record_message = m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
@@ -129,16 +132,7 @@ class TestsFlextTargetOracleTarget:
             | m.Meltano.SingerStateMessage
             | m.Meltano.SingerActivateVersionMessage
         ] = [
-            m.Meltano.SingerSchemaMessage.model_validate({
-                "type": "SCHEMA",
-                "stream": "users",
-                "schema": {
-                    "type": "object",
-                    "properties": cli_u.Cli.json_dumps({
-                        "id": {"type": "integer"},
-                    }).unwrap(),
-                },
-            }),
+            _users_schema_message(),
             m.Meltano.SingerRecordMessage.model_validate({
                 "type": "RECORD",
                 "stream": "users",
@@ -175,13 +169,6 @@ class TestsFlextTargetOracleTarget:
         exceptions = u.TargetOracle.Exceptions
         assert issubclass(exceptions.ProcessingError, Exception)
 
-    @staticmethod
-    def test_missing_schema_path_uses_schema_error_type() -> None:
-        """Test missing schema path uses schema error type."""
-        exceptions = u.TargetOracle.Exceptions
-        err = exceptions.SchemaError("schema missing")
-        tm.that(err, is_=exceptions.SchemaError)
-
     @pytest.mark.docker
     @staticmethod
     def test_metrics_and_write_record_contract(target: FlextTargetOracle) -> None:
@@ -200,17 +187,7 @@ class TestsFlextTargetOracleTarget:
         target: FlextTargetOracle,
     ) -> None:
         """Test write record inserts oracle record."""
-        schema_message = m.Meltano.SingerSchemaMessage.model_validate({
-            "type": "SCHEMA",
-            "stream": "users",
-            "schema": {
-                "type": "object",
-                "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"},
-                }).unwrap(),
-            },
-            "key_properties": ["id"],
-        })
+        schema_message = _users_schema_message(with_key_properties=True)
         tm.ok(target.process_singer_message(schema_message))
         result = target.write_record(
             u

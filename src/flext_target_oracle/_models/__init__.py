@@ -14,6 +14,9 @@ from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
     from flext_target_oracle._models.base import FlextTargetOracleModelsBase
+    from flext_target_oracle._models.error_metadata import (
+        FlextTargetOracleModelsErrorMetadata,
+    )
     from flext_target_oracle._models.health_status import (
         FlextTargetOracleModelsHealthStatus,
     )
@@ -22,6 +25,7 @@ if TYPE_CHECKING:
 
 __all__: tuple[str, ...] = (
     "FlextTargetOracleModelsBase",
+    "FlextTargetOracleModelsErrorMetadata",
     "FlextTargetOracleModelsHealthStatus",
     "FlextTargetOracleModelsSettings",
 )
@@ -31,6 +35,7 @@ install_lazy_exports(
     globals(),
     MappingProxyType({
         "FlextTargetOracleModelsBase": ".base",
+        "FlextTargetOracleModelsErrorMetadata": ".error_metadata",
         "FlextTargetOracleModelsHealthStatus": ".health_status",
         "FlextTargetOracleModelsSettings": ".settings",
     }),

@@ -138,8 +138,8 @@
     "**/target": true
   },
   "terminal.integrated.env.linux": {
-    "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}",
-    "VIRTUAL_ENV": "${workspaceFolder}/.venv"
+    "PATH": "${workspaceFolder}/../.venv/bin:${env:PATH}",
+    "VIRTUAL_ENV": "${workspaceFolder}/../.venv"
   },
   "shellcheck.useRepositoryRootAsCwd": true,
   "python.analysis.autoFormatStrings": true,
@@ -172,10 +172,10 @@
   "githubPullRequests.autoRepositoryDetection": true,
   "githubPullRequests.ignoreSubmodules": false,
   "ruff.interpreter": [
-    "${workspaceFolder}/.venv/bin/python"
+    "${workspaceFolder}/../.venv/bin/python"
   ],
   "ruff.path": [
-    "${workspaceFolder}/.venv/bin/ruff"
+    "${workspaceFolder}/../.venv/bin/ruff"
   ],
   "markdownlint.lintWorkspaceGlobs": [
     "!**/.git/**",

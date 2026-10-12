@@ -10,24 +10,24 @@ from __future__ import annotations
 from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import FlextMeltanoUtilities
 
-from flext_target_oracle._utilities import (
-    FlextTargetOracle,
-    FlextTargetOracleLoader,
-    FlextTargetOracleUtilitiesErrors,
+from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
+from flext_target_oracle._utilities.bootstrap import FlextTargetOracleUtilitiesBootstrap
+from flext_target_oracle._utilities.client import FlextTargetOracle
+from flext_target_oracle._utilities.errors import FlextTargetOracleUtilitiesErrors
+from flext_target_oracle._utilities.observability import (
     FlextTargetOracleUtilitiesObservability,
 )
-from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
 
 
 class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
     """Focused utility namespace used by Oracle target modules."""
 
     class TargetOracle(
+        FlextTargetOracleUtilitiesBase,
+        FlextTargetOracleUtilitiesBootstrap,
         FlextTargetOracle,
         FlextTargetOracleUtilitiesErrors,
-        FlextTargetOracleLoader,
         FlextTargetOracleUtilitiesObservability,
-        FlextTargetOracleUtilitiesBase,
     ):
         """Oracle target utility namespace."""
 
@@ -36,7 +36,6 @@ u = FlextTargetOracleUtilities
 
 __all__: list[str] = [
     "FlextTargetOracle",
-    "FlextTargetOracleLoader",
     "FlextTargetOracleUtilities",
     "u",
 ]

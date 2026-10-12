@@ -18,8 +18,8 @@ from typing import ClassVar
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_meltano import FlextMeltanoServiceBase, u
 
+from flext_core import e as core_e
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t
-from flext_target_oracle._utilities import FlextTargetOracleUtilitiesErrors as e
 
 
 class FlextTargetOracleLoader(FlextMeltanoServiceBase):
@@ -360,13 +360,13 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """Initialize loader with Oracle API using flext-db-oracle correctly.
 
         Raises:
-            OracleConnectionError: If Failed to create Oracle API.
+            FlextConnectionError: If the Oracle API cannot be created.
         """
         try:
             self._init_oracle_loader(settings)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             msg = f"Failed to create Oracle API: {exc}"
-            raise e.Exceptions.OracleConnectionError(msg) from exc
+            raise core_e.FlextConnectionError(msg) from exc
 
     def _init_oracle_loader(self, settings: FlextTargetOracleSettings) -> None:
         """Initialize mutable loader state."""

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated
 
-from flext_core import FlextSettings, m
+from flext_core import FlextSettings, m, t
 
 
 class FlextTargetOracleSettings(FlextSettings):
@@ -71,7 +71,7 @@ class FlextTargetOracleSettings(FlextSettings):
             str, m.Field(description="Column ordering strategy")
         ] = ""
         column_order_rules: Annotated[
-            dict[str, int], m.Field(description="Column priority rules")
+            t.MappingKV[str, int], m.Field(description="Column priority rules")
         ] = m.Field(default_factory=dict)
         column_mappings: Annotated[
             str,
