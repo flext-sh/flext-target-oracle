@@ -23,11 +23,11 @@ class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
     """Focused utility namespace used by Oracle target modules."""
 
     class TargetOracle(
-        FlextTargetOracleUtilitiesObservability,
-        FlextTargetOracleUtilitiesErrors,
-        FlextTargetOracleUtilitiesBase,
         FlextTargetOracle,
+        FlextTargetOracleUtilitiesErrors,
         FlextTargetOracleLoader,
+        FlextTargetOracleUtilitiesObservability,
+        FlextTargetOracleUtilitiesBase,
     ):
         """Oracle target utility namespace."""
 

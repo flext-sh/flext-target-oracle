@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
-    from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
     from flext_target_oracle._utilities.client import FlextTargetOracle
     from flext_target_oracle._utilities.errors import FlextTargetOracleUtilitiesErrors
     from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
@@ -25,7 +24,6 @@ if TYPE_CHECKING:
 __all__: tuple[str, ...] = (
     "FlextTargetOracle",
     "FlextTargetOracleLoader",
-    "FlextTargetOracleUtilitiesBase",
     "FlextTargetOracleUtilitiesErrors",
     "FlextTargetOracleUtilitiesObservability",
 )
@@ -36,7 +34,6 @@ install_lazy_exports(
     MappingProxyType({
         "FlextTargetOracle": ".client",
         "FlextTargetOracleLoader": ".loader",
-        "FlextTargetOracleUtilitiesBase": ".base",
         "FlextTargetOracleUtilitiesErrors": ".errors",
         "FlextTargetOracleUtilitiesObservability": ".observability",
     }),

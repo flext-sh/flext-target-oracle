@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from flext_tests import api, td, tf, tk, tm
 
     from flext_target_oracle import d, h, r, x
-    from tests import e2e, integration, performance, unit
     from tests.base import TestsFlextTargetOracleServiceBase, s
     from tests.constants import TestsFlextTargetOracleConstants, c
     from tests.models import TestsFlextTargetOracleModels, m
@@ -39,11 +38,9 @@ __all__: tuple[str, ...] = (
     "c",
     "d",
     "e",
-    "e2e",
     "h",
     "m",
     "p",
-    "performance",
     "r",
     "s",
     "t",
@@ -70,12 +67,9 @@ install_lazy_exports(
         "c": ".constants",
         "d": "flext_target_oracle",
         "e": "flext_db_oracle",
-        "e2e": ".e2e",
         "h": "flext_target_oracle",
-        "integration": ".integration",
         "m": ".models",
         "p": ".protocols",
-        "performance": ".performance",
         "r": "flext_target_oracle",
         "s": ".base",
         "t": ".typings",
@@ -84,7 +78,6 @@ install_lazy_exports(
         "tk": "flext_tests",
         "tm": "flext_tests",
         "u": ".utilities",
-        "unit": ".unit",
         "x": "flext_target_oracle",
     }),
     public_exports=__all__,
