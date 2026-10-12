@@ -16,11 +16,7 @@ from typing import Annotated, Self
 
 from flext_meltano import FlextMeltanoConfig, m
 
-
-class _TargetOracleNamespace(m.BaseModel):
-    """Open, frozen namespace exposing every ``config/*.yaml`` domain model-less."""
-
-    model_config = m.ConfigDict(extra="allow", frozen=True)
+import flext_target_oracle._models._target_oracle_namespace
 
 
 class FlextTargetOracleConfig(FlextMeltanoConfig):
@@ -57,13 +53,13 @@ class FlextTargetOracleConfig(FlextMeltanoConfig):
         return object.__hash__(self)
 
     TargetOracle: Annotated[
-        _TargetOracleNamespace,
+        flext_target_oracle._models._target_oracle_namespace._TargetOracleNamespace,
         m.Field(
             description=(
                 "Open namespace exposing ``config/*.yaml`` under ``TargetOracle``."
             ),
         ),
-    ] = _TargetOracleNamespace()
+    ] = flext_target_oracle._models._target_oracle_namespace._TargetOracleNamespace()
 
 
 config: FlextTargetOracleConfig = FlextTargetOracleConfig.fetch_global()

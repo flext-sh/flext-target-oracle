@@ -10,9 +10,11 @@ from __future__ import annotations
 import pytest
 from flext_cli import u as cli_u
 
-from flext_target_oracle import FlextTargetOracleSettings
-from flext_target_oracle.api import FlextTargetOracleService
-from flext_target_oracle.utilities import FlextTargetOracle
+from flext_target_oracle import (
+    FlextTargetOracle,
+    FlextTargetOracleService,
+    FlextTargetOracleSettings,
+)
 from tests import m, t, tm, u
 
 
@@ -188,7 +190,7 @@ class TestsFlextTargetOracleTarget:
         assert metrics.batch_size > 0
         tm.that({True, False}, has=metrics.use_bulk_operations)
         result = target.write_record(
-            t.json_value_adapter().dump_json({"id": 1}).decode("utf-8"),
+            u.json_value_adapter().dump_json({"id": 1}).decode("utf-8"),
         )
         tm.fail(result)
 
@@ -211,7 +213,7 @@ class TestsFlextTargetOracleTarget:
         })
         tm.ok(target.process_singer_message(schema_message))
         result = target.write_record(
-            t
+            u
             .json_value_adapter()
             .dump_json({"type": "RECORD", "stream": "users", "record": {"id": 1}})
             .decode("utf-8"),

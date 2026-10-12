@@ -12,9 +12,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_tests import u
-
-from tests import m
+from tests import m, u
 
 
 class TestsFlextTargetOracleModuleGovernance(u.FlextTestsModuleGovernanceMixin):

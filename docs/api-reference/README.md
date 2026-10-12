@@ -29,7 +29,7 @@ This section is generated from public exports and real docstrings.
 
 - Primary facades: `FlextTargetOracle`, `FlextTargetOracleCli`,
   `FlextTargetOracleConfig`, `FlextTargetOracleConstants`, `FlextTargetOracleLoader`,
-  `FlextTargetOracleModels` (+5 more)
+  `FlextTargetOracleModels` (+6 more)
 - Generated module pages: `7`
 
 Back to [project docs](../index.md).

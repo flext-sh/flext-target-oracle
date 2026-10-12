@@ -31,8 +31,8 @@ import os
 
 from flext_cli import u as cli_u
 
-from flext_target_oracle import FlextTargetOracleSettings, m, r, t, u
-from flext_target_oracle.utilities import FlextTargetOracle
+from examples import m, r, t, u
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 logging.basicConfig(level=logging.INFO)
 logger = u.fetch_logger(__name__)

@@ -13,7 +13,7 @@ class FlextTargetOracleTypesBase:
     """TargetOracle domain types namespace."""
 
     FLAT_CONTAINER_MAP_ADAPTER: m.TypeAdapter[t.JsonMapping] = u.json_mapping_adapter()
-    STR_MAP_ADAPTER: m.TypeAdapter[t.StrMapping] = t.str_mapping_adapter()
+    STR_MAP_ADAPTER: m.TypeAdapter[t.StrMapping] = u.str_mapping_adapter()
 
 
 __all__: list[str] = ["FlextTargetOracleTypesBase"]

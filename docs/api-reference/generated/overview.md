@@ -22,12 +22,12 @@
   `oracle`, `typed`
 - Main facades: `FlextTargetOracle`, `FlextTargetOracleCli`, `FlextTargetOracleConfig`,
   `FlextTargetOracleConstants`, `FlextTargetOracleLoader`, `FlextTargetOracleModels`,
-  `FlextTargetOracleProtocols`, `FlextTargetOracleService` (+3 more)
+  `FlextTargetOracleProtocols`, `FlextTargetOracleService` (+4 more)
 - Alias exports: `c`, `d`, `e`, `h`, `m`, `p`, `r`, `s`, `t`, `u`, `x`
 - Public symbol exports: `FlextTargetOracle`, `FlextTargetOracleCli`,
   `FlextTargetOracleConfig`, `FlextTargetOracleConstants`, `FlextTargetOracleLoader`,
   `FlextTargetOracleModels`, `FlextTargetOracleProtocols`, `FlextTargetOracleService`,
-  `FlextTargetOracleSettings`, `FlextTargetOracleTypes` (+5 more)
+  `FlextTargetOracleSettings`, `FlextTargetOracleTypes` (+6 more)
 - Exported module shortcuts: _none_
 - Generated module pages: `7`
 

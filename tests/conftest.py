@@ -15,11 +15,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from flext_tests import FlextTestsDocker, tk, tm
+from flext_tests import FlextTestsDocker
 
-from flext_target_oracle import FlextTargetOracleSettings
-from flext_target_oracle.utilities import FlextTargetOracleLoader
-from tests import c, m
+from flext_target_oracle import FlextTargetOracleLoader, FlextTargetOracleSettings
+from tests import c, m, tk, tm
 
 if TYPE_CHECKING:
     from collections.abc import Generator

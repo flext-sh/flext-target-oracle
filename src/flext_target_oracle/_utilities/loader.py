@@ -19,7 +19,7 @@ from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_meltano import FlextMeltanoServiceBase, u
 
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t
-from flext_target_oracle._utilities.errors import FlextTargetOracleUtilitiesErrors as e
+from flext_target_oracle._utilities import FlextTargetOracleUtilitiesErrors as e
 
 
 class FlextTargetOracleLoader(FlextMeltanoServiceBase):
@@ -588,7 +588,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         custom_indexes = u.json_mapping_adapter().validate_python(
             custom_indexes_result.value,
         )
-        stream_indexes = t.json_mapping_sequence_adapter().validate_python(
+        stream_indexes = u.json_mapping_sequence_adapter().validate_python(
             custom_indexes.get(stream_name, ()),
         )
         for raw_index in stream_indexes:
@@ -763,7 +763,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         if stream_name not in self.record_buffers:
             empty_records: t.MutableSequenceOf[t.JsonMapping] = []
             self.record_buffers[stream_name] = empty_records
-        copied_record = t.json_dict_adapter().validate_python(record_data)
+        copied_record = u.json_dict_adapter().validate_python(record_data)
         self.record_buffers[stream_name].append(copied_record)
         self._total_records += 1
         if (

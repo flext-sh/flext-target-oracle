@@ -21,8 +21,9 @@ from typing import TYPE_CHECKING, ClassVar, cast
 
 from flext_cli import u as cli_u
 
-from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t, u
-from flext_target_oracle.utilities import FlextTargetOracle
+import flext_target_oracle._models.processing_stats
+from examples import c, m, p, r, t, u
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 if TYPE_CHECKING:
     from types import FrameType
@@ -45,19 +46,6 @@ class HealthStatus(m.BaseModel):
     checks: t.MutableJsonMapping = u.Field(default_factory=dict, validate_default=True)
     metrics: t.MutableJsonMapping = u.Field(default_factory=dict, validate_default=True)
     error: str | None = None
-
-
-class ProcessingStats(m.BaseModel):
-    """In-memory counters for Singer stream processing."""
-
-    processing_start_time: float
-    processing_end_time: float | None = None
-    processing_duration_seconds: float = 0.0
-    messages_processed: int = 0
-    schemas_processed: int = 0
-    records_processed: int = 0
-    states_processed: int = 0
-    errors_encountered: int = 0
 
 
 class ProductionConfig:
@@ -300,7 +288,9 @@ class ProductionTargetManager:
         if not self.target:
             return r[t.JsonMapping].fail("Target not initialized")
         self.logger.info("Processing Singer stream with %d messages", len(messages))
-        stats = ProcessingStats(processing_start_time=time.time())
+        stats = flext_target_oracle._models.processing_stats.ProcessingStats(
+            processing_start_time=time.time()
+        )
         try:
             return self._process_singer_stream_checked(messages, stats)
         except (
@@ -320,7 +310,7 @@ class ProductionTargetManager:
     def _process_singer_stream_checked(
         self,
         messages: t.SequenceOf[SingerMessage],
-        stats: ProcessingStats,
+        stats: flext_target_oracle._models.processing_stats.ProcessingStats,
     ) -> p.Result[t.JsonMapping]:
         """Process a Singer stream after the public exception boundary.
 
@@ -340,7 +330,7 @@ class ProductionTargetManager:
         index: int,
         total: int,
         message: SingerMessage,
-        stats: ProcessingStats,
+        stats: flext_target_oracle._models.processing_stats.ProcessingStats,
     ) -> None:
         """Process one Singer message and update counters."""
         message_type = self._message_type(message)
@@ -374,7 +364,10 @@ class ProductionTargetManager:
         return "UNKNOWN"
 
     @staticmethod
-    def _record_processed_message(stats: ProcessingStats, message_type: str) -> None:
+    def _record_processed_message(
+        stats: flext_target_oracle._models.processing_stats.ProcessingStats,
+        message_type: str,
+    ) -> None:
         """Record counters for one successful Singer message."""
         stats.messages_processed += 1
         if message_type == "SCHEMA":
@@ -384,7 +377,9 @@ class ProductionTargetManager:
         elif message_type == "STATE":
             stats.states_processed += 1
 
-    def _finalize_processing_stats(self, stats: ProcessingStats) -> None:
+    def _finalize_processing_stats(
+        self, stats: flext_target_oracle._models.processing_stats.ProcessingStats
+    ) -> None:
         """Finalize target processing stats."""
         if self.target is None:
             stats.errors_encountered += 1

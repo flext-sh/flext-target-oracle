@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from flext_target_oracle.utilities import FlextTargetOracle, FlextTargetOracleLoader
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleLoader
 from tests import c, m, p, t, tm, u
 
 if TYPE_CHECKING:
@@ -238,7 +238,7 @@ class TestsFlextTargetOracleOracle:
         customer_city = customer_address_data.get("city")
         tm.that(customer_city, eq="objecttown")
         items = stored_data.get("items")
-        items_data = t.json_mapping_sequence_adapter().validate_python(items)
+        items_data = u.json_mapping_sequence_adapter().validate_python(items)
         tm.that(len(items_data), eq=2)
 
     @staticmethod
@@ -391,7 +391,7 @@ class TestsFlextTargetOracleOracle:
         """Test creation of custom indexes."""
         oracle_config = oracle_config.clone(
             TargetOracle={
-                "custom_indexes": t
+                "custom_indexes": u
                 .json_value_adapter()
                 .dump_json({
                     "test_indexes": [
@@ -444,7 +444,7 @@ class TestsFlextTargetOracleOracle:
         tm.ok(init_result)
         for message in singer_messages:
             result = target.execute(
-                t.json_value_adapter().dump_json(message).decode("utf-8"),
+                u.json_value_adapter().dump_json(message).decode("utf-8"),
             )
             tm.ok(result)
         table_count = _query_scalar(
@@ -469,7 +469,7 @@ class TestsFlextTargetOracleOracle:
         """Test column mapping and filtering features."""
         oracle_config = oracle_config.clone(
             TargetOracle={
-                "column_mappings": t
+                "column_mappings": u
                 .json_value_adapter()
                 .dump_json({"users": {"name": "full_name", "email": "email_address"}})
                 .decode("utf-8"),
@@ -493,11 +493,11 @@ class TestsFlextTargetOracleOracle:
             },
             "key_properties": ["id"],
         }
-        schema_msg_value: t.JsonValue = t.json_value_adapter().validate_python(
+        schema_msg_value: t.JsonValue = u.json_value_adapter().validate_python(
             schema_msg,
         )
         target.execute(
-            t.json_value_adapter().dump_json(schema_msg_value).decode("utf-8"),
+            u.json_value_adapter().dump_json(schema_msg_value).decode("utf-8"),
         )
         record_msg = {
             "type": "RECORD",
@@ -510,11 +510,11 @@ class TestsFlextTargetOracleOracle:
                 "internal_id": "INT-001",
             },
         }
-        record_msg_value: t.JsonValue = t.json_value_adapter().validate_python(
+        record_msg_value: t.JsonValue = u.json_value_adapter().validate_python(
             record_msg,
         )
         target.execute(
-            t.json_value_adapter().dump_json(record_msg_value).decode("utf-8"),
+            u.json_value_adapter().dump_json(record_msg_value).decode("utf-8"),
         )
         column_rows = _query_rows(
             oracle_engine,

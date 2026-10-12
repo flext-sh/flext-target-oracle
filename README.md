@@ -57,7 +57,7 @@ verification).
   classes listed under Module Map above.
 - Public extensions exposed by this project: `FlextTargetOracle`,
   `FlextTargetOracleCli`, `FlextTargetOracleConfig`, `FlextTargetOracleConstants`,
-  `FlextTargetOracleLoader`, `FlextTargetOracleModels` (+5 more).
+  `FlextTargetOracleLoader`, `FlextTargetOracleModels` (+6 more).
 - Library abstraction boundaries: see AGENTS.md §2.7.
 
 ## Quality Gates

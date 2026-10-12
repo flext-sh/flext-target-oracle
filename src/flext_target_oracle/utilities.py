@@ -10,13 +10,13 @@ from __future__ import annotations
 from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import FlextMeltanoUtilities
 
-from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
-from flext_target_oracle._utilities.client import FlextTargetOracle
-from flext_target_oracle._utilities.errors import FlextTargetOracleUtilitiesErrors
-from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
-from flext_target_oracle._utilities.observability import (
+from flext_target_oracle._utilities import (
+    FlextTargetOracle,
+    FlextTargetOracleLoader,
+    FlextTargetOracleUtilitiesErrors,
     FlextTargetOracleUtilitiesObservability,
 )
+from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
 
 
 class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):

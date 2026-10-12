@@ -12,8 +12,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from flext_target_oracle import FlextTargetOracleSettings, m, p, t, u
-from flext_target_oracle.utilities import FlextTargetOracle
+from examples import m, p, t, u
+from flext_target_oracle import FlextTargetOracle, FlextTargetOracleSettings
 
 OracleMessage = (
     m.Meltano.SingerSchemaMessage
