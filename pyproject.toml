@@ -603,3 +603,6 @@ constraint-dependencies = ["mypy<2.4.0"]
 environments = ["sys_platform == 'linux'", "sys_platform == 'darwin'"]
 link-mode = "copy"
 override-dependencies = ["flext-target-oracle"]
+
+[tool.uv.sources.flext-target-oracle]
+workspace = true
