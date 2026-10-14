@@ -1,7 +1,6 @@
-"""Oracle Data Loader using s and SOURCE OF TRUTH patterns.
+"""Oracle data loader for Singer target flushes.
 
-ZERO DUPLICATION - Uses flext-db-oracle API exclusively.
-SOLID COMPLIANCE - Single responsibility: Oracle data loading only.
+All database operations delegate to the public flext-db-oracle API.
 
 Copyright (c) 2025 FLEXT Team. All rights reserved.
 SPDX-License-Identifier: MIT
@@ -23,12 +22,10 @@ from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t
 
 
 class FlextTargetOracleLoader(FlextMeltanoServiceBase):
-    """Oracle batch loader service for Singer target flushes."""
+    """Oracle batch loader service for Singer target flushes.
 
-    """Oracle data loader using s and flext-db-oracle SOURCE OF TRUTH.
-
-    ZERO DUPLICATION - Uses ONLY public flext-db-oracle API.
-    SOLID COMPLIANCE - Single responsibility: Oracle data loading operations.
+    Buffers records per stream, maps Singer schemas to Oracle columns,
+    and flushes batches exclusively through the public flext-db-oracle API.
     """
 
     class StreamColumnPlan:
@@ -86,8 +83,12 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def _normalize_log_value(value: t.Scalar) -> t.JsonValue:
         """Normalize logging payloads into scalar or string values.
 
+        Args:
+            value: Scalar payload value to normalize.
+
         Returns:
-            The resulting ``t.JsonValue``.
+            The value in its string logging form.
+
         """
         return str(value)
 
@@ -95,8 +96,14 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def _oracle_timestamp_text(value: t.JsonValue) -> str:
         """Normalize timestamp payloads to Oracle TIMESTAMP text.
 
+        Args:
+            value: ISO timestamp string, or any JSON value when no source
+                timestamp exists.
+
         Returns:
-            The resulting ``str``.
+            The Oracle TIMESTAMP text, falling back to the current UTC
+            time when the value carries no usable timestamp.
+
         """
         if isinstance(value, str) and value:
             try:
@@ -111,8 +118,13 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def _with_oracle_timestamp_binds(cls, sql: str) -> str:
         """Wrap owner-managed SDC timestamp binds with Oracle conversion.
 
+        Args:
+            sql: SQL statement holding SDC timestamp bind placeholders.
+
         Returns:
-            The resulting ``str``.
+            The SQL with ``TO_TIMESTAMP`` conversions applied to the SDC
+            timestamp binds.
+
         """
         converted_sql = sql
         for column_name in cls._sdc_timestamp_columns:
@@ -130,8 +142,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[tuple[m.DbOracle.Column, ...]]:
         """Build and cache Oracle column metadata for one Singer stream.
 
+        Args:
+            stream_name: Name of the Singer stream to map.
+            schema: Singer schema for the stream.
+            key_properties: Singer key properties for the stream.
+
         Returns:
-            The resulting ``p.Result[tuple[m.DbOracle.Column, ...]]``.
+            The mapped Oracle columns for the stream, or a failure result
+            when the schema is invalid.
+
         """
         try:
             return self._loader_columns_unchecked(stream_name, schema, key_properties)
@@ -148,8 +167,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[tuple[m.DbOracle.Column, ...]]:
         """Build Oracle column metadata after validation has been delegated.
 
+        Args:
+            stream_name: Name of the Singer stream to map.
+            schema: Singer schema for the stream.
+            key_properties: Singer key properties for the stream.
+
         Returns:
-            The resulting ``p.Result[tuple[m.DbOracle.Column, ...]]``.
+            The mapped Oracle columns for the stream, or a failure result
+            when schema mapping or column mappings fail.
+
         """
         properties_value = schema.get("properties", {})
         properties = (
@@ -224,7 +250,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
 
     @staticmethod
     def _schema_field_type(definition: t.JsonMapping) -> str:
-        """Return the effective non-null Singer field type."""
+        """Return the effective non-null Singer field type.
+
+        Args:
+            definition: Singer JSON schema definition of one field.
+
+        Returns:
+            The first non-null declared type, or ``string`` when absent.
+
+        """
         field_type_value = definition.get("type", "string")
         if isinstance(field_type_value, str):
             return field_type_value
@@ -244,7 +278,17 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         source_name: str,
         definition_value: t.JsonValue,
     ) -> None:
-        """Append one mapped Oracle column when the Singer field is persisted."""
+        """Append one mapped Oracle column when the Singer field is persisted.
+
+        Args:
+            plan: Per-stream column planning context.
+            columns: Column list to append the mapped column to.
+            field_mappings: Mapping list to append the source-to-target
+                pair to.
+            source_name: Singer field name.
+            definition_value: Singer JSON schema definition of the field.
+
+        """
         if source_name in plan.ignored_columns:
             return
         definition = (
@@ -294,8 +338,13 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> list[m.DbOracle.Column]:
         """Apply configured column ordering.
 
+        Args:
+            columns: Columns to order.
+
         Returns:
-            The resulting ``list[m.DbOracle.Column]``.
+            The columns ordered by the configured group priorities, or
+            unchanged when ordering is not ``alphabetical``.
+
         """
         if self.target_config.TargetOracle.column_ordering != "alphabetical":
             return columns
@@ -359,8 +408,12 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def __init__(self, settings: FlextTargetOracleSettings, **_data: t.Scalar) -> None:
         """Initialize loader with Oracle API using flext-db-oracle correctly.
 
+        Args:
+            settings: Typed target settings for the loader.
+
         Raises:
             FlextConnectionError: If the Oracle API cannot be created.
+
         """
         try:
             self._init_oracle_loader(settings)
@@ -369,7 +422,12 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             raise core_e.FlextConnectionError(msg) from exc
 
     def _init_oracle_loader(self, settings: FlextTargetOracleSettings) -> None:
-        """Initialize mutable loader state."""
+        """Initialize mutable loader state.
+
+        Args:
+            settings: Typed target settings driving the loader.
+
+        """
         super().__init__()
         # NOTE (multi-agent): mro-rn88 — FlextDbOracleSettings namespaces its scalars
         # under
@@ -393,24 +451,24 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
 
     @property
     def oracle_api(self) -> FlextDbOracleApi:
-        """Access Oracle API instance."""
+        """The Oracle API instance used for all database operations."""
         return self._oracle_api
 
     @property
     def record_buffers(
         self,
     ) -> t.MutableMappingKV[str, t.MutableSequenceOf[t.JsonMapping]]:
-        """Access record buffers."""
+        """The buffered records keyed by stream name."""
         return self._record_buffers
 
     @property
     def target_config(self) -> FlextTargetOracleSettings:
-        """Access target configuration."""
+        """The typed target configuration for this loader."""
         return self._target_config
 
     @property
     def total_records(self) -> int:
-        """Access total records count."""
+        """The total number of records buffered across all streams."""
         return self._total_records
 
     def _run_connection_operation(
@@ -419,6 +477,16 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         operation_name: str,
         result: p.TargetOracle.ConnectionOperationResult,
     ) -> p.Result[bool]:
+        """Normalize one connection operation result into a typed result.
+
+        Args:
+            operation_name: Operation label used in failure messages.
+            result: Connection operation result to convert.
+
+        Returns:
+            The outcome of the connection operation.
+
+        """
         try:
             if result.failure:
                 return r[bool].fail(f"{operation_name} failed: {result.error}")
@@ -435,7 +503,8 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         Exposed for tests and parity with previous loader helpers.
 
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of the connection attempt.
+
         """
         return self._run_connection_operation(
             operation_name="Connect",
@@ -446,7 +515,8 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """Disconnect underlying FlextDbOracleApi (exposed for tests).
 
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of the disconnect attempt.
+
         """
         return self._run_connection_operation(
             operation_name="Disconnect",
@@ -461,8 +531,14 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[bool]:
         """Ensure table exists using flext-db-oracle API with correct table creation.
 
+        Args:
+            stream_name: Name of the Singer stream backing the table.
+            schema: Singer schema mapped to table columns.
+            key_properties: Singer key properties mapped to primary keys.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of ensuring the table exists.
+
         """
         try:
             return self._ensure_table_exists_unchecked(
@@ -482,8 +558,14 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[bool]:
         """Ensure a table exists after exception handling has been delegated.
 
+        Args:
+            stream_name: Name of the Singer stream backing the table.
+            schema: Singer schema mapped to table columns.
+            key_properties: Singer key properties mapped to primary keys.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of ensuring the table exists.
+
         """
         table_name = (
             f"{self.target_config.TargetOracle.table_prefix}"
@@ -514,8 +596,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[bool]:
         """Ensure the table exists using an already-connected Oracle API.
 
+        Args:
+            connected_api: Connected Oracle API to run DDL through.
+            stream_name: Name of the Singer stream backing the table.
+            table_name: Target table name.
+            columns: Mapped Oracle columns for the table.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of table creation, truncation, and index setup.
+
         """
         tables_result = connected_api.fetch_tables(
             schema=self.target_config.TargetOracle.default_target_schema,
@@ -552,8 +641,13 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[bool]:
         """Prepare an existing table before loading records.
 
+        Args:
+            connected_api: Connected Oracle API used for truncation.
+            table_name: Target table name.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of preparing the existing table.
+
         """
         if self.target_config.TargetOracle.truncate_before_load:
             truncate_sql = (
@@ -577,8 +671,14 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[bool]:
         """Create configured custom indexes for a stream table.
 
+        Args:
+            connected_api: Connected Oracle API to run index DDL through.
+            stream_name: Name of the Singer stream the indexes belong to.
+            table_name: Target table name to index.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of creating all configured indexes.
+
         """
         custom_indexes_result = u.Cli.json_loads(
             self.target_config.TargetOracle.custom_indexes or "{}",
@@ -631,8 +731,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[list[str]]:
         """Normalize custom index columns.
 
+        Args:
+            raw_index: Custom index configuration entry.
+            stream_name: Name of the Singer stream used in failure
+                messages.
+
         Returns:
-            The resulting ``p.Result[list[str]]``.
+            The upper-cased index column names, or a failure result when
+            the columns are missing or empty.
+
         """
         columns_value = raw_index.get("columns", ())
         if isinstance(columns_value, str) or not isinstance(columns_value, Sequence):
@@ -650,7 +757,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """Return the typed connection readiness payload for this target.
 
         Returns:
-            The resulting ``p.Result[t.JsonMapping]``.
+            The readiness payload with status, host, service, and schema,
+            or a failure result when the connection test fails.
+
         """
         connection_result = self.test_connection()
         if connection_result.failure:
@@ -669,7 +778,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """Finalize all streams and return stats using standardized models.
 
         Returns:
-            The resulting ``p.Result[m.TargetOracle.LoaderFinalizeResult]``.
+            The finalize outcome with totals, per-stream buffer status,
+            and the loading operation record.
+
         """
         try:
             return self._finalize_all_streams_unchecked()
@@ -686,7 +797,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """Finalize streams after exception handling has been delegated.
 
         Returns:
-            The resulting ``p.Result[m.TargetOracle.LoaderFinalizeResult]``.
+            The finalize outcome with totals, per-stream buffer status,
+            and the loading operation record.
+
         """
         started_at = str(u.now())
         records_failed = 0
@@ -722,8 +835,13 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
 
         Appends records to the internal buffer via load_record and flushes the batch.
 
+        Args:
+            stream_name: Name of the Singer stream to insert into.
+            records: Records to buffer and flush.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of loading the records and flushing the batch.
+
         """
         try:
             for record in records:
@@ -742,8 +860,14 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[bool]:
         """Load record with batching.
 
+        Args:
+            stream_name: Name of the Singer stream the record belongs to.
+            record_data: Singer record payload to buffer.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of buffering the record and flushing when the
+            batch is full.
+
         """
         try:
             return self._load_record_unchecked(stream_name, record_data)
@@ -758,8 +882,14 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[bool]:
         """Load one record after exception handling has been delegated.
 
+        Args:
+            stream_name: Name of the Singer stream the record belongs to.
+            record_data: Singer record payload to buffer.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of buffering the record and flushing when the
+            batch is full.
+
         """
         if stream_name not in self.record_buffers:
             empty_records: t.MutableSequenceOf[t.JsonMapping] = []
@@ -775,7 +905,13 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         return r[bool].ok(value=True)
 
     def log_error(self, message: str, **kwargs: t.Scalar) -> None:
-        """Log error message."""
+        """Log error message.
+
+        Args:
+            message: Error message to log.
+            **kwargs: Optional detail fields appended to the message.
+
+        """
         if not kwargs:
             self.logger.error(message)
             return
@@ -785,7 +921,13 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         self.logger.error("%s | %s", message, details)
 
     def log_info(self, message: str, **kwargs: t.Scalar) -> None:
-        """Log info message."""
+        """Log info message.
+
+        Args:
+            message: Info message to log.
+            **kwargs: Optional detail fields appended to the message.
+
+        """
         if not kwargs:
             self.logger.info(message)
             return
@@ -798,7 +940,8 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         """Test connection to Oracle database using flext-db-oracle API.
 
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of the connection test.
+
         """
         try:
             with self.oracle_api as connected_api:
@@ -821,8 +964,16 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[t.JsonMapping]:
         """Normalize one record into the owner-managed insert payload shape.
 
+        Args:
+            stream_name: Name of the Singer stream the record belongs to.
+            record: Singer record payload to normalize.
+            loaded_at: Load timestamp text applied when the record
+                carries no extraction timestamp.
+
         Returns:
-            The resulting ``p.Result[t.JsonMapping]``.
+            The insert parameters keyed by column name, or a failure
+            result when validation fails.
+
         """
         try:
             return self._build_insert_parameters_unchecked(
@@ -843,8 +994,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[t.JsonMapping]:
         """Build insert parameters after validation handling has been delegated.
 
+        Args:
+            stream_name: Name of the Singer stream the record belongs to.
+            record: Singer record payload to normalize.
+            loaded_at: Load timestamp text for the SDC audit columns.
+
         Returns:
-            The resulting ``p.Result[t.JsonMapping]``.
+            The insert parameters keyed by column name, or a failure
+            result when the stream has no registered schema.
+
         """
         stream_columns = self._stream_columns.get(stream_name, ())
         if not stream_columns:
@@ -882,8 +1040,12 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def _flush_batch(self, stream_name: str) -> p.Result[bool]:
         """Flush batch using flext-db-oracle API exclusively - NO direct SQLAlchemy.
 
+        Args:
+            stream_name: Name of the Singer stream to flush.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of flushing the buffered records.
+
         """
         try:
             return self._flush_batch_unchecked(stream_name)
@@ -894,8 +1056,12 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     def _flush_batch_unchecked(self, stream_name: str) -> p.Result[bool]:
         """Flush batch after exception handling has been delegated.
 
+        Args:
+            stream_name: Name of the Singer stream to flush.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of flushing the buffered records.
+
         """
         records = self.record_buffers.get(stream_name, [])
         if not records:
@@ -928,8 +1094,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[bool]:
         """Flush buffered records using an already-connected Oracle API.
 
+        Args:
+            connected_api: Connected Oracle API executing the inserts.
+            stream_name: Name of the Singer stream to flush.
+            records: Buffered Singer records to insert.
+            loaded_at: Load timestamp text for the SDC audit columns.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of merge deletes and the batch insert.
+
         """
         table_name = (
             f"{self.target_config.TargetOracle.table_prefix}"
@@ -981,8 +1154,15 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[list[t.JsonMapping]]:
         """Build validated insert parameters for buffered records.
 
+        Args:
+            stream_name: Name of the Singer stream the records belong to.
+            records: Buffered Singer records to normalize.
+            loaded_at: Load timestamp text for the SDC audit columns.
+
         Returns:
-            The resulting ``p.Result[list[t.JsonMapping]]``.
+            The insert parameters for each record, or a failure result
+            when any record fails to normalize.
+
         """
         params_list: list[t.JsonMapping] = []
         for record in records:
@@ -1006,8 +1186,18 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     ) -> p.Result[bool]:
         """Delete existing merge rows before inserting updated records.
 
+        Args:
+            connected_api: Connected Oracle API executing the deletes.
+            stream_name: Name of the Singer stream being loaded.
+            table_name: Target table name.
+            schema_name: Target schema name.
+            params_list: Insert parameters supplying the key column
+                values for each row.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of the merge deletes, or success when merge
+            loading is disabled or the stream has no key columns.
+
         """
         merge_enabled = (
             self.target_config.TargetOracle.sdc_mode.lower()
