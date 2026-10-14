@@ -1,7 +1,6 @@
 """Result and payload models for Oracle target operations.
 
 Copyright (c) 2026 FLEXT Team. All rights reserved.
-src/flext_target_oracle/_models/results
 SPDX-License-Identifier: MIT
 """
 
@@ -189,6 +188,7 @@ class FlextTargetOracleModelsResults:
             """Finalize statistics and return self.
 
             Returns:
-                The resulting ``Self``.
+                The finalized statistics model.
+
             """
             return self

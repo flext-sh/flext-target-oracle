@@ -33,6 +33,7 @@ def loader_config() -> FlextTargetOracleSettings:
 
     Returns:
         The resulting ``FlextTargetOracleSettings``.
+
     """
     # NOTE (multi-agent): mro-rn88 — project fields nest under TargetOracle.*; a flat
     # dict

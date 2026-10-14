@@ -1,7 +1,6 @@
 """CLI orchestration for Oracle target.
 
 Copyright (c) 2026 FLEXT Team. All rights reserved.
-src/flext_target_oracle/cli
 SPDX-License-Identifier: MIT
 """
 
@@ -25,7 +24,8 @@ class FlextTargetOracleCli:
         """Service readiness probe.
 
         Returns:
-            The resulting ``p.Result[str]``.
+            The readiness acknowledgement value.
+
         """
         return r[str].ok("CLI ready")
 
@@ -37,6 +37,7 @@ class FlextTargetOracleCli:
 
         Raises:
             SystemExit: If ``result.failure``.
+
         """
         if result.failure:
             self.logger.error(result.error or "Command failed")
@@ -47,8 +48,14 @@ class FlextTargetOracleCli:
     def run_cli(self, args: t.StrSequence | None = None) -> p.Result[str]:
         """Dispatch CLI args to the appropriate command.
 
+        Args:
+            args: CLI arguments; the first entry selects the command.
+                Defaults to ``sys.argv[1:]``.
+
         Returns:
-            The resulting ``p.Result[str]``.
+            The command output, the help text, or a failure result
+            naming the unknown command.
+
         """
         argv = args if args is not None else sys.argv[1:]
         if not argv or argv[0] in {"help", "-h", "--help"}:
@@ -81,7 +88,8 @@ def main() -> int:
     """Run the Oracle target CLI entrypoint.
 
     Returns:
-        The resulting ``int``.
+        The CLI exit code.
+
     """
     cli_service = FlextTargetOracleCli()
     return cli_service.finalize_cli_result(cli_service.run_cli())

@@ -26,6 +26,7 @@ def _users_schema_message(
 
     Returns:
         The resulting ``m.Meltano.SingerSchemaMessage``.
+
     """
     payload: t.MutableJsonMapping = {
         "type": "SCHEMA",
@@ -46,6 +47,7 @@ def target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle:
 
     Returns:
         The resulting ``FlextTargetOracle``.
+
     """
     return FlextTargetOracle(settings=oracle_config)
 

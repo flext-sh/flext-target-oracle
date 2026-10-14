@@ -20,8 +20,14 @@ class FlextTargetOracleUtilitiesBootstrap:
     ) -> p.Result[FlextTargetOracleSettings]:
         """Load settings from a JSON file or environment defaults.
 
+        Args:
+            config_file: Path to the JSON configuration file, or ``None``
+                to build settings from environment defaults.
+
         Returns:
-            The resulting ``p.Result[FlextTargetOracleSettings]``.
+            The validated settings, or a failure result when the file is
+            missing or invalid.
+
         """
         result_type: type[r[FlextTargetOracleSettings]] = r[FlextTargetOracleSettings]
         if config_file is None:
