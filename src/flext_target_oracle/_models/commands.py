@@ -74,3 +74,6 @@ class FlextTargetOracleModelsCommands:
             str | None,
             u.Field(description="Path to JSON configuration file to validate"),
         ] = None
+
+
+__all__: list[str] = ["FlextTargetOracleModelsCommands"]
