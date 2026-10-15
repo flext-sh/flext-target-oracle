@@ -14,10 +14,10 @@ from datetime import datetime
 from operator import itemgetter
 from typing import ClassVar
 
+from flext_core import e as core_e
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_meltano import FlextMeltanoServiceBase, u
 
-from flext_core import e as core_e
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t
 
 

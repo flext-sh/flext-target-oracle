@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_core import e as core_e
+
 from flext_target_oracle import t
 
 
