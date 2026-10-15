@@ -151,3 +151,6 @@ class FlextTargetOracleProtocolsBase:
 
         env_prefix: str
         TargetOracle: FlextTargetOracleProtocolsBase.OracleTargetGroupProtocol
+
+
+__all__: list[str] = ["FlextTargetOracleProtocolsBase"]

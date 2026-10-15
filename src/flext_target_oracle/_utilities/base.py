@@ -41,3 +41,6 @@ class FlextTargetOracleUtilitiesBase:
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             return result_type.fail(f"Invalid configuration file: {exc}")
         return result_type.ok(settings)
+
+
+__all__: list[str] = ["FlextTargetOracleUtilitiesBase"]

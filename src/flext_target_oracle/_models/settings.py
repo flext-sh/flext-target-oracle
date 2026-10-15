@@ -162,3 +162,6 @@ class FlextTargetOracleModelsSettings(FlextSettings):
             description="Target table name suffix",
             validate_default=True,
         )
+
+
+__all__: list[str] = ["FlextTargetOracleModelsSettings"]

@@ -47,3 +47,6 @@ class FlextTargetOracleConstantsBase:
     # Loading configuration (formerly separate Loading class)
     DEFAULT_POOL_MIN: Final[int] = 5
     DEFAULT_POOL_MAX: Final[int] = 20
+
+
+__all__: list[str] = ["FlextTargetOracleConstantsBase"]
