@@ -1,7 +1,6 @@
 """Oracle Singer target client implementation.
 
 Copyright (c) 2026 FLEXT Team. All rights reserved.
-src/flext_target_oracle/_utilities/client
 SPDX-License-Identifier: MIT
 """
 
@@ -12,7 +11,7 @@ from typing import TYPE_CHECKING, ClassVar
 from flext_meltano import u
 
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, settings, t
-from flext_target_oracle._utilities.loader import FlextTargetOracleLoader
+from flext_target_oracle.application import FlextTargetOracleLoader
 
 if TYPE_CHECKING:
     from collections.abc import MutableMapping
@@ -24,7 +23,12 @@ class FlextTargetOracle:
     logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     def __init__(self, settings: FlextTargetOracleSettings) -> None:
-        """Create target with validated settings and loader dependencies."""
+        """Create target with validated settings and loader dependencies.
+
+        Args:
+            settings: Typed target settings driving the loader.
+
+        """
         self.loader = FlextTargetOracleLoader(settings)
         self.schemas: MutableMapping[str, m.Meltano.SingerSchemaMessage] = {}
         self.state_message: m.Meltano.SingerStateMessage = m.Meltano.SingerStateMessage(
@@ -74,14 +78,20 @@ class FlextTargetOracle:
             ),
         )
 
-    def execute(
+    def run(
         self,
         payload: str | None = None,
     ) -> p.Result[m.TargetOracle.ExecuteResult]:
         """Execute readiness check or process one Singer JSON line.
 
+        Args:
+            payload: Singer JSON line to process, or ``None`` to only
+                verify connectivity.
+
         Returns:
-            The resulting ``p.Result[m.TargetOracle.ExecuteResult]``.
+            The readiness payload, or a failure result when processing
+            or the connectivity check fails.
+
         """
         if payload is not None:
             payload_result = self._execute_payload(payload)
@@ -108,8 +118,13 @@ class FlextTargetOracle:
     def _execute_payload(self, payload: str) -> p.Result[bool]:
         """Parse and process one Singer JSON line.
 
+        Args:
+            payload: Singer JSON line to parse and process.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The processing outcome, or a failure result when parsing or
+            handling the message fails.
+
         """
         message_result = self._parse_singer_payload(payload)
         if message_result.failure:
@@ -135,13 +150,16 @@ class FlextTargetOracle:
     ]:
         """Parse one Singer JSON payload into its Pydantic message model.
 
+        Args:
+            payload: Singer JSON line to parse.
+
         Returns:
-            The resulting ``p.Result[m.Meltano.SingerSchemaMessage |
-                m.Meltano.SingerRecordMessage | m.Meltano.SingerStateMessage |
-                m.Meltano.SingerActivateVersionMessage]``.
+            The parsed Singer message, or a failure result when the
+            payload is invalid.
+
         """
         try:
-            raw = t.json_mapping_adapter().validate_json(payload)
+            raw = u.json_mapping_adapter().validate_json(payload)
             return self._parse_singer_mapping(raw)
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             return r[
@@ -162,10 +180,13 @@ class FlextTargetOracle:
     ]:
         """Parse one Singer mapping into its concrete message model.
 
+        Args:
+            raw: Raw Singer message mapping holding a ``type`` discriminator.
+
         Returns:
-            The resulting ``p.Result[m.Meltano.SingerSchemaMessage |
-                m.Meltano.SingerRecordMessage | m.Meltano.SingerStateMessage |
-                m.Meltano.SingerActivateVersionMessage]``.
+            The parsed Singer message, or a failure result when the
+            message type is unsupported.
+
         """
         result_type = r[
             m.Meltano.SingerSchemaMessage
@@ -194,7 +215,9 @@ class FlextTargetOracle:
         """Flush remaining batches and return loader statistics.
 
         Returns:
-            The resulting ``p.Result[m.TargetOracle.LoaderFinalizeResult]``.
+            The finalize outcome with totals, per-stream buffer status,
+            and the loading operation record.
+
         """
         return self.loader.finalize_all_streams()
 
@@ -210,7 +233,8 @@ class FlextTargetOracle:
         """Initialize target by validating connectivity.
 
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of the connectivity validation.
+
         """
         return self.loader.test_connection()
 
@@ -223,8 +247,12 @@ class FlextTargetOracle:
     ) -> p.Result[bool]:
         """Process a single Singer message.
 
+        Args:
+            message: Singer message to dispatch to its handler.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The handling outcome for the message.
+
         """
         match message:
             case m.Meltano.SingerSchemaMessage() as schema_message:
@@ -235,10 +263,6 @@ class FlextTargetOracle:
                 return self._handle_state(state_message)
             case m.Meltano.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
-            case _:
-                return r[bool].fail(
-                    f"Unsupported Singer message type: {type(message).__name__}",
-                )
 
     def process_singer_messages(
         self,
@@ -251,8 +275,13 @@ class FlextTargetOracle:
     ) -> p.Result[m.TargetOracle.ProcessingSummary]:
         """Process SCHEMA/RECORD/STATE Singer messages.
 
+        Args:
+            messages: Singer messages to process in order.
+
         Returns:
-            The resulting ``p.Result[m.TargetOracle.ProcessingSummary]``.
+            The processing summary, or a failure result when any message
+            handling or the final flush fails.
+
         """
         processed = 0
         for message in messages:
@@ -275,15 +304,21 @@ class FlextTargetOracle:
         """Test Oracle connectivity through loader.
 
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of the connection test.
+
         """
         return self.loader.test_connection()
 
     def write_record(self, record_data: str) -> p.Result[bool]:
         """Write one Singer record payload to Oracle.
 
+        Args:
+            record_data: Singer RECORD message JSON to load.
+
         Returns:
-            The resulting ``p.Result[bool]``.
+            The outcome of buffering the record, or a failure result
+            when the payload is invalid.
+
         """
         try:
             payload = m.Meltano.SingerRecordMessage.model_validate_json(record_data)

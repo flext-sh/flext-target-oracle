@@ -1,7 +1,6 @@
 """Result and payload models for Oracle target operations.
 
 Copyright (c) 2026 FLEXT Team. All rights reserved.
-src/flext_target_oracle/_models/results
 SPDX-License-Identifier: MIT
 """
 
@@ -124,11 +123,10 @@ class FlextTargetOracleModelsResults:
             Literal["completed"],
             u.Field(..., description="Finalization status", validate_default=True),
         ] = "completed"
-        loading_operation: FlextTargetOracleModelsResults.LoaderOperation = u.Field(
-            ...,
-            description="Aggregated loading operation details",
-            validate_default=True,
-        )
+        loading_operation: Annotated[
+            FlextTargetOracleModelsResults.LoaderOperation,
+            u.Field(description="Aggregated loading operation details"),
+        ]
         buffer_status: Annotated[
             t.MappingKV[str, int],
             u.Field(
@@ -190,6 +188,7 @@ class FlextTargetOracleModelsResults:
             """Finalize statistics and return self.
 
             Returns:
-                The resulting ``Self``.
+                The finalized statistics model.
+
             """
             return self

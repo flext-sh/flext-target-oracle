@@ -15,10 +15,10 @@ import time
 from typing import TYPE_CHECKING
 
 import pytest
-from flext_tests import tm
 
-from flext_target_oracle.utilities import FlextTargetOracle, FlextTargetOracleLoader
-from tests import c, m, p, t
+from flext_target_oracle import FlextTargetOracle
+from flext_target_oracle.application import FlextTargetOracleLoader
+from tests import c, m, p, t, tm, u
 
 if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleApi
@@ -229,17 +229,17 @@ class TestsFlextTargetOracleOracle:
     def _assert_nested_stored_roundtrip(stored_data: t.JsonMapping) -> None:
         """Assert the nested JSON round-trip preserved customer and items."""
         customer = stored_data.get("customer")
-        customer_data = t.json_mapping_adapter().validate_python(customer)
+        customer_data = u.json_mapping_adapter().validate_python(customer)
         customer_name = customer_data.get("name")
         tm.that(customer_name, eq="Acme Corp")
         customer_address = customer_data.get("address")
-        customer_address_data = t.json_mapping_adapter().validate_python(
+        customer_address_data = u.json_mapping_adapter().validate_python(
             customer_address,
         )
         customer_city = customer_address_data.get("city")
         tm.that(customer_city, eq="objecttown")
         items = stored_data.get("items")
-        items_data = t.json_mapping_sequence_adapter().validate_python(items)
+        items_data = u.json_mapping_sequence_adapter().validate_python(items)
         tm.that(len(items_data), eq=2)
 
     @staticmethod
@@ -276,7 +276,7 @@ class TestsFlextTargetOracleOracle:
             ],
             "total": 349.97,
         }
-        typed_record = t.json_mapping_adapter().validate_python(record)
+        typed_record = u.json_mapping_adapter().validate_python(record)
         insert_res = loader.insert_records(stream_name, [typed_record])
         tm.ok(insert_res)
         json_str = _query_scalar(
@@ -284,7 +284,7 @@ class TestsFlextTargetOracleOracle:
             'SELECT json_data AS "json_data" FROM test_json WHERE id = 1',
             "json_data",
         )
-        stored_data = t.json_mapping_adapter().validate_json(json_str)
+        stored_data = u.json_mapping_adapter().validate_json(json_str)
         TestsFlextTargetOracleOracle._assert_nested_stored_roundtrip(stored_data)
         tm.ok(loader.disconnect())
 
@@ -392,7 +392,7 @@ class TestsFlextTargetOracleOracle:
         """Test creation of custom indexes."""
         oracle_config = oracle_config.clone(
             TargetOracle={
-                "custom_indexes": t
+                "custom_indexes": u
                 .json_value_adapter()
                 .dump_json({
                     "test_indexes": [
@@ -444,8 +444,8 @@ class TestsFlextTargetOracleOracle:
         init_result = target.initialize()
         tm.ok(init_result)
         for message in singer_messages:
-            result = target.execute(
-                t.json_value_adapter().dump_json(message).decode("utf-8"),
+            result = target.run(
+                u.json_value_adapter().dump_json(message).decode("utf-8"),
             )
             tm.ok(result)
         table_count = _query_scalar(
@@ -470,7 +470,7 @@ class TestsFlextTargetOracleOracle:
         """Test column mapping and filtering features."""
         oracle_config = oracle_config.clone(
             TargetOracle={
-                "column_mappings": t
+                "column_mappings": u
                 .json_value_adapter()
                 .dump_json({"users": {"name": "full_name", "email": "email_address"}})
                 .decode("utf-8"),
@@ -494,11 +494,11 @@ class TestsFlextTargetOracleOracle:
             },
             "key_properties": ["id"],
         }
-        schema_msg_value: t.JsonValue = t.json_value_adapter().validate_python(
+        schema_msg_value: t.JsonValue = u.json_value_adapter().validate_python(
             schema_msg,
         )
-        target.execute(
-            t.json_value_adapter().dump_json(schema_msg_value).decode("utf-8"),
+        target.run(
+            u.json_value_adapter().dump_json(schema_msg_value).decode("utf-8"),
         )
         record_msg = {
             "type": "RECORD",
@@ -511,11 +511,11 @@ class TestsFlextTargetOracleOracle:
                 "internal_id": "INT-001",
             },
         }
-        record_msg_value: t.JsonValue = t.json_value_adapter().validate_python(
+        record_msg_value: t.JsonValue = u.json_value_adapter().validate_python(
             record_msg,
         )
-        target.execute(
-            t.json_value_adapter().dump_json(record_msg_value).decode("utf-8"),
+        target.run(
+            u.json_value_adapter().dump_json(record_msg_value).decode("utf-8"),
         )
         column_rows = _query_rows(
             oracle_engine,

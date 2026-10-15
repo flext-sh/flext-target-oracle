@@ -11,11 +11,10 @@ from typing import TYPE_CHECKING
 
 import pytest
 from flext_cli import u as cli_u
-from flext_tests import tm
 
 from flext_target_oracle import FlextTargetOracleSettings
-from flext_target_oracle.utilities import FlextTargetOracleLoader
-from tests import m
+from flext_target_oracle.application import FlextTargetOracleLoader
+from tests import m, tm
 
 if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleApi
@@ -34,6 +33,7 @@ def loader_config() -> FlextTargetOracleSettings:
 
     Returns:
         The resulting ``FlextTargetOracleSettings``.
+
     """
     # NOTE (multi-agent): mro-rn88 — project fields nest under TargetOracle.*; a flat
     # dict
@@ -57,12 +57,12 @@ class TestsFlextTargetOracleLoader:
     """Behavior contract for test_loader."""
 
     @staticmethod
-    def test_loader_execute_returns_ready_payload(
+    def test_loader_connection_status_returns_ready_payload(
         loader_config: FlextTargetOracleSettings,
     ) -> None:
-        """execute() should return a typed readiness payload."""
+        """connection_status() should return a typed readiness payload."""
         loader = FlextTargetOracleLoader(loader_config)
-        result = loader.execute()
+        result = loader.connection_status()
         tm.that(result.success, is_=bool)
 
     @staticmethod

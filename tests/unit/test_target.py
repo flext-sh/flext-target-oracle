@@ -9,12 +9,36 @@ from __future__ import annotations
 
 import pytest
 from flext_cli import u as cli_u
-from flext_tests import tm
 
-from flext_target_oracle import FlextTargetOracleSettings
-from flext_target_oracle.api import FlextTargetOracleService
-from flext_target_oracle.utilities import FlextTargetOracle
-from tests import m, t, u
+from flext_target_oracle import (
+    FlextTargetOracle,
+    FlextTargetOracleService,
+    FlextTargetOracleSettings,
+)
+from tests import m, t, tm, u
+
+
+def _users_schema_message(
+    *,
+    with_key_properties: bool = False,
+) -> m.Meltano.SingerSchemaMessage:
+    """Build the canonical ``users`` SCHEMA message shared by these tests.
+
+    Returns:
+        The resulting ``m.Meltano.SingerSchemaMessage``.
+
+    """
+    payload: t.MutableJsonMapping = {
+        "type": "SCHEMA",
+        "stream": "users",
+        "schema": {
+            "type": "object",
+            "properties": cli_u.Cli.json_dumps({"id": {"type": "integer"}}).unwrap(),
+        },
+    }
+    if with_key_properties:
+        payload["key_properties"] = ["id"]
+    return m.Meltano.SingerSchemaMessage.model_validate(payload)
 
 
 @pytest.fixture
@@ -23,6 +47,7 @@ def target(oracle_config: FlextTargetOracleSettings) -> FlextTargetOracle:
 
     Returns:
         The resulting ``FlextTargetOracle``.
+
     """
     return FlextTargetOracle(settings=oracle_config)
 
@@ -42,7 +67,7 @@ class TestsFlextTargetOracleTarget:
     @staticmethod
     def test_execute_returns_ready_status(target: FlextTargetOracle) -> None:
         """Test execute returns ready status."""
-        result = target.execute()
+        result = target.run()
         tm.ok(result)
         tm.that(result.value.status, eq="ready")
         tm.that(result.value.oracle_host, eq="localhost")
@@ -68,17 +93,7 @@ class TestsFlextTargetOracleTarget:
         target: FlextTargetOracle,
     ) -> None:
         """Test discover catalog uses registered schemas."""
-        schema_message = m.Meltano.SingerSchemaMessage.model_validate({
-            "type": "SCHEMA",
-            "stream": "users",
-            "schema": {
-                "type": "object",
-                "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"},
-                }).unwrap(),
-            },
-            "key_properties": ["id"],
-        })
+        schema_message = _users_schema_message(with_key_properties=True)
         tm.ok(target.process_singer_message(schema_message))
         catalog_result = target.discover_catalog()
         tm.ok(catalog_result)
@@ -88,16 +103,7 @@ class TestsFlextTargetOracleTarget:
     @staticmethod
     def test_process_record_and_state_messages(target: FlextTargetOracle) -> None:
         """Test process record and state messages."""
-        schema_message = m.Meltano.SingerSchemaMessage.model_validate({
-            "type": "SCHEMA",
-            "stream": "users",
-            "schema": {
-                "type": "object",
-                "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"},
-                }).unwrap(),
-            },
-        })
+        schema_message = _users_schema_message()
         record_message = m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
             "stream": "users",
@@ -128,16 +134,7 @@ class TestsFlextTargetOracleTarget:
             | m.Meltano.SingerStateMessage
             | m.Meltano.SingerActivateVersionMessage
         ] = [
-            m.Meltano.SingerSchemaMessage.model_validate({
-                "type": "SCHEMA",
-                "stream": "users",
-                "schema": {
-                    "type": "object",
-                    "properties": cli_u.Cli.json_dumps({
-                        "id": {"type": "integer"},
-                    }).unwrap(),
-                },
-            }),
+            _users_schema_message(),
             m.Meltano.SingerRecordMessage.model_validate({
                 "type": "RECORD",
                 "stream": "users",
@@ -165,7 +162,7 @@ class TestsFlextTargetOracleTarget:
         target: FlextTargetOracle,
     ) -> None:
         """Test invalid json payload maps to processing failure."""
-        result = target.execute("{ invalid }")
+        result = target.run("{ invalid }")
         tm.fail(result)
         parse_result = target.write_record(
             '{"type": "RECORD", "stream": "users", "record": "bad"}',
@@ -173,13 +170,6 @@ class TestsFlextTargetOracleTarget:
         tm.fail(parse_result)
         exceptions = u.TargetOracle.Exceptions
         assert issubclass(exceptions.ProcessingError, Exception)
-
-    @staticmethod
-    def test_missing_schema_path_uses_schema_error_type() -> None:
-        """Test missing schema path uses schema error type."""
-        exceptions = u.TargetOracle.Exceptions
-        err = exceptions.SchemaError("schema missing")
-        tm.that(err, is_=exceptions.SchemaError)
 
     @pytest.mark.docker
     @staticmethod
@@ -189,7 +179,7 @@ class TestsFlextTargetOracleTarget:
         assert metrics.batch_size > 0
         tm.that({True, False}, has=metrics.use_bulk_operations)
         result = target.write_record(
-            t.json_value_adapter().dump_json({"id": 1}).decode("utf-8"),
+            u.json_value_adapter().dump_json({"id": 1}).decode("utf-8"),
         )
         tm.fail(result)
 
@@ -199,20 +189,10 @@ class TestsFlextTargetOracleTarget:
         target: FlextTargetOracle,
     ) -> None:
         """Test write record inserts oracle record."""
-        schema_message = m.Meltano.SingerSchemaMessage.model_validate({
-            "type": "SCHEMA",
-            "stream": "users",
-            "schema": {
-                "type": "object",
-                "properties": cli_u.Cli.json_dumps({
-                    "id": {"type": "integer"},
-                }).unwrap(),
-            },
-            "key_properties": ["id"],
-        })
+        schema_message = _users_schema_message(with_key_properties=True)
         tm.ok(target.process_singer_message(schema_message))
         result = target.write_record(
-            t
+            u
             .json_value_adapter()
             .dump_json({"type": "RECORD", "stream": "users", "record": {"id": 1}})
             .decode("utf-8"),

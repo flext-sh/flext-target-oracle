@@ -30,8 +30,14 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     def create_sink(self, stream_name: str, schema: t.JsonMapping) -> Never:
         """Not supported — use FlextTargetOracleLoader directly.
 
+        Args:
+            stream_name: Name of the Singer stream; unused.
+
+            schema: Singer schema for the stream; unused.
+
         Raises:
             TypeError: If target-oracle uses Loader pattern, not Singer sink.
+
         """
         msg = "target-oracle uses Loader pattern, not Singer sink"
         raise TypeError(msg)
@@ -43,7 +49,16 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     def run_about(
         command: m.TargetOracle.OracleTargetAboutCommand,
     ) -> p.Result[str]:
-        """Return target metadata for the about command message."""
+        """Return target metadata for the about command message.
+
+        Args:
+            command: About command carrying the requested output format.
+
+        Returns:
+            The project name, or its JSON metadata payload for the JSON
+            output format.
+
+        """
         payload: t.StrMapping = {
             "name": "flext-target-oracle",
             "description": "Singer target for Oracle loading",
@@ -63,8 +78,13 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     ) -> p.Result[str]:
         """Initialize the target for loading from a load command message.
 
+        Args:
+            command: Load command carrying the config and state files.
+
         Returns:
-            The resulting ``p.Result[str]``.
+            The load acknowledgement, or a failure result when the
+            settings cannot be loaded.
+
         """
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
@@ -78,13 +98,18 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     ) -> p.Result[str]:
         """Validate target configuration from a validate command message.
 
+        Args:
+            command: Validate command carrying the configuration file.
+
         Returns:
-            The resulting ``p.Result[str]``.
+            The validation acknowledgement, or a failure result when the
+            settings cannot be loaded or violate a required field rule.
+
         """
         settings_result = u.TargetOracle.load_target_settings(command.config_file)
         if settings_result.failure:
             return r[str].from_failure(settings_result)
-        settings: p.TargetOracle.OracleSettingsProtocol = settings_result.value
+        settings = settings_result.value
         validation_result = (
             r[bool].fail("oracle_host is required")
             if not settings.TargetOracle.oracle_host

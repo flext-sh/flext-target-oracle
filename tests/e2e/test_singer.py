@@ -11,10 +11,9 @@ from typing import TYPE_CHECKING
 
 import pytest
 from flext_cli import u as cli_u
-from flext_tests import tm
 
-from flext_target_oracle.utilities import FlextTargetOracle
-from tests import m
+from flext_target_oracle import FlextTargetOracle
+from tests import m, tm
 
 if TYPE_CHECKING:
     from flext_target_oracle import FlextTargetOracleSettings
@@ -53,7 +52,7 @@ class TestsFlextTargetOracleSinger:
             "record": {"id": 1, "amount": 10.5},
         }
         state = {"type": "STATE", "value": {"bookmarks": {"orders": {"version": 1}}}}
-        tm.ok(target.execute())
+        tm.ok(target.run())
         tm.ok(
             target.process_singer_message(
                 m.Meltano.SingerSchemaMessage.model_validate(schema),
