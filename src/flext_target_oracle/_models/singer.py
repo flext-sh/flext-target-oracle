@@ -50,3 +50,6 @@ class FlextTargetOracleModelsSinger:
             default_factory=lambda: MappingProxyType[str, str]({}),
             validate_default=True,
         )
+
+
+__all__: list[str] = ["FlextTargetOracleModelsSinger"]

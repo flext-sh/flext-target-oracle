@@ -7,6 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+import contextlib
 import os
 import secrets
 from pathlib import Path
@@ -15,11 +16,11 @@ from typing import TYPE_CHECKING
 
 import pytest
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from flext_tests import FlextTestsDocker, tk, tm
+from flext_tests import FlextTestsDocker
 
 from flext_target_oracle import FlextTargetOracleSettings
-from flext_target_oracle.utilities import FlextTargetOracleLoader
-from tests import c, m
+from flext_target_oracle.application import FlextTargetOracleLoader
+from tests import c, m, p, r, tk, tm
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -54,6 +55,7 @@ def docker_control() -> FlextTestsDocker:
 
     Returns:
         The resulting ``FlextTestsDocker``.
+
     """
     return tk.shared(
         "flext-oracle-db-test",
@@ -96,22 +98,25 @@ def _oracle_test_settings(username: str) -> FlextDbOracleSettings:
     })
 
 
-def _application_user_ready(oracle_settings: FlextDbOracleSettings) -> bool:
+def _application_user_ready(
+    oracle_settings: FlextDbOracleSettings,
+) -> p.Result[bool]:
     """Report whether the application user connects and answers a health query.
 
     Returns:
-        The resulting ``bool``.
+        The resulting ``p.Result[bool]``.
+
     """
     api = FlextDbOracleApi(oracle_settings)
     connect_result = api.connect()
     if connect_result.failure:
-        return False
+        return r[bool].from_failure(connect_result)
     health_result = api.oracle_services.execute_query(
         'SELECT 1 AS "health" FROM DUAL',
     )
     disconnect_result = api.disconnect()
     _ = disconnect_result
-    return health_result.success
+    return r[bool].ok(health_result.success)
 
 
 def _provision_user_account(admin_api: FlextDbOracleApi) -> str | None:
@@ -119,6 +124,7 @@ def _provision_user_account(admin_api: FlextDbOracleApi) -> str | None:
 
     Returns:
         The resulting failure message, or ``None`` on success.
+
     """
     last_error: str | None = None
     user_query_result = admin_api.oracle_services.execute_query(
@@ -160,6 +166,7 @@ def _provision_oracle_test_user(
 
     Returns:
         The resulting container name.
+
     """
     _ = container_name
     admin_settings = _oracle_test_settings("system")
@@ -176,7 +183,7 @@ def _provision_oracle_test_user(
                 last_error = provision_error
             admin_disconnect_result = admin_api.disconnect()
             _ = admin_disconnect_result
-            if _application_user_ready(oracle_settings):
+            if _application_user_ready(oracle_settings).success:
                 return container_name
             last_error = last_error or "application user not ready after provision"
         else:
@@ -191,6 +198,7 @@ def shared_oracle_container(docker_control: FlextTestsDocker) -> str:
 
     Returns:
         The resulting ``str``.
+
     """
     container_name = "flext-oracle-db-test"
     ensure_result = docker_control.execute()
@@ -220,6 +228,7 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
 
     Yields:
         Each ``FlextDbOracleApi``.
+
     """
     _ = shared_oracle_container
     api = FlextDbOracleApi(
@@ -258,11 +267,8 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
     # ConnectionResetError from the driver and pytest reports the whole test as
     # errored even though the test itself skipped or passed. Losing a connection
     # that is already dead is not a teardown failure.
-    try:
-        disconnect_result = api.disconnect()
-    except OSError:
-        return
-    _ = disconnect_result
+    with contextlib.suppress(OSError):
+        _ = api.disconnect()
 
 
 @pytest.fixture
@@ -289,6 +295,7 @@ def oracle_config(
 
     Returns:
         The resulting ``FlextTargetOracleSettings``.
+
     """
     _ = (shared_oracle_container, isolate_target_oracle_env)
     return FlextTargetOracleSettings.model_validate({
@@ -344,6 +351,7 @@ def nested_schema() -> t.JsonMapping:
 
     Returns:
         The resulting ``t.JsonMapping``.
+
     """
     return {
         "type": "SCHEMA",
@@ -367,6 +375,7 @@ def singer_messages() -> t.SequenceOf[t.JsonValue]:
 
     Returns:
         The resulting ``t.SequenceOf[t.JsonValue]``.
+
     """
     schema: t.JsonValue = {
         "type": "SCHEMA",
@@ -407,6 +416,7 @@ def oracle_loader(
 
     Yields:
         Each ``FlextTargetOracleLoader``.
+
     """
     _ = oracle_engine
     loader = FlextTargetOracleLoader(oracle_config)
@@ -416,11 +426,8 @@ def oracle_loader(
     yield loader
     # Same contract as the api fixture: a connection already dropped by the server
     # must not surface as a teardown ERROR.
-    try:
-        disconnect_result = loader.disconnect()
-    except OSError:
-        return
-    _ = disconnect_result
+    with contextlib.suppress(OSError):
+        _ = loader.disconnect()
 
 
 _PATH_MARKERS: t.MappingKV[str, t.StrSequence] = {

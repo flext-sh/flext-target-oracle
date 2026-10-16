@@ -7,128 +7,60 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Annotated, Self
+from typing import Annotated
 
-from flext_meltano import m, t, u
-
-from flext_core import FlextSettings
+from flext_meltano import m, t
 
 
-class FlextTargetOracleModelsSettings(FlextSettings):
+class FlextTargetOracleModelsSettings(m.ArbitraryTypesModel):
     """Configuration MRO mixin for TargetOracle namespace.
 
-    MRO carries ``FlextSettings`` (ENFORCE-042); the class is a namespace
-    holder, never instantiated — nested namespaces resolve via the MRO.
+    Namespace holder whose nested payload models resolve via the MRO.
     """
-
-    # ENFORCE-042 namespace-holder contract: ``FlextSettings`` contributes
-    # namespacing only — instance machinery stays plain object semantics so the
-    # settings singleton/validation machinery cannot leak into instantiated
-    # facade composites (e.g. the ``u`` logging facade).
-    def __new__(cls, *args: object, **kwargs: object) -> Self:
-        _ = args, kwargs
-        return object.__new__(cls)
-
-    def __init__(self, *args: object, **kwargs: object) -> None:
-        _ = self, args, kwargs
-
-    def __setattr__(self, name: str, value: object) -> None:
-        object.__setattr__(self, name, value)
-
-    def __eq__(self, other: object) -> bool:
-        """Identity equality per the frozen-config singleton contract.
-
-        Returns:
-            The resulting ``bool``.
-        """
-        return object.__eq__(self, other)
-
-    def __hash__(self) -> int:
-        """Identity hash per the frozen-config singleton contract.
-
-        Returns:
-            The resulting ``int``.
-        """
-        return object.__hash__(self)
 
     class OracleConnectionConfig(m.ArbitraryTypesModel):
         """Oracle connection configuration payload."""
 
-        host: str = u.Field(
-            ...,
-            description="Oracle database host",
-            validate_default=True,
-        )
-        port: t.PortNumber = u.Field(
-            ...,
-            description="Oracle database port",
-            validate_default=True,
-        )
-        service_name: str = u.Field(
-            ...,
-            description="Oracle service name",
-            validate_default=True,
-        )
-        username: str = u.Field(
-            ...,
-            description="Oracle database username",
-            validate_default=True,
-        )
-        password: str = u.Field(
-            ...,
-            description="Oracle database password",
-            validate_default=True,
-        )
-        timeout: t.PositiveInt = u.Field(
-            default=30,
-            description="Connection timeout in seconds",
-            validate_default=True,
-        )
-        pool_min: t.PositiveInt = u.Field(
-            default=2,
-            description="Oracle connection pool minimum",
-            validate_default=True,
-        )
-        pool_max: t.PositiveInt = u.Field(
-            default=20,
-            description="Oracle connection pool maximum",
-            validate_default=True,
-        )
-        pool_increment: t.PositiveInt = u.Field(
-            default=1,
-            description="Oracle connection pool increment",
-            validate_default=True,
-        )
-        encoding: str = u.Field(
-            default="UTF-8",
-            description="Oracle connection encoding",
-            validate_default=True,
-        )
-        ssl_enabled: bool = u.Field(
-            default=False,
-            description="Whether SSL is enabled",
-            validate_default=True,
-        )
-        autocommit: bool = u.Field(
-            default=False,
-            description="Whether autocommit is enabled",
-            validate_default=True,
-        )
+        host: Annotated[str, m.Field(description="Oracle database host")]
+        port: Annotated[t.PortNumber, m.Field(description="Oracle database port")]
+        service_name: Annotated[str, m.Field(description="Oracle service name")]
+        username: Annotated[str, m.Field(description="Oracle database username")]
+        password: Annotated[str, m.Field(description="Oracle database password")]
+        timeout: Annotated[
+            t.PositiveInt,
+            m.Field(description="Connection timeout in seconds"),
+        ] = 30
+        pool_min: Annotated[
+            t.PositiveInt,
+            m.Field(description="Oracle connection pool minimum"),
+        ] = 2
+        pool_max: Annotated[
+            t.PositiveInt,
+            m.Field(description="Oracle connection pool maximum"),
+        ] = 20
+        pool_increment: Annotated[
+            t.PositiveInt,
+            m.Field(description="Oracle connection pool increment"),
+        ] = 1
+        encoding: Annotated[
+            str,
+            m.Field(description="Oracle connection encoding"),
+        ] = "UTF-8"
+        ssl_enabled: Annotated[
+            bool,
+            m.Field(description="Whether SSL is enabled"),
+        ] = False
+        autocommit: Annotated[
+            bool,
+            m.Field(description="Whether autocommit is enabled"),
+        ] = False
         use_bulk_operations: Annotated[
             bool,
-            u.Field(
-                ...,
-                description="Whether bulk operations are enabled",
-                validate_default=True,
-            ),
+            m.Field(description="Whether bulk operations are enabled"),
         ] = False
         parallel_degree: Annotated[
             t.PositiveInt,
-            u.Field(
-                ...,
-                description="Oracle parallel execution degree",
-                validate_default=True,
-            ),
+            m.Field(description="Oracle parallel execution degree"),
         ] = 1
 
     class OracleConnectionModel(OracleConnectionConfig):
@@ -137,28 +69,23 @@ class FlextTargetOracleModelsSettings(FlextSettings):
     class TargetConfig(m.ArbitraryTypesModel):
         """Target runtime configuration payload."""
 
-        default_target_schema: str = u.Field(
-            ...,
-            description="Default Oracle target schema",
-            validate_default=True,
-        )
-        use_bulk_operations: bool = u.Field(
-            ...,
-            description="Whether bulk loading is enabled",
-            validate_default=True,
-        )
-        batch_size: t.BatchSize = u.Field(
-            ...,
-            description="Target batch size",
-            validate_default=True,
-        )
-        table_prefix: str = u.Field(
-            ...,
-            description="Target table name prefix",
-            validate_default=True,
-        )
-        table_suffix: str = u.Field(
-            ...,
-            description="Target table name suffix",
-            validate_default=True,
-        )
+        default_target_schema: Annotated[
+            str,
+            m.Field(description="Default Oracle target schema"),
+        ]
+        use_bulk_operations: Annotated[
+            bool,
+            m.Field(description="Whether bulk loading is enabled"),
+        ]
+        batch_size: Annotated[t.BatchSize, m.Field(description="Target batch size")]
+        table_prefix: Annotated[
+            str,
+            m.Field(description="Target table name prefix"),
+        ]
+        table_suffix: Annotated[
+            str,
+            m.Field(description="Target table name suffix"),
+        ]
+
+
+__all__: list[str] = ["FlextTargetOracleModelsSettings"]

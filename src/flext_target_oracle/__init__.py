@@ -10,22 +10,32 @@ from __future__ import annotations
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from flext_core import install_lazy_exports
-from flext_target_oracle.__version__ import (
-    __author__,
-    __author_email__,
-    __description__,
-    __license__,
-    __title__,
-    __url__,
-    __version__,
-    __version_info__,
-)
+from flext_core.lazy import install_lazy_exports
+
+from flext_target_oracle.__version__ import __version__
 
 if TYPE_CHECKING:
     from flext_db_oracle import e
     from flext_meltano import d, h, r, s, x
 
+    from flext_target_oracle import (
+        _constants,
+        _models,
+        _protocols,
+        _typings,
+        _utilities,
+        application,
+    )
+    from flext_target_oracle.__version__ import (
+        FlextTargetOracleVersion,
+        __author__,
+        __author_email__,
+        __description__,
+        __license__,
+        __title__,
+        __url__,
+        __version_info__,
+    )
     from flext_target_oracle._config import FlextTargetOracleConfig, config
     from flext_target_oracle._settings import FlextTargetOracleSettings, settings
     from flext_target_oracle.api import FlextTargetOracleService, target_oracle
@@ -36,7 +46,6 @@ if TYPE_CHECKING:
     from flext_target_oracle.typings import FlextTargetOracleTypes, t
     from flext_target_oracle.utilities import (
         FlextTargetOracle,
-        FlextTargetOracleLoader,
         FlextTargetOracleUtilities,
         u,
     )
@@ -47,13 +56,13 @@ __all__: tuple[str, ...] = (
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
-    "FlextTargetOracleLoader",
     "FlextTargetOracleModels",
     "FlextTargetOracleProtocols",
     "FlextTargetOracleService",
     "FlextTargetOracleSettings",
     "FlextTargetOracleTypes",
     "FlextTargetOracleUtilities",
+    "FlextTargetOracleVersion",
     "__author__",
     "__author_email__",
     "__description__",
@@ -62,6 +71,12 @@ __all__: tuple[str, ...] = (
     "__url__",
     "__version__",
     "__version_info__",
+    "_constants",
+    "_models",
+    "_protocols",
+    "_typings",
+    "_utilities",
+    "application",
     "c",
     "config",
     "d",
@@ -87,13 +102,26 @@ install_lazy_exports(
         "FlextTargetOracleCli": ".cli",
         "FlextTargetOracleConfig": "._config",
         "FlextTargetOracleConstants": ".constants",
-        "FlextTargetOracleLoader": ".utilities",
         "FlextTargetOracleModels": ".models",
         "FlextTargetOracleProtocols": ".protocols",
         "FlextTargetOracleService": ".api",
         "FlextTargetOracleSettings": "._settings",
         "FlextTargetOracleTypes": ".typings",
         "FlextTargetOracleUtilities": ".utilities",
+        "FlextTargetOracleVersion": ".__version__",
+        "__author__": ".__version__",
+        "__author_email__": ".__version__",
+        "__description__": ".__version__",
+        "__license__": ".__version__",
+        "__title__": ".__version__",
+        "__url__": ".__version__",
+        "__version_info__": ".__version__",
+        "_constants": "._constants",
+        "_models": "._models",
+        "_protocols": "._protocols",
+        "_typings": "._typings",
+        "_utilities": "._utilities",
+        "application": ".application",
         "c": ".constants",
         "config": "._config",
         "d": "flext_meltano",

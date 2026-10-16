@@ -10,12 +10,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Annotated
-
-from flext_meltano import u
-
 from flext_core import e as core_e
-from flext_target_oracle import m, t
+
+from flext_target_oracle import t
 
 
 class FlextTargetOracleUtilitiesErrors:
@@ -24,19 +21,6 @@ class FlextTargetOracleUtilitiesErrors:
     # Oracle Target exceptions inherit directly from the flext-core SOURCE OF
     # TRUTH; nesting under the db-oracle facade would shadow its typed init
     # signatures.
-    class ErrorMetadata(m.FlexibleInternalModel):
-        """Structured metadata attached to Oracle target error responses."""
-
-        code: Annotated[str, u.Field(description="Canonical error code")]
-        context: Annotated[
-            t.JsonMapping | None,
-            u.Field(description="Structured error context"),
-        ] = None
-        correlation_id: Annotated[
-            str | None,
-            u.Field(description="Cross-service correlation identifier"),
-        ] = None
-
     class Exceptions(core_e):
         """Oracle Target exceptions using flext-core SOURCE OF TRUTH."""
 
