@@ -71,6 +71,7 @@ Homepage = "https://github.com/flext-sh/flext"
 
 [dependency-groups]
 dev = [
+  "mkdocstrings-python>=2.0.9",
   "actionlint-py>=1.7.12.24",
   "bandit>=1.9.4",
   "deptry",
@@ -87,7 +88,6 @@ dev = [
   "mkdocs-redirects>=1.2.3",
   "mkdocs-section-index>=0.3.12",
   "mkdocstrings>=1.0.6",
-  "mkdocstrings-python>=2.0.8",
   "msgpack-types",
   "mypy>=2.3.1",
   "platformdirs>=4.12.0",
@@ -159,7 +159,6 @@ omit = [
 
 [tool.deptry]
 known_first_party = ["flext_target_oracle"]
-optional_dependencies_dev_groups = ["dev"]
 
 [tool.flext.docs]
 package_name = "flext_target_oracle"
@@ -168,7 +167,7 @@ package_name = "flext_target_oracle"
 allow-direct-references = true
 
 [tool.hatch.build.targets.wheel]
-include = ["/src/flext_target_oracle/**"]
+only-include = ["src/flext_target_oracle"]
 
 [tool.hatch.build.targets.wheel.sources]
 "src/flext_target_oracle" = "flext_target_oracle"
@@ -177,7 +176,7 @@ include = ["/src/flext_target_oracle/**"]
 "pyproject.toml" = "flext_target_oracle/pyproject.toml"
 
 [tool.hatch.build.targets.sdist]
-include = ["/src/flext_target_oracle/**"]
+only-include = ["src/flext_target_oracle"]
 
 [tool.hatch.build.targets.sdist.force-include]
 "pyproject.toml" = "pyproject.toml"
@@ -473,9 +472,9 @@ runtime-evaluated-base-classes = [
   "flext_meltano.services.consumer_bases.target_service_base.FlextMeltanoTargetServiceBase",
   "flext_target_oracle.FlextTargetOracleModels.TargetOracle",
   "flext_target_oracle.FlextTargetOracleSettings",
-  "flext_target_oracle._models.error_metadata.FlextTargetOracleModelsErrorMetadata",
-  "flext_target_oracle._models.health_status.FlextTargetOracleModelsHealthStatus",
-  "flext_target_oracle._models.settings.FlextTargetOracleModelsSettings",
+  "flext_target_oracle._models.FlextTargetOracleModelsErrorMetadata",
+  "flext_target_oracle._models.FlextTargetOracleModelsHealthStatus",
+  "flext_target_oracle._models.FlextTargetOracleModelsSettings",
   "flext_target_oracle._models.settings.OracleConnectionConfig",
   "flext_tests.FlextTestsServiceBase",
   "flext_tests.FlextTestsSettings",
