@@ -25,7 +25,7 @@ class FlextTargetOracleSettings(FlextSettings):
         extra="ignore",
     )
 
-    class _TargetOracle(m.BaseModel):
+    class _TargetOracle(m.StrictModel):
         """Namespaced Oracle target settings."""
 
         oracle_host: Annotated[str, m.Field(description="Oracle host")] = "localhost"
