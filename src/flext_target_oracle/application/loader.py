@@ -57,23 +57,23 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
         return empty_buffers
 
     model_config: ClassVar = {"frozen": False}
-    _target_config: FlextTargetOracleSettings = u.PrivateAttr()
-    _oracle_api: FlextDbOracleApi = u.PrivateAttr()
+    _target_config: FlextTargetOracleSettings
+    _oracle_api: FlextDbOracleApi
     _record_buffers: t.MutableMappingKV[str, t.MutableSequenceOf[t.JsonMapping]] = (
-        u.PrivateAttr(default_factory=_default_record_buffers)
+        m.PrivateAttr(default_factory=_default_record_buffers)
     )
     _stream_columns: t.MutableMappingKV[str, t.VariadicTuple[m.DbOracle.Column]] = (
-        u.PrivateAttr(
+        m.PrivateAttr(
             default_factory=dict[str, t.VariadicTuple[m.DbOracle.Column]],
         )
     )
-    _stream_field_mappings: t.MutableStrPairTupleMapping = u.PrivateAttr(
+    _stream_field_mappings: t.MutableStrPairTupleMapping = m.PrivateAttr(
         default_factory=dict[str, t.StrPairTuple],
     )
-    _stream_key_columns: t.MutableMappingKV[str, t.StrSequence] = u.PrivateAttr(
+    _stream_key_columns: t.MutableMappingKV[str, t.StrSequence] = m.PrivateAttr(
         default_factory=dict[str, t.StrSequence],
     )
-    _total_records: int = u.PrivateAttr(default_factory=lambda: 0)
+    _total_records: int = m.PrivateAttr(default_factory=lambda: 0)
     _sdc_timestamp_columns: ClassVar[t.StrSequence] = (
         "_SDC_EXTRACTED_AT",
         "_SDC_LOADED_AT",
