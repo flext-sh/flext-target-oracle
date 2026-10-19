@@ -23,7 +23,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
 
     target_name: Annotated[
         t.NonEmptyStr,
-        u.Field(description="Canonical Singer target identifier."),
+        m.Field(description="Canonical Singer target identifier."),
     ] = "target-oracle"
 
     @override
