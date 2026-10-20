@@ -590,7 +590,7 @@ def test_singer_tap_integration():
 
     target = FlextOracleTarget(settings)
 
-    assert process.stdout is not None
+    tm.not_none(process.stdout)
     for raw_line in process.stdout:
         try:
             line = raw_line.decode().strip()
