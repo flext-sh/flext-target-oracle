@@ -395,7 +395,7 @@ def test_operation_success():
 
 def test_operation_failure():
     result = operation_with_error()
-    assert result.failure
+    tm.fail(result)
     assert "expected error" in result.error
 ```
 

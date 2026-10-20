@@ -35,8 +35,8 @@ class TestsFlextTargetOracleConfig:
         tm.that(target.oracle_host, eq="localhost")
         tm.that(target.oracle_port, eq=1521)
         tm.that(target.default_target_schema, eq="SINGER_DATA")
-        tm.that(target.use_bulk_operations, eq=True)
-        tm.that(target.autocommit, eq=False)
+        tm.ok(target.use_bulk_operations)
+        tm.fail(target.autocommit)
 
     @staticmethod
     def test_test_service_settings_include_tests_namespace() -> None:
@@ -72,10 +72,10 @@ class TestsFlextTargetOracleConfig:
         tm.that(target.oracle_service_name, eq="XE")
         tm.that(target.oracle_user, eq="test")
         tm.that(target.oracle_password, eq="test")
-        tm.that(target.autocommit, eq=True)
+        tm.ok(target.autocommit)
         tm.that(target.transaction_timeout, eq=120)
         tm.that(target.parallel_degree, eq=4)
-        tm.that(target.use_bulk_operations, eq=True)
+        tm.ok(target.use_bulk_operations)
         tm.that(target.default_target_schema, eq="TEST_SCHEMA")
 
     @staticmethod

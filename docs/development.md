@@ -452,7 +452,7 @@ class TestNewFeature:
         result = new_feature_operation(invalid_loader)
 
         # Assert
-        assert result.failure
+        tm.fail(result)
         assert "expected error message" in result.error
 
     @pytest.mark.parametrize(

@@ -564,7 +564,7 @@ class TestSingerIntegration:
         invalid_msg = {"type": "INVALID"}
 
         result = target.process_singer_message(invalid_msg)
-        assert result.failure
+        tm.fail(result)
         assert "Unknown message type" in result.error
 ```
 
