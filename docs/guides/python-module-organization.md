@@ -144,7 +144,7 @@ from __future__ import annotations
 
 from flext_cli import u
 from flext_core import FlextSettings
-from pydantic import u.Field, u.field_validator
+from pydantic import u.Field, m.field_validator
 from enum import StrEnum, unique
 
 
@@ -563,7 +563,7 @@ from flext_cli import u
 from flext_core import FlextSettings
 from flext_meltano import Target  # Singer SDK integration layer
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from pydantic import u.Field, u.field_validator  # Third-party validation
+from pydantic import u.Field, m.field_validator  # Third-party validation
 
 # ✅ CORRECT - Standard library imports
 import json
