@@ -418,13 +418,14 @@ def profile_batch_processing():
 #### Unit Test Template
 
 ```text
-from __future__ import annotations
-
 """Test template for new functionality."""
+
+from __future__ import annotations
 
 import pytest
 
 from flext_target_oracle import FlextTargetOracleLoader
+from tests import tm
 
 
 class TestNewFeature:
@@ -439,8 +440,8 @@ class TestNewFeature:
         result = new_feature_operation(loader)
 
         # Assert
-        assert result.success
-        assert result.value == expected_value
+        tm.ok(result.success)
+        tm.that(result.value, eq=expected_value)
 
     def test_failure_case(self):
         """Test failure handling."""
@@ -461,7 +462,7 @@ class TestNewFeature:
     def test_parametrized(self, input_value, expected):
         """Test multiple input scenarios."""
         result = operation(input_value)
-        assert result == expected
+        tm.that(result, eq=expected)
 ```
 #### Integration Test Template
 
@@ -487,7 +488,7 @@ class TestOracleIntegration:
         """Test complete Singer message processing."""
         # Load record
         result = oracle_loader.load_record("test_stream", {...})
-        assert result.success
+        tm.ok(result.success)
 ```
 ### Test Data Management
 

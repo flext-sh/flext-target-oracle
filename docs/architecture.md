@@ -384,12 +384,13 @@ tests/
 ```text
 from __future__ import annotations
 
+from tests import tm
 
 # r testing pattern
 def test_operation_success():
     result = operation()
-    assert result.success
-    assert result.value == expected_value
+    tm.ok(result.success)
+    tm.that(result.value, eq=expected_value)
 
 
 def test_operation_failure():

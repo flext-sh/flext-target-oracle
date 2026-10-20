@@ -634,10 +634,10 @@ class TestFlextOracleTargetSettings:
             oracle_password="test_pass",
         )
 
-        assert settings.oracle_host == "localhost"
-        assert settings.oracle_port == 1521  # Default value
-        assert settings.batch_size == 1000  # Default value
-        assert settings.load_method == LoadMethod.INSERT  # Default
+        tm.that(settings.oracle_host, eq="localhost")
+        tm.that(settings.oracle_port, eq=1521) # Default value
+        tm.that(settings.batch_size, eq=1000) # Default value
+        tm.that(settings.load_method, eq=LoadMethod.INSERT) # Default
 
     def test_invalid_host_validation(self):
         """Test host validation rules."""
@@ -662,7 +662,7 @@ class TestFlextOracleTargetSettings:
 
         result = settings.validate_domain_rules()
         # In real test, this would validate connectivity, permissions, etc.
-        assert result.success or "connection" in result.error.lower()
+        tm.ok(result.success) or "connection" in result.error.lower()
 ```
 
 ```text
@@ -695,7 +695,7 @@ class TestSingerCompliance:
         }
 
         result = oracle_target.process_singer_message(schema_msg)
-        assert result.success, f"Schema processing failed: {result.error}"
+        tm.ok(result.success), f"Schema processing failed: {result.error}"
 
         # RECORD messages
         for i in range(5):
@@ -710,7 +710,7 @@ class TestSingerCompliance:
             }
 
             result = oracle_target.process_singer_message(record_msg)
-            assert result.success, f"Record {i} failed: {result.error}"
+            tm.ok(result.success), f"Record {i} failed: {result.error}"
 
         # STATE message
         state_msg = {
@@ -719,12 +719,12 @@ class TestSingerCompliance:
         }
 
         result = oracle_target.process_singer_message(state_msg)
-        assert result.success, f"State processing failed: {result.error}"
+        tm.ok(result.success), f"State processing failed: {result.error}"
 
         # Finalization
         stats_result = oracle_target.finalize()
         assert stats_result.success, f"Finalization failed: {stats_result.error}"
-        assert stats_result.value["total_records"] == 5
+        tm.that(stats_result.value["total_records"], eq=5)
 ```
 
 ---

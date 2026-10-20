@@ -536,7 +536,7 @@ class TestSingerIntegration:
         }
 
         result = target.process_singer_message(schema_msg)
-        assert result.success
+        tm.ok(result.success)
 
     def test_record_message_processing(self, target):
         """Test RECORD message handling."""
@@ -547,7 +547,7 @@ class TestSingerIntegration:
         }
 
         result = target.process_singer_message(record_msg)
-        assert result.success
+        tm.ok(result.success)
 
     def test_state_message_processing(self, target):
         """Test STATE message handling."""
@@ -557,7 +557,7 @@ class TestSingerIntegration:
         }
 
         result = target.process_singer_message(state_msg)
-        assert result.success
+        tm.ok(result.success)
 
     def test_invalid_message_handling(self, target):
         """Test invalid message handling."""
