@@ -421,7 +421,7 @@ class FlextOracleTargetSettings(m.Value):
     oracle_host: str = u.Field(..., description="Oracle host")
     batch_size: int = u.Field(default=1000, gt=0, le=50000, description="Batch size")
 
-    @u.field_validator("oracle_host")
+    @m.field_validator("oracle_host")
     @classmethod
     def validate_host(cls, v: str) -> str:
         if not v or v.isspace():

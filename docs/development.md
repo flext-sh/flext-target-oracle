@@ -144,7 +144,7 @@ def operation() -> p.Result[Data]:
 class Config(m.Value):
     field: str = u.Field(..., description="Required field")
 
-    @u.field_validator("field")
+    @m.field_validator("field")
     @classmethod
     def validate_field(cls, v: str) -> str:
         if not v.strip():
@@ -212,7 +212,7 @@ class FlextTargetOracleSettings(m.Value):
     oracle_port: int = u.Field(default=1521, ge=1, le=65535, description="Oracle port")
 
     # Custom validation
-    @u.field_validator("oracle_host")
+    @m.field_validator("oracle_host")
     @classmethod
     def validate_host(cls, v: str) -> str:
         if not v or v.isspace():
