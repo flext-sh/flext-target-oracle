@@ -27,13 +27,13 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     ] = "target-oracle"
 
     @override
-    def create_sink(self, stream_name: str, schema: t.JsonMapping) -> Never:
+    def create_sink(self, _stream_name: str, _schema: t.JsonMapping) -> Never:
         """Not supported — use FlextTargetOracleLoader directly.
 
         Args:
-            stream_name: Name of the Singer stream; unused.
+            _stream_name: Name of the Singer stream; unused.
 
-            schema: Singer schema for the stream; unused.
+            _schema: Singer schema for the stream; unused.
 
         Raises:
             TypeError: If target-oracle uses Loader pattern, not Singer sink.
