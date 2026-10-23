@@ -11,9 +11,7 @@ from __future__ import annotations
 
 from typing import Annotated, Never, override
 
-from flext_meltano.services.consumer_bases.target_service_base import (
-    FlextMeltanoTargetServiceBase,
-)
+from flext_meltano import FlextMeltanoTargetServiceBase
 
 from flext_target_oracle import c, m, p, r, t, u
 
