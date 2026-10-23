@@ -53,7 +53,7 @@ def _query_scalar(
     params: t.JsonMapping | None = None,
 ) -> str:
     rows = _query_rows(oracle_engine, sql, params)
-    assert rows
+    tm.that(bool(rows), eq=True)
     return str(rows[0].root[key])
 
 
@@ -170,7 +170,7 @@ class TestsFlextTargetOracleOracle:
             oracle_engine,
             'SELECT name AS "name", email AS "email" FROM test_merge WHERE id = 1',
         )
-        assert rows
+        tm.that(bool(rows), eq=True)
         tm.that(rows[0].root["name"], eq="Updated Name")
         tm.that(rows[0].root["email"], eq="updated@example.com")
         disconnect_result = loader.disconnect()
@@ -222,7 +222,7 @@ class TestsFlextTargetOracleOracle:
             "count",
         )
         tm.that(int(count), eq=5000)
-        assert elapsed < 10.0
+        tm.that(elapsed, lt=10.0)
         tm.ok(loader.disconnect())
 
     @staticmethod
@@ -344,7 +344,10 @@ class TestsFlextTargetOracleOracle:
         ]
         tm.that(len(audit_cols), eq=2)
         sdc_cols = [column for column in columns if column.startswith("_SDC_")]
-        assert all(columns.index(sdc) > columns.index("UPDATED_AT") for sdc in sdc_cols)
+        tm.that(
+            all(columns.index(sdc) > columns.index("UPDATED_AT") for sdc in sdc_cols),
+            eq=True,
+        )
         tm.ok(loader.disconnect())
 
     @staticmethod
@@ -427,7 +430,7 @@ class TestsFlextTargetOracleOracle:
         composite_indexes = [
             index_name for index_name in indexes if "NAME" in index_name
         ]
-        assert len(composite_indexes) > 0
+        tm.that(len(composite_indexes), gt=0)
         tm.ok(loader.disconnect())
 
     """End-to-end tests using the full FlextTargetOracle."""
@@ -459,7 +462,7 @@ class TestsFlextTargetOracleOracle:
             'SELECT COUNT(*) AS "count" FROM users',
             "count",
         )
-        assert int(data_count) > 0
+        tm.that(int(data_count), gt=0)
 
     @staticmethod
     @pytest.mark.usefixtures("clean_database")
@@ -532,6 +535,6 @@ class TestsFlextTargetOracleOracle:
             'SELECT full_name AS "full_name", email_address AS "email_address" '
             "FROM users WHERE id = 1",
         )
-        assert rows
+        tm.that(bool(rows), eq=True)
         tm.that(rows[0].root["full_name"], eq="John Doe")
         tm.that(rows[0].root["email_address"], eq="john@example.com")

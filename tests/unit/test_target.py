@@ -117,9 +117,8 @@ class TestsFlextTargetOracleTarget:
         tm.ok(target.process_singer_message(record_message))
         tm.ok(target.process_singer_message(state_message))
         state_value = target.state_message.value
-        assert isinstance(state_value, dict)
-        bookmarks_obj = state_value.get("bookmarks")
-        assert isinstance(bookmarks_obj, dict)
+        tm.that(state_value, is_=dict)
+        bookmarks_obj = tm.instance(state_value.get("bookmarks"), dict)
         tm.that(bookmarks_obj.get("users"), eq=1)
 
     @pytest.mark.docker
@@ -169,14 +168,14 @@ class TestsFlextTargetOracleTarget:
         )
         tm.fail(parse_result)
         exceptions = u.TargetOracle.Exceptions
-        assert issubclass(exceptions.ProcessingError, Exception)
+        tm.that(issubclass(exceptions.ProcessingError, Exception), eq=True)
 
     @pytest.mark.docker
     @staticmethod
     def test_metrics_and_write_record_contract(target: FlextTargetOracle) -> None:
         """Test metrics and write record contract."""
         metrics = target.compute_implementation_metrics()
-        assert metrics.batch_size > 0
+        tm.that(metrics.batch_size, gt=0)
         tm.that({True, False}, has=metrics.use_bulk_operations)
         result = target.write_record(
             u.json_value_adapter().dump_json({"id": 1}).decode("utf-8"),

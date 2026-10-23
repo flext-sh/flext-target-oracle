@@ -19,7 +19,7 @@ from tests import m, tm
 if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleApi
 
-    from tests import t
+from tests import t
 
 # Row-count probe for the table this test just created. The name is derived
 # from the loader's own typed settings (prefix + stream + suffix), never from
@@ -77,7 +77,7 @@ class TestsFlextTargetOracleLoader:
         finalize_result = loader.finalize_all_streams()
         tm.ok(finalize_result)
         tm.that(finalize_result.value, none=False)
-        assert finalize_result.value.streams_processed >= 0
+        tm.that(finalize_result.value.streams_processed, gte=0)
 
     @staticmethod
     def test_ensure_table_exists_returns_result(

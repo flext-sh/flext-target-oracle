@@ -19,7 +19,7 @@ from tests import m, tm
 
 if TYPE_CHECKING:
     from flext_target_oracle import FlextTargetOracleSettings
-    from tests import t
+from tests import t
 
 
 @pytest.mark.performance
@@ -42,7 +42,7 @@ class TestsFlextTargetOraclePerformance:
         result = target.run()
         elapsed = time.perf_counter() - start
         tm.ok(result)
-        assert elapsed < 1.0
+        tm.that(elapsed, lt=1.0)
 
     def test_message_processing_scales_linearly_for_state_updates(
         self,
@@ -69,7 +69,7 @@ class TestsFlextTargetOraclePerformance:
         state_value = target.state_message.value
         tm.that(state_value, is_=Mapping)
         tm.that(state_value.get("offset"), eq=1999)
-        assert elapsed < 2.0
+        tm.that(elapsed, lt=2.0)
 
     def test_schema_and_record_processing_has_no_json_reparse_loop(
         self,

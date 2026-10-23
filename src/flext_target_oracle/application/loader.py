@@ -436,7 +436,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             "DbOracle": {
                 "host": settings.TargetOracle.oracle_host,
                 "port": settings.TargetOracle.oracle_port,
-                "service_name": settings.TargetOracle.oracle_service_name,
+                c.ContextKey.SERVICE_NAME: settings.TargetOracle.oracle_service_name,
                 "username": settings.TargetOracle.oracle_user,
                 "password": settings.TargetOracle.oracle_password,
             },

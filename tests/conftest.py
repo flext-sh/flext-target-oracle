@@ -25,7 +25,7 @@ from tests import c, m, p, r, tk, tm
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from tests import t
+from tests import t
 
 _ORACLE_TEST_PASSWORD = secrets.token_hex(16)
 
@@ -91,7 +91,7 @@ def _oracle_test_settings(username: str) -> FlextDbOracleSettings:
         "DbOracle": {
             "host": os.environ["TEST_ORACLE_HOST"],
             "port": int(os.environ["TEST_ORACLE_PORT"]),
-            "service_name": os.environ["TEST_ORACLE_SERVICE"],
+            c.ContextKey.SERVICE_NAME: os.environ["TEST_ORACLE_SERVICE"],
             "username": username,
             "password": _ORACLE_TEST_PASSWORD,
         },
@@ -241,7 +241,7 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
                         str(c.TargetOracle.Tests.ORACLE_PORT),
                     ),
                 ),
-                "service_name": os.getenv(
+                c.ContextKey.SERVICE_NAME: os.getenv(
                     "TEST_ORACLE_SERVICE",
                     c.TargetOracle.Tests.ORACLE_SERVICE,
                 ),

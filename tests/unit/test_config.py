@@ -47,7 +47,7 @@ class TestsFlextTargetOracleConfig:
         # shared
         # Tests namespace and the project TargetOracle namespace via the public surface.
         tm.that(settings.Tests.model_dump(), none=False)
-        assert settings.TargetOracle.oracle_host
+        tm.that(bool(settings.TargetOracle.oracle_host), eq=True)
 
     @staticmethod
     def test_connection_scalars_round_trip_through_namespace() -> None:
@@ -111,3 +111,23 @@ class TestsFlextTargetOracleConfig:
         target = config.TargetOracle
         tm.that(target.batch_size, eq=100)
         tm.that(target.commit_interval, eq=200)
+
+    @staticmethod
+    def test_column_collections_round_trip_through_namespace() -> None:
+        """Read-only column contracts preserve supplied values through validation."""
+        ignored_columns = ["internal_id", "source_secret"]
+        column_order_rules = {"primary_keys": 2, "regular_columns": 4}
+        config = FlextTargetOracleSettings.model_validate({
+            "TargetOracle": {
+                "ignored_columns": ignored_columns,
+                "column_order_rules": column_order_rules,
+            },
+        })
+        tm.that(tuple(config.TargetOracle.ignored_columns), eq=tuple(ignored_columns))
+        tm.that(config.TargetOracle.column_order_rules, eq=column_order_rules)
+        round_trip = FlextTargetOracleSettings.model_validate(config.model_dump())
+        tm.that(
+            tuple(round_trip.TargetOracle.ignored_columns),
+            eq=tuple(ignored_columns),
+        )
+        tm.that(round_trip.TargetOracle.column_order_rules, eq=column_order_rules)

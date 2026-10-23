@@ -468,7 +468,7 @@ def process_batch(self, stream_name: str, records: list) -> p.Result[bool]:
         extra={
             "stream_name": stream_name,
             "batch_size": len(records),
-            "operation": "batch_processing",
+            c.ContextScope.OPERATION: "batch_processing",
             "target": "oracle",
         },
     )

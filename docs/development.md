@@ -243,7 +243,7 @@ def process_with_logging(stream_name: str, batch_size: int):
         extra={
             "stream_name": stream_name,
             "batch_size": batch_size,
-            "operation": "batch_processing",
+            c.ContextScope.OPERATION: "batch_processing",
         },
     )
 
@@ -425,7 +425,8 @@ from __future__ import annotations
 import pytest
 
 from flext_target_oracle import FlextTargetOracleLoader
-from tests import tm
+from tests import c, r
+from tests import c, tm
 
 
 class TestNewFeature:

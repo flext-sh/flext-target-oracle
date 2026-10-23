@@ -72,9 +72,7 @@ class TestsFlextTargetOracleSinger:
         tm.ok(finalize_result)
         tm.that(target.schemas, has="orders")
         state_value = target.state_message.value
-        assert isinstance(state_value, dict)
-        bookmarks_obj = state_value.get("bookmarks")
-        assert isinstance(bookmarks_obj, dict)
-        orders_obj = bookmarks_obj.get("orders")
-        assert isinstance(orders_obj, dict)
+        tm.that(state_value, is_=dict)
+        bookmarks_obj = tm.instance(state_value.get("bookmarks"), dict)
+        orders_obj = tm.instance(bookmarks_obj.get("orders"), dict)
         tm.that(orders_obj.get("version"), eq=1)

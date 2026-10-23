@@ -384,7 +384,8 @@ tests/
 ```text
 from __future__ import annotations
 
-from tests import tm
+from tests import c, r
+from tests import c, tm
 
 # r testing pattern
 def test_operation_success():
@@ -494,7 +495,7 @@ logger.info(
     extra={
         "stream_name": stream_name,
         "batch_size": len(records),
-        "correlation_id": correlation_id,
+        c.ContextKey.CORRELATION_ID: correlation_id,
     },
 )
 

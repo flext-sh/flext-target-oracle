@@ -13,7 +13,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated
 
-from flext_core import FlextSettings, m, t
+from flext_core import FlextSettings, m, t, u
+from typing_extensions import TypeForm
 
 
 class FlextTargetOracleSettings(FlextSettings):
@@ -72,7 +73,7 @@ class FlextTargetOracleSettings(FlextSettings):
         ] = ""
         column_order_rules: Annotated[
             t.MappingKV[str, int], m.Field(description="Column priority rules")
-        ] = m.Field(default_factory=dict)
+        ] = m.Field(default_factory=u.empty(TypeForm(t.MappingKV[str, int])))
         column_mappings: Annotated[
             str,
             m.Field(
@@ -80,8 +81,8 @@ class FlextTargetOracleSettings(FlextSettings):
             ),
         ] = "{}"
         ignored_columns: Annotated[
-            list[str], m.Field(description="Ignored columns")
-        ] = m.Field(default_factory=list)
+            t.StrSequence, m.Field(description="Ignored columns")
+        ] = m.Field(default_factory=tuple)
         custom_indexes: Annotated[
             str,
             m.Field(

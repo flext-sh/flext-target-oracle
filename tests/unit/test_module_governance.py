@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from tests import m, u
+from tests import m, tm, u
 
 
 class TestsFlextTargetOracleModuleGovernance(u.FlextTestsModuleGovernanceMixin):
@@ -23,12 +23,12 @@ class TestsFlextTargetOracleModuleGovernance(u.FlextTestsModuleGovernanceMixin):
     @staticmethod
     def test_target_oracle_namespace_does_not_wrap_meltano_singer_models() -> None:
         """Test target oracle namespace does not wrap meltano singer models."""
-        assert hasattr(m.TargetOracle, "SingerStreamModel")
-        assert not hasattr(m.TargetOracle, "Meltano")
-        assert not hasattr(m.TargetOracle, "SingerSchemaMessage")
-        assert not hasattr(m.TargetOracle, "SingerRecordMessage")
-        assert not hasattr(m.TargetOracle, "SingerStateMessage")
-        assert not hasattr(m.TargetOracle, "SingerActivateVersionMessage")
-        assert not hasattr(m.TargetOracle, "SingerCatalogMetadata")
-        assert not hasattr(m.TargetOracle, "SingerCatalogEntry")
-        assert not hasattr(m.TargetOracle, "SingerCatalog")
+        tm.that(hasattr(m.TargetOracle, "SingerStreamModel"), eq=True)
+        tm.that(hasattr(m.TargetOracle, "Meltano"), eq=False)
+        tm.that(hasattr(m.TargetOracle, "SingerSchemaMessage"), eq=False)
+        tm.that(hasattr(m.TargetOracle, "SingerRecordMessage"), eq=False)
+        tm.that(hasattr(m.TargetOracle, "SingerStateMessage"), eq=False)
+        tm.that(hasattr(m.TargetOracle, "SingerActivateVersionMessage"), eq=False)
+        tm.that(hasattr(m.TargetOracle, "SingerCatalogMetadata"), eq=False)
+        tm.that(hasattr(m.TargetOracle, "SingerCatalogEntry"), eq=False)
+        tm.that(hasattr(m.TargetOracle, "SingerCatalog"), eq=False)
