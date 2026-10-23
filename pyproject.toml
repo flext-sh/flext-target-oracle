@@ -140,12 +140,14 @@ codegen = [
 package_name = "flext_target_oracle"
 
 [tool.hatch.build.targets.wheel]
+exclude = ["/src/flext_target_oracle/config"]
 only-include = ["src/flext_target_oracle"]
 
 [tool.hatch.build.targets.wheel.sources]
 "src/flext_target_oracle" = "flext_target_oracle"
 
 [tool.hatch.build.targets.wheel.force-include]
+"src/flext_target_oracle/config" = "flext_target_oracle/config"
 "pyproject.toml" = "flext_target_oracle/pyproject.toml"
 
 [tool.hatch.build.targets.sdist]
