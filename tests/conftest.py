@@ -128,7 +128,10 @@ def _provision_user_account(admin_api: FlextDbOracleApi) -> str | None:
     """
     last_error: str | None = None
     user_query_result = admin_api.oracle_services.execute_query(
-        "SELECT COUNT(*) AS c.Aggregation.COUNT FROM all_users WHERE username = :username",
+        (
+            "SELECT COUNT(*) AS c.Aggregation.COUNT ",
+            "FROM all_users WHERE username = :username",
+        ),
         m.ConfigMap(root={"username": "FLEXT_TEST"}),
     )
     if user_query_result.failure:
