@@ -28,11 +28,11 @@ class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
     class TargetOracle(
         FlextTargetOracleModelsBase,
         FlextTargetOracleModelsCommands,
+        FlextTargetOracleModelsResults,
+        FlextTargetOracleModelsSinger,
         FlextTargetOracleModelsErrorMetadata,
         FlextTargetOracleModelsHealthStatus,
-        FlextTargetOracleModelsResults,
         FlextTargetOracleModelsSettings,
-        FlextTargetOracleModelsSinger,
     ):
         """Namespace of models for Oracle target."""
 
