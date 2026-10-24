@@ -54,7 +54,10 @@ class FlextTargetOracleUtilitiesObservability:
             f"Oracle authentication failed for {username} on {oracle_service}",
             metadata=FlextTargetOracleModelsErrorMetadata(
                 code=error_code or c.ErrorCode.AUTHENTICATION_ERROR,
-                context={"user": username, "oracle_service": oracle_service},
+                context={
+                    "user": username,
+                    "oracle_service": oracle_service,
+                },
                 correlation_id=None,
             ),
         )
@@ -214,7 +217,7 @@ class FlextTargetOracleUtilitiesObservability:
         FlextTargetOracleUtilitiesObservability.logger.debug(
             "Starting query performance monitor",
         )
-        context_data = {"table_name": table_name, "operation": operation}
+        context_data = {"table_name": table_name, c.ContextScope.OPERATION: operation}
         try:
             yield context_data
         finally:

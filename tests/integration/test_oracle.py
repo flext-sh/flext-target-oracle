@@ -53,7 +53,7 @@ def _query_scalar(
     params: t.JsonMapping | None = None,
 ) -> str:
     rows = _query_rows(oracle_engine, sql, params)
-    assert rows
+    tm.that(bool(rows), eq=True)
     return str(rows[0].root[key])
 
 
@@ -80,9 +80,9 @@ class TestsFlextTargetOracleOracle:
         tm.ok(table_res)
         table_count = _query_scalar(
             oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM user_tables '
+            "SELECT COUNT(*) AS c.Aggregation.COUNT FROM user_tables "
             "WHERE table_name = :table_name",
-            "count",
+            c.Aggregation.COUNT,
             {"table_name": "TEST_USERS"},
         )
         tm.that(int(table_count), eq=1)
@@ -133,7 +133,11 @@ class TestsFlextTargetOracleOracle:
         tm.that(len(rows), eq=2)
         tm.that(
             rows[0].root,
-            eq={"id": "1", "name": "John Doe", "email": "john@example.com"},
+            eq={
+                "id": c.ParserBooleanToken.ONE,
+                "name": "John Doe",
+                "email": "john@example.com",
+            },
         )
         tm.that(
             rows[1].root,
@@ -170,7 +174,7 @@ class TestsFlextTargetOracleOracle:
             oracle_engine,
             'SELECT name AS "name", email AS "email" FROM test_merge WHERE id = 1',
         )
-        assert rows
+        tm.that(bool(rows), eq=True)
         tm.that(rows[0].root["name"], eq="Updated Name")
         tm.that(rows[0].root["email"], eq="updated@example.com")
         disconnect_result = loader.disconnect()
@@ -194,7 +198,7 @@ class TestsFlextTargetOracleOracle:
         stream_name = "test_bulk"
         schema_message: t.JsonValue = {
             "type": "SCHEMA",
-            "stream": stream_name,
+            c.ProcessingMode.STREAM: stream_name,
             "schema": {
                 "type": "object",
                 "properties": {
@@ -218,11 +222,11 @@ class TestsFlextTargetOracleOracle:
         tm.ok(result)
         count = _query_scalar(
             oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM test_bulk',
-            "count",
+            "SELECT COUNT(*) AS c.Aggregation.COUNT FROM test_bulk",
+            c.Aggregation.COUNT,
         )
         tm.that(int(count), eq=5000)
-        assert elapsed < 10.0
+        tm.that(elapsed, lt=10.0)
         tm.ok(loader.disconnect())
 
     @staticmethod
@@ -311,7 +315,7 @@ class TestsFlextTargetOracleOracle:
         stream_name = "test_ordering"
         schema_message: t.JsonValue = {
             "type": "SCHEMA",
-            "stream": stream_name,
+            c.ProcessingMode.STREAM: stream_name,
             "schema": {
                 "type": "object",
                 "properties": {
@@ -344,7 +348,10 @@ class TestsFlextTargetOracleOracle:
         ]
         tm.that(len(audit_cols), eq=2)
         sdc_cols = [column for column in columns if column.startswith("_SDC_")]
-        assert all(columns.index(sdc) > columns.index("UPDATED_AT") for sdc in sdc_cols)
+        tm.that(
+            all(columns.index(sdc) > columns.index("UPDATED_AT") for sdc in sdc_cols),
+            eq=True,
+        )
         tm.ok(loader.disconnect())
 
     @staticmethod
@@ -369,15 +376,15 @@ class TestsFlextTargetOracleOracle:
         tm.ok(insert_initial)
         count = _query_scalar(
             oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM test_truncate',
-            "count",
+            "SELECT COUNT(*) AS c.Aggregation.COUNT FROM test_truncate",
+            c.Aggregation.COUNT,
         )
         tm.that(int(count), eq=1)
         loader.ensure_table_exists(stream_name, schema_dict, key_props)
         count = _query_scalar(
             oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM test_truncate',
-            "count",
+            "SELECT COUNT(*) AS c.Aggregation.COUNT FROM test_truncate",
+            c.Aggregation.COUNT,
         )
         tm.that(int(count), eq=0)
         tm.ok(loader.disconnect())
@@ -427,7 +434,7 @@ class TestsFlextTargetOracleOracle:
         composite_indexes = [
             index_name for index_name in indexes if "NAME" in index_name
         ]
-        assert len(composite_indexes) > 0
+        tm.that(len(composite_indexes), gt=0)
         tm.ok(loader.disconnect())
 
     """End-to-end tests using the full FlextTargetOracle."""
@@ -451,15 +458,15 @@ class TestsFlextTargetOracleOracle:
         table_count = _query_scalar(
             oracle_engine,
             "SELECT COUNT(*) AS \"count\" FROM user_tables WHERE table_name = 'USERS'",
-            "count",
+            c.Aggregation.COUNT,
         )
         tm.that(int(table_count), eq=1)
         data_count = _query_scalar(
             oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM users',
-            "count",
+            "SELECT COUNT(*) AS c.Aggregation.COUNT FROM users",
+            c.Aggregation.COUNT,
         )
-        assert int(data_count) > 0
+        tm.that(int(data_count), gt=0)
 
     @staticmethod
     @pytest.mark.usefixtures("clean_database")
@@ -481,7 +488,7 @@ class TestsFlextTargetOracleOracle:
         target.initialize()
         schema_msg = {
             "type": "SCHEMA",
-            "stream": "users",
+            c.ProcessingMode.STREAM: "users",
             "schema": {
                 "type": "object",
                 "properties": {
@@ -502,12 +509,12 @@ class TestsFlextTargetOracleOracle:
         )
         record_msg = {
             "type": "RECORD",
-            "stream": "users",
+            c.ProcessingMode.STREAM: "users",
             "record": {
                 "id": 1,
                 "name": "John Doe",
                 "email": "john@example.com",
-                "password": "p" + "0" * 9,
+                "password": "p" + c.ParserBooleanToken.ZERO * 9,
                 "internal_id": "INT-001",
             },
         }
@@ -532,6 +539,6 @@ class TestsFlextTargetOracleOracle:
             'SELECT full_name AS "full_name", email_address AS "email_address" '
             "FROM users WHERE id = 1",
         )
-        assert rows
+        tm.that(bool(rows), eq=True)
         tm.that(rows[0].root["full_name"], eq="John Doe")
         tm.that(rows[0].root["email_address"], eq="john@example.com")

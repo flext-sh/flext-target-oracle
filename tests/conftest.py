@@ -25,7 +25,7 @@ from tests import c, m, p, r, tk, tm
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from tests import t
+from tests import t
 
 _ORACLE_TEST_PASSWORD = secrets.token_hex(16)
 
@@ -91,7 +91,7 @@ def _oracle_test_settings(username: str) -> FlextDbOracleSettings:
         "DbOracle": {
             "host": os.environ["TEST_ORACLE_HOST"],
             "port": int(os.environ["TEST_ORACLE_PORT"]),
-            "service_name": os.environ["TEST_ORACLE_SERVICE"],
+            c.ContextKey.SERVICE_NAME: os.environ["TEST_ORACLE_SERVICE"],
             "username": username,
             "password": _ORACLE_TEST_PASSWORD,
         },
@@ -128,12 +128,15 @@ def _provision_user_account(admin_api: FlextDbOracleApi) -> str | None:
     """
     last_error: str | None = None
     user_query_result = admin_api.oracle_services.execute_query(
-        'SELECT COUNT(*) AS "count" FROM all_users WHERE username = :username',
+        (
+            "SELECT COUNT(*) AS c.Aggregation.COUNT ",
+            "FROM all_users WHERE username = :username",
+        ),
         m.ConfigMap(root={"username": "FLEXT_TEST"}),
     )
     if user_query_result.failure:
         return user_query_result.error or "user probe failed"
-    raw_user_count = user_query_result.value[0].root["count"]
+    raw_user_count = user_query_result.value[0].root[c.Aggregation.COUNT]
     user_count = (
         raw_user_count if isinstance(raw_user_count, int) else int(str(raw_user_count))
     )
@@ -241,7 +244,7 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
                         str(c.TargetOracle.Tests.ORACLE_PORT),
                     ),
                 ),
-                "service_name": os.getenv(
+                c.ContextKey.SERVICE_NAME: os.getenv(
                     "TEST_ORACLE_SERVICE",
                     c.TargetOracle.Tests.ORACLE_SERVICE,
                 ),
@@ -331,7 +334,7 @@ def simple_schema() -> t.JsonMapping:
     """Return a simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "schema": {
             "type": "object",
             "properties": {
@@ -355,7 +358,7 @@ def nested_schema() -> t.JsonMapping:
     """
     return {
         "type": "SCHEMA",
-        "stream": "orders",
+        c.ProcessingMode.STREAM: "orders",
         "schema": {
             "type": "object",
             "properties": {
@@ -379,7 +382,7 @@ def singer_messages() -> t.SequenceOf[t.JsonValue]:
     """
     schema: t.JsonValue = {
         "type": "SCHEMA",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "schema": {
             "type": "object",
             "properties": {
@@ -392,12 +395,12 @@ def singer_messages() -> t.SequenceOf[t.JsonValue]:
     }
     first_record: t.JsonValue = {
         "type": "RECORD",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "record": {"id": 1, "name": "John Doe", "email": "john@example.com"},
     }
     second_record: t.JsonValue = {
         "type": "RECORD",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "record": {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
     }
     state: t.JsonValue = {

@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Target Oracle type facade.
 
 Copyright (c) 2026 FLEXT Team. All rights reserved.

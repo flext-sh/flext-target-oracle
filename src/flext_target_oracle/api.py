@@ -11,9 +11,7 @@ from __future__ import annotations
 
 from typing import Annotated, Never, override
 
-from flext_meltano.services.consumer_bases.target_service_base import (
-    FlextMeltanoTargetServiceBase,
-)
+from flext_meltano import FlextMeltanoTargetServiceBase
 
 from flext_target_oracle import c, m, p, r, t, u
 
@@ -23,17 +21,17 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
 
     target_name: Annotated[
         t.NonEmptyStr,
-        u.Field(description="Canonical Singer target identifier."),
+        m.Field(description="Canonical Singer target identifier."),
     ] = "target-oracle"
 
     @override
-    def create_sink(self, stream_name: str, schema: t.JsonMapping) -> Never:
+    def create_sink(self, _stream_name: str, _schema: t.JsonMapping) -> Never:
         """Not supported — use FlextTargetOracleLoader directly.
 
         Args:
-            stream_name: Name of the Singer stream; unused.
+            _stream_name: Name of the Singer stream; unused.
 
-            schema: Singer schema for the stream; unused.
+            _schema: Singer schema for the stream; unused.
 
         Raises:
             TypeError: If target-oracle uses Loader pattern, not Singer sink.

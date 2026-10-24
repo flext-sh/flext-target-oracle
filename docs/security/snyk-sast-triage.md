@@ -35,7 +35,7 @@ em `.snyk`) / `risco-aceito` (com prazo).
 ```{.python .notest}
        85              "host": os.environ["TEST_ORACLE_HOST"],
        86              "port": int(os.environ["TEST_ORACLE_PORT"]),
-       87              "service_name": os.environ["TEST_ORACLE_SERVICE"],
+       87              c.ContextKey.SERVICE_NAME: os.environ["TEST_ORACLE_SERVICE"],
        88              "username": "system",
 >>>    89              "password": "flext_oracle_test",
        90          }

@@ -384,17 +384,19 @@ tests/
 ```text
 from __future__ import annotations
 
+from tests import c, r
+from tests import c, tm
 
 # r testing pattern
 def test_operation_success():
     result = operation()
-    assert result.success
-    assert result.value == expected_value
+    tm.ok(result.success)
+    tm.that(result.value, eq=expected_value)
 
 
 def test_operation_failure():
     result = operation_with_error()
-    assert result.failure
+    tm.fail(result)
     assert "expected error" in result.error
 ```
 
@@ -493,7 +495,7 @@ logger.info(
     extra={
         "stream_name": stream_name,
         "batch_size": len(records),
-        "correlation_id": correlation_id,
+        c.ContextKey.CORRELATION_ID: correlation_id,
     },
 )
 

@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_target_oracle import FlextTargetOracleSettings
-from tests import s, tm
+from tests import c, s, tm
 
 
 class TestsFlextTargetOracleConfig:
@@ -28,15 +28,15 @@ class TestsFlextTargetOracleConfig:
                 "oracle_host": "localhost",
                 "oracle_service_name": "XE",
                 "oracle_user": "test_user",
-                "oracle_password": "p" + "0" * 12,
+                "oracle_password": "p" + c.ParserBooleanToken.ZERO * 12,
             },
         })
         target = config.TargetOracle
         tm.that(target.oracle_host, eq="localhost")
         tm.that(target.oracle_port, eq=1521)
         tm.that(target.default_target_schema, eq="SINGER_DATA")
-        tm.that(target.use_bulk_operations, eq=True)
-        tm.that(target.autocommit, eq=False)
+        tm.ok(target.use_bulk_operations)
+        tm.fail(target.autocommit)
 
     @staticmethod
     def test_test_service_settings_include_tests_namespace() -> None:
@@ -47,7 +47,7 @@ class TestsFlextTargetOracleConfig:
         # shared
         # Tests namespace and the project TargetOracle namespace via the public surface.
         tm.that(settings.Tests.model_dump(), none=False)
-        assert settings.TargetOracle.oracle_host
+        tm.that(bool(settings.TargetOracle.oracle_host), eq=True)
 
     @staticmethod
     def test_connection_scalars_round_trip_through_namespace() -> None:
@@ -72,10 +72,10 @@ class TestsFlextTargetOracleConfig:
         tm.that(target.oracle_service_name, eq="XE")
         tm.that(target.oracle_user, eq="test")
         tm.that(target.oracle_password, eq="test")
-        tm.that(target.autocommit, eq=True)
+        tm.ok(target.autocommit)
         tm.that(target.transaction_timeout, eq=120)
         tm.that(target.parallel_degree, eq=4)
-        tm.that(target.use_bulk_operations, eq=True)
+        tm.ok(target.use_bulk_operations)
         tm.that(target.default_target_schema, eq="TEST_SCHEMA")
 
     @staticmethod
@@ -111,3 +111,23 @@ class TestsFlextTargetOracleConfig:
         target = config.TargetOracle
         tm.that(target.batch_size, eq=100)
         tm.that(target.commit_interval, eq=200)
+
+    @staticmethod
+    def test_column_collections_round_trip_through_namespace() -> None:
+        """Read-only column contracts preserve supplied values through validation."""
+        ignored_columns = ["internal_id", "source_secret"]
+        column_order_rules = {"primary_keys": 2, "regular_columns": 4}
+        config = FlextTargetOracleSettings.model_validate({
+            "TargetOracle": {
+                "ignored_columns": ignored_columns,
+                "column_order_rules": column_order_rules,
+            },
+        })
+        tm.that(tuple(config.TargetOracle.ignored_columns), eq=tuple(ignored_columns))
+        tm.that(config.TargetOracle.column_order_rules, eq=column_order_rules)
+        round_trip = FlextTargetOracleSettings.model_validate(config.model_dump())
+        tm.that(
+            tuple(round_trip.TargetOracle.ignored_columns),
+            eq=tuple(ignored_columns),
+        )
+        tm.that(round_trip.TargetOracle.column_order_rules, eq=column_order_rules)

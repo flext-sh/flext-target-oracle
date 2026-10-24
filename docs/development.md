@@ -144,7 +144,7 @@ def operation() -> p.Result[Data]:
 class Config(m.Value):
     field: str = u.Field(..., description="Required field")
 
-    @u.field_validator("field")
+    @m.field_validator("field")
     @classmethod
     def validate_field(cls, v: str) -> str:
         if not v.strip():
@@ -212,7 +212,7 @@ class FlextTargetOracleSettings(m.Value):
     oracle_port: int = u.Field(default=1521, ge=1, le=65535, description="Oracle port")
 
     # Custom validation
-    @u.field_validator("oracle_host")
+    @m.field_validator("oracle_host")
     @classmethod
     def validate_host(cls, v: str) -> str:
         if not v or v.isspace():
@@ -243,7 +243,7 @@ def process_with_logging(stream_name: str, batch_size: int):
         extra={
             "stream_name": stream_name,
             "batch_size": batch_size,
-            "operation": "batch_processing",
+            c.ContextScope.OPERATION: "batch_processing",
         },
     )
 
@@ -418,13 +418,15 @@ def profile_batch_processing():
 #### Unit Test Template
 
 ```text
-from __future__ import annotations
-
 """Test template for new functionality."""
+
+from __future__ import annotations
 
 import pytest
 
 from flext_target_oracle import FlextTargetOracleLoader
+from tests import c, r
+from tests import c, tm
 
 
 class TestNewFeature:
@@ -439,8 +441,8 @@ class TestNewFeature:
         result = new_feature_operation(loader)
 
         # Assert
-        assert result.success
-        assert result.value == expected_value
+        tm.ok(result.success)
+        tm.that(result.value, eq=expected_value)
 
     def test_failure_case(self):
         """Test failure handling."""
@@ -451,7 +453,7 @@ class TestNewFeature:
         result = new_feature_operation(invalid_loader)
 
         # Assert
-        assert result.failure
+        tm.fail(result)
         assert "expected error message" in result.error
 
     @pytest.mark.parametrize(
@@ -461,7 +463,7 @@ class TestNewFeature:
     def test_parametrized(self, input_value, expected):
         """Test multiple input scenarios."""
         result = operation(input_value)
-        assert result == expected
+        tm.that(result, eq=expected)
 ```
 #### Integration Test Template
 
@@ -487,7 +489,7 @@ class TestOracleIntegration:
         """Test complete Singer message processing."""
         # Load record
         result = oracle_loader.load_record("test_stream", {...})
-        assert result.success
+        tm.ok(result.success)
 ```
 ### Test Data Management
 

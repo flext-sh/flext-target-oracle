@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Utility helpers for Oracle Singer target integration.
 
 Copyright (c) 2026 FLEXT Team. All rights reserved.
@@ -10,11 +11,11 @@ from __future__ import annotations
 from flext_db_oracle import FlextDbOracleUtilities
 from flext_meltano import FlextMeltanoUtilities
 
-from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
-from flext_target_oracle._utilities.bootstrap import FlextTargetOracleUtilitiesBootstrap
-from flext_target_oracle._utilities.client import FlextTargetOracle
-from flext_target_oracle._utilities.errors import FlextTargetOracleUtilitiesErrors
-from flext_target_oracle._utilities.observability import (
+from flext_target_oracle._utilities import (
+    FlextTargetOracle,
+    FlextTargetOracleUtilitiesBase,
+    FlextTargetOracleUtilitiesBootstrap,
+    FlextTargetOracleUtilitiesErrors,
     FlextTargetOracleUtilitiesObservability,
 )
 

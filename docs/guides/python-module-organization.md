@@ -144,7 +144,7 @@ from __future__ import annotations
 
 from flext_cli import u
 from flext_core import FlextSettings
-from pydantic import u.Field, u.field_validator
+from pydantic import u.Field, m.field_validator
 from enum import StrEnum, unique
 
 
@@ -421,7 +421,7 @@ class FlextOracleTargetSettings(m.Value):
     oracle_host: str = u.Field(..., description="Oracle host")
     batch_size: int = u.Field(default=1000, gt=0, le=50000, description="Batch size")
 
-    @u.field_validator("oracle_host")
+    @m.field_validator("oracle_host")
     @classmethod
     def validate_host(cls, v: str) -> str:
         if not v or v.isspace():
@@ -468,7 +468,7 @@ def process_batch(self, stream_name: str, records: list) -> p.Result[bool]:
         extra={
             "stream_name": stream_name,
             "batch_size": len(records),
-            "operation": "batch_processing",
+            c.ContextScope.OPERATION: "batch_processing",
             "target": "oracle",
         },
     )
@@ -563,7 +563,7 @@ from flext_cli import u
 from flext_core import FlextSettings
 from flext_meltano import Target  # Singer SDK integration layer
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from pydantic import u.Field, u.field_validator  # Third-party validation
+from pydantic import u.Field, m.field_validator  # Third-party validation
 
 # ✅ CORRECT - Standard library imports
 import json
@@ -634,10 +634,10 @@ class TestFlextOracleTargetSettings:
             oracle_password="test_pass",
         )
 
-        assert settings.oracle_host == "localhost"
-        assert settings.oracle_port == 1521  # Default value
-        assert settings.batch_size == 1000  # Default value
-        assert settings.load_method == LoadMethod.INSERT  # Default
+        tm.that(settings.oracle_host, eq="localhost")
+        tm.that(settings.oracle_port, eq=1521) # Default value
+        tm.that(settings.batch_size, eq=1000) # Default value
+        tm.that(settings.load_method, eq=LoadMethod.INSERT) # Default
 
     def test_invalid_host_validation(self):
         """Test host validation rules."""
@@ -662,7 +662,7 @@ class TestFlextOracleTargetSettings:
 
         result = settings.validate_domain_rules()
         # In real test, this would validate connectivity, permissions, etc.
-        assert result.success or "connection" in result.error.lower()
+        tm.ok(result.success) or "connection" in result.error.lower()
 ```
 
 ```text
@@ -683,7 +683,7 @@ class TestSingerCompliance:
         # SCHEMA message
         schema_msg = {
             "type": "SCHEMA",
-            "stream": "test_users",
+            c.ProcessingMode.STREAM: "test_users",
             "schema": {
                 "type": "object",
                 "properties": {
@@ -695,13 +695,13 @@ class TestSingerCompliance:
         }
 
         result = oracle_target.process_singer_message(schema_msg)
-        assert result.success, f"Schema processing failed: {result.error}"
+        tm.ok(result.success), f"Schema processing failed: {result.error}"
 
         # RECORD messages
         for i in range(5):
             record_msg = {
                 "type": "RECORD",
-                "stream": "test_users",
+                c.ProcessingMode.STREAM: "test_users",
                 "record": {
                     "id": i,
                     "name": f"User {i}",
@@ -710,7 +710,7 @@ class TestSingerCompliance:
             }
 
             result = oracle_target.process_singer_message(record_msg)
-            assert result.success, f"Record {i} failed: {result.error}"
+            tm.ok(result.success), f"Record {i} failed: {result.error}"
 
         # STATE message
         state_msg = {
@@ -719,12 +719,12 @@ class TestSingerCompliance:
         }
 
         result = oracle_target.process_singer_message(state_msg)
-        assert result.success, f"State processing failed: {result.error}"
+        tm.ok(result.success), f"State processing failed: {result.error}"
 
         # Finalization
         stats_result = oracle_target.finalize()
         assert stats_result.success, f"Finalization failed: {stats_result.error}"
-        assert stats_result.value["total_records"] == 5
+        tm.that(stats_result.value["total_records"], eq=5)
 ```
 
 ---
@@ -956,7 +956,7 @@ def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
 def _write_record(self, record: Record) -> None:
     """Standard Singer SDK record writing method."""
     # Convert to old format for backward compatibility
-    message = {"type": "RECORD", "stream": record.stream, "record": record.data}
+    message = {"type": "RECORD", c.ProcessingMode.STREAM: record.stream, "record": record.data}
     result = self._handle_message_legacy(message)
     if result.failure:
         raise RuntimeError(result.error)  # Singer SDK expects exceptions
