@@ -1,12 +1,13 @@
 # AGENTS.md — flext-target-oracle
 
-> **Parent workspace law** lives in [`../AGENTS.md`](../AGENTS.md) — read it first.
-> Universal engineering core: `~/.agents/UNIVERSAL_CORE.md`. Composition: global
-> skills + parent/root `AGENTS.md` + this scope delta. Do not re-embed universal law.
->
-> **Standalone / independent mode:** when `../AGENTS.md` does not resolve, pin the
-> parent raw `AGENTS.md` URL to the same branch/release as this package (never
-> `main`): <https://raw.githubusercontent.com/flext-sh/flext/0.12.0-dev/AGENTS.md>
+Read the branch-matched [FLEXT root](../AGENTS.md) and its local flext-law through
+that root's authority entry point. In standalone mode resolve the same branch or
+release; a coincidental parent instruction file does not establish FLEXT authority.
+This file adds only this package's domain delta. Command routing, architecture
+and universal execution stay with their parent owners.
+
+Embedded AI Hub or Beads generated blocks are retired delivery material, not
+active local rules. Their withdrawal remains the publisher's responsibility.
 
 <!-- AIHUB-AGENTS-SCOPE-LOCAL-BEGIN -->
 
@@ -19,40 +20,12 @@ Singer **target** (loader) for Oracle Database. Thin driver over `flext-meltano`
 (ADR-006), delegating loading to `flext-db-oracle`. This is the connector's **CQRS
 variant**.
 
-## Structure
-
-```text
-src/flext_target_oracle/
-├── api.py            # FlextTargetOracleService(FlextMeltanoTargetServiceBase) — create_sink() raises (loader pattern, not Singer sink)
-├── cli.py
-├── _models/commands.py   # CQRS command DTOs — PURE DATA (no execute())
-├── constants.py typings.py protocols.py models.py utilities.py   # AUTO-GENERATED facets
-└── _constants/ _protocols/ _typings/ _utilities/
-```
-
-## Code Map
-
-| Symbol                     | Kind   | Location              | Role                                                          |
-| -------------------------- | ------ | --------------------- | ------------------------------------------------------------- |
-| `FlextTargetOracleService` | class  | `api.py`              | target service; uses a loader pattern (rejects `create_sink`) |
-| command DTOs               | models | `_models/commands.py` | pure-data CQRS commands                                       |
-
 ## Conventions (specific to this package)
 
 - **CQRS:** command `_models` are data-only DTOs; **execution belongs to
   services/handlers**, never `execute()` on a model.
 - Uses a loader pattern, not a Singer sink — `create_sink` intentionally raises.
 - Oracle settings namespaced (`settings.DbOracle.*`).
-- Config/settings canonical pattern: ADR-012.
-- Codemod governance (ast-grep + make mod): ADR-014.
-
-## Commands
-
-```bash
-make setup
-make check
-make test
-```
 
 <!-- AIHUB-AGENTS-SCOPE-LOCAL-END -->
 
