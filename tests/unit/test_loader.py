@@ -10,16 +10,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from flext_cli import u as cli_u
 
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle.application import FlextTargetOracleLoader
-from tests import m, tm
+from tests import c, m, t, tm, u
 
 if TYPE_CHECKING:
     from flext_db_oracle import FlextDbOracleApi
-
-from tests import t
 
 # Row-count probe for the table this test just created. The name is derived
 # from the loader's own typed settings (prefix + stream + suffix), never from
@@ -45,7 +42,7 @@ def loader_config() -> FlextTargetOracleSettings:
             "oracle_port": 1521,
             "oracle_service_name": "XE",
             "oracle_user": "test_user",
-            "oracle_password": "p" + "0" * 12,
+            "oracle_password": "p" + c.ParserBooleanToken.ZERO * 12,
             "default_target_schema": "TEST_SCHEMA",
             "batch_size": 2,
             "use_bulk_operations": True,
@@ -87,10 +84,10 @@ class TestsFlextTargetOracleLoader:
         loader = FlextTargetOracleLoader(loader_config)
         schema_message = {
             "type": "SCHEMA",
-            "stream": "users",
+            c.ProcessingMode.STREAM: "users",
             "schema": {
                 "type": "object",
-                "properties": cli_u.Cli.json_dumps({
+                "properties": u.Cli.json_dumps({
                     "id": {"type": "integer"},
                 }).unwrap(),
             },
@@ -118,10 +115,10 @@ class TestsFlextTargetOracleLoader:
         stream_name = "loader_flush"
         schema_message = {
             "type": "SCHEMA",
-            "stream": stream_name,
+            c.ProcessingMode.STREAM: stream_name,
             "schema": {
                 "type": "object",
-                "properties": cli_u.Cli.json_dumps({
+                "properties": u.Cli.json_dumps({
                     "id": {"type": "integer"},
                     "name": {"type": "string"},
                 }).unwrap(),
@@ -147,4 +144,4 @@ class TestsFlextTargetOracleLoader:
         count_query = _COUNT_QUERY_TEMPLATE.format(table=table_name)
         count_result = oracle_engine.oracle_services.execute_query(count_query)
         tm.ok(count_result)
-        tm.that(int(str(count_result.value[0].root["count"])), eq=2)
+        tm.that(int(str(count_result.value[0].root[c.Aggregation.COUNT])), eq=2)

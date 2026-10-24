@@ -8,14 +8,13 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import pytest
-from flext_cli import u as cli_u
 
 from flext_target_oracle import (
     FlextTargetOracle,
     FlextTargetOracleService,
     FlextTargetOracleSettings,
 )
-from tests import m, t, tm, u
+from tests import c, m, t, tm, u
 
 
 def _users_schema_message(
@@ -30,10 +29,10 @@ def _users_schema_message(
     """
     payload: t.MutableJsonMapping = {
         "type": "SCHEMA",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "schema": {
             "type": "object",
-            "properties": cli_u.Cli.json_dumps({"id": {"type": "integer"}}).unwrap(),
+            "properties": u.Cli.json_dumps({"id": {"type": "integer"}}).unwrap(),
         },
     }
     if with_key_properties:
@@ -106,7 +105,7 @@ class TestsFlextTargetOracleTarget:
         schema_message = _users_schema_message()
         record_message = m.Meltano.SingerRecordMessage.model_validate({
             "type": "RECORD",
-            "stream": "users",
+            c.ProcessingMode.STREAM: "users",
             "record": {"id": 1},
         })
         state_message = m.Meltano.SingerStateMessage.model_validate({
@@ -136,7 +135,7 @@ class TestsFlextTargetOracleTarget:
             _users_schema_message(),
             m.Meltano.SingerRecordMessage.model_validate({
                 "type": "RECORD",
-                "stream": "users",
+                c.ProcessingMode.STREAM: "users",
                 "record": {"id": 1},
             }),
             m.Meltano.SingerStateMessage.model_validate({
@@ -164,7 +163,7 @@ class TestsFlextTargetOracleTarget:
         result = target.run("{ invalid }")
         tm.fail(result)
         parse_result = target.write_record(
-            '{"type": "RECORD", "stream": "users", "record": "bad"}',
+            '{"type": "RECORD", c.ProcessingMode.STREAM: "users", "record": "bad"}',
         )
         tm.fail(parse_result)
         exceptions = u.TargetOracle.Exceptions
@@ -193,7 +192,11 @@ class TestsFlextTargetOracleTarget:
         result = target.write_record(
             u
             .json_value_adapter()
-            .dump_json({"type": "RECORD", "stream": "users", "record": {"id": 1}})
+            .dump_json({
+                "type": "RECORD",
+                c.ProcessingMode.STREAM: "users",
+                "record": {"id": 1},
+            })
             .decode("utf-8"),
         )
         tm.ok(result)

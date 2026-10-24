@@ -128,12 +128,12 @@ def _provision_user_account(admin_api: FlextDbOracleApi) -> str | None:
     """
     last_error: str | None = None
     user_query_result = admin_api.oracle_services.execute_query(
-        'SELECT COUNT(*) AS "count" FROM all_users WHERE username = :username',
+        "SELECT COUNT(*) AS c.Aggregation.COUNT FROM all_users WHERE username = :username",
         m.ConfigMap(root={"username": "FLEXT_TEST"}),
     )
     if user_query_result.failure:
         return user_query_result.error or "user probe failed"
-    raw_user_count = user_query_result.value[0].root["count"]
+    raw_user_count = user_query_result.value[0].root[c.Aggregation.COUNT]
     user_count = (
         raw_user_count if isinstance(raw_user_count, int) else int(str(raw_user_count))
     )
@@ -331,7 +331,7 @@ def simple_schema() -> t.JsonMapping:
     """Return a simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "schema": {
             "type": "object",
             "properties": {
@@ -355,7 +355,7 @@ def nested_schema() -> t.JsonMapping:
     """
     return {
         "type": "SCHEMA",
-        "stream": "orders",
+        c.ProcessingMode.STREAM: "orders",
         "schema": {
             "type": "object",
             "properties": {
@@ -379,7 +379,7 @@ def singer_messages() -> t.SequenceOf[t.JsonValue]:
     """
     schema: t.JsonValue = {
         "type": "SCHEMA",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "schema": {
             "type": "object",
             "properties": {
@@ -392,12 +392,12 @@ def singer_messages() -> t.SequenceOf[t.JsonValue]:
     }
     first_record: t.JsonValue = {
         "type": "RECORD",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "record": {"id": 1, "name": "John Doe", "email": "john@example.com"},
     }
     second_record: t.JsonValue = {
         "type": "RECORD",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "record": {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
     }
     state: t.JsonValue = {

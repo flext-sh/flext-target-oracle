@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from flext_target_oracle import FlextTargetOracleSettings
-from tests import s, tm
+from tests import c, s, tm
 
 
 class TestsFlextTargetOracleConfig:
@@ -28,7 +28,7 @@ class TestsFlextTargetOracleConfig:
                 "oracle_host": "localhost",
                 "oracle_service_name": "XE",
                 "oracle_user": "test_user",
-                "oracle_password": "p" + "0" * 12,
+                "oracle_password": "p" + c.ParserBooleanToken.ZERO * 12,
             },
         })
         target = config.TargetOracle

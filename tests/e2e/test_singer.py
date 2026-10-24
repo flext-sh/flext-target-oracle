@@ -10,10 +10,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from flext_cli import u as cli_u
 
 from flext_target_oracle import FlextTargetOracle
-from tests import m, tm
+from tests import c, m, tm, u
 
 if TYPE_CHECKING:
     from flext_target_oracle import FlextTargetOracleSettings
@@ -36,10 +35,10 @@ class TestsFlextTargetOracleSinger:
         target = self._target(oracle_config)
         schema = {
             "type": "SCHEMA",
-            "stream": "orders",
+            c.ProcessingMode.STREAM: "orders",
             "schema": {
                 "type": "object",
-                "properties": cli_u.Cli.json_dumps({
+                "properties": u.Cli.json_dumps({
                     "id": {"type": "integer"},
                     "amount": {"type": "number"},
                 }).unwrap(),
@@ -48,7 +47,7 @@ class TestsFlextTargetOracleSinger:
         }
         record = {
             "type": "RECORD",
-            "stream": "orders",
+            c.ProcessingMode.STREAM: "orders",
             "record": {"id": 1, "amount": 10.5},
         }
         state = {"type": "STATE", "value": {"bookmarks": {"orders": {"version": 1}}}}

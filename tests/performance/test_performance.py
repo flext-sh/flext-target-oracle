@@ -12,14 +12,12 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING
 
 import pytest
-from flext_cli import u as cli_u
 
 from flext_target_oracle import FlextTargetOracle
-from tests import m, tm
+from tests import c, m, t, tm, u
 
 if TYPE_CHECKING:
     from flext_target_oracle import FlextTargetOracleSettings
-from tests import t
 
 
 @pytest.mark.performance
@@ -79,16 +77,20 @@ class TestsFlextTargetOraclePerformance:
         target = self._target(oracle_config)
         schema = {
             "type": "SCHEMA",
-            "stream": "perf_stream",
+            c.ProcessingMode.STREAM: "perf_stream",
             "schema": {
                 "type": "object",
-                "properties": cli_u.Cli.json_dumps({
+                "properties": u.Cli.json_dumps({
                     "id": {"type": "integer"},
                 }).unwrap(),
             },
             "key_properties": ["id"],
         }
-        record = {"type": "RECORD", "stream": "perf_stream", "record": {"id": 1}}
+        record = {
+            "type": "RECORD",
+            c.ProcessingMode.STREAM: "perf_stream",
+            "record": {"id": 1},
+        }
         tm.ok(
             target.process_singer_message(
                 m.Meltano.SingerSchemaMessage.model_validate(schema),

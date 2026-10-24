@@ -683,7 +683,7 @@ class TestSingerCompliance:
         # SCHEMA message
         schema_msg = {
             "type": "SCHEMA",
-            "stream": "test_users",
+            c.ProcessingMode.STREAM: "test_users",
             "schema": {
                 "type": "object",
                 "properties": {
@@ -701,7 +701,7 @@ class TestSingerCompliance:
         for i in range(5):
             record_msg = {
                 "type": "RECORD",
-                "stream": "test_users",
+                c.ProcessingMode.STREAM: "test_users",
                 "record": {
                     "id": i,
                     "name": f"User {i}",
@@ -956,7 +956,7 @@ def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
 def _write_record(self, record: Record) -> None:
     """Standard Singer SDK record writing method."""
     # Convert to old format for backward compatibility
-    message = {"type": "RECORD", "stream": record.stream, "record": record.data}
+    message = {"type": "RECORD", c.ProcessingMode.STREAM: record.stream, "record": record.data}
     result = self._handle_message_legacy(message)
     if result.failure:
         raise RuntimeError(result.error)  # Singer SDK expects exceptions

@@ -48,7 +48,7 @@ Singer protocol implementation, compliance status, and integration patterns.
 ```json
 {
   "type": "SCHEMA",
-  "stream": "users",
+  c.ProcessingMode.STREAM: "users",
   "schema": {
     "type": "object",
     "properties": {
@@ -69,7 +69,7 @@ from __future__ import annotations
 
 def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
     """Handle SCHEMA message with table creation/evolution."""
-    stream_name = message.get("stream")
+    stream_name = message.get(c.ProcessingMode.STREAM)
     schema = message.get("schema", {})
 
     # Ensure target table exists
@@ -85,7 +85,7 @@ def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
 ```json
 {
   "type": "RECORD",
-  "stream": "users",
+  c.ProcessingMode.STREAM: "users",
   "record": {
     "id": 1,
     "name": "John Doe",
@@ -103,7 +103,7 @@ from __future__ import annotations
 
 def _handle_record(self, message: m.Dict) -> p.Result[bool]:
     """Handle RECORD message with batched loading."""
-    stream_name = message.get("stream")
+    stream_name = message.get(c.ProcessingMode.STREAM)
     record_data = message.get("record")
 
     if not isinstance(stream_name, str) or not isinstance(record_data, dict):
@@ -531,7 +531,7 @@ class TestSingerIntegration:
         """Test SCHEMA message handling."""
         schema_msg = {
             "type": "SCHEMA",
-            "stream": "test_stream",
+            c.ProcessingMode.STREAM: "test_stream",
             "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
         }
 
@@ -542,7 +542,7 @@ class TestSingerIntegration:
         """Test RECORD message handling."""
         record_msg = {
             "type": "RECORD",
-            "stream": "test_stream",
+            c.ProcessingMode.STREAM: "test_stream",
             "record": {"id": 1, "name": "Test"},
         }
 

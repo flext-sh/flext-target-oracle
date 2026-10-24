@@ -80,9 +80,9 @@ class TestsFlextTargetOracleOracle:
         tm.ok(table_res)
         table_count = _query_scalar(
             oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM user_tables '
+            "SELECT COUNT(*) AS c.Aggregation.COUNT FROM user_tables "
             "WHERE table_name = :table_name",
-            "count",
+            c.Aggregation.COUNT,
             {"table_name": "TEST_USERS"},
         )
         tm.that(int(table_count), eq=1)
@@ -133,7 +133,11 @@ class TestsFlextTargetOracleOracle:
         tm.that(len(rows), eq=2)
         tm.that(
             rows[0].root,
-            eq={"id": "1", "name": "John Doe", "email": "john@example.com"},
+            eq={
+                "id": c.ParserBooleanToken.ONE,
+                "name": "John Doe",
+                "email": "john@example.com",
+            },
         )
         tm.that(
             rows[1].root,
@@ -194,7 +198,7 @@ class TestsFlextTargetOracleOracle:
         stream_name = "test_bulk"
         schema_message: t.JsonValue = {
             "type": "SCHEMA",
-            "stream": stream_name,
+            c.ProcessingMode.STREAM: stream_name,
             "schema": {
                 "type": "object",
                 "properties": {
@@ -218,8 +222,8 @@ class TestsFlextTargetOracleOracle:
         tm.ok(result)
         count = _query_scalar(
             oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM test_bulk',
-            "count",
+            "SELECT COUNT(*) AS c.Aggregation.COUNT FROM test_bulk",
+            c.Aggregation.COUNT,
         )
         tm.that(int(count), eq=5000)
         tm.that(elapsed, lt=10.0)
@@ -311,7 +315,7 @@ class TestsFlextTargetOracleOracle:
         stream_name = "test_ordering"
         schema_message: t.JsonValue = {
             "type": "SCHEMA",
-            "stream": stream_name,
+            c.ProcessingMode.STREAM: stream_name,
             "schema": {
                 "type": "object",
                 "properties": {
@@ -372,15 +376,15 @@ class TestsFlextTargetOracleOracle:
         tm.ok(insert_initial)
         count = _query_scalar(
             oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM test_truncate',
-            "count",
+            "SELECT COUNT(*) AS c.Aggregation.COUNT FROM test_truncate",
+            c.Aggregation.COUNT,
         )
         tm.that(int(count), eq=1)
         loader.ensure_table_exists(stream_name, schema_dict, key_props)
         count = _query_scalar(
             oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM test_truncate',
-            "count",
+            "SELECT COUNT(*) AS c.Aggregation.COUNT FROM test_truncate",
+            c.Aggregation.COUNT,
         )
         tm.that(int(count), eq=0)
         tm.ok(loader.disconnect())
@@ -454,13 +458,13 @@ class TestsFlextTargetOracleOracle:
         table_count = _query_scalar(
             oracle_engine,
             "SELECT COUNT(*) AS \"count\" FROM user_tables WHERE table_name = 'USERS'",
-            "count",
+            c.Aggregation.COUNT,
         )
         tm.that(int(table_count), eq=1)
         data_count = _query_scalar(
             oracle_engine,
-            'SELECT COUNT(*) AS "count" FROM users',
-            "count",
+            "SELECT COUNT(*) AS c.Aggregation.COUNT FROM users",
+            c.Aggregation.COUNT,
         )
         tm.that(int(data_count), gt=0)
 
@@ -484,7 +488,7 @@ class TestsFlextTargetOracleOracle:
         target.initialize()
         schema_msg = {
             "type": "SCHEMA",
-            "stream": "users",
+            c.ProcessingMode.STREAM: "users",
             "schema": {
                 "type": "object",
                 "properties": {
@@ -505,12 +509,12 @@ class TestsFlextTargetOracleOracle:
         )
         record_msg = {
             "type": "RECORD",
-            "stream": "users",
+            c.ProcessingMode.STREAM: "users",
             "record": {
                 "id": 1,
                 "name": "John Doe",
                 "email": "john@example.com",
-                "password": "p" + "0" * 9,
+                "password": "p" + c.ParserBooleanToken.ZERO * 9,
                 "internal_id": "INT-001",
             },
         }
