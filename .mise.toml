@@ -53,4 +53,5 @@ python = "3.13"
 "github:qltysh/qlty" = { version = "latest" }
 "github:kucherenko/jscpd" = { version = "latest" }
 "github:microsoft/waza" = { version = "latest", version_prefix = "v" }
+"aqua:j178/prek" = "latest"
 # End SECTION: tools

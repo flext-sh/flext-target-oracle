@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Annotated, Never, override
+from typing import Annotated
 
 from flext_meltano import FlextMeltanoTargetServiceBase
 
@@ -23,22 +23,6 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
         t.NonEmptyStr,
         m.Field(description="Canonical Singer target identifier."),
     ] = "target-oracle"
-
-    @override
-    def create_sink(self, _stream_name: str, _schema: t.JsonMapping) -> Never:
-        """Not supported — use FlextTargetOracleLoader directly.
-
-        Args:
-            _stream_name: Name of the Singer stream; unused.
-
-            _schema: Singer schema for the stream; unused.
-
-        Raises:
-            TypeError: If target-oracle uses Loader pattern, not Singer sink.
-
-        """
-        msg = "target-oracle uses Loader pattern, not Singer sink"
-        raise TypeError(msg)
 
     # NOTE (multi-agent): mro-rn88 — CQRS handlers: Command models are pure data; the
     # service (a flext-core FlextService via MRO) owns execution. Behavior moved here

@@ -21,7 +21,9 @@ name: CI
     branches:
       - main
       - 0.12.0-dev
-    types: [opened, synchronize, reopened, ready_for_review, edited]
+    # No `edited`: a title edit must not cancel a running CI. The release
+    # title guard reacts to edits in its own workflow (release-plan.yml).
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_call:
     inputs:
       ref:
@@ -33,9 +35,9 @@ name: CI
       CI_DEPENDENCIES_APP_ID:
         required: false
         description: >-
-          Optional cross-repo dependency GitHub App id; when absent the
-          cross-repo credential step records NOT EXECUTED and public sibling
-          dependencies resolve anonymously.
+          Cross-repo dependency GitHub App id, required only by a repository
+          that declares private dependencies; when it is absent there, the
+          credential step records NOT EXECUTED and fails.
       CI_DEPENDENCIES_APP_PRIVATE_KEY:
         required: false
         description: >-
@@ -96,6 +98,9 @@ jobs:
       # A restored shim points at the Mise binary of an earlier run, which Mise
       # treats as unmanaged ("not replacing unmanaged file in shims directory",
       # one warning per tool); Mise regenerates the shims from mise.lock.
+      # The key is the content hash of the locks that decide what is
+      # installed: one immutable entry per lock state, never one per run, so
+      # saving never evicts the testmon cache with duplicate generations.
       - name: Restore tool caches
         id: tool-cache
         uses: actions/cache/restore@v6
@@ -111,9 +116,8 @@ jobs:
             ~/.cache/uv
             ~/.local/share/mise
             !~/.local/share/mise/shims
-          key: ${{ runner.os }}-3.13-tools-${{ hashFiles('uv.lock', 'mise.lock', 'pyproject.toml', '.mise.toml') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: ${{ runner.os }}-3.13-tools-${{ hashFiles('uv.lock', 'mise.lock', 'pyproject.toml', '.mise.toml') }}
           restore-keys: |
-            ${{ runner.os }}-3.13-tools-${{ hashFiles('uv.lock', 'mise.lock', 'pyproject.toml', '.mise.toml') }}-
             ${{ runner.os }}-3.13-tools-
 
       # Setup obtains any remaining declared members after authentication,
@@ -156,30 +160,25 @@ jobs:
             ${{ steps.testmon_path.outputs.namespace }}
             ${{ steps.testmon_path.outputs.seed_namespace }}
 
-      # CI approval, one visible step per ci workflow row (setup -> gen -> check -> tests).
+      # CI approval, one visible step per ci workflow row (setup -> check -> tests).
       - name: make setup (blocking)
         id: approval-setup
         run: CI=Y make setup
-      # CI approval, one visible step per ci workflow row (setup -> gen -> check -> tests).
-      - name: make gen (blocking)
-        id: approval-gen
-        # Every approval verb reports once setup provisioned the environment,
-        # so one red verdict never hides the others.
-        if: ${{ !cancelled() && steps.approval-setup.outcome == 'success' }}
-        run: CI=Y make gen
-      # CI approval, one visible step per ci workflow row (setup -> gen -> check -> tests).
+      # CI approval, one visible step per ci workflow row (setup -> check -> tests).
       - name: make check (blocking)
         id: approval-check
         # Every approval verb reports once setup provisioned the environment,
-        # so one red verdict never hides the others.
+        # so one red verdict never hides the others; a declared requirement
+        # (workflow requires) admits the step only after that verb is green.
         if: ${{ !cancelled() && steps.approval-setup.outcome == 'success' }}
         run: CI=Y make check
-      # CI approval, one visible step per ci workflow row (setup -> gen -> check -> tests).
+      # CI approval, one visible step per ci workflow row (setup -> check -> tests).
       - name: make tests (blocking)
         id: approval-tests
         # Every approval verb reports once setup provisioned the environment,
-        # so one red verdict never hides the others.
-        if: ${{ !cancelled() && steps.approval-setup.outcome == 'success' }}
+        # so one red verdict never hides the others; a declared requirement
+        # (workflow requires) admits the step only after that verb is green.
+        if: ${{ !cancelled() && steps.approval-setup.outcome == 'success' && steps.approval-check.outcome == 'success' }}
         run: CI=Y make tests
 
       - name: Dump reports on failure
@@ -201,8 +200,10 @@ jobs:
                 ' sh {} +
             fi
           done
+      # Reports exist only once check executed; uploading after an earlier
+      # failure would only add a second, misleading error.
       - name: Upload execution reports
-        if: ${{ always() }}
+        if: ${{ !cancelled() && (steps.approval-check.outcome == 'success' || steps.approval-check.outcome == 'failure') }}
         uses: actions/upload-artifact@v7
         with:
           name: flext-ci-reports-${{ github.run_id }}
@@ -243,10 +244,11 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       # Why: a failed gate's job log prints only counts; its raw receipts under
-      # the declared gate receipts directory are the evidence, so every job
-      # publishes them when it fails.
+      # the declared gate receipts directory are the evidence. Only the step
+      # that captures receipts can produce them, so the upload runs exactly
+      # when that step failed, never after an earlier failure that left none.
       - name: Upload gate receipts on failure
-        if: ${{ failure() }}
+        if: ${{ failure() && steps.approval-check.outcome == 'failure' }}
         uses: actions/upload-artifact@v7
         with:
           name: flext-gate-receipts-${{ github.job }}-${{ github.run_id }}
@@ -264,13 +266,14 @@ jobs:
           key: ${{ steps.testmon_path.outputs.key }}
 
 
-      # Save a new immutable generation after completed failures as well as
-      # successes, so warm restores never discard new provisioning progress.
+      # The lock-hash key is immutable: save only when the exact key missed,
+      # after a failing gate as well, so the next run starts warm.
       - name: Save tool caches
         # Native cache action access mode remains authoritative before upload.
         # Only declared events may publish; fork requests remain restore-only.
+        # An exact hit already holds this lock state: save only on a miss.
         if: >-
-          ${{ always() && !cancelled() && steps.tool-cache.outcome == 'success' && steps.tool-cache.outputs.cache-primary-key != '' && ((github.event_name == 'push' && startsWith(github.ref, 'refs/heads/')) || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)) }}
+          ${{ always() && !cancelled() && steps.tool-cache.outcome == 'success' && steps.tool-cache.outputs.cache-hit != 'true' && steps.tool-cache.outputs.cache-primary-key != '' && ((github.event_name == 'push' && startsWith(github.ref, 'refs/heads/')) || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)) }}
         uses: actions/cache/save@v6
         with:
           path: |
