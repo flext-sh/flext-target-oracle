@@ -128,15 +128,12 @@ def _provision_user_account(admin_api: FlextDbOracleApi) -> str | None:
     """
     last_error: str | None = None
     user_query_result = admin_api.oracle_services.execute_query(
-        (
-            "SELECT COUNT(*) AS c.Aggregation.COUNT ",
-            "FROM all_users WHERE username = :username",
-        ),
+        ('SELECT COUNT(*) AS "count" FROM all_users WHERE username = :username'),
         m.ConfigMap(root={"username": "FLEXT_TEST"}),
     )
     if user_query_result.failure:
         return user_query_result.error or "user probe failed"
-    raw_user_count = user_query_result.value[0].root[c.Aggregation.COUNT]
+    raw_user_count = user_query_result.value[0].root["count"]
     user_count = (
         raw_user_count if isinstance(raw_user_count, int) else int(str(raw_user_count))
     )
@@ -459,3 +456,19 @@ def pytest_collection_modifyitems(items: t.SequenceOf[pytest.Item]) -> None:
                 for marker in markers:
                     item.add_marker(getattr(pytest.mark, marker))
                 break
+
+
+__all__ = [
+    "clean_database",
+    "docker_control",
+    "isolate_target_oracle_env",
+    "nested_schema",
+    "oracle_config",
+    "oracle_engine",
+    "oracle_loader",
+    "pytest_collection_modifyitems",
+    "pytest_configure",
+    "shared_oracle_container",
+    "simple_schema",
+    "singer_messages",
+]
