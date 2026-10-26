@@ -11,10 +11,7 @@ from typing import TYPE_CHECKING, ClassVar
 
 from flext_meltano import p, u
 
-from flext_target_oracle import c, t
-from flext_target_oracle._models.error_metadata import (
-    FlextTargetOracleModelsErrorMetadata,
-)
+from flext_target_oracle import c, m, t
 from flext_target_oracle._utilities import FlextTargetOracleUtilitiesErrors
 
 if TYPE_CHECKING:
@@ -52,7 +49,7 @@ class FlextTargetOracleUtilitiesObservability:
         )
         return FlextTargetOracleUtilitiesErrors.Exceptions.AuthenticationError(
             f"Oracle authentication failed for {username} on {oracle_service}",
-            metadata=FlextTargetOracleModelsErrorMetadata(
+            metadata=m.TargetOracle.ErrorMetadata(
                 code=error_code or c.ErrorCode.AUTHENTICATION_ERROR,
                 context={
                     "user": username,
@@ -88,7 +85,7 @@ class FlextTargetOracleUtilitiesObservability:
         )
         return FlextTargetOracleUtilitiesErrors.Exceptions.OracleConnectionError(
             f"Oracle database unavailable: {connection_string}",
-            metadata=FlextTargetOracleModelsErrorMetadata(
+            metadata=m.TargetOracle.ErrorMetadata(
                 code=error_code or c.ErrorCode.CONNECTION_ERROR,
                 context={
                     "connection_string": connection_string,
@@ -127,7 +124,7 @@ class FlextTargetOracleUtilitiesObservability:
             stream_name,
             failed_records,
             record_count,
-            metadata=FlextTargetOracleModelsErrorMetadata(
+            metadata=m.TargetOracle.ErrorMetadata(
                 code=c.ErrorCode.PROCESSING_ERROR,
                 context={
                     "stream_name": stream_name,
@@ -165,7 +162,7 @@ class FlextTargetOracleUtilitiesObservability:
 
         return FlextTargetOracleUtilitiesErrors.Exceptions.SchemaError(
             f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
-            metadata=FlextTargetOracleModelsErrorMetadata(
+            metadata=m.TargetOracle.ErrorMetadata(
                 code=c.ErrorCode.VALIDATION_ERROR,
                 context={
                     "stream_name": stream_name,
