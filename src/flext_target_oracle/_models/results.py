@@ -10,7 +10,9 @@ from typing import Annotated, Literal, Self
 
 # NOTE (multi-agent): mro-rn88 — source `u` from flext_meltano (external, cycle-safe),
 # not the own package facade, to avoid the models→utilities→client circular import.
-from flext_meltano import m, t
+from flext_meltano import m
+
+from flext_target_oracle import t
 
 
 class FlextTargetOracleModelsResults:

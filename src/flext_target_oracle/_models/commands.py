@@ -9,12 +9,9 @@ from __future__ import annotations
 
 from typing import Annotated
 
-# NOTE (multi-agent): mro-rn88 — layer-m models import ONLY external facades + the
-# constants submodule (never the own package facade at runtime), which dissolves the
-# models→utilities→client circular import. Execution moved to FlextTargetOracleService.
-from flext_meltano import m, t
+from flext_meltano import m
 
-from flext_target_oracle import c
+from flext_target_oracle import c, t
 
 
 class FlextTargetOracleModelsCommands:

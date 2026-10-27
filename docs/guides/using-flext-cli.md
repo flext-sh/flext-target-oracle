@@ -47,29 +47,31 @@ Import the aliases used by each example from the public `flext_cli` package root
 
 ## Settings
 
-Import the existing settings class; do not redefine it:
+Import the existing settings class; without overrides, `fetch_global()` returns
+its shared per-class singleton:
 
-```text
+```python
 from flext_cli import FlextCliSettings
 
 settings = FlextCliSettings.fetch_global()
-assert settings is FlextCliSettings.fetch_global()
 ```
 
 If you need a project-specific subclass, extend `FlextSettings` (or `FlextCliSettings`)
 with `m.SettingsConfigDict`:
 
-```text
+```python
 from flext_core import FlextSettings, m
 
 
 class FlextApiSettings(FlextSettings):
+    """API settings read from ``FLEXT_API_*`` environment variables."""
+
     model_config = m.SettingsConfigDict(env_prefix="FLEXT_API_", extra="ignore")
 ```
 
 ## Model-driven command
 
-```text
+```python
 from __future__ import annotations
 
 from flext_cli import FlextCliCli, FlextCliSettings, m, t
@@ -78,11 +80,19 @@ settings = FlextCliSettings.fetch_global()
 
 
 class GreetInput(m.BaseModel):
+    """Greeting command input."""
+
     name: str
     shout: bool = False
 
 
 def greet_handler(model: GreetInput) -> t.JsonValue:
+    """Build the greeting payload for one input model.
+
+    Returns:
+        A JSON payload carrying the greeting message.
+
+    """
     message = f"Hello, {model.name}!"
     if model.shout:
         message = message.upper()
@@ -90,7 +100,9 @@ def greet_handler(model: GreetInput) -> t.JsonValue:
 
 
 command = FlextCliCli.model_command(
-    model_cls=GreetInput, handler=greet_handler, settings=settings
+    model_cls=GreetInput,
+    handler=greet_handler,
+    settings=settings,
 )
 cli = FlextCliCli()
 app = cli.create_app_with_common_params(name="greeting", help_text="Greeting commands")
@@ -109,31 +121,41 @@ Use `FlextCliCli.invoke_app` with the adapter-owned application, not Typer's `Cl
 directly. This independent example constructs and invokes a real model-backed command;
 handlers return their value but do not automatically print it.
 
-```text
-from flext_cli import FlextCliCli, m
+```python
+from tests import c, m, tm
+
+from flext_cli import FlextCliCli
 
 
 class GreetInput(m.BaseModel):
+    """Greeting command input."""
+
     name: str
 
 
 def greet_handler(model: GreetInput) -> str:
+    """Return the greeting for one input model."""
     return f"Hello, {model.name}!"
 
 
 def test_greet_command() -> None:
+    """The registered greeting command exits successfully."""
     cli = FlextCliCli()
     app = cli.create_app_with_common_params(
-        name="greeting", help_text="Greeting commands"
+        name="greeting",
+        help_text="Greeting commands",
     )
     command = cli.model_command(model_cls=GreetInput, handler=greet_handler)
     cli.register_command(
-        app, name="greet", help_text="Build a greeting", command=command
+        app,
+        name="greet",
+        help_text="Build a greeting",
+        command=command,
     )
     invocation = cli.invoke_app(app, args=["greet", "--name", "Ada"])
-    assert invocation.success
-    tm.that(invocation.value.exit_code, eq=0)
-    tm.that(greet_handler(GreetInput(name="Ada")), eq="Hello, Ada!")
+    tm.ok(invocation.success)
+    tm.that(invocation.value.exit_code, eq=c.Cli.EXIT_CODE_SUCCESS)
+    assert greet_handler(GreetInput(name="Ada")) == "Hello, Ada!"
 ```
 
 ## Good practices
@@ -149,19 +171,22 @@ with direct printing and process termination. Register the model-backed command 
 the public facade as shown above. A corrected handler consumes its declared input model
 and returns its value:
 
-```text
+```python
 from flext_cli import m
 
 
 class GreetInput(m.BaseModel):
+    """Greeting command input."""
+
     name: str
 
 
 def greet_handler(model: GreetInput) -> str:
+    """Return the greeting for one input model."""
     return f"Hello, {model.name}!"
 
 
-assert greet_handler(GreetInput(name="Ada")) == "Hello, Ada!"
+greeting = greet_handler(GreetInput(name="Ada"))  # "Hello, Ada!"
 ```
 
 ## Related

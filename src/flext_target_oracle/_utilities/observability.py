@@ -9,9 +9,9 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, ClassVar
 
-from flext_meltano import p, u
+from flext_meltano import u
 
-from flext_target_oracle import c, m, t
+from flext_target_oracle import c, m, p, t
 from flext_target_oracle._utilities import FlextTargetOracleUtilitiesErrors
 
 if TYPE_CHECKING:

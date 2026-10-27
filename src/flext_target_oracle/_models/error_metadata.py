@@ -8,7 +8,9 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from flext_meltano import m, t
+from flext_meltano import m
+
+from flext_target_oracle import t
 
 
 class FlextTargetOracleModelsErrorMetadata:

@@ -8,13 +8,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_db_oracle import FlextDbOracleProtocols
-from flext_meltano import FlextMeltanoProtocols
+from flext_db_oracle import p
+from flext_meltano import p as flext_meltano_p
 
 from flext_target_oracle._protocols import FlextTargetOracleProtocolsBase
 
 
-class FlextTargetOracleProtocols(FlextMeltanoProtocols, FlextDbOracleProtocols):
+class FlextTargetOracleProtocols(flext_meltano_p, p):
     """Oracle target protocol facade."""
 
     class TargetOracle(FlextTargetOracleProtocolsBase):

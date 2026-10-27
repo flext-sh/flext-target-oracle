@@ -11,6 +11,31 @@ case "${stage}" in
   pre-commit|pre-merge-commit|pre-push) ;;
   *) printf 'Unsupported Git hook stage: %s\n' "${stage}" >&2; exit 2 ;;
 esac
+# pre-push receives "<local ref> <local sha> <remote ref> <remote sha>" per ref
+# on stdin. A push whose every remote ref is inside a declared preservation
+# namespace carries WIP and runs no gate matrix; any other ref, including a
+# deletion outside those namespaces, selects the full matrix.
+if [ "${stage}" = pre-push ]; then
+  preservation_namespaces=('refs/heads/preserve/' 'refs/heads/wip/sweep-preserve/' 'refs/ai-hub/wip/' )
+  preservation_only=0
+  while read -r _local_ref _local_sha remote_ref _remote_sha; do
+    in_namespace=0
+    for namespace in "${preservation_namespaces[@]}"; do
+      case "${remote_ref}" in
+        "${namespace}"*) in_namespace=1 ;;
+      esac
+    done
+    if [ "${in_namespace}" -eq 0 ]; then
+      preservation_only=0
+      break
+    fi
+    preservation_only=1
+  done
+  if [ "${preservation_only}" -eq 1 ]; then
+    printf 'pre-push: preservation refs only, gate matrix not selected\n' >&2
+    exit 0
+  fi
+fi
 # The shared-worktree contract forbids a clean-tree prerequisite, and the
 # runner never removes unstaged work: --all-files validates the working tree
 # as it is (a superset of the candidate) instead of hiding changes from it.

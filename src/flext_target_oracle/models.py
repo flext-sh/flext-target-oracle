@@ -8,8 +8,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_db_oracle import FlextDbOracleModels
-from flext_meltano import FlextMeltanoModels
+from flext_db_oracle import m
+from flext_meltano import m as flext_meltano_m
 
 from flext_target_oracle._models import (
     FlextTargetOracleModelsBase,
@@ -22,21 +22,20 @@ from flext_target_oracle._models import (
 )
 
 
-class FlextTargetOracleModels(FlextMeltanoModels, FlextDbOracleModels):
+class FlextTargetOracleModels(flext_meltano_m, m):
     """Complete models for Oracle target operations extending FlextModels."""
 
     class TargetOracle(
         FlextTargetOracleModelsBase,
         FlextTargetOracleModelsCommands,
-        FlextTargetOracleModelsResults,
-        FlextTargetOracleModelsSinger,
         FlextTargetOracleModelsErrorMetadata,
         FlextTargetOracleModelsHealthStatus,
+        FlextTargetOracleModelsResults,
         FlextTargetOracleModelsSettings,
+        FlextTargetOracleModelsSinger,
     ):
         """Namespace of models for Oracle target."""
 
 
 m = FlextTargetOracleModels
-
 __all__: list[str] = ["FlextTargetOracleModels", "m"]

@@ -8,18 +8,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
-from flext_db_oracle import FlextDbOracleConstants
-from flext_meltano import FlextMeltanoConstants
+from flext_db_oracle import c
+from flext_meltano import c as flext_meltano_c
 
 from flext_target_oracle._constants import FlextTargetOracleConstantsBase
 
-if TYPE_CHECKING:
-    from flext_target_oracle import t
 
-
-class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
+class FlextTargetOracleConstants(flext_meltano_c, c):
     """Oracle target constant facade."""
 
     class TargetOracle(FlextTargetOracleConstantsBase):
@@ -27,4 +22,4 @@ class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
 
 
 c = FlextTargetOracleConstants
-__all__: t.StrSequence = ("FlextTargetOracleConstants", "c")
+__all__: list[str] = ["FlextTargetOracleConstants", "c"]
