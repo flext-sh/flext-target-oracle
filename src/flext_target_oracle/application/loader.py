@@ -62,9 +62,9 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
     _record_buffers: t.MutableMappingKV[str, t.MutableSequenceOf[t.JsonMapping]] = (
         m.PrivateAttr(default_factory=_default_record_buffers)
     )
-    _stream_columns: t.MutableMappingKV[str, t.VariadicTuple[m.DbOracle.Column]] = (
+    _stream_columns: t.MutableMappingKV[str, tuple[m.DbOracle.Column, ...]] = (
         m.PrivateAttr(
-            default_factory=dict[str, t.VariadicTuple[m.DbOracle.Column]],
+            default_factory=dict[str, tuple[m.DbOracle.Column, ...]],
         )
     )
     _stream_field_mappings: t.MutableStrPairTupleMapping = m.PrivateAttr(
