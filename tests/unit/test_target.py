@@ -7,6 +7,8 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import pytest
 
 from flext_target_oracle import (
@@ -126,7 +128,7 @@ class TestsFlextTargetOracleTarget:
         target: FlextTargetOracle,
     ) -> None:
         """Test process singer messages flushes loader."""
-        messages: t.SequenceOf[
+        messages: Sequence[
             m.Meltano.SingerSchemaMessage
             | m.Meltano.SingerRecordMessage
             | m.Meltano.SingerStateMessage

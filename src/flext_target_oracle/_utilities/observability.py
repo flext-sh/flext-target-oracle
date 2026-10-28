@@ -6,12 +6,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, ClassVar
 
 from flext_meltano import u
 
-from flext_target_oracle import c, m, p, t
+from flext_target_oracle import c, m, p
 from flext_target_oracle._utilities import FlextTargetOracleUtilitiesErrors
 
 if TYPE_CHECKING:
@@ -139,7 +140,7 @@ class FlextTargetOracleUtilitiesObservability:
     def target_oracle_singer_schema_validation_failed(
         *,
         stream_name: str,
-        schema_errors: t.StrSequence,
+        schema_errors: Sequence[str],
         singer_specification: str = "1.5.0",
     ) -> FlextTargetOracleUtilitiesErrors.Exceptions.SchemaError:
         """Build a Singer schema validation failure.
@@ -200,7 +201,7 @@ class FlextTargetOracleUtilitiesObservability:
     def target_oracle_monitor_query_performance(
         table_name: str,
         operation: str = "SELECT",
-    ) -> Generator[t.StrMapping]:
+    ) -> Generator[Mapping[str, str]]:
         """Yield a mutable context while timing a query operation.
 
         Args:

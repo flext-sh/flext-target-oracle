@@ -85,6 +85,15 @@ src/flext_target_oracle/
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 """FLEXT Target Oracle - Public API exports following ecosystem standards."""
 
 # FLEXT Core pattern re-exports for convenience
@@ -140,6 +149,15 @@ __version__ = "0.9.9"
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 """Oracle target configuration using FLEXT Value patterns."""
 
 from flext_cli import u
@@ -204,6 +222,15 @@ class FlextOracleTargetSettings(m.Value):
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 """Singer Target implementation using flext-meltano base patterns."""
 
 from flext_meltano import Target
@@ -239,6 +266,15 @@ class FlextOracleTarget(Target):
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 class FlextOracleTarget(Target):
     """Singer-compliant Oracle target."""
@@ -259,6 +295,15 @@ class FlextOracleTarget(Target):
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 """Oracle data loading using flext-db-oracle integration."""
 
@@ -300,6 +345,15 @@ result = connected_api.execute_dml(sql, param)
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 """Oracle target exceptions following FLEXT error patterns."""
 
@@ -389,6 +443,15 @@ src/flext_target_oracle/
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 # ✅ CORRECT - Railway-oriented programming throughout
 def process_record(self, stream_name: str, record_data: dict) -> p.Result[bool]:
@@ -414,6 +477,15 @@ def process_record_bad(self, stream_name: str, record_data: dict) -> None:
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 # ✅ CORRECT - Comprehensive validation with domain rules
 class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business validation."""
@@ -454,6 +526,15 @@ class BadConfig:
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 # ✅ CORRECT - Structured logging with context
 from flext_cli import u
@@ -613,6 +694,15 @@ tests/
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # tests/unit/test_config.py
 """Unit tests for configuration validation."""
 
@@ -667,6 +757,15 @@ class TestFlextOracleTargetSettings:
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 # tests/integration/test_singer_compliance.py
 """Singer protocol compliance tests."""
@@ -736,6 +835,15 @@ class TestSingerCompliance:
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # ✅ COMPLETE type annotations for all public methods
 from collections.abc import Callable
 
@@ -767,6 +875,15 @@ def process_message(self, message):  # Missing types
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 
 def ensure_table_exists(self, stream_name: str, schema: m.Dict) -> p.Result[bool]:
@@ -816,6 +933,15 @@ def ensure_table_exists(self, stream_name: str, schema: m.Dict) -> p.Result[bool
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # ✅ STANDARD - Ecosystem imports following established patterns
 
 
@@ -839,6 +965,15 @@ class OracleTargetResult[T]:  # Creates ecosystem fragmentation
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 # ✅ CORRECT - Hierarchical configuration following ecosystem patterns
 from flext_cli import u
@@ -895,6 +1030,15 @@ class FlextOracleTargetSettings(FlextSettings):
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 # Version 0.9.9 → 0.9.9 Migration Plan
 class TargetMigration_0_9_to_1_0:
@@ -923,6 +1067,15 @@ class TargetMigration_0_9_to_1_0:
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 # Maintain backward compatibility during migration
 from dataclasses import dataclass

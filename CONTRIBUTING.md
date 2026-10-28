@@ -208,6 +208,15 @@ Add new fields to `FlextOracleTargetSettings`:
 ```python
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 class FlextOracleTargetSettings(m.BaseModel):
     my_new_option: bool = u.Field(default=False, description="Enable my new feature")
@@ -241,6 +250,15 @@ For new DDL/DML operations:
 
 ```python
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 
 def process_record(

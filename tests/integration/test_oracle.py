@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import time
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 import pytest
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
 pytestmark = [pytest.mark.integration, pytest.mark.docker]
 
 
-def _schema_parts(message: t.JsonValue) -> t.Pair[t.JsonMapping, t.SequenceOf[str]]:
+def _schema_parts(message: t.JsonValue) -> tuple[t.JsonMapping, Sequence[str]]:
     schema_message = m.Meltano.SingerSchemaMessage.model_validate(message)
     return (schema_message.schema_definition, schema_message.key_properties)
 
@@ -37,12 +38,12 @@ def _query_rows(
     oracle_engine: FlextDbOracleApi,
     sql: str,
     params: t.JsonMapping | None = None,
-) -> t.SequenceOf[m.Dict]:
+) -> Sequence[m.Dict]:
     normalized_params = None if params is None else m.ConfigMap(root=dict(params))
-    query_result: p.Result[t.SequenceOf[m.Dict]] = (
+    query_result: p.Result[Sequence[m.Dict]] = (
         oracle_engine.oracle_services.execute_query(sql, normalized_params)
     )
-    rows: t.SequenceOf[m.Dict] = tm.ok(query_result)
+    rows: Sequence[m.Dict] = tm.ok(query_result)
     return rows
 
 
@@ -119,7 +120,7 @@ class TestsFlextTargetOracleOracle:
             key_props,
         )
         tm.ok(create_res)
-        records: t.SequenceOf[t.JsonMapping] = [
+        records: Sequence[t.JsonMapping] = [
             {"id": 1, "name": "John Doe", "email": "john@example.com"},
             {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
         ]
@@ -160,12 +161,12 @@ class TestsFlextTargetOracleOracle:
         schema_dict, key_props = _schema_parts(simple_schema)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         tm.ok(table_res)
-        initial_records: t.SequenceOf[t.JsonMapping] = [
+        initial_records: Sequence[t.JsonMapping] = [
             {"id": 1, "name": "Original Name", "email": "original@example.com"},
         ]
         insert_result = loader.insert_records(stream_name, initial_records)
         tm.ok(insert_result)
-        updated_records: t.SequenceOf[t.JsonMapping] = [
+        updated_records: Sequence[t.JsonMapping] = [
             {"id": 1, "name": "Updated Name", "email": "updated@example.com"},
         ]
         result = loader.insert_records(stream_name, updated_records)
@@ -212,7 +213,7 @@ class TestsFlextTargetOracleOracle:
         schema_dict, key_props = _schema_parts(schema_message)
         table_res = loader.ensure_table_exists(stream_name, schema_dict, key_props)
         tm.ok(table_res)
-        records: t.SequenceOf[t.JsonMapping] = [
+        records: Sequence[t.JsonMapping] = [
             {"id": i, "data": f"Bulk test data {i}", "value": i * 1.5}
             for i in range(5000)
         ]
@@ -444,7 +445,7 @@ class TestsFlextTargetOracleOracle:
     def test_full_singer_workflow(
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
-        singer_messages: t.SequenceOf[t.JsonValue],
+        singer_messages: Sequence[t.JsonValue],
     ) -> None:
         """Test complete Singer workflow: schema -> records -> state."""
         target = FlextTargetOracle(settings=oracle_config)

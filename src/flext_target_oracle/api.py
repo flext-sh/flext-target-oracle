@@ -9,6 +9,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Annotated
 
 from flext_meltano import FlextMeltanoTargetServiceBase
@@ -41,7 +42,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
             output format.
 
         """
-        payload: t.StrMapping = {
+        payload: Mapping[str, str] = {
             "name": "flext-target-oracle",
             "description": "Singer target for Oracle loading",
             "format": command.format,

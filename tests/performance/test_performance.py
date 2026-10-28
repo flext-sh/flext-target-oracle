@@ -8,13 +8,13 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import time
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING
 
 import pytest
 
 from flext_target_oracle import FlextTargetOracle
-from tests import c, m, t, tm, u
+from tests import c, m, tm, u
 
 if TYPE_CHECKING:
     from flext_target_oracle import FlextTargetOracleSettings
@@ -48,7 +48,7 @@ class TestsFlextTargetOraclePerformance:
     ) -> None:
         """Test message processing scales linearly for state updates."""
         target = self._target(oracle_config)
-        messages: t.SequenceOf[
+        messages: Sequence[
             m.Meltano.SingerSchemaMessage
             | m.Meltano.SingerRecordMessage
             | m.Meltano.SingerStateMessage

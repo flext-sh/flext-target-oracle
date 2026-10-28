@@ -126,6 +126,15 @@ make test                 # Must maintain coverage standards
 ````python
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # ✅ GOOD: FLEXT patterns
 from flext_cli import u
 
@@ -169,6 +178,15 @@ class BadConfig:
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 from flext_core import m, p, r
 
 
@@ -200,6 +218,15 @@ def process_batch(records: list[m.Dict]) -> p.Result[bool]:
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 from flext_core import m, p, u
 
 
@@ -229,6 +256,15 @@ class FlextTargetOracleSettings(m.Value):
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 import logging
 
@@ -290,6 +326,15 @@ else:
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 
 # Test table creation and schema evolution
@@ -392,6 +437,15 @@ python -m flext_core.tools.cli
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # Profile batch processing performance
 import cProfile
 import pstats
@@ -421,6 +475,15 @@ def profile_batch_processing():
 """Test template for new functionality."""
 
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 import pytest
 
@@ -470,6 +533,15 @@ class TestNewFeature:
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 """Integration test template."""
 
 import pytest
@@ -495,6 +567,15 @@ class TestOracleIntegration:
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 
 # Test fixtures for consistent test data
@@ -525,6 +606,15 @@ def sample_records():
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 # Test different batch sizes for optimal performance
 import time
@@ -563,6 +653,15 @@ def benchmark_batch_sizes(records: list[m.Dict]):
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 import os
 

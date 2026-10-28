@@ -6,14 +6,12 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Final
+from collections.abc import Mapping
+from typing import Final
 
 from flext_tests import FlextTestsConstants
 
 from flext_target_oracle import FlextTargetOracleConstants
-
-if TYPE_CHECKING:
-    from tests import t
 
 
 class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsConstants):
@@ -35,7 +33,7 @@ class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsCons
             # satisfy that structural contract for both checkers.
             SRC_DIR: str = "src"
             PACKAGE_DIR: str = "flext_target_oracle"
-            ALLOWED_MODULE_FUNCTIONS: Final[t.MappingKV[str, frozenset[str]]] = {
+            ALLOWED_MODULE_FUNCTIONS: Final[Mapping[str, frozenset[str]]] = {
                 "cli.py": frozenset({"main"}),
             }
 

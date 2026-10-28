@@ -66,6 +66,15 @@ Singer protocol implementation, compliance status, and integration patterns.
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
     """Handle SCHEMA message with table creation/evolution."""
@@ -100,6 +109,15 @@ def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 def _handle_record(self, message: m.Dict) -> p.Result[bool]:
     """Handle RECORD message with batched loading."""
@@ -131,6 +149,15 @@ def _handle_record(self, message: m.Dict) -> p.Result[bool]:
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 def _handle_state(self, message: m.Dict) -> p.Result[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
@@ -169,6 +196,15 @@ def _handle_state(self, message: m.Dict) -> p.Result[bool]:
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 # ❌ Custom method - not Singer SDK compliant
 def process_singer_message(self, message: dict) -> p.Result[bool]:
     # Custom message processing
@@ -178,6 +214,15 @@ def process_singer_message(self, message: dict) -> p.Result[bool]:
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 
 # ✅ Standard Singer SDK interface
@@ -386,6 +431,15 @@ settings = FlextOracleTargetSettings(
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # Performance testing different batch sizes
 import time
 
@@ -438,6 +492,15 @@ settings = FlextOracleTargetSettings(
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 # Consistent error handling with r
 def process_with_error_handling():
@@ -470,6 +533,15 @@ def process_with_error_handling():
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 # Current implementation (needs improvement)
 def _insert_batch(self, table_name: str, records: list) -> p.Result[bool]:
     """Insert batch with basic error handling."""
@@ -514,6 +586,15 @@ def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[boo
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 import pytest
 
@@ -572,6 +653,15 @@ class TestSingerIntegration:
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 # Test with actual Singer tap output ()
 import json

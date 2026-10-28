@@ -7,12 +7,11 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from types import MappingProxyType
 from typing import Annotated
 
 from flext_meltano import m
-
-from flext_target_oracle import t
 
 
 class FlextTargetOracleModelsSinger:
@@ -34,7 +33,7 @@ class FlextTargetOracleModelsSinger:
             ),
         ]
         ignored_columns: Annotated[
-            t.StrSequence,
+            Sequence[str],
             m.Field(
                 ...,
                 description="Columns ignored during record transformation",
@@ -42,7 +41,7 @@ class FlextTargetOracleModelsSinger:
             ),
         ] = m.Field(default_factory=tuple, validate_default=True)
         column_mappings: Annotated[
-            t.StrMapping,
+            Mapping[str, str],
             m.Field(
                 ...,
                 description="Singer column to Oracle column mapping",

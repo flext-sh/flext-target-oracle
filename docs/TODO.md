@@ -160,6 +160,15 @@ dependencies = [
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 class FlextOracleTarget(Target):
     def _test_connection(self) -> bool:
         return self._test_connection_impl()
@@ -263,6 +272,15 @@ def _create_table(...)        # Não precisa ser
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 def _evolve_table_schema(self, table_name: str, new_schema: dict):
     # Implementar ALTER TABLE baseado em diff de schema
 ```
@@ -279,6 +297,15 @@ def _evolve_table_schema(self, table_name: str, new_schema: dict):
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 class OracleConnectionFactory:
     @staticmethod
     def create_api(settings: FlextOracleTargetSettings) -> FlextDbOracleApi:
@@ -333,6 +360,15 @@ logger.info(
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 @pytest.fixture
 def oracle_connection():
     # Fixture para conexão Oracle real em testes de integração

@@ -10,6 +10,7 @@ from __future__ import annotations
 import contextlib
 import os
 import secrets
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from time import monotonic, sleep
 from typing import TYPE_CHECKING
@@ -370,11 +371,11 @@ def nested_schema() -> t.JsonMapping:
 
 
 @pytest.fixture
-def singer_messages() -> t.SequenceOf[t.JsonValue]:
+def singer_messages() -> Sequence[t.JsonValue]:
     """Complete Singer message stream for integration workflow tests.
 
     Returns:
-        The resulting ``t.SequenceOf[t.JsonValue]``.
+        The resulting ``Sequence[t.JsonValue]``.
 
     """
     schema: t.JsonValue = {
@@ -430,7 +431,7 @@ def oracle_loader(
         _ = loader.disconnect()
 
 
-_PATH_MARKERS: t.MappingKV[str, t.StrSequence] = {
+_PATH_MARKERS: Mapping[str, Sequence[str]] = {
     "unit": ("unit",),
     "integration": ("integration",),
     "e2e": ("e2e", "slow"),
@@ -438,7 +439,7 @@ _PATH_MARKERS: t.MappingKV[str, t.StrSequence] = {
 }
 
 
-def pytest_collection_modifyitems(items: t.SequenceOf[pytest.Item]) -> None:
+def pytest_collection_modifyitems(items: Sequence[pytest.Item]) -> None:
     """Add markers to test items based on their location."""
     tests_dir = Path(__file__).resolve().parent
     for item in items:

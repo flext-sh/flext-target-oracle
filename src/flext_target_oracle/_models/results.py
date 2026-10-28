@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from typing import Annotated, Literal, Self
 
 # NOTE (multi-agent): mro-rn88 — source `u` from flext_meltano (external, cycle-safe),
@@ -54,7 +55,7 @@ class FlextTargetOracleModelsResults:
             ),
         ]
         streams: Annotated[
-            t.StrSequence,
+            Sequence[str],
             m.Field(
                 ...,
                 description="Singer stream names seen during processing",
@@ -130,7 +131,7 @@ class FlextTargetOracleModelsResults:
             m.Field(description="Aggregated loading operation details"),
         ]
         buffer_status: Annotated[
-            t.MappingKV[str, int],
+            Mapping[str, int],
             m.Field(
                 ...,
                 description="Remaining buffered records by stream",

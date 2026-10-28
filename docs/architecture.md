@@ -54,6 +54,15 @@ The target is built on foundational FLEXT patterns:
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # r Railway Pattern - Consistent error handling
 
 
@@ -125,6 +134,15 @@ class FlextOracleTargetSettings(m.Value):
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 class FlextOracleTarget(Target):
     """Singer Target implementation with FLEXT patterns."""
@@ -151,6 +169,15 @@ class FlextOracleTarget(Target):
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 
 class FlextOracleTargetSettings(m.Value):
@@ -187,6 +214,15 @@ class FlextOracleTargetSettings(m.Value):
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 class FlextOracleTargetLoader:
     """Oracle data loading with batch processing."""
@@ -194,7 +230,7 @@ class FlextOracleTargetLoader:
     def __init__(self, settings: FlextOracleTargetSettings):
         # flext-db-oracle integration
         self.oracle_api = FlextDbOracleApi(oracle_config)
-        self._record_buffers: t.MappingKV[str, t.SequenceOf[m.Dict]] = {}
+        self._record_buffers: Mapping[str, Sequence[m.Dict]] = {}
 
     # Table management
     def ensure_table_exists(self, stream_name: str, schema: dict) -> p.Result[bool]: ...
@@ -297,12 +333,21 @@ flowchart TD
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 class BatchProcessor:
     """Configurable batch processing for optimal performance."""
 
     def __init__(self, batch_size: int = 1000):
-        self._buffers: t.MappingKV[str, t.SequenceOf[Record]] = {}
+        self._buffers: Mapping[str, Sequence[Record]] = {}
         self._batch_size = batch_size
 
     def add_record(self, stream: str, record: dict) -> p.Result[bool]:
@@ -383,6 +428,15 @@ tests/
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 from tests import c, r
 from tests import c, tm
