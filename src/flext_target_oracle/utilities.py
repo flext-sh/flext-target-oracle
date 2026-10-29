@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_db_oracle import u
+from flext_db_oracle import u as flext_db_oracle_u
 from flext_meltano import u as flext_meltano_u
 
 from flext_target_oracle._utilities import (
@@ -20,7 +20,7 @@ from flext_target_oracle._utilities import (
 )
 
 
-class FlextTargetOracleUtilities(flext_meltano_u, u):
+class FlextTargetOracleUtilities(flext_meltano_u, flext_db_oracle_u):
     """Focused utility namespace used by Oracle target modules."""
 
     class TargetOracle(

@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_db_oracle import m
+from flext_db_oracle import m as flext_db_oracle_m
 from flext_meltano import m as flext_meltano_m
 
 from flext_target_oracle._models import (
@@ -22,7 +22,7 @@ from flext_target_oracle._models import (
 )
 
 
-class FlextTargetOracleModels(flext_meltano_m, m):
+class FlextTargetOracleModels(flext_meltano_m, flext_db_oracle_m):
     """Complete models for Oracle target operations extending FlextModels."""
 
     class TargetOracle(
