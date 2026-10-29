@@ -14,8 +14,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Annotated
 
-from flext_core import FlextSettings, m, u
-from typing_extensions import TypeForm
+from flext_core import FlextSettings, m, t, u
 
 
 class FlextTargetOracleSettings(FlextSettings):
@@ -74,7 +73,7 @@ class FlextTargetOracleSettings(FlextSettings):
         ] = ""
         column_order_rules: Annotated[
             Mapping[str, int], m.Field(description="Column priority rules")
-        ] = m.Field(default_factory=u.empty(TypeForm(Mapping[str, int])))
+        ] = m.Field(default_factory=u.empty(t.TypeForm(Mapping[str, int])))
         column_mappings: Annotated[
             str,
             m.Field(
