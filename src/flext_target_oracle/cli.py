@@ -7,11 +7,12 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 import sys
+from collections.abc import Sequence
 from typing import ClassVar
 
 from flext_cli import cli
 
-from flext_target_oracle import FlextTargetOracleService, m, p, r, t, u
+from flext_target_oracle import FlextTargetOracleService, m, p, r, u
 
 
 class FlextTargetOracleCli:
@@ -45,7 +46,7 @@ class FlextTargetOracleCli:
         self.logger.info(result.value)
         return 0
 
-    def run_cli(self, args: t.StrSequence | None = None) -> p.Result[str]:
+    def run_cli(self, args: Sequence[str] | None = None) -> p.Result[str]:
         """Dispatch CLI args to the appropriate command.
 
         Args:

@@ -43,7 +43,7 @@ src/flext_target_oracle/
   services/handlers**, never `execute()` on a model.
 - Uses a loader pattern, not a Singer sink — `create_sink` intentionally raises.
 - Oracle settings namespaced (`settings.DbOracle.*`).
-- Config/settings canonical pattern: ADR-012.
+- Config/settings canonical pattern: ADR-005 (SSOT) and ADR-024 (DI config contract).
 - Codemod governance (ast-grep + make mod): ADR-014.
 
 ## Commands
@@ -51,7 +51,7 @@ src/flext_target_oracle/
 ```bash
 make setup
 make check
-make test
+make tests
 ```
 
 <!-- AIHUB-AGENTS-SCOPE-LOCAL-END -->

@@ -10,6 +10,7 @@ from __future__ import annotations
 import contextlib
 import os
 import secrets
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from time import monotonic, sleep
 from typing import TYPE_CHECKING
@@ -25,7 +26,7 @@ from tests import c, m, p, r, tk, tm
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from tests import t
+from tests import t
 
 _ORACLE_TEST_PASSWORD = secrets.token_hex(16)
 
@@ -91,7 +92,7 @@ def _oracle_test_settings(username: str) -> FlextDbOracleSettings:
         "DbOracle": {
             "host": os.environ["TEST_ORACLE_HOST"],
             "port": int(os.environ["TEST_ORACLE_PORT"]),
-            "service_name": os.environ["TEST_ORACLE_SERVICE"],
+            c.ContextKey.SERVICE_NAME: os.environ["TEST_ORACLE_SERVICE"],
             "username": username,
             "password": _ORACLE_TEST_PASSWORD,
         },
@@ -128,7 +129,7 @@ def _provision_user_account(admin_api: FlextDbOracleApi) -> str | None:
     """
     last_error: str | None = None
     user_query_result = admin_api.oracle_services.execute_query(
-        'SELECT COUNT(*) AS "count" FROM all_users WHERE username = :username',
+        ('SELECT COUNT(*) AS "count" FROM all_users WHERE username = :username'),
         m.ConfigMap(root={"username": "FLEXT_TEST"}),
     )
     if user_query_result.failure:
@@ -241,7 +242,7 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
                         str(c.TargetOracle.Tests.ORACLE_PORT),
                     ),
                 ),
-                "service_name": os.getenv(
+                c.ContextKey.SERVICE_NAME: os.getenv(
                     "TEST_ORACLE_SERVICE",
                     c.TargetOracle.Tests.ORACLE_SERVICE,
                 ),
@@ -331,7 +332,7 @@ def simple_schema() -> t.JsonMapping:
     """Return a simple Singer schema for testing."""
     return {
         "type": "SCHEMA",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "schema": {
             "type": "object",
             "properties": {
@@ -355,7 +356,7 @@ def nested_schema() -> t.JsonMapping:
     """
     return {
         "type": "SCHEMA",
-        "stream": "orders",
+        c.ProcessingMode.STREAM: "orders",
         "schema": {
             "type": "object",
             "properties": {
@@ -370,16 +371,16 @@ def nested_schema() -> t.JsonMapping:
 
 
 @pytest.fixture
-def singer_messages() -> t.SequenceOf[t.JsonValue]:
+def singer_messages() -> Sequence[t.JsonValue]:
     """Complete Singer message stream for integration workflow tests.
 
     Returns:
-        The resulting ``t.SequenceOf[t.JsonValue]``.
+        The resulting ``Sequence[t.JsonValue]``.
 
     """
     schema: t.JsonValue = {
         "type": "SCHEMA",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "schema": {
             "type": "object",
             "properties": {
@@ -392,12 +393,12 @@ def singer_messages() -> t.SequenceOf[t.JsonValue]:
     }
     first_record: t.JsonValue = {
         "type": "RECORD",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "record": {"id": 1, "name": "John Doe", "email": "john@example.com"},
     }
     second_record: t.JsonValue = {
         "type": "RECORD",
-        "stream": "users",
+        c.ProcessingMode.STREAM: "users",
         "record": {"id": 2, "name": "Jane Smith", "email": "jane@example.com"},
     }
     state: t.JsonValue = {
@@ -430,7 +431,7 @@ def oracle_loader(
         _ = loader.disconnect()
 
 
-_PATH_MARKERS: t.MappingKV[str, t.StrSequence] = {
+_PATH_MARKERS: Mapping[str, Sequence[str]] = {
     "unit": ("unit",),
     "integration": ("integration",),
     "e2e": ("e2e", "slow"),
@@ -438,7 +439,7 @@ _PATH_MARKERS: t.MappingKV[str, t.StrSequence] = {
 }
 
 
-def pytest_collection_modifyitems(items: t.SequenceOf[pytest.Item]) -> None:
+def pytest_collection_modifyitems(items: Sequence[pytest.Item]) -> None:
     """Add markers to test items based on their location."""
     tests_dir = Path(__file__).resolve().parent
     for item in items:
@@ -456,3 +457,19 @@ def pytest_collection_modifyitems(items: t.SequenceOf[pytest.Item]) -> None:
                 for marker in markers:
                     item.add_marker(getattr(pytest.mark, marker))
                 break
+
+
+__all__ = [
+    "clean_database",
+    "docker_control",
+    "isolate_target_oracle_env",
+    "nested_schema",
+    "oracle_config",
+    "oracle_engine",
+    "oracle_loader",
+    "pytest_collection_modifyitems",
+    "pytest_configure",
+    "shared_oracle_container",
+    "simple_schema",
+    "singer_messages",
+]

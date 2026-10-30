@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Utility helpers for Oracle Singer target integration.
 
 Copyright (c) 2026 FLEXT Team. All rights reserved.
@@ -7,35 +8,30 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_db_oracle import FlextDbOracleUtilities
-from flext_meltano import FlextMeltanoUtilities
+from flext_db_oracle import u as flext_db_oracle_u
+from flext_meltano import u as flext_meltano_u
 
-from flext_target_oracle._utilities.base import FlextTargetOracleUtilitiesBase
-from flext_target_oracle._utilities.bootstrap import FlextTargetOracleUtilitiesBootstrap
-from flext_target_oracle._utilities.client import FlextTargetOracle
-from flext_target_oracle._utilities.errors import FlextTargetOracleUtilitiesErrors
-from flext_target_oracle._utilities.observability import (
+from flext_target_oracle._utilities import (
+    FlextTargetOracle,
+    FlextTargetOracleUtilitiesBase,
+    FlextTargetOracleUtilitiesBootstrap,
+    FlextTargetOracleUtilitiesErrors,
     FlextTargetOracleUtilitiesObservability,
 )
 
 
-class FlextTargetOracleUtilities(FlextMeltanoUtilities, FlextDbOracleUtilities):
+class FlextTargetOracleUtilities(flext_meltano_u, flext_db_oracle_u):
     """Focused utility namespace used by Oracle target modules."""
 
     class TargetOracle(
-        FlextTargetOracleUtilitiesBase,
         FlextTargetOracleUtilitiesBootstrap,
+        FlextTargetOracleUtilitiesObservability,
+        FlextTargetOracleUtilitiesBase,
         FlextTargetOracle,
         FlextTargetOracleUtilitiesErrors,
-        FlextTargetOracleUtilitiesObservability,
     ):
         """Oracle target utility namespace."""
 
 
 u = FlextTargetOracleUtilities
-
-__all__: list[str] = [
-    "FlextTargetOracle",
-    "FlextTargetOracleUtilities",
-    "u",
-]
+__all__: list[str] = ["FlextTargetOracle", "FlextTargetOracleUtilities", "u"]

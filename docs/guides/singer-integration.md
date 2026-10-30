@@ -48,7 +48,7 @@ Singer protocol implementation, compliance status, and integration patterns.
 ```json
 {
   "type": "SCHEMA",
-  "stream": "users",
+  c.ProcessingMode.STREAM: "users",
   "schema": {
     "type": "object",
     "properties": {
@@ -66,10 +66,19 @@ Singer protocol implementation, compliance status, and integration patterns.
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
     """Handle SCHEMA message with table creation/evolution."""
-    stream_name = message.get("stream")
+    stream_name = message.get(c.ProcessingMode.STREAM)
     schema = message.get("schema", {})
 
     # Ensure target table exists
@@ -85,7 +94,7 @@ def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
 ```json
 {
   "type": "RECORD",
-  "stream": "users",
+  c.ProcessingMode.STREAM: "users",
   "record": {
     "id": 1,
     "name": "John Doe",
@@ -100,10 +109,19 @@ def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 def _handle_record(self, message: m.Dict) -> p.Result[bool]:
     """Handle RECORD message with batched loading."""
-    stream_name = message.get("stream")
+    stream_name = message.get(c.ProcessingMode.STREAM)
     record_data = message.get("record")
 
     if not isinstance(stream_name, str) or not isinstance(record_data, dict):
@@ -131,6 +149,15 @@ def _handle_record(self, message: m.Dict) -> p.Result[bool]:
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 def _handle_state(self, message: m.Dict) -> p.Result[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
@@ -169,6 +196,15 @@ def _handle_state(self, message: m.Dict) -> p.Result[bool]:
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 # ❌ Custom method - not Singer SDK compliant
 def process_singer_message(self, message: dict) -> p.Result[bool]:
     # Custom message processing
@@ -178,6 +214,15 @@ def process_singer_message(self, message: dict) -> p.Result[bool]:
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 
 # ✅ Standard Singer SDK interface
@@ -386,6 +431,15 @@ settings = FlextOracleTargetSettings(
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # Performance testing different batch sizes
 import time
 
@@ -438,6 +492,15 @@ settings = FlextOracleTargetSettings(
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 # Consistent error handling with r
 def process_with_error_handling():
@@ -470,6 +533,15 @@ def process_with_error_handling():
 
 ```{.python .notest}
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 # Current implementation (needs improvement)
 def _insert_batch(self, table_name: str, records: list) -> p.Result[bool]:
     """Insert batch with basic error handling."""
@@ -515,6 +587,15 @@ def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[boo
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 import pytest
 
 from flext_target_oracle import FlextOracleTarget
@@ -531,23 +612,23 @@ class TestSingerIntegration:
         """Test SCHEMA message handling."""
         schema_msg = {
             "type": "SCHEMA",
-            "stream": "test_stream",
+            c.ProcessingMode.STREAM: "test_stream",
             "schema": {"type": "object", "properties": {"id": {"type": "integer"}}},
         }
 
         result = target.process_singer_message(schema_msg)
-        assert result.success
+        tm.ok(result.success)
 
     def test_record_message_processing(self, target):
         """Test RECORD message handling."""
         record_msg = {
             "type": "RECORD",
-            "stream": "test_stream",
+            c.ProcessingMode.STREAM: "test_stream",
             "record": {"id": 1, "name": "Test"},
         }
 
         result = target.process_singer_message(record_msg)
-        assert result.success
+        tm.ok(result.success)
 
     def test_state_message_processing(self, target):
         """Test STATE message handling."""
@@ -557,14 +638,14 @@ class TestSingerIntegration:
         }
 
         result = target.process_singer_message(state_msg)
-        assert result.success
+        tm.ok(result.success)
 
     def test_invalid_message_handling(self, target):
         """Test invalid message handling."""
         invalid_msg = {"type": "INVALID"}
 
         result = target.process_singer_message(invalid_msg)
-        assert result.failure
+        tm.fail(result)
         assert "Unknown message type" in result.error
 ```
 
@@ -572,6 +653,15 @@ class TestSingerIntegration:
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 # Test with actual Singer tap output ()
 import json
@@ -590,7 +680,7 @@ def test_singer_tap_integration():
 
     target = FlextOracleTarget(settings)
 
-    assert process.stdout is not None
+    tm.not_none(process.stdout)
     for raw_line in process.stdout:
         try:
             line = raw_line.decode().strip()

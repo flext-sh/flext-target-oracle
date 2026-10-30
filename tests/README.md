@@ -257,7 +257,7 @@ def test_real_database_operation(oracle_loader, oracle_engine):
     # Verify in database
     with oracle_engine.connect() as conn:
         count = conn.execute(text("SELECT COUNT(*) FROM test")).scalar()
-        assert count == len(records)
+        tm.that(count, eq=len(records))
 ```
 
 ## 🎯 Best Practices

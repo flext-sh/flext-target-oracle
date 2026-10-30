@@ -9,14 +9,13 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from flext_meltano import m, t
+from flext_meltano import m
+
+from flext_target_oracle import t
 
 
-class FlextTargetOracleModelsSettings(m.ArbitraryTypesModel):
-    """Configuration MRO mixin for TargetOracle namespace.
-
-    Namespace holder whose nested payload models resolve via the MRO.
-    """
+class FlextTargetOracleModelsSettings:
+    """Configuration models for Oracle target."""
 
     class OracleConnectionConfig(m.ArbitraryTypesModel):
         """Oracle connection configuration payload."""

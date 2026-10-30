@@ -6,15 +6,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from collections.abc import MutableMapping, Sequence
+from typing import ClassVar
 
 from flext_meltano import u
 
 from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, settings, t
 from flext_target_oracle.application import FlextTargetOracleLoader
-
-if TYPE_CHECKING:
-    from collections.abc import MutableMapping
 
 
 class FlextTargetOracle:
@@ -266,7 +264,7 @@ class FlextTargetOracle:
 
     def process_singer_messages(
         self,
-        messages: t.SequenceOf[
+        messages: Sequence[
             m.Meltano.SingerSchemaMessage
             | m.Meltano.SingerRecordMessage
             | m.Meltano.SingerStateMessage

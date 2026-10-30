@@ -8,21 +8,26 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from flext_meltano import m, t
+from flext_meltano import m
+
+from flext_target_oracle import t
 
 
-class FlextTargetOracleModelsErrorMetadata(m.ArbitraryTypesModel):
-    """Structured metadata attached to Oracle target error responses."""
+class FlextTargetOracleModelsErrorMetadata:
+    """Error metadata namespace composed into ``m.TargetOracle``."""
 
-    code: Annotated[str, m.Field(description="Canonical error code")]
-    context: Annotated[
-        t.JsonMapping | None,
-        m.Field(description="Structured error context"),
-    ] = None
-    correlation_id: Annotated[
-        str | None,
-        m.Field(description="Cross-service correlation identifier"),
-    ] = None
+    class ErrorMetadata(m.ArbitraryTypesModel):
+        """Structured metadata attached to Oracle target error responses."""
+
+        code: Annotated[str, m.Field(description="Canonical error code")]
+        context: Annotated[
+            t.JsonMapping | None,
+            m.Field(description="Structured error context"),
+        ] = None
+        correlation_id: Annotated[
+            str | None,
+            m.Field(description="Cross-service correlation identifier"),
+        ] = None
 
 
 __all__: list[str] = ["FlextTargetOracleModelsErrorMetadata"]

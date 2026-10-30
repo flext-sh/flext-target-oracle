@@ -126,6 +126,15 @@ make test                 # Must maintain coverage standards
 ````python
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # ✅ GOOD: FLEXT patterns
 from flext_cli import u
 
@@ -144,7 +153,7 @@ def operation() -> p.Result[Data]:
 class Config(m.Value):
     field: str = u.Field(..., description="Required field")
 
-    @u.field_validator("field")
+    @m.field_validator("field")
     @classmethod
     def validate_field(cls, v: str) -> str:
         if not v.strip():
@@ -168,6 +177,15 @@ class BadConfig:
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 from flext_core import m, p, r
 
@@ -200,6 +218,15 @@ def process_batch(records: list[m.Dict]) -> p.Result[bool]:
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 from flext_core import m, p, u
 
 
@@ -212,7 +239,7 @@ class FlextTargetOracleSettings(m.Value):
     oracle_port: int = u.Field(default=1521, ge=1, le=65535, description="Oracle port")
 
     # Custom validation
-    @u.field_validator("oracle_host")
+    @m.field_validator("oracle_host")
     @classmethod
     def validate_host(cls, v: str) -> str:
         if not v or v.isspace():
@@ -230,6 +257,15 @@ class FlextTargetOracleSettings(m.Value):
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -243,7 +279,7 @@ def process_with_logging(stream_name: str, batch_size: int):
         extra={
             "stream_name": stream_name,
             "batch_size": batch_size,
-            "operation": "batch_processing",
+            c.ContextScope.OPERATION: "batch_processing",
         },
     )
 
@@ -290,6 +326,15 @@ else:
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 
 # Test table creation and schema evolution
@@ -392,6 +437,15 @@ python -m flext_core.tools.cli
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # Profile batch processing performance
 import cProfile
 import pstats
@@ -418,13 +472,24 @@ def profile_batch_processing():
 #### Unit Test Template
 
 ```text
+"""Test template for new functionality."""
+
 from __future__ import annotations
 
-"""Test template for new functionality."""
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 import pytest
 
 from flext_target_oracle import FlextTargetOracleLoader
+from tests import c, r
+from tests import c, tm
 
 
 class TestNewFeature:
@@ -439,8 +504,8 @@ class TestNewFeature:
         result = new_feature_operation(loader)
 
         # Assert
-        assert result.success
-        assert result.value == expected_value
+        tm.ok(result.success)
+        tm.that(result.value, eq=expected_value)
 
     def test_failure_case(self):
         """Test failure handling."""
@@ -451,7 +516,7 @@ class TestNewFeature:
         result = new_feature_operation(invalid_loader)
 
         # Assert
-        assert result.failure
+        tm.fail(result)
         assert "expected error message" in result.error
 
     @pytest.mark.parametrize(
@@ -461,12 +526,21 @@ class TestNewFeature:
     def test_parametrized(self, input_value, expected):
         """Test multiple input scenarios."""
         result = operation(input_value)
-        assert result == expected
+        tm.that(result, eq=expected)
 ```
 #### Integration Test Template
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 """Integration test template."""
 
@@ -487,12 +561,21 @@ class TestOracleIntegration:
         """Test complete Singer message processing."""
         # Load record
         result = oracle_loader.load_record("test_stream", {...})
-        assert result.success
+        tm.ok(result.success)
 ```
 ### Test Data Management
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 
 # Test fixtures for consistent test data
@@ -523,6 +606,15 @@ def sample_records():
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 # Test different batch sizes for optimal performance
 import time
@@ -561,6 +653,15 @@ def benchmark_batch_sizes(records: list[m.Dict]):
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 import os
 

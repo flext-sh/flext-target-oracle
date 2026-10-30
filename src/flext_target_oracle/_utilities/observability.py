@@ -6,15 +6,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, ClassVar
 
-from flext_meltano import p, u
+from flext_meltano import u
 
-from flext_target_oracle import c, t
-from flext_target_oracle._models.error_metadata import (
-    FlextTargetOracleModelsErrorMetadata,
-)
+from flext_target_oracle import c, m, p
 from flext_target_oracle._utilities import FlextTargetOracleUtilitiesErrors
 
 if TYPE_CHECKING:
@@ -52,9 +50,12 @@ class FlextTargetOracleUtilitiesObservability:
         )
         return FlextTargetOracleUtilitiesErrors.Exceptions.AuthenticationError(
             f"Oracle authentication failed for {username} on {oracle_service}",
-            metadata=FlextTargetOracleModelsErrorMetadata(
+            metadata=m.TargetOracle.ErrorMetadata(
                 code=error_code or c.ErrorCode.AUTHENTICATION_ERROR,
-                context={"user": username, "oracle_service": oracle_service},
+                context={
+                    "user": username,
+                    "oracle_service": oracle_service,
+                },
                 correlation_id=None,
             ),
         )
@@ -85,7 +86,7 @@ class FlextTargetOracleUtilitiesObservability:
         )
         return FlextTargetOracleUtilitiesErrors.Exceptions.OracleConnectionError(
             f"Oracle database unavailable: {connection_string}",
-            metadata=FlextTargetOracleModelsErrorMetadata(
+            metadata=m.TargetOracle.ErrorMetadata(
                 code=error_code or c.ErrorCode.CONNECTION_ERROR,
                 context={
                     "connection_string": connection_string,
@@ -124,7 +125,7 @@ class FlextTargetOracleUtilitiesObservability:
             stream_name,
             failed_records,
             record_count,
-            metadata=FlextTargetOracleModelsErrorMetadata(
+            metadata=m.TargetOracle.ErrorMetadata(
                 code=c.ErrorCode.PROCESSING_ERROR,
                 context={
                     "stream_name": stream_name,
@@ -139,7 +140,7 @@ class FlextTargetOracleUtilitiesObservability:
     def target_oracle_singer_schema_validation_failed(
         *,
         stream_name: str,
-        schema_errors: t.StrSequence,
+        schema_errors: Sequence[str],
         singer_specification: str = "1.5.0",
     ) -> FlextTargetOracleUtilitiesErrors.Exceptions.SchemaError:
         """Build a Singer schema validation failure.
@@ -162,7 +163,7 @@ class FlextTargetOracleUtilitiesObservability:
 
         return FlextTargetOracleUtilitiesErrors.Exceptions.SchemaError(
             f"Schema validation failed for {stream_name}: {'; '.join(schema_errors)}",
-            metadata=FlextTargetOracleModelsErrorMetadata(
+            metadata=m.TargetOracle.ErrorMetadata(
                 code=c.ErrorCode.VALIDATION_ERROR,
                 context={
                     "stream_name": stream_name,
@@ -200,7 +201,7 @@ class FlextTargetOracleUtilitiesObservability:
     def target_oracle_monitor_query_performance(
         table_name: str,
         operation: str = "SELECT",
-    ) -> Generator[t.StrMapping]:
+    ) -> Generator[Mapping[str, str]]:
         """Yield a mutable context while timing a query operation.
 
         Args:
@@ -214,7 +215,7 @@ class FlextTargetOracleUtilitiesObservability:
         FlextTargetOracleUtilitiesObservability.logger.debug(
             "Starting query performance monitor",
         )
-        context_data = {"table_name": table_name, "operation": operation}
+        context_data = {"table_name": table_name, c.ContextScope.OPERATION: operation}
         try:
             yield context_data
         finally:
