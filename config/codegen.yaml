@@ -1,4 +1,5 @@
 Infra:
   codegen:
     repository:
+      kind: internal_flext
       namespace_scan_dirs: []
