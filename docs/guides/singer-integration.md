@@ -147,7 +147,7 @@ def _handle_record(self, message: m.Dict) -> p.Result[bool]:
 
 **Implementation**:
 
-```{.python .notest}
+```python
 from __future__ import annotations
 
 from collections.abc import (
@@ -194,7 +194,7 @@ def _handle_state(self, message: m.Dict) -> p.Result[bool]:
 
 **Current Non-Standard Implementation**:
 
-```{.python .notest}
+```python
 from __future__ import annotations
 
 from collections.abc import (
@@ -531,7 +531,7 @@ def process_with_error_handling():
 
 ### Transaction Management
 
-```{.python .notest}
+```python
 from __future__ import annotations
 
 from collections.abc import (

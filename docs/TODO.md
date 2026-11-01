@@ -158,7 +158,7 @@ dependencies = [
 
 **Solução**:
 
-```{.python .notest}
+```python
 from __future__ import annotations
 
 from collections.abc import (
@@ -241,7 +241,7 @@ with self.oracle_api as connected_api, connected_api.begin_transaction():
 
 **Código Problemático**:
 
-```{.python .notest}
+```python
 def ensure_table_exists(...)  # Não precisa ser
 def _create_table(...)        # Não precisa ser
 ```
@@ -270,7 +270,7 @@ def _create_table(...)        # Não precisa ser
 
 **Solução**:
 
-```{.python .notest}
+```python
 from __future__ import annotations
 
 from collections.abc import (
@@ -295,7 +295,7 @@ def _evolve_table_schema(self, table_name: str, new_schema: dict):
 
 **Solução**:
 
-```{.python .notest}
+```python
 from __future__ import annotations
 
 from collections.abc import (
@@ -358,7 +358,7 @@ logger.info(
 
 **Solução**:
 
-```{.python .notest}
+```python
 from __future__ import annotations
 
 from collections.abc import (
