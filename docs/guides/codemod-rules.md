@@ -191,7 +191,8 @@ Neither a replacement name exclusion nor an N802 exemption repairs that claim.
 Ruff continues to validate getter names, including protocol properties, without
 the retired rule's N802 identity exemption. UP040 publication policy is separate
 and unchanged. This preserves ADR-028 Decision 8: transformations must not create
-new lint or type violations. See the [typing specification](https://typing.python.org/en/latest/spec/protocol.html#protocol-members).
+new lint or type violations. See the
+[typing specification](https://typing.python.org/en/latest/spec/protocol.html#protocol-members).
 
 The universal `rewire-test-assert-*` family implements the
 workspace assertion standard.
