@@ -8,11 +8,11 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
 from flext_meltano import u
 
-from flext_target_oracle import c, m, p
+from flext_target_oracle import c, m
 from flext_target_oracle._utilities import FlextTargetOracleUtilitiesErrors
 
 if TYPE_CHECKING:
@@ -21,8 +21,6 @@ if TYPE_CHECKING:
 
 class FlextTargetOracleUtilitiesObservability:
     """Runtime observability and error factory utilities."""
-
-    logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     @staticmethod
     def target_oracle_connection_authentication_failed(
@@ -42,7 +40,7 @@ class FlextTargetOracleUtilitiesObservability:
             The authentication failure exception with error metadata.
 
         """
-        FlextTargetOracleUtilitiesObservability.logger.error(
+        u.fetch_logger(__name__).error(
             "Oracle authentication failure",
             username=username,
             oracle_service=oracle_service,
@@ -78,7 +76,7 @@ class FlextTargetOracleUtilitiesObservability:
             The connection failure exception with error metadata.
 
         """
-        FlextTargetOracleUtilitiesObservability.logger.error(
+        u.fetch_logger(__name__).error(
             "Oracle database unavailable",
             connection_string=connection_string,
             error_code=error_code or "",
@@ -114,7 +112,7 @@ class FlextTargetOracleUtilitiesObservability:
             The processing failure exception with error metadata.
 
         """
-        FlextTargetOracleUtilitiesObservability.logger.error(
+        u.fetch_logger(__name__).error(
             "Singer record processing failed",
             stream_name=stream_name,
             record_count=record_count,
@@ -154,7 +152,7 @@ class FlextTargetOracleUtilitiesObservability:
             The schema failure exception with error metadata.
 
         """
-        FlextTargetOracleUtilitiesObservability.logger.error(
+        u.fetch_logger(__name__).error(
             "Singer schema validation failed",
             stream_name=stream_name,
             schema_errors="; ".join(schema_errors),
@@ -189,7 +187,7 @@ class FlextTargetOracleUtilitiesObservability:
 
         """
         context_keys = list(context.keys())
-        FlextTargetOracleUtilitiesObservability.logger.info(
+        u.fetch_logger(__name__).info(
             "Oracle connection pool health",
             connection_pool_size=connection_pool_size,
             active_connections=active_connections,
@@ -212,14 +210,14 @@ class FlextTargetOracleUtilitiesObservability:
             The mutable context mapping updated by the timed operation.
 
         """
-        FlextTargetOracleUtilitiesObservability.logger.debug(
+        u.fetch_logger(__name__).debug(
             "Starting query performance monitor",
         )
         context_data = {"table_name": table_name, c.ContextScope.OPERATION: operation}
         try:
             yield context_data
         finally:
-            FlextTargetOracleUtilitiesObservability.logger.debug(
+            u.fetch_logger(__name__).debug(
                 "Finished query performance monitor",
             )
 
@@ -242,7 +240,7 @@ class FlextTargetOracleUtilitiesObservability:
                 monitoring activation.
 
         """
-        FlextTargetOracleUtilitiesObservability.logger.info(
+        u.fetch_logger(__name__).info(
             "Oracle observability configured",
             oracle_host=oracle_host,
             oracle_service=oracle_service,

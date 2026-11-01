@@ -7,7 +7,6 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import MutableMapping, Sequence
-from typing import ClassVar
 
 from flext_meltano import u
 
@@ -17,8 +16,6 @@ from flext_target_oracle.application import FlextTargetOracleLoader
 
 class FlextTargetOracle:
     """Singer target client that coordinates schema and record loading."""
-
-    logger: ClassVar[p.Logger] = u.fetch_logger(__name__)
 
     def __init__(self, settings: FlextTargetOracleSettings) -> None:
         """Create target with validated settings and loader dependencies.
@@ -324,11 +321,11 @@ class FlextTargetOracle:
         except c.Meltano.SINGER_SAFE_EXCEPTIONS as exc:
             return r[bool].fail(f"Invalid record payload: {exc}", exception=exc)
 
+    @staticmethod
     def _handle_activate_version(
-        self,
         activate_message: m.Meltano.SingerActivateVersionMessage,
     ) -> p.Result[bool]:
-        self.logger.info(
+        u.fetch_logger(__name__).info(
             "ACTIVATE_VERSION received for Oracle target",
             stream=activate_message.stream,
             version=activate_message.version,
