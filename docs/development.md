@@ -619,7 +619,7 @@ from collections.abc import (
 # Test different batch sizes for optimal performance
 import time
 
-from flext_core import m
+from flext_core import m, p
 from flext_target_oracle import FlextTargetOracleLoader
 
 
