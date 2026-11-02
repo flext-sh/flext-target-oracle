@@ -204,7 +204,7 @@ def process_record(record: dict) -> p.Result[bool]:
 
 
 # ✅ Chain r[T] operations
-def process_batch(records: list[m.Dict]) -> p.Result[bool]:
+def process_batch(records: list[p.Dict]) -> p.Result[bool]:
     """Process batch of records with early termination on failure."""
     for record in records:
         result = process_record(record)
@@ -489,7 +489,7 @@ import pytest
 
 from flext_target_oracle import FlextTargetOracleLoader
 from tests import c, r
-from tests import c, tm
+from tests import c, p, tm
 
 
 class TestNewFeature:
@@ -623,7 +623,7 @@ from flext_core import m
 from flext_target_oracle import FlextTargetOracleLoader
 
 
-def benchmark_batch_sizes(records: list[m.Dict]):
+def benchmark_batch_sizes(records: list[p.Dict]):
     """Benchmark different batch sizes."""
     batch_sizes = [100, 500, 1000, 2000, 5000]
     results = {}

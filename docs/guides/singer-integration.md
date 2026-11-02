@@ -76,7 +76,7 @@ from collections.abc import (
 )
 
 
-def _handle_schema(self, message: m.Dict) -> p.Result[bool]:
+def _handle_schema(self, message: p.Dict) -> p.Result[bool]:
     """Handle SCHEMA message with table creation/evolution."""
     stream_name = message.get(c.ProcessingMode.STREAM)
     schema = message.get("schema", {})
@@ -119,7 +119,7 @@ from collections.abc import (
 )
 
 
-def _handle_record(self, message: m.Dict) -> p.Result[bool]:
+def _handle_record(self, message: p.Dict) -> p.Result[bool]:
     """Handle RECORD message with batched loading."""
     stream_name = message.get(c.ProcessingMode.STREAM)
     record_data = message.get("record")
@@ -158,7 +158,7 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
-def _handle_state(self, message: m.Dict) -> p.Result[bool]:
+def _handle_state(self, message: p.Dict) -> p.Result[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
     logger.debug("State message received - forwarding to Meltano")

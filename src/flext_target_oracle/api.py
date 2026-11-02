@@ -30,7 +30,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
     # out of the model layer to respect the c→t→p→m→u order and SRP.
     @staticmethod
     def run_about(
-        command: m.TargetOracle.OracleTargetAboutCommand,
+        command: p.TargetOracle.OracleTargetAboutCommand,
     ) -> p.Result[str]:
         """Return target metadata for the about command message.
 
@@ -57,7 +57,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
 
     @staticmethod
     def run_load(
-        command: m.TargetOracle.OracleTargetLoadCommand,
+        command: p.TargetOracle.OracleTargetLoadCommand,
     ) -> p.Result[str]:
         """Initialize the target for loading from a load command message.
 
@@ -77,7 +77,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
 
     @staticmethod
     def run_validate(
-        command: m.TargetOracle.OracleTargetValidateCommand,
+        command: p.TargetOracle.OracleTargetValidateCommand,
     ) -> p.Result[str]:
         """Validate target configuration from a validate command message.
 

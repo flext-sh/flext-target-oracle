@@ -64,7 +64,7 @@ def docker_control() -> FlextTestsDocker:
     )
 
 
-def _export_oracle_test_env(container_status: m.Tests.ContainerInfo) -> None:
+def _export_oracle_test_env(container_status: p.Tests.ContainerInfo) -> None:
     """Export the shared Oracle test environment from container port state."""
     resolved_port = next(
         (

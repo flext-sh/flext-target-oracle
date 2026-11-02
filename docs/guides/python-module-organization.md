@@ -12,7 +12,7 @@
   - [Simplified Structure (Current Approach)](#simplified-structure-current-approach)
 - [📋 FLEXT Pattern Implementation Standards](#flext-pattern-implementation-standards)
   - [r Railway Pattern Usage](#r-railway-pattern-usage)
-  - [m.Value Configuration Pattern](#mvalue-configuration-pattern)
+  - [p.Value Configuration Pattern](#mvalue-configuration-pattern)
   - [Structured Logging Pattern](#structured-logging-pattern)
 - [🔧 Module Dependency Patterns](#module-dependency-patterns)
   - [Dependency Direction (Clean Architecture)](#dependency-direction-clean-architecture)
@@ -251,7 +251,7 @@ class FlextOracleTarget(Target):
     def _handle_record(self, message: dict) -> p.Result[bool]:
         """Handle RECORD messages with batched loading."""
 
-    def finalize(self) -> p.Result[m.Dict]:
+    def finalize(self) -> p.Result[p.Dict]:
         """Finalize streams and return statistics."""
 ```
 
@@ -320,7 +320,7 @@ class FlextOracleTargetLoader:
     def load_record(self, stream_name: str, record_data: dict) -> p.Result[bool]:
         """Load record with batching and error handling."""
 
-    def finalize_all_streams(self) -> p.Result[m.Dict]:
+    def finalize_all_streams(self) -> p.Result[p.Dict]:
         """Finalize all streams and return statistics."""
 ```
 
@@ -848,12 +848,12 @@ from collections.abc import (
 from collections.abc import Callable
 
 
-def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
+def process_singer_message(self, message: p.Dict) -> p.Result[bool]:
     """Process Singer message with complete type safety."""
 
 
 def load_records(
-    self, stream_name: str, records: list[m.Dict]
+    self, stream_name: str, records: list[p.Dict]
 ) -> p.Result[dict[str, int | str]]:
     """Load records with specific return type."""
 
@@ -886,7 +886,7 @@ from collections.abc import (
 )
 
 
-def ensure_table_exists(self, stream_name: str, schema: m.Dict) -> p.Result[bool]:
+def ensure_table_exists(self, stream_name: str, schema: p.Dict) -> p.Result[bool]:
     """Ensure Oracle table exists for Singer stream with proper schema.
 
     This method implements the table creation workflow including schema
@@ -1088,7 +1088,7 @@ class Record:
     data: dict
 
 
-def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
+def process_singer_message(self, message: p.Dict) -> p.Result[bool]:
     """DEPRECATED: Custom message processing method.
 
     This method will be replaced with standard Singer SDK methods in v1.0.0.
