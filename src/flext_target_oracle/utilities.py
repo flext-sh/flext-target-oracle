@@ -13,7 +13,6 @@ from flext_meltano import u as flext_meltano_u
 
 from flext_target_oracle._utilities import (
     FlextTargetOracle,
-    FlextTargetOracleUtilitiesBase,
     FlextTargetOracleUtilitiesBootstrap,
     FlextTargetOracleUtilitiesErrors,
     FlextTargetOracleUtilitiesObservability,
@@ -25,10 +24,8 @@ class FlextTargetOracleUtilities(flext_meltano_u, flext_db_oracle_u):
 
     class TargetOracle(
         FlextTargetOracleUtilitiesBootstrap,
-        FlextTargetOracleUtilitiesObservability,
-        FlextTargetOracleUtilitiesBase,
-        FlextTargetOracle,
         FlextTargetOracleUtilitiesErrors,
+        FlextTargetOracleUtilitiesObservability,
     ):
         """Oracle target utility namespace."""
 

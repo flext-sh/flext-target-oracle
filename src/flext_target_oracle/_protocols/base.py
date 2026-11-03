@@ -9,10 +9,13 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
+from flext_meltano import FlextMeltanoProtocols
+
 if TYPE_CHECKING:
     from flext_meltano import p
 
     from flext_target_oracle import t
+    from flext_target_oracle._protocols import FlextTargetOracleProtocolsSettings
 
 
 class FlextTargetOracleProtocolsBase:
@@ -49,7 +52,7 @@ class FlextTargetOracleProtocolsBase:
 
         def connect_target(
             self,
-            settings: p.TargetOracle.OracleConnectionConfig,
+            settings: FlextTargetOracleProtocolsSettings.OracleConnectionConfig,
         ) -> p.Result[bool]:
             """Connect to Oracle database."""
             ...
@@ -113,7 +116,7 @@ class FlextTargetOracleProtocolsBase:
 
         def validate_target_credentials(
             self,
-            settings: p.TargetOracle.OracleConnectionConfig,
+            settings: FlextTargetOracleProtocolsSettings.OracleConnectionConfig,
         ) -> p.Result[bool]:
             """Validate Oracle credentials."""
             ...
@@ -150,6 +153,10 @@ class FlextTargetOracleProtocolsBase:
 
         env_prefix: str
         TargetOracle: FlextTargetOracleProtocolsBase.OracleTargetGroupProtocol
+
+    @runtime_checkable
+    class ConfigNamespace(FlextMeltanoProtocols.Model, Protocol):
+        """Structural data contract projected from the owning model."""
 
 
 __all__: list[str] = ["FlextTargetOracleProtocolsBase"]
