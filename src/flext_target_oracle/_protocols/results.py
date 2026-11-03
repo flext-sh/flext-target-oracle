@@ -13,52 +13,30 @@ from typing import TYPE_CHECKING, Literal, Protocol, Self, runtime_checkable
 
 from flext_meltano import FlextMeltanoProtocols
 
-from flext_target_oracle import t
-
 if TYPE_CHECKING:
     from flext_meltano import p
+
+    from flext_target_oracle import t
 
 
 class FlextTargetOracleProtocolsResults:
     """Own the structural contracts declared by its model source."""
 
     @runtime_checkable
-    class ExecuteResult(FlextMeltanoProtocols.Model, Protocol):
+    class ExecuteResult(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
-        @property
-        def name(self) -> str:
-            """Target package name."""
-            ...
-
-        @property
-        def status(self) -> Literal["ready"]:
-            """Target readiness status."""
-            ...
-
-        @property
-        def oracle_host(self) -> str:
-            """Configured Oracle host."""
-            ...
-
-        @property
-        def oracle_service(self) -> str:
-            """Configured Oracle service name."""
-            ...
+        name: str
+        status: Literal["ready"]
+        oracle_host: str
+        oracle_service: str
 
     @runtime_checkable
-    class ProcessingSummary(FlextMeltanoProtocols.Model, Protocol):
+    class ProcessingSummary(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
-        @property
-        def messages_processed(self) -> t.NonNegativeInt:
-            """Total Singer messages processed."""
-            ...
-
-        @property
-        def streams(self) -> Sequence[str]:
-            """Singer stream names seen during processing."""
-            ...
+        messages_processed: t.NonNegativeInt
+        streams: Sequence[str]
 
         @property
         def state(self) -> p.Meltano.SingerStateMessage:
@@ -66,52 +44,22 @@ class FlextTargetOracleProtocolsResults:
             ...
 
     @runtime_checkable
-    class LoaderOperation(FlextMeltanoProtocols.Model, Protocol):
+    class LoaderOperation(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
-        @property
-        def stream_name(self) -> str:
-            """Logical stream identifier."""
-            ...
-
-        @property
-        def started_at(self) -> str:
-            """Load operation start timestamp."""
-            ...
-
-        @property
-        def completed_at(self) -> str:
-            """Load operation completion timestamp."""
-            ...
-
-        @property
-        def records_loaded(self) -> t.NonNegativeInt:
-            """Number of loaded records."""
-            ...
-
-        @property
-        def records_failed(self) -> t.NonNegativeInt:
-            """Number of failed records."""
-            ...
+        stream_name: str
+        started_at: str
+        completed_at: str
+        records_loaded: t.NonNegativeInt
+        records_failed: t.NonNegativeInt
 
     @runtime_checkable
-    class LoaderFinalizeResult(FlextMeltanoProtocols.Model, Protocol):
+    class LoaderFinalizeResult(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
-        @property
-        def total_records(self) -> t.NonNegativeInt:
-            """Total records processed."""
-            ...
-
-        @property
-        def streams_processed(self) -> t.NonNegativeInt:
-            """Number of processed streams."""
-            ...
-
-        @property
-        def status(self) -> Literal["completed"]:
-            """Finalization status."""
-            ...
+        total_records: t.NonNegativeInt
+        streams_processed: t.NonNegativeInt
+        status: Literal["completed"]
 
         @property
         def loading_operation(
@@ -120,58 +68,25 @@ class FlextTargetOracleProtocolsResults:
             """Aggregated loading operation details."""
             ...
 
-        @property
-        def buffer_status(self) -> Mapping[str, int]:
-            """Remaining buffered records by stream."""
-            ...
+        buffer_status: Mapping[str, int]
 
     @runtime_checkable
-    class ImplementationMetrics(FlextMeltanoProtocols.Model, Protocol):
+    class ImplementationMetrics(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
-        @property
-        def streams_configured(self) -> t.NonNegativeInt:
-            """Number of configured streams."""
-            ...
-
-        @property
-        def batch_size(self) -> t.BatchSize:
-            """Configured batch size."""
-            ...
-
-        @property
-        def use_bulk_operations(self) -> bool:
-            """Whether bulk operations are enabled."""
-            ...
+        streams_configured: t.NonNegativeInt
+        batch_size: t.BatchSize
+        use_bulk_operations: bool
 
     @runtime_checkable
-    class LoadStatisticsModel(FlextMeltanoProtocols.Model, Protocol):
+    class LoadStatisticsModel(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
-        @property
-        def stream_name(self) -> str:
-            """Stream identifier."""
-            ...
-
-        @property
-        def total_records_processed(self) -> t.NonNegativeInt:
-            """Total processed records."""
-            ...
-
-        @property
-        def successful_records(self) -> t.NonNegativeInt:
-            """Successful records."""
-            ...
-
-        @property
-        def failed_records(self) -> t.NonNegativeInt:
-            """Failed records."""
-            ...
-
-        @property
-        def batches_processed(self) -> t.NonNegativeInt:
-            """Processed batch count."""
-            ...
+        stream_name: str
+        total_records_processed: t.NonNegativeInt
+        successful_records: t.NonNegativeInt
+        failed_records: t.NonNegativeInt
+        batches_processed: t.NonNegativeInt
 
         def finalize(self) -> Self:
             """Finalize statistics and return self."""

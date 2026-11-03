@@ -18,28 +18,13 @@ class FlextTargetOracleProtocolsSinger:
     """Own the structural contracts declared by its model source."""
 
     @runtime_checkable
-    class SingerStreamModel(FlextMeltanoProtocols.Model, Protocol):
+    class SingerStreamModel(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
-        @property
-        def stream_name(self) -> str:
-            """Singer stream name."""
-            ...
-
-        @property
-        def table_name(self) -> str:
-            """Oracle destination table name."""
-            ...
-
-        @property
-        def ignored_columns(self) -> Sequence[str]:
-            """Columns ignored during record transformation."""
-            ...
-
-        @property
-        def column_mappings(self) -> Mapping[str, str]:
-            """Singer column to Oracle column mapping."""
-            ...
+        stream_name: str
+        table_name: str
+        ignored_columns: Sequence[str]
+        column_mappings: Mapping[str, str]
 
 
 __all__: list[str] = [

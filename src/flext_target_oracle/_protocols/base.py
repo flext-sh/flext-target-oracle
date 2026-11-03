@@ -155,7 +155,7 @@ class FlextTargetOracleProtocolsBase:
         TargetOracle: FlextTargetOracleProtocolsBase.OracleTargetGroupProtocol
 
     @runtime_checkable
-    class ConfigNamespace(FlextMeltanoProtocols.Model, Protocol):
+    class ConfigNamespace(FlextMeltanoProtocols.BaseModel, Protocol):
         """Structural data contract projected from the owning model."""
 
 
