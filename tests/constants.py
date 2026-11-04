@@ -7,11 +7,11 @@ SPDX-License-Identifier: MIT
 from __future__ import annotations
 
 from collections.abc import Mapping
+from types import MappingProxyType
 from typing import Final
 
-from flext_tests import FlextTestsConstants
-
 from flext_target_oracle import FlextTargetOracleConstants
+from flext_tests import FlextTestsConstants
 
 
 class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsConstants):
@@ -33,9 +33,9 @@ class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsCons
             # satisfy that structural contract for both checkers.
             SRC_DIR: str = "src"
             PACKAGE_DIR: str = "flext_target_oracle"
-            ALLOWED_MODULE_FUNCTIONS: Final[Mapping[str, frozenset[str]]] = {
-                "cli.py": frozenset({"main"}),
-            }
+            ALLOWED_MODULE_FUNCTIONS: Final[Mapping[str, frozenset[str]]] = (
+                MappingProxyType({"cli.py": frozenset({"main"})})
+            )
 
 
 c = TestsFlextTargetOracleConstants
