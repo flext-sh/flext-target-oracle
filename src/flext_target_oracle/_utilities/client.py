@@ -325,7 +325,7 @@ class FlextTargetOracle:
 
     @staticmethod
     def _handle_activate_version(
-        activate_message: m.Meltano.SingerActivateVersionMessage,
+        activate_message: p.Meltano.SingerActivateVersionMessage,
     ) -> p.Result[bool]:
         u.fetch_logger(__name__).info(
             "ACTIVATE_VERSION received for Oracle target",
@@ -336,7 +336,7 @@ class FlextTargetOracle:
 
     def _handle_record(
         self,
-        record_message: m.Meltano.SingerRecordMessage,
+        record_message: p.Meltano.SingerRecordMessage,
     ) -> p.Result[bool]:
         load_result = self.loader.load_record(
             record_message.stream,
@@ -348,7 +348,7 @@ class FlextTargetOracle:
 
     def _handle_schema(
         self,
-        schema_message: m.Meltano.SingerSchemaMessage,
+        schema_message: p.Meltano.SingerSchemaMessage,
     ) -> p.Result[bool]:
         stream_name = schema_message.stream
         schema = schema_message.schema_definition
@@ -364,7 +364,7 @@ class FlextTargetOracle:
 
     def _handle_state(
         self,
-        state_message: m.Meltano.SingerStateMessage,
+        state_message: p.Meltano.SingerStateMessage,
     ) -> p.Result[bool]:
         self.state_message = state_message
         return r[bool].ok(value=True)
