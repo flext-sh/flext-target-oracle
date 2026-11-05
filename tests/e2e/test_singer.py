@@ -9,8 +9,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import pytest
-
 from flext_target_oracle import FlextTargetOracle
 from tests import c, m, tm, u
 
@@ -18,8 +16,8 @@ if TYPE_CHECKING:
     from flext_target_oracle import FlextTargetOracleSettings
 
 
-@pytest.mark.e2e
-@pytest.mark.integration
+@c.Tests.MARK.e2e
+@c.Tests.MARK.integration
 class TestsFlextTargetOracleSinger:
     """Validate SCHEMA -> RECORD -> STATE happy path against real Oracle."""
 

@@ -11,8 +11,6 @@ import time
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING
 
-import pytest
-
 from flext_target_oracle import FlextTargetOracle
 from tests import c, m, tm, u
 
@@ -20,9 +18,9 @@ if TYPE_CHECKING:
     from flext_target_oracle import FlextTargetOracleSettings
 
 
-@pytest.mark.performance
-@pytest.mark.integration
-@pytest.mark.docker
+@c.Tests.MARK.performance
+@c.Tests.MARK.integration
+@c.Tests.MARK.docker
 class TestsFlextTargetOraclePerformance:
     """Keep fast checks for throughput-sensitive code paths."""
 

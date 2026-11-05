@@ -12,9 +12,8 @@ from typing import TYPE_CHECKING
 
 from flext_meltano import u
 
+from flext_target_oracle import c, m
 from flext_target_oracle._utilities import FlextTargetOracleUtilitiesErrors
-from flext_target_oracle.constants import c
-from flext_target_oracle.models import m
 
 if TYPE_CHECKING:
     from collections.abc import Generator
