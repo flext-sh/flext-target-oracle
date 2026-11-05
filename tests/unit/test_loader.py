@@ -9,8 +9,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import pytest
-
 from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle.application import FlextTargetOracleLoader
 from tests import c, m, t, tm, u
@@ -24,7 +22,7 @@ if TYPE_CHECKING:
 _COUNT_QUERY_TEMPLATE = 'SELECT COUNT(*) AS "count" FROM {table}'
 
 
-@pytest.fixture
+@u.Tests.fixture
 def loader_config() -> FlextTargetOracleSettings:
     """Build deterministic configuration for loader tests.
 
@@ -103,8 +101,8 @@ class TestsFlextTargetOracleLoader:
         tm.that(result.success, is_=bool)
 
     @staticmethod
-    @pytest.mark.integration
-    @pytest.mark.docker
+    @c.Tests.MARK.integration
+    @c.Tests.MARK.docker
     def test_flush_batch_persists_records_to_real_oracle(
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,

@@ -15,8 +15,6 @@ import time
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-import pytest
-
 from flext_target_oracle import FlextTargetOracle
 from flext_target_oracle.application import FlextTargetOracleLoader
 from tests import c, m, p, t, tm, u
@@ -26,7 +24,7 @@ if TYPE_CHECKING:
 
     from flext_target_oracle import FlextTargetOracleSettings
 
-pytestmark = [pytest.mark.integration, pytest.mark.docker]
+pytestmark = [c.Tests.MARK.integration, c.Tests.MARK.docker]
 
 
 def _schema_parts(message: t.JsonValue) -> tuple[t.JsonMapping, Sequence[str]]:
@@ -58,13 +56,13 @@ def _query_scalar(
     return str(rows[0].root[key])
 
 
-@pytest.mark.integration
-@pytest.mark.oracle
+@c.Tests.MARK.integration
+@c.Tests.MARK.oracle
 class TestsFlextTargetOracleOracle:
     """Integration tests with real Oracle database."""
 
     @staticmethod
-    @pytest.mark.usefixtures("clean_database")
+    @c.Tests.MARK.usefixtures("clean_database")
     def test_create_simple_table(
         oracle_loader: FlextTargetOracleLoader,
         oracle_engine: FlextDbOracleApi,
@@ -105,7 +103,7 @@ class TestsFlextTargetOracleOracle:
         tm.that(columns, has="_SDC_LOADED_AT")
 
     @staticmethod
-    @pytest.mark.usefixtures("clean_database")
+    @c.Tests.MARK.usefixtures("clean_database")
     def test_insert_and_retrieve_data(
         oracle_loader: FlextTargetOracleLoader,
         oracle_engine: FlextDbOracleApi,
@@ -146,7 +144,7 @@ class TestsFlextTargetOracleOracle:
         )
 
     @staticmethod
-    @pytest.mark.usefixtures("clean_database")
+    @c.Tests.MARK.usefixtures("clean_database")
     def test_merge_mode_updates(
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
@@ -182,7 +180,7 @@ class TestsFlextTargetOracleOracle:
         tm.ok(disconnect_result)
 
     @staticmethod
-    @pytest.mark.usefixtures("clean_database")
+    @c.Tests.MARK.usefixtures("clean_database")
     def test_bulk_insert_performance(
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
@@ -248,7 +246,7 @@ class TestsFlextTargetOracleOracle:
         tm.that(len(items_data), eq=2)
 
     @staticmethod
-    @pytest.mark.usefixtures("clean_database")
+    @c.Tests.MARK.usefixtures("clean_database")
     def test_json_storage_mode(
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
@@ -294,7 +292,7 @@ class TestsFlextTargetOracleOracle:
         tm.ok(loader.disconnect())
 
     @staticmethod
-    @pytest.mark.usefixtures("clean_database")
+    @c.Tests.MARK.usefixtures("clean_database")
     def test_column_ordering(
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
@@ -356,7 +354,7 @@ class TestsFlextTargetOracleOracle:
         tm.ok(loader.disconnect())
 
     @staticmethod
-    @pytest.mark.usefixtures("clean_database")
+    @c.Tests.MARK.usefixtures("clean_database")
     def test_truncate_before_load(
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
@@ -391,7 +389,7 @@ class TestsFlextTargetOracleOracle:
         tm.ok(loader.disconnect())
 
     @staticmethod
-    @pytest.mark.usefixtures("clean_database")
+    @c.Tests.MARK.usefixtures("clean_database")
     def test_custom_indexes(
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
@@ -441,7 +439,7 @@ class TestsFlextTargetOracleOracle:
     """End-to-end tests using the full FlextTargetOracle."""
 
     @staticmethod
-    @pytest.mark.usefixtures("clean_database")
+    @c.Tests.MARK.usefixtures("clean_database")
     def test_full_singer_workflow(
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
@@ -470,7 +468,7 @@ class TestsFlextTargetOracleOracle:
         tm.that(int(data_count), gt=0)
 
     @staticmethod
-    @pytest.mark.usefixtures("clean_database")
+    @c.Tests.MARK.usefixtures("clean_database")
     def test_column_mapping_and_filtering(
         oracle_config: FlextTargetOracleSettings,
         oracle_engine: FlextDbOracleApi,
