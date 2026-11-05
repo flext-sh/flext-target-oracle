@@ -233,7 +233,7 @@ class FlextTargetOracle:
 
     def process_singer_message(
         self,
-        message: p.Meltano.SingerSchemaMessage
+        message: m.Meltano.SingerSchemaMessage
         | m.Meltano.SingerRecordMessage
         | m.Meltano.SingerStateMessage
         | m.Meltano.SingerActivateVersionMessage,
@@ -256,6 +256,10 @@ class FlextTargetOracle:
                 return self._handle_state(state_message)
             case m.Meltano.SingerActivateVersionMessage() as activate_message:
                 return self._handle_activate_version(activate_message)
+            case _:
+                return r[bool].fail(
+                    f"Unsupported Singer message type: {type(message).__name__}"
+                )
 
     def process_singer_messages(
         self,
@@ -321,7 +325,7 @@ class FlextTargetOracle:
 
     @staticmethod
     def _handle_activate_version(
-        activate_message: p.Meltano.SingerActivateVersionMessage,
+        activate_message: m.Meltano.SingerActivateVersionMessage,
     ) -> p.Result[bool]:
         u.fetch_logger(__name__).info(
             "ACTIVATE_VERSION received for Oracle target",
@@ -332,7 +336,7 @@ class FlextTargetOracle:
 
     def _handle_record(
         self,
-        record_message: p.Meltano.SingerRecordMessage,
+        record_message: m.Meltano.SingerRecordMessage,
     ) -> p.Result[bool]:
         load_result = self.loader.load_record(
             record_message.stream,
@@ -344,7 +348,7 @@ class FlextTargetOracle:
 
     def _handle_schema(
         self,
-        schema_message: p.Meltano.SingerSchemaMessage,
+        schema_message: m.Meltano.SingerSchemaMessage,
     ) -> p.Result[bool]:
         stream_name = schema_message.stream
         schema = schema_message.schema_definition
@@ -360,7 +364,7 @@ class FlextTargetOracle:
 
     def _handle_state(
         self,
-        state_message: p.Meltano.SingerStateMessage,
+        state_message: m.Meltano.SingerStateMessage,
     ) -> p.Result[bool]:
         self.state_message = state_message
         return r[bool].ok(value=True)
