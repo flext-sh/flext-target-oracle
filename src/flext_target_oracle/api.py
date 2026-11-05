@@ -14,7 +14,12 @@ from typing import Annotated
 
 from flext_meltano import FlextMeltanoTargetServiceBase
 
-from flext_target_oracle import c, m, p, r, t, u
+from flext_target_oracle.constants import c
+from flext_target_oracle.models import m
+from flext_target_oracle.protocols import p
+from flext_target_oracle.result import r
+from flext_target_oracle.typings import t
+from flext_target_oracle.utilities import u
 
 
 class FlextTargetOracleService(FlextMeltanoTargetServiceBase):

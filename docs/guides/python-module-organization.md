@@ -731,7 +731,7 @@ class TestFlextOracleTargetSettings:
 
     def test_invalid_host_validation(self):
         """Test host validation rules."""
-        with pytest.raises(ValidationError) as exc_info:
+        with u.Tests.raises(ValidationError) as exc_info:
             FlextOracleTargetSettings(
                 oracle_host="",  # Empty host should fail
                 oracle_service="XE",

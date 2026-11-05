@@ -8,9 +8,7 @@ from __future__ import annotations
 
 from collections.abc import MutableMapping, Sequence
 
-from flext_meltano import u
-
-from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, settings, t
+from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, settings, t, u
 from flext_target_oracle.application import FlextTargetOracleLoader
 
 

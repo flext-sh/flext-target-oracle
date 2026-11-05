@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_tests import FlextTestsServiceBase
+from flext_tests import FlextTestsServiceBase, TestsFlextTargetOracleSettings
 
-from tests import TestsFlextTargetOracleSettings, m, p
+from tests import m, p
 
 
 class TestsFlextTargetOracleServiceBase(FlextTestsServiceBase):

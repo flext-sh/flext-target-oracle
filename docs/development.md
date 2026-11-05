@@ -519,7 +519,7 @@ class TestNewFeature:
         tm.fail(result)
         assert "expected error message" in result.error
 
-    @pytest.mark.parametrize(
+    @c.Tests.MARK.parametrize(
         "input_value,expected",
         [("valid_input", "expected_output"), ("another_input", "another_output")],
     )

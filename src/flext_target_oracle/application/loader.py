@@ -16,9 +16,9 @@ from typing import ClassVar
 
 from flext_core import e as core_e
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from flext_meltano import FlextMeltanoServiceBase, u
+from flext_meltano import FlextMeltanoServiceBase
 
-from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t
+from flext_target_oracle import FlextTargetOracleSettings, c, m, p, r, t, u
 
 
 class FlextTargetOracleLoader(FlextMeltanoServiceBase):

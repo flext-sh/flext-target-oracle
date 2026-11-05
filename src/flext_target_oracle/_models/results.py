@@ -13,7 +13,7 @@ from typing import Annotated, Literal, Self
 # not the own package facade, to avoid the models→utilities→client circular import.
 from flext_meltano import m
 
-from flext_target_oracle import t
+from flext_target_oracle.typings import t
 
 
 class FlextTargetOracleModelsResults:

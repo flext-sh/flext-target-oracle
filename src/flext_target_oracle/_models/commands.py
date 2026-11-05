@@ -11,7 +11,8 @@ from typing import Annotated
 
 from flext_meltano import m
 
-from flext_target_oracle import c, t
+from flext_target_oracle.constants import c
+from flext_target_oracle.typings import t
 
 
 class FlextTargetOracleModelsCommands:

@@ -10,8 +10,9 @@ from collections.abc import Mapping
 from types import MappingProxyType
 from typing import Final
 
-from flext_target_oracle import FlextTargetOracleConstants
 from flext_tests import FlextTestsConstants
+
+from flext_target_oracle import FlextTargetOracleConstants
 
 
 class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsConstants):
