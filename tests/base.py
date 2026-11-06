@@ -9,9 +9,9 @@ from __future__ import annotations
 
 from typing import override
 
-from flext_tests import FlextTestsServiceBase
+from flext_tests import FlextTestsServiceBase, TestsFlextTargetOracleSettings
 
-from tests import TestsFlextTargetOracleSettings, m
+from tests import m, p
 
 
 class TestsFlextTargetOracleServiceBase(FlextTestsServiceBase):
@@ -27,7 +27,7 @@ class TestsFlextTargetOracleServiceBase(FlextTestsServiceBase):
 
     @classmethod
     @override
-    def runtime_bootstrap_options(cls) -> m.RuntimeBootstrapOptions:
+    def runtime_bootstrap_options(cls) -> p.RuntimeBootstrapOptions:
         return m.RuntimeBootstrapOptions(settings_type=TestsFlextTargetOracleSettings)
 
 

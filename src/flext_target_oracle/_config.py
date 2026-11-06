@@ -16,8 +16,6 @@ from typing import Annotated
 
 from flext_meltano import FlextMeltanoConfig, m
 
-from flext_target_oracle._models.base import FlextTargetOracleModelsBase
-
 
 class FlextTargetOracleConfig(FlextMeltanoConfig):
     """TargetOracle config auto-loaded model-less from ``config/*.yaml``.
@@ -27,13 +25,13 @@ class FlextTargetOracleConfig(FlextMeltanoConfig):
     """
 
     TargetOracle: Annotated[
-        FlextTargetOracleModelsBase.ConfigNamespace,
+        m.Meltano.MeltanoNamespace,
         m.Field(
             description=(
                 "Open namespace exposing ``config/*.yaml`` under TargetOracle."
             ),
         ),
-    ] = FlextTargetOracleModelsBase.ConfigNamespace()
+    ] = m.Meltano.MeltanoNamespace()
 
 
 config: FlextTargetOracleConfig = FlextTargetOracleConfig.fetch_global()

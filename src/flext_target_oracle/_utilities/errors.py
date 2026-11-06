@@ -10,9 +10,9 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_core import e as core_e
+from collections.abc import Sequence
 
-from flext_target_oracle import t
+from flext_core import e as core_e
 
 
 class FlextTargetOracleUtilitiesErrors:
@@ -49,4 +49,4 @@ class FlextTargetOracleUtilitiesErrors:
             """Oracle schema-specific validation errors."""
 
 
-__all__: t.StrSequence = ("FlextTargetOracleUtilitiesErrors",)
+__all__: Sequence[str] = ("FlextTargetOracleUtilitiesErrors",)

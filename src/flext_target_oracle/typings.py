@@ -1,3 +1,4 @@
+# AUTO-GENERATED FILE — Regenerate with: make gen
 """Target Oracle type facade.
 
 Copyright (c) 2026 FLEXT Team. All rights reserved.
@@ -7,13 +8,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_db_oracle import FlextDbOracleTypes
-from flext_meltano import FlextMeltanoTypes
+from flext_db_oracle import t as flext_db_oracle_t
+from flext_meltano import t as flext_meltano_t
 
 from flext_target_oracle._typings import FlextTargetOracleTypesBase
 
 
-class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
+class FlextTargetOracleTypes(flext_meltano_t, flext_db_oracle_t):
     """Oracle target type facade."""
 
     class TargetOracle(FlextTargetOracleTypesBase):
@@ -21,5 +22,4 @@ class FlextTargetOracleTypes(FlextMeltanoTypes, FlextDbOracleTypes):
 
 
 t = FlextTargetOracleTypes
-
 __all__: list[str] = ["FlextTargetOracleTypes", "t"]

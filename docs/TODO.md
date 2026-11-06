@@ -158,8 +158,17 @@ dependencies = [
 
 **Solução**:
 
-```{.python .notest}
+```python
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 class FlextOracleTarget(Target):
     def _test_connection(self) -> bool:
         return self._test_connection_impl()
@@ -232,7 +241,7 @@ with self.oracle_api as connected_api, connected_api.begin_transaction():
 
 **Código Problemático**:
 
-```{.python .notest}
+```python
 def ensure_table_exists(...)  # Não precisa ser
 def _create_table(...)        # Não precisa ser
 ```
@@ -261,8 +270,17 @@ def _create_table(...)        # Não precisa ser
 
 **Solução**:
 
-```{.python .notest}
+```python
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 def _evolve_table_schema(self, table_name: str, new_schema: dict):
     # Implementar ALTER TABLE baseado em diff de schema
 ```
@@ -277,8 +295,17 @@ def _evolve_table_schema(self, table_name: str, new_schema: dict):
 
 **Solução**:
 
-```{.python .notest}
+```python
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 class OracleConnectionFactory:
     @staticmethod
     def create_api(settings: FlextOracleTargetSettings) -> FlextDbOracleApi:
@@ -331,8 +358,17 @@ logger.info(
 
 **Solução**:
 
-```{.python .notest}
+```python
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 @pytest.fixture
 def oracle_connection():
     # Fixture para conexão Oracle real em testes de integração

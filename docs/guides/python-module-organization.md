@@ -12,7 +12,7 @@
   - [Simplified Structure (Current Approach)](#simplified-structure-current-approach)
 - [📋 FLEXT Pattern Implementation Standards](#flext-pattern-implementation-standards)
   - [r Railway Pattern Usage](#r-railway-pattern-usage)
-  - [m.Value Configuration Pattern](#mvalue-configuration-pattern)
+  - [p.Value Configuration Pattern](#mvalue-configuration-pattern)
   - [Structured Logging Pattern](#structured-logging-pattern)
 - [🔧 Module Dependency Patterns](#module-dependency-patterns)
   - [Dependency Direction (Clean Architecture)](#dependency-direction-clean-architecture)
@@ -67,7 +67,7 @@ This structure serves as a reference for Singer target implementations within th
 
 ### **Current Implementation Structure**
 
-```{.python .notest}
+```python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Public API gateway & exports
 ├── settings.py                # ⚙️ m.Value configuration patterns
@@ -84,6 +84,15 @@ src/flext_target_oracle/
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 """FLEXT Target Oracle - Public API exports following ecosystem standards."""
 
@@ -138,13 +147,22 @@ __version__ = "0.9.9"
 
 ##### **`settings.py` - Configuration with Domain Validation**
 
-```{.python .notest}
+```python
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 """Oracle target configuration using FLEXT Value patterns."""
 
 from flext_cli import u
 from flext_core import FlextSettings
-from pydantic import u.Field, u.field_validator
+from pydantic import u.Field, m.field_validator
 from enum import StrEnum, unique
 
 
@@ -204,6 +222,15 @@ class FlextOracleTargetSettings(m.Value):
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 """Singer Target implementation using flext-meltano base patterns."""
 
 from flext_meltano import Target
@@ -224,7 +251,7 @@ class FlextOracleTarget(Target):
     def _handle_record(self, message: dict) -> p.Result[bool]:
         """Handle RECORD messages with batched loading."""
 
-    def finalize(self) -> p.Result[m.Dict]:
+    def finalize(self) -> p.Result[p.Dict]:
         """Finalize streams and return statistics."""
 ```
 
@@ -238,6 +265,15 @@ class FlextOracleTarget(Target):
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 
 class FlextOracleTarget(Target):
@@ -260,6 +296,15 @@ class FlextOracleTarget(Target):
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 """Oracle data loading using flext-db-oracle integration."""
 
 
@@ -275,7 +320,7 @@ class FlextOracleTargetLoader:
     def load_record(self, stream_name: str, record_data: dict) -> p.Result[bool]:
         """Load record with batching and error handling."""
 
-    def finalize_all_streams(self) -> p.Result[m.Dict]:
+    def finalize_all_streams(self) -> p.Result[p.Dict]:
         """Finalize all streams and return statistics."""
 ```
 
@@ -300,6 +345,15 @@ result = connected_api.execute_dml(sql, param)
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 """Oracle target exceptions following FLEXT error patterns."""
 
@@ -342,7 +396,7 @@ class FlextOracleTargetProcessingError(FlextOracleTargetError): ...
 
 ### **Ideal Structure for Singer Targets**
 
-```{.python .notest}
+```python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean public API exports
 ├── settings/                  # ⚙️ Configuration module
@@ -371,7 +425,7 @@ src/flext_target_oracle/
 
 For simple Singer targets, the current flat structure is acceptable with fixes:
 
-```{.python .notest}
+```python
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean exports (fixed)
 ├── settings.py                # ⚙️ Enhanced configuration
@@ -388,6 +442,15 @@ src/flext_target_oracle/
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 
 # ✅ CORRECT - Railway-oriented programming throughout
@@ -412,8 +475,17 @@ def process_record_bad(self, stream_name: str, record_data: dict) -> None:
 
 ### **m.Value Configuration Pattern**
 
-```{.python .notest}
+```python
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 # ✅ CORRECT - Comprehensive validation with domain rules
 class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business validation."""
@@ -421,7 +493,7 @@ class FlextOracleTargetSettings(m.Value):
     oracle_host: str = u.Field(..., description="Oracle host")
     batch_size: int = u.Field(default=1000, gt=0, le=50000, description="Batch size")
 
-    @u.field_validator("oracle_host")
+    @m.field_validator("oracle_host")
     @classmethod
     def validate_host(cls, v: str) -> str:
         if not v or v.isspace():
@@ -455,6 +527,15 @@ class BadConfig:
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # ✅ CORRECT - Structured logging with context
 from flext_cli import u
 
@@ -468,7 +549,7 @@ def process_batch(self, stream_name: str, records: list) -> p.Result[bool]:
         extra={
             "stream_name": stream_name,
             "batch_size": len(records),
-            "operation": "batch_processing",
+            c.ContextScope.OPERATION: "batch_processing",
             "target": "oracle",
         },
     )
@@ -526,7 +607,7 @@ def process_batch_bad(self, stream_name: str, records: list):
 
 ### **Dependency Direction (Clean Architecture)**
 
-```{.python .notest}
+```python
 # ✅ CORRECT - Dependencies flow inward
 ┌─────────────────────────────┐
 │     target.py               │  # Application Layer
@@ -557,13 +638,13 @@ from flext_db_oracle import FlextDbOracleApi
 
 ### **External Dependency Integration**
 
-```{.python .notest}
+```python
 # ✅ CORRECT - FLEXT ecosystem integration
 from flext_cli import u
 from flext_core import FlextSettings
 from flext_meltano import Target  # Singer SDK integration layer
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from pydantic import u.Field, u.field_validator  # Third-party validation
+from pydantic import u.Field, m.field_validator  # Third-party validation
 
 # ✅ CORRECT - Standard library imports
 import json
@@ -584,7 +665,7 @@ import cx_Oracle  # Should use flext-db-oracle abstraction
 
 ### **Test Structure Mirroring Source**
 
-```{.python .notest}
+```python
 tests/
 ├── unit/                           # Unit tests (isolated)
 │   ├── test_config.py             # Tests settings.py
@@ -613,6 +694,15 @@ tests/
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # tests/unit/test_config.py
 """Unit tests for configuration validation."""
 
@@ -634,14 +724,14 @@ class TestFlextOracleTargetSettings:
             oracle_password="test_pass",
         )
 
-        assert settings.oracle_host == "localhost"
-        assert settings.oracle_port == 1521  # Default value
-        assert settings.batch_size == 1000  # Default value
-        assert settings.load_method == LoadMethod.INSERT  # Default
+        tm.that(settings.oracle_host, eq="localhost")
+        tm.that(settings.oracle_port, eq=1521) # Default value
+        tm.that(settings.batch_size, eq=1000) # Default value
+        tm.that(settings.load_method, eq=LoadMethod.INSERT) # Default
 
     def test_invalid_host_validation(self):
         """Test host validation rules."""
-        with pytest.raises(ValidationError) as exc_info:
+        with u.Tests.raises(ValidationError) as exc_info:
             FlextOracleTargetSettings(
                 oracle_host="",  # Empty host should fail
                 oracle_service="XE",
@@ -662,11 +752,20 @@ class TestFlextOracleTargetSettings:
 
         result = settings.validate_domain_rules()
         # In real test, this would validate connectivity, permissions, etc.
-        assert result.success or "connection" in result.error.lower()
+        tm.ok(result.success) or "connection" in result.error.lower()
 ```
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 # tests/integration/test_singer_compliance.py
 """Singer protocol compliance tests."""
@@ -683,7 +782,7 @@ class TestSingerCompliance:
         # SCHEMA message
         schema_msg = {
             "type": "SCHEMA",
-            "stream": "test_users",
+            c.ProcessingMode.STREAM: "test_users",
             "schema": {
                 "type": "object",
                 "properties": {
@@ -695,13 +794,13 @@ class TestSingerCompliance:
         }
 
         result = oracle_target.process_singer_message(schema_msg)
-        assert result.success, f"Schema processing failed: {result.error}"
+        tm.ok(result.success), f"Schema processing failed: {result.error}"
 
         # RECORD messages
         for i in range(5):
             record_msg = {
                 "type": "RECORD",
-                "stream": "test_users",
+                c.ProcessingMode.STREAM: "test_users",
                 "record": {
                     "id": i,
                     "name": f"User {i}",
@@ -710,7 +809,7 @@ class TestSingerCompliance:
             }
 
             result = oracle_target.process_singer_message(record_msg)
-            assert result.success, f"Record {i} failed: {result.error}"
+            tm.ok(result.success), f"Record {i} failed: {result.error}"
 
         # STATE message
         state_msg = {
@@ -719,12 +818,12 @@ class TestSingerCompliance:
         }
 
         result = oracle_target.process_singer_message(state_msg)
-        assert result.success, f"State processing failed: {result.error}"
+        tm.ok(result.success), f"State processing failed: {result.error}"
 
         # Finalization
         stats_result = oracle_target.finalize()
         assert stats_result.success, f"Finalization failed: {stats_result.error}"
-        assert stats_result.value["total_records"] == 5
+        tm.that(stats_result.value["total_records"], eq=5)
 ```
 
 ---
@@ -736,16 +835,25 @@ class TestSingerCompliance:
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # ✅ COMPLETE type annotations for all public methods
 from collections.abc import Callable
 
 
-def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
+def process_singer_message(self, message: p.Dict) -> p.Result[bool]:
     """Process Singer message with complete type safety."""
 
 
 def load_records(
-    self, stream_name: str, records: list[m.Dict]
+    self, stream_name: str, records: list[p.Dict]
 ) -> p.Result[dict[str, int | str]]:
     """Load records with specific return type."""
 
@@ -768,8 +876,17 @@ def process_message(self, message):  # Missing types
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
-def ensure_table_exists(self, stream_name: str, schema: m.Dict) -> p.Result[bool]:
+
+def ensure_table_exists(self, stream_name: str, schema: p.Dict) -> p.Result[bool]:
     """Ensure Oracle table exists for Singer stream with proper schema.
 
     This method implements the table creation workflow including schema
@@ -816,6 +933,15 @@ def ensure_table_exists(self, stream_name: str, schema: m.Dict) -> p.Result[bool
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # ✅ STANDARD - Ecosystem imports following established patterns
 
 
@@ -839,6 +965,15 @@ class OracleTargetResult[T]:  # Creates ecosystem fragmentation
 
 ```text
 from __future__ import annotations
+
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
 
 # ✅ CORRECT - Hierarchical configuration following ecosystem patterns
 from flext_cli import u
@@ -895,6 +1030,15 @@ class FlextOracleTargetSettings(FlextSettings):
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 
 # Version 0.9.9 → 0.9.9 Migration Plan
 class TargetMigration_0_9_to_1_0:
@@ -924,6 +1068,15 @@ class TargetMigration_0_9_to_1_0:
 ```text
 from __future__ import annotations
 
+from collections.abc import (
+    Iterable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+
 # Maintain backward compatibility during migration
 from dataclasses import dataclass
 from warnings import warn
@@ -935,7 +1088,7 @@ class Record:
     data: dict
 
 
-def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
+def process_singer_message(self, message: p.Dict) -> p.Result[bool]:
     """DEPRECATED: Custom message processing method.
 
     This method will be replaced with standard Singer SDK methods in v1.0.0.
@@ -956,7 +1109,7 @@ def process_singer_message(self, message: m.Dict) -> p.Result[bool]:
 def _write_record(self, record: Record) -> None:
     """Standard Singer SDK record writing method."""
     # Convert to old format for backward compatibility
-    message = {"type": "RECORD", "stream": record.stream, "record": record.data}
+    message = {"type": "RECORD", c.ProcessingMode.STREAM: record.stream, "record": record.data}
     result = self._handle_message_legacy(message)
     if result.failure:
         raise RuntimeError(result.error)  # Singer SDK expects exceptions
@@ -1030,7 +1183,7 @@ def _write_record(self, record: Record) -> None:
 
 **Module Extensions**:
 
-```{.python .notest}
+```python
 src/flext_target_oracle/
 ├── settings/
 │   ├── environments.py     # Environment-specific configurations

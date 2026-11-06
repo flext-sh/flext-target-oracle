@@ -28,7 +28,7 @@
   `FlextTargetOracleConfig`, `FlextTargetOracleConstants`, `FlextTargetOracleModels`,
   `FlextTargetOracleProtocols`, `FlextTargetOracleService`, `FlextTargetOracleSettings`,
   `FlextTargetOracleTypes`, `FlextTargetOracleUtilities` (+5 more)
-- Exported module shortcuts: `application`
+- Exported module shortcuts: _none_
 - Generated module pages: `7`
 
 ## Next Pages

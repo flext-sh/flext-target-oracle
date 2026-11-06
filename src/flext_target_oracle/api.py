@@ -9,11 +9,10 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from typing import Annotated, Never, override
+from collections.abc import Mapping
+from typing import Annotated
 
-from flext_meltano.services.consumer_bases.target_service_base import (
-    FlextMeltanoTargetServiceBase,
-)
+from flext_meltano import FlextMeltanoTargetServiceBase
 
 from flext_target_oracle import c, m, p, r, t, u
 
@@ -23,31 +22,15 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
 
     target_name: Annotated[
         t.NonEmptyStr,
-        u.Field(description="Canonical Singer target identifier."),
+        m.Field(description="Canonical Singer target identifier."),
     ] = "target-oracle"
-
-    @override
-    def create_sink(self, stream_name: str, schema: t.JsonMapping) -> Never:
-        """Not supported — use FlextTargetOracleLoader directly.
-
-        Args:
-            stream_name: Name of the Singer stream; unused.
-
-            schema: Singer schema for the stream; unused.
-
-        Raises:
-            TypeError: If target-oracle uses Loader pattern, not Singer sink.
-
-        """
-        msg = "target-oracle uses Loader pattern, not Singer sink"
-        raise TypeError(msg)
 
     # NOTE (multi-agent): mro-rn88 — CQRS handlers: Command models are pure data; the
     # service (a flext-core FlextService via MRO) owns execution. Behavior moved here
     # out of the model layer to respect the c→t→p→m→u order and SRP.
     @staticmethod
     def run_about(
-        command: m.TargetOracle.OracleTargetAboutCommand,
+        command: p.TargetOracle.OracleTargetAboutCommand,
     ) -> p.Result[str]:
         """Return target metadata for the about command message.
 
@@ -59,7 +42,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
             output format.
 
         """
-        payload: t.StrMapping = {
+        payload: Mapping[str, str] = {
             "name": "flext-target-oracle",
             "description": "Singer target for Oracle loading",
             "format": command.format,
@@ -74,7 +57,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
 
     @staticmethod
     def run_load(
-        command: m.TargetOracle.OracleTargetLoadCommand,
+        command: p.TargetOracle.OracleTargetLoadCommand,
     ) -> p.Result[str]:
         """Initialize the target for loading from a load command message.
 
@@ -94,7 +77,7 @@ class FlextTargetOracleService(FlextMeltanoTargetServiceBase):
 
     @staticmethod
     def run_validate(
-        command: m.TargetOracle.OracleTargetValidateCommand,
+        command: p.TargetOracle.OracleTargetValidateCommand,
     ) -> p.Result[str]:
         """Validate target configuration from a validate command message.
 

@@ -11,9 +11,10 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Annotated
 
-from flext_core import FlextSettings, m, t
+from flext_core import FlextSettings, m, t, u
 
 
 class FlextTargetOracleSettings(FlextSettings):
@@ -25,7 +26,7 @@ class FlextTargetOracleSettings(FlextSettings):
         extra="ignore",
     )
 
-    class _TargetOracle(m.BaseModel):
+    class _TargetOracle(m.StrictModel):
         """Namespaced Oracle target settings."""
 
         oracle_host: Annotated[str, m.Field(description="Oracle host")] = "localhost"
@@ -71,8 +72,8 @@ class FlextTargetOracleSettings(FlextSettings):
             str, m.Field(description="Column ordering strategy")
         ] = ""
         column_order_rules: Annotated[
-            t.MappingKV[str, int], m.Field(description="Column priority rules")
-        ] = m.Field(default_factory=dict)
+            Mapping[str, int], m.Field(description="Column priority rules")
+        ] = m.Field(default_factory=u.empty(t.TypeForm(Mapping[str, int])))
         column_mappings: Annotated[
             str,
             m.Field(
@@ -80,8 +81,8 @@ class FlextTargetOracleSettings(FlextSettings):
             ),
         ] = "{}"
         ignored_columns: Annotated[
-            list[str], m.Field(description="Ignored columns")
-        ] = m.Field(default_factory=list)
+            Sequence[str], m.Field(description="Ignored columns")
+        ] = m.Field(default_factory=tuple)
         custom_indexes: Annotated[
             str,
             m.Field(
