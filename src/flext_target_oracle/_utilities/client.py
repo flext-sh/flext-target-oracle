@@ -23,7 +23,7 @@ class FlextTargetOracle:
 
         """
         self.loader = FlextTargetOracleLoader(settings)
-        self.schemas: MutableMapping[str, m.Meltano.SingerSchemaMessage] = {}
+        self.schemas: MutableMapping[str, p.Meltano.SingerSchemaMessage] = {}
         self.state_message: p.Meltano.SingerStateMessage = m.Meltano.SingerStateMessage(
             type=c.Meltano.SingerMessageType.STATE,
             value={},

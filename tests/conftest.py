@@ -108,7 +108,7 @@ def _application_user_ready(
         The resulting ``p.Result[bool]``.
 
     """
-    api = FlextDbOracleApi(runtime_settings=oracle_settings)
+    api = FlextDbOracleApi(settings=oracle_settings)
     connect_result = api.connect()
     if connect_result.failure:
         return r[bool].from_failure(connect_result)
@@ -176,7 +176,7 @@ def _provision_oracle_test_user(
     deadline = monotonic() + 8
     last_error = "Oracle application user is not ready yet"
     while monotonic() < deadline:
-        admin_api = FlextDbOracleApi(runtime_settings=admin_settings)
+        admin_api = FlextDbOracleApi(settings=admin_settings)
         admin_connect_result = admin_api.connect()
         if admin_connect_result.success:
             provision_error = _provision_user_account(admin_api)
@@ -211,7 +211,7 @@ def shared_oracle_container(docker_control: FlextTestsDocker) -> str:
     # application-user connection before falling back to admin provisioning, so
     # first-test setup stays well under the per-test timeout.
     oracle_settings = _oracle_test_settings(os.environ["TEST_ORACLE_USER"])
-    ready_api = FlextDbOracleApi(runtime_settings=oracle_settings)
+    ready_api = FlextDbOracleApi(settings=oracle_settings)
     ready_connect = ready_api.connect()
     if ready_connect.success:
         ready_health = ready_api.oracle_services.execute_query(
@@ -233,7 +233,7 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
     """
     _ = shared_oracle_container
     api = FlextDbOracleApi(
-        runtime_settings=FlextDbOracleSettings.model_validate({
+        settings=FlextDbOracleSettings.model_validate({
             "DbOracle": {
                 "host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
                 "port": int(

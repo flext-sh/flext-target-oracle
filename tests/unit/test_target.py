@@ -14,13 +14,13 @@ from flext_target_oracle import (
     FlextTargetOracleService,
     FlextTargetOracleSettings,
 )
-from tests import c, m, p, t, tm, u
+from tests import c, m, t, tm, u
 
 
 def _users_schema_message(
     *,
     with_key_properties: bool = False,
-) -> p.Meltano.SingerSchemaMessage:
+) -> m.Meltano.SingerSchemaMessage:
     """Build the canonical ``users`` SCHEMA message shared by these tests.
 
     Returns:

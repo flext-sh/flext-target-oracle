@@ -440,7 +440,7 @@ class FlextTargetOracleLoader(FlextMeltanoServiceBase):
             },
         })
         self._target_config = settings
-        self._oracle_api = FlextDbOracleApi(runtime_settings=oracle_config)
+        self._oracle_api = FlextDbOracleApi(settings=oracle_config)
         self._record_buffers = self._default_record_buffers()
         self._stream_columns = {}
         self._stream_field_mappings = dict[str, t.StrPairTuple]()
