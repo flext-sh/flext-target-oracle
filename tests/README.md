@@ -39,7 +39,7 @@ management.
 
 ## 📁 Test Structure
 
-```
+```text
 tests/
 ├── conftest.py          # Pytest configuration and shared fixtures
 ├── pytest.ini           # Pytest settings

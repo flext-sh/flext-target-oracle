@@ -1130,7 +1130,6 @@ def _write_record(self, record: Record) -> None:
 ### **Development Standards Checklist**
 
 - [ ] **Development Standards Checklist**
-
 - [ ] **Type Annotations**: 100% type coverage with strict typing compliance
 - [ ] **Error Handling**: All operations return r[T] for railway-oriented programming
 - [ ] **Logging**: Structured logging with appropriate context and correlation IDs
