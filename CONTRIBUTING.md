@@ -85,7 +85,7 @@ provides guidelines and instructions for contributing to the project.
 
 ### Test Structure
 
-```
+```text
 tests/
 ├── unit/         # Fast unit tests with mocked dependencies
 ├── integration/  # Tests with real Oracle database
@@ -309,7 +309,7 @@ export FLEXT_LOG_LEVEL=DEBUG
 
 Follow conventional commits:
 
-```
+```text
 feat: add bulk merge support
 fix: handle NULL values in JSON columns
 docs: update configuration examples
