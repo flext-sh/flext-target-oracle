@@ -233,10 +233,10 @@ class FlextTargetOracle:
 
     def process_singer_message(
         self,
-        message: m.Meltano.SingerSchemaMessage
-        | m.Meltano.SingerRecordMessage
-        | m.Meltano.SingerStateMessage
-        | m.Meltano.SingerActivateVersionMessage,
+        message: p.Meltano.SingerSchemaMessage
+        | p.Meltano.SingerRecordMessage
+        | p.Meltano.SingerStateMessage
+        | p.Meltano.SingerActivateVersionMessage,
     ) -> p.Result[bool]:
         """Process a single Singer message.
 
@@ -264,10 +264,10 @@ class FlextTargetOracle:
     def process_singer_messages(
         self,
         messages: Sequence[
-            m.Meltano.SingerSchemaMessage
-            | m.Meltano.SingerRecordMessage
-            | m.Meltano.SingerStateMessage
-            | m.Meltano.SingerActivateVersionMessage
+            p.Meltano.SingerSchemaMessage
+            | p.Meltano.SingerRecordMessage
+            | p.Meltano.SingerStateMessage
+            | p.Meltano.SingerActivateVersionMessage
         ],
     ) -> p.Result[p.TargetOracle.ProcessingSummary]:
         """Process SCHEMA/RECORD/STATE Singer messages.

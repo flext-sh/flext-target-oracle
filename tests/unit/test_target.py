@@ -20,7 +20,7 @@ from tests import c, m, p, t, tm, u
 def _users_schema_message(
     *,
     with_key_properties: bool = False,
-) -> p.Meltano.SingerSchemaMessage:
+) -> m.Meltano.SingerSchemaMessage:
     """Build the canonical ``users`` SCHEMA message shared by these tests.
 
     Returns:
