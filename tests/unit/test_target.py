@@ -24,7 +24,7 @@ def _users_schema_message(
     """Build the canonical ``users`` SCHEMA message shared by these tests.
 
     Returns:
-        The resulting ``m.Meltano.SingerSchemaMessage``.
+        The resulting ``p.Meltano.SingerSchemaMessage``.
 
     """
     payload: t.MutableJsonMapping = {
