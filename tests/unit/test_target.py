@@ -14,17 +14,17 @@ from flext_target_oracle import (
     FlextTargetOracleService,
     FlextTargetOracleSettings,
 )
-from tests import c, m, t, tm, u
+from tests import c, m, p, t, tm, u
 
 
 def _users_schema_message(
     *,
     with_key_properties: bool = False,
-) -> m.Meltano.SingerSchemaMessage:
+) -> p.Meltano.SingerSchemaMessage:
     """Build the canonical ``users`` SCHEMA message shared by these tests.
 
     Returns:
-        The resulting ``m.Meltano.SingerSchemaMessage``.
+        The resulting ``p.Meltano.SingerSchemaMessage``.
 
     """
     payload: t.MutableJsonMapping = {
@@ -127,10 +127,10 @@ class TestsFlextTargetOracleTarget:
     ) -> None:
         """Test process singer messages flushes loader."""
         messages: Sequence[
-            m.Meltano.SingerSchemaMessage
-            | m.Meltano.SingerRecordMessage
-            | m.Meltano.SingerStateMessage
-            | m.Meltano.SingerActivateVersionMessage
+            p.Meltano.SingerSchemaMessage
+            | p.Meltano.SingerRecordMessage
+            | p.Meltano.SingerStateMessage
+            | p.Meltano.SingerActivateVersionMessage
         ] = [
             _users_schema_message(),
             m.Meltano.SingerRecordMessage.model_validate({
