@@ -27,9 +27,9 @@ This section is generated from public exports and real docstrings.
 
 ## Surface Summary
 
-- Primary facades: `FlextTargetOracle`, `FlextTargetOracleCli`,
-  `FlextTargetOracleConfig`, `FlextTargetOracleConstants`, `FlextTargetOracleModels`,
-  `FlextTargetOracleProtocols` (+5 more)
+- Primary facades: `FlextTargetOracleCli`, `FlextTargetOracleConfig`,
+  `FlextTargetOracleConstants`, `FlextTargetOracleModels`, `FlextTargetOracleProtocols`,
+  `FlextTargetOracleService` (+4 more)
 - Generated module pages: `7`
 
 Back to [project docs](../index.md).

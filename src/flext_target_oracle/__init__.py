@@ -34,15 +34,10 @@ if TYPE_CHECKING:
     from flext_target_oracle.models import FlextTargetOracleModels, m
     from flext_target_oracle.protocols import FlextTargetOracleProtocols, p
     from flext_target_oracle.typings import FlextTargetOracleTypes, t
-    from flext_target_oracle.utilities import (
-        FlextTargetOracle,
-        FlextTargetOracleUtilities,
-        u,
-    )
+    from flext_target_oracle.utilities import FlextTargetOracleUtilities, u
 
 
 __all__: tuple[str, ...] = (
-    "FlextTargetOracle",
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
@@ -82,7 +77,6 @@ install_lazy_exports(
     __name__,
     globals(),
     {
-        "FlextTargetOracle": ".utilities",
         "FlextTargetOracleCli": ".cli",
         "FlextTargetOracleConfig": "._config",
         "FlextTargetOracleConstants": ".constants",

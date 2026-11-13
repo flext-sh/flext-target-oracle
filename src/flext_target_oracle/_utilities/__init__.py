@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from flext_target_oracle._utilities.bootstrap import (
         FlextTargetOracleUtilitiesBootstrap,
     )
-    from flext_target_oracle._utilities.client import FlextTargetOracle
     from flext_target_oracle._utilities.errors import FlextTargetOracleUtilitiesErrors
     from flext_target_oracle._utilities.observability import (
         FlextTargetOracleUtilitiesObservability,
@@ -24,7 +23,6 @@ if TYPE_CHECKING:
 
 
 __all__: tuple[str, ...] = (
-    "FlextTargetOracle",
     "FlextTargetOracleUtilitiesBase",
     "FlextTargetOracleUtilitiesBootstrap",
     "FlextTargetOracleUtilitiesErrors",
@@ -35,7 +33,6 @@ install_lazy_exports(
     __name__,
     globals(),
     {
-        "FlextTargetOracle": ".client",
         "FlextTargetOracleUtilitiesBase": ".base",
         "FlextTargetOracleUtilitiesBootstrap": ".bootstrap",
         "FlextTargetOracleUtilitiesErrors": ".errors",
