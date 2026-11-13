@@ -8,13 +8,13 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_db_oracle import c as flext_db_oracle_c
-from flext_meltano import c as flext_meltano_c
+from flext_db_oracle import FlextDbOracleConstants
+from flext_meltano import FlextMeltanoConstants
 
 from flext_target_oracle._constants import FlextTargetOracleConstantsBase
 
 
-class FlextTargetOracleConstants(flext_meltano_c, flext_db_oracle_c):
+class FlextTargetOracleConstants(FlextMeltanoConstants, FlextDbOracleConstants):
     """Oracle target constant facade."""
 
     class TargetOracle(FlextTargetOracleConstantsBase):

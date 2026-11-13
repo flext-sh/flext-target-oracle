@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from flext_tests import api, td, tf, tk, tm
 
     from flext_target_oracle import (
-        FlextTargetOracle,
         FlextTargetOracleCli,
         FlextTargetOracleConfig,
         FlextTargetOracleConstants,
@@ -68,7 +67,6 @@ if TYPE_CHECKING:
 
 
 __all__: tuple[str, ...] = (
-    "FlextTargetOracle",
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
@@ -132,7 +130,6 @@ install_lazy_exports(
     __name__,
     globals(),
     {
-        "FlextTargetOracle": "flext_target_oracle",
         "FlextTargetOracleCli": "flext_target_oracle",
         "FlextTargetOracleConfig": "flext_target_oracle",
         "FlextTargetOracleConstants": "flext_target_oracle",

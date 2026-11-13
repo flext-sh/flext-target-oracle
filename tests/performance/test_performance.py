@@ -11,7 +11,7 @@ import time
 from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING
 
-from flext_target_oracle import FlextTargetOracle
+from flext_target_oracle.application import FlextTargetOracle
 from tests import c, m, tm, u
 
 if TYPE_CHECKING:

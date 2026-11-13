@@ -12,14 +12,15 @@ from typing import TYPE_CHECKING
 from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
+    from flext_target_oracle.application.client import FlextTargetOracle
     from flext_target_oracle.application.loader import FlextTargetOracleLoader
 
 
-__all__: tuple[str, ...] = ("FlextTargetOracleLoader",)
+__all__: tuple[str, ...] = ("FlextTargetOracle", "FlextTargetOracleLoader")
 
 install_lazy_exports(
     __name__,
     globals(),
-    {"FlextTargetOracleLoader": ".loader"},
+    {"FlextTargetOracle": ".client", "FlextTargetOracleLoader": ".loader"},
     public_exports=__all__,
 )

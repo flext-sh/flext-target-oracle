@@ -9,11 +9,8 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from flext_target_oracle import (
-    FlextTargetOracle,
-    FlextTargetOracleService,
-    FlextTargetOracleSettings,
-)
+from flext_target_oracle import FlextTargetOracleService, FlextTargetOracleSettings
+from flext_target_oracle.application import FlextTargetOracle
 from tests import c, m, p, t, tm, u
 
 

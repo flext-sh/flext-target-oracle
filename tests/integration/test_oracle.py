@@ -15,8 +15,7 @@ import time
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
-from flext_target_oracle import FlextTargetOracle
-from flext_target_oracle.application import FlextTargetOracleLoader
+from flext_target_oracle.application import FlextTargetOracle, FlextTargetOracleLoader
 from tests import c, m, p, t, tm, u
 
 if TYPE_CHECKING:
