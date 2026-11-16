@@ -39,4 +39,17 @@ install_lazy_exports(
         "FlextTargetOracleUtilitiesObservability": ".observability",
     },
     public_exports=__all__,
+    deferred_members={
+        "FlextTargetOracleUtilitiesBootstrap": ("load_target_settings",),
+        "FlextTargetOracleUtilitiesErrors": ("Exceptions",),
+        "FlextTargetOracleUtilitiesObservability": (
+            "target_oracle_connection_authentication_failed",
+            "target_oracle_connection_database_unavailable",
+            "target_oracle_singer_record_processing_failed",
+            "target_oracle_singer_schema_validation_failed",
+            "target_oracle_monitor_connection_health",
+            "target_oracle_monitor_query_performance",
+            "configure_oracle_observability",
+        ),
+    },
 )

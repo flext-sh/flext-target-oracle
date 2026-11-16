@@ -22,4 +22,10 @@ install_lazy_exports(
     globals(),
     {"FlextTargetOracleTypesBase": ".base"},
     public_exports=__all__,
+    deferred_members={
+        "FlextTargetOracleTypesBase": (
+            "FLAT_CONTAINER_MAP_ADAPTER",
+            "STR_MAP_ADAPTER",
+        ),
+    },
 )
