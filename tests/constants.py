@@ -10,6 +10,7 @@ from collections.abc import Mapping
 from types import MappingProxyType
 from typing import Final
 
+from flext_core import FlextConstants
 from flext_tests import FlextTestsConstants
 
 from flext_target_oracle import FlextTargetOracleConstants
@@ -24,8 +25,8 @@ class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsCons
         class Tests:
             """Internal tests declarations for test-only objects."""
 
-            ORACLE_HOST: Final[str] = "localhost"
-            ORACLE_PORT: Final[int] = 1521
+            ORACLE_HOST: Final[str] = FlextConstants.LOCALHOST
+            ORACLE_PORT: Final[int] = FlextConstants.ORACLE_PORT
             ORACLE_SERVICE: Final[str] = "XE"
             ORACLE_PASSWORD: Final[str] = f"{ORACLE_SERVICE}-oracle-credential"
             TEST_SCHEMA: Final[str] = "FLEXT_TEST"
