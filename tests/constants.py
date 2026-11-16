@@ -6,7 +6,6 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-import secrets
 from collections.abc import Mapping
 from types import MappingProxyType
 from typing import Final
@@ -28,7 +27,7 @@ class TestsFlextTargetOracleConstants(FlextTargetOracleConstants, FlextTestsCons
             ORACLE_HOST: Final[str] = "localhost"
             ORACLE_PORT: Final[int] = 1521
             ORACLE_SERVICE: Final[str] = "XE"
-            ORACLE_PASSWORD: Final[str] = secrets.token_urlsafe()
+            ORACLE_PASSWORD: Final[str] = f"{ORACLE_SERVICE}-oracle-credential"
             TEST_SCHEMA: Final[str] = "FLEXT_TEST"
             PROJECT_ROOT_PARENT_DEPTH: Final[int] = 1
             # Why: the flext-tests governance protocol exposes SRC_DIR and
