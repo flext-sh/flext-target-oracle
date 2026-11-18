@@ -39,4 +39,9 @@ install_lazy_exports(
         "FlextTargetOracleUtilitiesObservability": ".observability",
     },
     public_exports=__all__,
+    deferred_members=(
+        "FlextTargetOracleUtilitiesBootstrap",
+        "FlextTargetOracleUtilitiesErrors",
+        "FlextTargetOracleUtilitiesObservability",
+    ),
 )

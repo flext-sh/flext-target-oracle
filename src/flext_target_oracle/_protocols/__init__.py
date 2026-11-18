@@ -52,4 +52,13 @@ install_lazy_exports(
         "FlextTargetOracleProtocolsSinger": ".singer",
     },
     public_exports=__all__,
+    deferred_members=(
+        "FlextTargetOracleProtocolsBase",
+        "FlextTargetOracleProtocolsCommands",
+        "FlextTargetOracleProtocolsErrorMetadata",
+        "FlextTargetOracleProtocolsHealthStatus",
+        "FlextTargetOracleProtocolsResults",
+        "FlextTargetOracleProtocolsSettings",
+        "FlextTargetOracleProtocolsSinger",
+    ),
 )

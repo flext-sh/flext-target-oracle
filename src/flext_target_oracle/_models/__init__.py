@@ -48,4 +48,13 @@ install_lazy_exports(
         "FlextTargetOracleModelsSinger": ".singer",
     },
     public_exports=__all__,
+    deferred_members=(
+        "FlextTargetOracleModelsBase",
+        "FlextTargetOracleModelsCommands",
+        "FlextTargetOracleModelsErrorMetadata",
+        "FlextTargetOracleModelsHealthStatus",
+        "FlextTargetOracleModelsResults",
+        "FlextTargetOracleModelsSettings",
+        "FlextTargetOracleModelsSinger",
+    ),
 )
