@@ -7,8 +7,7 @@ SPDX-License-Identifier: MIT
 
 from __future__ import annotations
 
-from flext_target_oracle import FlextTargetOracleSettings
-from tests import c, s, tm
+from tests import FlextTargetOracleSettings, c, s, tm
 
 
 class TestsFlextTargetOracleConfig:
@@ -58,7 +57,7 @@ class TestsFlextTargetOracleConfig:
                 "oracle_port": 1521,
                 "oracle_service_name": "XE",
                 "oracle_user": "test",
-                "oracle_password": c.TargetOracle.Tests.ORACLE_PASSWORD,
+                "oracle_password": c.Tests.ORACLE_PASSWORD,
                 "default_target_schema": "TEST_SCHEMA",
                 "autocommit": True,
                 "transaction_timeout": 120,
@@ -71,7 +70,7 @@ class TestsFlextTargetOracleConfig:
         tm.that(target.oracle_port, eq=1521)
         tm.that(target.oracle_service_name, eq="XE")
         tm.that(target.oracle_user, eq="test")
-        tm.that(target.oracle_password, eq=c.TargetOracle.Tests.ORACLE_PASSWORD)
+        tm.that(target.oracle_password, eq=c.Tests.ORACLE_PASSWORD)
         tm.ok(target.autocommit)
         tm.that(target.transaction_timeout, eq=120)
         tm.that(target.parallel_degree, eq=4)
@@ -86,7 +85,7 @@ class TestsFlextTargetOracleConfig:
                 "oracle_host": "localhost",
                 "oracle_service_name": "XE",
                 "oracle_user": "test",
-                "oracle_password": c.TargetOracle.Tests.ORACLE_PASSWORD,
+                "oracle_password": c.Tests.ORACLE_PASSWORD,
                 "table_prefix": "stg_",
                 "table_suffix": "_tbl",
             },
@@ -103,7 +102,7 @@ class TestsFlextTargetOracleConfig:
                 "oracle_host": "localhost",
                 "oracle_service_name": "XE",
                 "oracle_user": "test",
-                "oracle_password": c.TargetOracle.Tests.ORACLE_PASSWORD,
+                "oracle_password": c.Tests.ORACLE_PASSWORD,
                 "batch_size": 100,
                 "commit_interval": 200,
             },
