@@ -1,0 +1,84 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "flext-infra-check",
+          "informationUri": "https://github.com/flext-sh/flext-infra",
+          "rules": []
+        }
+      },
+      "results": []
+    }
+  ],
+  "properties": {
+    "phase": "complete",
+    "requested_gates": [
+      "lint",
+      "format"
+    ],
+    "pending_gates": [],
+    "targets": [
+      {
+        "name": "flext-target-oracle",
+        "path": "/home/marlonsc/flext/flext-target-oracle",
+        "applicable_gates": [
+          "lint",
+          "format"
+        ],
+        "source_identity": null
+      }
+    ],
+    "results": [
+      {
+        "project": "flext-target-oracle",
+        "gates": {
+          "lint": {
+            "result": {
+              "project": "flext-target-oracle",
+              "gate": "lint",
+              "passed": true,
+              "errors": [],
+              "duration": 0.073
+            },
+            "issues": [],
+            "raw_receipt": "/home/marlonsc/flext/flext-target-oracle/.reports/check/9fffc37b-9a25-4bea-af86-27f71415081d/flext-target-oracle/lint.raw.log",
+            "outcome": "clean",
+            "process": {
+              "raw_return_code": 0,
+              "timed_out": false,
+              "forwarded_signal": null
+            },
+            "components": {},
+            "requested_components": []
+          },
+          "format": {
+            "result": {
+              "project": "flext-target-oracle",
+              "gate": "format",
+              "passed": true,
+              "errors": [],
+              "duration": 0.039
+            },
+            "issues": [],
+            "raw_receipt": "/home/marlonsc/flext/flext-target-oracle/.reports/check/9fffc37b-9a25-4bea-af86-27f71415081d/flext-target-oracle/format.raw.log",
+            "outcome": "clean",
+            "process": {
+              "raw_return_code": 0,
+              "timed_out": false,
+              "forwarded_signal": null
+            },
+            "components": {},
+            "requested_components": []
+          }
+        }
+      }
+    ],
+    "selected_files": [
+      "/home/marlonsc/flext/flext-target-oracle/tests/unit/test_module_governance.py"
+    ],
+    "global_targets": null
+  }
+}

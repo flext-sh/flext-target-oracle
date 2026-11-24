@@ -1,0 +1,37 @@
+{
+  "failed_count": 0,
+  "error_count": 1,
+  "warning_count": 0,
+  "skipped_count": 0,
+  "connectivity_skip_cases": [],
+  "collection_failed_count": 0,
+  "collection_skipped_count": 0,
+  "collection_failed_cases": [],
+  "collection_skip_cases": [],
+  "reported_node_ids": [
+    "tests/e2e/test_singer.py::TestsFlextTargetOracleSinger::test_complete_singer_flow"
+  ],
+  "phase_outcomes": [
+    {
+      "node_id": "tests/e2e/test_singer.py::TestsFlextTargetOracleSinger::test_complete_singer_flow",
+      "phase": "setup",
+      "outcome": "failed"
+    },
+    {
+      "node_id": "tests/e2e/test_singer.py::TestsFlextTargetOracleSinger::test_complete_singer_flow",
+      "phase": "teardown",
+      "outcome": "passed"
+    }
+  ],
+  "markdown_attempts": [],
+  "markdown_items": [],
+  "failed_cases": [],
+  "error_traces": [
+    "=== ERROR: tests.e2e.test_singer.TestsFlextTargetOracleSinger::test_complete_singer_flow ===\nfailed on setup with \"Failed: Oracle test user provisioning failed after readiness\"\n../.venv/lib/python3.13/site-packages/pytest_asyncio/plugin.py:925: in pytest_fixture_setup\n    return (yield)\n            ^^^^^\ntests/conftest.py:223: in shared_oracle_container\n    return _provision_oracle_test_user(container_name, oracle_settings)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/conftest.py:193: in _provision_oracle_test_user\n    pytest.fail(\"Oracle test user provisioning failed after readiness\")\nE   Failed: Oracle test user provisioning failed after readiness"
+  ],
+  "warning_lines": [],
+  "skip_cases": [],
+  "slow_entries": [
+    "12.619000s | tests.e2e.test_singer.TestsFlextTargetOracleSinger::test_complete_singer_flow"
+  ]
+}

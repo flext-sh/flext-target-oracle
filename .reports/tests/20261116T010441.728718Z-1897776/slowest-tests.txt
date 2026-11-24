@@ -1,0 +1,1 @@
+12.619000s | tests.e2e.test_singer.TestsFlextTargetOracleSinger::test_complete_singer_flow

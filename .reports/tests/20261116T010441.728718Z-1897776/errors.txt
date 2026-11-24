@@ -1,0 +1,11 @@
+=== ERROR: tests.e2e.test_singer.TestsFlextTargetOracleSinger::test_complete_singer_flow ===
+failed on setup with "Failed: Oracle test user provisioning failed after readiness"
+../.venv/lib/python3.13/site-packages/pytest_asyncio/plugin.py:925: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+tests/conftest.py:223: in shared_oracle_container
+    return _provision_oracle_test_user(container_name, oracle_settings)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/conftest.py:193: in _provision_oracle_test_user
+    pytest.fail("Oracle test user provisioning failed after readiness")
+E   Failed: Oracle test user provisioning failed after readiness

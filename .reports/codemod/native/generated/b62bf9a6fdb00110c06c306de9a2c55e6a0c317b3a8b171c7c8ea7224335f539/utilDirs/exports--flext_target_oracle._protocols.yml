@@ -1,0 +1,1 @@
+{"id":"exports--flext_target_oracle._protocols","language":"Python","rule":{"regex":"^(?:FlextTargetOracleProtocolsBase|FlextTargetOracleProtocolsCommands|FlextTargetOracleProtocolsErrorMetadata|FlextTargetOracleProtocolsHealthStatus|FlextTargetOracleProtocolsResults|FlextTargetOracleProtocolsSettings|FlextTargetOracleProtocolsSinger)$"}}

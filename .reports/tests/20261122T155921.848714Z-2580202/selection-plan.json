@@ -1,0 +1,11 @@
+{
+  "manifest_path": "/home/marlonsc/flext/flext-target-oracle/.reports/tests/20261122T155921.848714Z-2580202/testmon-inventory.json",
+  "node_ids": [
+    "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_module_level_loggers",
+    "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_unapproved_top_level_functions",
+    "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_target_oracle_namespace_does_not_wrap_meltano_singer_models"
+  ],
+  "whole_target": true,
+  "inventory_collected": true,
+  "owns_no_tests": false
+}

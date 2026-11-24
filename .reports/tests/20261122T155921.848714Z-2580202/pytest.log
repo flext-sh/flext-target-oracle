@@ -1,0 +1,30 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.18, pytest-9.2.0, pluggy-1.7.0 -- /home/marlonsc/flext/.venv/bin/python
+cachedir: .pytest_cache
+hypothesis profile 'default'
+benchmark: 5.3.1 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+testmon: selection deactivated, environment: toolchain-9fcc61e2dbb2-35674906-e3b0c442
+Help shape testmon! Tell us what saves you time and what we can improve: https://testmon.org/survey
+Using --randomly-seed=3390367264
+rootdir: /home/marlonsc/flext/flext-target-oracle
+configfile: pyproject.toml
+plugins: flext-tests-0.12.0, hypothesis-6.170.15, anyio-4.16.0, platformdirs-4.14.5, asyncio-1.4.1.post1, benchmark-5.3.1, cov-7.1.0, markdown-docs-0.9.2, reportlog-1.0.0, testmon-2.3.0, timeout-2.4.0, xdist-3.8.0, singer-sdk-0.54.9, randomly-5.1.0, flext-infra-0.12.3
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+timeout: 2.0s
+timeout method: signal
+timeout func_only: True
+collecting ... collected 3 items
+run-last-failure: 25 known failures not in selected tests
+
+tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_module_level_loggers PASSED [ 33%]
+tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_unapproved_top_level_functions PASSED [ 66%]
+tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_target_oracle_namespace_does_not_wrap_meltano_singer_models PASSED [100%]
+
+- generated xml file: /home/marlonsc/flext/flext-target-oracle/.reports/tests/20261122T155921.848714Z-2580202/junit.xml -
+- generated report log file: /home/marlonsc/flext/flext-target-oracle/.reports/tests/20261122T155921.848714Z-2580202/events.jsonl -
+------------------------------- flext slow tests -------------------------------
+no test near the ordinary or slow limit
+============================= slowest 25 durations =============================
+
+(9 durations < 2s hidden.)
+============================== 3 passed in 0.82s ===============================

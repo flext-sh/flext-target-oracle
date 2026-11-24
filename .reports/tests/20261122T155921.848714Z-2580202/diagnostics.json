@@ -1,0 +1,74 @@
+{
+  "failed_count": 0,
+  "error_count": 0,
+  "warning_count": 0,
+  "skipped_count": 0,
+  "connectivity_skip_cases": [],
+  "collection_failed_count": 0,
+  "collection_skipped_count": 0,
+  "collection_failed_cases": [],
+  "collection_skip_cases": [],
+  "reported_node_ids": [
+    "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_module_level_loggers",
+    "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_unapproved_top_level_functions",
+    "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_target_oracle_namespace_does_not_wrap_meltano_singer_models"
+  ],
+  "phase_outcomes": [
+    {
+      "node_id": "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_module_level_loggers",
+      "phase": "setup",
+      "outcome": "passed"
+    },
+    {
+      "node_id": "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_module_level_loggers",
+      "phase": "call",
+      "outcome": "passed"
+    },
+    {
+      "node_id": "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_module_level_loggers",
+      "phase": "teardown",
+      "outcome": "passed"
+    },
+    {
+      "node_id": "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_unapproved_top_level_functions",
+      "phase": "setup",
+      "outcome": "passed"
+    },
+    {
+      "node_id": "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_unapproved_top_level_functions",
+      "phase": "call",
+      "outcome": "passed"
+    },
+    {
+      "node_id": "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_unapproved_top_level_functions",
+      "phase": "teardown",
+      "outcome": "passed"
+    },
+    {
+      "node_id": "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_target_oracle_namespace_does_not_wrap_meltano_singer_models",
+      "phase": "setup",
+      "outcome": "passed"
+    },
+    {
+      "node_id": "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_target_oracle_namespace_does_not_wrap_meltano_singer_models",
+      "phase": "call",
+      "outcome": "passed"
+    },
+    {
+      "node_id": "tests/unit/test_module_governance.py::TestsFlextTargetOracleModuleGovernance::test_target_oracle_namespace_does_not_wrap_meltano_singer_models",
+      "phase": "teardown",
+      "outcome": "passed"
+    }
+  ],
+  "markdown_attempts": [],
+  "markdown_items": [],
+  "failed_cases": [],
+  "error_traces": [],
+  "warning_lines": [],
+  "skip_cases": [],
+  "slow_entries": [
+    "0.518000s | tests.unit.test_module_governance.TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_module_level_loggers",
+    "0.035000s | tests.unit.test_module_governance.TestsFlextTargetOracleModuleGovernance::test_package_modules_do_not_define_unapproved_top_level_functions",
+    "0.005000s | tests.unit.test_module_governance.TestsFlextTargetOracleModuleGovernance::test_target_oracle_namespace_does_not_wrap_meltano_singer_models"
+  ]
+}
