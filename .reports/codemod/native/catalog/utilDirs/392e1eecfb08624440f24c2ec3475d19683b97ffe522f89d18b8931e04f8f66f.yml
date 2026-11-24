@@ -1,0 +1,1 @@
+{"id":"exports--flext_target_oracle._models","language":"Python","rule":{"regex":"^(?:FlextTargetOracleModelsBase|FlextTargetOracleModelsCommands|FlextTargetOracleModelsErrorMetadata|FlextTargetOracleModelsHealthStatus|FlextTargetOracleModelsResults|FlextTargetOracleModelsSettings|FlextTargetOracleModelsSinger)$"}}

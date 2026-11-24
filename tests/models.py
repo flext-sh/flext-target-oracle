@@ -8,17 +8,14 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsModels
 
-from flext_target_oracle import FlextTargetOracleModels
+from tests import FlextTargetOracleModels
 
 
 class TestsFlextTargetOracleModels(FlextTestsModels, FlextTargetOracleModels):
     """Test models combining TestsFlextModels and project-specific models."""
 
-    class TargetOracle(FlextTargetOracleModels.TargetOracle):
-        """TargetOracle domain models extending project models."""
-
-        class Tests:
-            """Internal tests declarations for test-only objects."""
+    class Tests(FlextTestsModels.Tests):
+        """Internal tests declarations for test-only objects."""
 
 
 m = TestsFlextTargetOracleModels

@@ -1,0 +1,1 @@
+{"id":"exports--examples","language":"Python","rule":{"regex":"^(?:c|config|d|e|h|m|main|p|r|s|settings|t|target_oracle|u|x)$"}}

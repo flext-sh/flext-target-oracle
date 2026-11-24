@@ -19,14 +19,11 @@ import pytest
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
 from flext_tests import FlextTestsDocker
 
-from flext_target_oracle import FlextTargetOracleSettings
 from flext_target_oracle.application import FlextTargetOracleLoader
-from tests import c, m, p, r, tk, tm
+from tests import FlextTargetOracleSettings, c, m, p, r, t, tk, tm
 
 if TYPE_CHECKING:
     from collections.abc import Generator
-
-from tests import t
 
 _ORACLE_TEST_PASSWORD = secrets.token_hex(16)
 
@@ -235,20 +232,20 @@ def oracle_engine(shared_oracle_container: str) -> Generator[FlextDbOracleApi]:
     api = FlextDbOracleApi(
         settings=FlextDbOracleSettings.model_validate({
             "DbOracle": {
-                "host": os.getenv("TEST_ORACLE_HOST", c.TargetOracle.Tests.ORACLE_HOST),
+                "host": os.getenv("TEST_ORACLE_HOST", c.Tests.ORACLE_HOST),
                 "port": int(
                     os.getenv(
                         "TEST_ORACLE_PORT",
-                        str(c.TargetOracle.Tests.ORACLE_PORT),
+                        str(c.Tests.ORACLE_PORT),
                     ),
                 ),
                 c.ContextKey.SERVICE_NAME: os.getenv(
                     "TEST_ORACLE_SERVICE",
-                    c.TargetOracle.Tests.ORACLE_SERVICE,
+                    c.Tests.ORACLE_SERVICE,
                 ),
                 "username": os.getenv(
                     "TEST_ORACLE_USER",
-                    c.TargetOracle.Tests.TEST_SCHEMA,
+                    c.Tests.TEST_SCHEMA,
                 ),
                 "password": os.getenv("TEST_ORACLE_PASSWORD", _ORACLE_TEST_PASSWORD),
             },
@@ -303,21 +300,21 @@ def oracle_config(
         "TargetOracle": {
             "oracle_host": os.getenv(
                 "TEST_ORACLE_HOST",
-                c.TargetOracle.Tests.ORACLE_HOST,
+                c.Tests.ORACLE_HOST,
             ),
             "oracle_port": int(
-                os.getenv("TEST_ORACLE_PORT", str(c.TargetOracle.Tests.ORACLE_PORT)),
+                os.getenv("TEST_ORACLE_PORT", str(c.Tests.ORACLE_PORT)),
             ),
             "oracle_service_name": os.getenv(
                 "TEST_ORACLE_SERVICE",
-                c.TargetOracle.Tests.ORACLE_SERVICE,
+                c.Tests.ORACLE_SERVICE,
             ),
             "oracle_user": os.getenv(
                 "TEST_ORACLE_USER",
-                c.TargetOracle.Tests.TEST_SCHEMA,
+                c.Tests.TEST_SCHEMA,
             ),
             "oracle_password": os.getenv("TEST_ORACLE_PASSWORD", _ORACLE_TEST_PASSWORD),
-            "default_target_schema": c.TargetOracle.Tests.TEST_SCHEMA,
+            "default_target_schema": c.Tests.TEST_SCHEMA,
             "batch_size": 1000,
             "table_prefix": "",
             "table_suffix": "",

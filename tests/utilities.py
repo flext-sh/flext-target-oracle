@@ -8,17 +8,14 @@ from __future__ import annotations
 
 from flext_tests import FlextTestsUtilities
 
-from flext_target_oracle import FlextTargetOracleUtilities
+from tests import FlextTargetOracleUtilities
 
 
 class TestsFlextTargetOracleUtilities(FlextTestsUtilities, FlextTargetOracleUtilities):
     """Test utilities combining TestsFlextUtilities and project-specific utilities."""
 
-    class TargetOracle(FlextTargetOracleUtilities.TargetOracle):
-        """TargetOracle domain utilities extending project utilities."""
-
-        class Tests:
-            """Internal tests declarations for test-only objects."""
+    class Tests(FlextTestsUtilities.Tests):
+        """Internal tests declarations for test-only objects."""
 
 
 u = TestsFlextTargetOracleUtilities

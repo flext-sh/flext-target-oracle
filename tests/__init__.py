@@ -13,7 +13,7 @@ from flext_core.lazy import install_lazy_exports
 
 if TYPE_CHECKING:
     from flext_db_oracle import e
-    from flext_tests import api, td, tf, tk, tm
+    from flext_tests import api, d, h, r, td, tf, tk, tm, x
 
     from flext_target_oracle import (
         FlextTargetOracleCli,
@@ -27,13 +27,13 @@ if TYPE_CHECKING:
         FlextTargetOracleUtilities,
         FlextTargetOracleVersion,
         config,
-        d,
-        h,
         main,
-        r,
         settings,
         target_oracle,
-        x,
+    )
+    from flext_target_oracle.application import (
+        FlextTargetOracle,
+        FlextTargetOracleLoader,
     )
     from tests.base import TestsFlextTargetOracleServiceBase, s
     from tests.conftest import (
@@ -59,9 +59,11 @@ if TYPE_CHECKING:
 
 
 __all__: tuple[str, ...] = (
+    "FlextTargetOracle",
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
+    "FlextTargetOracleLoader",
     "FlextTargetOracleModels",
     "FlextTargetOracleProtocols",
     "FlextTargetOracleService",
@@ -114,9 +116,11 @@ install_lazy_exports(
     __name__,
     globals(),
     {
+        "FlextTargetOracle": "flext_target_oracle.application",
         "FlextTargetOracleCli": "flext_target_oracle",
         "FlextTargetOracleConfig": "flext_target_oracle",
         "FlextTargetOracleConstants": "flext_target_oracle",
+        "FlextTargetOracleLoader": "flext_target_oracle.application",
         "FlextTargetOracleModels": "flext_target_oracle",
         "FlextTargetOracleProtocols": "flext_target_oracle",
         "FlextTargetOracleService": "flext_target_oracle",
@@ -135,10 +139,10 @@ install_lazy_exports(
         "c": ".constants",
         "clean_database": ".conftest",
         "config": "flext_target_oracle",
-        "d": "flext_target_oracle",
+        "d": "flext_tests",
         "docker_control": ".conftest",
         "e": "flext_db_oracle",
-        "h": "flext_target_oracle",
+        "h": "flext_tests",
         "isolate_target_oracle_env": ".conftest",
         "m": ".models",
         "main": "flext_target_oracle",
@@ -149,7 +153,7 @@ install_lazy_exports(
         "p": ".protocols",
         "pytest_collection_modifyitems": ".conftest",
         "pytest_configure": ".conftest",
-        "r": "flext_target_oracle",
+        "r": "flext_tests",
         "s": ".base",
         "settings": "flext_target_oracle",
         "shared_oracle_container": ".conftest",
@@ -162,7 +166,7 @@ install_lazy_exports(
         "tk": "flext_tests",
         "tm": "flext_tests",
         "u": ".utilities",
-        "x": "flext_target_oracle",
+        "x": "flext_tests",
     },
     public_exports=__all__,
 )

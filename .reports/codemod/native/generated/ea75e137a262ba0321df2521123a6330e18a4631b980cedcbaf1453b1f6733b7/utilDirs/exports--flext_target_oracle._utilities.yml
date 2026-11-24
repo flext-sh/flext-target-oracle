@@ -1,0 +1,1 @@
+{"id":"exports--flext_target_oracle._utilities","language":"Python","rule":{"regex":"^(?:FlextTargetOracleUtilitiesBase|FlextTargetOracleUtilitiesBootstrap|FlextTargetOracleUtilitiesErrors|FlextTargetOracleUtilitiesObservability)$"}}

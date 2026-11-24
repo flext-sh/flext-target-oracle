@@ -1,0 +1,1 @@
+{"id":"exports--flext_target_oracle.application","language":"Python","rule":{"regex":"^(?:FlextTargetOracle|FlextTargetOracleLoader)$"}}
