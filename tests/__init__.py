@@ -35,6 +35,10 @@ if TYPE_CHECKING:
         target_oracle,
         x,
     )
+    from flext_target_oracle.application import (
+        FlextTargetOracle,
+        FlextTargetOracleLoader,
+    )
     from tests.base import TestsFlextTargetOracleServiceBase, s
     from tests.conftest import (
         clean_database,
@@ -59,9 +63,11 @@ if TYPE_CHECKING:
 
 
 __all__: tuple[str, ...] = (
+    "FlextTargetOracle",
     "FlextTargetOracleCli",
     "FlextTargetOracleConfig",
     "FlextTargetOracleConstants",
+    "FlextTargetOracleLoader",
     "FlextTargetOracleModels",
     "FlextTargetOracleProtocols",
     "FlextTargetOracleService",
@@ -114,9 +120,11 @@ install_lazy_exports(
     __name__,
     globals(),
     {
+        "FlextTargetOracle": "flext_target_oracle.application",
         "FlextTargetOracleCli": "flext_target_oracle",
         "FlextTargetOracleConfig": "flext_target_oracle",
         "FlextTargetOracleConstants": "flext_target_oracle",
+        "FlextTargetOracleLoader": "flext_target_oracle.application",
         "FlextTargetOracleModels": "flext_target_oracle",
         "FlextTargetOracleProtocols": "flext_target_oracle",
         "FlextTargetOracleService": "flext_target_oracle",
