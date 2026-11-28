@@ -17,6 +17,14 @@
 
 ## Quick Start
 
+Run from the active workspace/worktree root. For a standalone checkout, this is
+the repository root. In a physical FLEXT workspace, stay at the workspace root;
+use `ALL=Y` with test verbs when the run must include every governed member.
+
+The package root exports `FlextTargetOracleSettings` and the `target_oracle`
+facade. The loader examples later in this guide concern the implementation
+layer in `application/loader.py`; that class is not a package-root export.
+
 ### Prerequisites
 
 - **Python 3.13+**: Required for compatibility with FLEXT ecosystem
@@ -28,23 +36,23 @@
 ```bash
 # Clone repository
 git clone <repository-url>
-cd flext-target-oracle
+cd flext-target-oracle  # Standalone checkout; use the workspace root for a member
 
 # Complete development setup
 make setup                    # Installs dependencies + pre-commit hooks
-make check                    # Verify setup with full quality gates
+make check CHECK_PHASE=complete  # Verify setup with complete quality gates
 ```
 
 ### Verify Installation
 
 ```bash
 # Run basic health checks
-make check                    # Lint + type check
-make test                     # Full test suite
+make check CHECK_PHASE=complete  # Complete configured validation
+make tests                      # Native incremental Testmon selection
 
 # Expected output:
 # ✅ All quality gates pass
-# ✅ All tests pass
+# ✅ Selected tests pass
 # ✅ Python 3.13+
 ```
 
@@ -54,9 +62,8 @@ make test                     # Full test suite
 
 ```bash
 # Essential quality gates (run before every commit)
-make check               # Complete validation pipeline (lint + type + security)
-make fmt                 # Format code with ruff
-make fix                 # Auto-fix linting issues
+# Generation, repair, formatting, and complete validation
+make check CHECK_PHASE=complete
 make clean               # Remove build artifacts
 ```
 
@@ -65,14 +72,15 @@ make clean               # Remove build artifacts
 #### Test Suite
 
 ```bash
-# Run tests
-make test
+# Native incremental selection through the persistent Testmon cache
+make tests
+```
 
-# Run specific test file
-pytest tests/test_config.py -v
+Use a separate complete-inventory run when explicit qualification requires every
+selected test, including the configuration and target cases:
 
-# Run specific test method
-pytest tests/test_target.py::test_target_initialization -v
+```bash
+make tests-full
 ```
 
 #### Integration Testing (Requires Oracle)
@@ -87,18 +95,15 @@ docker run -d --name oracle-test \
 # Wait for Oracle to be ready (2-3 minutes)
 docker logs -f oracle-test
 
-# Run integration tests
-make test
-
-# Or run specific integration tests
-pytest tests/integration/ -v -m integration
+# For explicit integration qualification after Oracle prerequisites are available
+make tests-full
 ```
 
 #### Performance Testing
 
 ```bash
-# Benchmark using the test suite
-pytest tests/performance/ -v
+# For explicit performance qualification through the complete native inventory
+make tests-full
 ```
 
 ### Code Quality Standards
@@ -108,22 +113,16 @@ pytest tests/performance/ -v
 All code must pass these checks before commit:
 
 ```bash
-# Linting (ruff)
-make check                # Must pass with zero warnings
+# Lint, typing, security, documentation, and the configured complete gates
+make check CHECK_PHASE=complete
 
-# Type checking (pyrefly + pyright + mypy)
-make check                # Must pass with zero errors
-
-# Security scanning
-make check                # Security gates included
-
-# Test coverage
-make test                 # Must maintain coverage standards
+# Native incremental behavioral validation through the persistent Testmon cache
+make tests
 ```
 
 #### Code Style Guidelines
 
-````python
+```python
 from __future__ import annotations
 
 from collections.abc import (
@@ -170,7 +169,7 @@ def bad_operation():
 class BadConfig:
     def __init__(self, field):
         self.field = field  # No validation!
-        ```
+```
 ## FLEXT Pattern Implementation
 
 ### r Railway Pattern
@@ -310,10 +309,10 @@ def process_with_logging(stream_name: str, batch_size: int):
 ```text
 # Test Oracle connectivity manually
 from flext_core import u
-from flext_target_oracle import FlextOracleTargetLoader
+from flext_target_oracle.application.loader import FlextTargetOracleLoader
 
 # Create test configuration
-loader = FlextOracleTargetLoader(...)
+loader = FlextTargetOracleLoader(...)
 
 # Verify connection
 result = loader.test_connection()
@@ -372,14 +371,8 @@ def test_table_management():
 docker ps -a --filter oracle
 docker logs oracle-test
 
-# Debug with Python
-PYTHONPATH=src python -c "
-from flext_target_oracle import FlextTargetOracleLoader
-import logging
-logging.basicConfig(level=logging.DEBUG)
-loader = FlextTargetOracleLoader(...)
-u.Cli.print('Config created successfully')
-"
+# Verify the installed public facade in the provisioned environment
+python -c "from flext_target_oracle import target_oracle; assert target_oracle.target_name == 'target-oracle'"
 ```
 #### 2. Import Errors
 
@@ -391,7 +384,7 @@ u.Cli.print('Config created successfully')
 
 ```bash
 # ✅ Debug imports
-python -c "from flext_target_oracle import *; u.Cli.print(dir())"
+python -c "from flext_target_oracle import FlextTargetOracleSettings, target_oracle"
 ```
 #### 3. Configuration Validation Errors
 
@@ -487,9 +480,8 @@ from collections.abc import (
 
 import pytest
 
-from flext_target_oracle import FlextTargetOracleLoader
-from tests import c, r
-from tests import c, p, tm
+from flext_target_oracle.application.loader import FlextTargetOracleLoader
+from tests import c, p, r, tm
 
 
 class TestNewFeature:
@@ -546,7 +538,7 @@ from collections.abc import (
 
 import pytest
 
-from flext_target_oracle import FlextTargetOracleLoader
+from flext_target_oracle.application.loader import FlextTargetOracleLoader
 
 
 class TestOracleIntegration:
@@ -620,7 +612,7 @@ from collections.abc import (
 import time
 
 from flext_core import m, p
-from flext_target_oracle import FlextTargetOracleLoader
+from flext_target_oracle.application.loader import FlextTargetOracleLoader
 
 
 def benchmark_batch_sizes(records: list[p.Dict]):
@@ -688,7 +680,7 @@ def monitor_memory_usage():
 
 Before submitting a pull request:
 
-- [ ] **Code Quality**: `make check` passes with zero issues
+- [ ] **Code Quality**: `make check CHECK_PHASE=complete` passes with zero issues
 - [ ] **Tests**: All existing tests pass, new tests added for new functionality
 - [ ] **Documentation**: Updated relevant documentation (architecture, API)
 - [ ] **Security**: No new security vulnerabilities introduced
@@ -716,7 +708,9 @@ Types: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `chore`
 
 ______________________________________________________________________
 
-**Document Version**: 1.0\
-**Last Updated**: 2025-08-04\
-**Next Review**: 2025-08-11
-````
+**Document Version**: 1.1\
+**Reviewed**: 2026-11-28\
+**Author**: Marlon Costa <marlon.costa@datacosmos.com.br>.
+
+Historical metadata: version 1.0 was last updated on 2025-08-04 and recorded
+2025-08-11 as its next-review date.

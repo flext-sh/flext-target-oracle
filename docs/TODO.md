@@ -37,6 +37,18 @@
 
 <!-- TOC END -->
 
+**Contexto do registro — revisão em 2026-11-28**: esta análise de 2025-08-04
+é preservada como linha de base histórica. As prioridades, números de linha,
+contagens e pendências abaixo não comprovam o estado atual nem ficam encerrados
+por esta revisão documental. Revalide cada item no código e nos recibos do
+candidato antes de tratá-lo como pendência atual ou resolvida.
+
+A superfície atual é a [fachada `target_oracle`](https://github.com/flext-sh/flext-target-oracle/blob/0.12.0-dev/src/flext_target_oracle/api.py) e o modelo
+[`FlextTargetOracleSettings`](https://github.com/flext-sh/flext-target-oracle/blob/0.12.0-dev/src/flext_target_oracle/_settings.py), com campos em `TargetOracle`.
+
+**Revisão documental**: 1.1 · 2026-11-28 · Marlon Costa
+<marlon.costa@datacosmos.com.br>.
+
 **Data da Análise**: 2025-08-04\
 **Versão**: 0.9.9\
 **Status**: Documentação Atualizada - Implementação Pendente · 1.0.0 Release Preparation
@@ -169,12 +181,15 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 class FlextOracleTarget(Target):
     def _test_connection(self) -> bool:
         return self._test_connection_impl()
 
     def _write_record(self, record: Record) -> None:
         # Implementar método Singer padrão
+        ...
 ```
 
 ---
@@ -239,9 +254,9 @@ with self.oracle_api as connected_api, connected_api.begin_transaction():
 
 **Problema**: Muitos métodos desnecessários
 
-**Código Problemático**:
+**Código Problemático** (assinaturas esquemáticas, com parâmetros omitidos):
 
-```python
+```text
 def ensure_table_exists(...)  # Não precisa ser
 def _create_table(...)        # Não precisa ser
 ```
@@ -281,8 +296,11 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 def _evolve_table_schema(self, table_name: str, new_schema: dict):
     # Implementar ALTER TABLE baseado em diff de schema
+    ...
 ```
 
 ---
@@ -306,10 +324,13 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 class OracleConnectionFactory:
     @staticmethod
     def create_api(settings: FlextOracleTargetSettings) -> FlextDbOracleApi:
         # Factory para criação de conexões
+        ...
 ```
 
 ---
@@ -369,13 +390,18 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 @pytest.fixture
 def oracle_connection():
     # Fixture para conexão Oracle real em testes de integração
+    ...
+
 
 @pytest.fixture
 def malicious_data():
     # Fixture para testar SQL injection
+    ...
 ```
 
 ---

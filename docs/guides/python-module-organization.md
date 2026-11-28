@@ -48,7 +48,16 @@
 ## 🏗️ **Module Architecture Overview**
 
 FLEXT Target Oracle implements a **simplified Clean Architecture** optimized for Singer
-target implementation while maintaining full compliance with FLEXT ecosystem patterns.
+target implementation using the FLEXT ecosystem contracts.
+The current public entry points are the
+[`target_oracle` facade](https://github.com/flext-sh/flext-target-oracle/blob/0.12.0-dev/src/flext_target_oracle/api.py) and
+[`FlextTargetOracleSettings`](https://github.com/flext-sh/flext-target-oracle/blob/0.12.0-dev/src/flext_target_oracle/_settings.py). Settings live under `TargetOracle`;
+implementation loaders live in `application/loader.py` and are not package-root exports.
+
+The module-by-module analysis in the next section records the 2025-08-04 design
+baseline. Its filenames, aliases, and defect descriptions must be checked against
+those current owners before reuse; retaining them does not close the old findings.
+
 This structure serves as a reference for Singer target implementations within the
 32-project FLEXT ecosystem.
 
@@ -67,7 +76,7 @@ This structure serves as a reference for Singer target implementations within th
 
 ### **Current Implementation Structure**
 
-```python
+```text
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Public API gateway & exports
 ├── settings.py                # ⚙️ m.Value configuration patterns
@@ -160,9 +169,7 @@ from collections.abc import (
 )
 """Oracle target configuration using FLEXT Value patterns."""
 
-from flext_cli import u
-from flext_core import FlextSettings
-from pydantic import u.Field, m.field_validator
+from flext_core import m, p
 from enum import StrEnum, unique
 
 
@@ -179,22 +186,22 @@ class FlextOracleTargetSettings(m.Value):
     """Type-safe Oracle configuration with business rule validation."""
 
     # Required Oracle connection parameters
-    oracle_host: str = u.Field(..., description="Oracle database host")
-    oracle_port: int = u.Field(default=1521, ge=1, le=65535, description="Oracle port")
-    oracle_service: str = u.Field(..., description="Oracle service name")
-    oracle_user: str = u.Field(..., description="Oracle username")
-    oracle_password: str = u.Field(..., description="Oracle password")
+    oracle_host: str = m.Field(..., description="Oracle database host")
+    oracle_port: int = m.Field(default=1521, ge=1, le=65535, description="Oracle port")
+    oracle_service: str = m.Field(..., description="Oracle service name")
+    oracle_user: str = m.Field(..., description="Oracle username")
+    oracle_password: str = m.Field(..., description="Oracle password")
 
     # Business configuration
-    default_target_schema: str = u.Field(default="target", description="Target schema")
-    load_method: LoadMethod = u.Field(
+    default_target_schema: str = m.Field(default="target", description="Target schema")
+    load_method: LoadMethod = m.Field(
         default=LoadMethod.INSERT, description="Load strategy"
     )
-    batch_size: int = u.Field(default=1000, gt=0, description="Records per batch")
-    use_bulk_operations: bool = u.Field(
+    batch_size: int = m.Field(default=1000, gt=0, description="Records per batch")
+    use_bulk_operations: bool = m.Field(
         default=True, description="Enable bulk operations"
     )
-    connection_timeout: int = u.Field(
+    connection_timeout: int = m.Field(
         default=30, gt=0, description="Connection timeout"
     )
 
@@ -396,7 +403,7 @@ class FlextOracleTargetProcessingError(FlextOracleTargetError): ...
 
 ### **Ideal Structure for Singer Targets**
 
-```python
+```text
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean public API exports
 ├── settings/                  # ⚙️ Configuration module
@@ -425,7 +432,7 @@ src/flext_target_oracle/
 
 For simple Singer targets, the current flat structure is acceptable with fixes:
 
-```python
+```text
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean exports (fixed)
 ├── settings.py                # ⚙️ Enhanced configuration
@@ -486,12 +493,14 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 # ✅ CORRECT - Comprehensive validation with domain rules
 class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business validation."""
 
-    oracle_host: str = u.Field(..., description="Oracle host")
-    batch_size: int = u.Field(default=1000, gt=0, le=50000, description="Batch size")
+    oracle_host: str = m.Field(..., description="Oracle host")
+    batch_size: int = m.Field(default=1000, gt=0, le=50000, description="Batch size")
 
     @m.field_validator("oracle_host")
     @classmethod
@@ -513,7 +522,8 @@ class FlextOracleTargetSettings(m.Value):
             if result.failure:
                 return result
 
-        return r[bool].| ok(value=True)
+        return r[bool].ok(value=True)
+
 
 # ❌ INCORRECT - Plain dataclass without validation
 @dataclass
@@ -607,7 +617,7 @@ def process_batch_bad(self, stream_name: str, records: list):
 
 ### **Dependency Direction (Clean Architecture)**
 
-```python
+```text
 # ✅ CORRECT - Dependencies flow inward
 ┌─────────────────────────────┐
 │     target.py               │  # Application Layer
@@ -622,12 +632,11 @@ def process_batch_bad(self, stream_name: str, records: list):
 │   FLEXT Core Dependencies   │  # Foundation Layer
 │ (r, FlextValueObj)│
 └─────────────────────────────┘
+```
 
-# Application layer imports
-from flext_target_oracle import FlextOracleTargetSettings
-from flext_target_oracle import FlextOracleTargetLoader
-from flext_cli import u
-from flext_core import FlextSettings
+```python
+# Application-facing imports
+from flext_target_oracle import FlextTargetOracleSettings, target_oracle
 from flext_cli import u
 from flext_core import FlextSettings
 from flext_db_oracle import FlextDbOracleApi
@@ -641,10 +650,9 @@ from flext_db_oracle import FlextDbOracleApi
 ```python
 # ✅ CORRECT - FLEXT ecosystem integration
 from flext_cli import u
-from flext_core import FlextSettings
+from flext_core import FlextSettings, m  # Validation through the FLEXT facade
 from flext_meltano import Target  # Singer SDK integration layer
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from pydantic import u.Field, m.field_validator  # Third-party validation
 
 # ✅ CORRECT - Standard library imports
 import json
@@ -665,7 +673,7 @@ import cx_Oracle  # Should use flext-db-oracle abstraction
 
 ### **Test Structure Mirroring Source**
 
-```python
+```text
 tests/
 ├── unit/                           # Unit tests (isolated)
 │   ├── test_config.py             # Tests settings.py
@@ -690,6 +698,23 @@ tests/
 ```
 
 ### **Test Pattern Examples**
+
+Current settings examples use the exported model and its declared namespace:
+
+```python
+from flext_target_oracle import FlextTargetOracleSettings
+
+runtime_settings = FlextTargetOracleSettings(
+    TargetOracle={"oracle_host": "localhost", "oracle_port": 1521}
+)
+assert runtime_settings.TargetOracle.oracle_host == "localhost"
+assert runtime_settings.TargetOracle.oracle_port == 1521
+```
+
+The two test sketches below belong to the 2025-08-04 design record. Their former
+flat settings API, `LoadMethod` export, and custom Singer methods are not current
+package-root contracts. Keep their behavioral intentions when writing tests
+against the actual public facade and current native fixtures.
 
 ```text
 from __future__ import annotations
@@ -1137,9 +1162,11 @@ def _write_record(self, record: Record) -> None:
 
 ### **Quality Gate Checklist**
 
-- [ ] **Code Quality**: `make check` passes (lint + type + security, zero warnings)
-- [ ] **Testing**: `make test` passes with coverage standards met
-- [ ] **Formatting**: `make fmt` keeps code consistently formatted
+- [ ] **Code Quality**: `make check CHECK_PHASE=complete` passes the configured
+  complete gates without warnings
+- [ ] **Testing**: `make tests` passes with coverage standards met
+- [ ] **Formatting**: the local `make check CHECK_PHASE=complete` phase keeps code
+  consistently formatted
 - [ ] **Integration**: Works with existing FLEXT ecosystem projects
 - [ ] **Performance**: No regressions in batch processing or connection management
 
@@ -1182,7 +1209,7 @@ def _write_record(self, record: Record) -> None:
 
 **Module Extensions**:
 
-```python
+```text
 src/flext_target_oracle/
 ├── settings/
 │   ├── environments.py     # Environment-specific configurations
@@ -1209,7 +1236,12 @@ src/flext_target_oracle/
 
 ---
 
-**Document Version**: 1.0 **Last Updated**: 2025-08-04 **Target Audience**: FLEXT
+**Document Version**: 1.1 · **Reviewed**: 2026-11-28 ·
+Marlon Costa <marlon.costa@datacosmos.com.br>.
+
+Historical metadata: version 1.0 was last updated on 2025-08-04.
+
+**Target Audience**: FLEXT
 ecosystem developers working on Singer targets **Scope**: Python module organization for
 Oracle target implementation **Compliance**: FLEXT ecosystem standards and Singer
 specification requirements
