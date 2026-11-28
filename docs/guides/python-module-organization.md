@@ -67,7 +67,7 @@ This structure serves as a reference for Singer target implementations within th
 
 ### **Current Implementation Structure**
 
-```python
+```text
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Public API gateway & exports
 ├── settings.py                # ⚙️ m.Value configuration patterns
@@ -160,9 +160,7 @@ from collections.abc import (
 )
 """Oracle target configuration using FLEXT Value patterns."""
 
-from flext_cli import u
-from flext_core import FlextSettings
-from pydantic import u.Field, m.field_validator
+from flext_core import m, p
 from enum import StrEnum, unique
 
 
@@ -179,22 +177,22 @@ class FlextOracleTargetSettings(m.Value):
     """Type-safe Oracle configuration with business rule validation."""
 
     # Required Oracle connection parameters
-    oracle_host: str = u.Field(..., description="Oracle database host")
-    oracle_port: int = u.Field(default=1521, ge=1, le=65535, description="Oracle port")
-    oracle_service: str = u.Field(..., description="Oracle service name")
-    oracle_user: str = u.Field(..., description="Oracle username")
-    oracle_password: str = u.Field(..., description="Oracle password")
+    oracle_host: str = m.Field(..., description="Oracle database host")
+    oracle_port: int = m.Field(default=1521, ge=1, le=65535, description="Oracle port")
+    oracle_service: str = m.Field(..., description="Oracle service name")
+    oracle_user: str = m.Field(..., description="Oracle username")
+    oracle_password: str = m.Field(..., description="Oracle password")
 
     # Business configuration
-    default_target_schema: str = u.Field(default="target", description="Target schema")
-    load_method: LoadMethod = u.Field(
+    default_target_schema: str = m.Field(default="target", description="Target schema")
+    load_method: LoadMethod = m.Field(
         default=LoadMethod.INSERT, description="Load strategy"
     )
-    batch_size: int = u.Field(default=1000, gt=0, description="Records per batch")
-    use_bulk_operations: bool = u.Field(
+    batch_size: int = m.Field(default=1000, gt=0, description="Records per batch")
+    use_bulk_operations: bool = m.Field(
         default=True, description="Enable bulk operations"
     )
-    connection_timeout: int = u.Field(
+    connection_timeout: int = m.Field(
         default=30, gt=0, description="Connection timeout"
     )
 
@@ -396,7 +394,7 @@ class FlextOracleTargetProcessingError(FlextOracleTargetError): ...
 
 ### **Ideal Structure for Singer Targets**
 
-```python
+```text
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean public API exports
 ├── settings/                  # ⚙️ Configuration module
@@ -425,7 +423,7 @@ src/flext_target_oracle/
 
 For simple Singer targets, the current flat structure is acceptable with fixes:
 
-```python
+```text
 src/flext_target_oracle/
 ├── __init__.py              # 🎯 Clean exports (fixed)
 ├── settings.py                # ⚙️ Enhanced configuration
@@ -486,12 +484,14 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 # ✅ CORRECT - Comprehensive validation with domain rules
 class FlextOracleTargetSettings(m.Value):
     """Type-safe configuration with business validation."""
 
-    oracle_host: str = u.Field(..., description="Oracle host")
-    batch_size: int = u.Field(default=1000, gt=0, le=50000, description="Batch size")
+    oracle_host: str = m.Field(..., description="Oracle host")
+    batch_size: int = m.Field(default=1000, gt=0, le=50000, description="Batch size")
 
     @m.field_validator("oracle_host")
     @classmethod
@@ -513,7 +513,8 @@ class FlextOracleTargetSettings(m.Value):
             if result.failure:
                 return result
 
-        return r[bool].| ok(value=True)
+        return r[bool].ok(value=True)
+
 
 # ❌ INCORRECT - Plain dataclass without validation
 @dataclass
@@ -607,7 +608,7 @@ def process_batch_bad(self, stream_name: str, records: list):
 
 ### **Dependency Direction (Clean Architecture)**
 
-```python
+```text
 # ✅ CORRECT - Dependencies flow inward
 ┌─────────────────────────────┐
 │     target.py               │  # Application Layer
@@ -622,7 +623,9 @@ def process_batch_bad(self, stream_name: str, records: list):
 │   FLEXT Core Dependencies   │  # Foundation Layer
 │ (r, FlextValueObj)│
 └─────────────────────────────┘
+```
 
+```python
 # Application layer imports
 from flext_target_oracle import FlextOracleTargetSettings
 from flext_target_oracle import FlextOracleTargetLoader
@@ -641,10 +644,9 @@ from flext_db_oracle import FlextDbOracleApi
 ```python
 # ✅ CORRECT - FLEXT ecosystem integration
 from flext_cli import u
-from flext_core import FlextSettings
+from flext_core import FlextSettings, m  # Validation through the FLEXT facade
 from flext_meltano import Target  # Singer SDK integration layer
 from flext_db_oracle import FlextDbOracleApi, FlextDbOracleSettings
-from pydantic import u.Field, m.field_validator  # Third-party validation
 
 # ✅ CORRECT - Standard library imports
 import json
@@ -665,7 +667,7 @@ import cx_Oracle  # Should use flext-db-oracle abstraction
 
 ### **Test Structure Mirroring Source**
 
-```python
+```text
 tests/
 ├── unit/                           # Unit tests (isolated)
 │   ├── test_config.py             # Tests settings.py
@@ -1182,7 +1184,7 @@ def _write_record(self, record: Record) -> None:
 
 **Module Extensions**:
 
-```python
+```text
 src/flext_target_oracle/
 ├── settings/
 │   ├── environments.py     # Environment-specific configurations

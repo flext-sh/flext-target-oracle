@@ -123,7 +123,7 @@ make test                 # Must maintain coverage standards
 
 #### Code Style Guidelines
 
-````python
+```python
 from __future__ import annotations
 
 from collections.abc import (
@@ -170,7 +170,7 @@ def bad_operation():
 class BadConfig:
     def __init__(self, field):
         self.field = field  # No validation!
-        ```
+```
 ## FLEXT Pattern Implementation
 
 ### r Railway Pattern
@@ -719,4 +719,3 @@ ______________________________________________________________________
 **Document Version**: 1.0\
 **Last Updated**: 2025-08-04\
 **Next Review**: 2025-08-11
-````

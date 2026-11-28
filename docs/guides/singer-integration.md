@@ -158,11 +158,13 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 def _handle_state(self, message: p.Dict) -> p.Result[bool]:
     """Handle STATE message - forwarded to orchestrator."""
     # State messages are typically handled by Meltano/orchestrator
     logger.debug("State message received - forwarding to Meltano")
-    return r[bool].| ok(value=True)
+    return r[bool].ok(value=True)
 ```
 
 ## Current Implementation Status
@@ -205,9 +207,12 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 # ❌ Custom method - not Singer SDK compliant
 def process_singer_message(self, message: dict) -> p.Result[bool]:
     # Custom message processing
+    ...
 ```
 
 **Required Singer SDK Methods**:
@@ -542,6 +547,8 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 # Current implementation (needs improvement)
 def _insert_batch(self, table_name: str, records: list) -> p.Result[bool]:
     """Insert batch with basic error handling."""
@@ -553,10 +560,11 @@ def _insert_batch(self, table_name: str, records: list) -> p.Result[bool]:
                 if result.failure:
                     return r[bool].fail(f"Insert failed: {result.error}")
 
-        return r[bool].| ok(value=True)
+        return r[bool].ok(value=True)
 
     except Exception as e:
         return r[bool].fail(f"Batch insert failed: {e}")
+
 
 # Improved implementation (needed)
 def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[bool]:
@@ -573,7 +581,7 @@ def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[boo
                 # Commit only on success
                 connected_api.commit()
 
-        return r[bool].| ok(value=True)
+        return r[bool].ok(value=True)
 
     except Exception as e:
         # Transaction automatically rolled back

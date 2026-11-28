@@ -169,12 +169,15 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 class FlextOracleTarget(Target):
     def _test_connection(self) -> bool:
         return self._test_connection_impl()
 
     def _write_record(self, record: Record) -> None:
         # Implementar método Singer padrão
+        ...
 ```
 
 ---
@@ -239,9 +242,9 @@ with self.oracle_api as connected_api, connected_api.begin_transaction():
 
 **Problema**: Muitos métodos desnecessários
 
-**Código Problemático**:
+**Código Problemático** (assinaturas esquemáticas, com parâmetros omitidos):
 
-```python
+```text
 def ensure_table_exists(...)  # Não precisa ser
 def _create_table(...)        # Não precisa ser
 ```
@@ -281,8 +284,11 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 def _evolve_table_schema(self, table_name: str, new_schema: dict):
     # Implementar ALTER TABLE baseado em diff de schema
+    ...
 ```
 
 ---
@@ -306,10 +312,13 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 class OracleConnectionFactory:
     @staticmethod
     def create_api(settings: FlextOracleTargetSettings) -> FlextDbOracleApi:
         # Factory para criação de conexões
+        ...
 ```
 
 ---
@@ -369,13 +378,18 @@ from collections.abc import (
     MutableSequence,
     Sequence,
 )
+
+
 @pytest.fixture
 def oracle_connection():
     # Fixture para conexão Oracle real em testes de integração
+    ...
+
 
 @pytest.fixture
 def malicious_data():
     # Fixture para testar SQL injection
+    ...
 ```
 
 ---
