@@ -35,9 +35,19 @@
 
 ## Overview
 
-FLEXT Target Oracle implements the Singer specification for data integration, providing
-standardized data loading capabilities for Oracle databases. This document details the
-Singer protocol implementation, compliance status, and integration patterns.
+FLEXT Target Oracle provides Oracle loading components for Singer-oriented
+integrations.
+
+The current [public service](https://github.com/flext-sh/flext-target-oracle/blob/0.12.0-dev/src/flext_target_oracle/api.py) is `FlextTargetOracleService`, exposed as
+`target_oracle` and based on `FlextMeltanoTargetServiceBase`. It documents a
+loader-based implementation. Its public command methods include `run_about`,
+`run_load`, and `run_validate`; a load-ready acknowledgement is not evidence that
+records were persisted or that every Singer SDK contract was exercised.
+
+Use the current [settings model](https://github.com/flext-sh/flext-target-oracle/blob/0.12.0-dev/src/flext_target_oracle/_settings.py) through its `TargetOracle`
+namespace. The implementation-status table and compliance roadmap below are the
+2025-08-04 baseline, not current acceptance receipts. Their open findings remain
+subject to source review and native runtime evidence.
 
 ## Singer Protocol Implementation
 
@@ -48,7 +58,7 @@ Singer protocol implementation, compliance status, and integration patterns.
 ```json
 {
   "type": "SCHEMA",
-  c.ProcessingMode.STREAM: "users",
+  "stream": "users",
   "schema": {
     "type": "object",
     "properties": {
@@ -94,7 +104,7 @@ def _handle_schema(self, message: p.Dict) -> p.Result[bool]:
 ```json
 {
   "type": "RECORD",
-  c.ProcessingMode.STREAM: "users",
+  "stream": "users",
   "record": {
     "id": 1,
     "name": "John Doe",
@@ -168,6 +178,10 @@ def _handle_state(self, message: p.Dict) -> p.Result[bool]:
 ```
 
 ## Current Implementation Status
+
+Historical implementation assessment recorded on 2025-08-04. The table and
+missing-method checklist retain that scope; this documentation update neither
+confirms those statuses for the current implementation nor closes the findings.
 
 ### ✅ Implemented Features
 
@@ -407,6 +421,20 @@ sequenceDiagram
 
 ### Batch Processing Configuration
 
+Configure current batch settings through the public namespace:
+
+```python
+from flext_target_oracle import FlextTargetOracleSettings
+
+runtime_settings = FlextTargetOracleSettings(
+    TargetOracle={"batch_size": 1000, "commit_interval": 1000}
+)
+assert runtime_settings.TargetOracle.batch_size == 1000
+```
+
+The following flat-settings sketch is retained from the 2025-08-04 design
+record. Its field placement and timeout name are not the current settings API:
+
 ```text
 # Configure batch processing for optimal performance
 settings = FlextOracleTargetSettings(
@@ -592,6 +620,11 @@ def _insert_batch_improved(self, table_name: str, records: list) -> p.Result[boo
 
 ### Unit Testing Singer Messages
 
+The following custom-target test sketch is retained from the 2025-08-04 design
+record. `FlextOracleTarget` and `process_singer_message` are not the current
+package-root API. Use the public facade and provisioned native fixtures for new
+tests, preserving the schema, record, state, and invalid-input behaviors intended here.
+
 ```text
 from __future__ import annotations
 
@@ -746,6 +779,11 @@ def test_singer_tap_integration():
 
 ---
 
-**Document Version**: 1.0 **Last Updated**: 2025-08-04 **Singer Specification**:
-[hub.meltano.com/singer/spec](https://hub.meltano.com/singer/spec) **Next Review**:
-2025-08-11
+**Document Version**: 1.1 · **Reviewed**: 2026-11-28 ·
+Marlon Costa <marlon.costa@datacosmos.com.br>.
+
+**Singer Specification**:
+[hub.meltano.com/singer/spec](https://hub.meltano.com/singer/spec).
+
+Historical metadata: version 1.0 was last updated on 2025-08-04 and recorded
+2025-08-11 as its next-review date.
